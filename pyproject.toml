@@ -1,0 +1,62 @@
+[project]
+name = "bytesmith"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "click>=8.2.1",
+    "langgraph>=0.6.7",
+    "prompt-toolkit>=3.0.52",
+    "pydantic>=2.11.7",
+    "python-dotenv>=1.1.1",
+    "rich>=14.1.0",
+]
+
+scripts.bytesmith = "bytesmith.cli:cli"
+
+[dependency-groups]
+dev = ["ruff>=0.12.12"]
+
+[tool.ruff]
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "LOG",
+    "UP",
+    "T10",
+    "ISC",
+    "ICN",
+    "LOG",
+    "G",
+    "PIE",
+    "PT",
+    "Q",
+    "RSE",
+    "FURB",
+    "RUF",
+]
+ignore = [
+    "E712",
+    "E501",
+    "UP006",
+    "UP007",
+    "UP035",
+    "UP045",
+    "PIE790",
+    "RUF005",
+    "RUF006",
+    "RUF012",
+    "ISC001",
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
