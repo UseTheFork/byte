@@ -1,6 +1,9 @@
 import os
 from typing import List
 
+from rich.console import Console
+from rich.table import Table
+
 from bytesmith.commands.registry import Command, command_registry
 from bytesmith.context.file_manager import FileMode, file_context_manager
 
@@ -46,6 +49,23 @@ class AddFileCommand(Command):
         except (OSError, PermissionError):
             pass
         return []
+
+    def display_pre_prompt_info(self, console: Console) -> None:
+        """Display current file context status."""
+        files = file_context_manager.list_files()
+        if not files:
+            return
+
+        table = Table(title="File Context", show_header=True, header_style="bold magenta")
+        table.add_column("File", style="cyan", no_wrap=True)
+        table.add_column("Mode", style="green")
+
+        for file_ctx in files:
+            mode_display = "Editable" if file_ctx.mode == FileMode.EDITABLE else "Read-only"
+            table.add_row(file_ctx.relative_path, mode_display)
+
+        console.print(table)
+        console.print()
 
 
 class ReadOnlyCommand(Command):
@@ -115,37 +135,7 @@ class DropFileCommand(Command):
         return [f.relative_path for f in files if f.relative_path.startswith(text)]
 
 
-class SetModeCommand(Command):
-    @property
-    def name(self) -> str:
-        return "mode"
-
-    @property
-    def description(self) -> str:
-        return "Set file mode (readonly/editable)"
-
-    async def execute(self, args: str) -> str:
-        parts = args.split()
-        if len(parts) != 2:
-            return "Usage: /mode <file_path> <readonly|editable>"
-
-        file_path, mode_str = parts
-
-        if mode_str.lower() in ["readonly", "read-only"]:
-            mode = FileMode.READ_ONLY
-        elif mode_str.lower() == "editable":
-            mode = FileMode.EDITABLE
-        else:
-            return "Mode must be 'readonly' or 'editable'"
-
-        if file_context_manager.set_file_mode(file_path, mode):
-            return f"Set {file_path} to {mode_str}"
-        else:
-            return f"File {file_path} not found in context"
-
-
 # Auto-register commands
 command_registry.register_slash_command(AddFileCommand())
 command_registry.register_slash_command(ReadOnlyCommand())
 command_registry.register_slash_command(DropFileCommand())
-command_registry.register_slash_command(SetModeCommand())

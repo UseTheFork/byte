@@ -3,6 +3,7 @@ import asyncio
 from rich.console import Console
 
 from bytesmith.commands.processor import CommandProcessor
+from bytesmith.commands.registry import command_registry
 from bytesmith.ui.prompt import PromptHandler
 
 
@@ -19,7 +20,10 @@ class ByteSmith:
 
         while True:
             try:
-                user_input = await self.prompt_handler.get_input_async("bytesmith> ")
+                # Display pre-prompt information from all commands
+                command_registry.display_all_pre_prompt_info(self.console)
+                
+                user_input = await self.prompt_handler.get_input_async("> ")
 
                 if not user_input.strip():
                     continue

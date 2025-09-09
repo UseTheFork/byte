@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional
+from rich.console import Console
 
 
 class Command(ABC):
@@ -26,6 +27,10 @@ class Command(ABC):
         """Return completion suggestions for this command."""
         return []
 
+    def display_pre_prompt_info(self, console: Console) -> None:
+        """Display information before the prompt. Override to show status."""
+        pass
+
 
 class CommandRegistry:
     def __init__(self):
@@ -45,6 +50,13 @@ class CommandRegistry:
 
     def get_at_command(self, name: str) -> Optional[Command]:
         return self._at_commands.get(name)
+
+    def display_all_pre_prompt_info(self, console: Console) -> None:
+        """Display pre-prompt info from all registered commands."""
+        for command in self._slash_commands.values():
+            command.display_pre_prompt_info(console)
+        for command in self._at_commands.values():
+            command.display_pre_prompt_info(console)
 
     def get_slash_completions(self, text: str) -> List[str]:
         """Get completions for slash commands."""
