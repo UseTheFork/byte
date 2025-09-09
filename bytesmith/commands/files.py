@@ -1,8 +1,8 @@
 import os
 from typing import List
 
+from rich.columns import Columns
 from rich.console import Console
-from rich.table import Table
 
 from bytesmith.commands.registry import Command, command_registry
 from bytesmith.context.file_manager import FileMode, file_context_manager
@@ -51,20 +51,14 @@ class AddFileCommand(Command):
         return []
 
     def display_pre_prompt_info(self, console: Console) -> None:
-        """Display current file context status."""
-        files = file_context_manager.list_files()
-        if not files:
+        """Display editable files."""
+        editable_files = file_context_manager.list_files(FileMode.EDITABLE)
+        if not editable_files:
             return
 
-        table = Table(title="File Context", show_header=True, header_style="bold magenta")
-        table.add_column("File", style="cyan", no_wrap=True)
-        table.add_column("Mode", style="green")
-
-        for file_ctx in files:
-            mode_display = "Editable" if file_ctx.mode == FileMode.EDITABLE else "Read-only"
-            table.add_row(file_ctx.relative_path, mode_display)
-
-        console.print(table)
+        file_names = [f"[cyan]{f.relative_path}[/cyan]" for f in editable_files]
+        console.print("[bold green]Editable Files:[/bold green]")
+        console.print(Columns(file_names, equal=True, expand=True))
         console.print()
 
 
@@ -109,6 +103,17 @@ class ReadOnlyCommand(Command):
         except (OSError, PermissionError):
             pass
         return []
+
+    def display_pre_prompt_info(self, console: Console) -> None:
+        """Display read-only files."""
+        readonly_files = file_context_manager.list_files(FileMode.READ_ONLY)
+        if not readonly_files:
+            return
+
+        file_names = [f"[yellow]{f.relative_path}[/yellow]" for f in readonly_files]
+        console.print("[bold blue]Read-only Files:[/bold blue]")
+        console.print(Columns(file_names, equal=True, expand=True))
+        console.print()
 
 
 class DropFileCommand(Command):
