@@ -11,14 +11,44 @@ class CommandCompleter(Completer):
         text = document.text_before_cursor
 
         if text.startswith("/"):
-            completions = command_registry.get_slash_completions(text)
+            # Parse slash command
+            if " " in text:
+                cmd_part, args_part = text.split(" ", 1)
+                cmd_name = cmd_part[1:]  # Remove /
+                command = command_registry.get_slash_command(cmd_name)
+                if command:
+                    completions = command.get_completions(args_part)
+                    # Only replace the args part, not the whole command
+                    for completion in completions:
+                        yield Completion(completion, start_position=-len(args_part))
+                return
+            else:
+                # Complete command names
+                cmd_prefix = text[1:]  # Remove /
+                for cmd_name in command_registry._slash_commands.keys():
+                    if cmd_name.startswith(cmd_prefix):
+                        yield Completion(cmd_name, start_position=-len(cmd_prefix))
+                return
+                
         elif text.startswith("@"):
-            completions = command_registry.get_at_completions(text)
-        else:
-            completions = []
-
-        for completion in completions:
-            yield Completion(completion, start_position=-len(text))
+            # Parse @ command
+            if " " in text:
+                cmd_part, args_part = text.split(" ", 1)
+                cmd_name = cmd_part[1:]  # Remove @
+                command = command_registry.get_at_command(cmd_name)
+                if command:
+                    completions = command.get_completions(args_part)
+                    # Only replace the args part, not the whole command
+                    for completion in completions:
+                        yield Completion(completion, start_position=-len(args_part))
+                return
+            else:
+                # Complete command names
+                cmd_prefix = text[1:]  # Remove @
+                for cmd_name in command_registry._at_commands.keys():
+                    if cmd_name.startswith(cmd_prefix):
+                        yield Completion(cmd_name, start_position=-len(cmd_prefix))
+                return
 
 
 class PromptHandler:
