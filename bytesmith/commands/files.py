@@ -8,20 +8,6 @@ from bytesmith.commands.registry import Command, command_registry
 from bytesmith.context.file_manager import FileMode, file_context_manager
 
 
-class ExitCommand(Command):
-    @property
-    def name(self) -> str:
-        return "exit"
-
-    @property
-    def description(self) -> str:
-        return "Exit ByteSmith"
-
-    async def execute(self, args: str) -> str:
-        # This will be handled specially in the main loop
-        return "EXIT_REQUESTED"
-
-
 class AddFileCommand(Command):
     @property
     def name(self) -> str:
@@ -64,7 +50,7 @@ class AddFileCommand(Command):
             pass
         return []
 
-    def display_pre_prompt_info(self, console: Console) -> None:
+    def pre_prompt(self, console: Console) -> None:
         """Display editable files."""
         editable_files = file_context_manager.list_files(FileMode.EDITABLE)
         if not editable_files:
@@ -118,7 +104,7 @@ class ReadOnlyCommand(Command):
             pass
         return []
 
-    def display_pre_prompt_info(self, console: Console) -> None:
+    def pre_prompt(self, console: Console) -> None:
         """Display read-only files."""
         readonly_files = file_context_manager.list_files(FileMode.READ_ONLY)
         if not readonly_files:
@@ -158,4 +144,3 @@ class DropFileCommand(Command):
 command_registry.register_slash_command(AddFileCommand())
 command_registry.register_slash_command(ReadOnlyCommand())
 command_registry.register_slash_command(DropFileCommand())
-command_registry.register_slash_command(ExitCommand())

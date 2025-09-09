@@ -21,25 +21,21 @@ class ByteSmith:
         while True:
             try:
                 # Display pre-prompt information from all commands
-                command_registry.display_all_pre_prompt_info(self.console)
-                
+                command_registry.pre_prompt(self.console)
+
                 user_input = await self.prompt_handler.get_input_async("> ")
 
                 if not user_input.strip():
                     continue
 
-                if user_input.lower() in ["exit", "quit"]:
-                    self.console.print("[yellow]Goodbye![/yellow]")
-                    break
-
                 # Process input through command system
                 response = await self.command_processor.process_input(user_input)
-                
+
                 # Handle exit command
                 if response == "EXIT_REQUESTED":
                     self.console.print("[yellow]Goodbye![/yellow]")
                     break
-                
+
                 self.console.print(response)
 
             except KeyboardInterrupt:

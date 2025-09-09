@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "click>=8.2.1",
+    "langchain[anthropic,google-genai,openai]>=0.3.27",
     "langgraph>=0.6.7",
     "prompt-toolkit>=3.0.52",
     "pydantic>=2.11.7",

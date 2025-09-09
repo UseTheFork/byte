@@ -9,8 +9,6 @@ class CommandProcessor:
 
         if user_input.startswith("/"):
             return await self._process_slash_command(user_input[1:])
-        elif user_input.startswith("@"):
-            return await self._process_at_command(user_input[1:])
         else:
             # For regular input, include file context
             context = file_context_manager.generate_context_prompt()
@@ -31,15 +29,3 @@ class CommandProcessor:
             return await command.execute(args)
         else:
             return f"Unknown slash command: /{cmd_name}"
-
-    async def _process_at_command(self, command_text: str) -> str:
-        if " " in command_text:
-            cmd_name, args = command_text.split(" ", 1)
-        else:
-            cmd_name, args = command_text, ""
-
-        command = command_registry.get_at_command(cmd_name)
-        if command:
-            return await command.execute(args)
-        else:
-            return f"Unknown @ command: @{cmd_name}"
