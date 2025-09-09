@@ -34,6 +34,12 @@ class ByteSmith:
 
                 # Process input through command system
                 response = await self.command_processor.process_input(user_input)
+                
+                # Handle exit command
+                if response == "EXIT_REQUESTED":
+                    self.console.print("[yellow]Goodbye![/yellow]")
+                    break
+                
                 self.console.print(response)
 
             except KeyboardInterrupt:

@@ -8,6 +8,20 @@ from bytesmith.commands.registry import Command, command_registry
 from bytesmith.context.file_manager import FileMode, file_context_manager
 
 
+class ExitCommand(Command):
+    @property
+    def name(self) -> str:
+        return "exit"
+
+    @property
+    def description(self) -> str:
+        return "Exit ByteSmith"
+
+    async def execute(self, args: str) -> str:
+        # This will be handled specially in the main loop
+        return "EXIT_REQUESTED"
+
+
 class AddFileCommand(Command):
     @property
     def name(self) -> str:
@@ -144,3 +158,4 @@ class DropFileCommand(Command):
 command_registry.register_slash_command(AddFileCommand())
 command_registry.register_slash_command(ReadOnlyCommand())
 command_registry.register_slash_command(DropFileCommand())
+command_registry.register_slash_command(ExitCommand())
