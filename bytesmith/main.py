@@ -2,18 +2,20 @@ import asyncio
 
 from rich.console import Console
 
-from bytesmith.prompt import PromptHandler
+from bytesmith.commands.processor import CommandProcessor
+from bytesmith.ui.prompt import PromptHandler
 
 
 class ByteSmith:
     def __init__(self):
         self.console = Console()
         self.prompt_handler = PromptHandler()
+        self.command_processor = CommandProcessor()
 
     async def run_async(self):
         """Main CLI loop."""
         self.console.print("[bold blue]ByteSmith CLI Assistant[/bold blue]")
-        self.console.print("Type 'exit' or 'quit' to leave\n")
+        self.console.print("Type 'exit', 'quit', or '/help' for commands\n")
 
         while True:
             try:
@@ -26,8 +28,9 @@ class ByteSmith:
                     self.console.print("[yellow]Goodbye![/yellow]")
                     break
 
-                # For now, just echo the input
-                self.console.print(f"You said: {user_input}")
+                # Process input through command system
+                response = await self.command_processor.process_input(user_input)
+                self.console.print(response)
 
             except KeyboardInterrupt:
                 self.console.print("\n[yellow]Goodbye![/yellow]")
