@@ -15,36 +15,27 @@ class FileService:
         self.file_repository = file_repository
         self.file_context_manager = file_context_manager or FileContextManager()
 
-    def add_file(self, path: str, mode: FileMode) -> bool:
+    async def add_file(self, path: str, mode: FileMode) -> bool:
         """Add a file to the context."""
         success = self.file_context_manager.add_file(path, mode)
-        if success:
-            # Optionally persist to repository
-            file_context = self.file_context_manager.get_file_context(path)
-            if file_context:
-                self.file_repository.save(file_context)
+
         return success
 
-    def remove_file(self, path: str) -> bool:
+    async def remove_file(self, path: str) -> bool:
         """Remove a file from the context."""
         success = self.file_context_manager.remove_file(path)
-        if success:
-            # Optionally remove from repository
-            self.file_repository.delete_by_path(path)
+
         return success
 
     def list_files(self, mode: Optional[FileMode] = None) -> List[FileContext]:
         """List all files in context."""
         return self.file_context_manager.list_files(mode)
 
-    def set_file_mode(self, path: str, mode: FileMode) -> bool:
+    async def set_file_mode(self, path: str, mode: FileMode) -> bool:
         """Change the mode of a file in context."""
+        # Get old mode first
         success = self.file_context_manager.set_file_mode(path, mode)
-        if success:
-            # Update in repository
-            file_context = self.file_context_manager.get_file_context(path)
-            if file_context:
-                self.file_repository.save(file_context)
+
         return success
 
     def get_file_context(self, path: str) -> Optional[FileContext]:

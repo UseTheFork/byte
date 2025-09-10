@@ -23,7 +23,7 @@ class AddFileCommand(Command):
             return "Usage: /add <file_path>"
 
         file_service = self.container.make("file_service")
-        if file_service.add_file(args, FileMode.EDITABLE):
+        if await file_service.add_file(args, FileMode.EDITABLE):
             return f"Added {args} to context as editable"
         else:
             return f"Failed to add {args} (file not found or not readable)"
@@ -81,7 +81,7 @@ class ReadOnlyCommand(Command):
             return "Usage: /read-only <file_path>"
 
         file_service = self.container.make("file_service")
-        if file_service.add_file(args, FileMode.READ_ONLY):
+        if await file_service.add_file(args, FileMode.READ_ONLY):
             return f"Added {args} to context as read-only"
         else:
             return f"Failed to add {args} (file not found or not readable)"
@@ -142,7 +142,7 @@ class DropFileCommand(Command):
             return "Usage: /drop <file_path>"
 
         file_service = self.container.make("file_service")
-        if file_service.remove_file(args):
+        if await file_service.remove_file(args):
             return f"Removed {args} from context"
         else:
             return f"File {args} not found in context"
