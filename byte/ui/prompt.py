@@ -3,7 +3,7 @@ from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.document import Document
 from prompt_toolkit.history import InMemoryHistory
 
-from bytesmith.commands.registry import command_registry
+from byte.commands.registry import command_registry
 
 
 class CommandCompleter(Completer):

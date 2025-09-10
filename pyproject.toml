@@ -1,5 +1,5 @@
 [project]
-name = "bytesmith"
+name = "byte"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -14,7 +14,7 @@ dependencies = [
     "rich>=14.1.0",
 ]
 
-scripts.bytesmith = "bytesmith.cli:cli"
+scripts.byte = "byte.cli:cli"
 
 [dependency-groups]
 dev = ["ruff>=0.12.12"]

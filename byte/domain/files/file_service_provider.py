@@ -1,0 +1,61 @@
+from byte.container import Container
+from byte.domain.files.commands import AddFileCommand, DropFileCommand, ReadOnlyCommand
+from byte.domain.files.context_manager import FileContextManager
+from byte.domain.files.file_service import FileService
+from byte.providers.service_provider import ServiceProvider
+from byte.repositories.file_repository import InMemoryFileRepository
+
+
+class FileServiceProvider(ServiceProvider):
+    """Service provider for all file-related functionality."""
+
+    def register(self, container: Container):
+        """Register file services and commands."""
+        # Register core file services
+        container.singleton("file_context_manager", lambda: FileContextManager())
+        container.bind("file_repository", lambda: InMemoryFileRepository())
+        container.bind(
+            "file_service",
+            lambda: FileService(
+                container.make("file_repository"),
+                container.make("file_context_manager"),
+            ),
+        )
+
+        # Register file-related commands
+        container.bind("add_file_command", lambda: AddFileCommand(container))
+        container.bind("readonly_command", lambda: ReadOnlyCommand(container))
+        container.bind("drop_file_command", lambda: DropFileCommand(container))
+
+    def boot(self, container: Container):
+        """Boot file services and register commands with registry."""
+        # Get the command registry
+        command_registry = container.make("command_registry")
+
+        # Register all file-related commands
+        command_registry.register_slash_command(container.make("add_file_command"))
+        command_registry.register_slash_command(container.make("readonly_command"))
+        command_registry.register_slash_command(container.make("drop_file_command"))
+
+        # Initialize file context or any other domain-specific setup
+        self._initialize_file_context(container)
+
+    def _initialize_file_context(self, container: Container):
+        """Initialize file context and any domain-specific setup."""
+        # file_service = container.make("file_service")
+        # Any file context initialization logic here
+        # For example:
+        # - Loading saved file contexts from disk
+        # - Setting up file watchers
+        # - Initializing default file patterns
+        # - Setting up file validation rules
+        pass
+
+    def provides(self) -> list:
+        return [
+            "file_repository",
+            "file_service",
+            "add_file_command",
+            "readonly_command",
+            "drop_file_command",
+        ]

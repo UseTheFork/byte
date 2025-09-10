@@ -4,11 +4,15 @@ from typing import List
 from rich.columns import Columns
 from rich.console import Console
 
-from bytesmith.commands.registry import Command, command_registry
-from bytesmith.context.file_manager import FileMode, file_context_manager
+from byte.commands.registry import Command
+
+from .context_manager import FileMode
 
 
 class AddFileCommand(Command):
+    def __init__(self, container=None):
+        self.container = container
+
     @property
     def name(self) -> str:
         return "add"
@@ -21,7 +25,8 @@ class AddFileCommand(Command):
         if not args:
             return "Usage: /add <file_path>"
 
-        if file_context_manager.add_file(args, FileMode.EDITABLE):
+        file_service = self.container.make("file_service")
+        if file_service.add_file(args, FileMode.EDITABLE):
             return f"Added {args} to context as editable"
         else:
             return f"Failed to add {args} (file not found or not readable)"
@@ -52,7 +57,10 @@ class AddFileCommand(Command):
 
     def pre_prompt(self, console: Console) -> None:
         """Display editable files."""
-        editable_files = file_context_manager.list_files(FileMode.EDITABLE)
+        if not self.container:
+            return
+        file_service = self.container.make("file_service")
+        editable_files = file_service.list_files(FileMode.EDITABLE)
         if not editable_files:
             return
 
@@ -63,6 +71,9 @@ class AddFileCommand(Command):
 
 
 class ReadOnlyCommand(Command):
+    def __init__(self, container=None):
+        self.container = container
+
     @property
     def name(self) -> str:
         return "read-only"
@@ -75,7 +86,8 @@ class ReadOnlyCommand(Command):
         if not args:
             return "Usage: /read-only <file_path>"
 
-        if file_context_manager.add_file(args, FileMode.READ_ONLY):
+        file_service = self.container.make("file_service")
+        if file_service.add_file(args, FileMode.READ_ONLY):
             return f"Added {args} to context as read-only"
         else:
             return f"Failed to add {args} (file not found or not readable)"
@@ -106,7 +118,10 @@ class ReadOnlyCommand(Command):
 
     def pre_prompt(self, console: Console) -> None:
         """Display read-only files."""
-        readonly_files = file_context_manager.list_files(FileMode.READ_ONLY)
+        if not self.container:
+            return
+        file_service = self.container.make("file_service")
+        readonly_files = file_service.list_files(FileMode.READ_ONLY)
         if not readonly_files:
             return
 
@@ -117,6 +132,9 @@ class ReadOnlyCommand(Command):
 
 
 class DropFileCommand(Command):
+    def __init__(self, container=None):
+        self.container = container
+
     @property
     def name(self) -> str:
         return "drop"
@@ -129,18 +147,16 @@ class DropFileCommand(Command):
         if not args:
             return "Usage: /drop <file_path>"
 
-        if file_context_manager.remove_file(args):
+        file_service = self.container.make("file_service")
+        if file_service.remove_file(args):
             return f"Removed {args} from context"
         else:
             return f"File {args} not found in context"
 
     def get_completions(self, text: str) -> List[str]:
         """Complete with files currently in context."""
-        files = file_context_manager.list_files()
+        if not self.container:
+            return []
+        file_service = self.container.make("file_service")
+        files = file_service.list_files()
         return [f.relative_path for f in files if f.relative_path.startswith(text)]
-
-
-# Auto-register commands
-command_registry.register_slash_command(AddFileCommand())
-command_registry.register_slash_command(ReadOnlyCommand())
-command_registry.register_slash_command(DropFileCommand())

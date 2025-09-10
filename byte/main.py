@@ -2,16 +2,18 @@ import asyncio
 
 from rich.console import Console
 
-from bytesmith.commands.processor import CommandProcessor
-from bytesmith.commands.registry import command_registry
-from bytesmith.ui.prompt import PromptHandler
+from byte.bootstrap import bootstrap
+from byte.commands.processor import CommandProcessor
+from byte.commands.registry import command_registry
+from byte.ui.prompt import PromptHandler
 
 
-class ByteSmith:
-    def __init__(self):
+class Byte:
+    def __init__(self, container):
+        self.container = container
         self.console = Console()
         self.prompt_handler = PromptHandler()
-        self.command_processor = CommandProcessor()
+        self.command_processor = CommandProcessor(container)
 
     async def run_async(self):
         """Main CLI loop."""
@@ -48,7 +50,9 @@ class ByteSmith:
 
 
 def main():
-    app = ByteSmith()
+    # Bootstrap the application and get the container
+    container = bootstrap()
+    app = Byte(container)
     app.run()
 
 

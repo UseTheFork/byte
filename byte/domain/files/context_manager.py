@@ -115,7 +115,60 @@ class FileContextManager:
     def clear(self):
         """Clear all files from context."""
         self._files.clear()
+from enum import Enum
+from pathlib import Path
+from typing import List, Optional
 
 
-# Global file context manager
-file_context_manager = FileContextManager()
+class FileMode(Enum):
+    EDITABLE = "editable"
+    READ_ONLY = "read_only"
+
+
+class FileContext:
+    def __init__(self, path: Path, mode: FileMode, content: str = ""):
+        self.path = path
+        self.mode = mode
+        self.content = content
+        self.relative_path = str(path)
+
+
+class FileContextManager:
+    def __init__(self):
+        self._files = {}
+
+    def add_file(self, path: str, mode: FileMode) -> bool:
+        try:
+            file_path = Path(path)
+            if file_path.exists() and file_path.is_file():
+                content = file_path.read_text()
+                file_context = FileContext(file_path, mode, content)
+                self._files[str(file_path)] = file_context
+                return True
+        except Exception:
+            pass
+        return False
+
+    def remove_file(self, path: str) -> bool:
+        if path in self._files:
+            del self._files[path]
+            return True
+        return False
+
+    def list_files(self, mode: Optional[FileMode] = None) -> List[FileContext]:
+        files = list(self._files.values())
+        if mode:
+            files = [f for f in files if f.mode == mode]
+        return files
+
+    def generate_context_prompt(self) -> str:
+        if not self._files:
+            return ""
+        
+        context_parts = []
+        for file_context in self._files.values():
+            context_parts.append(f"File: {file_context.relative_path} ({file_context.mode.value})")
+            context_parts.append(file_context.content)
+            context_parts.append("")
+        
+        return "\n".join(context_parts)

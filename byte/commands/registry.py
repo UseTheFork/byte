@@ -36,6 +36,7 @@ class Command(ABC):
 class CommandRegistry:
     def __init__(self):
         self._slash_commands: Dict[str, Command] = {}
+        self._at_commands: Dict[str, Command] = {}
 
     def register_slash_command(self, command: Command):
         """Register a slash command."""

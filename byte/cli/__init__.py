@@ -1,6 +1,6 @@
 import click
 
-from bytesmith.main import main
+from byte.main import main
 
 
 @click.command()

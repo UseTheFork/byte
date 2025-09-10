@@ -1,8 +1,10 @@
-from bytesmith.commands.registry import command_registry
-from bytesmith.context.file_manager import file_context_manager
+from byte.commands.registry import command_registry
 
 
 class CommandProcessor:
+    def __init__(self, container):
+        self.container = container
+
     async def process_input(self, user_input: str) -> str:
         """Process user input and execute commands if applicable."""
         user_input = user_input.strip()
@@ -11,7 +13,8 @@ class CommandProcessor:
             return await self._process_slash_command(user_input[1:])
         else:
             # For regular input, include file context
-            context = file_context_manager.generate_context_prompt()
+            file_service = self.container.make("file_service")
+            context = file_service.generate_context_prompt()
             if context:
                 full_input = f"{context}\n\nUser input: {user_input}"
                 return f"Processing with context:\n{full_input}"
