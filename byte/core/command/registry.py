@@ -7,6 +7,9 @@ from rich.console import Console
 class Command(ABC):
     """Base class for all commands."""
 
+    def __init__(self, container=None):
+        self.container = container
+
     @property
     @abstractmethod
     def name(self) -> str:

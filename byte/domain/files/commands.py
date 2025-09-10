@@ -10,9 +10,6 @@ from .context_manager import FileMode
 
 
 class AddFileCommand(Command):
-    def __init__(self, container=None):
-        self.container = container
-
     @property
     def name(self) -> str:
         return "add"
@@ -71,9 +68,6 @@ class AddFileCommand(Command):
 
 
 class ReadOnlyCommand(Command):
-    def __init__(self, container=None):
-        self.container = container
-
     @property
     def name(self) -> str:
         return "read-only"
