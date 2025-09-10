@@ -4,7 +4,7 @@ from typing import List
 from rich.columns import Columns
 from rich.console import Console
 
-from byte.commands.registry import Command
+from byte.core.command.registry import Command
 
 from .context_manager import FileMode
 

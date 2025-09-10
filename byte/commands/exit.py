@@ -1,4 +1,4 @@
-from byte.commands.registry import Command, command_registry
+from byte.core.command.registry import Command, command_registry
 
 
 class ExitCommand(Command):

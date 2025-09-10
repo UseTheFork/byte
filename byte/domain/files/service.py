@@ -1,8 +1,7 @@
 from typing import List, Optional
 
-from byte.repositories.file_repository import FileRepositoryInterface
-
-from .context_manager import FileContext, FileContextManager, FileMode
+from byte.domain.files.context_manager import FileContext, FileContextManager, FileMode
+from byte.domain.files.repository import FileRepositoryInterface
 
 
 class FileService:
@@ -74,29 +73,3 @@ class FileService:
             return True
         except Exception:
             return False
-from typing import List, Optional
-from .context_manager import FileContext, FileMode, FileContextManager
-
-
-class FileService:
-    def __init__(self, repository, context_manager: FileContextManager):
-        self.repository = repository
-        self.context_manager = context_manager
-
-    def add_file(self, path: str, mode: FileMode) -> bool:
-        if self.context_manager.add_file(path, mode):
-            # Optionally save to repository
-            file_context = self.context_manager._files.get(path)
-            if file_context:
-                self.repository.save(file_context)
-            return True
-        return False
-
-    def remove_file(self, path: str) -> bool:
-        if self.context_manager.remove_file(path):
-            self.repository.delete_by_path(path)
-            return True
-        return False
-
-    def list_files(self, mode: Optional[FileMode] = None) -> List[FileContext]:
-        return self.context_manager.list_files(mode)

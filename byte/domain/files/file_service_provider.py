@@ -1,9 +1,9 @@
 from byte.container import Container
+from byte.core.service_provider import ServiceProvider
 from byte.domain.files.commands import AddFileCommand, DropFileCommand, ReadOnlyCommand
 from byte.domain.files.context_manager import FileContextManager
-from byte.domain.files.file_service import FileService
-from byte.providers.service_provider import ServiceProvider
-from byte.repositories.file_repository import InMemoryFileRepository
+from byte.domain.files.repository import InMemoryFileRepository
+from byte.domain.files.service import FileService
 
 
 class FileServiceProvider(ServiceProvider):

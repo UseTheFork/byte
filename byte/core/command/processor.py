@@ -1,4 +1,4 @@
-from byte.commands.registry import command_registry
+from byte.core.command.registry import command_registry
 
 
 class CommandProcessor:

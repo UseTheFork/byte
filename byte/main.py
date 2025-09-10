@@ -3,8 +3,8 @@ import asyncio
 from rich.console import Console
 
 from byte.bootstrap import bootstrap
-from byte.commands.processor import CommandProcessor
-from byte.commands.registry import command_registry
+from byte.core.command.processor import CommandProcessor
+from byte.core.command.registry import command_registry
 from byte.ui.prompt import PromptHandler
 
 
