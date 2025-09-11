@@ -2,6 +2,7 @@ from byte.container import app
 from byte.core.command.registry import command_registry
 from byte.core.events.service_provider import EventServiceProvider
 from byte.domain.files.file_service_provider import FileServiceProvider
+from byte.domain.llm.service_provider import LLMServiceProvider
 from byte.domain.system.service_provider import SystemServiceProvider
 
 
@@ -13,6 +14,7 @@ def bootstrap():
     service_providers = [
         EventServiceProvider(),  # Register events first
         FileServiceProvider(),
+        LLMServiceProvider(),
         SystemServiceProvider(),
     ]
 
