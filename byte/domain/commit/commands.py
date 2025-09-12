@@ -1,4 +1,3 @@
-from typing import List
 
 import git
 import rich
@@ -9,7 +8,6 @@ from langchain_core.language_models.chat_models import (
 
 from byte.core.command.registry import Command
 from byte.domain.commit.prompt import commit_prompt
-
 from byte.domain.llm.service import LLMService
 
 
@@ -23,7 +21,6 @@ class CommitCommand(Command):
         return "Create a git commit with staged changes"
 
     async def execute(self, args: str) -> str:
-
 
         # commit_message = args.strip()
 
@@ -46,10 +43,8 @@ class CommitCommand(Command):
 
             # Create the commit
             commit = repo.index.commit(result_message.text())
-            rich.print()
-
-            return f"123"
-            # return f"Commit created successfully:\n[{commit.hexsha[:7]}] {commit.message.strip()}"
+            rich.print(f"Commit [{commit.hexsha[:7]}] {commit.message.strip()}")
+            return "Commit created successfully:\n"
 
         except InvalidGitRepositoryError:
             return "Not in a git repository"
@@ -57,24 +52,3 @@ class CommitCommand(Command):
             return f"Git commit failed: {e}"
         except Exception as e:
             return f"Unexpected error: {e}"
-
-    def get_completions(self, text: str) -> List[str]:
-        """Provide common commit message templates."""
-        templates = [
-            "feat: add new feature",
-            "fix: resolve bug in",
-            "docs: update documentation",
-            "style: format code",
-            "refactor: restructure code",
-            "test: add tests for",
-            "chore: update dependencies",
-        ]
-
-        if not text:
-            return templates
-
-        return [
-            template
-            for template in templates
-            if template.lower().startswith(text.lower())
-        ]
