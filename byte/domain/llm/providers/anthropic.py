@@ -10,7 +10,6 @@ class AnthropicLLMService(LLMService):
         return {
             "main": {
                 "model": "claude-3-5-sonnet-20241022",
-                "thinking": {"type": "enabled", "budget_tokens": 2000},
             },
             "weak": {
                 "model": "claude-3-5-haiku-20241022",

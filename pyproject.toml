@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "click>=8.2.1",
+    "gitpython>=3.1.45",
     "langchain[anthropic,google-genai,openai]>=0.3.27",
     "langgraph>=0.6.7",
     "prompt-toolkit>=3.0.52",
@@ -57,6 +58,23 @@ ignore = [
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
+
+[tool.basedpyright]
+include = ["byte"]
+pythonPlatform = "All"
+pythonVersion = "3.12"
+reportIgnoreCommentWithoutRule = true
+reportUnnecessaryTypeIgnoreComment = "warning"
+typeCheckingMode = "basic"
+
+[[tool.basedpyright.executionEnvironments]]
+root = "examples"
+reportUnknownArgumentType = "hint"
+reportUnknownMemberType = "hint"
+reportUnknownVariableType = "hint"
+reportMissingImports = "hint"
+reportMissingTypeStubs = "hint"
+
 
 [build-system]
 build-backend = "hatchling.build"
