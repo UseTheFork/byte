@@ -1,5 +1,6 @@
 from byte.container import app
 from byte.core.command.registry import command_registry
+from byte.core.config.service_provider import ConfigServiceProvider
 from byte.core.events.service_provider import EventServiceProvider
 from byte.domain.commit.service_provider import CommitServiceProvider
 from byte.domain.files.file_service_provider import FileServiceProvider
@@ -20,9 +21,10 @@ def bootstrap():
     # Make the global command registry available through dependency injection
     app.singleton("command_registry", lambda: command_registry)
 
-    # Order matters: EventServiceProvider must be first since other services
-    # may need to register event listeners during their boot phase
+    # Order matters: ConfigServiceProvider must be early since other services
+    # may need configuration access during their boot phase
     service_providers = [
+        ConfigServiceProvider(),  # Configuration management
         EventServiceProvider(),  # Foundation for domain events
         UIServiceProvider(),  # Console and prompt services
         FileServiceProvider(),  # File context management

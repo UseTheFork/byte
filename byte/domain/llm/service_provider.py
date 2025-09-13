@@ -1,4 +1,3 @@
-import os
 from typing import TYPE_CHECKING
 
 from rich.console import Console
@@ -37,7 +36,10 @@ class LLMServiceProvider(ServiceProvider):
         to first available provider if preferred option is unavailable.
         Usage: Called internally during service registration
         """
-        preferred_provider = os.getenv("BYTE_LLM_PROVIDER", "").lower()
+        # Get preferred provider from config system (with env fallback)
+        config_service = container.make("config")
+        console: Console = container.make("console")
+        preferred_provider = config_service.config.llm.provider.lower()
 
         # Provider priority order - Anthropic first for best performance
         providers = [
@@ -54,8 +56,8 @@ class LLMServiceProvider(ServiceProvider):
                     if service.is_available():
                         return service
                     else:
-                        print(
-                            f"Warning: Preferred provider '{preferred_provider}' not available"
+                        console.print(
+                            f"[warning]Warning: Preferred provider '{preferred_provider}' not available[/warning]"
                         )
                         break
 
