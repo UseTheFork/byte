@@ -1,3 +1,4 @@
+from .config import CommitConfig
 from .service_provider import CommitServiceProvider
 
-__all__ = ["CommitServiceProvider"]
+__all__ = ["CommitConfig", "CommitServiceProvider"]

@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Any
 
-from byte.core.config.schema import Config
+from byte.core.config.schema import AppConfig, Config
 
 if TYPE_CHECKING:
     from byte.core.config.service import ConfigService
@@ -30,9 +30,9 @@ class Configurable:
         Usage: `self.config.app.name` -> type-safe access to configuration
         """
         if not hasattr(self, "_config_service"):
-            # Return default config if service not available
+            # Return minimal default config if service not available
             from pathlib import Path
 
-            return Config.from_dict({}, Path.cwd(), False)
+            return Config(app=AppConfig(project_root=Path.cwd()))
 
         return self._config_service.config

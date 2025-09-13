@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional
 
 import yaml
 
-from byte.core.config.schema import Config
+from byte.core.config.schema import AppConfig, Config
 
 
 class ConfigService:
@@ -20,6 +20,7 @@ class ConfigService:
     ):
         self._raw_config: Dict[str, Any] = config_data or {}
         self._cli_args: Dict[str, Any] = cli_args or {}
+        self._schema_registry: Dict[str, type] = {}
         self._typed_config: Optional[Config] = None
         self._loaded_files: set = set()
         self._project_root: Optional[Path] = None
@@ -47,13 +48,7 @@ class ConfigService:
         # Apply CLI arguments (highest priority)
         self._apply_cli_args()
 
-        # Detect git repository
-        has_git = (self._project_root / ".git").exists()
-
-        # Create typed config with computed values and all sources merged
-        self._typed_config = Config.from_dict(
-            self._raw_config, self._project_root, has_git
-        )
+        # Don't build typed config yet - domain schemas not registered
 
     def _find_project_root(self) -> Path:
         """Find project root by looking for .git directory or using current directory."""
@@ -139,6 +134,51 @@ class ConfigService:
         if cli_config:
             self._merge_config(cli_config)
 
+    def register_schema(self, domain: str, schema_class: type) -> None:
+        """Register a domain-specific config schema.
+
+        Usage: `config.register_schema("llm", LLMConfig)` -> domain owns its config
+        """
+        self._schema_registry[domain] = schema_class
+        # Invalidate cached config to force rebuild
+        self._typed_config = None
+
+    def _build_typed_config(self) -> Config:
+        """Build the final Config object from registered domain schemas."""
+        domain_configs = {}
+
+        # Build each domain's config from its schema
+        for domain, schema_class in self._schema_registry.items():
+            domain_data = self._raw_config.get(domain, {})
+
+            # Create typed config instance with defaults
+            domain_configs[domain] = schema_class(
+                **{
+                    k: v
+                    for k, v in domain_data.items()
+                    if k in schema_class.__dataclass_fields__
+                }
+            )
+
+        # Build app config with computed values
+        app_data = self._raw_config.get("app", {})
+        has_git = (
+            (self._project_root / ".git").exists() if self._project_root else False
+        )
+
+        app_config = AppConfig(
+            name=app_data.get("name", "Byte"),
+            version=app_data.get("version", "1.0.0"),
+            debug=app_data.get("debug", False),
+            project_root=self._project_root,
+            has_git=has_git,
+        )
+
+        return Config(
+            app=app_config,
+            **domain_configs,
+        )
+
     @property
     def project_root(self) -> Path:
         """Get the detected project root directory."""
@@ -186,12 +226,8 @@ class ConfigService:
                 yaml_data = yaml.safe_load(f) or {}
                 self._merge_config(yaml_data)
                 self._loaded_files.add(str(path))
-                # Recreate typed config after loading new data
-                if self._project_root:
-                    has_git = (self._project_root / ".git").exists()
-                    self._typed_config = Config.from_dict(
-                        self._raw_config, self._project_root, has_git
-                    )
+                # Invalidate typed config to force rebuild
+                self._typed_config = None
         except (OSError, yaml.YAMLError) as e:
             print(f"Failed to load config from {file_path}: {e}")
 
@@ -202,11 +238,7 @@ class ConfigService:
         Usage: `config_service.config.app.name` -> type-safe access
         """
         if self._typed_config is None:
-            project_root = self._project_root or Path.cwd()
-            has_git = (project_root / ".git").exists() if project_root else False
-            self._typed_config = Config.from_dict(
-                self._raw_config, project_root, has_git
-            )
+            self._typed_config = self._build_typed_config()
         return self._typed_config
 
     def reload(self) -> None:
@@ -217,11 +249,8 @@ class ConfigService:
             config_file = self._byte_dir / "config.yaml"
             if config_file.exists():
                 self.load_yaml(str(config_file))
-            if self._project_root:
-                has_git = (self._project_root / ".git").exists()
-                self._typed_config = Config.from_dict(
-                    self._raw_config, self._project_root, has_git
-                )
+        # Invalidate typed config to force rebuild
+        self._typed_config = None
 
     def _merge_config(self, new_config: Dict[str, Any]) -> None:
         """Recursively merge new configuration into existing config."""

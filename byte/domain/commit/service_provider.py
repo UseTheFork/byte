@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from byte.container import Container
 from byte.core.service_provider import ServiceProvider
 from byte.domain.commit.commands import CommitCommand
+from byte.domain.commit.config import CommitConfig
 
 if TYPE_CHECKING:
     from byte.container import Container
@@ -22,6 +23,11 @@ class CommitServiceProvider(ServiceProvider):
 
         Usage: `provider.register(container)` -> binds commit command
         """
+        # Register commit config schema first
+        config_service = container.make("config")
+        config_service.register_schema("commit", CommitConfig)
+
+        # Register commit command
         container.bind("commit_command", lambda: CommitCommand(container))
 
     def boot(self, container: "Container") -> None:

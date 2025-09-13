@@ -5,7 +5,7 @@ from byte.main import main
 
 @click.command()
 def cli():
-    """ByteSmith CLI Assistant"""
+    """Byte CLI Assistant"""
     main()
 
 

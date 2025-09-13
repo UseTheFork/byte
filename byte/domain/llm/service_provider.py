@@ -4,6 +4,7 @@ from rich.console import Console
 
 from byte.container import Container
 from byte.core.service_provider import ServiceProvider
+from byte.domain.llm.config import LLMConfig
 from byte.domain.llm.providers.anthropic import AnthropicLLMService
 from byte.domain.llm.providers.gemini import GeminiLLMService
 from byte.domain.llm.providers.openai import OpenAILLMService
@@ -26,6 +27,11 @@ class LLMServiceProvider(ServiceProvider):
 
         Usage: `provider.register(container)` -> configures best available LLM service
         """
+        # Register LLM config schema first
+        config_service = container.make("config")
+        config_service.register_schema("llm", LLMConfig)
+
+        # Register LLM service
         llm_service = self._create_llm_service(container)
         container.singleton("llm_service", lambda: llm_service)
 
