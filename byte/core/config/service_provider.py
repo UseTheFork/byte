@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING
 
+from rich.console import Console
+
 from byte.core.config.service import ConfigService
 from byte.core.service_provider import ServiceProvider
 
@@ -23,7 +25,14 @@ class ConfigServiceProvider(ServiceProvider):
 
     def boot(self, container: "Container") -> None:
         """Boot configuration services after all providers are registered."""
-        pass
+        console: Console = container.make("console")
+        config_service = container.make("config")
+
+        console.print("│", style="text")
+        console.print(
+            f"├─ [success]Project root:[/success] [info]{config_service.project_root}[/info]"
+        )
+        console.print("│", style="text")
 
     def provides(self) -> list:
         """Return list of services provided by this provider."""

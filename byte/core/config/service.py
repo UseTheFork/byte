@@ -2,7 +2,9 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+import git
 import yaml
+from git.exc import InvalidGitRepositoryError
 
 from byte.core.config.schema import AppConfig, Config
 
@@ -10,8 +12,8 @@ from byte.core.config.schema import AppConfig, Config
 class ConfigService:
     """Configuration service with automatic workspace initialization.
 
-    Manages configuration in a .byte directory within the project root,
-    creating default configurations and directory structure as needed.
+    Manages configuration in a .byte directory within the git repository root.
+    Requires a git repository - will fail if not in one.
     Usage: `config.get('app.name')` -> automatically initializes workspace
     """
 
@@ -26,15 +28,18 @@ class ConfigService:
         self._project_root: Optional[Path] = None
         self._byte_dir: Optional[Path] = None
 
-        # Initialize workspace on creation
+        # Initialize workspace on creation - will fail if not in git repo
         self._initialize_workspace()
 
     def _initialize_workspace(self) -> None:
-        """Initialize .byte workspace directory and load configurations."""
+        """Initialize .byte workspace directory and load configurations.
+
+        Raises InvalidGitRepositoryError if not in a git repository.
+        """
         self._project_root = self._find_project_root()
         self._byte_dir = self._project_root / ".byte"
 
-        # Only ensure .byte directory exists - don't create config files
+        # Ensure .byte directory exists
         self._byte_dir.mkdir(exist_ok=True)
 
         # Load config.yaml if it exists
@@ -51,16 +56,18 @@ class ConfigService:
         # Don't build typed config yet - domain schemas not registered
 
     def _find_project_root(self) -> Path:
-        """Find project root by looking for .git directory or using current directory."""
-        current = Path.cwd()
+        """Find git repository root directory.
 
-        # Walk up directory tree looking for .git
-        for parent in [current] + list(current.parents):
-            if (parent / ".git").exists():
-                return parent
-
-        # Fall back to current directory if no git repo found
-        return current
+        Raises InvalidGitRepositoryError if not in a git repository.
+        """
+        try:
+            # Use git library to find repository root
+            repo = git.Repo(search_parent_directories=True)
+            return Path(repo.working_dir)
+        except InvalidGitRepositoryError:
+            raise InvalidGitRepositoryError(
+                "Byte requires a git repository. Please run 'git init' or navigate to a git repository."
+            )
 
     def _load_env_config(self) -> None:
         """Load configuration from environment variables with BYTE_ prefix."""
@@ -160,18 +167,14 @@ class ConfigService:
                 }
             )
 
-        # Build app config with computed values
+        # Build app config
         app_data = self._raw_config.get("app", {})
-        has_git = (
-            (self._project_root / ".git").exists() if self._project_root else False
-        )
 
         app_config = AppConfig(
             name=app_data.get("name", "Byte"),
             version=app_data.get("version", "1.0.0"),
             debug=app_data.get("debug", False),
             project_root=self._project_root,
-            has_git=has_git,
         )
 
         return Config(

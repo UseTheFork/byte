@@ -11,7 +11,6 @@ class AppConfig:
     version: str = "1.0.0"
     debug: bool = False
     project_root: Optional[Path] = None
-    has_git: bool = False
 
 
 @dataclass(frozen=True)
