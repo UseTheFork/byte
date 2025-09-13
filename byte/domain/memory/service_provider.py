@@ -1,0 +1,42 @@
+from typing import TYPE_CHECKING
+
+from byte.core.service_provider import ServiceProvider
+from byte.domain.memory.config import MemoryConfig
+from byte.domain.memory.service import MemoryService
+
+if TYPE_CHECKING:
+    from byte.container import Container
+
+
+class MemoryServiceProvider(ServiceProvider):
+    """Service provider for conversation memory management.
+
+    Registers memory services for short-term conversation persistence using
+    LangGraph checkpointers. Enables stateful conversations and thread
+    management for the AI agent system.
+    Usage: Register with container to enable conversation memory
+    """
+
+    def register(self, container: "Container") -> None:
+        """Register memory services in the container.
+
+        Usage: `provider.register(container)` -> binds memory services
+        """
+        # Register memory config schema
+        config_service = container.make("config")
+        config_service.register_schema("memory", MemoryConfig)
+
+        # Register memory service
+        container.singleton("memory_service", lambda: MemoryService(container))
+
+    def boot(self, container: "Container") -> None:
+        """Boot memory services after all providers are registered.
+
+        Usage: `provider.boot(container)` -> memory system ready for use
+        """
+        # Memory service is lazy-loaded, no explicit boot needed
+        pass
+
+    def provides(self) -> list:
+        """Return list of services provided by this provider."""
+        return ["memory_service"]

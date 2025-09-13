@@ -4,7 +4,9 @@ from byte.core.config.service_provider import ConfigServiceProvider
 from byte.core.events.service_provider import EventServiceProvider
 from byte.domain.commit.service_provider import CommitServiceProvider
 from byte.domain.files.file_service_provider import FileServiceProvider
+from byte.domain.knowledge.service_provider import KnowledgeServiceProvider
 from byte.domain.llm.service_provider import LLMServiceProvider
+from byte.domain.memory.service_provider import MemoryServiceProvider
 from byte.domain.system.service_provider import SystemServiceProvider
 from byte.domain.ui.service_provider import UIServiceProvider
 
@@ -27,6 +29,8 @@ def bootstrap():
         ConfigServiceProvider(),  # Configuration management
         EventServiceProvider(),  # Foundation for domain events
         UIServiceProvider(),  # Console and prompt services
+        MemoryServiceProvider(),  # Short-term conversation memory
+        KnowledgeServiceProvider(),  # Long-term knowledge storage
         FileServiceProvider(),  # File context management
         LLMServiceProvider(),  # Language model integration
         CommitServiceProvider(),  # Git commit functionality

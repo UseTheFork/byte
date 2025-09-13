@@ -1,6 +1,11 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from byte.domain.commit.config import CommitConfig
+    from byte.domain.knowledge.config import KnowledgeConfig
+    from byte.domain.memory.config import MemoryConfig
 
 
 @dataclass(frozen=True)
@@ -18,6 +23,12 @@ class Config:
     """Root configuration object containing all config sections."""
 
     app: AppConfig
+
+    # Type hints for dynamically added domain configs
+    if TYPE_CHECKING:
+        memory: "MemoryConfig"
+        knowledge: "KnowledgeConfig"
+        commit: "CommitConfig"
 
     def __init__(self, **kwargs):
         # Use object.__setattr__ since this is a frozen dataclass

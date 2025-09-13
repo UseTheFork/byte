@@ -1,0 +1,155 @@
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+
+from byte.core.config.configurable import Configurable
+from byte.core.events.eventable import Eventable
+from byte.domain.knowledge.models import KnowledgeItem, ProjectPattern, UserPreference
+from byte.domain.knowledge.store import ByteKnowledgeStore
+
+if TYPE_CHECKING:
+    from byte.container import Container
+
+
+class KnowledgeService(Configurable, Eventable):
+    """Domain service for long-term knowledge and preference management.
+
+    Orchestrates persistent storage of user preferences, project patterns,
+    and learned behaviors across conversation sessions. Provides high-level
+    APIs for storing and retrieving knowledge with semantic organization.
+    Usage: `knowledge_service.set_user_preference("theme", "dark")` -> persists preference
+    """
+
+    def __init__(self, container: Optional["Container"] = None):
+        self.container = container
+        self._store: Optional[ByteKnowledgeStore] = None
+        self._boot_mixins()
+
+    def _boot_mixins(self) -> None:
+        """Boot method for auto-initializing mixins."""
+        if hasattr(self, "boot_configurable"):
+            self.boot_configurable()
+        if hasattr(self, "boot_eventable"):
+            self.boot_eventable()
+
+    @property
+    def store(self) -> ByteKnowledgeStore:
+        """Get knowledge store with lazy initialization.
+
+        Usage: `store = knowledge_service.store` -> direct store access
+        """
+        if self._store is None:
+            config_service = self.container.make("config")
+            self._store = ByteKnowledgeStore(config_service)
+        return self._store
+
+    def set_user_preference(
+        self, category: str, subcategory: str, settings: Dict[str, Any]
+    ) -> bool:
+        """Store user preference with hierarchical organization.
+
+        Usage: `knowledge_service.set_user_preference("coding", "python", {"indent": 4})`
+        """
+        preference = UserPreference(category, subcategory, settings)
+        item = KnowledgeItem(
+            namespace=["user", "preferences", category],
+            key=subcategory,
+            value=preference.settings,
+            metadata={"type": "user_preference", "category": category},
+        )
+        return self.store.put(item)
+
+    def get_user_preference(
+        self, category: str, subcategory: str
+    ) -> Optional[Dict[str, Any]]:
+        """Retrieve user preference settings.
+
+        Usage: `settings = knowledge_service.get_user_preference("coding", "python")`
+        """
+        item = self.store.get(["user", "preferences", category], subcategory)
+        return item.value if item else None
+
+    def set_project_pattern(
+        self, pattern_type: str, pattern_data: Dict[str, Any], confidence: float = 1.0
+    ) -> bool:
+        """Store project-specific learned pattern.
+
+        Usage: `knowledge_service.set_project_pattern("file_structure", {"dirs": ["src"]})`
+        """
+        project_root = self.config.app.project_root.name
+        pattern = ProjectPattern(pattern_type, pattern_data, confidence)
+        item = KnowledgeItem(
+            namespace=["project", project_root, "patterns"],
+            key=pattern_type,
+            value={"data": pattern.pattern_data, "confidence": pattern.confidence},
+            metadata={"type": "project_pattern", "project": project_root},
+        )
+        return self.store.put(item)
+
+    def get_project_pattern(self, pattern_type: str) -> Optional[Dict[str, Any]]:
+        """Retrieve project-specific pattern.
+
+        Usage: `pattern = knowledge_service.get_project_pattern("file_structure")`
+        """
+        project_root = self.config.app.project_root.name
+        item = self.store.get(["project", project_root, "patterns"], pattern_type)
+        return item.value if item else None
+
+    def store_knowledge(
+        self,
+        namespace: List[str],
+        key: str,
+        value: Any,
+        ttl_minutes: Optional[int] = None,
+    ) -> bool:
+        """Store arbitrary knowledge with custom namespace.
+
+        Usage: `knowledge_service.store_knowledge(["ai", "learned"], "pattern", data)`
+        """
+        item = KnowledgeItem(
+            namespace=namespace,
+            key=key,
+            value=value,
+            ttl_minutes=ttl_minutes,
+            metadata={"type": "custom_knowledge"},
+        )
+        return self.store.put(item)
+
+    def retrieve_knowledge(self, namespace: List[str], key: str) -> Optional[Any]:
+        """Retrieve knowledge by namespace and key.
+
+        Usage: `data = knowledge_service.retrieve_knowledge(["ai", "learned"], "pattern")`
+        """
+        item = self.store.get(namespace, key)
+        return item.value if item else None
+
+    def search_knowledge(
+        self, namespace_prefix: List[str], limit: int = 50
+    ) -> List[KnowledgeItem]:
+        """Search knowledge within namespace hierarchy.
+
+        Usage: `items = knowledge_service.search_knowledge(["user"])` -> all user knowledge
+        """
+        return self.store.search(namespace_prefix, limit)
+
+    def get_user_preferences_summary(self) -> Dict[str, Dict[str, Any]]:
+        """Get summary of all user preferences organized by category.
+
+        Usage: `prefs = knowledge_service.get_user_preferences_summary()` -> all preferences
+        """
+        items = self.store.search(["user", "preferences"])
+        summary = {}
+
+        for item in items:
+            if len(item.namespace) >= 3:
+                category = item.namespace[2]  # ["user", "preferences", "category"]
+                if category not in summary:
+                    summary[category] = {}
+                summary[category][item.key] = item.value
+
+        return summary
+
+    def cleanup_expired_knowledge(self) -> int:
+        """Remove expired knowledge items based on TTL.
+
+        Usage: `count = knowledge_service.cleanup_expired_knowledge()` -> maintenance
+        """
+        return self.store.cleanup_expired()
