@@ -12,6 +12,7 @@ Byte follows **Domain-Driven Design** with **Dependency Injection** and **Event-
 - **Dependency Injection**: Services are injected via container pattern
 - **Event-Driven**: Cross-domain communication via domain events
 - **Immutable Data**: Prefer frozen dataclasses for data containers
+- **Automatic Mixin Initialization**: Mixins self-boot via `boot_{mixin_name}` methods
 
 ## Project Structure
 
@@ -52,13 +53,14 @@ class FileServiceProvider(ServiceProvider):
 User interactions are handled via commands:
 
 ```python
-class AddFileCommand(Command):
+class AddFileCommand(Command, Eventable):
     @property
     def name(self) -> str:
         return "add"
 
     async def execute(self, args: str) -> None:
-        # Command implementation
+        # Mixins boot automatically
+        await self.event(FileAdded(file_path=args))
 ```
 
 ### 3. Repository Pattern
@@ -84,6 +86,21 @@ class FileAdded(Event):
 
 # Usage
 await self.event(FileAdded(file_path="main.py"))
+```
+
+### 5. Mixin Boot Pattern
+
+Mixins automatically initialize via boot methods called by base classes:
+
+```python
+class Eventable:
+    def boot_eventable(self) -> None:
+        """Auto-called by Command.__init__."""
+        event_dispatcher = self.container.make("event_dispatcher")
+        self._event_dispatcher = event_dispatcher
+
+class ExitCommand(Command, Eventable):
+    # No manual boot() needed - boot_eventable() called automatically
 ```
 
 ## Dependency Flow
@@ -125,7 +142,7 @@ await self.event(FileAdded(file_path="main.py"))
 
 ## Extension Points
 
-- **New Commands**: Extend `Command` class and register via service provider
+- **New Commands**: Extend `Command` class with mixins - boot methods called automatically
 - **New Domains**: Create domain folder with service provider
 - **New Events**: Extend `Event` class and emit via `Eventable` mixin
 - **New LLM Providers**: Implement `LLMService` interface
@@ -137,5 +154,6 @@ await self.event(FileAdded(file_path="main.py"))
 - Emit events for cross-domain communication
 - Prefer immutable data structures
 - Handle errors gracefully with specific exceptions
+- Use `boot_{mixin_name}` pattern for automatic mixin initialization
 - Follow the [Python Style Guide](PYTHON_STYLEGUIDE.md) for code formatting and structure
 - Follow the [Comment Style Guide](COMMENT_STYLEGUIDE.md) for documentation and comments
