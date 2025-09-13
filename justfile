@@ -14,6 +14,7 @@ ai:
 		--no-detect-urls \
 		--git-commit-verify \
 		--read .byte/conventions/COMMENT_STYLEGUIDE.md \
+		--read .byte/conventions/PYTHON_STYLEGUIDE.md \
 		--lint-cmd "just lint" \
 		--add-gitignore-files
 

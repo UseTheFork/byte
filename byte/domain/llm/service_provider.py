@@ -14,27 +14,39 @@ if TYPE_CHECKING:
 
 
 class LLMServiceProvider(ServiceProvider):
-    """Service provider for LLM functionality."""
+    """Service provider for LLM functionality.
 
-    def register(self, container: Container):
-        """Register LLM services."""
-        # Register the appropriate LLM service based on config/env
+    Automatically detects and configures the best available LLM provider
+    based on environment variables and API key availability. Supports
+    provider preference via BYTE_LLM_PROVIDER environment variable.
+    Usage: Register with container to enable AI functionality throughout app
+    """
+
+    def register(self, container: "Container") -> None:
+        """Register LLM services with automatic provider selection.
+
+        Usage: `provider.register(container)` -> configures best available LLM service
+        """
         llm_service = self._create_llm_service(container)
         container.singleton("llm_service", lambda: llm_service)
 
-    def _create_llm_service(self, container):
-        """Create the appropriate LLM service based on configuration."""
-        # Check environment variable for preferred provider
+    def _create_llm_service(self, container: "Container") -> "LLMService":
+        """Create the appropriate LLM service based on configuration.
+
+        Respects user preference from environment variable, falling back
+        to first available provider if preferred option is unavailable.
+        Usage: Called internally during service registration
+        """
         preferred_provider = os.getenv("BYTE_LLM_PROVIDER", "").lower()
 
-        # Provider priority order
+        # Provider priority order - Anthropic first for best performance
         providers = [
             ("anthropic", AnthropicLLMService),
             ("openai", OpenAILLMService),
             ("gemini", GeminiLLMService),
         ]
 
-        # If preferred provider is specified and available, use it
+        # Honor user preference if specified and available
         if preferred_provider:
             for name, service_class in providers:
                 if name == preferred_provider:
@@ -47,7 +59,7 @@ class LLMServiceProvider(ServiceProvider):
                         )
                         break
 
-        # Fall back to first available provider
+        # Fall back to first available provider for seamless experience
         for name, service_class in providers:
             service = service_class(container)
             if service.is_available():
@@ -55,12 +67,17 @@ class LLMServiceProvider(ServiceProvider):
 
         raise RuntimeError("No LLM provider available. Please set API keys.")
 
-    def boot(self, container: Container):
-        """Boot LLM services."""
+    def boot(self, container: "Container") -> None:
+        """Boot LLM services and display configuration information.
+
+        Shows user which models are active for transparency and debugging,
+        helping users understand which AI capabilities are available.
+        Usage: Called automatically during application startup
+        """
         llm_service: LLMService = container.make("llm_service")
         console: Console = container.make("console")
 
-        # Get model configurations to display actual model names
+        # Display active model configuration for user awareness
         config = llm_service.get_model_config()
         main_model = config.get("main", {}).get("model", "Unknown")
         weak_model = config.get("weak", {}).get("model", "Unknown")
@@ -71,4 +88,5 @@ class LLMServiceProvider(ServiceProvider):
         console.print("│", style="text")
 
     def provides(self) -> list:
+        """Return list of services provided by this provider."""
         return ["llm_service"]

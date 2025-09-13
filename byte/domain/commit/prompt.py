@@ -1,9 +1,8 @@
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.prompts.chat import ChatPromptTemplate
 
-# https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/prompts.py#L8
-# Conventional Commits text adapted from:
-# https://www.conventionalcommits.org/en/v1.0.0/#summary
+# Conventional commit message generation prompt
+# Adapted from Aider: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/prompts.py#L8
+# Conventional Commits specification: https://www.conventionalcommits.org/en/v1.0.0/#summary
 commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
     [
         (

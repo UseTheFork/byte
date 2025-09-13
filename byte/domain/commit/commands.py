@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import git
 from git.exc import GitCommandError, InvalidGitRepositoryError
@@ -10,10 +10,22 @@ if TYPE_CHECKING:
     from langchain_core.language_models.chat_models import BaseChatModel
     from rich.console import Console
 
+    from byte.container import Container
     from byte.domain.llm.service import LLMService
 
 
 class CommitCommand(Command):
+    """Command to generate AI-powered git commit messages from staged changes.
+
+    Analyzes staged git changes and uses LLM to generate conventional commit
+    messages following best practices. Requires staged changes to be present
+    and validates git repository state before proceeding.
+    Usage: `/commit` -> generates and creates commit with AI-generated message
+    """
+
+    def __init__(self, container: Optional["Container"] = None):
+        super().__init__(container)
+
     @property
     def name(self) -> str:
         return "commit"
@@ -23,27 +35,35 @@ class CommitCommand(Command):
         return "Create a git commit with staged changes"
 
     async def execute(self, args: str) -> None:
+        """Generate commit message from staged changes and create commit.
+
+        Validates git repository state, analyzes staged changes, and uses
+        the main LLM to generate a conventional commit message before
+        creating the actual commit.
+        Usage: Called by command processor when user types `/commit`
+        """
         console: Console = self.container.make("console")
 
         try:
-            # Initialize git repository
+            # Initialize git repository with parent directory search
             repo = git.Repo(search_parent_directories=True)
 
-            # Check if there are staged changes
+            # Validate staged changes exist to prevent empty commits
             if not repo.index.diff("HEAD"):
-                console.print("[yellow]No staged changes to commit.[/yellow]")
+                console.print("[warning]No staged changes to commit.[/warning]")
                 return
 
-            # Get the diff of staged changes
+            # Extract staged changes for AI analysis
             staged_diff = repo.git.diff("--cached")
 
-            console.print("[blue]Generating commit message...[/blue]")
+            console.print("[info]Generating commit message...[/info]")
 
+            # Use main model for high-quality commit message generation
             llm_service: LLMService = self.container.make("llm_service")
             llm: BaseChatModel = llm_service.get_main_model()
             result_message = llm.invoke(commit_prompt.invoke({"changes": staged_diff}))
 
-            # Create the commit
+            # Create commit with AI-generated message
             commit = repo.index.commit(result_message.content)
             console.print(
                 f"[success]Commit:[/success] [info]{commit.hexsha[:7]}[/info] {commit.message.strip()}"

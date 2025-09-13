@@ -1,28 +1,42 @@
+from typing import TYPE_CHECKING
+
 from byte.container import Container
 from byte.core.service_provider import ServiceProvider
 from byte.domain.system.commands import ExitCommand, HelpCommand
 
+if TYPE_CHECKING:
+    from byte.container import Container
+
 
 class SystemServiceProvider(ServiceProvider):
-    """Service provider for system-level commands and functionality."""
+    """Service provider for system-level commands and functionality.
 
-    def register(self, container: Container):
-        """Register system commands in the container."""
+    Registers core system commands like exit and help, making them available
+    through the command registry for user interaction via slash commands.
+    Usage: Register with container to enable /exit and /help commands
+    """
 
-        # Register system commands
+    def register(self, container: "Container") -> None:
+        """Register system commands in the container.
+
+        Usage: `provider.register(container)` -> binds exit and help commands
+        """
         container.bind("exit_command", lambda: ExitCommand(container))
         container.bind("help_command", lambda: HelpCommand(container))
 
-    def boot(self, container: Container):
-        """Boot system services and register commands with registry."""
-        # Get the command registry
+    def boot(self, container: "Container") -> None:
+        """Boot system services and register commands with registry.
+
+        Usage: `provider.boot(container)` -> commands become available as /exit, /help
+        """
         command_registry = container.make("command_registry")
 
-        # Register all system commands
+        # Register system commands for user access
         command_registry.register_slash_command(container.make("exit_command"))
         command_registry.register_slash_command(container.make("help_command"))
 
     def provides(self) -> list:
+        """Return list of services provided by this provider."""
         return [
             "exit_command",
             "help_command",
