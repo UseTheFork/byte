@@ -12,6 +12,13 @@ if TYPE_CHECKING:
 
 
 class AddFileCommand(Command):
+    """Command to add files to AI context as editable.
+
+    Enables users to make files available for AI modification via
+    SEARCH/REPLACE blocks, supporting tab completion for file paths.
+    Usage: `/add main.py` -> file becomes editable in AI context
+    """
+
     @property
     def name(self) -> str:
         return "add"
@@ -21,6 +28,7 @@ class AddFileCommand(Command):
         return "Add file to context as editable"
 
     async def execute(self, args: str) -> None:
+        """Add specified file to context with editable permissions."""
         console: Console = self.container.make("console")
 
         if not args:
@@ -38,8 +46,13 @@ class AddFileCommand(Command):
             return
 
     def get_completions(self, text: str) -> List[str]:
-        """File path completions."""
+        """Provide file path completions for improved user experience.
+
+        Scans filesystem to suggest matching file paths, filtering to
+        only show regular files since directories cannot be added to context.
+        """
         try:
+            # Parse directory and filename prefix from partial input
             if "/" in text:
                 directory = os.path.dirname(text)
                 prefix = os.path.basename(text)
@@ -54,15 +67,21 @@ class AddFileCommand(Command):
                         full_path = (
                             os.path.join(directory, item) if directory != "." else item
                         )
+                        # Only suggest files, not directories
                         if os.path.isfile(full_path):
                             items.append(full_path)
                 return items
         except (OSError, PermissionError):
+            # Gracefully handle permission errors in restricted directories
             pass
         return []
 
     def pre_prompt(self) -> None:
-        """Display editable files."""
+        """Display current editable files before each prompt.
+
+        Provides visual feedback about which files the AI can modify,
+        helping users understand the current context state.
+        """
         if not self.container:
             return
         file_service = self.container.make("file_service")
@@ -79,6 +98,13 @@ class AddFileCommand(Command):
 
 
 class ReadOnlyCommand(Command):
+    """Command to add files to AI context as read-only references.
+
+    Allows AI to reference file content for context without permission
+    to modify, useful for configuration files, documentation, or examples.
+    Usage: `/read-only config.json` -> file available for reference only
+    """
+
     @property
     def name(self) -> str:
         return "read-only"
@@ -88,6 +114,7 @@ class ReadOnlyCommand(Command):
         return "Add file to context as read-only"
 
     async def execute(self, args: str) -> None:
+        """Add specified file to context with read-only permissions."""
         console: Console = self.container.make("console")
         if not args:
             console.print("Usage: /read-only <file_path>")
@@ -104,7 +131,11 @@ class ReadOnlyCommand(Command):
             return
 
     def get_completions(self, text: str) -> List[str]:
-        """File path completions."""
+        """Provide file path completions identical to AddFileCommand.
+
+        Reuses the same completion logic since both commands work with
+        file paths, maintaining consistent user experience across commands.
+        """
         try:
             if "/" in text:
                 directory = os.path.dirname(text)
@@ -128,7 +159,11 @@ class ReadOnlyCommand(Command):
         return []
 
     def pre_prompt(self) -> None:
-        """Display read-only files."""
+        """Display current read-only files before each prompt.
+
+        Shows which files are available for AI reference, using different
+        styling to distinguish from editable files in the UI.
+        """
         if not self.container:
             return
         file_service = self.container.make("file_service")
@@ -145,6 +180,13 @@ class ReadOnlyCommand(Command):
 
 
 class DropFileCommand(Command):
+    """Command to remove files from AI context.
+
+    Enables users to clean up context by removing files that are no
+    longer relevant, reducing noise and improving AI focus on current task.
+    Usage: `/drop old_file.py` -> removes file from AI awareness
+    """
+
     def __init__(self, container=None):
         self.container = container
 
@@ -157,6 +199,7 @@ class DropFileCommand(Command):
         return "Remove file from context"
 
     async def execute(self, args: str) -> None:
+        """Remove specified file from active context."""
         console: Console = self.container.make("console")
         if not args:
             console.print("Usage: /drop <file_path>")
@@ -164,14 +207,18 @@ class DropFileCommand(Command):
 
         file_service = self.container.make("file_service")
         if await file_service.remove_file(args):
-            console.print("[success]Removed {args} from context[/success]")
+            console.print(f"[success]Removed {args} from context[/success]")
             return
         else:
-            console.print("[error]File {args} not found in context[/error]")
+            console.print(f"[error]File {args} not found in context[/error]")
             return
 
     def get_completions(self, text: str) -> List[str]:
-        """Complete with files currently in context."""
+        """Complete with files currently in context for accurate removal.
+
+        Only suggests files that are actually in context, preventing
+        errors and providing immediate feedback about available files.
+        """
         if not self.container:
             return []
         file_service = self.container.make("file_service")

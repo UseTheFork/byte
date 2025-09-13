@@ -37,20 +37,6 @@ class FileServiceProvider(ServiceProvider):
         command_registry.register_slash_command(container.make("readonly_command"))
         command_registry.register_slash_command(container.make("drop_file_command"))
 
-        # Initialize file context or any other domain-specific setup
-        self._initialize_file_context(container)
-
-    def _initialize_file_context(self, container: Container):
-        """Initialize file context and any domain-specific setup."""
-        # file_service = container.make("file_service")
-        # Any file context initialization logic here
-        # For example:
-        # - Loading saved file contexts from disk
-        # - Setting up file watchers
-        # - Initializing default file patterns
-        # - Setting up file validation rules
-        pass
-
     def provides(self) -> list:
         return [
             "file_repository",
