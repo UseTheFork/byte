@@ -15,6 +15,7 @@ ai:
 		--git-commit-verify \
 		--read .byte/conventions/COMMENT_STYLEGUIDE.md \
 		--read .byte/conventions/PYTHON_STYLEGUIDE.md \
+		--read .byte/conventions/ARCHITECTURE.md \
 		--lint-cmd "just lint" \
 		--add-gitignore-files
 
