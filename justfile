@@ -16,3 +16,7 @@ ai:
 		--read .byte/conventions/COMMENT_STYLEGUIDE.md \
 		--lint-cmd "just lint" \
 		--add-gitignore-files
+
+[doc('Lint files')]
+lint files:
+		pre-commit run --files {{files}}

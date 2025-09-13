@@ -36,6 +36,7 @@
 
                 packages = [
                   pkgs.just # Command Runner
+                  pkgs.pre-commit
 
                   pkgs.uv
 

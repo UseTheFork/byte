@@ -11,18 +11,28 @@ if TYPE_CHECKING:
 
 
 class Byte:
+    """Main application class that orchestrates the CLI interface and command processing.
+    
+    Separates concerns by delegating prompt handling to PromptHandler and command
+    processing to CommandProcessor, while maintaining the main event loop.
+    """
+    
     def __init__(self, container):
         self.container = container
         self.prompt_handler = PromptHandler()
         self.command_processor = CommandProcessor(container)
 
     async def run_async(self):
-        """Main CLI loop."""
+        """Main CLI loop that handles user interaction and command execution.
+        
+        Uses async/await to prevent blocking on user input while maintaining
+        responsive command execution and graceful shutdown handling.
+        """
         console: Console = self.container.make("console")
 
         while True:
             try:
-                # Display pre-prompt information from all commands
+                # Allow commands to display contextual information before each prompt
                 command_registry.pre_prompt()
 
                 user_input = await self.prompt_handler.get_input_async("> ")
@@ -30,10 +40,10 @@ class Byte:
                 if not user_input.strip():
                     continue
 
-                # Process input through command system
+                # Delegate all input processing to maintain separation of concerns
                 response = await self.command_processor.process_input(user_input)
 
-                # Handle exit command
+                # Use string-based exit signal to avoid tight coupling with exit command
                 if response == "EXIT_REQUESTED":
                     console.print("[warning]Goodbye![/warning]")
                     break
@@ -43,12 +53,19 @@ class Byte:
                 break
 
     def run(self):
-        """Run the async CLI loop."""
+        """Synchronous entry point that wraps the async event loop.
+        
+        Provides a clean interface for callers who don't need async context.
+        """
         asyncio.run(self.run_async())
 
 
 def main():
-    # Bootstrap the application and get the container
+    """Application entry point that bootstraps dependencies and starts the CLI.
+    
+    Follows dependency injection pattern by bootstrapping the container first,
+    then injecting it into the main application class.
+    """
     container = bootstrap()
     app = Byte(container)
     app.run()
