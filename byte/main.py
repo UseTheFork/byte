@@ -1,29 +1,29 @@
 import asyncio
-
-from rich.console import Console
+from typing import TYPE_CHECKING
 
 from byte.bootstrap import bootstrap
 from byte.core.command.processor import CommandProcessor
 from byte.core.command.registry import command_registry
 from byte.core.ui.prompt import PromptHandler
 
+if TYPE_CHECKING:
+    from rich.console import Console
+
 
 class Byte:
     def __init__(self, container):
         self.container = container
-        self.console = Console()
         self.prompt_handler = PromptHandler()
         self.command_processor = CommandProcessor(container)
 
     async def run_async(self):
         """Main CLI loop."""
-        self.console.print("[bold blue]ByteSmith CLI Assistant[/bold blue]")
-        self.console.print("Type 'exit', 'quit', or '/help' for commands\n")
+        console: Console = self.container.make("console")
 
         while True:
             try:
                 # Display pre-prompt information from all commands
-                command_registry.pre_prompt(self.console)
+                command_registry.pre_prompt()
 
                 user_input = await self.prompt_handler.get_input_async("> ")
 
@@ -35,13 +35,11 @@ class Byte:
 
                 # Handle exit command
                 if response == "EXIT_REQUESTED":
-                    self.console.print("[yellow]Goodbye![/yellow]")
+                    console.print("[warning]Goodbye![/warning]")
                     break
 
-                self.console.print(response)
-
             except KeyboardInterrupt:
-                self.console.print("\n[yellow]Goodbye![/yellow]")
+                console.print("\n[warning]Goodbye![/warning]")
                 break
 
     def run(self):

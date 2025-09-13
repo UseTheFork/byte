@@ -1,12 +1,14 @@
 import os
-from typing import List
+from typing import TYPE_CHECKING, List
 
 from rich.columns import Columns
 from rich.console import Console
 
 from byte.core.command.registry import Command
+from byte.domain.files.context_manager import FileMode
 
-from .context_manager import FileMode
+if TYPE_CHECKING:
+    from rich.console import Console
 
 
 class AddFileCommand(Command):
@@ -18,15 +20,22 @@ class AddFileCommand(Command):
     def description(self) -> str:
         return "Add file to context as editable"
 
-    async def execute(self, args: str) -> str:
+    async def execute(self, args: str) -> None:
+        console: Console = self.container.make("console")
+
         if not args:
-            return "Usage: /add <file_path>"
+            console.print("Usage: /add <file_path>")
+            return
 
         file_service = self.container.make("file_service")
         if await file_service.add_file(args, FileMode.EDITABLE):
-            return f"Added {args} to context as editable"
+            console.print(f"[success]Added {args} to context as editable[/success]")
+            return
         else:
-            return f"Failed to add {args} (file not found or not readable)"
+            console.print(
+                f"[error]Failed to add {args} (file not found or not readable)[/error]"
+            )
+            return
 
     def get_completions(self, text: str) -> List[str]:
         """File path completions."""
@@ -52,7 +61,7 @@ class AddFileCommand(Command):
             pass
         return []
 
-    def pre_prompt(self, console: Console) -> None:
+    def pre_prompt(self) -> None:
         """Display editable files."""
         if not self.container:
             return
@@ -61,8 +70,10 @@ class AddFileCommand(Command):
         if not editable_files:
             return
 
-        file_names = [f"[cyan]{f.relative_path}[/cyan]" for f in editable_files]
-        console.print("[bold green]Editable Files:[/bold green]")
+        console: Console = self.container.make("console")
+
+        file_names = [f"[info]{f.relative_path}[/info]" for f in editable_files]
+        console.print("[bold success]Editable Files:[/bold success]")
         console.print(Columns(file_names, equal=True, expand=True))
         console.print()
 
@@ -76,15 +87,21 @@ class ReadOnlyCommand(Command):
     def description(self) -> str:
         return "Add file to context as read-only"
 
-    async def execute(self, args: str) -> str:
+    async def execute(self, args: str) -> None:
+        console: Console = self.container.make("console")
         if not args:
-            return "Usage: /read-only <file_path>"
+            console.print("Usage: /read-only <file_path>")
+            return
 
         file_service = self.container.make("file_service")
         if await file_service.add_file(args, FileMode.READ_ONLY):
-            return f"Added {args} to context as read-only"
+            console.print(f"[success]Added {args} to context as read-only[/success]")
+            return
         else:
-            return f"Failed to add {args} (file not found or not readable)"
+            console.print(
+                f"[error]Failed to add {args} (file not found or not readable)[/error]"
+            )
+            return
 
     def get_completions(self, text: str) -> List[str]:
         """File path completions."""
@@ -110,7 +127,7 @@ class ReadOnlyCommand(Command):
             pass
         return []
 
-    def pre_prompt(self, console: Console) -> None:
+    def pre_prompt(self) -> None:
         """Display read-only files."""
         if not self.container:
             return
@@ -119,8 +136,10 @@ class ReadOnlyCommand(Command):
         if not readonly_files:
             return
 
-        file_names = [f"[yellow]{f.relative_path}[/yellow]" for f in readonly_files]
-        console.print("[bold blue]Read-only Files:[/bold blue]")
+        console: Console = self.container.make("console")
+
+        file_names = [f"[warning]{f.relative_path}[/warning]" for f in readonly_files]
+        console.print("[bold info]Read-only Files:[/bold info]")
         console.print(Columns(file_names, equal=True, expand=True))
         console.print()
 
@@ -137,15 +156,19 @@ class DropFileCommand(Command):
     def description(self) -> str:
         return "Remove file from context"
 
-    async def execute(self, args: str) -> str:
+    async def execute(self, args: str) -> None:
+        console: Console = self.container.make("console")
         if not args:
-            return "Usage: /drop <file_path>"
+            console.print("Usage: /drop <file_path>")
+            return
 
         file_service = self.container.make("file_service")
         if await file_service.remove_file(args):
-            return f"Removed {args} from context"
+            console.print("[success]Removed {args} from context[/success]")
+            return
         else:
-            return f"File {args} not found in context"
+            console.print("[error]File {args} not found in context[/error]")
+            return
 
     def get_completions(self, text: str) -> List[str]:
         """Complete with files currently in context."""

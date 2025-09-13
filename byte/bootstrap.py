@@ -5,6 +5,7 @@ from byte.domain.commit.service_provider import CommitServiceProvider
 from byte.domain.files.file_service_provider import FileServiceProvider
 from byte.domain.llm.service_provider import LLMServiceProvider
 from byte.domain.system.service_provider import SystemServiceProvider
+from byte.domain.ui.service_provider import UIServiceProvider
 
 
 def bootstrap():
@@ -14,6 +15,7 @@ def bootstrap():
     # Define all service providers
     service_providers = [
         EventServiceProvider(),  # Register events first
+        UIServiceProvider(),
         FileServiceProvider(),
         LLMServiceProvider(),
         CommitServiceProvider(),

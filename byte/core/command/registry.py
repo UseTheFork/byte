@@ -1,14 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
-
-from rich.console import Console
+from typing import Any, Dict, List, Optional
 
 
 class Command(ABC):
     """Base class for all commands."""
 
     def __init__(self, container=None):
-        self.container = container
+        self.container: Any = container
 
     @property
     @abstractmethod
@@ -23,7 +21,7 @@ class Command(ABC):
         pass
 
     @abstractmethod
-    async def execute(self, args: str) -> str:
+    async def execute(self, args: str) -> None:
         """Execute the command with given arguments."""
         pass
 
@@ -31,7 +29,7 @@ class Command(ABC):
         """Return completion suggestions for this command."""
         return []
 
-    def pre_prompt(self, console: Console) -> None:
+    def pre_prompt(self) -> None:
         """Display information before the prompt. Override to show status."""
         pass
 
@@ -51,10 +49,10 @@ class CommandRegistry:
     def get_at_command(self, name: str) -> Optional[Command]:
         return self._at_commands.get(name)
 
-    def pre_prompt(self, console: Console) -> None:
+    def pre_prompt(self) -> None:
         """Display pre-prompt info from all registered commands."""
         for command in self._slash_commands.values():
-            command.pre_prompt(console)
+            command.pre_prompt()
 
     def get_slash_completions(self, text: str) -> List[str]:
         """Get completions for slash commands."""

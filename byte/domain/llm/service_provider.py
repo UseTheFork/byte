@@ -1,4 +1,5 @@
 import os
+from typing import TYPE_CHECKING
 
 from rich.console import Console
 
@@ -7,6 +8,9 @@ from byte.core.service_provider import ServiceProvider
 from byte.domain.llm.providers.anthropic import AnthropicLLMService
 from byte.domain.llm.providers.gemini import GeminiLLMService
 from byte.domain.llm.providers.openai import OpenAILLMService
+
+if TYPE_CHECKING:
+    from byte.domain.llm.service import LLMService
 
 
 class LLMServiceProvider(ServiceProvider):
@@ -53,18 +57,18 @@ class LLMServiceProvider(ServiceProvider):
 
     def boot(self, container: Container):
         """Boot LLM services."""
-        llm_service = container.make("llm_service")
-        console = Console()
+        llm_service: LLMService = container.make("llm_service")
+        console: Console = container.make("console")
 
         # Get model configurations to display actual model names
         config = llm_service.get_model_config()
         main_model = config.get("main", {}).get("model", "Unknown")
         weak_model = config.get("weak", {}).get("model", "Unknown")
 
-        console.print(
-            f"[green]Main model:[/green] [cyan]{main_model}[/cyan] | "
-            f"[green]Weak model:[/green] [cyan]{weak_model}[/cyan]"
-        )
+        console.print("│", style="text")
+        console.print(f"├─ [success]Main model:[/success] [info]{main_model}[/info]")
+        console.print(f"├─ [success]Weak model:[/success] [info]{weak_model}[/info]")
+        console.print("│", style="text")
 
     def provides(self) -> list:
         return ["llm_service"]
