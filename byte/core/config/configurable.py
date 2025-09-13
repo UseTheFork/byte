@@ -1,4 +1,9 @@
+from typing import TYPE_CHECKING, Any
+
 from byte.core.config.schema import Config
+
+if TYPE_CHECKING:
+    from byte.core.config.service import ConfigService
 
 
 class Configurable:
@@ -8,6 +13,10 @@ class Configurable:
     syntax, with automatic container resolution and type safety.
     Usage: `class MyService(Configurable): ...` then `self.config.app.name`
     """
+
+    # Type hint for container attribute that will be provided by classes using this mixin
+    container: Any
+    _config_service: "ConfigService"
 
     def boot_configurable(self) -> None:
         """Boot method for Configurable mixin - automatically called by Command.__init__."""

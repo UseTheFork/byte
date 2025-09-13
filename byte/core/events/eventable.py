@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from byte.core.events.dispatcher import EventDispatcher
 from byte.core.events.event import Event
@@ -10,6 +10,10 @@ class Eventable:
     Enables services to emit events without direct coupling to the event system.
     Usage: `class FileService(Eventable): ...` then `await self.event(FileAdded(...))`
     """
+
+    # Type hint for container attribute that will be provided by classes using this mixin
+    container: Any
+    _event_dispatcher: Optional[EventDispatcher]
 
     def __init__(self, event_dispatcher: Optional[EventDispatcher] = None):
         # Optional dispatcher allows services to work without events if needed
