@@ -1,21 +1,20 @@
 from typing import TYPE_CHECKING, Optional
 
 from byte.core.command.registry import Command
+from byte.core.events.eventable import Eventable
+from byte.domain.system.events import ExitRequested
 
 if TYPE_CHECKING:
     from byte.container import Container
 
 
-class ExitCommand(Command):
-    """Command to gracefully exit the ByteSmith application.
+class ExitCommand(Command, Eventable):
+    """Command to gracefully exit the Byte application.
 
-    Returns a special signal that the main loop recognizes to terminate
+    Emits ExitRequested event that the main loop listens for to terminate
     the application cleanly, allowing for proper cleanup operations.
     Usage: `/exit` -> triggers application shutdown
     """
-
-    def __init__(self, container: Optional["Container"] = None):
-        super().__init__(container)
 
     @property
     def name(self) -> str:
@@ -23,14 +22,14 @@ class ExitCommand(Command):
 
     @property
     def description(self) -> str:
-        return "Exit ByteSmith"
+        return "Exit Byte"
 
-    async def execute(self, args: str) -> str:
-        """Signal application exit to the main loop.
+    async def execute(self, args: str) -> None:
+        """Emit exit event to signal application shutdown.
 
         Usage: Called by command processor when user types `/exit`
         """
-        return "EXIT_REQUESTED"
+        await self.event(ExitRequested())
 
 
 class HelpCommand(Command):
@@ -52,15 +51,19 @@ class HelpCommand(Command):
     def description(self) -> str:
         return "Show available commands"
 
-    async def execute(self, args: str) -> str:
-        """Generate formatted help text for all registered commands.
+    async def execute(self, args: str) -> None:
+        """Display formatted help text for all registered commands.
 
         Usage: Called by command processor when user types `/help`
         """
         if not self.container:
-            return "Help system not available"
+            console = self.container.make("console") if self.container else None
+            if console:
+                console.print("[error]Help system not available[/error]")
+            return
 
         command_registry = self.container.make("command_registry")
+        console = self.container.make("console")
         slash_commands = command_registry._slash_commands
 
         help_text = "Available commands:\n\n"
@@ -71,4 +74,4 @@ class HelpCommand(Command):
                 help_text += f"  /{name} - {cmd.description}\n"
             help_text += "\n"
 
-        return help_text.strip()
+        console.print(help_text.strip())

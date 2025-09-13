@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import git
 from git.exc import GitCommandError, InvalidGitRepositoryError
@@ -10,7 +10,6 @@ if TYPE_CHECKING:
     from langchain_core.language_models.chat_models import BaseChatModel
     from rich.console import Console
 
-    from byte.container import Container
     from byte.domain.llm.service import LLMService
 
 
@@ -22,9 +21,6 @@ class CommitCommand(Command):
     and validates git repository state before proceeding.
     Usage: `/commit` -> generates and creates commit with AI-generated message
     """
-
-    def __init__(self, container: Optional["Container"] = None):
-        super().__init__(container)
 
     @property
     def name(self) -> str:

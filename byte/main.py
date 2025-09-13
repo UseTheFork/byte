@@ -5,6 +5,7 @@ from byte.bootstrap import bootstrap
 from byte.core.command.processor import CommandProcessor
 from byte.core.command.registry import command_registry
 from byte.core.ui.prompt import PromptHandler
+from byte.domain.system.events import ExitRequested
 
 if TYPE_CHECKING:
     from rich.console import Console
@@ -21,6 +22,18 @@ class Byte:
         self.container = container
         self.prompt_handler = PromptHandler()
         self.command_processor = CommandProcessor(container)
+        self._should_exit = False
+
+        # Listen for exit events
+        event_dispatcher = container.make("event_dispatcher")
+        event_dispatcher.listen("ExitRequested", self._handle_exit_request)
+
+    def _handle_exit_request(self, event: ExitRequested):
+        """Handle exit request by setting exit flag.
+
+        Usage: Called automatically when ExitRequested event is emitted
+        """
+        self._should_exit = True
 
     async def run_async(self):
         """Main CLI loop that handles user interaction and command execution.
@@ -30,7 +43,7 @@ class Byte:
         """
         console: Console = self.container.make("console")
 
-        while True:
+        while not self._should_exit:
             try:
                 # Allow commands to display contextual information before each prompt
                 command_registry.pre_prompt()
@@ -40,17 +53,18 @@ class Byte:
                 if not user_input.strip():
                     continue
 
-                # Delegate all input processing to maintain separation of concerns
-                response = await self.command_processor.process_input(user_input)
+                # Process input without expecting return value
+                await self.command_processor.process_input(user_input)
 
-                # Use string-based exit signal to avoid tight coupling with exit command
-                if response == "EXIT_REQUESTED":
-                    console.print("[warning]Goodbye![/warning]")
+                # Check if exit was requested after processing
+                if self._should_exit:
                     break
 
             except KeyboardInterrupt:
                 console.print("\n[warning]Goodbye![/warning]")
                 break
+
+        console.print("[warning]Goodbye![/warning]")
 
     def run(self):
         """Synchronous entry point that wraps the async event loop.
