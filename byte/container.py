@@ -3,25 +3,25 @@ from typing import Any, Callable, Dict
 
 class Container:
     """Simple dependency injection container for managing service bindings.
-    
+
     Implements the Service Locator pattern with support for both transient
     and singleton lifetimes. Services are resolved lazily on first access.
     """
-    
+
     def __init__(self):
         self._bindings: Dict[str, Callable] = {}
         self._instances: Dict[str, Any] = {}
 
     def bind(self, abstract: str, concrete: Callable):
         """Register a transient service binding.
-        
+
         Each call to make() will create a new instance by invoking the factory.
         """
         self._bindings[abstract] = concrete
 
     def singleton(self, abstract: str, concrete: Callable):
         """Register a singleton service binding.
-        
+
         The factory will be called once on first access, then the same
         instance will be returned for all subsequent make() calls.
         """
@@ -30,11 +30,11 @@ class Container:
 
     def make(self, abstract: str):
         """Resolve a service from the container.
-        
+
         For singletons, returns cached instance if available, otherwise
         creates and caches a new instance. For transient bindings,
         always creates a new instance.
-        
+
         Raises ValueError if no binding exists for the requested service.
         """
         # Return cached singleton instance if available

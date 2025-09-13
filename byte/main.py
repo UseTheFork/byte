@@ -12,11 +12,11 @@ if TYPE_CHECKING:
 
 class Byte:
     """Main application class that orchestrates the CLI interface and command processing.
-    
+
     Separates concerns by delegating prompt handling to PromptHandler and command
     processing to CommandProcessor, while maintaining the main event loop.
     """
-    
+
     def __init__(self, container):
         self.container = container
         self.prompt_handler = PromptHandler()
@@ -24,7 +24,7 @@ class Byte:
 
     async def run_async(self):
         """Main CLI loop that handles user interaction and command execution.
-        
+
         Uses async/await to prevent blocking on user input while maintaining
         responsive command execution and graceful shutdown handling.
         """
@@ -54,7 +54,7 @@ class Byte:
 
     def run(self):
         """Synchronous entry point that wraps the async event loop.
-        
+
         Provides a clean interface for callers who don't need async context.
         """
         asyncio.run(self.run_async())
@@ -62,7 +62,7 @@ class Byte:
 
 def main():
     """Application entry point that bootstraps dependencies and starts the CLI.
-    
+
     Follows dependency injection pattern by bootstrapping the container first,
     then injecting it into the main application class.
     """

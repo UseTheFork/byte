@@ -7,7 +7,7 @@ from datetime import datetime
 @dataclass
 class Event(ABC):
     """Base event class for domain events in the system.
-    
+
     Provides automatic ID generation and timestamping for event tracking.
     Usage: `class FileAdded(Event): file_path: str`
     """

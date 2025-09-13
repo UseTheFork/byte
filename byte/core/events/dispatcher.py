@@ -6,7 +6,7 @@ from byte.core.events.event import Event
 
 class EventDispatcher:
     """Event dispatcher implementing the Observer pattern for domain events.
-    
+
     Decouples event producers from consumers, enabling loose coupling between domains.
     Usage: `dispatcher.listen("FileAdded", handle_file_added)` then `await dispatcher.dispatch(FileAdded(...))`
     """
@@ -17,7 +17,7 @@ class EventDispatcher:
 
     def listen(self, event_type: str, listener: Callable):
         """Register an event listener for a specific event type.
-        
+
         Usage: `dispatcher.listen("FileAdded", lambda event: print(event.file_path))`
         """
         if event_type not in self._listeners:
@@ -26,7 +26,7 @@ class EventDispatcher:
 
     async def dispatch(self, event: Event):
         """Dispatch an event to all registered listeners.
-        
+
         Handles both sync and async listeners, continuing execution even if individual listeners fail.
         Usage: `await dispatcher.dispatch(FileAdded(file_path="/path/to/file"))`
         """
@@ -45,7 +45,7 @@ class EventDispatcher:
 
     def __call__(self, event: Event):
         """Enable callable syntax for cleaner event dispatching.
-        
+
         Usage: `await dispatcher(FileAdded(...))` instead of `await dispatcher.dispatch(...)`
         """
         return self.dispatch(event)

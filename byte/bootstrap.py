@@ -10,11 +10,11 @@ from byte.domain.ui.service_provider import UIServiceProvider
 
 def bootstrap():
     """Initialize and configure the application's dependency injection container.
-    
+
     Follows a two-phase initialization pattern: register all services first,
     then boot them. This ensures all dependencies are available during the
     boot phase when services may need to reference each other.
-    
+
     Returns the fully configured container ready for use.
     """
     # Make the global command registry available through dependency injection
@@ -24,11 +24,11 @@ def bootstrap():
     # may need to register event listeners during their boot phase
     service_providers = [
         EventServiceProvider(),  # Foundation for domain events
-        UIServiceProvider(),     # Console and prompt services
-        FileServiceProvider(),   # File context management
-        LLMServiceProvider(),    # Language model integration
-        CommitServiceProvider(), # Git commit functionality
-        SystemServiceProvider(), # Core system commands
+        UIServiceProvider(),  # Console and prompt services
+        FileServiceProvider(),  # File context management
+        LLMServiceProvider(),  # Language model integration
+        CommitServiceProvider(),  # Git commit functionality
+        SystemServiceProvider(),  # Core system commands
     ]
 
     # Phase 1: Register all service bindings in the container

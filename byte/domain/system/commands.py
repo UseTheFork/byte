@@ -27,7 +27,7 @@ class HelpCommand(Command):
     async def execute(self, args: str) -> str:
         if not self.container:
             return "Help system not available"
-        
+
         command_registry = self.container.make("command_registry")
         slash_commands = command_registry._slash_commands
 

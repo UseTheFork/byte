@@ -6,7 +6,7 @@ from byte.core.events.event import Event
 
 class Eventable:
     """Mixin class that provides event dispatching capability to domain services.
-    
+
     Enables services to emit events without direct coupling to the event system.
     Usage: `class FileService(Eventable): ...` then `await self.event(FileAdded(...))`
     """
@@ -17,7 +17,7 @@ class Eventable:
 
     async def event(self, event: Event):
         """Dispatch an event through the configured dispatcher.
-        
+
         Gracefully handles missing dispatcher to prevent service failures.
         Usage: `await self.event(FileAdded(file_path="/path/to/file"))`
         """

@@ -21,12 +21,12 @@ class Settings:
     def has_openai_key(self) -> bool:
         """Check if OpenAI API key is configured."""
         return bool(self.openai_api_key)
-    
+
     @property
     def has_anthropic_key(self) -> bool:
         """Check if Anthropic API key is configured."""
         return bool(self.anthropic_api_key)
-    
+
     @property
     def has_google_key(self) -> bool:
         """Check if Google API key is configured."""
