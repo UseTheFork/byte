@@ -1,7 +1,7 @@
 import asyncio
 from typing import TYPE_CHECKING
 
-from byte.bootstrap import bootstrap
+from byte.bootstrap import bootstrap, shutdown
 from byte.core.command.processor import CommandProcessor
 from byte.core.command.registry import command_registry
 from byte.core.ui.prompt import PromptHandler
@@ -35,7 +35,11 @@ class Byte:
         """
         self._should_exit = True
 
-    async def run_async(self):
+    async def cleanup(self):
+        """Clean up application resources."""
+        await shutdown(self.container)
+
+    async def run(self):
         """Main CLI loop that handles user interaction and command execution.
 
         Uses async/await to prevent blocking on user input while maintaining
@@ -43,47 +47,44 @@ class Byte:
         """
         console: Console = self.container.make("console")
 
-        while not self._should_exit:
-            try:
-                # Allow commands to display contextual information before each prompt
-                command_registry.pre_prompt()
+        try:
+            while not self._should_exit:
+                try:
+                    # Allow commands to display contextual information before each prompt
+                    command_registry.pre_prompt()
 
-                user_input = await self.prompt_handler.get_input_async("> ")
+                    user_input = await self.prompt_handler.get_input_async("> ")
 
-                if not user_input.strip():
-                    continue
+                    if not user_input.strip():
+                        continue
 
-                # Process input without expecting return value
-                await self.command_processor.process_input(user_input)
+                    # Process input without expecting return value
+                    await self.command_processor.process_input(user_input)
 
-                # Check if exit was requested after processing
-                if self._should_exit:
+                    # Check if exit was requested after processing
+                    if self._should_exit:
+                        break
+
+                except KeyboardInterrupt:
+                    console.print("\n[warning]Goodbye![/warning]")
                     break
-
-            except KeyboardInterrupt:
-                console.print("\n[warning]Goodbye![/warning]")
-                break
+        finally:
+            # Always cleanup before exit
+            await self.cleanup()
 
         console.print("[warning]Goodbye![/warning]")
 
-    def run(self):
-        """Synchronous entry point that wraps the async event loop.
 
-        Provides a clean interface for callers who don't need async context.
-        """
-        asyncio.run(self.run_async())
-
-
-def main():
+async def main():
     """Application entry point that bootstraps dependencies and starts the CLI.
 
     Follows dependency injection pattern by bootstrapping the container first,
     then injecting it into the main application class.
     """
-    container = bootstrap()
+    container = await bootstrap()
     app = Byte(container)
-    app.run()
+    await app.run()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

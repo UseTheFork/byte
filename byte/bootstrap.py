@@ -2,6 +2,7 @@ from byte.container import app
 from byte.core.command.registry import command_registry
 from byte.core.config.service_provider import ConfigServiceProvider
 from byte.core.events.service_provider import EventServiceProvider
+from byte.domain.coder.service_provider import CoderServiceProvider
 from byte.domain.commit.service_provider import CommitServiceProvider
 from byte.domain.files.file_service_provider import FileServiceProvider
 from byte.domain.knowledge.service_provider import KnowledgeServiceProvider
@@ -11,7 +12,7 @@ from byte.domain.system.service_provider import SystemServiceProvider
 from byte.domain.ui.service_provider import UIServiceProvider
 
 
-def bootstrap():
+async def bootstrap():
     """Initialize and configure the application's dependency injection container.
 
     Follows a two-phase initialization pattern: register all services first,
@@ -33,6 +34,7 @@ def bootstrap():
         KnowledgeServiceProvider(),  # Long-term knowledge storage
         FileServiceProvider(),  # File context management
         LLMServiceProvider(),  # Language model integration
+        CoderServiceProvider(),  # Specialized coder agent
         CommitServiceProvider(),  # Git commit functionality
         SystemServiceProvider(),  # Core system commands
     ]
@@ -40,11 +42,22 @@ def bootstrap():
     # Phase 1: Register all service bindings in the container
     # This makes services available for dependency resolution
     for provider in service_providers:
-        provider.register(app)
+        await provider.register(app)
 
     # Phase 2: Boot services after all are registered
     # This allows services to safely reference dependencies during initialization
     for provider in service_providers:
-        provider.boot(app)
+        await provider.boot(app)
+
+    # Store service providers for shutdown
+    app._service_providers = service_providers
 
     return app
+
+
+async def shutdown(container):
+    """Shutdown all service providers in reverse order."""
+    if hasattr(container, "_service_providers"):
+        # Shutdown in reverse order (opposite of boot)
+        for provider in reversed(container._service_providers):
+            await provider.shutdown(container)

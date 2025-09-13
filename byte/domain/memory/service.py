@@ -6,7 +6,7 @@ from byte.core.events.eventable import Eventable
 from byte.domain.memory.checkpointer import ByteCheckpointer
 
 if TYPE_CHECKING:
-    from langgraph.checkpoint.sqlite import SqliteSaver
+    from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
     from byte.container import Container
 
@@ -43,12 +43,12 @@ class MemoryService(Configurable, Eventable):
             self._checkpointer = ByteCheckpointer(config_service)
         return self._checkpointer
 
-    def get_saver(self) -> "SqliteSaver":
-        """Get SqliteSaver for LangGraph graph compilation.
+    async def get_saver(self) -> "AsyncSqliteSaver":
+        """Get AsyncSqliteSaver for LangGraph graph compilation.
 
-        Usage: `graph = builder.compile(checkpointer=memory_service.get_saver())`
+        Usage: `graph = builder.compile(checkpointer=await memory_service.get_saver())`
         """
-        return self.checkpointer.get_saver()
+        return await self.checkpointer.get_saver()
 
     def create_thread(self) -> str:
         """Create a new conversation thread with unique identifier.
@@ -66,21 +66,26 @@ class MemoryService(Configurable, Eventable):
         # Placeholder implementation
         return []
 
-    def delete_thread(self, thread_id: str) -> bool:
+    async def delete_thread(self, thread_id: str) -> bool:
         """Delete a specific conversation thread and its history.
 
-        Usage: `success = memory_service.delete_thread(thread_id)` -> cleanup thread
+        Usage: `success = await memory_service.delete_thread(thread_id)` -> cleanup thread
         """
         try:
-            saver = self.get_saver()
-            saver.delete_thread(thread_id)
+            saver = await self.get_saver()
+            await saver.adelete_thread(thread_id)
             return True
         except Exception:
             return False
 
-    def cleanup_old_threads(self) -> int:
+    async def cleanup_old_threads(self) -> int:
         """Remove old threads based on retention policy.
 
-        Usage: `count = memory_service.cleanup_old_threads()` -> maintenance cleanup
+        Usage: `count = await memory_service.cleanup_old_threads()` -> maintenance cleanup
         """
-        return self.checkpointer.cleanup_old_threads()
+        return await self.checkpointer.cleanup_old_threads()
+
+    async def close(self):
+        """Close memory service resources."""
+        if self._checkpointer:
+            await self._checkpointer.close()

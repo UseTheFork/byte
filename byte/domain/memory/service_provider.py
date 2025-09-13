@@ -37,6 +37,15 @@ class MemoryServiceProvider(ServiceProvider):
         # Memory service is lazy-loaded, no explicit boot needed
         pass
 
+    async def shutdown(self, container: "Container"):
+        """Shutdown memory services and close database connections."""
+        try:
+            if "memory_service" in container._instances:
+                memory_service = container.make("memory_service")
+                await memory_service.close()
+        except Exception:
+            pass  # Ignore cleanup errors during shutdown
+
     def provides(self) -> list:
         """Return list of services provided by this provider."""
         return ["memory_service"]

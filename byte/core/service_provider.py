@@ -24,7 +24,7 @@ class ServiceProvider(ABC):
         self.container = container
 
     @abstractmethod
-    def register(self, container: Container):
+    async def register(self, container: Container):
         """Register services in the container without initializing them.
 
         This is phase 1 of the two-phase initialization. Only bind service
@@ -33,7 +33,7 @@ class ServiceProvider(ABC):
         """
         pass
 
-    def boot(self, container: Container):
+    async def boot(self, container: Container):
         """Boot services after all providers have been registered.
 
         This is phase 2 where services can safely reference each other since
@@ -41,6 +41,14 @@ class ServiceProvider(ABC):
         - Registering event listeners
         - Configuring service relationships
         - Performing initialization that requires other services
+        """
+        pass
+
+    async def shutdown(self, container: Container):
+        """Shutdown services and clean up resources.
+
+        Called during application shutdown to allow each provider to clean up
+        its own resources. Override in providers that need cleanup.
         """
         pass
 

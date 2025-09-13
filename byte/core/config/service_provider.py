@@ -17,16 +17,16 @@ class ConfigServiceProvider(ServiceProvider):
     Usage: Register with container to enable config('app.name') access
     """
 
-    def register(self, container: "Container") -> None:
+    async def register(self, container: "Container") -> None:
         """Register configuration services in the container."""
         # ConfigService automatically initializes workspace and loads config.yaml
         # TODO: Pass CLI args when available
         container.singleton("config", lambda: ConfigService())
 
-    def boot(self, container: "Container") -> None:
+    async def boot(self, container: "Container") -> None:
         """Boot configuration services after all providers are registered."""
-        console: Console = container.make("console")
-        config_service = container.make("config")
+        console: Console = await container.make("console")
+        config_service = await container.make("config")
 
         console.print("│", style="text")
         console.print(

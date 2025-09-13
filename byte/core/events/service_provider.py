@@ -10,12 +10,12 @@ class EventServiceProvider(ServiceProvider):
     share the same event bus for proper cross-domain communication.
     """
 
-    def register(self, container: Container):
+    async def register(self, container: Container):
         """Register event dispatcher as singleton for shared event bus."""
         # Singleton ensures all services use the same dispatcher instance
         container.singleton("event_dispatcher", lambda: EventDispatcher())
 
-    def boot(self, container: Container):
+    async def boot(self, container: Container):
         """Boot event services after all providers are registered.
 
         Domain service providers will register their specific event listeners

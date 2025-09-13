@@ -28,7 +28,7 @@ class Container:
         self._bindings[abstract] = concrete
         # Instance caching is handled in make() method
 
-    def make(self, abstract: str):
+    async def make(self, abstract: str):
         """Resolve a service from the container.
 
         For singletons, returns cached instance if available, otherwise
@@ -42,10 +42,10 @@ class Container:
             return self._instances[abstract]
 
         if abstract in self._bindings:
-            instance = self._bindings[abstract]()
-            # Cache all instances for now (simple singleton behavior)
-            # TODO: Distinguish between singleton and transient lifetimes
+            factory = self._bindings[abstract]
+            instance = await factory()
             self._instances[abstract] = instance
+
             return instance
 
         raise ValueError(f"No binding found for {abstract}")

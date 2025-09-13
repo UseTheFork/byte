@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
+    from byte.domain.coder.config import CoderConfig
     from byte.domain.commit.config import CommitConfig
     from byte.domain.knowledge.config import KnowledgeConfig
     from byte.domain.memory.config import MemoryConfig
@@ -26,6 +27,7 @@ class Config:
 
     # Type hints for dynamically added domain configs
     if TYPE_CHECKING:
+        coder: "CoderConfig"
         memory: "MemoryConfig"
         knowledge: "KnowledgeConfig"
         commit: "CommitConfig"

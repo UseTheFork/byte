@@ -37,6 +37,15 @@ class KnowledgeServiceProvider(ServiceProvider):
         # Knowledge service is lazy-loaded, no explicit boot needed
         pass
 
+    async def shutdown(self, container: "Container"):
+        """Shutdown knowledge services and close database connections."""
+        try:
+            if "knowledge_service" in container._instances:
+                knowledge_service = container.make("knowledge_service")
+                await knowledge_service.close()
+        except Exception:
+            pass  # Ignore cleanup errors during shutdown
+
     def provides(self) -> list:
         """Return list of services provided by this provider."""
         return ["knowledge_service"]

@@ -41,12 +41,12 @@ class KnowledgeService(Configurable, Eventable):
             self._store = ByteKnowledgeStore(config_service)
         return self._store
 
-    def set_user_preference(
+    async def set_user_preference(
         self, category: str, subcategory: str, settings: Dict[str, Any]
     ) -> bool:
         """Store user preference with hierarchical organization.
 
-        Usage: `knowledge_service.set_user_preference("coding", "python", {"indent": 4})`
+        Usage: `await knowledge_service.set_user_preference("coding", "python", {"indent": 4})`
         """
         preference = UserPreference(category, subcategory, settings)
         item = KnowledgeItem(
@@ -55,24 +55,24 @@ class KnowledgeService(Configurable, Eventable):
             value=preference.settings,
             metadata={"type": "user_preference", "category": category},
         )
-        return self.store.put(item)
+        return await self.store.put(item)
 
-    def get_user_preference(
+    async def get_user_preference(
         self, category: str, subcategory: str
     ) -> Optional[Dict[str, Any]]:
         """Retrieve user preference settings.
 
-        Usage: `settings = knowledge_service.get_user_preference("coding", "python")`
+        Usage: `settings = await knowledge_service.get_user_preference("coding", "python")`
         """
-        item = self.store.get(["user", "preferences", category], subcategory)
+        item = await self.store.get(["user", "preferences", category], subcategory)
         return item.value if item else None
 
-    def set_project_pattern(
+    async def set_project_pattern(
         self, pattern_type: str, pattern_data: Dict[str, Any], confidence: float = 1.0
     ) -> bool:
         """Store project-specific learned pattern.
 
-        Usage: `knowledge_service.set_project_pattern("file_structure", {"dirs": ["src"]})`
+        Usage: `await knowledge_service.set_project_pattern("file_structure", {"dirs": ["src"]})`
         """
         project_root = self.config.app.project_root.name
         pattern = ProjectPattern(pattern_type, pattern_data, confidence)
@@ -82,18 +82,18 @@ class KnowledgeService(Configurable, Eventable):
             value={"data": pattern.pattern_data, "confidence": pattern.confidence},
             metadata={"type": "project_pattern", "project": project_root},
         )
-        return self.store.put(item)
+        return await self.store.put(item)
 
-    def get_project_pattern(self, pattern_type: str) -> Optional[Dict[str, Any]]:
+    async def get_project_pattern(self, pattern_type: str) -> Optional[Dict[str, Any]]:
         """Retrieve project-specific pattern.
 
-        Usage: `pattern = knowledge_service.get_project_pattern("file_structure")`
+        Usage: `pattern = await knowledge_service.get_project_pattern("file_structure")`
         """
         project_root = self.config.app.project_root.name
-        item = self.store.get(["project", project_root, "patterns"], pattern_type)
+        item = await self.store.get(["project", project_root, "patterns"], pattern_type)
         return item.value if item else None
 
-    def store_knowledge(
+    async def store_knowledge(
         self,
         namespace: List[str],
         key: str,
@@ -102,7 +102,7 @@ class KnowledgeService(Configurable, Eventable):
     ) -> bool:
         """Store arbitrary knowledge with custom namespace.
 
-        Usage: `knowledge_service.store_knowledge(["ai", "learned"], "pattern", data)`
+        Usage: `await knowledge_service.store_knowledge(["ai", "learned"], "pattern", data)`
         """
         item = KnowledgeItem(
             namespace=namespace,
@@ -111,31 +111,31 @@ class KnowledgeService(Configurable, Eventable):
             ttl_minutes=ttl_minutes,
             metadata={"type": "custom_knowledge"},
         )
-        return self.store.put(item)
+        return await self.store.put(item)
 
-    def retrieve_knowledge(self, namespace: List[str], key: str) -> Optional[Any]:
+    async def retrieve_knowledge(self, namespace: List[str], key: str) -> Optional[Any]:
         """Retrieve knowledge by namespace and key.
 
-        Usage: `data = knowledge_service.retrieve_knowledge(["ai", "learned"], "pattern")`
+        Usage: `data = await knowledge_service.retrieve_knowledge(["ai", "learned"], "pattern")`
         """
-        item = self.store.get(namespace, key)
+        item = await self.store.get(namespace, key)
         return item.value if item else None
 
-    def search_knowledge(
+    async def search_knowledge(
         self, namespace_prefix: List[str], limit: int = 50
     ) -> List[KnowledgeItem]:
         """Search knowledge within namespace hierarchy.
 
-        Usage: `items = knowledge_service.search_knowledge(["user"])` -> all user knowledge
+        Usage: `items = await knowledge_service.search_knowledge(["user"])` -> all user knowledge
         """
-        return self.store.search(namespace_prefix, limit)
+        return await self.store.search(namespace_prefix, limit)
 
-    def get_user_preferences_summary(self) -> Dict[str, Dict[str, Any]]:
+    async def get_user_preferences_summary(self) -> Dict[str, Dict[str, Any]]:
         """Get summary of all user preferences organized by category.
 
-        Usage: `prefs = knowledge_service.get_user_preferences_summary()` -> all preferences
+        Usage: `prefs = await knowledge_service.get_user_preferences_summary()` -> all preferences
         """
-        items = self.store.search(["user", "preferences"])
+        items = await self.store.search(["user", "preferences"])
         summary = {}
 
         for item in items:
@@ -147,9 +147,14 @@ class KnowledgeService(Configurable, Eventable):
 
         return summary
 
-    def cleanup_expired_knowledge(self) -> int:
+    async def cleanup_expired_knowledge(self) -> int:
         """Remove expired knowledge items based on TTL.
 
-        Usage: `count = knowledge_service.cleanup_expired_knowledge()` -> maintenance
+        Usage: `count = await knowledge_service.cleanup_expired_knowledge()` -> maintenance
         """
-        return self.store.cleanup_expired()
+        return await self.store.cleanup_expired()
+
+    async def close(self):
+        """Close knowledge service resources."""
+        if self._store:
+            await self._store.close()
