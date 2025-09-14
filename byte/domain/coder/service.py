@@ -1,11 +1,15 @@
+import asyncio
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from langchain_core.messages import HumanMessage
 
 from byte.core.config.configurable import Configurable
 from byte.core.events.eventable import Eventable
+from byte.core.mixins.bootable import Bootable
 from byte.domain.coder.graph import CoderGraphBuilder
 from byte.domain.coder.state import CoderState
+from byte.domain.llm.service import LLMService
+from byte.domain.memory.service import MemoryService
 
 if TYPE_CHECKING:
     from langchain_core.tools import BaseTool
@@ -14,7 +18,7 @@ if TYPE_CHECKING:
     from byte.container import Container
 
 
-class CoderService(Configurable, Eventable):
+class CoderService(Bootable, Configurable, Eventable):
     """Domain service for the coder agent specialized in software development.
 
     Orchestrates coding assistance through LangGraph-based agent with
@@ -27,14 +31,8 @@ class CoderService(Configurable, Eventable):
         self.container = container
         self._graph: Optional[CompiledStateGraph] = None
         self._tools: List[BaseTool] = []
-        self._boot_mixins()
-
-    def _boot_mixins(self) -> None:
-        """Boot method for auto-initializing mixins."""
-        if hasattr(self, "boot_configurable"):
-            self.boot_configurable()
-        if hasattr(self, "boot_eventable"):
-            self.boot_eventable()
+        if container:
+            asyncio.create_task(self._async_init())
 
     def register_tool(self, tool: "BaseTool") -> None:
         """Register a coding tool for use by the coder agent.
@@ -67,7 +65,7 @@ class CoderService(Configurable, Eventable):
         """
         # Bind tools to LLM for tool-calling
         if self._tools:
-            llm_service = self.container.make("llm_service")
+            llm_service: LLMService = await self.container.make("llm_service")
             llm = llm_service.get_main_model()
 
             # Apply coder-specific temperature if configured
@@ -98,7 +96,7 @@ class CoderService(Configurable, Eventable):
         """
         # Get or create thread ID
         if thread_id is None:
-            memory_service = self.container.make("memory_service")
+            memory_service: MemoryService = await self.container.make("memory_service")
             thread_id = memory_service.create_thread()
 
         # Create configuration with thread ID

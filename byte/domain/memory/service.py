@@ -1,8 +1,11 @@
+import asyncio
 import uuid
 from typing import TYPE_CHECKING, List, Optional
 
 from byte.core.config.configurable import Configurable
+from byte.core.config.service import ConfigService
 from byte.core.events.eventable import Eventable
+from byte.core.mixins.bootable import Bootable
 from byte.domain.memory.checkpointer import ByteCheckpointer
 
 if TYPE_CHECKING:
@@ -11,7 +14,7 @@ if TYPE_CHECKING:
     from byte.container import Container
 
 
-class MemoryService(Configurable, Eventable):
+class MemoryService(Bootable, Configurable, Eventable):
     """Domain service for managing conversation memory and thread persistence.
 
     Orchestrates short-term memory through LangGraph checkpointers, providing
@@ -23,23 +26,16 @@ class MemoryService(Configurable, Eventable):
     def __init__(self, container: Optional["Container"] = None):
         self.container = container
         self._checkpointer: Optional[ByteCheckpointer] = None
-        self._boot_mixins()
+        if container:
+            asyncio.create_task(self._async_init())
 
-    def _boot_mixins(self) -> None:
-        """Boot method for auto-initializing mixins."""
-        if hasattr(self, "boot_configurable"):
-            self.boot_configurable()
-        if hasattr(self, "boot_eventable"):
-            self.boot_eventable()
-
-    @property
-    def checkpointer(self) -> ByteCheckpointer:
+    async def get_checkpointer(self) -> ByteCheckpointer:
         """Get configured checkpointer instance with lazy initialization.
 
-        Usage: `saver = memory_service.checkpointer.get_saver()` -> for graph compilation
+        Usage: `checkpointer = await memory_service.get_checkpointer()` -> for accessing checkpointer
         """
         if self._checkpointer is None:
-            config_service = self.container.make("config")
+            config_service: ConfigService = await self.container.make("config")
             self._checkpointer = ByteCheckpointer(config_service)
         return self._checkpointer
 
@@ -48,7 +44,8 @@ class MemoryService(Configurable, Eventable):
 
         Usage: `graph = builder.compile(checkpointer=await memory_service.get_saver())`
         """
-        return await self.checkpointer.get_saver()
+        checkpointer = await self.get_checkpointer()
+        return await checkpointer.get_saver()
 
     def create_thread(self) -> str:
         """Create a new conversation thread with unique identifier.
@@ -83,7 +80,8 @@ class MemoryService(Configurable, Eventable):
 
         Usage: `count = await memory_service.cleanup_old_threads()` -> maintenance cleanup
         """
-        return await self.checkpointer.cleanup_old_threads()
+        checkpointer = await self.get_checkpointer()
+        return await checkpointer.cleanup_old_threads()
 
     async def close(self):
         """Close memory service resources."""

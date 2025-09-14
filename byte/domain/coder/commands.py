@@ -44,18 +44,18 @@ class CoderCommand(Command):
         console.print(f"[info]Processing coding request:[/info] {args}")
         console.print()
 
-        try:
-            # Stream coder agent response token by token
-            async for chunk in coder_service.stream_code(args):
-                # Extract message from the streaming tuple (message, metadata)
-                if isinstance(chunk, tuple) and len(chunk) >= 1:
-                    message = chunk[0]
-                    # Handle AIMessageChunk streaming - print content directly
-                    if hasattr(message, "content") and message.content:
-                        console.print(message.content, end="")
-                # Handle direct message chunks
-                elif hasattr(chunk, "content") and chunk.content:
-                    console.print(chunk.content, end="")
+        # try:
+        # Stream coder agent response token by token
+        async for chunk in coder_service.stream_code(args):
+            # Extract message from the streaming tuple (message, metadata)
+            if isinstance(chunk, tuple) and len(chunk) >= 1:
+                message = chunk[0]
+                # Handle AIMessageChunk streaming - print content directly
+                if hasattr(message, "content") and message.content:
+                    console.print(message.content, end="")
+            # Handle direct message chunks
+            elif hasattr(chunk, "content") and chunk.content:
+                console.print(chunk.content, end="")
 
-        except Exception as e:
-            console.print(f"[error]Error processing coder request:[/error] {e}")
+        # except Exception as e:
+        #     console.print(f"[error]Error processing coder request:[/error] {e}")
