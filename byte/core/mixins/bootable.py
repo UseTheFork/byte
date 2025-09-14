@@ -1,5 +1,4 @@
 import asyncio
-from abc import abstractmethod
 
 
 class Bootable:
@@ -24,7 +23,6 @@ class Bootable:
                     else:
                         boot_method()
 
-    @abstractmethod
     async def boot(self) -> None:
         """Boot method called after initialization.
 

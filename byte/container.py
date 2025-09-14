@@ -12,6 +12,7 @@ class Container:
     def __init__(self):
         self._bindings: Dict[str, Callable] = {}
         self._instances: Dict[str, Any] = {}
+        self._service_providers = []
 
     def bind(self, abstract: str, concrete: Callable):
         """Register a transient service binding.

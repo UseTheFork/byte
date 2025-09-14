@@ -112,8 +112,12 @@ class CoderService(Bootable, Configurable, Eventable):
 
         # Get the graph and stream coder responses with token-level streaming
         graph = await self.get_graph()
-        async for chunk in graph.astream(initial_state, config, stream_mode="messages"):
-            yield chunk
+        async for message_chunk, metadata in graph.astream(
+            initial_state, config, stream_mode="messages"
+        ):
+            # Only yield chunks with actual content (skip empty AIMessageChunk objects)
+            if hasattr(message_chunk, "content") and message_chunk.content:
+                yield (message_chunk, metadata)
 
     def list_tools(self) -> List[str]:
         """List all registered coding tools available to the coder agent.

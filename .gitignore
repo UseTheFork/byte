@@ -54,3 +54,5 @@ apps/cli/test_traces/
 
 node_modules
 dist
+
+.byte/*

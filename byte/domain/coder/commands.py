@@ -41,21 +41,27 @@ class CoderCommand(Command):
         coder_service: CoderService = await self.container.make("coder_service")
 
         # Show that we're processing the request
-        console.print(f"[info]Processing coding request:[/info] {args}")
         console.print()
 
-        # try:
-        # Stream coder agent response token by token
-        async for chunk in coder_service.stream_code(args):
-            # Extract message from the streaming tuple (message, metadata)
-            if isinstance(chunk, tuple) and len(chunk) >= 1:
-                message = chunk[0]
-                # Handle AIMessageChunk streaming - print content directly
-                if hasattr(message, "content") and message.content:
-                    console.print(message.content, end="")
-            # Handle direct message chunks
-            elif hasattr(chunk, "content") and chunk.content:
-                console.print(chunk.content, end="")
+        try:
+            # Use centralized response handler for consistent streaming
+            from byte.core.response.handler import ResponseHandler
+            from byte.core.response.types import ResponseOptions
 
-        # except Exception as e:
-        #     console.print(f"[error]Error processing coder request:[/error] {e}")
+            response_handler: ResponseHandler = await self.container.make(
+                "response_handler"
+            )
+            options = ResponseOptions(
+                show_thinking=False,
+                show_tool_calls=True,
+                show_tool_results=True,
+                verbose=False,
+            )
+
+            # Stream coder agent response through centralized handler
+            await response_handler.handle_stream(
+                coder_service.stream_code(args), console, options
+            )
+
+        except Exception as e:
+            console.print(f"[error]Error processing coder request:[/error] {e}")

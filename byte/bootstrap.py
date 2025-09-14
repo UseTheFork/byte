@@ -2,6 +2,7 @@ from byte.container import app
 from byte.core.command.registry import command_registry
 from byte.core.config.service_provider import ConfigServiceProvider
 from byte.core.events.service_provider import EventServiceProvider
+from byte.core.response.service_provider import ResponseServiceProvider
 from byte.domain.coder.service_provider import CoderServiceProvider
 from byte.domain.commit.service_provider import CommitServiceProvider
 from byte.domain.files.file_service_provider import FileServiceProvider
@@ -29,6 +30,7 @@ async def bootstrap():
     service_providers = [
         ConfigServiceProvider(),  # Configuration management
         EventServiceProvider(),  # Foundation for domain events
+        ResponseServiceProvider(),  # Agent response handling
         UIServiceProvider(),  # Console and prompt services
         MemoryServiceProvider(),  # Short-term conversation memory
         KnowledgeServiceProvider(),  # Long-term knowledge storage
