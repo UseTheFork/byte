@@ -2,7 +2,6 @@ import functools
 from typing import TYPE_CHECKING, List, Optional
 
 from rich.console import Console
-from rich.markdown import Markdown
 
 from byte.context import get_container
 
@@ -24,14 +23,8 @@ def pause_live_display(func):
             active_live = getattr(response_handler, "_active_live", None)
 
             if active_live and active_live.is_started:
-                # Print current content and stop live display
-                if (
-                    hasattr(response_handler, "_accumulated_content")
-                    and response_handler._accumulated_content
-                ):
-                    active_live.console.print(
-                        Markdown(response_handler._accumulated_content)
-                    )
+                # Just stop the live display without printing or clearing content
+                # The content will continue to accumulate and be shown when live resumes
                 active_live.stop()
                 live_was_active = True
             else:
