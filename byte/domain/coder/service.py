@@ -63,8 +63,18 @@ class CoderService(Bootable, Configurable, Eventable):
         Binds tools to the LLM, builds the specialized coder graph,
         and configures memory persistence for conversation continuity.
         """
+        # Add interaction tools to enable user communication
+        from byte.core.ui.tools import ConfirmTool, SelectTool, UserInputTool
+
+        interaction_tools = [
+            ConfirmTool(self.container),
+            UserInputTool(self.container),
+            SelectTool(self.container),
+        ]
+        all_tools = self._tools + interaction_tools
+
         # Bind tools to LLM for tool-calling
-        if self._tools:
+        if all_tools:
             llm_service: LLMService = await self.container.make("llm_service")
             llm = llm_service.get_main_model()
 
@@ -74,12 +84,12 @@ class CoderService(Bootable, Configurable, Eventable):
                 llm.temperature = coder_config.temperature
 
             # Bind tools to the LLM
-            llm_with_tools = llm.bind_tools(self._tools)
+            llm_with_tools = llm.bind_tools(all_tools)
             # Update the LLM service with tool-bound model
             llm_service._models["main"] = llm_with_tools
 
-        # Build the coder graph
-        builder = CoderGraphBuilder(self.container, self._tools)
+        # Build the coder graph with all tools
+        builder = CoderGraphBuilder(self.container, all_tools)
         return await builder.build()
 
     async def stream_code(

@@ -4,6 +4,7 @@ from rich.theme import Theme
 from byte.container import Container
 from byte.core.service_provider import ServiceProvider
 from byte.domain.ui.config import UIConfig
+from byte.domain.ui.interactions import InteractionService
 
 
 class UIServiceProvider(ServiceProvider):
@@ -66,10 +67,15 @@ class UIServiceProvider(ServiceProvider):
 
         container.singleton("console", lambda: console)
 
+        # Register interaction service for user interactions
+        container.singleton(
+            "interaction_service", lambda: InteractionService(container)
+        )
+
     async def boot(self, container: Container):
         """Boot UI services."""
         # UI services are ready to use after registration
         pass
 
     def provides(self) -> list:
-        return ["console"]
+        return ["console", "prompt_handler", "interaction_service"]
