@@ -2,6 +2,7 @@ import asyncio
 from typing import TYPE_CHECKING
 
 from byte.bootstrap import bootstrap, shutdown
+from byte.context import container_context
 from byte.core.command.processor import CommandProcessor
 from byte.core.command.registry import command_registry
 from byte.core.ui.prompt import PromptHandler
@@ -20,6 +21,7 @@ class Byte:
 
     def __init__(self, container):
         self.container = container
+        container_context.set(self.container)
         self.prompt_handler = PromptHandler()
         self.command_processor = CommandProcessor(container)
         self._should_exit = False

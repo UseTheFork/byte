@@ -1,6 +1,8 @@
 from typing import TYPE_CHECKING
 
 from byte.core.command.registry import Command
+from byte.core.response.handler import ResponseHandler
+from byte.core.response.types import ResponseOptions
 from byte.domain.coder.service import CoderService
 
 if TYPE_CHECKING:
@@ -43,25 +45,23 @@ class CoderCommand(Command):
         # Show that we're processing the request
         console.print()
 
-        try:
-            # Use centralized response handler for consistent streaming
-            from byte.core.response.handler import ResponseHandler
-            from byte.core.response.types import ResponseOptions
+        # try:
+        # Use centralized response handler for consistent streaming
 
-            response_handler: ResponseHandler = await self.container.make(
-                "response_handler"
-            )
-            options = ResponseOptions(
-                show_thinking=False,
-                show_tool_calls=True,
-                show_tool_results=True,
-                verbose=False,
-            )
+        response_handler: ResponseHandler = await self.container.make(
+            "response_handler"
+        )
+        options = ResponseOptions(
+            show_thinking=False,
+            show_tool_calls=True,
+            show_tool_results=True,
+            verbose=False,
+        )
 
-            # Stream coder agent response through centralized handler
-            await response_handler.handle_stream(
-                coder_service.stream_code(args), console, options
-            )
+        # Stream coder agent response through centralized handler
+        await response_handler.handle_stream(
+            coder_service.stream_code(args), console, options
+        )
 
-        except Exception as e:
-            console.print(f"[error]Error processing coder request:[/error] {e}")
+        # except Exception as e:
+        #     console.print(f"[error]Error processing coder request:[/error] {e}")

@@ -1,10 +1,55 @@
+import functools
 from typing import TYPE_CHECKING, List, Optional
 
-from prompt_toolkit import prompt
-from prompt_toolkit.shortcuts import confirm
+from rich.console import Console
+from rich.markdown import Markdown
+
+from byte.context import get_container
 
 if TYPE_CHECKING:
-    from byte.container import Container
+    pass
+
+
+def pause_live_display(func):
+    """Decorator to pause any active Live display during interactive input."""
+
+    @functools.wraps(func)
+    async def wrapper(self, *args, **kwargs):
+        container = get_container()
+
+        # Check if there's an active response handler with live display
+        try:
+            response_handler = await container.make("response_handler")
+            # Store reference to any active live display
+            active_live = getattr(response_handler, "_active_live", None)
+
+            if active_live and active_live.is_started:
+                # Print current content and stop live display
+                if (
+                    hasattr(response_handler, "_accumulated_content")
+                    and response_handler._accumulated_content
+                ):
+                    active_live.console.print(
+                        Markdown(response_handler._accumulated_content)
+                    )
+                active_live.stop()
+                live_was_active = True
+            else:
+                live_was_active = False
+
+        except Exception:
+            live_was_active = False
+            active_live = None
+
+        try:
+            # Execute the interactive function
+            return await func(self, *args, **kwargs)
+        finally:
+            # Restart live display if it was active
+            if live_was_active and active_live:
+                active_live.start()
+
+    return wrapper
 
 
 class InteractionService:
@@ -15,22 +60,38 @@ class InteractionService:
     Usage: `await interaction_service.confirm("Delete this file?")` -> bool response
     """
 
-    def __init__(self, container: Optional["Container"] = None):
-        self.container = container
-
+    @pause_live_display
     async def confirm(self, message: str, default: bool = False) -> bool:
         """Ask user for yes/no confirmation with default value.
 
         Usage: `confirmed = await interaction_service.confirm("Proceed?", default=True)`
         """
-        try:
-            # Use prompt_toolkit's confirm for consistent UX
-            suffix = " (Y/n)" if default else " (y/N)"
-            return confirm(f"{message}{suffix}")
-        except (EOFError, KeyboardInterrupt):
-            # User cancelled - return the opposite of default to be safe
-            return not default
+        suffix = " (Y/n)" if default else " (y/N)"
 
+        try:
+            container = get_container()
+            console: Console = await container.make("console")
+
+            while True:
+                console.print(f"\n{message}{suffix}: ", end="")
+                result = (console.input()).strip().lower()
+
+                if not result:
+                    return default
+
+                if result in ["y", "yes"]:
+                    return True
+                elif result in ["n", "no"]:
+                    return False
+                else:
+                    console.print("Please enter 'y' or 'n'")
+                    continue
+
+        except (EOFError, KeyboardInterrupt):
+            # Fallback if container/console not available
+            return default
+
+    @pause_live_display
     async def select(
         self, message: str, choices: List[str], default: Optional[str] = None
     ) -> str:
@@ -41,55 +102,61 @@ class InteractionService:
         if not choices:
             raise ValueError("Choices list cannot be empty")
 
-        # Display options
-        print(f"\n{message}")
-        for i, choice in enumerate(choices, 1):
-            marker = " (default)" if choice == default else ""
-            print(f"  {i}. {choice}{marker}")
+        try:
+            container = get_container()
+            console: Console = await container.make("console")
 
-        while True:
-            try:
-                response = prompt("Enter choice number: ").strip()
+            # Display options
+            console.print(f"\n{message}")
+            for i, choice in enumerate(choices, 1):
+                marker = " (default)" if choice == default else ""
+                console.print(f"  {i}. {choice}{marker}")
 
-                # Handle empty response with default
-                if not response and default:
-                    return default
+            while True:
+                try:
+                    console.print("Enter choice number: ", end="")
+                    response = (console.input()).strip()
 
-                # Parse numeric choice
-                choice_num = int(response)
-                if 1 <= choice_num <= len(choices):
-                    return choices[choice_num - 1]
-                else:
-                    print(f"Please enter a number between 1 and {len(choices)}")
+                    # Handle empty response with default
+                    if not response and default:
+                        return default
 
-            except (ValueError, EOFError, KeyboardInterrupt):
-                if default:
-                    return default
-                print("Invalid input. Please enter a number.")
+                    # Parse numeric choice
+                    choice_num = int(response)
+                    if 1 <= choice_num <= len(choices):
+                        return choices[choice_num - 1]
+                    else:
+                        console.print(
+                            f"Please enter a number between 1 and {len(choices)}"
+                        )
 
+                except (ValueError, EOFError, KeyboardInterrupt):
+                    if default:
+                        return default
+                    console.print("Invalid input. Please enter a number.")
+
+        except Exception:
+            # Fallback if container/console not available
+            if default:
+                return default
+            return choices[0] if choices else ""
+
+    @pause_live_display
     async def input_text(self, message: str, default: str = "") -> str:
         """Ask user for text input with optional default.
 
         Usage: `text = await interaction_service.input_text("Enter name:", "default_name")`
         """
         try:
+            container = get_container()
+            console: Console = await container.make("console")
+
             suffix = f" [{default}]" if default else ""
-            response = prompt(f"{message}{suffix}: ")
-            return response.strip() or default
+            console.print(f"{message}{suffix}: ", end="")
+            response = (console.input()).strip()
+            return response or default
         except (EOFError, KeyboardInterrupt):
             return default
-
-    async def input_multiline(self, message: str) -> str:
-        """Ask user for multi-line text input.
-
-        Usage: `text = await interaction_service.input_multiline("Enter description:")`
-        """
-        print(f"{message} (Press Ctrl+D or Ctrl+Z to finish):")
-        lines = []
-        try:
-            while True:
-                line = input()
-                lines.append(line)
-        except (EOFError, KeyboardInterrupt):
-            pass
-        return "\n".join(lines)
+        except Exception:
+            # Fallback if container/console not available
+            return default

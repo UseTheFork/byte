@@ -35,8 +35,13 @@ class TextChunkFormatter(ResponseFormatter):
         if not chunk.content:
             return
 
+        # Extract text content from chunk
+        text_content = self._extract_text_content(chunk.content)
+        if not text_content:
+            return
+
         # Accumulate content
-        self._accumulated_content += chunk.content
+        self._accumulated_content += text_content
 
         # Create live display on first chunk
         if self._live_display is None:
@@ -63,6 +68,23 @@ class TextChunkFormatter(ResponseFormatter):
             if self._accumulated_content:
                 console.print(Markdown(self._accumulated_content))
             self._reset()
+
+    def _extract_text_content(self, content) -> str:
+        """Extract text content from various chunk formats."""
+        if isinstance(content, str):
+            return content
+        elif isinstance(content, list):
+            # Handle list of content blocks (e.g., from Anthropic)
+            text_parts = []
+            for item in content:
+                if isinstance(item, dict) and "text" in item:
+                    text_parts.append(item["text"])
+                elif isinstance(item, str):
+                    text_parts.append(item)
+            return "".join(text_parts)
+        else:
+            # Fallback to string conversion
+            return str(content) if content else ""
 
     def _reset(self) -> None:
         """Reset formatter state for next use."""

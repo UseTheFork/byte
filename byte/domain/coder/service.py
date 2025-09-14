@@ -4,12 +4,14 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from langchain_core.messages import HumanMessage
 
 from byte.core.config.configurable import Configurable
+from byte.core.config.service import ConfigService
 from byte.core.events.eventable import Eventable
 from byte.core.mixins.bootable import Bootable
 from byte.domain.coder.graph import CoderGraphBuilder
 from byte.domain.coder.state import CoderState
 from byte.domain.llm.service import LLMService
 from byte.domain.memory.service import MemoryService
+from byte.domain.ui.tools import user_confirm, user_input, user_select
 
 if TYPE_CHECKING:
     from langchain_core.tools import BaseTool
@@ -63,14 +65,8 @@ class CoderService(Bootable, Configurable, Eventable):
         Binds tools to the LLM, builds the specialized coder graph,
         and configures memory persistence for conversation continuity.
         """
-        # Add interaction tools to enable user communication
-        from byte.core.ui.tools import ConfirmTool, SelectTool, UserInputTool
 
-        interaction_tools = [
-            ConfirmTool(self.container),
-            UserInputTool(self.container),
-            SelectTool(self.container),
-        ]
+        interaction_tools = [user_confirm, user_select, user_input]
         all_tools = self._tools + interaction_tools
 
         # Bind tools to LLM for tool-calling
@@ -79,7 +75,8 @@ class CoderService(Bootable, Configurable, Eventable):
             llm = llm_service.get_main_model()
 
             # Apply coder-specific temperature if configured
-            coder_config = self.config.coder
+            config: ConfigService = await self.container.make("config")
+            coder_config = config.config.coder
             if hasattr(llm, "temperature"):
                 llm.temperature = coder_config.temperature
 
@@ -122,12 +119,8 @@ class CoderService(Bootable, Configurable, Eventable):
 
         # Get the graph and stream coder responses with token-level streaming
         graph = await self.get_graph()
-        async for message_chunk, metadata in graph.astream(
-            initial_state, config, stream_mode="messages"
-        ):
-            # Only yield chunks with actual content (skip empty AIMessageChunk objects)
-            if hasattr(message_chunk, "content") and message_chunk.content:
-                yield (message_chunk, metadata)
+        async for events in graph.astream_events(initial_state, config, version="v2"):
+            yield events
 
     def list_tools(self) -> List[str]:
         """List all registered coding tools available to the coder agent.

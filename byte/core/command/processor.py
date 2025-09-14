@@ -50,10 +50,10 @@ class CommandProcessor:
 
     async def _process_regular_input(self, user_input: str) -> None:
         """Process regular chat input with file context enhancement."""
-        file_service = self.container.make("file_service")
-        console = self.container.make("console")
+        file_service = await self.container.make("file_service")
+        console = await self.container.make("console")
 
-        context = file_service.generate_context_prompt()
+        context = await file_service.generate_context_prompt()
         if context:
             full_input = f"{context}\n\nUser input: {user_input}"
             console.print(f"Processing with context:\n{full_input}")

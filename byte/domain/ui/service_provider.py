@@ -68,9 +68,7 @@ class UIServiceProvider(ServiceProvider):
         container.singleton("console", lambda: console)
 
         # Register interaction service for user interactions
-        container.singleton(
-            "interaction_service", lambda: InteractionService(container)
-        )
+        container.singleton("interaction_service", lambda: InteractionService())
 
     async def boot(self, container: Container):
         """Boot UI services."""
