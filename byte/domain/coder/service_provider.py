@@ -18,13 +18,13 @@ class CoderServiceProvider(ServiceProvider):
     Usage: Register with container to enable coder agent functionality
     """
 
-    def register(self, container: "Container") -> None:
+    async def register(self, container: "Container") -> None:
         """Register coder agent services in the container.
 
         Usage: `provider.register(container)` -> binds coder services
         """
         # Register coder config schema
-        config_service = container.make("config")
+        config_service = await container.make("config")
         config_service.register_schema("coder", CoderConfig)
 
         # Register coder service
@@ -33,15 +33,17 @@ class CoderServiceProvider(ServiceProvider):
         # Register coder command
         container.bind("coder_command", lambda: CoderCommand(container))
 
-    def boot(self, container: "Container") -> None:
+    async def boot(self, container: "Container") -> None:
         """Boot coder services after all providers are registered.
 
         Usage: `provider.boot(container)` -> coder agent ready for development tasks
         """
-        command_registry = container.make("command_registry")
+        command_registry = await container.make("command_registry")
 
         # Register coder command for user access
-        command_registry.register_slash_command(container.make("coder_command"))
+        await command_registry.register_slash_command(
+            await container.make("coder_command")
+        )
 
         # Coder service is lazy-loaded, no explicit boot needed
         # Tools will be registered by their respective domains

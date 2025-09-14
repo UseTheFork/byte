@@ -1,3 +1,5 @@
+from rich.console import Console
+
 from byte.core.command.registry import command_registry
 
 
@@ -39,7 +41,7 @@ class CommandProcessor:
             cmd_name, args = command_text, ""
 
         command = command_registry.get_slash_command(cmd_name)
-        console = self.container.make("console")
+        console: Console = await self.container.make("console")
 
         if command:
             await command.execute(args)

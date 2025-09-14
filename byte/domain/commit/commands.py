@@ -38,7 +38,7 @@ class CommitCommand(Command):
         creating the actual commit.
         Usage: Called by command processor when user types `/commit`
         """
-        console: Console = self.container.make("console")
+        console: Console = await self.container.make("console")
 
         try:
             # Initialize git repository with parent directory search
@@ -55,9 +55,11 @@ class CommitCommand(Command):
             console.print("[info]Generating commit message...[/info]")
 
             # Use main model for high-quality commit message generation
-            llm_service: LLMService = self.container.make("llm_service")
+            llm_service: LLMService = await self.container.make("llm_service")
             llm: BaseChatModel = llm_service.get_main_model()
-            result_message = llm.invoke(commit_prompt.invoke({"changes": staged_diff}))
+            result_message = await llm.ainvoke(
+                await commit_prompt.ainvoke({"changes": staged_diff})
+            )
 
             # Create commit with AI-generated message
             commit = repo.index.commit(result_message.content)

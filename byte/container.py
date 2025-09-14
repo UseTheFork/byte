@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any, Callable, Dict
 
 
@@ -43,9 +44,15 @@ class Container:
 
         if abstract in self._bindings:
             factory = self._bindings[abstract]
-            instance = await factory()
-            self._instances[abstract] = instance
 
+            # Handle both sync and async factories
+            if asyncio.iscoroutinefunction(factory):
+                instance = await factory()
+            else:
+                instance = factory()
+
+            # Cache singleton instances
+            self._instances[abstract] = instance
             return instance
 
         raise ValueError(f"No binding found for {abstract}")

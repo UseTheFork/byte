@@ -18,10 +18,10 @@ class Configurable:
     container: Any
     _config_service: "ConfigService"
 
-    def boot_configurable(self) -> None:
+    async def boot_configurable(self) -> None:
         """Boot method for Configurable mixin - automatically called by Command.__init__."""
         if hasattr(self, "container") and self.container:
-            self._config_service = self.container.make("config")
+            self._config_service = await self.container.make("config")
 
     @property
     def config(self) -> Config:

@@ -22,20 +22,20 @@ class LLMServiceProvider(ServiceProvider):
     Usage: Register with container to enable AI functionality throughout app
     """
 
-    def register(self, container: "Container") -> None:
+    async def register(self, container: "Container") -> None:
         """Register LLM services with automatic provider selection.
 
         Usage: `provider.register(container)` -> configures best available LLM service
         """
         # Register LLM config schema first
-        config_service = container.make("config")
+        config_service = await container.make("config")
         config_service.register_schema("llm", LLMConfig)
 
         # Register LLM service
-        llm_service = self._create_llm_service(container)
+        llm_service = await self._create_llm_service(container)
         container.singleton("llm_service", lambda: llm_service)
 
-    def _create_llm_service(self, container: "Container") -> "LLMService":
+    async def _create_llm_service(self, container: "Container") -> "LLMService":
         """Create the appropriate LLM service based on configuration.
 
         Respects user preference from environment variable, falling back
@@ -43,8 +43,8 @@ class LLMServiceProvider(ServiceProvider):
         Usage: Called internally during service registration
         """
         # Get preferred provider from config system (with env fallback)
-        config_service = container.make("config")
-        console: Console = container.make("console")
+        config_service = await container.make("config")
+        console: Console = await container.make("console")
         preferred_provider = config_service.config.llm.provider.lower()
 
         # Provider priority order - Anthropic first for best performance
@@ -75,15 +75,15 @@ class LLMServiceProvider(ServiceProvider):
 
         raise RuntimeError("No LLM provider available. Please set API keys.")
 
-    def boot(self, container: "Container") -> None:
+    async def boot(self, container: "Container") -> None:
         """Boot LLM services and display configuration information.
 
         Shows user which models are active for transparency and debugging,
         helping users understand which AI capabilities are available.
         Usage: Called automatically during application startup
         """
-        llm_service: LLMService = container.make("llm_service")
-        console: Console = container.make("console")
+        llm_service: LLMService = await container.make("llm_service")
+        console: Console = await container.make("console")
 
         # Display active model configuration for user awareness
         config = llm_service.get_model_config()

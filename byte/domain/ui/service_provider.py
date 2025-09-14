@@ -9,11 +9,11 @@ from byte.domain.ui.config import UIConfig
 class UIServiceProvider(ServiceProvider):
     """Service provider for UI system."""
 
-    def register(self, container: Container) -> None:
+    async def register(self, container: Container) -> None:
         """Register UI services in the container."""
 
         # Register UI config schema first
-        config_service = container.make("config")
+        config_service = await container.make(abstract="config")
         config_service.register_schema("ui", UIConfig)
 
         # "pink": "#f5c2e7",
@@ -67,7 +67,7 @@ class UIServiceProvider(ServiceProvider):
 
         container.singleton("console", lambda: console)
 
-    def boot(self, container: Container):
+    async def boot(self, container: Container):
         """Boot UI services."""
         # UI services are ready to use after registration
         pass

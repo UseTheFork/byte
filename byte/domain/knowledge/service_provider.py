@@ -17,19 +17,19 @@ class KnowledgeServiceProvider(ServiceProvider):
     Usage: Register with container to enable long-term knowledge storage
     """
 
-    def register(self, container: "Container") -> None:
+    async def register(self, container: "Container") -> None:
         """Register knowledge services in the container.
 
         Usage: `provider.register(container)` -> binds knowledge services
         """
         # Register knowledge config schema
-        config_service = container.make("config")
+        config_service = await container.make("config")
         config_service.register_schema("knowledge", KnowledgeConfig)
 
         # Register knowledge service
         container.singleton("knowledge_service", lambda: KnowledgeService(container))
 
-    def boot(self, container: "Container") -> None:
+    async def boot(self, container: "Container") -> None:
         """Boot knowledge services after all providers are registered.
 
         Usage: `provider.boot(container)` -> knowledge system ready for use
@@ -41,7 +41,7 @@ class KnowledgeServiceProvider(ServiceProvider):
         """Shutdown knowledge services and close database connections."""
         try:
             if "knowledge_service" in container._instances:
-                knowledge_service = container.make("knowledge_service")
+                knowledge_service = await container.make("knowledge_service")
                 await knowledge_service.close()
         except Exception:
             pass  # Ignore cleanup errors during shutdown

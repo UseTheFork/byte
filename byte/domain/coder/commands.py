@@ -1,12 +1,10 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from byte.core.command.registry import Command
 from byte.domain.coder.service import CoderService
 
 if TYPE_CHECKING:
     from rich.console import Console
-
-    from byte.container import Container
 
 
 class CoderCommand(Command):
@@ -17,9 +15,6 @@ class CoderCommand(Command):
     with full file context integration and streaming responses.
     Usage: `/coder Fix the bug in main.py` -> streams coder agent response
     """
-
-    def __init__(self, container: Optional["Container"] = None):
-        super().__init__(container)
 
     @property
     def name(self) -> str:
@@ -36,14 +31,14 @@ class CoderCommand(Command):
         streaming the response in real-time for immediate feedback.
         Usage: Called by command processor when user types `/coder <request>`
         """
+        console: Console = await self.container.make("console")
+
         if not args.strip():
-            console: Console = self.container.make("console")
             console.print("[warning]Please provide a coding request.[/warning]")
             console.print("Usage: /coder <your coding request>")
             return
 
-        console: Console = self.container.make("console")
-        coder_service: CoderService = self.container.make("coder_service")
+        coder_service: CoderService = await self.container.make("coder_service")
 
         # Show that we're processing the request
         console.print(f"[info]Processing coding request:[/info] {args}")

@@ -24,8 +24,10 @@ class Byte:
         self.command_processor = CommandProcessor(container)
         self._should_exit = False
 
+    async def initialize(self):
+        """Initialize async resources and event listeners."""
         # Listen for exit events
-        event_dispatcher = container.make("event_dispatcher")
+        event_dispatcher = await self.container.make("event_dispatcher")
         event_dispatcher.listen("ExitRequested", self._handle_exit_request)
 
     def _handle_exit_request(self, event: ExitRequested):
@@ -45,13 +47,15 @@ class Byte:
         Uses async/await to prevent blocking on user input while maintaining
         responsive command execution and graceful shutdown handling.
         """
-        console: Console = self.container.make("console")
+        await self.initialize()
+
+        console: Console = await self.container.make("console")
 
         try:
             while not self._should_exit:
                 try:
                     # Allow commands to display contextual information before each prompt
-                    command_registry.pre_prompt()
+                    await command_registry.pre_prompt()
 
                     user_input = await self.prompt_handler.get_input_async("> ")
 
@@ -86,5 +90,9 @@ async def main():
     await app.run()
 
 
-if __name__ == "__main__":
+def cli():
     asyncio.run(main())
+
+
+if __name__ == "__main__":
+    cli()

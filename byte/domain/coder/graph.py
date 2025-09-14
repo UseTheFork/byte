@@ -37,7 +37,7 @@ class CoderGraphBuilder:
         graph = StateGraph(CoderState)
 
         # Create specialized nodes
-        coder_node = create_coder_node(self.container)
+        coder_node = await create_coder_node(self.container)
         tool_node = ToolNode(self.tools)
 
         # Add nodes to graph
@@ -61,11 +61,11 @@ class CoderGraphBuilder:
         graph.add_edge("tools", "coder")
 
         # Get memory service for conversation persistence
-        memory_service = self.container.make("memory_service")
+        memory_service = await self.container.make("memory_service")
         checkpointer = await memory_service.get_saver()
 
         # Get coder configuration
-        config_service = self.container.make("config")
+        config_service = await self.container.make("config")
         coder_config = config_service.config.coder
 
         # Compile graph with memory and configuration

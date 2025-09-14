@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from byte.container import Container
 
 
-def create_coder_node(container: "Container") -> callable:
+async def create_coder_node(container: "Container") -> callable:
     """Create the coder agent node specialized for software development tasks.
 
     Returns a node function that uses the LLM with coding-specific prompts
@@ -22,16 +22,17 @@ def create_coder_node(container: "Container") -> callable:
     Usage: `coder_node = create_coder_node(container)` -> LangGraph node function
     """
 
-    def coder_node(state: CoderState) -> dict:
+    # Pre-resolve services during node creation
+    llm_service = await container.make("llm_service")
+    file_service = await container.make("file_service")
+
+    async def coder_node(state: CoderState) -> dict:
         """Coder agent node that processes coding requests and generates responses.
 
         Uses the configured LLM with coding-specific system prompt and context
         to analyze user requests and either call tools or provide direct coding
         assistance. Always includes comprehensive file and project context.
         """
-        # Get services from container
-        llm_service = container.make("llm_service")
-        file_service = container.make("file_service")
 
         # Get LLM (tools will be bound by graph builder)
         llm: BaseChatModel = llm_service.get_main_model()

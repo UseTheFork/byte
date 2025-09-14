@@ -16,7 +16,7 @@ class SystemServiceProvider(ServiceProvider):
     Usage: Register with container to enable /exit and /help commands
     """
 
-    def register(self, container: "Container") -> None:
+    async def register(self, container: "Container") -> None:
         """Register system commands in the container.
 
         Usage: `provider.register(container)` -> binds exit and help commands
@@ -24,16 +24,20 @@ class SystemServiceProvider(ServiceProvider):
         container.bind("exit_command", lambda: ExitCommand(container))
         container.bind("help_command", lambda: HelpCommand(container))
 
-    def boot(self, container: "Container") -> None:
+    async def boot(self, container: "Container") -> None:
         """Boot system services and register commands with registry.
 
         Usage: `provider.boot(container)` -> commands become available as /exit, /help
         """
-        command_registry = container.make("command_registry")
+        command_registry = await container.make("command_registry")
 
         # Register system commands for user access
-        command_registry.register_slash_command(container.make("exit_command"))
-        command_registry.register_slash_command(container.make("help_command"))
+        await command_registry.register_slash_command(
+            await container.make("exit_command")
+        )
+        await command_registry.register_slash_command(
+            await container.make("help_command")
+        )
 
     def provides(self) -> list:
         """Return list of services provided by this provider."""

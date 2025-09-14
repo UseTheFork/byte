@@ -6,6 +6,7 @@ from rich.console import Console
 
 from byte.core.command.registry import Command
 from byte.domain.files.context_manager import FileMode
+from byte.domain.files.service import FileService
 
 if TYPE_CHECKING:
     from rich.console import Console
@@ -76,7 +77,7 @@ class AddFileCommand(Command):
             pass
         return []
 
-    def pre_prompt(self) -> None:
+    async def pre_prompt(self) -> None:
         """Display current editable files before each prompt.
 
         Provides visual feedback about which files the AI can modify,
@@ -84,7 +85,7 @@ class AddFileCommand(Command):
         """
         if not self.container:
             return
-        file_service = self.container.make("file_service")
+        file_service: FileService = await self.container.make("file_service")
         editable_files = file_service.list_files(FileMode.EDITABLE)
         if not editable_files:
             return
@@ -158,7 +159,7 @@ class ReadOnlyCommand(Command):
             pass
         return []
 
-    def pre_prompt(self) -> None:
+    async def pre_prompt(self) -> None:
         """Display current read-only files before each prompt.
 
         Shows which files are available for AI reference, using different
@@ -166,12 +167,12 @@ class ReadOnlyCommand(Command):
         """
         if not self.container:
             return
-        file_service = self.container.make("file_service")
+        file_service: FileService = await self.container.make("file_service")
         readonly_files = file_service.list_files(FileMode.READ_ONLY)
         if not readonly_files:
             return
 
-        console: Console = self.container.make("console")
+        console: Console = await self.container.make("console")
 
         file_names = [f"[warning]{f.relative_path}[/warning]" for f in readonly_files]
         console.print("[bold info]Read-only Files:[/bold info]")
@@ -205,7 +206,7 @@ class DropFileCommand(Command):
             console.print("Usage: /drop <file_path>")
             return
 
-        file_service = self.container.make("file_service")
+        file_service: FileService = await self.container.make("file_service")
         if await file_service.remove_file(args):
             console.print(f"[success]Removed {args} from context[/success]")
             return
