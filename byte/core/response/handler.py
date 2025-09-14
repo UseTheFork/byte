@@ -1,5 +1,8 @@
 from typing import TYPE_CHECKING, Any, AsyncGenerator, Dict
 
+from rich.live import Live
+from rich.spinner import Spinner
+
 from .formatters import (
     ErrorFormatter,
     ResponseFormatter,
@@ -48,9 +51,20 @@ class ResponseHandler:
             options = ResponseOptions()
 
         text_formatter = None
-        # AI: Can we display a loader while we wait for the llm to start responding ai?
+
+        # Show loading spinner while waiting for first response
+        spinner = Spinner("dots", text="Thinking...")
+        loading_display = Live(spinner, console=console, refresh_per_second=10)
+        loading_display.start()
+        first_chunk_received = False
+
         try:
             async for raw_chunk in stream:
+                # Stop loading spinner on first chunk
+                if not first_chunk_received:
+                    loading_display.stop()
+                    first_chunk_received = True
+
                 chunk = self._normalize_chunk(raw_chunk)
                 # Get or create formatter instance for this stream
                 if chunk.type not in self._active_formatters:
@@ -68,9 +82,13 @@ class ResponseHandler:
                     await formatter.format_and_display(chunk, console, options)
 
         finally:
+            # Ensure loading spinner is stopped
+            if "loading_display" in locals() and not first_chunk_received:
+                loading_display.stop()
+
             # Finalize text formatter to make content scrollable
             if text_formatter and hasattr(text_formatter, "finalize"):
-                text_formatter.finalize(console)
+                text_formatter.finalize(console)  # pyright: ignore[reportAttributeAccessIssue]
 
             # Clear active formatters for next stream
             self._active_formatters.clear()
