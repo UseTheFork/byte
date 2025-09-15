@@ -3,7 +3,6 @@ from rich.theme import Theme
 
 from byte.container import Container
 from byte.core.service_provider import ServiceProvider
-from byte.domain.ui.config import UIConfig
 from byte.domain.ui.interactions import InteractionService
 
 
@@ -12,10 +11,6 @@ class UIServiceProvider(ServiceProvider):
 
     async def register(self, container: Container) -> None:
         """Register UI services in the container."""
-
-        # Register UI config schema first
-        config_service = await container.make(abstract="config")
-        config_service.register_schema("ui", UIConfig)
 
         # "pink": "#f5c2e7",
         # "mauve": "#cba6f7",

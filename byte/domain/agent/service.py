@@ -1,19 +1,19 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from byte.core.config.configurable import Configurable
 from byte.core.events.eventable import Eventable
 from byte.core.mixins.bootable import Bootable
 
 if TYPE_CHECKING:
-    from byte.container import Container
+    pass
 
 
-# byte/domain/agent/service.py
 class AgentService(Bootable, Configurable, Eventable):
     """Main agent service that routes requests to specialized agents."""
 
-    def __init__(self, container: Optional["Container"] = None):
-        self.container = container
+    _current_agent: str = "coder"
+
+    async def boot(self):
         self._current_agent = "coder"  # Default
         self._agents = {}
 

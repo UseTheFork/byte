@@ -33,6 +33,19 @@ class ServiceProvider(ABC):
         """
         pass
 
+    async def configure(self, container: Container):
+        """Configure domain-specific settings after registration but before boot.
+
+        This phase allows domains to:
+        - Parse their own configuration from raw config data
+        - Handle environment variable mapping
+        - Validate configuration with domain-specific rules
+        - Store parsed config in the container for service access
+
+        Called after all providers are registered but before boot phase.
+        """
+        pass
+
     async def boot(self, container: Container):
         """Boot services after all providers have been registered.
 

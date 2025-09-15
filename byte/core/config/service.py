@@ -6,7 +6,7 @@ import git
 import yaml
 from git.exc import InvalidGitRepositoryError
 
-from byte.core.config.schema import AppConfig, Config
+from byte.core.config.schema import Config
 
 
 class ConfigService:
@@ -141,47 +141,6 @@ class ConfigService:
         if cli_config:
             self._merge_config(cli_config)
 
-    def register_schema(self, domain: str, schema_class: type) -> None:
-        """Register a domain-specific config schema.
-
-        Usage: `config.register_schema("llm", LLMConfig)` -> domain owns its config
-        """
-        self._schema_registry[domain] = schema_class
-        # Invalidate cached config to force rebuild
-        self._typed_config = None
-
-    def _build_typed_config(self) -> Config:
-        """Build the final Config object from registered domain schemas."""
-        domain_configs = {}
-
-        # Build each domain's config from its schema
-        for domain, schema_class in self._schema_registry.items():
-            domain_data = self._raw_config.get(domain, {})
-
-            # Create typed config instance with defaults
-            domain_configs[domain] = schema_class(
-                **{
-                    k: v
-                    for k, v in domain_data.items()
-                    if k in schema_class.__dataclass_fields__
-                }
-            )
-
-        # Build app config
-        app_data = self._raw_config.get("app", {})
-
-        app_config = AppConfig(
-            name=app_data.get("name", "Byte"),
-            version=app_data.get("version", "1.0.0"),
-            debug=app_data.get("debug", False),
-            project_root=self._project_root,
-        )
-
-        return Config(
-            app=app_config,
-            **domain_configs,
-        )
-
     @property
     def project_root(self) -> Path:
         """Get the detected project root directory."""
@@ -234,26 +193,20 @@ class ConfigService:
         except (OSError, yaml.YAMLError) as e:
             print(f"Failed to load config from {file_path}: {e}")
 
-    @property
-    def config(self) -> Config:
-        """Get strongly-typed configuration object.
+    def get_raw_config(self) -> tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
+        """Get separate raw config data from all sources.
 
-        Usage: `config_service.config.app.name` -> type-safe access
+        Returns three dictionaries containing configuration data from each source,
+        allowing domains to decide which values to use and how to merge them.
+
+        Returns:
+            Tuple of (yaml_config, env_config, cli_config) dictionaries
+
+        Usage: `yaml, env, cli = config_service.get_raw_config()` -> domain handles merging
         """
-        if self._typed_config is None:
-            self._typed_config = self._build_typed_config()
-        return self._typed_config
-
-    def reload(self) -> None:
-        """Reload configuration from disk and recreate typed config."""
-        self._loaded_files.clear()
-        self._raw_config.clear()
-        if self._byte_dir:
-            config_file = self._byte_dir / "config.yaml"
-            if config_file.exists():
-                self.load_yaml(str(config_file))
-        # Invalidate typed config to force rebuild
-        self._typed_config = None
+        # For now, return the merged config as YAML and empty dicts for env/cli
+        # TODO: Separate the config sources during loading
+        return self._raw_config, {}, self._cli_args
 
     def _merge_config(self, new_config: Dict[str, Any]) -> None:
         """Recursively merge new configuration into existing config."""

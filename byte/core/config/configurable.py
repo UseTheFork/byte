@@ -1,38 +1,25 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from byte.core.config.schema import AppConfig, Config
+from byte.core.config.schema import BaseConfig
 
 if TYPE_CHECKING:
-    from byte.core.config.service import ConfigService
+    pass
 
 
 class Configurable:
-    """Mixin that provides type-safe config access to services.
+    def set_config(self, config: BaseConfig) -> None:
+        """Set the configuration object directly.
 
-    Enables services to access configuration using self.config.app.name
-    syntax, with automatic container resolution and type safety.
-    Usage: `class MyService(Configurable): ...` then `self.config.app.name`
-    """
-
-    # Type hint for container attribute that will be provided by classes using this mixin
-    container: Any
-    _config_service: "ConfigService"
-
-    async def boot_configurable(self) -> None:
-        """Boot method for Configurable mixin - automatically called by Command.__init__."""
-        if hasattr(self, "container") and self.container:
-            self._config_service = await self.container.make("config")
+        Usage: `service.set_config(domain_config)` -> sets config during configure phase
+        """
+        self._config = config
 
     @property
-    def config(self) -> Config:
-        """Get strongly-typed configuration object.
+    def config(self) -> BaseConfig:
+        """Get the service's configuration object.
 
-        Usage: `self.config.app.name` -> type-safe access to configuration
+        Usage: `self.config.enabled` -> access config properties
         """
-        if not hasattr(self, "_config_service"):
-            # Return minimal default config if service not available
-            from pathlib import Path
-
-            return Config(app=AppConfig(project_root=Path.cwd()))
-
-        return self._config_service.config
+        if not hasattr(self, "_config"):
+            raise RuntimeError("Configuration not set. Call set_config() first.")
+        return self._config

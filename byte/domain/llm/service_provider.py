@@ -1,16 +1,10 @@
-from typing import TYPE_CHECKING
-
 from rich.console import Console
 
 from byte.container import Container
+from byte.core.config.service import ConfigService
 from byte.core.service_provider import ServiceProvider
-from byte.domain.llm.config import LLMConfig
-from byte.domain.llm.providers.anthropic import AnthropicLLMService
-from byte.domain.llm.providers.gemini import GeminiLLMService
-from byte.domain.llm.providers.openai import OpenAILLMService
-
-if TYPE_CHECKING:
-    from byte.domain.llm.service import LLMService
+from byte.domain.llm.config import LLMConfig, ModelConfig
+from byte.domain.llm.service import LLMService
 
 
 class LLMServiceProvider(ServiceProvider):
@@ -27,53 +21,30 @@ class LLMServiceProvider(ServiceProvider):
 
         Usage: `provider.register(container)` -> configures best available LLM service
         """
-        # Register LLM config schema first
-        config_service = await container.make("config")
-        config_service.register_schema("llm", LLMConfig)
+        container.bind("llm_service", lambda: LLMService(container))
 
-        # Register LLM service
-        llm_service = await self._create_llm_service(container)
-        container.singleton("llm_service", lambda: llm_service)
+    async def configure(self, container: "Container") -> None:
+        """Configure lint domain settings after registration but before boot.
 
-    async def _create_llm_service(self, container: "Container") -> "LLMService":
-        """Create the appropriate LLM service based on configuration.
-
-        Respects user preference from environment variable, falling back
-        to first available provider if preferred option is unavailable.
-        Usage: Called internally during service registration
+        Handles lint-specific configuration parsing, validation, and storage.
+        Usage: Called automatically during container configure phase
         """
-        # Get preferred provider from config system (with env fallback)
-        config_service = await container.make("config")
-        console: Console = await container.make("console")
-        preferred_provider = config_service.config.llm.provider.lower()
+        # Get the config service to access raw configuration data
+        config_service: ConfigService = await container.make("config")
 
-        # Provider priority order - Anthropic first for best performance
-        providers = [
-            ("anthropic", AnthropicLLMService),
-            ("openai", OpenAILLMService),
-            ("gemini", GeminiLLMService),
-        ]
+        # Get raw config data from all sources
+        yaml_config, env_config, cli_config = config_service.get_raw_config()
 
-        # Honor user preference if specified and available
-        if preferred_provider:
-            for name, service_class in providers:
-                if name == preferred_provider:
-                    service = service_class(container)
-                    if service.is_available():
-                        return service
-                    else:
-                        console.print(
-                            f"[warning]Warning: Preferred provider '{preferred_provider}' not available[/warning]"
-                        )
-                        break
+        model = yaml_config.get("model", "")
 
-        # Fall back to first available provider for seamless experience
-        for name, service_class in providers:
-            service = service_class(container)
-            if service.is_available():
-                return service
+        if model == "sonnet":
+            main_model = ModelConfig(model="claude-sonnet-4-20250514")
+            weak_model = ModelConfig(model="claude-3-5-haiku-20241022")
 
-        raise RuntimeError("No LLM provider available. Please set API keys.")
+        llm_config = LLMConfig(base=model, main=main_model, weak=weak_model)
+
+        llm_service: LLMService = await container.make("llm_service")
+        llm_service.set_config(llm_config)
 
     async def boot(self, container: "Container") -> None:
         """Boot LLM services and display configuration information.
@@ -86,9 +57,8 @@ class LLMServiceProvider(ServiceProvider):
         console: Console = await container.make("console")
 
         # Display active model configuration for user awareness
-        config = llm_service.get_model_config()
-        main_model = config.get("main", {}).get("model", "Unknown")
-        weak_model = config.get("weak", {}).get("model", "Unknown")
+        main_model = llm_service._config.main.model
+        weak_model = llm_service._config.weak.model
 
         console.print("│", style="text")
         console.print(f"├─ [success]Main model:[/success] [info]{main_model}[/info]")

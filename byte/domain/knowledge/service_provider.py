@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 
 from byte.core.service_provider import ServiceProvider
-from byte.domain.knowledge.config import KnowledgeConfig
 from byte.domain.knowledge.service import KnowledgeService
 
 if TYPE_CHECKING:
@@ -22,10 +21,6 @@ class KnowledgeServiceProvider(ServiceProvider):
 
         Usage: `provider.register(container)` -> binds knowledge services
         """
-        # Register knowledge config schema
-        config_service = await container.make("config")
-        config_service.register_schema("knowledge", KnowledgeConfig)
-
         # Register knowledge service
         container.singleton("knowledge_service", lambda: KnowledgeService(container))
 

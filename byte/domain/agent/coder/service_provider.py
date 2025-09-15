@@ -2,7 +2,6 @@ from typing import TYPE_CHECKING
 
 from byte.core.service_provider import ServiceProvider
 from byte.domain.agent.coder.commands import CoderCommand
-from byte.domain.agent.coder.config import CoderConfig
 from byte.domain.agent.coder.service import CoderService
 
 if TYPE_CHECKING:
@@ -23,9 +22,6 @@ class CoderServiceProvider(ServiceProvider):
 
         Usage: `provider.register(container)` -> binds coder services
         """
-        # Register coder config schema
-        config_service = await container.make("config")
-        config_service.register_schema("coder", CoderConfig)
 
         # Register coder service
         container.singleton("coder_service", lambda: CoderService(container))

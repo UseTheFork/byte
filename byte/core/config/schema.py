@@ -1,16 +1,29 @@
-from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
+from pydantic.dataclasses import dataclass
+
 if TYPE_CHECKING:
-    from byte.domain.coder.config import CoderConfig
+    from byte.domain.agent.coder.config import CoderConfig
     from byte.domain.commit.config import CommitConfig
     from byte.domain.knowledge.config import KnowledgeConfig
     from byte.domain.memory.config import MemoryConfig
 
 
 @dataclass(frozen=True)
-class AppConfig:
+class BaseConfig:
+    """Base configuration class that all domain configs should extend.
+
+    Provides pydantic-based validation and serialization for all configuration
+    objects in the system. Ensures consistent behavior across domains.
+    Usage: `class MyDomainConfig(BaseConfig): enabled: bool = True`
+    """
+
+    pass
+
+
+@dataclass(frozen=True)
+class AppConfig(BaseConfig):
     """Application-level configuration."""
 
     name: str = "Byte"

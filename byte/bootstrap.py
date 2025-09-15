@@ -6,7 +6,9 @@ from byte.core.response.service_provider import ResponseServiceProvider
 from byte.domain.agent.service_provider import AgentServiceProvider
 from byte.domain.commit.service_provider import CommitServiceProvider
 from byte.domain.files.file_service_provider import FileServiceProvider
+from byte.domain.git.service_provider import GitServiceProvider
 from byte.domain.knowledge.service_provider import KnowledgeServiceProvider
+from byte.domain.lint.service_provider import LintServiceProvider
 from byte.domain.llm.service_provider import LLMServiceProvider
 from byte.domain.memory.service_provider import MemoryServiceProvider
 from byte.domain.system.service_provider import SystemServiceProvider
@@ -27,6 +29,7 @@ async def bootstrap():
 
     # Order matters: ConfigServiceProvider must be early since other services
     # may need configuration access during their boot phase
+
     service_providers = [
         ConfigServiceProvider(),  # Configuration management
         EventServiceProvider(),  # Foundation for domain events
@@ -36,6 +39,8 @@ async def bootstrap():
         KnowledgeServiceProvider(),  # Long-term knowledge storage
         FileServiceProvider(),  # File context management
         LLMServiceProvider(),  # Language model integration
+        GitServiceProvider(),  # Git repository operations
+        LintServiceProvider(),  # Code linting functionality
         CommitServiceProvider(),  # Git commit functionality
         AgentServiceProvider(),  # AI agent routing and management
         SystemServiceProvider(),  # Core system commands
@@ -46,7 +51,11 @@ async def bootstrap():
     for provider in service_providers:
         await provider.register(app)
 
-    # Phase 2: Boot services after all are registered
+    # Phase 2: Configure domain-specific settings
+    for provider in service_providers:
+        await provider.configure(app)
+
+    # Phase 3: Boot services after all are registered
     # This allows services to safely reference dependencies during initialization
     for provider in service_providers:
         await provider.boot(app)

@@ -1,6 +1,8 @@
 import asyncio
 from typing import Any, Callable, Dict
 
+from byte.core.mixins.bootable import Bootable
+
 
 class Container:
     """Simple dependency injection container for managing service bindings.
@@ -30,7 +32,7 @@ class Container:
         self._bindings[abstract] = concrete
         # Instance caching is handled in make() method
 
-    async def make(self, abstract: str):
+    async def make(self, abstract: str) -> Any:
         """Resolve a service from the container.
 
         For singletons, returns cached instance if available, otherwise
@@ -49,8 +51,13 @@ class Container:
             # Handle both sync and async factories
             if asyncio.iscoroutinefunction(factory):
                 instance = await factory()
+
             else:
                 instance = factory()
+
+            # Explicitly boot if bootable
+            if isinstance(instance, Bootable):
+                await instance.ensure_booted()
 
             # Cache singleton instances
             self._instances[abstract] = instance

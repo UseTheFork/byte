@@ -1,11 +1,31 @@
 import asyncio
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from byte.container import Container
 
 
 class Bootable:
+    _is_booted = False
+    container: Optional["Container"]
+
+    def __init__(self, container: Optional["Container"] = None):
+        self.container = container
+        super().__init__()
+
+    async def ensure_booted(self) -> None:
+        """Ensure this service is booted before use."""
+        if not self._is_booted:
+            await self._async_init()
+
     async def _async_init(self) -> None:
         """Handle async initialization after container is set."""
+        if self._is_booted:
+            return
+
         await self.boot()
         await self._boot_mixins()
+        self._is_booted = True
 
     async def _boot_mixins(self) -> None:
         """Automatically boot all mixins that have boot_{mixin_name} methods."""

@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 
 from byte.core.service_provider import ServiceProvider
-from byte.domain.memory.config import MemoryConfig
 from byte.domain.memory.service import MemoryService
 
 if TYPE_CHECKING:
@@ -22,10 +21,6 @@ class MemoryServiceProvider(ServiceProvider):
 
         Usage: `provider.register(container)` -> binds memory services
         """
-        # Register memory config schema
-        config_service = await container.make("config")
-        config_service.register_schema("memory", MemoryConfig)
-
         # Register memory service
         container.singleton("memory_service", lambda: MemoryService(container))
 
