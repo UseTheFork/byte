@@ -1,23 +1,43 @@
-import asyncio
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Annotated, List, Optional, Sequence
 
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
+from langgraph.graph import END, START, StateGraph
+from langgraph.graph.message import add_messages
+from langgraph.prebuilt import ToolNode
+from typing_extensions import TypedDict
 
+from byte.context import make
 from byte.core.config.configurable import Configurable
-from byte.core.config.service import ConfigService
 from byte.core.events.eventable import Eventable
 from byte.core.mixins.bootable import Bootable
-from byte.domain.agent.coder.graph import CoderGraphBuilder
-from byte.domain.agent.coder.state import CoderState
-from byte.domain.llm.service import LLMService
+from byte.domain.agent.coder.prompts import coder_prompt
 from byte.domain.memory.service import MemoryService
 from byte.domain.ui.tools import user_confirm, user_input, user_select
 
 if TYPE_CHECKING:
+    from langchain_core.language_models.chat_models import BaseChatModel
     from langchain_core.tools import BaseTool
     from langgraph.graph.state import CompiledStateGraph
 
     from byte.container import Container
+
+
+class CoderState(TypedDict):
+    """State schema for the coder agent specialized for coding tasks.
+
+    Extends the standard MessagesState pattern with coding-specific context
+    like file information, project structure, and code analysis results.
+    Optimized for software development workflows and code generation.
+    Usage: Standard LangGraph state for coding-focused tool-calling agent
+    """
+
+    # Core message history with automatic message management
+    messages: Annotated[Sequence[BaseMessage], add_messages]
+
+    # Coding-specific context
+    file_context: str  # Current files in context from FileService
+    project_structure: str  # Project layout and organization
+    code_analysis: str  # Static analysis results and insights
 
 
 class CoderService(Bootable, Configurable, Eventable):
@@ -32,21 +52,7 @@ class CoderService(Bootable, Configurable, Eventable):
     def __init__(self, container: Optional["Container"] = None):
         self.container = container
         self._graph: Optional[CompiledStateGraph] = None
-        self._tools: List[BaseTool] = []
-        if container:
-            asyncio.create_task(self._async_init())
-
-    def register_tool(self, tool: "BaseTool") -> None:
-        """Register a coding tool for use by the coder agent.
-
-        Tools are automatically bound to the coder LLM and made available
-        for coding tasks. Common tools include file operations, code analysis,
-        testing, and documentation generation.
-        Usage: `coder_service.register_tool(file_editor_tool)` -> tool available
-        """
-        self._tools.append(tool)
-        # Invalidate cached graph to force rebuild with new tools
-        self._graph = None
+        self._tools: List[BaseTool] = [user_confirm, user_select, user_input]
 
     async def get_graph(self) -> "CompiledStateGraph":
         """Get or create the coder agent graph with current tools.
@@ -60,36 +66,10 @@ class CoderService(Bootable, Configurable, Eventable):
         return self._graph
 
     async def _create_graph(self) -> "CompiledStateGraph":
-        """Create and configure the coder agent graph.
+        """Create and configure the coder agent graph."""
+        return await self.build()
 
-        Binds tools to the LLM, builds the specialized coder graph,
-        and configures memory persistence for conversation continuity.
-        """
-
-        interaction_tools = [user_confirm, user_select, user_input]
-        all_tools = self._tools + interaction_tools
-
-        # Bind tools to LLM for tool-calling
-        if all_tools:
-            llm_service: LLMService = await self.container.make("llm_service")
-            llm = llm_service.get_main_model()
-
-            # Apply coder-specific temperature if configured
-            config: ConfigService = await self.container.make("config")
-            coder_config = config.config.coder
-            if hasattr(llm, "temperature"):
-                llm.temperature = coder_config.temperature
-
-            # Bind tools to the LLM
-            llm_with_tools = llm.bind_tools(all_tools)
-            # Update the LLM service with tool-bound model
-            llm_service._models["main"] = llm_with_tools
-
-        # Build the coder graph with all tools
-        builder = CoderGraphBuilder(self.container, all_tools)
-        return await builder.build()
-
-    async def stream_code(
+    async def stream(
         self,
         request: str,
         thread_id: Optional[str] = None,
@@ -103,7 +83,7 @@ class CoderService(Bootable, Configurable, Eventable):
         """
         # Get or create thread ID
         if thread_id is None:
-            memory_service: MemoryService = await self.container.make("memory_service")
+            memory_service: MemoryService = await make("memory_service")
             thread_id = memory_service.create_thread()
 
         # Create configuration with thread ID
@@ -122,20 +102,89 @@ class CoderService(Bootable, Configurable, Eventable):
         async for events in graph.astream_events(initial_state, config, version="v2"):
             yield events
 
-    def list_tools(self) -> List[str]:
-        """List all registered coding tools available to the coder agent.
+    async def build(self) -> "CompiledStateGraph":
+        """Build and compile the coder agent graph with memory and tools.
 
-        Usage: `tools = coder_service.list_tools()` -> available tool names
+        Creates a StateGraph optimized for coding tasks with specialized
+        prompts, file context integration, and development-focused routing.
+        Usage: `graph = await builder.build()` -> ready for coding assistance
         """
-        return [tool.name for tool in self._tools]
 
-    def get_capabilities(self) -> Dict[str, Any]:
-        """Get coder agent capabilities and configuration.
+        # Create the state graph with coder-specific state
+        graph = StateGraph(CoderState)
 
-        Usage: `caps = coder_service.get_capabilities()` -> agent info
-        """
-        return {
-            "tools": self.list_tools(),
-            "max_iterations": self.config.coder.max_iterations,
-            "temperature": self.config.coder.temperature,
-        }
+        # Create specialized nodes
+        coder_node = await self.create_coder_node()
+        tool_node = ToolNode(self._tools)
+
+        # Add nodes to graph
+        graph.add_node("coder", coder_node)
+        graph.add_node("tools", tool_node)
+
+        # Set entry point to coder
+        graph.add_edge(START, "coder")
+
+        # Add conditional routing from coder
+        graph.add_conditional_edges(
+            "coder",
+            self.should_continue,
+            {
+                "tools": "tools",  # If tool calls, execute tools
+                "end": END,  # If no tool calls, end conversation
+            },
+        )
+
+        # After tools, always return to coder for analysis
+        graph.add_edge("tools", "coder")
+
+        # Get memory service for conversation persistence
+        memory_service = await make("memory_service")
+        checkpointer = await memory_service.get_saver()
+
+        # Compile graph with memory and configuration
+        return graph.compile(checkpointer=checkpointer, debug=False)
+
+    async def create_coder_node(self) -> callable:
+        """Create the coder agent node specialized for software development tasks."""
+        # Pre-resolve services during node creation
+        llm_service = await make("llm_service")
+        file_service = await make("file_service")
+
+        async def coder_node(state: CoderState) -> dict:
+            """Coder agent node that processes coding requests and generates responses."""
+            # Get LLM with tools bound
+            llm: BaseChatModel = llm_service.get_main_model()
+            llm_with_tools = llm.bind_tools(self._tools)
+
+            # Build enhanced context for coding tasks
+            messages = list(state["messages"])
+
+            # Always add file context for coding assistance
+            file_context = file_service.generate_context_prompt()
+            if file_context.strip():
+                # Add file context as system message
+                context_message = SystemMessage(
+                    content=f"## Current File Context:\n{file_context}"
+                )
+                messages.insert(0, context_message)
+
+            # Apply coder-specific system prompt
+            prompt_messages = coder_prompt.format_messages(messages=messages)
+
+            # Invoke LLM with coding context
+            response = await llm_with_tools.ainvoke(prompt_messages)
+
+            return {"messages": [response]}
+
+        return coder_node
+
+    def should_continue(self, state: CoderState) -> str:
+        """Conditional edge function for coder agent flow control."""
+        messages = state["messages"]
+        last_message = messages[-1]
+
+        # If the last message has tool calls, route to tools
+        if hasattr(last_message, "tool_calls") and last_message.tool_calls:
+            return "tools"
+
+        return "end"

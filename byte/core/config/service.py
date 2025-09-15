@@ -7,9 +7,10 @@ import yaml
 from git.exc import InvalidGitRepositoryError
 
 from byte.core.config.schema import Config
+from byte.core.mixins.bootable import Bootable
 
 
-class ConfigService:
+class ConfigService(Bootable):
     """Configuration service with automatic workspace initialization.
 
     Manages configuration in a .byte directory within the git repository root.

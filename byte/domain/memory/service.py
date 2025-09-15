@@ -1,17 +1,14 @@
-import asyncio
 import uuid
 from typing import TYPE_CHECKING, List, Optional
 
 from byte.core.config.configurable import Configurable
-from byte.core.config.service import ConfigService
 from byte.core.events.eventable import Eventable
 from byte.core.mixins.bootable import Bootable
 from byte.domain.memory.checkpointer import ByteCheckpointer
+from byte.domain.memory.config import MemoryConfig
 
 if TYPE_CHECKING:
     from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
-
-    from byte.container import Container
 
 
 class MemoryService(Bootable, Configurable, Eventable):
@@ -23,11 +20,8 @@ class MemoryService(Bootable, Configurable, Eventable):
     Usage: `memory_service.create_thread()` -> new conversation session
     """
 
-    def __init__(self, container: Optional["Container"] = None):
-        self.container = container
-        self._checkpointer: Optional[ByteCheckpointer] = None
-        if container:
-            asyncio.create_task(self._async_init())
+    _checkpointer: Optional[ByteCheckpointer] = None
+    _config: MemoryConfig
 
     async def get_checkpointer(self) -> ByteCheckpointer:
         """Get configured checkpointer instance with lazy initialization.
@@ -35,8 +29,7 @@ class MemoryService(Bootable, Configurable, Eventable):
         Usage: `checkpointer = await memory_service.get_checkpointer()` -> for accessing checkpointer
         """
         if self._checkpointer is None:
-            config_service: ConfigService = await self.container.make("config")
-            self._checkpointer = ByteCheckpointer(config_service)
+            self._checkpointer = ByteCheckpointer(self._config)
         return self._checkpointer
 
     async def get_saver(self) -> "AsyncSqliteSaver":

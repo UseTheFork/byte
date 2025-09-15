@@ -1,11 +1,12 @@
-from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 import aiosqlite
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
+from byte.domain.memory.config import MemoryConfig
+
 if TYPE_CHECKING:
-    from byte.core.config.service import ConfigService
+    pass
 
 
 class ByteCheckpointer:
@@ -17,9 +18,9 @@ class ByteCheckpointer:
     Usage: `checkpointer = ByteCheckpointer(config_service).get_saver()`
     """
 
-    def __init__(self, config_service: "ConfigService"):
-        self.config_service = config_service
+    def __init__(self, config: MemoryConfig):
         self._saver: Optional[AsyncSqliteSaver] = None
+        self._config = config
 
     async def get_saver(self) -> AsyncSqliteSaver:
         """Get configured AsyncSqliteSaver instance with lazy initialization.
@@ -33,11 +34,7 @@ class ByteCheckpointer:
     async def _create_saver(self) -> AsyncSqliteSaver:
         """Create and configure AsyncSqliteSaver with Byte-specific settings."""
         # Get database path from config or use default
-        memory_config = self.config_service.config.memory
-        if memory_config.database_path:
-            db_path = Path(memory_config.database_path)
-        else:
-            db_path = self.config_service.byte_dir / "memory.db"
+        db_path = self._config.database_path
 
         # Ensure parent directory exists
         db_path.parent.mkdir(parents=True, exist_ok=True)

@@ -1,12 +1,14 @@
-from dataclasses import dataclass
-from typing import Optional
+from pathlib import Path
+
+from pydantic import Field
+
+from byte.core.config.schema import BaseConfig
 
 
-@dataclass(frozen=True)
-class MemoryConfig:
+class MemoryConfig(BaseConfig):
     """Memory domain configuration for conversation persistence."""
 
-    database_path: Optional[str] = None  # Defaults to .byte/memory.db
+    database_path: Path = Field(default_factory=lambda: Path(".byte/memory.db"))
     thread_retention_days: int = 30  # How long to keep conversation threads
     max_threads_per_user: int = 100  # Maximum threads before cleanup
     enable_compression: bool = True  # Compress old conversation data

@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from byte.context import make
 from byte.core.config.configurable import Configurable
 from byte.core.events.eventable import Eventable
 from byte.core.mixins.bootable import Bootable
@@ -14,20 +15,21 @@ class AgentService(Bootable, Configurable, Eventable):
     _current_agent: str = "coder"
 
     async def boot(self):
-        self._current_agent = "coder"  # Default
+        """Boot method to initialize the agent service."""
+        self._current_agent = "coder"  # Set default agent
         self._agents = {}
 
     async def route_to_agent(self, agent_name: str, request: str):
         """Route request to the specified agent."""
         if agent_name not in self._agents:
             # Lazy load agent
-            agent_service = await self.container.make(f"{agent_name}_service")
+            agent_service = await make(f"{agent_name}_service")
             self._agents[agent_name] = agent_service
 
         agent = self._agents[agent_name]
 
         # Return the async generator directly, don't await it
-        async for event in agent.stream_code(request):
+        async for event in agent.stream(request):
             yield event
 
     def set_active_agent(self, agent_name: str) -> bool:
@@ -44,4 +46,5 @@ class AgentService(Bootable, Configurable, Eventable):
         return agent_name in valid_agents
 
     def get_active_agent(self) -> str:
+        """Get the currently active agent, ensuring service is booted."""
         return self._current_agent

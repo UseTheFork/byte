@@ -1,6 +1,7 @@
 # byte/domain/agent/commands.py
 from typing import List
 
+from byte.context import make
 from byte.core.command.registry import Command
 
 
@@ -33,9 +34,9 @@ class SwitchAgentCommand(Command):
             await self._show_agent_status()
             return
 
-        agent_service = await self.container.make("agent_service")
-        command_processor = await self.container.make("command_processor")
-        console = await self.container.make("console")
+        agent_service = await make("agent_service")
+        command_processor = await make("command_processor")
+        console = await make("console")
 
         if agent_service.set_active_agent(args):
             # Update command processor's active agent

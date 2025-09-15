@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Any, Dict
 
 from langchain_anthropic import ChatAnthropic
+from langchain_core.language_models import BaseChatModel
 
 from byte.core.config.configurable import Configurable
 from byte.core.mixins.bootable import Bootable
@@ -36,14 +37,14 @@ class LLMService(Bootable, Configurable):
         elif self._config.base == "sonnet" and model_type == "weak":
             return ChatAnthropic(**self._config.weak.__dict__, **kwargs)
 
-    def get_main_model(self) -> Any:
+    def get_main_model(self) -> BaseChatModel:
         """Convenience method for accessing the primary model.
 
         Usage: `main_model = service.get_main_model()` -> high-capability model
         """
         return self.get_model("main")
 
-    def get_weak_model(self) -> Any:
+    def get_weak_model(self) -> BaseChatModel:
         """Convenience method for accessing the secondary model.
 
         Usage: `weak_model = service.get_weak_model()` -> faster/cheaper model

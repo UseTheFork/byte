@@ -1,6 +1,8 @@
 from typing import TYPE_CHECKING
 
+from byte.core.config.service import ConfigService
 from byte.core.service_provider import ServiceProvider
+from byte.domain.memory.config import MemoryConfig
 from byte.domain.memory.service import MemoryService
 
 if TYPE_CHECKING:
@@ -23,6 +25,23 @@ class MemoryServiceProvider(ServiceProvider):
         """
         # Register memory service
         container.singleton("memory_service", lambda: MemoryService(container))
+
+    async def configure(self, container: "Container") -> None:
+        """Configure lint domain settings after registration but before boot.
+
+        Handles lint-specific configuration parsing, validation, and storage.
+        Usage: Called automatically during container configure phase
+        """
+        # Get the config service to access raw configuration data
+        config_service: ConfigService = await container.make("config")
+
+        # Get raw config data from all sources
+        yaml_config, env_config, cli_config = config_service.get_raw_config()
+
+        config = MemoryConfig(database_path=config_service.byte_dir / "memory.db")
+
+        memory_service: MemoryService = await container.make("memory_service")
+        memory_service.set_config(config)
 
     async def boot(self, container: "Container") -> None:
         """Boot memory services after all providers are registered.

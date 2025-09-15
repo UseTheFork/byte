@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from byte.domain.agent.coder.config import CoderConfig
@@ -10,8 +10,7 @@ if TYPE_CHECKING:
     from byte.domain.memory.config import MemoryConfig
 
 
-@dataclass(frozen=True)
-class BaseConfig:
+class BaseConfig(BaseModel):
     """Base configuration class that all domain configs should extend.
 
     Provides pydantic-based validation and serialization for all configuration
@@ -22,7 +21,6 @@ class BaseConfig:
     pass
 
 
-@dataclass(frozen=True)
 class AppConfig(BaseConfig):
     """Application-level configuration."""
 
@@ -32,7 +30,6 @@ class AppConfig(BaseConfig):
     project_root: Optional[Path] = None
 
 
-@dataclass(frozen=True)
 class Config:
     """Root configuration object containing all config sections."""
 

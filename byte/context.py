@@ -1,6 +1,6 @@
 # In container.py or a new context.py file
 from contextvars import ContextVar
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
     from byte.container import Container
@@ -16,3 +16,9 @@ def get_container() -> "Container":
     if container is None:
         raise RuntimeError("No container available in current context")
     return container
+
+
+async def make(service_name: str) -> Any:
+    """Convenience method to get a service from the current container context."""
+    container = get_container()
+    return await container.make(service_name)
