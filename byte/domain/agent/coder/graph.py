@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING, List
 from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode
 
-from byte.domain.coder.nodes import create_coder_node, should_continue
-from byte.domain.coder.state import CoderState
+from byte.domain.agent.coder.nodes import create_coder_node, should_continue
+from byte.domain.agent.coder.state import CoderState
 
 if TYPE_CHECKING:
     from langchain_core.tools import BaseTool

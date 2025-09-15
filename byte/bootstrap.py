@@ -3,7 +3,7 @@ from byte.core.command.registry import command_registry
 from byte.core.config.service_provider import ConfigServiceProvider
 from byte.core.events.service_provider import EventServiceProvider
 from byte.core.response.service_provider import ResponseServiceProvider
-from byte.domain.coder.service_provider import CoderServiceProvider
+from byte.domain.agent.service_provider import AgentServiceProvider
 from byte.domain.commit.service_provider import CommitServiceProvider
 from byte.domain.files.file_service_provider import FileServiceProvider
 from byte.domain.knowledge.service_provider import KnowledgeServiceProvider
@@ -36,8 +36,8 @@ async def bootstrap():
         KnowledgeServiceProvider(),  # Long-term knowledge storage
         FileServiceProvider(),  # File context management
         LLMServiceProvider(),  # Language model integration
-        CoderServiceProvider(),  # Specialized coder agent
         CommitServiceProvider(),  # Git commit functionality
+        AgentServiceProvider(),  # AI agent routing and management
         SystemServiceProvider(),  # Core system commands
     ]
 

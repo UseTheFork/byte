@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from byte.core.command.registry import Command
 from byte.core.response.handler import ResponseHandler
-from byte.domain.coder.service import CoderService
+from byte.domain.agent.coder.service import CoderService
 
 if TYPE_CHECKING:
     from rich.console import Console

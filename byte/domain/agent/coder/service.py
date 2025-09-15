@@ -7,8 +7,8 @@ from byte.core.config.configurable import Configurable
 from byte.core.config.service import ConfigService
 from byte.core.events.eventable import Eventable
 from byte.core.mixins.bootable import Bootable
-from byte.domain.coder.graph import CoderGraphBuilder
-from byte.domain.coder.state import CoderState
+from byte.domain.agent.coder.graph import CoderGraphBuilder
+from byte.domain.agent.coder.state import CoderState
 from byte.domain.llm.service import LLMService
 from byte.domain.memory.service import MemoryService
 from byte.domain.ui.tools import user_confirm, user_input, user_select

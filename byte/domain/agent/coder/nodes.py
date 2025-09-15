@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING, List
 from langchain_core.messages import SystemMessage
 from langgraph.prebuilt import ToolNode
 
-from byte.domain.coder.prompts import coder_prompt
-from byte.domain.coder.state import CoderState
+from byte.domain.agent.coder.prompts import coder_prompt
+from byte.domain.agent.coder.state import CoderState
 
 if TYPE_CHECKING:
     from langchain_core.language_models.chat_models import BaseChatModel

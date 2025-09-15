@@ -1,6 +1,8 @@
 from rich.console import Console
 
 from byte.core.command.registry import command_registry
+from byte.core.response.handler import ResponseHandler
+from byte.domain.agent.service import AgentService
 
 
 class CommandProcessor:
@@ -14,6 +16,13 @@ class CommandProcessor:
     def __init__(self, container):
         # Container provides access to file service and other dependencies
         self.container = container
+
+        # TODO: This should be set from a config option.
+        self._current_agent = "coder"
+
+    def set_active_agent(self, agent_name: str) -> None:
+        """Update the active agent for regular input processing."""
+        self._current_agent = agent_name
 
     async def process_input(self, user_input: str) -> None:
         """Process user input and execute commands if applicable.
@@ -49,13 +58,14 @@ class CommandProcessor:
             console.print(f"[error]Unknown slash command: /{cmd_name}[/error]")
 
     async def _process_regular_input(self, user_input: str) -> None:
-        """Process regular chat input with file context enhancement."""
-        file_service = await self.container.make("file_service")
-        console = await self.container.make("console")
+        """Route regular input to the currently active agent."""
+        console: Console = await self.container.make("console")
+        agent_service: AgentService = await self.container.make("agent_service")
 
-        context = await file_service.generate_context_prompt()
-        if context:
-            full_input = f"{context}\n\nUser input: {user_input}"
-            console.print(f"Processing with context:\n{full_input}")
-        else:
-            console.print(f"Regular input: {user_input}")
+        response_handler: ResponseHandler = await self.container.make(
+            "response_handler"
+        )
+
+        await response_handler.handle_stream(
+            agent_service.route_to_agent(self._current_agent, user_input), console
+        )

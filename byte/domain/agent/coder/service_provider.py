@@ -1,9 +1,9 @@
 from typing import TYPE_CHECKING
 
 from byte.core.service_provider import ServiceProvider
-from byte.domain.coder.commands import CoderCommand
-from byte.domain.coder.config import CoderConfig
-from byte.domain.coder.service import CoderService
+from byte.domain.agent.coder.commands import CoderCommand
+from byte.domain.agent.coder.config import CoderConfig
+from byte.domain.agent.coder.service import CoderService
 
 if TYPE_CHECKING:
     from byte.container import Container

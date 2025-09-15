@@ -6,6 +6,7 @@ from byte.context import container_context
 from byte.core.command.processor import CommandProcessor
 from byte.core.command.registry import command_registry
 from byte.core.ui.prompt import PromptHandler
+from byte.domain.agent.service import AgentService
 from byte.domain.system.events import ExitRequested
 
 if TYPE_CHECKING:
@@ -59,7 +60,13 @@ class Byte:
                     # Allow commands to display contextual information before each prompt
                     await command_registry.pre_prompt()
 
-                    user_input = await self.prompt_handler.get_input_async("> ")
+                    agent_service: AgentService = await self.container.make(
+                        "agent_service"
+                    )
+                    current_agent = agent_service.get_active_agent()
+                    user_input = await self.prompt_handler.get_input_async(
+                        f"[{current_agent}]> "
+                    )
 
                     if not user_input.strip():
                         continue
