@@ -1,6 +1,8 @@
 from typing import TYPE_CHECKING
 
+from byte.context import make
 from byte.core.command.registry import Command
+from byte.domain.lint.service import LintService
 
 if TYPE_CHECKING:
     from rich.console import Console
@@ -31,7 +33,9 @@ class LintCommand(Command):
 
         Usage: Called by command processor when user types `/lint [args]`
         """
-        console: Console = await self.container.make("console")
+        console: Console = await make("console")
+        lint_service: LintService = await make("lint_service")
+        await lint_service.lint_changed_files()
 
         # TODO: Implement lint command execution
         console.print("[info]Lint command not yet implemented[/info]")

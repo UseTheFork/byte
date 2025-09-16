@@ -42,7 +42,7 @@ async def bootstrap():
         GitServiceProvider(),  # Git repository operations
         LintServiceProvider(),  # Code linting functionality
         CommitServiceProvider(),  # Git commit functionality
-        AgentServiceProvider(),  # AI agent routing and management
+        AgentServiceProvider(),  # Agent routing and management
         SystemServiceProvider(),  # Core system commands
     ]
 

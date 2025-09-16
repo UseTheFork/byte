@@ -1,10 +1,14 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List
 
+import git
+from git.exc import InvalidGitRepositoryError
+
+from byte.context import make
 from byte.core.config.configurable import Configurable
+from byte.core.config.service import ConfigService
 from byte.core.events.eventable import Eventable
 from byte.core.mixins.bootable import Bootable
-from byte.domain.git.config import GitConfig
 
 if TYPE_CHECKING:
     pass
@@ -19,27 +23,52 @@ class GitService(Bootable, Configurable, Eventable):
     Usage: `changed_files = await git_service.get_changed_files()` -> list of modified files
     """
 
-    async def boot(self) -> None:
-        """Initialize git service with configuration.
+    async def boot(self):
+        config: ConfigService = await make("config")
 
-        Usage: Called automatically during container boot phase
+        # Initialize git repository using the project root from config
+        try:
+            self._repo = git.Repo(config.project_root)
+        except InvalidGitRepositoryError:
+            raise InvalidGitRepositoryError(
+                f"Not a git repository: {config.project_root}. Please run 'git init' or navigate to a git repository."
+            )
+
+    async def get_repo(self):
+        """Get the git repository instance, ensuring service is booted.
+
+        Usage: `repo = await git_service.get_repo()` -> git.Repo instance
         """
-        self._config: Optional[GitConfig] = None
-        config_service = await self.container.make("config")
-        self._config = config_service.get("git", GitConfig)
+        await self.ensure_booted()
+        return self._repo
 
-    def get_changed_files(
-        self, file_extensions: Optional[List[str]] = None
-    ) -> List[Path]:
+    async def get_changed_files(self, include_untracked: bool = True) -> List[Path]:
         """Get list of changed files in the repository.
 
         Args:
-            file_extensions: Filter by file extensions (e.g., ['.py', '.js'])
+            include_untracked: Include untracked files in the results
 
         Returns:
             List of Path objects for changed files
 
-        Usage: `files = git_service.get_changed_files(['.py'])` -> only Python files
+        Usage: `files = git_service.get_changed_files()` -> all changed files including untracked
         """
-        # TODO: Implement git changed files detection
-        return []
+        if not self._repo:
+            return []
+
+        changed_files = []
+
+        # Get modified and staged files
+        for item in self._repo.index.diff(None):  # Working tree vs index
+            changed_files.append(Path(item.a_path))
+
+        for item in self._repo.index.diff("HEAD"):  # Index vs HEAD
+            changed_files.append(Path(item.a_path))
+
+        # Get untracked files if requested
+        if include_untracked:
+            for untracked_file in self._repo.untracked_files:
+                changed_files.append(Path(untracked_file))
+
+        # Remove duplicates and return
+        return list(set(changed_files))
