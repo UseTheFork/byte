@@ -53,11 +53,32 @@ class UIServiceProvider(ServiceProvider):
         )
 
         console = Console(theme=catppuccin_mocha_theme)
-        console.print("░       ░░░  ░░░░  ░░        ░░        ░", style="primary")
-        console.print("▒  ▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒▒▒", style="primary")
-        console.print("▓       ▓▓▓▓▓    ▓▓▓▓▓▓▓  ▓▓▓▓▓      ▓▓▓", style="primary")
-        console.print("█  ████  █████  ████████  █████  ███████", style="primary")
-        console.print("█       ██████  ████████  █████        █", style="primary")
+
+        # Create diagonal gradient from primary to secondary color
+        logo_lines = [
+            "░       ░░░  ░░░░  ░░        ░░        ░",
+            "▒  ▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒▒▒",
+            "▓       ▓▓▓▓▓    ▓▓▓▓▓▓▓  ▓▓▓▓▓      ▓▓▓",
+            "█  ████  █████  ████████  █████  ███████",
+            "█       ██████  ████████  █████        █",
+        ]
+
+        for row_idx, line in enumerate(logo_lines):
+            styled_line = ""
+            for col_idx, char in enumerate(line):
+                # Calculate diagonal position (0.0 = top-left, 1.0 = bottom-right)
+                diagonal_progress = (row_idx + col_idx) / (
+                    len(logo_lines) + len(line) - 2
+                )
+
+                # Use primary for first half, secondary for second half of diagonal
+                if diagonal_progress < 0.5:
+                    styled_line += f"[primary]{char}[/primary]"
+                else:
+                    styled_line += f"[secondary]{char}[/secondary]"
+
+            console.print(styled_line)
+
         console.print("┌── The No Vibe CLI Agent", style="text")
 
         container.singleton("console", lambda: console)
