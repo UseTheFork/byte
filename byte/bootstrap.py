@@ -1,10 +1,10 @@
 from byte.container import app
 from byte.core.command.registry import command_registry
 from byte.core.config.config import ByteConfg
-from byte.core.events.service_provider import EventServiceProvider
 from byte.core.response.service_provider import ResponseServiceProvider
 from byte.domain.agent.service_provider import AgentServiceProvider
 from byte.domain.commit.service_provider import CommitServiceProvider
+from byte.domain.events.service_provider import EventServiceProvider
 from byte.domain.files.file_service_provider import FileServiceProvider
 from byte.domain.git.service_provider import GitServiceProvider
 from byte.domain.knowledge.service_provider import KnowledgeServiceProvider
@@ -27,7 +27,6 @@ async def bootstrap(config: ByteConfg):
     # Make the global command registry available through dependency injection
     app.singleton("command_registry", lambda: command_registry)
 
-    # AI: Add a doc comment here.
     app.singleton("config", lambda: config)
 
     # Order matters: ConfigServiceProvider must be early since other services

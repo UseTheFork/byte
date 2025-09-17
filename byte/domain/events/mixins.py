@@ -1,7 +1,7 @@
 from typing import Any, Optional
 
-from byte.core.events.dispatcher import EventDispatcher
-from byte.core.events.event import Event
+from byte.domain.events.dispatcher import EventDispatcher
+from byte.domain.events.event import Event
 
 
 class Eventable:

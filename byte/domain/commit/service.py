@@ -5,10 +5,11 @@ from git.exc import GitCommandError, InvalidGitRepositoryError
 
 from byte.context import make
 from byte.core.config.mixins import Configurable
-from byte.core.events.mixins import Eventable
+from byte.core.response.handler import ResponseHandler
 from byte.core.service.mixins import Bootable
 from byte.domain.commit.events import CommitCreated, PreCommitStarted
 from byte.domain.commit.prompt import commit_prompt
+from byte.domain.events.mixins import Eventable
 
 if TYPE_CHECKING:
     from langchain_core.language_models.chat_models import BaseChatModel
@@ -56,8 +57,13 @@ class CommitService(Bootable, Configurable, Eventable):
             llm_service: LLMService = await make("llm_service")
             llm: BaseChatModel = llm_service.get_weak_model()
 
-            result_message = await llm.ainvoke(
-                await commit_prompt.ainvoke({"changes": staged_diff})
+            response_handler: ResponseHandler = await make("response_handler")
+
+            # AI: How do we have our `handle_stream` return the final result of `astream_events` ai?
+            result_message = await response_handler.handle_stream(
+                llm.astream_events(
+                    await commit_prompt.ainvoke({"changes": staged_diff})
+                )
             )
 
             # Create commit with AI-generated message

@@ -1,8 +1,8 @@
 from typing import Any, Dict, List, Optional
 
 from byte.context import make
-from byte.core.events.mixins import Eventable
 from byte.core.service.mixins import Bootable
+from byte.domain.events.mixins import Eventable
 from byte.domain.knowledge.models import KnowledgeItem, ProjectPattern, UserPreference
 from byte.domain.knowledge.store import ByteKnowledgeStore
 

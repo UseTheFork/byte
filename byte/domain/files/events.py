@@ -1,4 +1,4 @@
-from byte.core.events.event import Event
+from byte.domain.events.event import Event
 from byte.domain.files.context_manager import FileMode
 
 

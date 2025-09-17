@@ -4,6 +4,8 @@ from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
 
+from byte.context import make
+from byte.core.logging import log
 from byte.core.response.formatters import MarkdownStream
 
 
@@ -13,22 +15,27 @@ class ResponseHandler:
     def __init__(self):
         self._accumulated_content = ""
 
-    async def handle_stream(
-        self,
-        event_stream: AsyncGenerator[Any, None],
-        console: Console,
-    ) -> None:
+    async def handle_stream(self, event_stream: AsyncGenerator[Any, None]) -> Any:
         """Handle agent response stream with simple Live display."""
 
         self._accumulated_content = ""
+        console = await make("console")
+        final_message = None
 
         async for event in event_stream:
-            self._process_event(event, console)
+            result = self._process_event(event, console)
+            if result:  # If _process_event returns a final message
+                final_message = result
 
-    def _process_event(self, event: dict, console: Console):
+        return final_message
+
+    def _process_event(self, event: dict, console: Console) -> Any:
         """Process a single event and update content."""
         event_type = event.get("event", "")
         # event_name = event.get("name", "")
+
+        log.debug(event_type)
+        log.debug(event)
 
         if event_type == "on_chat_model_stream":
             if "chunk" in event["data"]:

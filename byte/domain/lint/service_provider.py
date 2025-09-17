@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
-from byte.core.events.dispatcher import EventDispatcher
 from byte.core.service_provider import ServiceProvider
+from byte.domain.events.dispatcher import EventDispatcher
 from byte.domain.lint.commands import LintCommand
 from byte.domain.lint.service import LintService
 

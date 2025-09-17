@@ -5,8 +5,8 @@ import git
 from git.exc import InvalidGitRepositoryError
 
 from byte.core.config.mixins import Configurable
-from byte.core.events.mixins import Eventable
 from byte.core.service.mixins import Bootable
+from byte.domain.events.mixins import Eventable
 
 if TYPE_CHECKING:
     pass

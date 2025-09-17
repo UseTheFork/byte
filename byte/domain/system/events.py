@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from byte.core.events.event import Event
+from byte.domain.events.event import Event
 
 
 @dataclass
