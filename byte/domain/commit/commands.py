@@ -1,17 +1,11 @@
 from typing import TYPE_CHECKING
 
-import git
-from git.exc import GitCommandError, InvalidGitRepositoryError
-
 from byte.context import make
 from byte.core.command.registry import Command
-from byte.domain.commit.prompt import commit_prompt
+from byte.domain.commit.service import CommitService
 
 if TYPE_CHECKING:
-    from langchain_core.language_models.chat_models import BaseChatModel
-    from rich.console import Console
-
-    from byte.domain.llm.service import LLMService
+    pass
 
 
 class CommitCommand(Command):
@@ -39,42 +33,5 @@ class CommitCommand(Command):
         creating the actual commit.
         Usage: Called by command processor when user types `/commit`
         """
-        console: Console = await make("console")
-
-        try:
-            # Initialize git repository with parent directory search
-            repo = git.Repo(search_parent_directories=True)
-
-            # Validate staged changes exist to prevent empty commits
-            if not repo.index.diff("HEAD"):
-                console.print("[warning]No staged changes to commit.[/warning]")
-                return
-
-            # Extract staged changes for AI analysis
-            staged_diff = repo.git.diff("--cached")
-
-            console.print("[info]Generating commit message...[/info]")
-
-            # Use main model for high-quality commit message generation
-            llm_service: LLMService = await self.container.make("llm_service")
-            llm: BaseChatModel = llm_service.get_main_model()
-            result_message = await llm.ainvoke(
-                await commit_prompt.ainvoke({"changes": staged_diff})
-            )
-
-            # Create commit with AI-generated message
-            commit = repo.index.commit(result_message.content)
-            console.print(
-                f"[success]Commit:[/success] [info]{commit.hexsha[:7]}[/info] {commit.message.strip()}"
-            )
-            return
-
-        except InvalidGitRepositoryError:
-            console.print("[error]Error: Not in a git repository[/error]")
-            return
-        except GitCommandError as e:
-            console.print(f"[error]Git commit failed:[/error] {e}")
-            return
-        except Exception as e:
-            console.print(f"[error]Unexpected error:[/error] {e}")
-            return
+        commit_service: CommitService = await make("commit_service")
+        await commit_service.execute()
