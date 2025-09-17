@@ -15,10 +15,6 @@ class Eventable:
     container: Any
     _event_dispatcher: Optional[EventDispatcher]
 
-    def __init__(self, event_dispatcher: Optional[EventDispatcher] = None):
-        # Optional dispatcher allows services to work without events if needed
-        self._event_dispatcher = event_dispatcher
-
     async def boot_eventable(self) -> None:
         """Boot method for Eventable mixin - automatically called by Command.__init__."""
         if hasattr(self, "container") and self.container:

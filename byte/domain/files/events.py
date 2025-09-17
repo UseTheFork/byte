@@ -1,10 +1,7 @@
-from dataclasses import dataclass
-
 from byte.core.events.event import Event
 from byte.domain.files.context_manager import FileMode
 
 
-@dataclass
 class FileAdded(Event):
     """Event fired when a file is added to the AI context.
 
@@ -17,7 +14,6 @@ class FileAdded(Event):
     mode: FileMode = FileMode.READ_ONLY
 
 
-@dataclass
 class FileRemoved(Event):
     """Event fired when a file is removed from the AI context.
 
@@ -29,7 +25,6 @@ class FileRemoved(Event):
     file_path: str = ""
 
 
-@dataclass
 class FileModeChanged(Event):
     """Event fired when a file's access mode changes.
 
@@ -43,7 +38,6 @@ class FileModeChanged(Event):
     new_mode: FileMode = FileMode.READ_ONLY
 
 
-@dataclass
 class ContextCleared(Event):
     """Event fired when the entire file context is cleared.
 

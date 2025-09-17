@@ -9,7 +9,7 @@ from typing_extensions import TypedDict
 
 from byte.context import make
 from byte.core.config.mixins import Configurable
-from byte.core.events.eventable import Eventable
+from byte.core.events.mixins import Eventable
 from byte.core.service.mixins import Bootable
 from byte.domain.agent.coder.prompts import coder_prompt
 from byte.domain.files.service import FileService

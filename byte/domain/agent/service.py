@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from byte.context import make
 from byte.core.config.mixins import Configurable
-from byte.core.events.eventable import Eventable
+from byte.core.events.mixins import Eventable
 from byte.core.service.mixins import Bootable
 
 if TYPE_CHECKING:

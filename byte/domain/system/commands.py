@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
 from byte.core.command.registry import Command
-from byte.core.events.eventable import Eventable
+from byte.core.events.mixins import Eventable
 from byte.domain.system.events import ExitRequested
 
 if TYPE_CHECKING:
