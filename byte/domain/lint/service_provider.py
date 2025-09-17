@@ -42,7 +42,7 @@ class LintServiceProvider(ServiceProvider):
         )
 
         # Register event listener for pre-commit linting
-        event_dispatcher.listen("PreCommitStarted", lint_service.lint_changed_files)
+        event_dispatcher.listen("PreCommitStarted", lint_service._handle_pre_commit)
 
     def provides(self) -> list:
         """Return list of services provided by this provider."""
