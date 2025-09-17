@@ -3,7 +3,9 @@ from typing import TYPE_CHECKING, List
 
 from rich.columns import Columns
 from rich.console import Console
+from rich.panel import Panel
 
+from byte.context import make
 from byte.core.command.registry import Command
 from byte.domain.files.context_manager import FileMode
 from byte.domain.files.service import FileService
@@ -30,13 +32,13 @@ class AddFileCommand(Command):
 
     async def execute(self, args: str) -> None:
         """Add specified file to context with editable permissions."""
-        console: Console = self.container.make("console")
+        console: Console = await make("console")
 
         if not args:
             console.print("Usage: /add <file_path>")
             return
 
-        file_service = self.container.make("file_service")
+        file_service = await make("file_service")
         if await file_service.add_file(args, FileMode.EDITABLE):
             console.print(f"[success]Added {args} to context as editable[/success]")
             return
@@ -85,17 +87,21 @@ class AddFileCommand(Command):
         """
         if not self.container:
             return
-        file_service: FileService = await self.container.make("file_service")
+        file_service: FileService = await make("file_service")
         editable_files = file_service.list_files(FileMode.EDITABLE)
         if not editable_files:
             return
 
-        console: Console = self.container.make("console")
+        console: Console = await make("console")
 
         file_names = [f"[info]{f.relative_path}[/info]" for f in editable_files]
-        console.print("[bold success]Editable Files:[/bold success]")
-        console.print(Columns(file_names, equal=True, expand=True))
-        console.print()
+        console.print(
+            Panel(
+                Columns(file_names, equal=True, expand=True),
+                title="[bold success]Editable Files[/bold success]",
+                border_style="success",
+            )
+        )
 
 
 class ReadOnlyCommand(Command):
@@ -116,12 +122,12 @@ class ReadOnlyCommand(Command):
 
     async def execute(self, args: str) -> None:
         """Add specified file to context with read-only permissions."""
-        console: Console = self.container.make("console")
+        console: Console = await make("console")
         if not args:
             console.print("Usage: /read-only <file_path>")
             return
 
-        file_service = self.container.make("file_service")
+        file_service = await make("file_service")
         if await file_service.add_file(args, FileMode.READ_ONLY):
             console.print(f"[success]Added {args} to context as read-only[/success]")
             return
@@ -167,17 +173,21 @@ class ReadOnlyCommand(Command):
         """
         if not self.container:
             return
-        file_service: FileService = await self.container.make("file_service")
+        file_service: FileService = await make("file_service")
         readonly_files = file_service.list_files(FileMode.READ_ONLY)
         if not readonly_files:
             return
 
-        console: Console = await self.container.make("console")
+        console: Console = await make("console")
 
         file_names = [f"[warning]{f.relative_path}[/warning]" for f in readonly_files]
-        console.print("[bold info]Read-only Files:[/bold info]")
-        console.print(Columns(file_names, equal=True, expand=True))
-        console.print()
+        console.print(
+            Panel(
+                Columns(file_names, equal=True, expand=True),
+                title="[bold info]Read-only Files[/bold info]",
+                border_style="info",
+            )
+        )
 
 
 class DropFileCommand(Command):
@@ -201,12 +211,12 @@ class DropFileCommand(Command):
 
     async def execute(self, args: str) -> None:
         """Remove specified file from active context."""
-        console: Console = self.container.make("console")
+        console: Console = await make("console")
         if not args:
             console.print("Usage: /drop <file_path>")
             return
 
-        file_service: FileService = await self.container.make("file_service")
+        file_service: FileService = await make("file_service")
         if await file_service.remove_file(args):
             console.print(f"[success]Removed {args} from context[/success]")
             return
@@ -214,7 +224,7 @@ class DropFileCommand(Command):
             console.print(f"[error]File {args} not found in context[/error]")
             return
 
-    def get_completions(self, text: str) -> List[str]:
+    async def get_completions(self, text: str) -> List[str]:
         """Complete with files currently in context for accurate removal.
 
         Only suggests files that are actually in context, preventing
@@ -222,6 +232,6 @@ class DropFileCommand(Command):
         """
         if not self.container:
             return []
-        file_service = self.container.make("file_service")
+        file_service = await make("file_service")
         files = file_service.list_files()
         return [f.relative_path for f in files if f.relative_path.startswith(text)]

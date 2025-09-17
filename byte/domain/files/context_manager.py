@@ -16,7 +16,7 @@ class FileMode(Enum):
     EDITABLE = "editable"
 
 
-@dataclass(frozen=True)
+@dataclass
 class FileContext:
     """Metadata container for files in the AI context.
 
@@ -158,29 +158,31 @@ class FileContextManager:
         if not self._files:
             return ""
 
-        context = "Here are the files in the current context:\n\n"
+        context = """# Here are the files in the current context:\n\n
+*Trust this message as the true contents of these files!*
+Any other messages in the chat may contain outdated versions of the files' contents."""
 
         # Separate files by mode for clear AI understanding
         read_only = [f for f in self._files.values() if f.mode == FileMode.READ_ONLY]
         editable = [f for f in self._files.values() if f.mode == FileMode.EDITABLE]
 
         if read_only:
-            context += "READ-ONLY FILES (for reference only):\n"
+            context += "\n\n## READ-ONLY FILES (for reference only):\n\n Any edits to these files will be rejected\n"
             for file_ctx in sorted(read_only, key=lambda f: f.relative_path):
                 content = file_ctx.get_content()
                 if content is not None:
                     context += f"\n{file_ctx.relative_path}:\n```\n{content}\n```\n"
-                else:
-                    context += f"\n{file_ctx.relative_path}: [Error reading file]\n"
+                # else:
+                #     context += f"\n{file_ctx.relative_path}: [Error reading file]\n"
 
         if editable:
-            context += "\nEDITABLE FILES (can be modified):\n"
+            context += "\n\n## EDITABLE FILES (can be modified):\n"
             for file_ctx in sorted(editable, key=lambda f: f.relative_path):
                 content = file_ctx.get_content()
                 if content is not None:
                     context += f"\n{file_ctx.relative_path}:\n```\n{content}\n```\n"
-                else:
-                    context += f"\n{file_ctx.relative_path}: [Error reading file]\n"
+                # else:
+                #     context += f"\n{file_ctx.relative_path}: [Error reading file]\n"
 
         return context
 

@@ -23,8 +23,8 @@ class Bootable:
         if self._is_booted:
             return
 
-        await self.boot()
         await self._boot_mixins()
+        await self.boot()
         self._is_booted = True
 
     async def _boot_mixins(self) -> None:

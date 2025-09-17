@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 import git
 from git.exc import GitCommandError, InvalidGitRepositoryError
 
+from byte.context import make
 from byte.core.command.registry import Command
 from byte.domain.commit.prompt import commit_prompt
 
@@ -38,7 +39,7 @@ class CommitCommand(Command):
         creating the actual commit.
         Usage: Called by command processor when user types `/commit`
         """
-        console: Console = await self.container.make("console")
+        console: Console = await make("console")
 
         try:
             # Initialize git repository with parent directory search

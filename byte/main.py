@@ -3,8 +3,10 @@ from typing import TYPE_CHECKING
 
 from byte.bootstrap import bootstrap, shutdown
 from byte.context import container_context
+from byte.core.cli import cli
 from byte.core.command.processor import CommandProcessor
 from byte.core.command.registry import command_registry
+from byte.core.config.config import ByteConfg
 from byte.core.ui.prompt import PromptHandler
 from byte.domain.agent.service import AgentService
 from byte.domain.system.events import ExitRequested
@@ -88,19 +90,19 @@ class Byte:
         console.print("[warning]Goodbye![/warning]")
 
 
-async def main():
+async def main(config: ByteConfg):
     """Application entry point that bootstraps dependencies and starts the CLI.
 
     Follows dependency injection pattern by bootstrapping the container first,
     then injecting it into the main application class.
     """
-    container = await bootstrap()
+    container = await bootstrap(config)
     app = Byte(container)
     await app.run()
 
 
-def cli():
-    asyncio.run(main())
+def run(config: ByteConfg):
+    asyncio.run(main(config))
 
 
 if __name__ == "__main__":

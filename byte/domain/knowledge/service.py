@@ -1,15 +1,13 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
-from byte.core.config.configurable import Configurable
+from byte.context import make
 from byte.core.events.eventable import Eventable
+from byte.core.service.mixins import Bootable
 from byte.domain.knowledge.models import KnowledgeItem, ProjectPattern, UserPreference
 from byte.domain.knowledge.store import ByteKnowledgeStore
 
-if TYPE_CHECKING:
-    from byte.container import Container
 
-
-class KnowledgeService(Configurable, Eventable):
+class KnowledgeService(Eventable, Bootable):
     """Domain service for long-term knowledge and preference management.
 
     Orchestrates persistent storage of user preferences, project patterns,
@@ -18,26 +16,17 @@ class KnowledgeService(Configurable, Eventable):
     Usage: `knowledge_service.set_user_preference("theme", "dark")` -> persists preference
     """
 
-    def __init__(self, container: Optional["Container"] = None):
-        self.container = container
+    async def boot(self) -> None:
         self._store: Optional[ByteKnowledgeStore] = None
-        self._boot_mixins()
-
-    def _boot_mixins(self) -> None:
-        """Boot method for auto-initializing mixins."""
-        if hasattr(self, "boot_configurable"):
-            self.boot_configurable()
-        if hasattr(self, "boot_eventable"):
-            self.boot_eventable()
 
     @property
-    def store(self) -> ByteKnowledgeStore:
+    async def store(self) -> ByteKnowledgeStore:
         """Get knowledge store with lazy initialization.
 
         Usage: `store = knowledge_service.store` -> direct store access
         """
         if self._store is None:
-            config_service = self.container.make("config")
+            config_service = await make("config")
             self._store = ByteKnowledgeStore(config_service)
         return self._store
 
@@ -55,7 +44,9 @@ class KnowledgeService(Configurable, Eventable):
             value=preference.settings,
             metadata={"type": "user_preference", "category": category},
         )
-        return await self.store.put(item)
+
+        store = await self.store
+        return await store.put(item)
 
     async def get_user_preference(
         self, category: str, subcategory: str

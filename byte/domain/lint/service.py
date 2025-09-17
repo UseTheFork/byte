@@ -9,10 +9,9 @@ from rich.spinner import Spinner
 from rich.text import Text
 
 from byte.context import make
-from byte.core.config.configurable import Configurable
-from byte.core.mixins.bootable import Bootable
+from byte.core.config.mixins import Configurable
+from byte.core.service.mixins import Bootable
 from byte.domain.git.service import GitService
-from byte.domain.lint.config import LintConfig
 
 
 class LintService(Bootable, Configurable):
@@ -23,8 +22,6 @@ class LintService(Bootable, Configurable):
     target only changed files for efficient linting workflows.
     Usage: `await lint_service.lint_changed_files()` -> runs configured linters on git changes
     """
-
-    _config: LintConfig
 
     async def lint_changed_files(self) -> Dict[str, List[str]]:
         """Run configured linters on git changed files.
@@ -45,10 +42,10 @@ class LintService(Bootable, Configurable):
         results = {}
 
         # Handle commands as a list of command strings
-        if self._config.commands:
+        if self._config.auto_lint and self._config.lint_commands:
             spinner = Spinner("dots", text="Running linters...")
             with Live(spinner, console=console, transient=True, refresh_per_second=10):
-                for i, command_template in enumerate(self._config.commands):
+                for i, command_template in enumerate(self._config.lint_commands):
                     command_name = f"command_{i}"
                     results[command_name] = []
 

@@ -4,11 +4,9 @@ from typing import TYPE_CHECKING, List
 import git
 from git.exc import InvalidGitRepositoryError
 
-from byte.context import make
-from byte.core.config.configurable import Configurable
-from byte.core.config.service import ConfigService
+from byte.core.config.mixins import Configurable
 from byte.core.events.eventable import Eventable
-from byte.core.mixins.bootable import Bootable
+from byte.core.service.mixins import Bootable
 
 if TYPE_CHECKING:
     pass
@@ -24,14 +22,12 @@ class GitService(Bootable, Configurable, Eventable):
     """
 
     async def boot(self):
-        config: ConfigService = await make("config")
-
         # Initialize git repository using the project root from config
         try:
-            self._repo = git.Repo(config.project_root)
+            self._repo = git.Repo(self._config.project_root)
         except InvalidGitRepositoryError:
             raise InvalidGitRepositoryError(
-                f"Not a git repository: {config.project_root}. Please run 'git init' or navigate to a git repository."
+                f"Not a git repository: {self._config.project_root}. Please run 'git init' or navigate to a git repository."
             )
 
     async def get_repo(self):

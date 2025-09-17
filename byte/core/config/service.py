@@ -6,8 +6,7 @@ import git
 import yaml
 from git.exc import InvalidGitRepositoryError
 
-from byte.core.config.schema import Config
-from byte.core.mixins.bootable import Bootable
+from byte.core.service.mixins import Bootable
 
 
 class ConfigService(Bootable):
@@ -24,7 +23,6 @@ class ConfigService(Bootable):
         self._raw_config: Dict[str, Any] = config_data or {}
         self._cli_args: Dict[str, Any] = cli_args or {}
         self._schema_registry: Dict[str, type] = {}
-        self._typed_config: Optional[Config] = None
         self._loaded_files: set = set()
         self._project_root: Optional[Path] = None
         self._byte_dir: Optional[Path] = None

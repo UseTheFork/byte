@@ -1,9 +1,9 @@
 import uuid
 from typing import TYPE_CHECKING, List, Optional
 
-from byte.core.config.configurable import Configurable
+from byte.core.config.mixins import Configurable
 from byte.core.events.eventable import Eventable
-from byte.core.mixins.bootable import Bootable
+from byte.core.service.mixins import Bootable
 from byte.domain.memory.checkpointer import ByteCheckpointer
 from byte.domain.memory.config import MemoryConfig
 
@@ -21,7 +21,14 @@ class MemoryService(Bootable, Configurable, Eventable):
     """
 
     _checkpointer: Optional[ByteCheckpointer] = None
-    _config: MemoryConfig
+    _service_config: MemoryConfig
+
+    async def _configure_service(self) -> None:
+        """Configure memory service with database path and retention settings."""
+
+        self._service_config = MemoryConfig(
+            database_path=self._config.byte_dir / "memory.db"
+        )
 
     async def get_checkpointer(self) -> ByteCheckpointer:
         """Get configured checkpointer instance with lazy initialization.
@@ -29,7 +36,7 @@ class MemoryService(Bootable, Configurable, Eventable):
         Usage: `checkpointer = await memory_service.get_checkpointer()` -> for accessing checkpointer
         """
         if self._checkpointer is None:
-            self._checkpointer = ByteCheckpointer(self._config)
+            self._checkpointer = ByteCheckpointer(self._service_config)
         return self._checkpointer
 
     async def get_saver(self) -> "AsyncSqliteSaver":

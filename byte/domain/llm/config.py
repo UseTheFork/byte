@@ -1,4 +1,4 @@
-from byte.core.config.schema import BaseConfig
+from byte.core.config.config import BaseConfig
 
 
 class ModelConfig(BaseConfig):
@@ -11,6 +11,6 @@ class ModelConfig(BaseConfig):
 class LLMConfig(BaseConfig):
     """LLM domain configuration with validation and defaults."""
 
-    base: str = ""
+    model: str = ""
     main: ModelConfig = ModelConfig()
     weak: ModelConfig = ModelConfig()

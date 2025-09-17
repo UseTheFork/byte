@@ -1,7 +1,7 @@
 import asyncio
 from typing import Any, Callable, Dict
 
-from byte.core.mixins.bootable import Bootable
+from byte.core.service.mixins import Bootable
 
 
 class Container:

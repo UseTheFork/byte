@@ -3,9 +3,9 @@ from typing import TYPE_CHECKING, Any, Dict
 from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
 
-from byte.core.config.configurable import Configurable
-from byte.core.mixins.bootable import Bootable
-from byte.domain.llm.config import LLMConfig
+from byte.core.config.mixins import Configurable
+from byte.core.service.mixins import Bootable
+from byte.domain.llm.config import LLMConfig, ModelConfig
 
 if TYPE_CHECKING:
     pass
@@ -21,7 +21,17 @@ class LLMService(Bootable, Configurable):
     """
 
     _models: Dict[str, Any] = {}
-    _config: LLMConfig
+    _service_config: LLMConfig
+
+    async def _configure_service(self) -> None:
+        """Configure LLM service with model settings based on global configuration."""
+        if self._config.model == "sonnet":
+            main_model = ModelConfig(model="claude-sonnet-4-20250514")
+            weak_model = ModelConfig(model="claude-3-5-haiku-20241022")
+
+        self._service_config = LLMConfig(
+            model=self._config.model, main=main_model, weak=weak_model
+        )
 
     def get_model(self, model_type: str = "main", **kwargs) -> Any:
         """Get a model instance with lazy initialization and caching.
@@ -31,11 +41,11 @@ class LLMService(Bootable, Configurable):
         Usage: `model = service.get_model("main")` -> cached LangChain model instance
         """
 
-        if self._config.base == "sonnet" and model_type == "main":
-            return ChatAnthropic(**self._config.main.__dict__, **kwargs)
-
-        elif self._config.base == "sonnet" and model_type == "weak":
-            return ChatAnthropic(**self._config.weak.__dict__, **kwargs)
+        # TODO: Need to figure out how to make this handle for other providers.
+        if model_type == "main":
+            return ChatAnthropic(**self._service_config.main.__dict__, **kwargs)
+        elif model_type == "weak":
+            return ChatAnthropic(**self._service_config.weak.__dict__, **kwargs)
 
     def get_main_model(self) -> BaseChatModel:
         """Convenience method for accessing the primary model.

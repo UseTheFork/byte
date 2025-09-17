@@ -2,7 +2,7 @@ import asyncio
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
-from byte.core.mixins.bootable import Bootable
+from byte.core.service.mixins import Bootable
 
 
 class Command(ABC, Bootable):

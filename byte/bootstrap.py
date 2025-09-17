@@ -1,6 +1,6 @@
 from byte.container import app
 from byte.core.command.registry import command_registry
-from byte.core.config.service_provider import ConfigServiceProvider
+from byte.core.config.config import ByteConfg
 from byte.core.events.service_provider import EventServiceProvider
 from byte.core.response.service_provider import ResponseServiceProvider
 from byte.domain.agent.service_provider import AgentServiceProvider
@@ -15,7 +15,7 @@ from byte.domain.system.service_provider import SystemServiceProvider
 from byte.domain.ui.service_provider import UIServiceProvider
 
 
-async def bootstrap():
+async def bootstrap(config: ByteConfg):
     """Initialize and configure the application's dependency injection container.
 
     Follows a two-phase initialization pattern: register all services first,
@@ -27,11 +27,13 @@ async def bootstrap():
     # Make the global command registry available through dependency injection
     app.singleton("command_registry", lambda: command_registry)
 
+    # AI: Add a doc comment here.
+    app.singleton("config", lambda: config)
+
     # Order matters: ConfigServiceProvider must be early since other services
     # may need configuration access during their boot phase
 
     service_providers = [
-        ConfigServiceProvider(),  # Configuration management
         EventServiceProvider(),  # Foundation for domain events
         ResponseServiceProvider(),  # Agent response handling
         UIServiceProvider(),  # Console and prompt services
@@ -51,11 +53,7 @@ async def bootstrap():
     for provider in service_providers:
         await provider.register(app)
 
-    # Phase 2: Configure domain-specific settings
-    for provider in service_providers:
-        await provider.configure(app)
-
-    # Phase 3: Boot services after all are registered
+    # Phase 2: Boot services after all are registered
     # This allows services to safely reference dependencies during initialization
     for provider in service_providers:
         await provider.boot(app)
