@@ -20,6 +20,6 @@ commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
             "- Does not exceed 72 characters."
             "Reply only with the one-line commit message, without any additional text, explanations, or line breaks.",
         ),
-        ("user", "{changes}"),
+        ("placeholder", "{messages}"),
     ]
 )

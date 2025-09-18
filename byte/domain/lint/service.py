@@ -11,7 +11,7 @@ from rich.text import Text
 from byte.context import make
 from byte.core.config.mixins import Configurable
 from byte.core.service.mixins import Bootable
-from byte.domain.commit.events import PreCommitStarted
+from byte.domain.agent.commit.events import PreCommitStarted
 from byte.domain.git.service import GitService
 
 

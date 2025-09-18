@@ -52,7 +52,7 @@ class CoderCommand(Command):
         )
 
         # Stream coder agent response through centralized handler
-        await response_handler.handle_stream(coder_service.stream(args), console)
+        await response_handler.handle_stream(coder_service.stream(args))
 
         # except Exception as e:
         #     console.print(f"[error]Error processing coder request:[/error] {e}")

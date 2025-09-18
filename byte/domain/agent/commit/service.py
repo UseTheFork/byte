@@ -2,24 +2,47 @@ from typing import TYPE_CHECKING
 
 import git
 from git.exc import GitCommandError, InvalidGitRepositoryError
+from langgraph.graph import END, START, StateGraph
 
 from byte.context import make
-from byte.core.config.mixins import Configurable
 from byte.core.response.handler import ResponseHandler
-from byte.core.service.mixins import Bootable
-from byte.domain.commit.events import CommitCreated, PreCommitStarted
-from byte.domain.commit.prompt import commit_prompt
-from byte.domain.events.mixins import Eventable
+from byte.domain.agent.base import BaseAgentService, BaseAssistant
+from byte.domain.agent.commit.events import CommitCreated, PreCommitStarted
+from byte.domain.agent.commit.prompt import commit_prompt
 
 if TYPE_CHECKING:
     from langchain_core.language_models.chat_models import BaseChatModel
+    from langgraph.graph.state import CompiledStateGraph
     from rich.console import Console
 
     from byte.domain.llm.service import LLMService
 
 
-class CommitService(Bootable, Configurable, Eventable):
+class CommitService(BaseAgentService):
     """Domain service for generating AI-powered git commit messages and creating commits."""
+
+    async def _handle_unstaged_changes(self, repo, console) -> None:
+        """Check for unstaged changes and offer to add them to the commit.
+
+        Args:
+            repo: Git repository instance
+            console: Rich console for output
+
+        Usage: Called internally during commit process to handle unstaged files
+        """
+        unstaged_changes = repo.index.diff(None)  # None compares working tree to index
+        if unstaged_changes:
+            interaction_service = await make("interaction_service")
+            should_add = await interaction_service.confirm(
+                f"Found {len(unstaged_changes)} unstaged changes. Add them to this commit?",
+                default=True,
+            )
+            if should_add:
+                # Add all unstaged changes
+                repo.git.add("--all")
+                console.print(
+                    f"[info]Added {len(unstaged_changes)} unstaged changes[/info]"
+                )
 
     async def execute(self) -> None:
         """Generate commit message from staged changes and create commit.
@@ -34,6 +57,9 @@ class CommitService(Bootable, Configurable, Eventable):
         try:
             # Initialize git repository with parent directory search
             repo = git.Repo(search_parent_directories=True)
+
+            # Check for unstaged changes and offer to add them
+            await self._handle_unstaged_changes(repo, console)
 
             # Validate staged changes exist to prevent empty commits
             if not repo.index.diff("HEAD"):
@@ -53,17 +79,10 @@ class CommitService(Bootable, Configurable, Eventable):
 
             console.print("[info]Generating commit message...[/info]")
 
-            # Use main model for high-quality commit message generation
-            llm_service: LLMService = await make("llm_service")
-            llm: BaseChatModel = llm_service.get_weak_model()
-
             response_handler: ResponseHandler = await make("response_handler")
 
-            # AI: How do we have our `handle_stream` return the final result of `astream_events` ai?
             result_message = await response_handler.handle_stream(
-                llm.astream_events(
-                    await commit_prompt.ainvoke({"changes": staged_diff})
-                )
+                self.stream(staged_diff)
             )
 
             # Create commit with AI-generated message
@@ -92,3 +111,30 @@ class CommitService(Bootable, Configurable, Eventable):
         except Exception as e:
             console.print(f"[error]Unexpected error:[/error] {e}")
             return
+
+    async def build(self) -> "CompiledStateGraph":
+        """Build and compile the coder agent graph with memory and tools.
+
+        Creates a StateGraph optimized for coding tasks with specialized
+        prompts, file context integration, and development-focused routing.
+        Usage: `graph = await builder.build()` -> ready for coding assistance
+        """
+
+        llm_service: LLMService = await make("llm_service")
+        llm: BaseChatModel = llm_service.get_weak_model()
+
+        assistant_runnable = commit_prompt | llm
+        State = self.get_state_class()
+
+        # Create the state graph with coder-specific state
+        graph = StateGraph(State)
+
+        # Add nodes to graph
+        graph.add_node("agent", BaseAssistant(assistant_runnable))
+
+        # Set entry point to coder
+        graph.add_edge(START, "agent")
+        graph.add_edge("agent", END)
+
+        # Compile graph with memory and configuration
+        return graph.compile(debug=False)

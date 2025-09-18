@@ -59,7 +59,6 @@ class CommandProcessor:
 
     async def _process_regular_input(self, user_input: str) -> None:
         """Route regular input to the currently active agent."""
-        console: Console = await self.container.make("console")
         agent_service: AgentService = await self.container.make("agent_service")
 
         response_handler: ResponseHandler = await self.container.make(
@@ -67,5 +66,5 @@ class CommandProcessor:
         )
 
         await response_handler.handle_stream(
-            agent_service.route_to_agent(self._current_agent, user_input), console
+            agent_service.route_to_agent(self._current_agent, user_input)
         )

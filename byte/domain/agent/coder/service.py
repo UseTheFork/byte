@@ -1,6 +1,5 @@
-from typing import TYPE_CHECKING, Annotated, List, Optional
+from typing import TYPE_CHECKING, Annotated, Type
 
-from langchain_core.messages import HumanMessage
 from langchain_core.runnables import Runnable, RunnableConfig
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import AnyMessage, add_messages
@@ -8,23 +7,19 @@ from langgraph.prebuilt import ToolNode
 from typing_extensions import TypedDict
 
 from byte.context import make
-from byte.core.config.mixins import Configurable
-from byte.core.service.mixins import Bootable
+from byte.domain.agent.base import BaseAgentService
 from byte.domain.agent.coder.prompts import coder_prompt
-from byte.domain.events.mixins import Eventable
 from byte.domain.files.service import FileService
-from byte.domain.memory.service import MemoryService
 from byte.domain.ui.tools import user_confirm, user_input, user_select
 
 if TYPE_CHECKING:
     from langchain_core.language_models.chat_models import BaseChatModel
-    from langchain_core.tools import BaseTool
     from langgraph.graph.state import CompiledStateGraph
 
-    from byte.container import Container
 
+class CoderState(TypedDict):
+    """Coder-specific state with file context."""
 
-class State(TypedDict):
     messages: Annotated[list[AnyMessage], add_messages]
     file_context: str
 
@@ -33,7 +28,7 @@ class Assistant:
     def __init__(self, runnable: Runnable):
         self.runnable = runnable
 
-    async def __call__(self, state: State, config: RunnableConfig):
+    async def __call__(self, state: CoderState, config: RunnableConfig):
         while True:
             # configuration = config.get("configurable", {})
             # passenger_id = configuration.get("passenger_id", None)
@@ -55,7 +50,7 @@ class Assistant:
         return {"messages": result}
 
 
-class CoderService(Bootable, Configurable, Eventable):
+class CoderService(BaseAgentService):
     """Domain service for the coder agent specialized in software development.
 
     Orchestrates coding assistance through LangGraph-based agent with
@@ -64,48 +59,12 @@ class CoderService(Bootable, Configurable, Eventable):
     Usage: `coder_service.stream_code("Fix this bug", thread_id)` -> streaming response
     """
 
-    def __init__(self, container: Optional["Container"] = None):
-        self.container = container
-        self._graph: Optional[CompiledStateGraph] = None
-        self._tools: List[BaseTool] = [user_confirm, user_select, user_input]
+    def get_state_class(self) -> Type[TypedDict]:  # pyright: ignore[reportInvalidTypeForm]
+        """Return coder-specific state class."""
+        return CoderState
 
-    async def get_graph(self) -> "CompiledStateGraph":
-        """Get or create the coder agent graph with current tools.
-
-        Lazy-loads the graph with all registered tools and memory integration.
-        The graph is cached until tools are modified to avoid rebuilding.
-        Usage: `graph = await coder_service.get_graph()` -> ready for coding tasks
-        """
-        if self._graph is None:
-            self._graph = await self.build()
-        return self._graph
-
-    async def stream(
-        self,
-        request: str,
-        thread_id: Optional[str] = None,
-    ):
-        """Stream coder agent responses for real-time coding assistance.
-
-        Yields partial responses as the agent processes coding requests,
-        enabling responsive development workflows and progress indication.
-        Always streams responses for optimal CLI user experience.
-        Usage: `async for chunk in coder_service.stream_code(request): ...`
-        """
-        # Get or create thread ID
-        if thread_id is None:
-            memory_service: MemoryService = await make("memory_service")
-            thread_id = memory_service.create_thread()
-
-        # Create configuration with thread ID
-        config = RunnableConfig(configurable={"thread_id": thread_id})
-
-        initial_state = State(messages=[HumanMessage(content=request)])
-
-        # Get the graph and stream coder responses with token-level streaming
-        graph = await self.get_graph()
-        async for events in graph.astream_events(initial_state, config, version="v2"):
-            yield events
+    def get_tools(self):
+        return [user_confirm, user_select, user_input]
 
     async def build(self) -> "CompiledStateGraph":
         """Build and compile the coder agent graph with memory and tools.
@@ -117,16 +76,17 @@ class CoderService(Bootable, Configurable, Eventable):
 
         llm_service = await make("llm_service")
         llm: BaseChatModel = llm_service.get_main_model()
-        # llm_with_tools = llm.bind_tools(self._tools)
 
-        assistant_runnable = coder_prompt | llm.bind_tools(self._tools)
+        assistant_runnable = coder_prompt | llm.bind_tools(self.get_tools())
+
+        State = self.get_state_class()
 
         # Create the state graph with coder-specific state
         graph = StateGraph(State)
 
         # Create specialized nodes
         # coder_node = await self.create_coder_node()
-        tool_node = ToolNode(self._tools)
+        tool_node = ToolNode(self.get_tools())
 
         # Add nodes to graph
         graph.add_node("fetch_file_context", self.get_file_context)
@@ -157,14 +117,14 @@ class CoderService(Bootable, Configurable, Eventable):
         # Compile graph with memory and configuration
         return graph.compile(checkpointer=checkpointer, debug=False)
 
-    async def get_file_context(self, state: State):
+    async def get_file_context(self, state: CoderState):
         """Foo"""
         file_service: FileService = await make("file_service")
         initial_file_context = file_service.generate_context_prompt()
 
         return {"file_context": initial_file_context}
 
-    async def should_continue(self, state: State) -> str:
+    async def should_continue(self, state: CoderState) -> str:
         """Conditional edge function for coder agent flow control."""
         messages = state["messages"]
         last_message = messages[-1]

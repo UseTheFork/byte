@@ -2,8 +2,8 @@ from typing import TYPE_CHECKING
 
 from byte.container import Container
 from byte.core.service_provider import ServiceProvider
-from byte.domain.commit.commands import CommitCommand
-from byte.domain.commit.service import CommitService
+from byte.domain.agent.commit.commands import CommitCommand
+from byte.domain.agent.commit.service import CommitService
 
 if TYPE_CHECKING:
     from byte.container import Container
@@ -23,7 +23,7 @@ class CommitServiceProvider(ServiceProvider):
 
         Usage: `provider.register(container)` -> binds commit command
         """
-        container.bind("commit_service", lambda: CommitService(container))
+        container.bind("commit_agent", lambda: CommitService(container))
 
         # Register commit command
         container.bind("commit_command", lambda: CommitCommand(container))

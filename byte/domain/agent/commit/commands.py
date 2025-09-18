@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from byte.context import make
 from byte.core.command.registry import Command
-from byte.domain.commit.service import CommitService
+from byte.domain.agent.commit.service import CommitService
 
 if TYPE_CHECKING:
     pass
@@ -33,5 +33,5 @@ class CommitCommand(Command):
         creating the actual commit.
         Usage: Called by command processor when user types `/commit`
         """
-        commit_service: CommitService = await make("commit_service")
+        commit_service: CommitService = await make("commit_agent")
         await commit_service.execute()

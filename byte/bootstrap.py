@@ -3,7 +3,6 @@ from byte.core.command.registry import command_registry
 from byte.core.config.config import ByteConfg
 from byte.core.response.service_provider import ResponseServiceProvider
 from byte.domain.agent.service_provider import AgentServiceProvider
-from byte.domain.commit.service_provider import CommitServiceProvider
 from byte.domain.events.service_provider import EventServiceProvider
 from byte.domain.files.file_service_provider import FileServiceProvider
 from byte.domain.git.service_provider import GitServiceProvider
@@ -42,7 +41,6 @@ async def bootstrap(config: ByteConfg):
         LLMServiceProvider(),  # Language model integration
         GitServiceProvider(),  # Git repository operations
         LintServiceProvider(),  # Code linting functionality
-        CommitServiceProvider(),  # Git commit functionality
         AgentServiceProvider(),  # Agent routing and management
         SystemServiceProvider(),  # Core system commands
     ]
