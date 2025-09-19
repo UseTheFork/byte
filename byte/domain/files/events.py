@@ -47,3 +47,39 @@ class ContextCleared(Event):
     """
 
     pass
+
+
+class FileDeleted(Event):
+    """Event fired when a file is deleted from the file system.
+
+    Enables automatic cleanup of context and other file-related state
+    when files are removed from the project directory.
+    Usage: `await self.event(FileDeleted(file_path="/path/to/deleted/file.py"))`
+    """
+
+    file_path: str = ""
+
+
+class AICommentDetected(Event):
+    """Event fired when an AI comment pattern is detected in a file.
+
+    Triggers automatic context management and potential completion workflows
+    when files contain instruction comments like '// TODO:' or '# TODO:'.
+    Usage: `await self.event(AICommentDetected(file_path="main.py", comment_content="fix this bug", line_number=42))`
+    """
+
+    file_path: str = ""
+    comment_content: str = ""
+    line_number: int = 0
+
+
+class FileModified(Event):
+    """Event fired when a file is created, modified, or deleted.
+
+    General file system change event that other services can listen to
+    for various file monitoring and synchronization needs.
+    Usage: `await self.event(FileModified(file_path="main.py", change_type="modified"))`
+    """
+
+    file_path: str = ""
+    change_type: str = ""  # "created", "modified", "deleted"

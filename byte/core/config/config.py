@@ -52,6 +52,8 @@ class ByteConfg(BaseSettings):
     auto_lint: bool = True
     lint_commands: set[str] = set()
 
+    watch_files: bool = True
+
     @classmethod
     def settings_customise_sources(
         cls,

@@ -72,6 +72,7 @@ class Byte:
                     await event_dispatcher.dispatch(
                         PrePrompt(current_agent=current_agent)
                     )
+
                     user_input = await self.prompt_handler.get_input_async(
                         f"[{agent.name}]> "
                     )

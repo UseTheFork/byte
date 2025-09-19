@@ -44,7 +44,7 @@ class FileService(Bootable, Configurable, Eventable):
         Usage: `await service.add_file("config.py", FileMode.READ_ONLY)`
         Usage: `await service.add_file("src/*.py", FileMode.EDITABLE)` -> adds all Python files
         """
-        file_discovery = await make(FileDiscoveryService)
+        file_discovery = await self.container.make(FileDiscoveryService)
         discovered_files = await file_discovery.get_files()
         discovered_file_paths = {str(f.resolve()) for f in discovered_files}
 

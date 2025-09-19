@@ -5,6 +5,7 @@ from byte.domain.events.dispatcher import EventDispatcher
 from byte.domain.files.commands import AddFileCommand, DropFileCommand, ReadOnlyCommand
 from byte.domain.files.discovery_service import FileDiscoveryService
 from byte.domain.files.service import FileService
+from byte.domain.files.watcher_service import FileWatcherService
 from byte.domain.system.events import PrePrompt
 
 
@@ -17,6 +18,7 @@ class FileServiceProvider(ServiceProvider):
         # Register file discovery service as singleton for caching
         container.singleton(FileDiscoveryService)
         container.singleton(FileService)
+        container.singleton(FileWatcherService)
 
         # Register file-related commands
         container.bind(AddFileCommand)
@@ -28,6 +30,10 @@ class FileServiceProvider(ServiceProvider):
         # Ensure file discovery is booted first to scan project files
         file_discovery = await container.make(FileDiscoveryService)
         await file_discovery.ensure_booted()
+
+        # Boot the file watcher service (only if enabled in config)
+        file_watcher = await container.make(FileWatcherService)
+        await file_watcher.ensure_booted()
 
         # setup `PrePrompt` listener to display files in context
         file_service = await container.make(FileService)
@@ -52,6 +58,7 @@ class FileServiceProvider(ServiceProvider):
         return [
             FileDiscoveryService,
             FileService,
+            FileWatcherService,
             AddFileCommand,
             ReadOnlyCommand,
             DropFileCommand,
