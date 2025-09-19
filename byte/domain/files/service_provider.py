@@ -2,7 +2,7 @@ from byte.container import Container
 from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
 from byte.domain.files.commands import AddFileCommand, DropFileCommand, ReadOnlyCommand
-from byte.domain.files.discovery import FileDiscoveryService
+from byte.domain.files.discovery_service import FileDiscoveryService
 from byte.domain.files.service import FileService
 
 

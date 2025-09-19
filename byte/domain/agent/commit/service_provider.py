@@ -24,7 +24,7 @@ class CommitServiceProvider(ServiceProvider):
 
         Usage: `provider.register(container)` -> binds commit command
         """
-        container.bind(CommitService)
+        container.singleton(CommitService)
 
         # Register commit command
         container.bind(CommitCommand)

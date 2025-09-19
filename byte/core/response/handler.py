@@ -8,13 +8,15 @@ from rich.panel import Panel
 from rich.spinner import Spinner
 
 from byte.context import make
+from byte.core.config.mixins import Configurable
 from byte.core.response.formatters import MarkdownStream
+from byte.core.service.mixins import Bootable
 
 
-class ResponseHandler:
+class ResponseHandler(Bootable, Configurable):
     """Simplified response handler using Rich Live for streaming display."""
 
-    def __init__(self):
+    async def boot(self):
         self._accumulated_content = ""
 
     async def handle_stream(

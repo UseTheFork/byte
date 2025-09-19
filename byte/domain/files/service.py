@@ -7,7 +7,7 @@ from byte.core.config.mixins import Configurable
 from byte.core.service.mixins import Bootable
 from byte.domain.events.mixins import Eventable
 from byte.domain.files.context_manager import FileContext, FileMode
-from byte.domain.files.discovery import FileDiscoveryService
+from byte.domain.files.discovery_service import FileDiscoveryService
 from byte.domain.files.events import (
     ContextCleared,
     FileAdded,

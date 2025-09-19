@@ -1,6 +1,5 @@
-import asyncio
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from byte.core.service.mixins import Bootable
 
@@ -12,14 +11,6 @@ class Command(ABC, Bootable):
     tab completion, help text, and pre-prompt status display.
     Usage: `class MyCommand(Command): ...` then register with CommandRegistry
     """
-
-    def __init__(self, container=None):
-        # Container provides access to services like file_service, console, etc.
-        self.container: Any = container
-
-        # Automatically call boot after initialization is complete
-        if container:
-            asyncio.create_task(self._async_init())
 
     @property
     @abstractmethod
@@ -72,9 +63,6 @@ class CommandRegistry(Bootable):
     slash commands (/add) and @ commands (@mention). Supports tab completion
     for improved user experience.
     """
-
-    def __init__(self, container=None):
-        super().__init__(container)
 
     async def boot(self):
         # Separate namespaces for different command types

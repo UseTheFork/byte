@@ -18,7 +18,7 @@ class ResponseServiceProvider(ServiceProvider):
 
     async def register(self, container: "Container") -> None:
         """Register response handling services in the container."""
-        container.singleton(ResponseHandler)
+        container.bind(ResponseHandler)
 
     async def boot(self, container: "Container") -> None:
         """Boot response handling services after all providers are registered."""

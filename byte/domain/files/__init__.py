@@ -1,5 +1,5 @@
 from .context_manager import FileContext, FileMode
-from .discovery import FileDiscoveryService
+from .discovery_service import FileDiscoveryService
 from .service import FileService
 from .service_provider import FileServiceProvider
 

@@ -1,22 +1,17 @@
-from typing import TYPE_CHECKING
-
 import git
 from git.exc import GitCommandError, InvalidGitRepositoryError
+from langchain_core.language_models.chat_models import BaseChatModel
 from langgraph.graph import END, START, StateGraph
+from langgraph.graph.state import CompiledStateGraph
+from rich.console import Console
 
 from byte.context import make
 from byte.core.response.handler import ResponseHandler
 from byte.domain.agent.base import BaseAgentService, BaseAssistant
 from byte.domain.agent.commit.events import CommitCreated, PreCommitStarted
 from byte.domain.agent.commit.prompt import commit_prompt
+from byte.domain.llm.service import LLMService
 from byte.domain.ui.interactions import InteractionService
-
-if TYPE_CHECKING:
-    from langchain_core.language_models.chat_models import BaseChatModel
-    from langgraph.graph.state import CompiledStateGraph
-    from rich.console import Console
-
-    from byte.domain.llm.service import LLMService
 
 
 class CommitService(BaseAgentService):
@@ -33,16 +28,39 @@ class CommitService(BaseAgentService):
         """
         unstaged_changes = repo.index.diff(None)  # None compares working tree to index
         if unstaged_changes:
+            # Display unstaged changes in a clear panel format
+            from rich.panel import Panel
+
+            file_list = []
+            for change in unstaged_changes:
+                change_type = (
+                    "modified"
+                    if change.change_type == "M"
+                    else "new"
+                    if change.change_type == "A"
+                    else "deleted"
+                )
+                file_list.append(f"  • {change.a_path} ({change_type})")
+
+            files_display = "\n".join(file_list)
+            console.print(
+                Panel(
+                    f"Found {len(unstaged_changes)} unstaged changes:\n\n{files_display}",
+                    title="[bold yellow]Unstaged Changes[/bold yellow]",
+                    border_style="yellow",
+                )
+            )
+
             interaction_service = await make(InteractionService)
             should_add = await interaction_service.confirm(
-                f"Found {len(unstaged_changes)} unstaged changes. Add them to this commit?",
+                "Add these unstaged changes to this commit?",
                 default=True,
             )
             if should_add:
                 # Add all unstaged changes
                 repo.git.add("--all")
                 console.print(
-                    f"[info]Added {len(unstaged_changes)} unstaged changes[/info]"
+                    f"[success]Added {len(unstaged_changes)} unstaged changes to commit[/success]"
                 )
 
     async def execute(self) -> None:
@@ -53,6 +71,7 @@ class CommitService(BaseAgentService):
         creating the actual commit.
         Usage: Called by command processor when user types `/commit`
         """
+
         console = await make(Console)
 
         try:
