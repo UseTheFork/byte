@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
+from byte.domain.agent.commit.events import PreCommitStarted
 from byte.domain.events.dispatcher import EventDispatcher
 from byte.domain.lint.commands import LintCommand
 from byte.domain.lint.service import LintService
@@ -41,7 +42,7 @@ class LintServiceProvider(ServiceProvider):
         await command_registry.register_slash_command(await container.make(LintCommand))
 
         # Register event listener for pre-commit linting
-        event_dispatcher.listen("PreCommitStarted", lint_service._handle_pre_commit)
+        event_dispatcher.listen(PreCommitStarted, lint_service.handle_pre_commit)
 
     def provides(self) -> list:
         """Return list of services provided by this provider."""

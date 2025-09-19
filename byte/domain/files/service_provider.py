@@ -29,7 +29,7 @@ class FileServiceProvider(ServiceProvider):
         file_discovery = await container.make(FileDiscoveryService)
         await file_discovery.ensure_booted()
 
-        # setup `PrePrompt` listner to display files in context
+        # setup `PrePrompt` listener to display files in context
         file_service = await container.make(FileService)
         event_dispatcher = await container.make(EventDispatcher)
         event_dispatcher.listen(PrePrompt, file_service.list_in_context_files)

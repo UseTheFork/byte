@@ -88,6 +88,7 @@ class CommitService(BaseAgent):
             staged_diff = repo.git.diff("--cached")
 
             # Emit pre-commit event for other domains to react
+            # AI:
             await self.event(
                 PreCommitStarted(
                     staged_files=len(repo.index.diff("HEAD")),

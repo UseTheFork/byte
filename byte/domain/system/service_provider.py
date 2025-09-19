@@ -3,10 +3,8 @@ from typing import TYPE_CHECKING
 from byte.container import Container
 from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
-from byte.domain.events.dispatcher import EventDispatcher
 from byte.domain.files.commands import AddFileCommand, DropFileCommand, ReadOnlyCommand
 from byte.domain.system.commands import ExitCommand, HelpCommand
-from byte.domain.system.events import PrePrompt
 
 if TYPE_CHECKING:
     from byte.container import Container
@@ -25,11 +23,11 @@ class SystemServiceProvider(ServiceProvider):
 
         Usage: `provider.register(container)` -> binds exit and help commands
         """
-        container.singleton(ExitCommand)
-        container.singleton(HelpCommand)
-        container.singleton(AddFileCommand)
-        container.singleton(ReadOnlyCommand)
-        container.singleton(DropFileCommand)
+        container.bind(ExitCommand)
+        container.bind(HelpCommand)
+        container.bind(AddFileCommand)
+        container.bind(ReadOnlyCommand)
+        container.bind(DropFileCommand)
 
     async def boot(self, container: "Container") -> None:
         """Boot system services and register commands with registry.
@@ -37,7 +35,6 @@ class SystemServiceProvider(ServiceProvider):
         Usage: `provider.boot(container)` -> commands become available as /exit, /help
         """
         command_registry = await container.make(CommandRegistry)
-        event_dispatcher = await container.make(EventDispatcher)
 
         # Register system commands for user access
         await command_registry.register_slash_command(await container.make(ExitCommand))
@@ -53,20 +50,11 @@ class SystemServiceProvider(ServiceProvider):
         await command_registry.register_slash_command(readonly_command)
         await command_registry.register_slash_command(drop_file_command)
 
-        event_dispatcher.listen("PrePrompt", self._handle_pre_prompt)
+        # event_dispatcher.listen(PrePrompt, self._handle_pre_prompt)
 
         # Store command references for event handling
         self._add_file_command = add_file_command
         self._readonly_command = readonly_command
-
-    async def _handle_pre_prompt(self, event: PrePrompt) -> None:
-        """Handle PrePrompt events by calling pre_prompt methods on file commands.
-
-        This allows file commands to display contextual information before each prompt.
-        """
-        # Call pre_prompt methods on file commands to display context
-        await self._add_file_command.pre_prompt()
-        await self._readonly_command.pre_prompt()
 
     def provides(self) -> list:
         """Return list of services provided by this provider."""

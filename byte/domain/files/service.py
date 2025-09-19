@@ -1,3 +1,4 @@
+import glob
 from os import PathLike
 from pathlib import Path
 from typing import Dict, List, Optional, Union
@@ -37,39 +38,108 @@ class FileService(Bootable, Configurable, Eventable):
     async def add_file(self, path: Union[str, PathLike], mode: FileMode) -> bool:
         """Add a file to the active context for AI awareness.
 
-        Validates file existence and readability before adding to prevent
-        context pollution with invalid files. Emits FileAdded event.
+        Supports wildcard patterns like 'byte/*' to add multiple files at once.
+        Only adds files that are available in the FileDiscoveryService to ensure
+        they are valid project files that respect gitignore patterns.
         Usage: `await service.add_file("config.py", FileMode.READ_ONLY)`
+        Usage: `await service.add_file("src/*.py", FileMode.EDITABLE)` -> adds all Python files
         """
+        file_discovery = await make(FileDiscoveryService)
+        discovered_files = await file_discovery.get_files()
+        discovered_file_paths = {str(f.resolve()) for f in discovered_files}
 
-        path_obj = Path(path).resolve()
+        path_str = str(path)
 
-        # Validate file exists and is readable
-        if not path_obj.exists() or not path_obj.is_file():
-            return False
+        # Check if path contains wildcard patterns
+        if "*" in path_str or "?" in path_str or "[" in path_str:
+            # Handle glob patterns
+            matching_paths = glob.glob(path_str, recursive=True)
+            if not matching_paths:
+                return False
 
-        key = str(path_obj)
-        self._context_files[key] = FileContext(path=path_obj, mode=mode)
+            success_count = 0
+            for match_path in matching_paths:
+                path_obj = Path(match_path).resolve()
 
-        # Emit event for UI updates and other interested components
-        await self.event(FileAdded(file_path=str(path_obj), mode=mode))
-        return True
+                # Only add files that are in the discovery service and are actual files
+                if path_obj.is_file() and str(path_obj) in discovered_file_paths:
+                    key = str(path_obj)
+                    self._context_files[key] = FileContext(path=path_obj, mode=mode)
+                    await self.event(FileAdded(file_path=str(path_obj), mode=mode))
+                    success_count += 1
+
+            return success_count > 0
+        else:
+            # Handle single file path
+            path_obj = Path(path).resolve()
+
+            # Only add if file is in the discovery service
+            if not path_obj.is_file() or str(path_obj) not in discovered_file_paths:
+                return False
+
+            key = str(path_obj)
+            self._context_files[key] = FileContext(path=path_obj, mode=mode)
+
+            # Emit event for UI updates and other interested components
+            await self.event(FileAdded(file_path=str(path_obj), mode=mode))
+            return True
 
     async def remove_file(self, path: Union[str, PathLike]) -> bool:
         """Remove a file from active context to reduce noise.
 
-        Useful when files are no longer relevant to the current task
-        or when context becomes too large for effective AI processing.
+        Supports wildcard patterns like 'byte/*' to remove multiple files at once.
+        Only removes files that are available in the FileDiscoveryService to ensure
+        consistency with project file management.
         Usage: `await service.remove_file("old_file.py")`
+        Usage: `await service.remove_file("src/*.py")` -> removes all Python files
         """
-        path_obj = Path(path).resolve()
-        key = str(path_obj)
+        file_discovery = await make(FileDiscoveryService)
+        discovered_files = await file_discovery.get_files()
+        discovered_file_paths = {str(f.resolve()) for f in discovered_files}
 
-        if key in self._context_files:
-            del self._context_files[key]
-            await self.event(FileRemoved(file_path=str(path_obj)))
+        path_str = str(path)
+
+        # Check if path contains wildcard patterns
+        if "*" in path_str or "?" in path_str or "[" in path_str:
+            # Handle glob patterns - match against files currently in context
+            matching_paths = []
+            for context_path in list(self._context_files.keys()):
+                # Only consider files that are in the discovery service
+                if context_path not in discovered_file_paths:
+                    continue
+
+                # Convert absolute path back to relative for pattern matching
+                try:
+                    relative_path = str(Path(context_path).relative_to(Path.cwd()))
+                    if glob.fnmatch.fnmatch(
+                        relative_path, path_str
+                    ) or glob.fnmatch.fnmatch(context_path, path_str):
+                        matching_paths.append(context_path)
+                except ValueError:
+                    # If can't make relative, try matching absolute path
+                    if glob.fnmatch.fnmatch(context_path, path_str):
+                        matching_paths.append(context_path)
+
+            if not matching_paths:
+                return False
+
+            # Remove all matching files
+            for match_path in matching_paths:
+                del self._context_files[match_path]
+                await self.event(FileRemoved(file_path=match_path))
+
             return True
-        return False
+        else:
+            # Handle single file path
+            path_obj = Path(path).resolve()
+            key = str(path_obj)
+
+            # Only remove if file is in context and in discovery service
+            if key in self._context_files and key in discovered_file_paths:
+                del self._context_files[key]
+                await self.event(FileRemoved(file_path=str(path_obj)))
+                return True
+            return False
 
     def list_files(self, mode: Optional[FileMode] = None) -> List[FileContext]:
         """List files in context, optionally filtered by access mode.
@@ -217,7 +287,7 @@ Any other messages in the chat may contain outdated versions of the files' conte
             console.print(
                 Panel(
                     Columns(file_names, equal=True, expand=True),
-                    title="[bold success]Editable Files[/bold success]",
+                    title=f"[bold success]Editable Files ({len(editable_files)})[/bold success]",
                     border_style="success",
                 )
             )
@@ -228,7 +298,7 @@ Any other messages in the chat may contain outdated versions of the files' conte
             console.print(
                 Panel(
                     Columns(file_names, equal=True, expand=True),
-                    title="[bold info]Read-only Files[/bold info]",
+                    title=f"[bold info]Read-only Files ({len(readonly_files)})[/bold info]",
                     border_style="info",
                 )
             )

@@ -35,7 +35,7 @@ class Byte:
 
         # Listen for exit events
         event_dispatcher = await self.container.make(EventDispatcher)
-        event_dispatcher.listen("ExitRequested", self._handle_exit_request)
+        event_dispatcher.listen(ExitRequested, self._handle_exit_request)
 
     def _handle_exit_request(self, event: ExitRequested):
         """Handle exit request by setting exit flag.

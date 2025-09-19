@@ -198,7 +198,7 @@ class LintService(Bootable, Configurable):
         # TODO: Implement linting of specific files
         return {}
 
-    async def _handle_pre_commit(self, event: PreCommitStarted) -> None:
+    async def handle_pre_commit(self, event: PreCommitStarted) -> None:
         """Handle pre-commit event by running linters on staged files.
 
         Automatically runs configured linters when a commit process begins,
