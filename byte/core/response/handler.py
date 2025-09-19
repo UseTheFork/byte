@@ -7,13 +7,12 @@ from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.spinner import Spinner
 
-from byte.context import make
 from byte.core.config.mixins import Configurable
 from byte.core.response.formatters import MarkdownStream
-from byte.core.service.mixins import Bootable
+from byte.core.service.mixins import Bootable, Injectable
 
 
-class ResponseHandler(Bootable, Configurable):
+class ResponseHandler(Bootable, Configurable, Injectable):
     """Simplified response handler using Rich Live for streaming display."""
 
     async def boot(self):
@@ -25,7 +24,7 @@ class ResponseHandler(Bootable, Configurable):
         """Handle agent response stream with simple Live display."""
 
         self._accumulated_content = ""
-        self._console = await make(Console)
+        self._console = await self.make(Console)
 
         # Setup a Live Spinner
         spinner = Spinner("dots", text="Thinking...")

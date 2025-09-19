@@ -7,14 +7,11 @@ coder_prompt = ChatPromptTemplate.from_messages(
         (
             "system",
             """# Task
-Act as an expert software developer.
+Act as an expert code analyst.
 
-Always use best practices when coding.
-Respect and use existing conventions, libraries, etc that are already present in the code base.
+Answer questions about the supplied code.
 
-Take requests for changes to the supplied code.
-If the request is ambiguous, ask questions.
-
+If you need to describe code changes, do so *briefly*.
 
 ## Current Context:
 Current date: {time}
@@ -27,9 +24,7 @@ Current date: {time}
 
 
 # From https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/watch_prompts.py#L6
-watch_prompt = """I've written your instructions in comments in the code and marked them with "ai"
-Find them in the code files I've shared with you, and follow their instructions.
-
-After completing those instructions, also be sure to remove all the "AI" comments from the code too."""
+watch_prompt = """Find the "AI" comments below in the code files I've shared with you.
+They contain my questions that I need you to answer and other instructions for you."""
 
 # You can see the "AI" comments shown below (marked with █).

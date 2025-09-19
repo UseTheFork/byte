@@ -18,7 +18,7 @@ from byte.domain.memory.service import MemoryService
 from byte.domain.ui.tools import user_confirm, user_input, user_select
 
 
-class CoderState(TypedDict):
+class AskState(TypedDict):
     """Coder-specific state with file context."""
 
     messages: Annotated[list[AnyMessage], add_messages]
@@ -29,11 +29,8 @@ class Assistant:
     def __init__(self, runnable: Runnable):
         self.runnable = runnable
 
-    async def __call__(self, state: CoderState, config: RunnableConfig):
+    async def __call__(self, state: AskState, config: RunnableConfig):
         while True:
-            # configuration = config.get("configurable", {})
-            # passenger_id = configuration.get("passenger_id", None)
-            # state = {**state, "file_context": passenger_id}
             result = self.runnable.invoke(state, config=config)
             # If the LLM happens to return an empty response, we will re-prompt it
             # for an actual response.
@@ -51,20 +48,14 @@ class Assistant:
         return {"messages": result}
 
 
-class CoderAgent(BaseAgent):
-    """Domain service for the coder agent specialized in software development.
+class AskAgent(BaseAgent):
+    """ """
 
-    Orchestrates coding assistance through LangGraph-based agent with
-    specialized tools, file context integration, and conversation memory.
-    Optimized for code generation, debugging, refactoring, and analysis.
-    Usage: `coder_service.stream_code("Fix this bug", thread_id)` -> streaming response
-    """
-
-    name: str = "coder"
+    name: str = "ask"
 
     def get_state_class(self) -> Type[TypedDict]:  # pyright: ignore[reportInvalidTypeForm]
         """Return coder-specific state class."""
-        return CoderState
+        return AskState
 
     def get_tools(self):
         return [user_confirm, user_select, user_input]
@@ -74,26 +65,16 @@ class CoderAgent(BaseAgent):
         await self.execute(watch_prompt)
 
     async def execute(self, args: str) -> None:
-        """Execute coder request and stream response to console.
+        """ """
 
-        Processes the user's coding request through the coder agent,
-        streaming the response in real-time for immediate feedback.
-        Usage: Called by command processor when user types `/coder <request>`
-        """
-
-        coder_service = await self.make(CoderAgent)
+        coder_service = await self.make(AskAgent)
         response_handler = await self.make(ResponseHandler)
 
         # Stream coder agent response through centralized handler
         await response_handler.handle_stream(coder_service.stream(args))
 
     async def build(self) -> "CompiledStateGraph":
-        """Build and compile the coder agent graph with memory and tools.
-
-        Creates a StateGraph optimized for coding tasks with specialized
-        prompts, file context integration, and development-focused routing.
-        Usage: `graph = await builder.build()` -> ready for coding assistance
-        """
+        """ """
 
         llm_service = await self.make(LLMService)
         llm: BaseChatModel = llm_service.get_main_model()
@@ -138,14 +119,14 @@ class CoderAgent(BaseAgent):
         # Compile graph with memory and configuration
         return graph.compile(checkpointer=checkpointer, debug=False)
 
-    async def get_file_context(self, state: CoderState):
+    async def get_file_context(self, state: AskState):
         """Foo"""
         file_service: FileService = await self.make(FileService)
         initial_file_context = file_service.generate_context_prompt()
 
         return {"file_context": initial_file_context}
 
-    async def should_continue(self, state: CoderState) -> str:
+    async def should_continue(self, state: AskState) -> str:
         """Conditional edge function for coder agent flow control."""
         messages = state["messages"]
         last_message = messages[-1]

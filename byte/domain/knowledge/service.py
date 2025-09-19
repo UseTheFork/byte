@@ -1,13 +1,12 @@
 from typing import Any, Dict, List, Optional
 
-from byte.context import make
-from byte.core.service.mixins import Bootable
+from byte.core.service.mixins import Bootable, Injectable
 from byte.domain.events.mixins import Eventable
 from byte.domain.knowledge.models import KnowledgeItem, ProjectPattern, UserPreference
 from byte.domain.knowledge.store import ByteKnowledgeStore
 
 
-class KnowledgeService(Eventable, Bootable):
+class KnowledgeService(Eventable, Injectable, Bootable):
     """Domain service for long-term knowledge and preference management.
 
     Orchestrates persistent storage of user preferences, project patterns,
@@ -26,7 +25,7 @@ class KnowledgeService(Eventable, Bootable):
         Usage: `store = knowledge_service.store` -> direct store access
         """
         if self._store is None:
-            config_service = await make("config")
+            config_service = await self.make("config")
             self._store = ByteKnowledgeStore(config_service)
         return self._store
 

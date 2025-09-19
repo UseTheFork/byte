@@ -3,7 +3,6 @@ from typing import List
 
 from rich.console import Console
 
-from byte.context import make
 from byte.core.command.registry import Command
 from byte.domain.agent.service import AgentService
 from byte.domain.agent.state import CommandProcessor
@@ -38,9 +37,9 @@ class SwitchAgentCommand(Command):
             await self._show_agent_status()
             return
 
-        agent_service = await make(AgentService)
-        command_processor = await make(CommandProcessor)
-        console = await make(Console)
+        agent_service = await self.make(AgentService)
+        command_processor = await self.make(CommandProcessor)
+        console = await self.make(Console)
 
         if agent_service.set_active_agent(args):
             # Update command processor's active agent
@@ -71,8 +70,8 @@ class SwitchAgentCommand(Command):
 
     async def _show_agent_status(self) -> None:
         """Show current agent and available options."""
-        agent_service = await make(AgentService)
-        console = await make(Console)
+        agent_service = await self.make(AgentService)
+        console = await self.make(Console)
 
         current_agent = agent_service.get_active_agent()
         available_agents = self._get_available_agents()

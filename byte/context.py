@@ -1,8 +1,7 @@
 from contextvars import ContextVar
-from typing import TYPE_CHECKING, Optional, Type, TypeVar
+from typing import Optional, Type, TypeVar
 
-if TYPE_CHECKING:
-    from byte.container import Container
+from byte.container import Container
 
 T = TypeVar("T")
 

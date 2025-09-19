@@ -1,4 +1,3 @@
-from byte.context import make
 from byte.core.command.registry import Command
 from byte.domain.lint.service import LintService
 
@@ -28,5 +27,5 @@ class LintCommand(Command):
 
         Usage: Called by command processor when user types `/lint [args]`
         """
-        lint_service = await make(LintService)
+        lint_service = await self.make(LintService)
         await lint_service.lint_changed_files()

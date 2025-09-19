@@ -2,21 +2,15 @@ from rich.console import Console
 
 from byte.core.command.registry import Command
 from byte.core.response.handler import ResponseHandler
-from byte.domain.agent.coder.service import CoderAgent
+from byte.domain.agent.ask.service import AskAgent
 
 
-class CoderCommand(Command):
-    """Command to interact with the coder agent for software development assistance.
-
-    Provides direct access to the specialized coder agent through slash commands,
-    enabling users to request code generation, debugging, refactoring, and analysis
-    with full file context integration and streaming responses.
-    Usage: `/coder Fix the bug in main.py` -> streams coder agent response
-    """
+class AskCommand(Command):
+    """ """
 
     @property
     def name(self) -> str:
-        return "coder"
+        return "ask"
 
     @property
     def description(self) -> str:
@@ -36,7 +30,7 @@ class CoderCommand(Command):
             console.print("Usage: /coder <your coding request>")
             return
 
-        coder_service = await self.make(CoderAgent)
+        coder_service = await self.make(AskAgent)
 
         response_handler = await self.make(ResponseHandler)
 

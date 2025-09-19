@@ -7,9 +7,8 @@ from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
 
-from byte.context import make
 from byte.core.config.mixins import Configurable
-from byte.core.service.mixins import Bootable
+from byte.core.service.mixins import Bootable, Injectable
 from byte.domain.events.event import Event
 from byte.domain.events.mixins import Eventable
 from byte.domain.files.context_manager import FileContext, FileMode
@@ -22,7 +21,7 @@ from byte.domain.files.events import (
 )
 
 
-class FileService(Bootable, Configurable, Eventable):
+class FileService(Bootable, Configurable, Injectable, Eventable):
     """Simplified domain service for file context management with project discovery.
 
     Manages the active set of files available to the AI assistant, with
@@ -44,7 +43,7 @@ class FileService(Bootable, Configurable, Eventable):
         Usage: `await service.add_file("config.py", FileMode.READ_ONLY)`
         Usage: `await service.add_file("src/*.py", FileMode.EDITABLE)` -> adds all Python files
         """
-        file_discovery = await self.container.make(FileDiscoveryService)
+        file_discovery = await self.make(FileDiscoveryService)
         discovered_files = await file_discovery.get_files()
         discovered_file_paths = {str(f.resolve()) for f in discovered_files}
 
@@ -93,7 +92,7 @@ class FileService(Bootable, Configurable, Eventable):
         Usage: `await service.remove_file("old_file.py")`
         Usage: `await service.remove_file("src/*.py")` -> removes all Python files
         """
-        file_discovery = await make(FileDiscoveryService)
+        file_discovery = await self.make(FileDiscoveryService)
         discovered_files = await file_discovery.get_files()
         discovered_file_paths = {str(f.resolve()) for f in discovered_files}
 
@@ -244,7 +243,7 @@ Any other messages in the chat may contain outdated versions of the files' conte
         optionally filtered by extension for language-specific operations.
         Usage: `py_files = service.get_project_files('.py')` -> Python files
         """
-        file_discovery = await make(FileDiscoveryService)
+        file_discovery = await self.make(FileDiscoveryService)
         return await file_discovery.get_relative_paths(extension)
 
     async def find_project_files(self, pattern: str) -> List[str]:
@@ -254,7 +253,7 @@ Any other messages in the chat may contain outdated versions of the files' conte
         file index, respecting gitignore patterns automatically.
         Usage: `matches = service.find_project_files('src/main')` -> matching files
         """
-        file_discovery = await make(FileDiscoveryService)
+        file_discovery = await self.make(FileDiscoveryService)
         matches = await file_discovery.find_files(pattern)
 
         if not self._config.project_root:
@@ -278,9 +277,9 @@ Any other messages in the chat may contain outdated versions of the files' conte
         helping users understand the current context state.
         """
 
-        console = await make(Console)
+        console = await self.make(Console)
 
-        file_service = await make(FileService)
+        file_service = await self.make(FileService)
         editable_files = file_service.list_files(FileMode.EDITABLE)
         if editable_files:
             file_names = [f"[text]{f.relative_path}[/text]" for f in editable_files]

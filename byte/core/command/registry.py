@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional
 
-from byte.core.service.mixins import Bootable
+from byte.core.service.mixins import Bootable, Injectable
 
 
-class Command(ABC, Bootable):
+class Command(ABC, Bootable, Injectable):
     """Base class for all commands implementing the Command pattern.
 
     Provides a consistent interface for executable commands with support for

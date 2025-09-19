@@ -1,14 +1,13 @@
 from typing import Type
 
-from byte.context import make
 from byte.core.config.mixins import Configurable
-from byte.core.service.mixins import Bootable
+from byte.core.service.mixins import Bootable, Injectable
 from byte.domain.agent.base import BaseAgent
 from byte.domain.agent.coder.service import CoderAgent
 from byte.domain.events.mixins import Eventable
 
 
-class AgentService(Bootable, Configurable, Eventable):
+class AgentService(Bootable, Configurable, Injectable, Eventable):
     """Main agent service that routes requests to specialized agents."""
 
     _current_agent: Type[BaseAgent] = CoderAgent
@@ -34,7 +33,7 @@ class AgentService(Bootable, Configurable, Eventable):
             if not self._is_valid_agent(agent_type):
                 raise ValueError(f"Unknown agent type: {agent_type}")
 
-            agent_service = await make(agent_type)
+            agent_service = await self.make(agent_type)
             self._agents[agent_type] = agent_service
 
         agent = self._agents[agent_type]

@@ -20,3 +20,14 @@ class PrePrompt(Event):
     """
 
     current_agent: Type[BaseAgent]
+
+
+class PromptRefresh(Event):
+    """Event fired when the prompt loop should refresh immediately.
+
+    Triggers the main loop to break out of waiting for user input
+    and restart the prompt cycle, useful for file watcher notifications.
+    Usage: `await self.event(PromptRefresh(reason="Added file due to AI comment"))`
+    """
+
+    reason: str = ""

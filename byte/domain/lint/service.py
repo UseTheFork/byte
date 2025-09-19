@@ -8,14 +8,13 @@ from rich.panel import Panel
 from rich.spinner import Spinner
 from rich.text import Text
 
-from byte.context import make
 from byte.core.config.mixins import Configurable
-from byte.core.service.mixins import Bootable
+from byte.core.service.mixins import Bootable, Injectable
 from byte.domain.agent.commit.events import PreCommitStarted
 from byte.domain.git.service import GitService
 
 
-class LintService(Bootable, Configurable):
+class LintService(Bootable, Injectable, Configurable):
     """Domain service for code linting and formatting operations.
 
     Orchestrates multiple linting commands configured in config.yaml to analyze
@@ -32,8 +31,8 @@ class LintService(Bootable, Configurable):
 
         Usage: `results = await lint_service.lint_changed_files()` -> lint changed files
         """
-        console: Console = await make(Console)
-        git_service: GitService = await make(GitService)
+        console: Console = await self.make(Console)
+        git_service: GitService = await self.make(GitService)
         changed_files = await git_service.get_changed_files()
 
         # Get git root directory for consistent command execution
@@ -177,7 +176,8 @@ class LintService(Bootable, Configurable):
         panel = Panel(
             summary_text,
             title="[bold]Lint Results[/bold]",
-            border_style="blue",
+            title_align="left",
+            border_style="primary",
             padding=(0, 1),
         )
         console.print(panel)

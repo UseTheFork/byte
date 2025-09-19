@@ -83,3 +83,29 @@ class FileModified(Event):
 
     file_path: str = ""
     change_type: str = ""  # "created", "modified", "deleted"
+
+
+class CompletionRequested(Event):
+    """Event fired when an AI! comment is detected, requesting coder service completion.
+
+    Triggers the coder service to process the task described in the comment,
+    enabling automatic code completion based on inline instructions.
+    Usage: `await self.event(CompletionRequested(file_path="main.py", task="fix this bug", line_number=42))`
+    """
+
+    file_path: str = ""
+    task: str = ""
+    line_number: int = 0
+
+
+class AskRequested(Event):
+    """Event fired when an AI? comment is detected, requesting ask service response.
+
+    Triggers the ask service to answer the question described in the comment,
+    enabling automatic question answering based on inline queries.
+    Usage: `await self.event(AskRequested(file_path="main.py", question="what does this function do?", line_number=42))`
+    """
+
+    file_path: str = ""
+    question: str = ""
+    line_number: int = 0

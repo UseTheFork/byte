@@ -6,7 +6,6 @@ from langgraph.graph.state import CompiledStateGraph
 from rich.console import Console
 from rich.panel import Panel
 
-from byte.context import make
 from byte.core.response.handler import ResponseHandler
 from byte.domain.agent.base import BaseAgent, BaseAssistant
 from byte.domain.agent.commit.events import CommitCreated, PreCommitStarted
@@ -44,12 +43,13 @@ class CommitService(BaseAgent):
             console.print(
                 Panel(
                     f"Found {len(unstaged_changes)} unstaged changes:\n\n{files_display}",
-                    title="[bold yellow]Unstaged Changes[/bold yellow]",
-                    border_style="yellow",
+                    title="[bold]Unstaged Changes[/bold]",
+                    title_align="left",
+                    border_style="warning",
                 )
             )
 
-            interaction_service = await make(InteractionService)
+            interaction_service = await self.make(InteractionService)
             should_add = await interaction_service.confirm(
                 "Add these unstaged changes to this commit?",
                 default=True,
@@ -70,7 +70,7 @@ class CommitService(BaseAgent):
         Usage: Called by command processor when user types `/commit`
         """
 
-        console = await make(Console)
+        console = await self.make(Console)
 
         try:
             # Initialize git repository with parent directory search
@@ -95,7 +95,7 @@ class CommitService(BaseAgent):
                 )
             )
 
-            response_handler = await make(ResponseHandler)
+            response_handler = await self.make(ResponseHandler)
 
             result_message = await response_handler.handle_stream(
                 self.stream(staged_diff)
@@ -116,8 +116,9 @@ class CommitService(BaseAgent):
             console.print(
                 Panel(
                     f"[success]Commit:[/success] [info]{commit.hexsha[:7]}[/info] {commit.message.strip()}",
-                    title="[bold green]Commit Created[/bold green]",
-                    border_style="green",
+                    title="[bold]Commit Created[/bold]",
+                    title_align="left",
+                    border_style="primary",
                 )
             )
             return
@@ -140,7 +141,7 @@ class CommitService(BaseAgent):
         Usage: `graph = await builder.build()` -> ready for coding assistance
         """
 
-        llm_service = await make(LLMService)
+        llm_service = await self.make(LLMService)
         llm: BaseChatModel = llm_service.get_weak_model()
 
         assistant_runnable = commit_prompt | llm

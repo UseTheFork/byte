@@ -1,13 +1,13 @@
 from rich.console import Console
 
-from byte.context import make
 from byte.core.command.registry import CommandRegistry
 from byte.core.response.handler import ResponseHandler
+from byte.core.service.mixins import Injectable
 from byte.domain.agent.coder.service import CoderAgent
 from byte.domain.agent.service import AgentService
 
 
-class CommandProcessor:
+class CommandProcessor(Injectable):
     """Processes user input and routes commands to appropriate handlers.
 
     Distinguishes between slash commands (/add, /drop) and regular chat input,
@@ -16,10 +16,8 @@ class CommandProcessor:
     """
 
     def __init__(self, container):
-        # Container provides access to file service and other dependencies
-        self.container = container
-
         # TODO: This should be set from a config option.
+        self.container = container
         self._current_agent = CoderAgent
 
     def set_active_agent(self, agent_name: str) -> None:
@@ -46,14 +44,14 @@ class CommandProcessor:
 
         Splits command name from arguments and delegates to registered command handlers.
         """
-        command_registry = await make(CommandRegistry)
+        command_registry = await self.make(CommandRegistry)
         if " " in command_text:
             cmd_name, args = command_text.split(" ", 1)
         else:
             cmd_name, args = command_text, ""
 
         command = command_registry.get_slash_command(cmd_name)
-        console = await make(Console)
+        console = await self.make(Console)
 
         if command:
             await command.execute(args)
@@ -62,9 +60,9 @@ class CommandProcessor:
 
     async def _process_regular_input(self, user_input: str) -> None:
         """Route regular input to the currently active agent."""
-        agent_service = await make(AgentService)
+        agent_service = await self.make(AgentService)
 
-        response_handler = await make(ResponseHandler)
+        response_handler = await self.make(ResponseHandler)
 
         await response_handler.handle_stream(
             agent_service.route_to_agent(self._current_agent, user_input)

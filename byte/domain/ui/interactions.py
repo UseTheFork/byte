@@ -1,15 +1,13 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
 
 from rich.console import Console
 from rich.prompt import Confirm, Prompt
 
-from byte.context import make
-
-if TYPE_CHECKING:
-    pass
+from byte.core.config.mixins import Configurable
+from byte.core.service.mixins import Bootable, Injectable
 
 
-class InteractionService:
+class InteractionService(Bootable, Configurable, Injectable):
     """Service for user interactions during agent execution.
 
     Provides standardized methods for getting user input during tool execution
@@ -24,7 +22,7 @@ class InteractionService:
         """
 
         try:
-            console = await make(Console)
+            console = await self.make(Console)
 
             return Confirm.ask(
                 f"{message}",
@@ -47,7 +45,7 @@ class InteractionService:
             raise ValueError("Choices list cannot be empty")
 
         try:
-            console: Console = await make(Console)
+            console: Console = await self.make(Console)
 
             # Display options
             console.print(f"\n{message}")
@@ -87,7 +85,7 @@ class InteractionService:
         Usage: `text = await interaction_service.input_text("Enter name:", "default_name")`
         """
         try:
-            console: Console = await make(Console)
+            console: Console = await self.make(Console)
 
             result = Prompt.ask(
                 message,

@@ -5,9 +5,8 @@ from langchain_core.messages import HumanMessage
 from langgraph.graph.message import AnyMessage, add_messages
 from langgraph.graph.state import CompiledStateGraph, Runnable, RunnableConfig
 
-from byte.context import make
 from byte.core.config.mixins import Configurable
-from byte.core.service.mixins import Bootable
+from byte.core.service.mixins import Bootable, Injectable
 from byte.domain.events.mixins import Eventable
 from byte.domain.memory.service import MemoryService
 
@@ -44,7 +43,7 @@ class BaseAssistant:
         return {"messages": result}
 
 
-class BaseAgent(ABC, Bootable, Configurable, Eventable):
+class BaseAgent(ABC, Bootable, Configurable, Injectable, Eventable):
     """Base class for all agent services providing common graph management functionality.
 
     Defines the interface for agent services with lazy-loaded graph compilation,
@@ -80,11 +79,13 @@ class BaseAgent(ABC, Bootable, Configurable, Eventable):
         """
         # Get or create thread ID
         if thread_id is None:
-            memory_service = await make(MemoryService)
+            memory_service = await self.make(MemoryService)
             thread_id = memory_service.create_thread()
 
         # Create configuration with thread ID
-        config = RunnableConfig(configurable={"thread_id": thread_id})
+        config = RunnableConfig(
+            configurable={"thread_id": thread_id, "container": self.container}
+        )
 
         State = self.get_state_class()
 

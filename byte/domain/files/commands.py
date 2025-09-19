@@ -2,7 +2,6 @@ from typing import TYPE_CHECKING, List
 
 from rich.console import Console
 
-from byte.context import make
 from byte.core.command.registry import Command
 from byte.domain.files.context_manager import FileMode
 from byte.domain.files.service import FileService
@@ -29,13 +28,13 @@ class AddFileCommand(Command):
 
     async def execute(self, args: str) -> None:
         """Add specified file to context with editable permissions."""
-        console = await make(Console)
+        console = await self.make(Console)
 
         if not args:
             console.print("Usage: /add <file_path>")
             return
 
-        file_service = await make(FileService)
+        file_service = await self.make(FileService)
         if await file_service.add_file(args, FileMode.EDITABLE):
             console.print(f"[success]Added {args} to context as editable[/success]")
             return
@@ -52,7 +51,7 @@ class AddFileCommand(Command):
         the input pattern, respecting gitignore patterns automatically.
         """
         try:
-            file_service = await make(FileService)
+            file_service = await self.make(FileService)
 
             # Get project files matching the pattern
             matches = await file_service.find_project_files(text)
@@ -82,12 +81,12 @@ class ReadOnlyCommand(Command):
 
     async def execute(self, args: str) -> None:
         """Add specified file to context with read-only permissions."""
-        console = await make(Console)
+        console = await self.make(Console)
         if not args:
             console.print("Usage: /read-only <file_path>")
             return
 
-        file_service = await make(FileService)
+        file_service = await self.make(FileService)
         if await file_service.add_file(args, FileMode.READ_ONLY):
             console.print(f"[success]Added {args} to context as read-only[/success]")
             return
@@ -104,7 +103,7 @@ class ReadOnlyCommand(Command):
         suggesting project files that match the input pattern.
         """
         try:
-            file_service = await make(FileService)
+            file_service = await self.make(FileService)
 
             matches = await file_service.find_project_files(text)
             return [f for f in matches if not await file_service.is_file_in_context(f)]
@@ -133,12 +132,12 @@ class DropFileCommand(Command):
 
     async def execute(self, args: str) -> None:
         """Remove specified file from active context."""
-        console = await make(Console)
+        console = await self.make(Console)
         if not args:
             console.print("Usage: /drop <file_path>")
             return
 
-        file_service: FileService = await make(FileService)
+        file_service: FileService = await self.make(FileService)
         if await file_service.remove_file(args):
             console.print(f"[success]Removed {args} from context[/success]")
             return
@@ -153,7 +152,7 @@ class DropFileCommand(Command):
         suggesting project files that match the input pattern.
         """
         try:
-            file_service = await make(FileService)
+            file_service = await self.make(FileService)
 
             matches = await file_service.find_project_files(text)
             return [f for f in matches if not await file_service.is_file_in_context(f)]

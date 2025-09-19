@@ -1,12 +1,10 @@
-from typing import TYPE_CHECKING
-
+from byte.container import Container
 from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
 from byte.domain.agent.coder.commands import CoderCommand
 from byte.domain.agent.coder.service import CoderAgent
-
-if TYPE_CHECKING:
-    from byte.container import Container
+from byte.domain.events.dispatcher import EventDispatcher
+from byte.domain.files.events import CompletionRequested
 
 
 class CoderServiceProvider(ServiceProvider):
@@ -41,6 +39,10 @@ class CoderServiceProvider(ServiceProvider):
         await command_registry.register_slash_command(
             await container.make(CoderCommand)
         )
+
+        coder_agent = await container.make(CoderAgent)
+        event_dispatcher = await container.make(EventDispatcher)
+        event_dispatcher.listen(CompletionRequested, coder_agent.execute_watch_request)
 
         # Coder service is lazy-loaded, no explicit boot needed
         # Tools will be registered by their respective domains

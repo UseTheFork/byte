@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
+from byte.domain.agent.ask.service_provider import AskServiceProvider
 from byte.domain.agent.coder.service_provider import CoderServiceProvider
 from byte.domain.agent.commands import SwitchAgentCommand
 from byte.domain.agent.commit.service_provider import CommitServiceProvider
@@ -24,6 +25,7 @@ class AgentServiceProvider(ServiceProvider):
         super().__init__()
         self.agent_providers = [
             CoderServiceProvider(),
+            AskServiceProvider(),
             CommitServiceProvider(),
         ]
 

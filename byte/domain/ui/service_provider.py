@@ -13,7 +13,7 @@ class UIServiceProvider(ServiceProvider):
         """Register UI services in the container."""
 
         # Register interaction service for user interactions
-        container.singleton(InteractionService, lambda: InteractionService())
+        container.singleton(InteractionService)
 
     async def boot(self, container: Container):
         """Boot UI services."""
