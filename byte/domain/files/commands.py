@@ -1,8 +1,6 @@
 from typing import TYPE_CHECKING, List
 
-from rich.columns import Columns
 from rich.console import Console
-from rich.panel import Panel
 
 from byte.context import make
 from byte.core.command.registry import Command
@@ -65,30 +63,6 @@ class AddFileCommand(Command):
             # Fallback to empty list if discovery fails
             return []
 
-    async def pre_prompt(self) -> None:
-        """Display current editable files before each prompt.
-
-        Provides visual feedback about which files the AI can modify,
-        helping users understand the current context state.
-        """
-        if not self.container:
-            return
-        file_service = await make(FileService)
-        editable_files = file_service.list_files(FileMode.EDITABLE)
-        if not editable_files:
-            return
-
-        console = await make(Console)
-
-        file_names = [f"[info]{f.relative_path}[/info]" for f in editable_files]
-        console.print(
-            Panel(
-                Columns(file_names, equal=True, expand=True),
-                title="[bold success]Editable Files[/bold success]",
-                border_style="success",
-            )
-        )
-
 
 class ReadOnlyCommand(Command):
     """Command to add files to AI context as read-only references.
@@ -137,30 +111,6 @@ class ReadOnlyCommand(Command):
         except Exception:
             return []
 
-    async def pre_prompt(self) -> None:
-        """Display current read-only files before each prompt.
-
-        Shows which files are available for AI reference, using different
-        styling to distinguish from editable files in the UI.
-        """
-        if not self.container:
-            return
-        file_service: FileService = await make(FileService)
-        readonly_files = file_service.list_files(FileMode.READ_ONLY)
-        if not readonly_files:
-            return
-
-        console: Console = await make(Console)
-
-        file_names = [f"[warning]{f.relative_path}[/warning]" for f in readonly_files]
-        console.print(
-            Panel(
-                Columns(file_names, equal=True, expand=True),
-                title="[bold info]Read-only Files[/bold info]",
-                border_style="info",
-            )
-        )
-
 
 class DropFileCommand(Command):
     """Command to remove files from AI context.
@@ -197,22 +147,15 @@ class DropFileCommand(Command):
             return
 
     async def get_completions(self, text: str) -> List[str]:
-        """Complete with files currently in context for accurate removal.
+        """Provide intelligent file path completions from project discovery.
 
-        Only suggests files that are actually in context, preventing
-        errors and providing immediate feedback about available files.
+        Uses the same completion logic as AddFileCommand for consistency,
+        suggesting project files that match the input pattern.
         """
         try:
-            return []
+            file_service = await make(FileService)
 
-            import asyncio
-
-            from byte.context import get_container
-
-            container = get_container()
-            file_service = asyncio.run(container.make(FileService))
-
-            files = file_service.list_files()
-            return [f.relative_path for f in files if f.relative_path.startswith(text)]
+            matches = await file_service.find_project_files(text)
+            return [f for f in matches if not await file_service.is_file_in_context(f)]
         except Exception:
             return []

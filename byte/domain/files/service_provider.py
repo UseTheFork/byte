@@ -1,9 +1,11 @@
 from byte.container import Container
 from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
+from byte.domain.events.dispatcher import EventDispatcher
 from byte.domain.files.commands import AddFileCommand, DropFileCommand, ReadOnlyCommand
 from byte.domain.files.discovery_service import FileDiscoveryService
 from byte.domain.files.service import FileService
+from byte.domain.system.events import PrePrompt
 
 
 class FileServiceProvider(ServiceProvider):
@@ -26,6 +28,11 @@ class FileServiceProvider(ServiceProvider):
         # Ensure file discovery is booted first to scan project files
         file_discovery = await container.make(FileDiscoveryService)
         await file_discovery.ensure_booted()
+
+        # setup `PrePrompt` listner to display files in context
+        file_service = await container.make(FileService)
+        event_dispatcher = await container.make(EventDispatcher)
+        event_dispatcher.listen(PrePrompt, file_service.list_in_context_files)
 
         # Get the command registry
         command_registry = await container.make(CommandRegistry)

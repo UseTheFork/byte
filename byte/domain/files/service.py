@@ -2,9 +2,14 @@ from os import PathLike
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
+from rich.columns import Columns
+from rich.console import Console
+from rich.panel import Panel
+
 from byte.context import make
 from byte.core.config.mixins import Configurable
 from byte.core.service.mixins import Bootable
+from byte.domain.events.event import Event
 from byte.domain.events.mixins import Eventable
 from byte.domain.files.context_manager import FileContext, FileMode
 from byte.domain.files.discovery_service import FileDiscoveryService
@@ -36,6 +41,7 @@ class FileService(Bootable, Configurable, Eventable):
         context pollution with invalid files. Emits FileAdded event.
         Usage: `await service.add_file("config.py", FileMode.READ_ONLY)`
         """
+
         path_obj = Path(path).resolve()
 
         # Validate file exists and is readable
@@ -194,3 +200,37 @@ Any other messages in the chat may contain outdated versions of the files' conte
         """
         path_obj = Path(path).resolve()
         return str(path_obj) in self._context_files
+
+    async def list_in_context_files(self, event: Event):
+        """Display current editable files before each prompt.
+
+        Provides visual feedback about which files the AI can modify,
+        helping users understand the current context state.
+        """
+
+        console = await make(Console)
+
+        file_service = await make(FileService)
+        editable_files = file_service.list_files(FileMode.EDITABLE)
+        if editable_files:
+            file_names = [f"[text]{f.relative_path}[/text]" for f in editable_files]
+            console.print(
+                Panel(
+                    Columns(file_names, equal=True, expand=True),
+                    title="[bold success]Editable Files[/bold success]",
+                    border_style="success",
+                )
+            )
+
+        readonly_files = file_service.list_files(FileMode.READ_ONLY)
+        if readonly_files:
+            file_names = [f"[text]{f.relative_path}[/text]" for f in readonly_files]
+            console.print(
+                Panel(
+                    Columns(file_names, equal=True, expand=True),
+                    title="[bold info]Read-only Files[/bold info]",
+                    border_style="info",
+                )
+            )
+
+        return event

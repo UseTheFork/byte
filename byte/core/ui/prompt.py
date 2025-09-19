@@ -3,10 +3,11 @@ from typing import AsyncGenerator
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.document import Document
-from prompt_toolkit.history import InMemoryHistory
+from prompt_toolkit.history import FileHistory
 
 from byte.context import make
 from byte.core.command.registry import CommandRegistry
+from byte.core.config.config import BYTE_DIR
 
 
 class CommandCompleter(Completer):
@@ -50,7 +51,7 @@ class PromptHandler:
     def __init__(self):
         self.completer = CommandCompleter()
         self.session = PromptSession(
-            history=InMemoryHistory(),
+            history=FileHistory(BYTE_DIR / ".input_history"),
             multiline=False,
             completer=self.completer,
         )
