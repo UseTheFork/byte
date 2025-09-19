@@ -22,7 +22,7 @@ class KnowledgeServiceProvider(ServiceProvider):
         Usage: `provider.register(container)` -> binds knowledge services
         """
         # Register knowledge service
-        container.singleton("knowledge_service", lambda: KnowledgeService(container))
+        container.singleton(KnowledgeService)
 
     async def boot(self, container: "Container") -> None:
         """Boot knowledge services after all providers are registered.
@@ -35,12 +35,12 @@ class KnowledgeServiceProvider(ServiceProvider):
     async def shutdown(self, container: "Container"):
         """Shutdown knowledge services and close database connections."""
         try:
-            if "knowledge_service" in container._instances:
-                knowledge_service = await container.make("knowledge_service")
+            if KnowledgeService in container._instances:
+                knowledge_service = await container.make(KnowledgeService)
                 await knowledge_service.close()
         except Exception:
             pass  # Ignore cleanup errors during shutdown
 
     def provides(self) -> list:
         """Return list of services provided by this provider."""
-        return ["knowledge_service"]
+        return [KnowledgeService]

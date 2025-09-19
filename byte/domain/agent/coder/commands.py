@@ -1,11 +1,9 @@
-from typing import TYPE_CHECKING
+from rich.console import Console
 
+from byte.context import make
 from byte.core.command.registry import Command
 from byte.core.response.handler import ResponseHandler
-from byte.domain.agent.coder.service import CoderService
-
-if TYPE_CHECKING:
-    from rich.console import Console
+from byte.domain.agent.coder.service import CoderAgent
 
 
 class CoderCommand(Command):
@@ -32,27 +30,16 @@ class CoderCommand(Command):
         streaming the response in real-time for immediate feedback.
         Usage: Called by command processor when user types `/coder <request>`
         """
-        console: Console = await self.container.make("console")
+        console: Console = await make(Console)
 
         if not args.strip():
             console.print("[warning]Please provide a coding request.[/warning]")
             console.print("Usage: /coder <your coding request>")
             return
 
-        coder_service: CoderService = await self.container.make("coder_service")
+        coder_service = await make(CoderAgent)
 
-        # Show that we're processing the request
-        console.print()
-
-        # try:
-        # Use centralized response handler for consistent streaming
-
-        response_handler: ResponseHandler = await self.container.make(
-            "response_handler"
-        )
+        response_handler = await make(ResponseHandler)
 
         # Stream coder agent response through centralized handler
         await response_handler.handle_stream(coder_service.stream(args))
-
-        # except Exception as e:
-        #     console.print(f"[error]Error processing coder request:[/error] {e}")

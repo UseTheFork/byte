@@ -7,9 +7,11 @@ from langgraph.prebuilt import ToolNode
 from typing_extensions import TypedDict
 
 from byte.context import make
-from byte.domain.agent.base import BaseAgentService
+from byte.domain.agent.base import BaseAgent
 from byte.domain.agent.coder.prompts import coder_prompt
 from byte.domain.files.service import FileService
+from byte.domain.llm.service import LLMService
+from byte.domain.memory.service import MemoryService
 from byte.domain.ui.tools import user_confirm, user_input, user_select
 
 if TYPE_CHECKING:
@@ -50,7 +52,7 @@ class Assistant:
         return {"messages": result}
 
 
-class CoderService(BaseAgentService):
+class CoderAgent(BaseAgent):
     """Domain service for the coder agent specialized in software development.
 
     Orchestrates coding assistance through LangGraph-based agent with
@@ -58,6 +60,8 @@ class CoderService(BaseAgentService):
     Optimized for code generation, debugging, refactoring, and analysis.
     Usage: `coder_service.stream_code("Fix this bug", thread_id)` -> streaming response
     """
+
+    name: str = "coder"
 
     def get_state_class(self) -> Type[TypedDict]:  # pyright: ignore[reportInvalidTypeForm]
         """Return coder-specific state class."""
@@ -74,7 +78,7 @@ class CoderService(BaseAgentService):
         Usage: `graph = await builder.build()` -> ready for coding assistance
         """
 
-        llm_service = await make("llm_service")
+        llm_service = await make(LLMService)
         llm: BaseChatModel = llm_service.get_main_model()
 
         assistant_runnable = coder_prompt | llm.bind_tools(self.get_tools())
@@ -111,7 +115,7 @@ class CoderService(BaseAgentService):
         graph.add_edge("tools", "coder")
 
         # Get memory service for conversation persistence
-        memory_service = await make("memory_service")
+        memory_service = await make(MemoryService)
         checkpointer = await memory_service.get_saver()
 
         # Compile graph with memory and configuration
@@ -119,7 +123,7 @@ class CoderService(BaseAgentService):
 
     async def get_file_context(self, state: CoderState):
         """Foo"""
-        file_service: FileService = await make("file_service")
+        file_service: FileService = await make(FileService)
         initial_file_context = file_service.generate_context_prompt()
 
         return {"file_context": initial_file_context}

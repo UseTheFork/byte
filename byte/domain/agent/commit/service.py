@@ -4,17 +4,18 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from rich.console import Console
+from rich.panel import Panel
 
 from byte.context import make
 from byte.core.response.handler import ResponseHandler
-from byte.domain.agent.base import BaseAgentService, BaseAssistant
+from byte.domain.agent.base import BaseAgent, BaseAssistant
 from byte.domain.agent.commit.events import CommitCreated, PreCommitStarted
 from byte.domain.agent.commit.prompt import commit_prompt
 from byte.domain.llm.service import LLMService
 from byte.domain.ui.interactions import InteractionService
 
 
-class CommitService(BaseAgentService):
+class CommitService(BaseAgent):
     """Domain service for generating AI-powered git commit messages and creating commits."""
 
     async def _handle_unstaged_changes(self, repo, console) -> None:
@@ -28,9 +29,6 @@ class CommitService(BaseAgentService):
         """
         unstaged_changes = repo.index.diff(None)  # None compares working tree to index
         if unstaged_changes:
-            # Display unstaged changes in a clear panel format
-            from rich.panel import Panel
-
             file_list = []
             for change in unstaged_changes:
                 change_type = (
@@ -116,7 +114,11 @@ class CommitService(BaseAgentService):
             )
 
             console.print(
-                f"[success]Commit:[/success] [info]{commit.hexsha[:7]}[/info] {commit.message.strip()}"
+                Panel(
+                    f"[success]Commit:[/success] [info]{commit.hexsha[:7]}[/info] {commit.message.strip()}",
+                    title="[bold green]Commit Created[/bold green]",
+                    border_style="green",
+                )
             )
             return
 

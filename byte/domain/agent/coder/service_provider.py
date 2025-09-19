@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
 from byte.domain.agent.coder.commands import CoderCommand
-from byte.domain.agent.coder.service import CoderService
+from byte.domain.agent.coder.service import CoderAgent
 
 if TYPE_CHECKING:
     from byte.container import Container
@@ -25,7 +25,7 @@ class CoderServiceProvider(ServiceProvider):
         """
 
         # Register coder service
-        container.singleton(CoderService)
+        container.singleton(CoderAgent)
 
         # Register coder command
         container.bind(CoderCommand)

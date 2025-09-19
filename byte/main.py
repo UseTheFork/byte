@@ -7,12 +7,11 @@ from byte.container import Container
 from byte.context import container_context
 from byte.core.cli import cli
 from byte.core.command.processor import CommandProcessor
-from byte.core.command.registry import CommandRegistry
 from byte.core.config.config import ByteConfg
 from byte.core.ui.prompt import PromptHandler
 from byte.domain.agent.service import AgentService
 from byte.domain.events.dispatcher import EventDispatcher
-from byte.domain.system.events import ExitRequested
+from byte.domain.system.events import ExitRequested, PrePrompt
 
 
 class Byte:
@@ -57,21 +56,24 @@ class Byte:
         """
         await self.initialize()
 
-        console = await self.container.make(Console)
-        command_registry = await self.container.make(CommandRegistry)
+        console: Console = await self.container.make(Console)
+        event_dispatcher = await self.container.make(EventDispatcher)
 
         try:
             while not self._should_exit:
                 try:
                     # Allow commands to display contextual information before each prompt
-                    await command_registry.pre_prompt()
-
                     agent_service: AgentService = await self.container.make(
                         AgentService
                     )
                     current_agent = agent_service.get_active_agent()
+                    agent = await self.container.make(current_agent)
+
+                    await event_dispatcher.dispatch(
+                        PrePrompt(current_agent=current_agent)
+                    )
                     user_input = await self.prompt_handler.get_input_async(
-                        f"[{current_agent}]> "
+                        f"[{agent.name}]> "
                     )
 
                     if not user_input.strip():
@@ -85,7 +87,6 @@ class Byte:
                         break
 
                 except KeyboardInterrupt:
-                    console.print("\n[warning]Goodbye![/warning]")
                     break
         finally:
             # Always cleanup before exit

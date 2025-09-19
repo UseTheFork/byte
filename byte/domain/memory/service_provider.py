@@ -35,7 +35,7 @@ class MemoryServiceProvider(ServiceProvider):
     async def shutdown(self, container: "Container"):
         """Shutdown memory services and close database connections."""
         try:
-            if "memory_service" in container._instances:
+            if MemoryService in container._instances:
                 memory_service = await container.make(MemoryService)
                 await memory_service.close()
         except Exception:

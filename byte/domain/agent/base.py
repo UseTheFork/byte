@@ -44,15 +44,16 @@ class BaseAssistant:
         return {"messages": result}
 
 
-class BaseAgentService(ABC, Bootable, Configurable, Eventable):
+class BaseAgent(ABC, Bootable, Configurable, Eventable):
     """Base class for all agent services providing common graph management functionality.
 
     Defines the interface for agent services with lazy-loaded graph compilation,
     tool management, and memory integration. Subclasses must implement the build
     method to define their specific agent behavior and routing logic.
-    Usage: `class MyAgent(BaseAgentService): async def build(self): ...`
+    Usage: `class MyAgent(BaseAgent): async def build(self): ...`
     """
 
+    name: str = ""
     _graph: Optional[CompiledStateGraph] = None
 
     @abstractmethod

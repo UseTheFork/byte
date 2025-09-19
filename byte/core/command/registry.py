@@ -47,14 +47,6 @@ class Command(ABC, Bootable):
         """
         return []
 
-    async def pre_prompt(self) -> None:
-        """Display status information before each prompt.
-
-        Override to show relevant state like active files, current mode, etc.
-        Called before every user prompt to provide contextual awareness.
-        """
-        pass
-
 
 class CommandRegistry(Bootable):
     """Central registry for command discovery and routing.
@@ -83,15 +75,6 @@ class CommandRegistry(Bootable):
     def get_at_command(self, name: str) -> Optional[Command]:
         """Retrieve a registered @ command by name."""
         return self._at_commands.get(name)
-
-    async def pre_prompt(self) -> None:
-        """Display status from all commands before prompting user.
-
-        Allows commands to show relevant state like active files or current mode
-        without cluttering the main interface.
-        """
-        for command in self._slash_commands.values():
-            await command.pre_prompt()
 
     async def get_slash_completions(self, text: str) -> List[str]:
         """Generate tab completions for slash commands and their arguments.

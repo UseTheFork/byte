@@ -3,6 +3,7 @@ from rich.console import Console
 from byte.context import make
 from byte.core.command.registry import CommandRegistry
 from byte.core.response.handler import ResponseHandler
+from byte.domain.agent.coder.service import CoderAgent
 from byte.domain.agent.service import AgentService
 
 
@@ -19,7 +20,7 @@ class CommandProcessor:
         self.container = container
 
         # TODO: This should be set from a config option.
-        self._current_agent = "coder"
+        self._current_agent = CoderAgent
 
     def set_active_agent(self, agent_name: str) -> None:
         """Update the active agent for regular input processing."""

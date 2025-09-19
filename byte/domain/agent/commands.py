@@ -71,8 +71,8 @@ class SwitchAgentCommand(Command):
 
     async def _show_agent_status(self) -> None:
         """Show current agent and available options."""
-        agent_service = await self.container.make("agent_service")
-        console = await self.container.make("console")
+        agent_service = await make(AgentService)
+        console = await make(Console)
 
         current_agent = agent_service.get_active_agent()
         available_agents = self._get_available_agents()
