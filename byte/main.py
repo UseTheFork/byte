@@ -31,6 +31,9 @@ class Byte:
 
     async def initialize(self):
         """Initialize async resources and event listeners."""
+        # Initialize prompt handler
+        await self.prompt_handler.initialize()
+
         # Listen for exit events
         event_dispatcher = await self.container.make(EventDispatcher)
         event_dispatcher.listen("ExitRequested", self._handle_exit_request)
@@ -54,7 +57,6 @@ class Byte:
         """
         await self.initialize()
 
-        # AI:
         console = await self.container.make(Console)
         command_registry = await self.container.make(CommandRegistry)
 

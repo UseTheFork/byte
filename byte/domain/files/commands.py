@@ -47,29 +47,20 @@ class AddFileCommand(Command):
             )
             return
 
-    def get_completions(self, text: str) -> List[str]:
+    async def get_completions(self, text: str) -> List[str]:
         """Provide intelligent file path completions from project discovery.
 
         Uses the file discovery service to suggest project files that match
         the input pattern, respecting gitignore patterns automatically.
         """
         try:
-            return []
-
-            # Use async context to get file service, but we need sync here
-            # This is a limitation of the current completion system
-            import asyncio
-
-            from byte.context import get_container
-
-            container = get_container()
-            file_service = asyncio.run(container.make(FileService))
+            file_service = await make(FileService)
 
             # Get project files matching the pattern
-            matches = file_service.find_project_files(text)
+            matches = await file_service.find_project_files(text)
 
             # Filter out files already in context to avoid duplicates
-            return [f for f in matches if not file_service.is_file_in_context(f)]
+            return [f for f in matches if not await file_service.is_file_in_context(f)]
         except Exception:
             # Fallback to empty list if discovery fails
             return []
@@ -132,24 +123,17 @@ class ReadOnlyCommand(Command):
             )
             return
 
-    def get_completions(self, text: str) -> List[str]:
+    async def get_completions(self, text: str) -> List[str]:
         """Provide intelligent file path completions from project discovery.
 
         Uses the same completion logic as AddFileCommand for consistency,
         suggesting project files that match the input pattern.
         """
         try:
-            return []
+            file_service = await make(FileService)
 
-            import asyncio
-
-            from byte.context import get_container
-
-            container = get_container()
-            file_service = asyncio.run(container.make(FileService))
-
-            matches = file_service.find_project_files(text)
-            return [f for f in matches if not file_service.is_file_in_context(f)]
+            matches = await file_service.find_project_files(text)
+            return [f for f in matches if not await file_service.is_file_in_context(f)]
         except Exception:
             return []
 
@@ -212,7 +196,7 @@ class DropFileCommand(Command):
             console.print(f"[error]File {args} not found in context[/error]")
             return
 
-    def get_completions(self, text: str) -> List[str]:
+    async def get_completions(self, text: str) -> List[str]:
         """Complete with files currently in context for accurate removal.
 
         Only suggests files that are actually in context, preventing

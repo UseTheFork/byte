@@ -48,7 +48,7 @@ class Command(ABC, Bootable):
         """
         pass
 
-    def get_completions(self, text: str) -> List[str]:
+    async def get_completions(self, text: str) -> List[str]:
         """Return tab completion suggestions for command arguments.
 
         Override to provide context-aware completions like file paths.
@@ -72,6 +72,9 @@ class CommandRegistry(Bootable):
     slash commands (/add) and @ commands (@mention). Supports tab completion
     for improved user experience.
     """
+
+    def __init__(self, container=None):
+        super().__init__(container)
 
     async def boot(self):
         # Separate namespaces for different command types
@@ -102,7 +105,7 @@ class CommandRegistry(Bootable):
         for command in self._slash_commands.values():
             await command.pre_prompt()
 
-    def get_slash_completions(self, text: str) -> List[str]:
+    async def get_slash_completions(self, text: str) -> List[str]:
         """Generate tab completions for slash commands and their arguments.
 
         Handles both command name completion and argument completion by
@@ -122,10 +125,10 @@ class CommandRegistry(Bootable):
             cmd_name, args = text.split(" ", 1)
             command = self._slash_commands.get(cmd_name)
             if command:
-                return command.get_completions(args)
+                return await command.get_completions(args)
         return []
 
-    def get_at_completions(self, text: str) -> List[str]:
+    async def get_at_completions(self, text: str) -> List[str]:
         """Generate tab completions for @ commands and their arguments.
 
         Similar to slash completions but for @command syntax.
@@ -144,5 +147,5 @@ class CommandRegistry(Bootable):
             cmd_name, args = text.split(" ", 1)
             command = self._at_commands.get(cmd_name)
             if command:
-                return command.get_completions(args)
+                return await command.get_completions(args)
         return []

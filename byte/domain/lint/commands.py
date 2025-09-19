@@ -28,5 +28,5 @@ class LintCommand(Command):
 
         Usage: Called by command processor when user types `/lint [args]`
         """
-        lint_service: LintService = await make("lint_service")
+        lint_service = await make(LintService)
         await lint_service.lint_changed_files()

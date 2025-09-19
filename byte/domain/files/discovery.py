@@ -21,10 +21,10 @@ class FileDiscoveryService(Bootable, Configurable):
         self._all_files: Set[Path] = set()
         self._gitignore_spec: Optional[pathspec.PathSpec] = None
 
-        self._load_gitignore_patterns()
+        await self._load_gitignore_patterns()
         await self._scan_project_files()
 
-    def _load_gitignore_patterns(self) -> None:
+    async def _load_gitignore_patterns(self) -> None:
         """Load and compile gitignore patterns from .gitignore files.
 
         Searches for .gitignore files in project root and parent directories,
@@ -32,54 +32,34 @@ class FileDiscoveryService(Bootable, Configurable):
         """
         patterns = []
 
-        # Always ignore common patterns
-        patterns.extend(
-            [
-                ".git/",
-                "__pycache__/",
-                "*.pyc",
-                "*.pyo",
-                "*.pyd",
-                ".Python",
-                "build/",
-                "develop-eggs/",
-                "dist/",
-                "downloads/",
-                "eggs/",
-                ".eggs/",
-                "lib/",
-                "lib64/",
-                "parts/",
-                "sdist/",
-                "var/",
-                "wheels/",
-                "*.egg-info/",
-                ".installed.cfg",
-                "*.egg",
-                ".env",
-                ".venv",
-                "env/",
-                "venv/",
-                "ENV/",
-                "env.bak/",
-                "venv.bak/",
-            ]
-        )
+        # Load project-specific .gitignore only if we have a valid project root
+        if self._config.project_root is not None:
+            gitignore_path = self._config.project_root / ".gitignore"
+            if gitignore_path.exists():
+                try:
+                    with open(gitignore_path, encoding="utf-8") as f:
+                        patterns.extend(
+                            line.strip()
+                            for line in f
+                            if line.strip() and not line.startswith("#")
+                        )
+                except (OSError, UnicodeDecodeError):
+                    # Gracefully handle unreadable gitignore files
+                    pass
 
-        print(self._config.project_root)
-
-        gitignore_path = self._config.project_root / ".gitignore"
-        if gitignore_path.exists():
-            try:
-                with open(gitignore_path, encoding="utf-8") as f:
-                    patterns.extend(
-                        line.strip()
-                        for line in f
-                        if line.strip() and not line.startswith("#")
-                    )
-            except (OSError, UnicodeDecodeError):
-                # Gracefully handle unreadable gitignore files
-                pass
+            # Also load .byte/.ignore file for project-specific ignore patterns
+            byte_ignore_path = self._config.byte_dir / ".ignore"
+            if byte_ignore_path.exists():
+                try:
+                    with open(byte_ignore_path, encoding="utf-8") as f:
+                        patterns.extend(
+                            line.strip()
+                            for line in f
+                            if line.strip() and not line.startswith("#")
+                        )
+                except (OSError, UnicodeDecodeError):
+                    # Gracefully handle unreadable .ignore files
+                    pass
 
         self._gitignore_spec = pathspec.PathSpec.from_lines("gitwildmatch", patterns)
 
@@ -96,15 +76,15 @@ class FileDiscoveryService(Bootable, Configurable):
             root_path = Path(root)
 
             # Filter directories to avoid scanning ignored ones
-            dirs[:] = [d for d in dirs if not self._is_ignored(root_path / d)]
+            dirs[:] = [d for d in dirs if not await self._is_ignored(root_path / d)]
 
             # Add non-ignored files to our cache
             for file in files:
                 file_path = root_path / file
-                if not self._is_ignored(file_path) and file_path.is_file():
+                if not await self._is_ignored(file_path) and file_path.is_file():
                     self._all_files.add(file_path)
 
-    def _is_ignored(self, path: Path) -> bool:
+    async def _is_ignored(self, path: Path) -> bool:
         """Check if a path should be ignored based on gitignore patterns.
 
         Uses relative path from project root for pattern matching,
@@ -123,7 +103,7 @@ class FileDiscoveryService(Bootable, Configurable):
             # Path is outside project root
             return True
 
-    def get_files(self, extension: Optional[str] = None) -> List[Path]:
+    async def get_files(self, extension: Optional[str] = None) -> List[Path]:
         """Get all discovered files, optionally filtered by extension.
 
         Returns cached file list for fast access, with optional filtering
@@ -139,20 +119,20 @@ class FileDiscoveryService(Bootable, Configurable):
             files, key=lambda p: str(p.relative_to(self._config.project_root))
         )
 
-    def get_relative_paths(self, extension: Optional[str] = None) -> List[str]:
+    async def get_relative_paths(self, extension: Optional[str] = None) -> List[str]:
         """Get relative path strings for UI display and completions.
 
         Provides user-friendly relative paths from project root,
         suitable for command completions and file selection interfaces.
         Usage: `paths = discovery.get_relative_paths('.py')` -> ['src/main.py', ...]
         """
-        files = self.get_files(extension)
+        files = await self.get_files(extension)
         if not self._config.project_root:
             return [str(f) for f in files]
 
         return [str(f.relative_to(self._config.project_root)) for f in files]
 
-    def find_files(self, pattern: str) -> List[Path]:
+    async def find_files(self, pattern: str) -> List[Path]:
         """Find files matching a partial path pattern for completions.
 
         Supports prefix matching for tab completion and file search,
@@ -175,7 +155,7 @@ class FileDiscoveryService(Bootable, Configurable):
             matches, key=lambda p: str(p.relative_to(self._config.project_root))
         )
 
-    def refresh(self) -> None:
+    async def refresh(self) -> None:
         """Refresh the file cache by rescanning the project directory.
 
         Useful when files are added/removed outside of the application
@@ -183,9 +163,5 @@ class FileDiscoveryService(Bootable, Configurable):
         Usage: `discovery.refresh()` -> updates cached file list
         """
         self._all_files.clear()
-        self._load_gitignore_patterns()
-        # Note: This is sync, but _scan_project_files is async
-        # In practice, we'd want to make this async too or provide both sync/async versions
-        import asyncio
-
-        asyncio.create_task(self._scan_project_files())
+        await self._load_gitignore_patterns()
+        await self._scan_project_files()

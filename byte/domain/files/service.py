@@ -2,6 +2,7 @@ from os import PathLike
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
+from byte.context import make
 from byte.core.config.mixins import Configurable
 from byte.core.service.mixins import Bootable
 from byte.domain.events.mixins import Eventable
@@ -26,8 +27,6 @@ class FileService(Bootable, Configurable, Eventable):
 
     async def boot(self) -> None:
         """Initialize file service and ensure discovery service is ready."""
-        self.file_discovery = FileDiscoveryService(self.container)
-        await self.file_discovery.ensure_booted()
         self._context_files: Dict[str, FileContext] = {}
 
     async def add_file(self, path: Union[str, PathLike], mode: FileMode) -> bool:
@@ -162,28 +161,31 @@ Any other messages in the chat may contain outdated versions of the files' conte
         await self.event(ContextCleared())
 
     # Project file discovery methods
-    def get_project_files(self, extension: Optional[str] = None) -> List[str]:
+    async def get_project_files(self, extension: Optional[str] = None) -> List[str]:
         """Get all project files as relative path strings.
 
         Uses the discovery service to provide fast access to all project files,
         optionally filtered by extension for language-specific operations.
         Usage: `py_files = service.get_project_files('.py')` -> Python files
         """
-        return self.file_discovery.get_relative_paths(extension)
+        file_discovery = await make(FileDiscoveryService)
+        return await file_discovery.get_relative_paths(extension)
 
-    def find_project_files(self, pattern: str) -> List[str]:
+    async def find_project_files(self, pattern: str) -> List[str]:
         """Find project files matching a pattern for completions.
 
         Provides fast file path completion by searching the cached project
         file index, respecting gitignore patterns automatically.
         Usage: `matches = service.find_project_files('src/main')` -> matching files
         """
-        matches = self.file_discovery.find_files(pattern)
-        if not self.file_discovery._project_root:
-            return [str(f) for f in matches]
-        return [str(f.relative_to(self.file_discovery._project_root)) for f in matches]
+        file_discovery = await make(FileDiscoveryService)
+        matches = await file_discovery.find_files(pattern)
 
-    def is_file_in_context(self, path: Union[str, PathLike]) -> bool:
+        if not self._config.project_root:
+            return [str(f) for f in matches]
+        return [str(f.relative_to(self._config.project_root)) for f in matches]
+
+    async def is_file_in_context(self, path: Union[str, PathLike]) -> bool:
         """Check if a file is currently in the AI context.
 
         Quick lookup to determine if a file is already being tracked,
