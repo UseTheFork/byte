@@ -19,7 +19,7 @@ class LLMServiceProvider(ServiceProvider):
 
         Usage: `provider.register(container)` -> configures best available LLM service
         """
-        container.bind("llm_service", lambda: LLMService(container))
+        container.singleton(LLMService)
 
     async def boot(self, container: "Container") -> None:
         """Boot LLM services and display configuration information.
@@ -28,8 +28,8 @@ class LLMServiceProvider(ServiceProvider):
         helping users understand which AI capabilities are available.
         Usage: Called automatically during application startup
         """
-        llm_service: LLMService = await container.make("llm_service")
-        console: Console = await container.make("console")
+        llm_service = await container.make(LLMService)
+        console = await container.make(Console)
 
         # Display active model configuration for user awareness
         main_model = llm_service._service_config.main.model

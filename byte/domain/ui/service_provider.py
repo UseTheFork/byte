@@ -12,6 +12,12 @@ class UIServiceProvider(ServiceProvider):
     async def register(self, container: Container) -> None:
         """Register UI services in the container."""
 
+        # Register interaction service for user interactions
+        container.singleton(InteractionService, lambda: InteractionService())
+
+    async def boot(self, container: Container):
+        """Boot UI services."""
+
         # "pink": "#f5c2e7",
         # "mauve": "#cba6f7",
         # "red": "#f38ba8",
@@ -52,7 +58,8 @@ class UIServiceProvider(ServiceProvider):
             }
         )
 
-        console = Console(theme=catppuccin_mocha_theme)
+        console = await container.make(Console)
+        console.push_theme(catppuccin_mocha_theme)
 
         # Create diagonal gradient from primary to secondary color
         logo_lines = [
@@ -81,15 +88,5 @@ class UIServiceProvider(ServiceProvider):
 
         console.print("┌── The No Vibe CLI Agent", style="text")
 
-        container.singleton("console", lambda: console)
-
-        # Register interaction service for user interactions
-        container.singleton("interaction_service", lambda: InteractionService())
-
-    async def boot(self, container: Container):
-        """Boot UI services."""
-        # UI services are ready to use after registration
-        pass
-
     def provides(self) -> list:
-        return ["console", "prompt_handler", "interaction_service"]
+        return [Console, InteractionService]

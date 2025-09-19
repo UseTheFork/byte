@@ -21,7 +21,7 @@ class GitServiceProvider(ServiceProvider):
         Usage: `provider.register(container)` -> binds git service
         """
         # Register git service
-        container.bind("git_service", lambda: GitService(container))
+        container.bind(GitService)
 
     async def boot(self, container: "Container") -> None:
         """Boot git services.
@@ -32,4 +32,4 @@ class GitServiceProvider(ServiceProvider):
 
     def provides(self) -> list:
         """Return list of services provided by this provider."""
-        return ["git_service"]
+        return [GitService]

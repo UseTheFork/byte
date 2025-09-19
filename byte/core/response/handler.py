@@ -23,16 +23,13 @@ class ResponseHandler:
         """Handle agent response stream with simple Live display."""
 
         self._accumulated_content = ""
-        self._console: Console = await make("console")
+        self._console = await make(Console)
 
         # Setup a Live Spinner
         spinner = Spinner("dots", text="Thinking...")
         self._live = Live(
             spinner, console=self._console, transient=True, refresh_per_second=20
         )
-
-        # spinner = Spinner("dots", text="Running linters...")
-        # with Live(spinner, console=console, transient=True, refresh_per_second=10):
 
         final_message = None
 

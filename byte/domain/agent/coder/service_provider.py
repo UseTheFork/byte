@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
 from byte.domain.agent.coder.commands import CoderCommand
 from byte.domain.agent.coder.service import CoderService
@@ -24,21 +25,21 @@ class CoderServiceProvider(ServiceProvider):
         """
 
         # Register coder service
-        container.singleton("coder_service", lambda: CoderService(container))
+        container.singleton(CoderService)
 
         # Register coder command
-        container.bind("coder_command", lambda: CoderCommand(container))
+        container.bind(CoderCommand)
 
     async def boot(self, container: "Container") -> None:
         """Boot coder services after all providers are registered.
 
         Usage: `provider.boot(container)` -> coder agent ready for development tasks
         """
-        command_registry = await container.make("command_registry")
+        command_registry = await container.make(CommandRegistry)
 
         # Register coder command for user access
         await command_registry.register_slash_command(
-            await container.make("coder_command")
+            await container.make(CoderCommand)
         )
 
         # Coder service is lazy-loaded, no explicit boot needed
@@ -46,4 +47,4 @@ class CoderServiceProvider(ServiceProvider):
 
     def provides(self) -> list:
         """Return list of services provided by this provider."""
-        return ["coder_service", "coder_command"]
+        return [CommandRegistry, CoderCommand]

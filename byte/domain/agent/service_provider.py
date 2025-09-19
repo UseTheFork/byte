@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
 from byte.domain.agent.coder.service_provider import CoderServiceProvider
 from byte.domain.agent.commands import SwitchAgentCommand
@@ -27,7 +28,7 @@ class AgentServiceProvider(ServiceProvider):
         ]
 
     async def register(self, container: "Container") -> None:
-        container.singleton("agent_service", lambda: AgentService(container))
+        container.singleton(AgentService)
 
         # Register all sub-agents
         for provider in self.agent_providers:
@@ -45,7 +46,7 @@ class AgentServiceProvider(ServiceProvider):
             await provider.boot(container)
 
         # Register agent switching commands
-        command_registry = await container.make("command_registry")
+        command_registry = await container.make(CommandRegistry)
         await command_registry.register_slash_command(SwitchAgentCommand(container))
 
     def provides(self) -> list:

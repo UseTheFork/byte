@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
 from byte.domain.events.dispatcher import EventDispatcher
 from byte.domain.lint.commands import LintCommand
@@ -24,22 +25,20 @@ class LintServiceProvider(ServiceProvider):
         Usage: `provider.register(container)` -> binds lint service and command
         """
         # Register lint service and command
-        container.bind("lint_service", lambda: LintService(container))
-        container.bind("lint_command", lambda: LintCommand(container))
+        container.singleton(LintService)
+        container.singleton(LintCommand)
 
     async def boot(self, container: "Container") -> None:
         """Boot lint services and register commands with registry.
 
         Usage: `provider.boot(container)` -> `/lint` becomes available to users
         """
-        command_registry = await container.make("command_registry")
-        event_dispatcher: EventDispatcher = await container.make("event_dispatcher")
-        lint_service: LintService = await container.make("lint_service")
+        command_registry = await container.make(CommandRegistry)
+        event_dispatcher = await container.make(EventDispatcher)
+        lint_service = await container.make(LintService)
 
         # Register lint command for user access
-        await command_registry.register_slash_command(
-            await container.make("lint_command")
-        )
+        await command_registry.register_slash_command(await container.make(LintCommand))
 
         # Register event listener for pre-commit linting
         event_dispatcher.listen("PreCommitStarted", lint_service._handle_pre_commit)

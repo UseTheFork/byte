@@ -3,12 +3,15 @@ from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.document import Document
 from prompt_toolkit.history import InMemoryHistory
 
-from byte.core.command.registry import command_registry
+from byte.context import make
+from byte.core.command.registry import CommandRegistry
 
 
 class CommandCompleter(Completer):
-    def get_completions(self, document: Document, complete_event):
+    async def get_completions(self, document: Document, complete_event):
+        pass
         text = document.text_before_cursor
+        command_registry = await make(CommandRegistry)
 
         if text.startswith("/"):
             # Parse slash command

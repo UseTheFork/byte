@@ -32,8 +32,8 @@ class LintService(Bootable, Configurable):
 
         Usage: `results = await lint_service.lint_changed_files()` -> lint changed files
         """
-        console: Console = await make("console")
-        git_service: GitService = await make("git_service")
+        console: Console = await make(Console)
+        git_service: GitService = await make(GitService)
         changed_files = await git_service.get_changed_files()
 
         # Get git root directory for consistent command execution

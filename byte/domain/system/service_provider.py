@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from byte.container import Container
+from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
 from byte.domain.system.commands import ExitCommand, HelpCommand
 
@@ -21,27 +22,23 @@ class SystemServiceProvider(ServiceProvider):
 
         Usage: `provider.register(container)` -> binds exit and help commands
         """
-        container.bind("exit_command", lambda: ExitCommand(container))
-        container.bind("help_command", lambda: HelpCommand(container))
+        container.singleton(ExitCommand)
+        container.singleton(HelpCommand)
 
     async def boot(self, container: "Container") -> None:
         """Boot system services and register commands with registry.
 
         Usage: `provider.boot(container)` -> commands become available as /exit, /help
         """
-        command_registry = await container.make("command_registry")
+        command_registry = await container.make(CommandRegistry)
 
         # Register system commands for user access
-        await command_registry.register_slash_command(
-            await container.make("exit_command")
-        )
-        await command_registry.register_slash_command(
-            await container.make("help_command")
-        )
+        await command_registry.register_slash_command(await container.make(ExitCommand))
+        await command_registry.register_slash_command(await container.make(HelpCommand))
 
     def provides(self) -> list:
         """Return list of services provided by this provider."""
         return [
-            "exit_command",
-            "help_command",
+            ExitCommand,
+            HelpCommand,
         ]

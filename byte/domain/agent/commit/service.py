@@ -9,6 +9,7 @@ from byte.core.response.handler import ResponseHandler
 from byte.domain.agent.base import BaseAgentService, BaseAssistant
 from byte.domain.agent.commit.events import CommitCreated, PreCommitStarted
 from byte.domain.agent.commit.prompt import commit_prompt
+from byte.domain.ui.interactions import InteractionService
 
 if TYPE_CHECKING:
     from langchain_core.language_models.chat_models import BaseChatModel
@@ -32,7 +33,7 @@ class CommitService(BaseAgentService):
         """
         unstaged_changes = repo.index.diff(None)  # None compares working tree to index
         if unstaged_changes:
-            interaction_service = await make("interaction_service")
+            interaction_service = await make(InteractionService)
             should_add = await interaction_service.confirm(
                 f"Found {len(unstaged_changes)} unstaged changes. Add them to this commit?",
                 default=True,
@@ -52,7 +53,7 @@ class CommitService(BaseAgentService):
         creating the actual commit.
         Usage: Called by command processor when user types `/commit`
         """
-        console: Console = await make("console")
+        console = await make(Console)
 
         try:
             # Initialize git repository with parent directory search
@@ -77,9 +78,7 @@ class CommitService(BaseAgentService):
                 )
             )
 
-            console.print("[info]Generating commit message...[/info]")
-
-            response_handler: ResponseHandler = await make("response_handler")
+            response_handler = await make(ResponseHandler)
 
             result_message = await response_handler.handle_stream(
                 self.stream(staged_diff)
@@ -120,7 +119,7 @@ class CommitService(BaseAgentService):
         Usage: `graph = await builder.build()` -> ready for coding assistance
         """
 
-        llm_service: LLMService = await make("llm_service")
+        llm_service = await make(LLMService)
         llm: BaseChatModel = llm_service.get_weak_model()
 
         assistant_runnable = commit_prompt | llm

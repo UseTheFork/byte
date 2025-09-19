@@ -1,8 +1,12 @@
 # byte/domain/agent/commands.py
 from typing import List
 
+from rich.console import Console
+
 from byte.context import make
 from byte.core.command.registry import Command
+from byte.domain.agent.service import AgentService
+from byte.domain.agent.state import CommandProcessor
 
 
 class SwitchAgentCommand(Command):
@@ -34,9 +38,9 @@ class SwitchAgentCommand(Command):
             await self._show_agent_status()
             return
 
-        agent_service = await make("agent_service")
-        command_processor = await make("command_processor")
-        console = await make("console")
+        agent_service = await make(AgentService)
+        command_processor = await make(CommandProcessor)
+        console = await make(Console)
 
         if agent_service.set_active_agent(args):
             # Update command processor's active agent
@@ -48,6 +52,7 @@ class SwitchAgentCommand(Command):
             console.print(f"Available agents: {', '.join(available_agents)}")
 
     def get_completions(self, text: str) -> List[str]:
+        pass
         """Provide tab completion for available agent names.
 
         Usage: `/agent c<TAB>` -> suggests "coder"

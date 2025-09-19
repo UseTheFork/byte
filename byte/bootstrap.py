@@ -1,16 +1,19 @@
+from rich.console import Console
+
 from byte.container import app
-from byte.core.command.registry import command_registry
+from byte.core.command.registry import CommandRegistry
 from byte.core.config.config import ByteConfg
 from byte.core.response.service_provider import ResponseServiceProvider
 from byte.domain.agent.service_provider import AgentServiceProvider
 from byte.domain.events.service_provider import EventServiceProvider
-from byte.domain.files.file_service_provider import FileServiceProvider
+from byte.domain.files.service_provider import FileServiceProvider
 from byte.domain.git.service_provider import GitServiceProvider
 from byte.domain.knowledge.service_provider import KnowledgeServiceProvider
 from byte.domain.lint.service_provider import LintServiceProvider
 from byte.domain.llm.service_provider import LLMServiceProvider
 from byte.domain.memory.service_provider import MemoryServiceProvider
 from byte.domain.system.service_provider import SystemServiceProvider
+from byte.domain.tools.service_provider import ToolsServiceProvider
 from byte.domain.ui.service_provider import UIServiceProvider
 
 
@@ -24,9 +27,12 @@ async def bootstrap(config: ByteConfg):
     Returns the fully configured container ready for use.
     """
     # Make the global command registry available through dependency injection
-    app.singleton("command_registry", lambda: command_registry)
+    app.singleton(CommandRegistry)
 
-    app.singleton("config", lambda: config)
+    app.singleton(ByteConfg, lambda: config)
+
+    console = Console()
+    app.singleton(Console, lambda: console)
 
     # Order matters: ConfigServiceProvider must be early since other services
     # may need configuration access during their boot phase
@@ -38,6 +44,7 @@ async def bootstrap(config: ByteConfg):
         MemoryServiceProvider(),  # Short-term conversation memory
         KnowledgeServiceProvider(),  # Long-term knowledge storage
         FileServiceProvider(),  # File context management
+        ToolsServiceProvider(),  # File context management
         LLMServiceProvider(),  # Language model integration
         GitServiceProvider(),  # Git repository operations
         LintServiceProvider(),  # Code linting functionality

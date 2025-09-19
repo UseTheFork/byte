@@ -79,7 +79,7 @@ class BaseAgentService(ABC, Bootable, Configurable, Eventable):
         """
         # Get or create thread ID
         if thread_id is None:
-            memory_service: MemoryService = await make("memory_service")
+            memory_service = await make(MemoryService)
             thread_id = memory_service.create_thread()
 
         # Create configuration with thread ID

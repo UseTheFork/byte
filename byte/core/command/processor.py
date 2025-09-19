@@ -1,6 +1,7 @@
 from rich.console import Console
 
-from byte.core.command.registry import command_registry
+from byte.context import make
+from byte.core.command.registry import CommandRegistry
 from byte.core.response.handler import ResponseHandler
 from byte.domain.agent.service import AgentService
 
@@ -44,13 +45,14 @@ class CommandProcessor:
 
         Splits command name from arguments and delegates to registered command handlers.
         """
+        command_registry = await make(CommandRegistry)
         if " " in command_text:
             cmd_name, args = command_text.split(" ", 1)
         else:
             cmd_name, args = command_text, ""
 
         command = command_registry.get_slash_command(cmd_name)
-        console: Console = await self.container.make("console")
+        console = await make(Console)
 
         if command:
             await command.execute(args)
@@ -59,11 +61,9 @@ class CommandProcessor:
 
     async def _process_regular_input(self, user_input: str) -> None:
         """Route regular input to the currently active agent."""
-        agent_service: AgentService = await self.container.make("agent_service")
+        agent_service = await make(AgentService)
 
-        response_handler: ResponseHandler = await self.container.make(
-            "response_handler"
-        )
+        response_handler = await make(ResponseHandler)
 
         await response_handler.handle_stream(
             agent_service.route_to_agent(self._current_agent, user_input)

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, List, Optional
 from rich.console import Console
 from rich.prompt import Confirm, Prompt
 
-from byte.context import get_container
+from byte.context import make
 
 if TYPE_CHECKING:
     pass
@@ -24,8 +24,7 @@ class InteractionService:
         """
 
         try:
-            container = get_container()
-            console: Console = await container.make("console")
+            console = await make(Console)
 
             return Confirm.ask(
                 f"{message}",
@@ -48,8 +47,7 @@ class InteractionService:
             raise ValueError("Choices list cannot be empty")
 
         try:
-            container = get_container()
-            console: Console = await container.make("console")
+            console: Console = await make(Console)
 
             # Display options
             console.print(f"\n{message}")
@@ -89,8 +87,7 @@ class InteractionService:
         Usage: `text = await interaction_service.input_text("Enter name:", "default_name")`
         """
         try:
-            container = get_container()
-            console: Console = await container.make("console")
+            console: Console = await make(Console)
 
             result = Prompt.ask(
                 message,

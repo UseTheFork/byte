@@ -18,7 +18,7 @@ class ResponseServiceProvider(ServiceProvider):
 
     async def register(self, container: "Container") -> None:
         """Register response handling services in the container."""
-        container.singleton("response_handler", lambda: ResponseHandler())
+        container.singleton(ResponseHandler)
 
     async def boot(self, container: "Container") -> None:
         """Boot response handling services after all providers are registered."""
@@ -27,4 +27,4 @@ class ResponseServiceProvider(ServiceProvider):
 
     def provides(self) -> list:
         """Return list of services provided by this provider."""
-        return ["response_handler"]
+        return [ResponseHandler]

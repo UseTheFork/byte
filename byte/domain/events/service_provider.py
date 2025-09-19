@@ -13,7 +13,7 @@ class EventServiceProvider(ServiceProvider):
     async def register(self, container: Container):
         """Register event dispatcher as singleton for shared event bus."""
         # Singleton ensures all services use the same dispatcher instance
-        container.singleton("event_dispatcher", lambda: EventDispatcher())
+        container.singleton(EventDispatcher)
 
     async def boot(self, container: Container):
         """Boot event services after all providers are registered.
@@ -25,4 +25,4 @@ class EventServiceProvider(ServiceProvider):
         pass
 
     def provides(self) -> list:
-        return ["event_dispatcher"]
+        return [EventDispatcher]

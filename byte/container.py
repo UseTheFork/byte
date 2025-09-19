@@ -1,7 +1,9 @@
 import asyncio
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Optional, Type, TypeVar
 
 from byte.core.service.mixins import Bootable
+
+T = TypeVar("T")
 
 
 class Container:
@@ -12,58 +14,78 @@ class Container:
     """
 
     def __init__(self):
-        self._bindings: Dict[str, Callable] = {}
-        self._instances: Dict[str, Any] = {}
+        self._singletons: Dict[Type, Callable[[], Any]] = {}
+        self._transients: Dict[Type, Callable[[], Any]] = {}
+        self._instances: Dict[Type, Any] = {}
         self._service_providers = []
 
-    def bind(self, abstract: str, concrete: Callable):
+    def bind(
+        self, service_class: Type[T], concrete: Optional[Callable[[], T]] = None
+    ) -> None:
         """Register a transient service binding.
 
-        Each call to make() will create a new instance by invoking the factory.
+        Usage:
+        container.bind(FileService, lambda: FileService(container))
+        container.bind(FileService)  # Auto-creates with container
         """
-        self._bindings[abstract] = concrete
+        if concrete is None:
 
-    def singleton(self, abstract: str, concrete: Callable):
+            def concrete():
+                return service_class(self)
+
+        self._transients[service_class] = concrete
+
+    def singleton(
+        self, service_class: Type[T], concrete: Optional[Callable[[], T]] = None
+    ) -> None:
         """Register a singleton service binding.
 
-        The factory will be called once on first access, then the same
-        instance will be returned for all subsequent make() calls.
+        Usage:
+        container.singleton(FileService, lambda: FileService(container))
+        container.singleton(FileService)  # Auto-creates with container
         """
-        self._bindings[abstract] = concrete
-        # Instance caching is handled in make() method
+        if concrete is None:
+            # Auto-create factory for class
+            def concrete():
+                return service_class(self)
 
-    async def make(self, abstract: str) -> Any:
+        self._singletons[service_class] = concrete
+
+    async def make(self, service_class: Type[T]) -> T:
         """Resolve a service from the container.
 
-        For singletons, returns cached instance if available, otherwise
-        creates and caches a new instance. For transient bindings,
-        always creates a new instance.
-
-        Raises ValueError if no binding exists for the requested service.
+        Usage:
+        file_service = await container.make(FileService)
         """
         # Return cached singleton instance if available
-        if abstract in self._instances:
-            return self._instances[abstract]
+        if service_class in self._instances:
+            return self._instances[service_class]
 
-        if abstract in self._bindings:
-            factory = self._bindings[abstract]
-
-            # Handle both sync and async factories
-            if asyncio.iscoroutinefunction(factory):
-                instance = await factory()
-
-            else:
-                instance = factory()
-
-            # Explicitly boot if bootable
-            if isinstance(instance, Bootable):
-                await instance.ensure_booted()
-
-            # Cache singleton instances
-            self._instances[abstract] = instance
+        # Try to create from singleton bindings
+        if service_class in self._singletons:
+            factory = self._singletons[service_class]
+            instance = await self._create_instance(factory)
+            self._instances[service_class] = instance  # Cache it
             return instance
 
-        raise ValueError(f"No binding found for {abstract}")
+        # Try to create from transient bindings
+        if service_class in self._transients:
+            factory = self._transients[service_class]
+            return await self._create_instance(factory)  # Don't cache
+
+        raise ValueError(f"No binding found for {service_class.__name__}")
+
+    async def _create_instance(self, factory: Callable) -> Any:
+        """Helper to create and boot instances."""
+        if asyncio.iscoroutinefunction(factory):
+            instance = await factory()
+        else:
+            instance = factory()
+
+        if isinstance(instance, Bootable):
+            await instance.ensure_booted()
+
+        return instance
 
 
 # Global application container instance

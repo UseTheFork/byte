@@ -33,5 +33,5 @@ class CommitCommand(Command):
         creating the actual commit.
         Usage: Called by command processor when user types `/commit`
         """
-        commit_service: CommitService = await make("commit_agent")
+        commit_service = await make(CommitService)
         await commit_service.execute()

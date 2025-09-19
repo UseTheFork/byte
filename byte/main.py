@@ -1,18 +1,18 @@
 import asyncio
-from typing import TYPE_CHECKING
+
+from rich.console import Console
 
 from byte.bootstrap import bootstrap, shutdown
+from byte.container import Container
 from byte.context import container_context
 from byte.core.cli import cli
 from byte.core.command.processor import CommandProcessor
-from byte.core.command.registry import command_registry
+from byte.core.command.registry import CommandRegistry
 from byte.core.config.config import ByteConfg
 from byte.core.ui.prompt import PromptHandler
 from byte.domain.agent.service import AgentService
+from byte.domain.events.dispatcher import EventDispatcher
 from byte.domain.system.events import ExitRequested
-
-if TYPE_CHECKING:
-    from rich.console import Console
 
 
 class Byte:
@@ -22,7 +22,7 @@ class Byte:
     processing to CommandProcessor, while maintaining the main event loop.
     """
 
-    def __init__(self, container):
+    def __init__(self, container: Container):
         self.container = container
         container_context.set(self.container)
         self.prompt_handler = PromptHandler()
@@ -32,7 +32,7 @@ class Byte:
     async def initialize(self):
         """Initialize async resources and event listeners."""
         # Listen for exit events
-        event_dispatcher = await self.container.make("event_dispatcher")
+        event_dispatcher = await self.container.make(EventDispatcher)
         event_dispatcher.listen("ExitRequested", self._handle_exit_request)
 
     def _handle_exit_request(self, event: ExitRequested):
@@ -54,7 +54,9 @@ class Byte:
         """
         await self.initialize()
 
-        console: Console = await self.container.make("console")
+        # AI:
+        console = await self.container.make(Console)
+        command_registry = await self.container.make(CommandRegistry)
 
         try:
             while not self._should_exit:
@@ -63,7 +65,7 @@ class Byte:
                     await command_registry.pre_prompt()
 
                     agent_service: AgentService = await self.container.make(
-                        "agent_service"
+                        AgentService
                     )
                     current_agent = agent_service.get_active_agent()
                     user_input = await self.prompt_handler.get_input_async(

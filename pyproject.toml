@@ -11,6 +11,7 @@ dependencies = [
     "langchain[anthropic,google-genai,openai]>=0.3.27",
     "langgraph>=0.6.7",
     "langgraph-checkpoint-sqlite>=2.0.11",
+    "pathspec>=0.12.1",
     "prompt-toolkit>=3.0.52",
     "pydantic>=2.11.7",
     "pydantic-settings>=2.10.1",

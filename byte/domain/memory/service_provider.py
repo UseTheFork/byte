@@ -22,7 +22,7 @@ class MemoryServiceProvider(ServiceProvider):
         Usage: `provider.register(container)` -> binds memory services
         """
         # Register memory service
-        container.singleton("memory_service", lambda: MemoryService(container))
+        container.singleton(MemoryService)
 
     async def boot(self, container: "Container") -> None:
         """Boot memory services after all providers are registered.
@@ -36,7 +36,7 @@ class MemoryServiceProvider(ServiceProvider):
         """Shutdown memory services and close database connections."""
         try:
             if "memory_service" in container._instances:
-                memory_service = await container.make("memory_service")
+                memory_service = await container.make(MemoryService)
                 await memory_service.close()
         except Exception:
             pass  # Ignore cleanup errors during shutdown

@@ -1,17 +1,18 @@
 import asyncio
 from typing import Callable, Dict, List
 
+from byte.core.service.mixins import Bootable
 from byte.domain.events.event import Event
 
 
-class EventDispatcher:
+class EventDispatcher(Bootable):
     """Event dispatcher implementing the Observer pattern for domain events.
 
     Decouples event producers from consumers, enabling loose coupling between domains.
     Usage: `dispatcher.listen("FileAdded", handle_file_added)` then `await dispatcher.dispatch(FileAdded(...))`
     """
 
-    def __init__(self):
+    async def boot(self):
         # Group listeners by event type for efficient lookup
         self._listeners: Dict[str, List[Callable]] = {}
 

@@ -65,7 +65,7 @@ class Command(ABC, Bootable):
         pass
 
 
-class CommandRegistry:
+class CommandRegistry(Bootable):
     """Central registry for command discovery and routing.
 
     Manages command registration and provides lookup services for both
@@ -73,7 +73,7 @@ class CommandRegistry:
     for improved user experience.
     """
 
-    def __init__(self):
+    async def boot(self):
         # Separate namespaces for different command types
         self._slash_commands: Dict[str, Command] = {}
         self._at_commands: Dict[str, Command] = {}
@@ -146,7 +146,3 @@ class CommandRegistry:
             if command:
                 return command.get_completions(args)
         return []
-
-
-# Global registry instance for application-wide command access
-command_registry = CommandRegistry()

@@ -18,7 +18,7 @@ class Eventable:
     async def boot_eventable(self) -> None:
         """Boot method for Eventable mixin - automatically called by Command.__init__."""
         if hasattr(self, "container") and self.container:
-            event_dispatcher = await self.container.make("event_dispatcher")
+            event_dispatcher = await self.container.make(EventDispatcher)
             self._event_dispatcher = event_dispatcher
 
     async def event(self, event: Event):
