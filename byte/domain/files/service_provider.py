@@ -1,3 +1,5 @@
+from rich.console import Console
+
 from byte.container import Container
 from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
@@ -53,6 +55,14 @@ class FileServiceProvider(ServiceProvider):
         await command_registry.register_slash_command(
             await container.make(DropFileCommand)
         )
+
+        console = await container.make(Console)
+
+        found_files = await file_discovery.get_files()
+        console.print(
+            f"├─ [success]Discovered:[/success] [info]{len(found_files)} files[/info]"
+        )
+        console.print("│", style="text")
 
     def provides(self) -> list:
         return [

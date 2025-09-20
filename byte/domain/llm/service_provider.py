@@ -34,11 +34,8 @@ class LLMServiceProvider(ServiceProvider):
         # Display active model configuration for user awareness
         main_model = llm_service._service_config.main.model
         weak_model = llm_service._service_config.weak.model
-
-        console.print("│", style="text")
         console.print(f"├─ [success]Main model:[/success] [info]{main_model}[/info]")
         console.print(f"├─ [success]Weak model:[/success] [info]{weak_model}[/info]")
-        console.print("│", style="text")
 
     def provides(self) -> list:
         """Return list of services provided by this provider."""

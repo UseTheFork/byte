@@ -86,7 +86,8 @@ class UIServiceProvider(ServiceProvider):
 
             console.print(styled_line)
 
-        console.print("┌── The No Vibe CLI Agent", style="text")
+        console.print("┌── Booting", style="text")
+        console.print("│", style="text")
 
     def provides(self) -> list:
         return [Console, InteractionService]

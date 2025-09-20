@@ -172,55 +172,60 @@ class FileWatcherService(Bootable, Configurable, Injectable, Eventable):
         lines = content.split("\n")
 
         for line_num, line in enumerate(lines, 1):
+            # Collect all matches from all patterns on this line
+            all_matches = []
+
             for pattern in self._ai_patterns:
-                match = pattern.search(line)
-                if match:
+                # Use finditer to get all matches, not just the first one
+                for match in pattern.finditer(line):
                     ai_type = match.group(1).strip() if match.groups() else ":"
                     comment_content = (
                         match.group(2).strip() if len(match.groups()) > 1 else ""
                     )
+                    all_matches.append((ai_type, comment_content, match.start()))
 
-                    # Emit AI comment detected event
+            # Sort matches by position in line to process them in order
+            all_matches.sort(key=lambda x: x[2])
+
+            # Process each match found on this line
+            for ai_type, comment_content, _ in all_matches:
+                # Emit AI comment detected event
+                await self.event(
+                    AICommentDetected(
+                        file_path=str(file_path),
+                        comment_content=comment_content,
+                        line_number=line_num,
+                    )
+                )
+
+                # Handle different AI comment types
+                if ai_type == ":":
+                    # Add file to editable context
+                    await self._auto_add_file_to_context(file_path, FileMode.EDITABLE)
+                elif ai_type == "@":
+                    # Add file to read-only context
+                    await self._auto_add_file_to_context(file_path, FileMode.READ_ONLY)
+
+                if ai_type == "!":
+                    # Trigger completion request for coder service
                     await self.event(
-                        AICommentDetected(
+                        CompletionRequested(
                             file_path=str(file_path),
-                            comment_content=comment_content,
+                            task=comment_content,
                             line_number=line_num,
                         )
                     )
+                elif ai_type == "?":
+                    # Trigger ask request for question answering
+                    from byte.domain.files.events import AskRequested
 
-                    # Handle different AI comment types
-                    if ai_type == ":":
-                        # Add file to editable context
-                        await self._auto_add_file_to_context(
-                            file_path, FileMode.EDITABLE
+                    await self.event(
+                        AskRequested(
+                            file_path=str(file_path),
+                            question=comment_content,
+                            line_number=line_num,
                         )
-                    elif ai_type == "@":
-                        # Add file to read-only context
-                        await self._auto_add_file_to_context(
-                            file_path, FileMode.READ_ONLY
-                        )
-
-                    if ai_type == "!":
-                        # Trigger completion request for coder service
-                        await self.event(
-                            CompletionRequested(
-                                file_path=str(file_path),
-                                task=comment_content,
-                                line_number=line_num,
-                            )
-                        )
-                    elif ai_type == "?":
-                        # Trigger ask request for question answering
-                        from byte.domain.files.events import AskRequested
-
-                        await self.event(
-                            AskRequested(
-                                file_path=str(file_path),
-                                question=comment_content,
-                                line_number=line_num,
-                            )
-                        )
+                    )
 
     async def _auto_add_file_to_context(
         self, file_path: Path, mode: FileMode = FileMode.EDITABLE

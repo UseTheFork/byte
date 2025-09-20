@@ -1,5 +1,4 @@
 import io
-import time
 
 from rich import box
 from rich.console import Console
@@ -129,23 +128,11 @@ class MarkdownStream:
         """
         # On the first call, stop the spinner and start the Live renderer
         if not getattr(self, "_live_started", False):
-            self.live = Live(Text(""), refresh_per_second=1.0 / self.min_delay)
+            self.live = Live(Text(""), refresh_per_second=20)
             self.live.start()
             self._live_started = True
 
-        now = time.time()
-        # Throttle updates to maintain smooth rendering
-        if not final and now - self.when < self.min_delay:
-            return
-        self.when = now
-
-        # Measure render time and adjust min_delay to maintain smooth rendering
-        start = time.time()
         lines = self._render_markdown_to_lines(text)
-        render_time = time.time() - start
-
-        # Set min_delay to render time plus a small buffer
-        self.min_delay = min(max(render_time * 10, 1.0 / 20), 2)
 
         num_lines = len(lines)
 

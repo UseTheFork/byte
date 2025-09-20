@@ -3,8 +3,7 @@ from typing import Any, AsyncGenerator
 from langchain_core.messages import AIMessage
 from rich.console import Console
 from rich.live import Live
-from rich.markdown import Markdown
-from rich.panel import Panel
+from rich.rule import Rule
 from rich.spinner import Spinner
 
 from byte.core.config.mixins import Configurable
@@ -58,13 +57,16 @@ class ResponseHandler(Bootable, Configurable, Injectable):
                     self.markdown_stream.update(self._accumulated_content)
         elif event_type == "on_chat_model_start":
             self._live.stop()
+            self._console.print()
+            self._console.print(Rule("Agent", align="left"))
             self.markdown_stream = MarkdownStream()
         elif event_type == "on_chat_model_end":
             self.markdown_stream.update(self._accumulated_content, True)
             self._accumulated_content = ""
         elif event_type == "on_tool_start":
             tool_name = event.get("name", "Unknown tool")
-            self._console.print(Panel.fit(Markdown(f"**Using Tool:** {tool_name}")))
+            self._console.print()
+            self._console.print(Rule(f"Using Tool: {tool_name}", align="left"))
         elif event_type == "on_tool_end":
             pass
         elif event_type == "on_chain_start":

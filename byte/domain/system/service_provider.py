@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING
 
+from rich.console import Console
+
 from byte.container import Container
 from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
@@ -55,6 +57,11 @@ class SystemServiceProvider(ServiceProvider):
         # Store command references for event handling
         self._add_file_command = add_file_command
         self._readonly_command = readonly_command
+
+        console = await container.make(Console)
+
+        console.print("│", style="text")
+        console.print("┕─[success]LETS GOOOO!![/success]")
 
     def provides(self) -> list:
         """Return list of services provided by this provider."""
