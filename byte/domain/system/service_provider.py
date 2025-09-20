@@ -1,15 +1,14 @@
-from typing import TYPE_CHECKING
+from typing import List, Type
 
 from rich.console import Console
 
 from byte.container import Container
+from byte.core.actors.base import Actor
 from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
 from byte.domain.files.commands import AddFileCommand, DropFileCommand, ReadOnlyCommand
+from byte.domain.system.actor import CoordinatorActor
 from byte.domain.system.commands import ExitCommand, HelpCommand
-
-if TYPE_CHECKING:
-    from byte.container import Container
 
 
 class SystemServiceProvider(ServiceProvider):
@@ -19,6 +18,9 @@ class SystemServiceProvider(ServiceProvider):
     through the command registry for user interaction via slash commands.
     Usage: Register with container to enable /exit and /help commands
     """
+
+    def provides_actors(self) -> List[Type[Actor]]:
+        return [CoordinatorActor]
 
     async def register(self, container: "Container") -> None:
         """Register system commands in the container.
@@ -36,6 +38,8 @@ class SystemServiceProvider(ServiceProvider):
 
         Usage: `provider.boot(container)` -> commands become available as /exit, /help
         """
+        await super().boot(container)
+
         command_registry = await container.make(CommandRegistry)
 
         # Register system commands for user access

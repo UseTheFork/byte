@@ -15,6 +15,7 @@ from byte.domain.files.events import CompletionRequested
 from byte.domain.files.service import FileService
 from byte.domain.llm.service import LLMService
 from byte.domain.memory.service import MemoryService
+from byte.domain.tools.file_operations import replace_text_in_file
 from byte.domain.ui.tools import user_confirm, user_input, user_select
 
 
@@ -30,6 +31,7 @@ class Assistant:
         self.runnable = runnable
 
     async def __call__(self, state: CoderState, config: RunnableConfig):
+        print("here")
         while True:
             # configuration = config.get("configurable", {})
             # passenger_id = configuration.get("passenger_id", None)
@@ -67,7 +69,7 @@ class CoderAgent(BaseAgent):
         return CoderState
 
     def get_tools(self):
-        return [user_confirm, user_select, user_input]
+        return [user_confirm, user_select, user_input, replace_text_in_file]
 
     async def execute_watch_request(self, event: CompletionRequested) -> None:
         """ """

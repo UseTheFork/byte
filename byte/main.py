@@ -6,12 +6,7 @@ from byte.bootstrap import bootstrap, shutdown
 from byte.container import Container
 from byte.context import container_context
 from byte.core.cli import cli
-from byte.core.command.processor import CommandProcessor
 from byte.core.config.config import ByteConfg
-from byte.core.ui.prompt import PromptHandler
-from byte.domain.agent.service import AgentService
-from byte.domain.events.dispatcher import EventDispatcher
-from byte.domain.system.events import ExitRequested, PrePrompt, PromptRefresh
 
 
 class Byte:
@@ -23,119 +18,86 @@ class Byte:
 
     def __init__(self, container: Container):
         self.container = container
-        container_context.set(self.container)
-        self.prompt_handler = PromptHandler()
-        self.command_processor = CommandProcessor(container)
-        self._should_exit = False
-        self._refresh_queue = asyncio.Queue(maxsize=10)
+        self.actor_tasks = []
 
     async def initialize(self):
-        """Initialize async resources and event listeners."""
-        # Initialize prompt handler
-        await self.prompt_handler.initialize()
+        """Discover and start all registered actors"""
+        # Get all registered actor instances
+        # Since ServiceProviders have already registered them as singletons
+        actors = await self._discover_actors()
 
-        # Listen for exit and refresh events
-        event_dispatcher = await self.container.make(EventDispatcher)
-        event_dispatcher.listen(ExitRequested, self._handle_exit_request)
-        event_dispatcher.listen(PromptRefresh, self._handle_prompt_refresh)
+        # Start all actors
+        for actor in actors:
+            task = asyncio.create_task(actor.start())
+            task.set_name(f"actor_{actor.name}")
+            self.actor_tasks.append(task)
 
-    def _handle_exit_request(self, event: ExitRequested):
-        """Handle exit request by setting exit flag.
+        return self.actor_tasks
 
-        Usage: Called automatically when ExitRequested event is emitted
-        """
-        self._should_exit = True
+    async def _discover_actors(self):
+        """Discover all registered actor instances from the container"""
+        actors = []
 
-    def _handle_prompt_refresh(self, event: PromptRefresh):
-        """Handle prompt refresh request by queuing it instead of immediate refresh.
+        # Get all service providers that have actors
+        if hasattr(self.container, "_service_providers"):
+            for provider in self.container._service_providers:
+                if hasattr(provider, "provides_actors"):
+                    for actor_class in provider.provides_actors():
+                        actor = await self.container.make(actor_class)
+                        actors.append(actor)
 
-        Usage: Called automatically when PromptRefresh event is emitted
-        """
-        try:
-            # Non-blocking put - if queue is full, we'll just drop the event
-            self._refresh_queue.put_nowait(event)
-        except asyncio.QueueFull:
-            # Queue is full, ignore this refresh request
-            # This prevents memory issues if many refresh events pile up
-            pass
-
-    async def _check_for_refresh(self):
-        """Check if there are any queued refresh events."""
-        try:
-            # Non-blocking get - returns immediately if queue is empty
-            refresh_event = self._refresh_queue.get_nowait()
-            return refresh_event
-        except asyncio.QueueEmpty:
-            return None
-
-    async def cleanup(self):
-        """Clean up application resources."""
-        await shutdown(self.container)
+        return actors
 
     async def run(self):
-        """Main CLI loop that handles user interaction and command execution.
-
-        Uses async/await to prevent blocking on user input while maintaining
-        responsive command execution and graceful shutdown handling.
-        """
-        await self.initialize()
-
-        console: Console = await self.container.make(Console)
-        event_dispatcher = await self.container.make(EventDispatcher)
-
+        """Run the actor-based application"""
         try:
-            while not self._should_exit:
-                try:
-                    # Check for any queued refresh events before starting new prompt
-                    refresh_event = await self._check_for_refresh()
-                    if refresh_event:
-                        console.print(f"[dim]{refresh_event.reason}[/dim]")
-                        # Continue to show the updated prompt
+            tasks = await self.initialize()
 
-                    # Allow commands to display contextual information before each prompt
-                    agent_service: AgentService = await self.container.make(
-                        AgentService
-                    )
-                    current_agent = agent_service.get_active_agent()
-                    agent = await self.container.make(current_agent)
+            if not tasks:
+                print("No actors registered!")
+                return
 
-                    await event_dispatcher.dispatch(
-                        PrePrompt(current_agent=current_agent)
-                    )
+            # Wait for any task to complete (likely shutdown)
+            done, pending = await asyncio.wait(
+                tasks, return_when=asyncio.FIRST_COMPLETED
+            )
 
-                    # Get user input (this can now be interrupted safely)
-                    user_input = await self.prompt_handler.get_input_async(
-                        f"[{agent.name}]> "
-                    )
+            # Cancel remaining tasks
+            for task in pending:
+                task.cancel()
 
-                    if not user_input.strip():
-                        continue
+            # Wait for all tasks to finish
+            await asyncio.gather(*pending, return_exceptions=True)
 
-                    # Process the command
-                    await self.command_processor.process_input(user_input)
+        except KeyboardInterrupt:
+            print("\nShutting down...")
+            await self._shutdown()
 
-                    # Check if exit was requested after processing
-                    if self._should_exit:
-                        break
+    async def _shutdown(self):
+        """Graceful shutdown of all actors"""
+        # Cancel all tasks
+        for task in self.actor_tasks:
+            if not task.done():
+                task.cancel()
 
-                except KeyboardInterrupt:
-                    break
-        finally:
-            # Always cleanup before exit
-            await self.cleanup()
-
-        console.print("[warning]Goodbye![/warning]")
+        # Wait for tasks to complete
+        await asyncio.gather(*self.actor_tasks, return_exceptions=True)
 
 
 async def main(config: ByteConfg):
-    """Application entry point that bootstraps dependencies and starts the CLI.
-
-    Follows dependency injection pattern by bootstrapping the container first,
-    then injecting it into the main application class.
-    """
+    """Simplified application entry point using actor system."""
     container = await bootstrap(config)
+    container_context.set(container)
+
+    # Create and run the actor-based app
     app = Byte(container)
     await app.run()
+
+    # Cleanup
+    await shutdown(container)
+
+    console = Console()
+    console.print("[warning]Goodbye![/warning]")
 
 
 def run(config: ByteConfg):

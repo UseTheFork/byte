@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
+from typing import List, Type
 
 from byte.container import Container
+from byte.core.actors.base import Actor
+from byte.core.actors.message import MessageBus
 
 
 class ServiceProvider(ABC):
@@ -14,6 +17,32 @@ class ServiceProvider(ABC):
     def __init__(self):
         # Optional container reference for providers that need it during initialization
         self.container = None
+
+    def provides_actors(self) -> List[Type[Actor]]:
+        """Return list of actor classes this provider makes available."""
+        return []
+
+    async def boot_actors(self, container: Container):
+        """Auto-register and boot all actors from provides_actors()"""
+        actors = self.provides_actors()
+        if not actors:
+            return
+
+        message_bus = await container.make(MessageBus)
+
+        for actor_class in actors:
+            # Create proper factory that provides all required arguments
+            def make_actor(cls=actor_class, bus=message_bus, cont=container):
+                # Use class name as actor name (lowercase)
+                actor_name = cls.__name__.lower().replace("actor", "")
+                return cls(actor_name, bus, cont)
+
+            # Register with proper factory
+            container.singleton(actor_class, make_actor)
+
+            # Boot and setup subscriptions
+            actor = await container.make(actor_class)
+            await actor.setup_subscriptions(message_bus)
 
     def set_container(self, container: Container):
         """Set the container instance for providers that need container access.
@@ -42,7 +71,7 @@ class ServiceProvider(ABC):
         - Configuring service relationships
         - Performing initialization that requires other services
         """
-        pass
+        await self.boot_actors(container)
 
     async def shutdown(self, container: Container):
         """Shutdown services and clean up resources.

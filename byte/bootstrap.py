@@ -1,6 +1,7 @@
 from rich.console import Console
 
 from byte.container import app
+from byte.core.actors.message import MessageBus
 from byte.core.command.registry import CommandRegistry
 from byte.core.config.config import ByteConfg
 from byte.core.response.service_provider import ResponseServiceProvider
@@ -26,6 +27,10 @@ async def bootstrap(config: ByteConfg):
 
     Returns the fully configured container ready for use.
     """
+
+    # Setup main message bus for the app
+    app.singleton(MessageBus)
+
     # Make the global command registry available through dependency injection
     app.singleton(CommandRegistry)
 

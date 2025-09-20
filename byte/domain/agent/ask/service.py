@@ -30,6 +30,7 @@ class Assistant:
         self.runnable = runnable
 
     async def __call__(self, state: AskState, config: RunnableConfig):
+        print(config)
         while True:
             result = self.runnable.invoke(state, config=config)
             # If the LLM happens to return an empty response, we will re-prompt it

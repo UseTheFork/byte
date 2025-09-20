@@ -1,13 +1,20 @@
+from typing import List, Type
+
 from rich.console import Console
 from rich.theme import Theme
 
 from byte.container import Container
+from byte.core.actors.base import Actor
 from byte.core.service_provider import ServiceProvider
+from byte.domain.ui.actor import InputActor, RenderingActor
 from byte.domain.ui.interactions import InteractionService
 
 
 class UIServiceProvider(ServiceProvider):
     """Service provider for UI system."""
+
+    def provides_actors(self) -> List[Type[Actor]]:
+        return [InputActor, RenderingActor]
 
     async def register(self, container: Container) -> None:
         """Register UI services in the container."""
@@ -17,6 +24,7 @@ class UIServiceProvider(ServiceProvider):
 
     async def boot(self, container: Container):
         """Boot UI services."""
+        await super().boot(container)
 
         # "pink": "#f5c2e7",
         # "mauve": "#cba6f7",

@@ -1,15 +1,15 @@
-from typing import TYPE_CHECKING
+from typing import List, Type
 
+from byte.container import Container
+from byte.core.actors.base import Actor
 from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
+from byte.domain.agent.actor import AgentActor
 from byte.domain.agent.ask.service_provider import AskServiceProvider
 from byte.domain.agent.coder.service_provider import CoderServiceProvider
 from byte.domain.agent.commands import SwitchAgentCommand
 from byte.domain.agent.commit.service_provider import CommitServiceProvider
 from byte.domain.agent.service import AgentService
-
-if TYPE_CHECKING:
-    from byte.container import Container
 
 
 class AgentServiceProvider(ServiceProvider):
@@ -29,6 +29,9 @@ class AgentServiceProvider(ServiceProvider):
             CommitServiceProvider(),
         ]
 
+    def provides_actors(self) -> List[Type[Actor]]:
+        return [AgentActor]
+
     async def register(self, container: "Container") -> None:
         container.singleton(AgentService)
 
@@ -42,6 +45,7 @@ class AgentServiceProvider(ServiceProvider):
         Initializes all registered agents and registers the /agent command for
         switching between different AI agents during runtime.
         """
+        await super().boot(container)
 
         # Boot all sub-agents
         for provider in self.agent_providers:

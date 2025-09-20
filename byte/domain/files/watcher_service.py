@@ -37,12 +37,13 @@ class FileWatcherService(Bootable, Configurable, Injectable, Eventable):
         # Comment patterns for different file types
         self._ai_patterns = [
             # JavaScript, C++, etc.
-            re.compile(r"^\s*//\s*AI([:|@|!|\?])\s*(.*)$", re.MULTILINE),
+            re.compile(r"//.*?AI([:|@|!|\?])\s*(.*)$", re.MULTILINE | re.IGNORECASE),
             # Python, shell, etc.
-            re.compile(r"^\s*#\s*AI([:|@|!|\?])\s*(.*)$", re.MULTILINE),
+            re.compile(r"#.*?AI([:|@|!|\?])\s*(.*)$", re.MULTILINE | re.IGNORECASE),
             # HTML, XML
             re.compile(
-                r"^\s*<!--\s*AI([:|@|!|\?])\s*(.*?)\s*-->", re.MULTILINE | re.DOTALL
+                r"<!--.*?AI([:|@|!|\?])\s*(.*?)\s*-->",
+                re.MULTILINE | re.DOTALL | re.IGNORECASE,
             ),
         ]
 
