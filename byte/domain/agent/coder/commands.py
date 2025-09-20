@@ -1,18 +1,9 @@
-from rich.console import Console
-
+from byte.core.actors.message import Message, MessageBus, MessageType
 from byte.core.command.registry import Command
-from byte.core.response.handler import ResponseHandler
-from byte.domain.agent.coder.service import CoderAgent
 
 
 class CoderCommand(Command):
-    """Command to interact with the coder agent for software development assistance.
-
-    Provides direct access to the specialized coder agent through slash commands,
-    enabling users to request code generation, debugging, refactoring, and analysis
-    with full file context integration and streaming responses.
-    Usage: `/coder Fix the bug in main.py` -> streams coder agent response
-    """
+    """Command to interact with the coder agent."""
 
     @property
     def name(self) -> str:
@@ -23,22 +14,18 @@ class CoderCommand(Command):
         return "Get coding assistance from the specialized coder agent"
 
     async def execute(self, args: str) -> None:
-        """Execute coder request and stream response to console.
-
-        Processes the user's coding request through the coder agent,
-        streaming the response in real-time for immediate feedback.
-        Usage: Called by command processor when user types `/coder <request>`
-        """
-        console: Console = await self.make(Console)
-
+        """Execute coder request through the actor system."""
         if not args.strip():
-            console.print("[warning]Please provide a coding request.[/warning]")
-            console.print("Usage: /coder <your coding request>")
+            print("Please provide a coding request.")
+            print("Usage: /coder <your coding request>")
             return
 
-        coder_service = await self.make(CoderAgent)
-
-        response_handler = await self.make(ResponseHandler)
-
-        # Stream coder agent response through centralized handler
-        await response_handler.handle_stream(coder_service.stream(args))
+        # Send message to agent actor instead of handling directly
+        message_bus = await self.make(MessageBus)
+        await message_bus.send_to(
+            "agent",
+            Message(
+                type=MessageType.USER_INPUT,
+                payload={"input": args, "agent_type": "coder"},
+            ),
+        )

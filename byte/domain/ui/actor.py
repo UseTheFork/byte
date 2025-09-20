@@ -113,8 +113,39 @@ class ReactiveMarkdownStream(MarkdownStream):
             self.live.start()
             self._live_started = True
 
-        # Your existing line processing logic here
-        # but broken into smaller, non-blocking pieces
+        # lines_chunk contains ALL lines from accumulated content
+        # We need to figure out what's new since last time
+        total_lines = len(lines_chunk)
+        num_already_printed = len(self.printed)
+
+        if not is_final:
+            # Keep some lines in the live window for updates
+            stable_lines = max(0, total_lines - self.live_window)
+        else:
+            # If final, all lines are stable
+            stable_lines = total_lines
+
+        # Calculate how many new stable lines to print above live window
+        new_stable_count = stable_lines - num_already_printed
+
+        if new_stable_count > 0:
+            # Print only the NEW stable lines above the live window
+            new_stable_lines = lines_chunk[num_already_printed:stable_lines]
+            stable_text = "".join(new_stable_lines)
+            if stable_text:
+                stable_display = Text.from_ansi(stable_text)
+                self.live.console.print(stable_display)
+
+            # Update our record of printed lines
+            self.printed = lines_chunk[:stable_lines]
+
+        # Update live window with remaining unstable lines
+        if not is_final:
+            remaining_lines = lines_chunk[stable_lines:]
+            if remaining_lines:
+                live_text = "".join(remaining_lines)
+                live_display = Text.from_ansi(live_text)
+                self.live.update(live_display)
 
         if is_final and self.live:
             self.live.update(Text(""))

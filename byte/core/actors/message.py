@@ -4,7 +4,6 @@ from enum import Enum
 from typing import Any, Dict, Optional
 
 from byte.container import Container
-from byte.core.logging import log
 from byte.core.service.mixins import Bootable
 
 
@@ -66,7 +65,6 @@ class MessageBus(Bootable):
 
     async def send_to(self, actor_name: str, message: Message):
         """Send message to specific actor"""
-        log.info(message)
         if actor_name in self.queues:
             await self.queues[actor_name].put(message)
         else:
