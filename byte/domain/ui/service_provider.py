@@ -96,6 +96,3 @@ class UIServiceProvider(ServiceProvider):
 
         console.print("┌── Booting", style="text")
         console.print("│", style="text")
-
-    def provides(self) -> list:
-        return [Console, InteractionService]

@@ -8,7 +8,7 @@ from rich.spinner import Spinner
 from rich.text import Text
 
 from byte.core.actors.base import Actor
-from byte.core.actors.message import Message, MessageBus, MessageType
+from byte.core.actors.message import Message, MessageType
 from byte.core.response.formatters import MarkdownStream
 
 
@@ -215,9 +215,11 @@ class RenderingActor(Actor):
         # Optional callback for stream update notifications
         pass
 
-    async def setup_subscriptions(self, message_bus: MessageBus):
-        message_bus.subscribe(self.__class__, MessageType.SHUTDOWN)
-        message_bus.subscribe(self.__class__, MessageType.START_STREAM)
-        message_bus.subscribe(self.__class__, MessageType.STREAM_CHUNK)
-        message_bus.subscribe(self.__class__, MessageType.END_STREAM)
-        message_bus.subscribe(self.__class__, MessageType.CANCEL_STREAM)
+    async def subscriptions(self):
+        return [
+            MessageType.SHUTDOWN,
+            MessageType.START_STREAM,
+            MessageType.STREAM_CHUNK,
+            MessageType.END_STREAM,
+            MessageType.CANCEL_STREAM,
+        ]

@@ -1,7 +1,7 @@
 import asyncio
 
 from byte.core.actors.base import Actor
-from byte.core.actors.message import Message, MessageBus, MessageType
+from byte.core.actors.message import Message, MessageType
 from byte.core.ui.prompt import PromptHandler
 from byte.domain.system.actor.command_router_actor import CommandRouterActor
 
@@ -73,5 +73,5 @@ class InputActor(Actor):
             except Exception as e:
                 await self.on_error(e)
 
-    async def setup_subscriptions(self, message_bus: MessageBus):
-        message_bus.subscribe(self.__class__, MessageType.SHUTDOWN)
+    async def subscriptions(self):
+        return [MessageType.SHUTDOWN]

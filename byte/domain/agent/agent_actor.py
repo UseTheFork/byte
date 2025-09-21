@@ -1,7 +1,7 @@
 import asyncio
 
 from byte.core.actors.base import Actor
-from byte.core.actors.message import Message, MessageBus, MessageType
+from byte.core.actors.message import Message, MessageType
 from byte.core.actors.streams import StreamManager
 from byte.domain.agent.coder.service import CoderAgent
 from byte.domain.agent.service import AgentService
@@ -90,8 +90,10 @@ class AgentActor(Actor):
             # Cleanup completed streams periodically
             self.stream_manager.cleanup_completed_streams()
 
-    async def setup_subscriptions(self, message_bus: MessageBus):
-        message_bus.subscribe(self.name, MessageType.SHUTDOWN)
-        message_bus.subscribe(self.name, MessageType.USER_INPUT)
-        message_bus.subscribe(self.name, MessageType.AGENT_REQUEST)
-        message_bus.subscribe(self.name, MessageType.CANCEL_STREAM)
+    async def subscriptions(self):
+        return [
+            MessageType.SHUTDOWN,
+            MessageType.USER_INPUT,
+            MessageType.AGENT_REQUEST,
+            MessageType.CANCEL_STREAM,
+        ]

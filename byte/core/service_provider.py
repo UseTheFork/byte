@@ -44,7 +44,13 @@ class ServiceProvider(ABC):
         for actor_class in actors:
             # Boot and setup subscriptions
             actor = await container.make(actor_class)
-            await actor.setup_subscriptions(message_bus)
+
+            subscriptions = await actor.subscriptions()
+            if not subscriptions:
+                continue
+
+            for subscription in subscriptions:
+                message_bus.subscribe(actor.__class__, subscription)
 
     def set_container(self, container: Container):
         """Set the container instance for providers that need container access.

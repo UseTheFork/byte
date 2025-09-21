@@ -1,5 +1,5 @@
 from byte.core.actors.base import Actor
-from byte.core.actors.message import Message, MessageBus, MessageType
+from byte.core.actors.message import Message, MessageType
 from byte.core.logging import log
 from byte.domain.lint.actor.lint_actor import LintActor
 from byte.domain.system.actor.system_command_actor import SystemCommandActor
@@ -55,5 +55,7 @@ class CommandRouterActor(Actor):
         }
         return command_routing.get(command_name)
 
-    async def setup_subscriptions(self, message_bus: MessageBus):
-        message_bus.subscribe(CommandRouterActor, MessageType.COMMAND_INPUT)
+    async def subscriptions(self):
+        return [
+            MessageType.COMMAND_INPUT,
+        ]

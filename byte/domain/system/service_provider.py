@@ -40,8 +40,6 @@ class SystemServiceProvider(ServiceProvider):
 
         Usage: `provider.boot(container)` -> commands become available as /exit, /help
         """
-        await super().boot(container)
-
         command_registry = await container.make(CommandRegistry)
 
         # Register system commands for user access

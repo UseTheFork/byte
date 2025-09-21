@@ -1,7 +1,7 @@
 from enum import Enum
 
 from byte.core.actors.base import Actor
-from byte.core.actors.message import Message, MessageBus, MessageType
+from byte.core.actors.message import Message, MessageType
 from byte.core.logging import log
 
 
@@ -136,7 +136,6 @@ class CoordinatorActor(Actor):
         """Handle state entry logic"""
         if new_state == AppState.SHUTTING_DOWN:
             # Begin shutdown sequence
-            log.info("stuf")
             await self.stop()
 
     async def on_idle(self):
@@ -144,10 +143,12 @@ class CoordinatorActor(Actor):
         if self.shutdown_requested and self.current_state != AppState.SHUTTING_DOWN:
             await self._transition_to(AppState.SHUTTING_DOWN)
 
-    async def setup_subscriptions(self, message_bus: MessageBus):
-        message_bus.subscribe(CoordinatorActor, MessageType.SHUTDOWN)
-        message_bus.subscribe(CoordinatorActor, MessageType.STATE_CHANGE)
-        message_bus.subscribe(CoordinatorActor, MessageType.USER_INPUT)
-        message_bus.subscribe(CoordinatorActor, MessageType.START_STREAM)
-        message_bus.subscribe(CoordinatorActor, MessageType.END_STREAM)
-        message_bus.subscribe(CoordinatorActor, MessageType.COMMAND_INPUT)
+    async def subscriptions(self):
+        return [
+            MessageType.SHUTDOWN,
+            MessageType.STATE_CHANGE,
+            MessageType.USER_INPUT,
+            MessageType.START_STREAM,
+            MessageType.END_STREAM,
+            MessageType.COMMAND_INPUT,
+        ]

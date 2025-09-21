@@ -1,7 +1,7 @@
 from rich.console import Console
 
 from byte.core.actors.base import Actor
-from byte.core.actors.message import Message, MessageBus, MessageType
+from byte.core.actors.message import Message, MessageType
 from byte.core.command.registry import CommandRegistry
 from byte.domain.system.actor.coordinator_actor import CoordinatorActor
 
@@ -79,6 +79,8 @@ class SystemCommandActor(Actor):
             ),
         )
 
-    async def setup_subscriptions(self, message_bus: MessageBus):
-        message_bus.subscribe(SystemCommandActor, MessageType.DOMAIN_COMMAND)
-        message_bus.subscribe(SystemCommandActor, MessageType.SHUTDOWN)
+    async def subscriptions(self):
+        return [
+            MessageType.SHUTDOWN,
+            MessageType.DOMAIN_COMMAND,
+        ]

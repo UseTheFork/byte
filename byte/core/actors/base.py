@@ -86,18 +86,14 @@ class Actor(ABC, Bootable, Injectable):
         """Generate unique correlation ID for message tracking"""
         return str(uuid.uuid4())
 
-    async def setup_subscriptions(self, message_bus: MessageBus):
+    async def subscriptions(self):
         """Set up message subscriptions for this actor.
 
         Override in subclasses to define what message types this actor handles.
         This is called during the boot phase by the ServiceProvider.
 
-        Usage: Override in subclass like:
-        ```
-        async def setup_subscriptions(self, message_bus: MessageBus):
-            message_bus.subscribe(self.name, MessageType.USER_INPUT)
-            message_bus.subscribe(self.name, MessageType.AGENT_REQUEST)
-        ```
+        Returns:
+            List[MessageType]: List of message types this actor subscribes to
         """
         # Base implementation does nothing - subclasses override
-        pass
+        return []
