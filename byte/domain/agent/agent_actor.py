@@ -5,15 +5,18 @@ from byte.core.actors.message import Message, MessageBus, MessageType
 from byte.core.actors.streams import StreamManager
 from byte.domain.agent.coder.service import CoderAgent
 from byte.domain.agent.service import AgentService
+from byte.domain.ui.actor.rendering_actor import RenderingActor
 
 
 class AgentActor(Actor):
-    def __init__(self, name: str, message_bus, container=None):
-        super().__init__(name, message_bus, container)
-        self.stream_manager = StreamManager(message_bus.get_queue("rendering"))
+    async def boot(self):
+        await super().boot()
+        self.stream_manager = StreamManager(self.message_bus.get_queue(RenderingActor))
 
     async def handle_message(self, message: Message):
-        if message.type == MessageType.USER_INPUT:
+        if message.type == MessageType.SHUTDOWN:
+            await self.stop()
+        elif message.type == MessageType.USER_INPUT:
             await self._handle_user_input(message)
         elif message.type == MessageType.AGENT_REQUEST:
             await self._handle_agent_request(message)
@@ -55,7 +58,7 @@ class AgentActor(Actor):
             await self.stream_manager.start_stream(stream_id)
 
             # Get agent service
-            agent_service = await self.container.make(AgentService)
+            agent_service = await self.make(AgentService)
 
             # Route to appropriate agent (defaulting to CoderAgent for now)
             agent_class = CoderAgent  # This would be dynamic based on agent_type
@@ -88,6 +91,7 @@ class AgentActor(Actor):
             self.stream_manager.cleanup_completed_streams()
 
     async def setup_subscriptions(self, message_bus: MessageBus):
+        message_bus.subscribe(self.name, MessageType.SHUTDOWN)
         message_bus.subscribe(self.name, MessageType.USER_INPUT)
         message_bus.subscribe(self.name, MessageType.AGENT_REQUEST)
         message_bus.subscribe(self.name, MessageType.CANCEL_STREAM)

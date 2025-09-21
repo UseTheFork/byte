@@ -1,22 +1,24 @@
 import asyncio
 import uuid
 from abc import ABC, abstractmethod
-from typing import Dict, Optional
+from typing import Dict, Optional, Type, TypeVar
 
 from byte.core.actors.message import Message, MessageBus, MessageType
+from byte.core.service.mixins import Bootable, Injectable
+
+T = TypeVar("T")
 
 
-class Actor(ABC):
-    def __init__(self, name: str, message_bus: MessageBus, container=None):
-        self.name = name
-        self.message_bus = message_bus
-        self.container = container
+class Actor(ABC, Bootable, Injectable):
+    async def boot(self):
+        self.name = self.__class__
+        self.message_bus = await self.make(MessageBus)
         self.running = False
         self.inbox: Optional[asyncio.Queue] = None
 
         # Register with message bus
-        message_bus.register_actor(name)
-        self.inbox = message_bus.get_queue(name)
+        self.message_bus.register_actor(self.name)
+        self.inbox = self.message_bus.get_queue(self.name)
 
     async def start(self):
         """Start the actor's message processing loop"""
@@ -24,6 +26,7 @@ class Actor(ABC):
         await self.on_start()
 
         while self.running:
+            # log.info(f"{self.__class__.__name__}: running={self.running}")
             try:
                 # Wait for message with timeout to allow periodic cleanup
                 message = await asyncio.wait_for(self.inbox.get(), timeout=1.0)
@@ -59,9 +62,9 @@ class Actor(ABC):
 
     async def on_error(self, error: Exception):
         """Called when an error occurs - override for error handling"""
-        print(f"Actor {self.name} error: {error}")
+        print(f"Actor {self.__class__} error: {error}")
 
-    async def send_to(self, actor_name: str, message: Message):
+    async def send_to(self, actor_name: Type[T], message: Message):
         """Send message to another actor"""
         await self.message_bus.send_to(actor_name, message)
 

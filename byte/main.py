@@ -29,7 +29,7 @@ class Byte:
         # Start all actors
         for actor in actors:
             task = asyncio.create_task(actor.start())
-            task.set_name(f"actor_{actor.name}")
+            task.set_name(f"actor_{actor.__class__}")
             self.actor_tasks.append(task)
 
         return self.actor_tasks
@@ -41,8 +41,8 @@ class Byte:
         # Get all service providers that have actors
         if hasattr(self.container, "_service_providers"):
             for provider in self.container._service_providers:
-                if hasattr(provider, "provides_actors"):
-                    for actor_class in provider.provides_actors():
+                if hasattr(provider, "actors"):
+                    for actor_class in provider.actors():
                         actor = await self.container.make(actor_class)
                         actors.append(actor)
 

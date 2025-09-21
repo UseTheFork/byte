@@ -1,14 +1,14 @@
-from typing import TYPE_CHECKING
+from typing import List, Type
 
+from byte.container import Container
+from byte.core.actors.base import Actor
 from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
 from byte.domain.agent.commit.events import PreCommitStarted
 from byte.domain.events.dispatcher import EventDispatcher
+from byte.domain.lint.actor.lint_actor import LintActor
 from byte.domain.lint.commands import LintCommand
 from byte.domain.lint.service import LintService
-
-if TYPE_CHECKING:
-    from byte.container import Container
 
 
 class LintServiceProvider(ServiceProvider):
@@ -19,6 +19,9 @@ class LintServiceProvider(ServiceProvider):
     programmatic access for agent workflows.
     Usage: Register with container to enable `/lint` command and lint service
     """
+
+    def actors(self) -> List[Type[Actor]]:
+        return [LintActor]
 
     async def register(self, container: "Container") -> None:
         """Register lint services in the container.
@@ -34,6 +37,8 @@ class LintServiceProvider(ServiceProvider):
 
         Usage: `provider.boot(container)` -> `/lint` becomes available to users
         """
+        await super().boot(container)
+
         command_registry = await container.make(CommandRegistry)
         event_dispatcher = await container.make(EventDispatcher)
         lint_service = await container.make(LintService)

@@ -1,8 +1,12 @@
 from typing import TYPE_CHECKING, Optional
 
-from byte.core.command.registry import Command
+from rich.console import Console
+
+from byte.core.actors.message import Message, MessageBus, MessageType
+from byte.core.command.registry import Command, CommandRegistry
+from byte.core.logging import log
 from byte.domain.events.mixins import Eventable
-from byte.domain.system.events import ExitRequested
+from byte.domain.system.actor.coordinator_actor import CoordinatorActor
 
 if TYPE_CHECKING:
     from byte.container import Container
@@ -29,7 +33,15 @@ class ExitCommand(Command, Eventable):
 
         Usage: Called by command processor when user types `/exit`
         """
-        await self.event(ExitRequested())
+        log.info("1234243243243")
+        message_bus = await self.make(MessageBus)
+        await message_bus.send_to(
+            CoordinatorActor,
+            Message(
+                type=MessageType.SHUTDOWN,
+                payload={"reason": "user_exit_command"},
+            ),
+        )
 
 
 class HelpCommand(Command):
@@ -62,8 +74,8 @@ class HelpCommand(Command):
                 console.print("[error]Help system not available[/error]")
             return
 
-        command_registry = self.container.make("command_registry")
-        console = self.container.make("console")
+        command_registry = await self.container.make(CommandRegistry)
+        console = await self.container.make(Console)
         slash_commands = command_registry._slash_commands
 
         help_text = "Available commands:\n\n"

@@ -18,28 +18,30 @@ class ServiceProvider(ABC):
         # Optional container reference for providers that need it during initialization
         self.container = None
 
-    def provides_actors(self) -> List[Type[Actor]]:
+    def actors(self) -> List[Type[Actor]]:
         """Return list of actor classes this provider makes available."""
         return []
 
+    async def register_actors(self, container: Container):
+        """"""
+        actors = self.actors()
+        if not actors:
+            return
+
+        for actor_class in actors:
+            # Create proper factory that provides all required arguments
+            # Register with proper factory
+            container.singleton(actor_class)
+
     async def boot_actors(self, container: Container):
-        """Auto-register and boot all actors from provides_actors()"""
-        actors = self.provides_actors()
+        """boot all actors from actors()"""
+        actors = self.actors()
         if not actors:
             return
 
         message_bus = await container.make(MessageBus)
 
         for actor_class in actors:
-            # Create proper factory that provides all required arguments
-            def make_actor(cls=actor_class, bus=message_bus, cont=container):
-                # Use class name as actor name (lowercase)
-                actor_name = cls.__name__.lower().replace("actor", "")
-                return cls(actor_name, bus, cont)
-
-            # Register with proper factory
-            container.singleton(actor_class, make_actor)
-
             # Boot and setup subscriptions
             actor = await container.make(actor_class)
             await actor.setup_subscriptions(message_bus)
@@ -71,7 +73,7 @@ class ServiceProvider(ABC):
         - Configuring service relationships
         - Performing initialization that requires other services
         """
-        await self.boot_actors(container)
+        pass
 
     async def shutdown(self, container: Container):
         """Shutdown services and clean up resources.
@@ -80,11 +82,3 @@ class ServiceProvider(ABC):
         its own resources. Override in providers that need cleanup.
         """
         pass
-
-    def provides(self) -> list:
-        """Return list of service identifiers this provider makes available.
-
-        Used for documentation and potential dependency resolution validation.
-        Should match the keys used in register() method calls.
-        """
-        return []

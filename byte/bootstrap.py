@@ -60,11 +60,13 @@ async def bootstrap(config: ByteConfg):
     # Phase 1: Register all service bindings in the container
     # This makes services available for dependency resolution
     for provider in service_providers:
+        await provider.register_actors(app)
         await provider.register(app)
 
     # Phase 2: Boot services after all are registered
     # This allows services to safely reference dependencies during initialization
     for provider in service_providers:
+        await provider.boot_actors(app)
         await provider.boot(app)
 
     # Store service providers for shutdown

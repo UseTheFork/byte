@@ -1,5 +1,6 @@
 from byte.core.actors.message import Message, MessageBus, MessageType
 from byte.core.command.registry import Command
+from byte.domain.agent.agent_actor import AgentActor
 
 
 class CoderCommand(Command):
@@ -23,7 +24,7 @@ class CoderCommand(Command):
         # Send message to agent actor instead of handling directly
         message_bus = await self.make(MessageBus)
         await message_bus.send_to(
-            "agent",
+            AgentActor,
             Message(
                 type=MessageType.USER_INPUT,
                 payload={"input": args, "agent_type": "coder"},

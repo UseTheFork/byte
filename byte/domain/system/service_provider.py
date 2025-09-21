@@ -7,7 +7,9 @@ from byte.core.actors.base import Actor
 from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
 from byte.domain.files.commands import AddFileCommand, DropFileCommand, ReadOnlyCommand
-from byte.domain.system.actor import CoordinatorActor
+from byte.domain.system.actor.command_router_actor import CommandRouterActor
+from byte.domain.system.actor.coordinator_actor import CoordinatorActor
+from byte.domain.system.actor.system_command_actor import SystemCommandActor
 from byte.domain.system.commands import ExitCommand, HelpCommand
 
 
@@ -19,8 +21,8 @@ class SystemServiceProvider(ServiceProvider):
     Usage: Register with container to enable /exit and /help commands
     """
 
-    def provides_actors(self) -> List[Type[Actor]]:
-        return [CoordinatorActor]
+    def actors(self) -> List[Type[Actor]]:
+        return [CoordinatorActor, CommandRouterActor, SystemCommandActor]
 
     async def register(self, container: "Container") -> None:
         """Register system commands in the container.

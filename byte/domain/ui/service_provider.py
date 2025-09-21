@@ -6,14 +6,15 @@ from rich.theme import Theme
 from byte.container import Container
 from byte.core.actors.base import Actor
 from byte.core.service_provider import ServiceProvider
-from byte.domain.ui.actor import InputActor, RenderingActor
+from byte.domain.ui.actor.input_actor import InputActor
+from byte.domain.ui.actor.rendering_actor import RenderingActor
 from byte.domain.ui.interactions import InteractionService
 
 
 class UIServiceProvider(ServiceProvider):
     """Service provider for UI system."""
 
-    def provides_actors(self) -> List[Type[Actor]]:
+    def actors(self) -> List[Type[Actor]]:
         return [InputActor, RenderingActor]
 
     async def register(self, container: Container) -> None:
@@ -24,7 +25,6 @@ class UIServiceProvider(ServiceProvider):
 
     async def boot(self, container: Container):
         """Boot UI services."""
-        await super().boot(container)
 
         # "pink": "#f5c2e7",
         # "mauve": "#cba6f7",

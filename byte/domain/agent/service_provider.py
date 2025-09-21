@@ -4,7 +4,7 @@ from byte.container import Container
 from byte.core.actors.base import Actor
 from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
-from byte.domain.agent.actor import AgentActor
+from byte.domain.agent.agent_actor import AgentActor
 from byte.domain.agent.ask.service_provider import AskServiceProvider
 from byte.domain.agent.coder.service_provider import CoderServiceProvider
 from byte.domain.agent.commands import SwitchAgentCommand
@@ -29,7 +29,7 @@ class AgentServiceProvider(ServiceProvider):
             CommitServiceProvider(),
         ]
 
-    def provides_actors(self) -> List[Type[Actor]]:
+    def actors(self) -> List[Type[Actor]]:
         return [AgentActor]
 
     async def register(self, container: "Container") -> None:

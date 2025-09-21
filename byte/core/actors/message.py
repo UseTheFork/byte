@@ -1,16 +1,22 @@
 import asyncio
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Type, TypeVar
 
 from byte.container import Container
 from byte.core.service.mixins import Bootable
+
+T = TypeVar("T")
 
 
 class MessageType(Enum):
     # User interaction
     USER_INPUT = "user_input"
     COMMAND_INPUT = "command_input"
+
+    DOMAIN_COMMAND = "domain_command"
+    COMMAND_COMPLETED = "command_completed"
+    COMMAND_FAILED = "command_failed"
 
     # Agent processing
     AGENT_REQUEST = "agent_request"
@@ -50,21 +56,22 @@ class Message:
 class MessageBus(Bootable):
     def __init__(self, container: Optional["Container"] = None):
         super().__init__(container)
-        self.queues: Dict[str, asyncio.Queue] = {}
-        self.subscribers: Dict[MessageType, list[str]] = {}
+        self.queues: Dict[Type, asyncio.Queue] = {}
+        self.subscribers: Dict[MessageType, list[Type]] = {}
 
-    def register_actor(self, actor_name: str, queue_size: int = 100):
+    def register_actor(self, actor_name: Type[T], queue_size: int = 100):
         """Register an actor with the message bus"""
         self.queues[actor_name] = asyncio.Queue(maxsize=queue_size)
 
-    def subscribe(self, actor_name: str, message_type: MessageType):
+    def subscribe(self, actor_name: Type[T], message_type: MessageType):
         """Subscribe an actor to a message type"""
         if message_type not in self.subscribers:
             self.subscribers[message_type] = []
         self.subscribers[message_type].append(actor_name)
 
-    async def send_to(self, actor_name: str, message: Message):
+    async def send_to(self, actor_name: Type[T], message: Message):
         """Send message to specific actor"""
+
         if actor_name in self.queues:
             await self.queues[actor_name].put(message)
         else:
@@ -76,6 +83,6 @@ class MessageBus(Bootable):
             for actor_name in self.subscribers[message.type]:
                 await self.send_to(actor_name, message)
 
-    def get_queue(self, actor_name: str) -> asyncio.Queue:
+    def get_queue(self, actor_name: Type[T]) -> asyncio.Queue:
         """Get queue for an actor"""
-        return self.queues.get(actor_name)
+        return self.queues.get(actor_name)  # pyright: ignore[reportReturnType]
