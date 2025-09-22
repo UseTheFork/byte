@@ -1,22 +1,24 @@
+from typing import List, Type
+
 from rich.console import Console
 
 from byte.container import Container
+from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
-from byte.domain.files.discovery_service import FileDiscoveryService
-from byte.domain.files.service import FileService
-from byte.domain.files.watcher_service import FileWatcherService
+from byte.domain.files.service.discovery_service import FileDiscoveryService
+from byte.domain.files.service.file_service import FileService
+from byte.domain.files.service.watcher_service import FileWatcherService
 
 
 class FileServiceProvider(ServiceProvider):
     """Service provider for simplified file functionality with project discovery."""
 
+    def services(self) -> List[Type[Service]]:
+        return [FileDiscoveryService, FileService, FileWatcherService]
+
     async def register(self, container: Container):
         """Register file services and commands."""
-
-        # Register file discovery service as singleton for caching
-        container.singleton(FileDiscoveryService)
-        container.singleton(FileService)
-        container.singleton(FileWatcherService)
+        pass
 
     async def boot(self, container: Container):
         """Boot file services and register commands with registry."""

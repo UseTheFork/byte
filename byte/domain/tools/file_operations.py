@@ -8,7 +8,7 @@ from byte.context import make
 from byte.core.logging import log
 from byte.domain.cli_input.service.interactions_service import InteractionService
 from byte.domain.files.context_manager import FileMode
-from byte.domain.files.service import FileService
+from byte.domain.files.service.file_service import FileService
 
 
 @tool(parse_docstring=True)

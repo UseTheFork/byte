@@ -42,7 +42,7 @@ class BaseAssistant:
         return {"messages": result}
 
 
-class BaseAgent(ABC, Bootable, Configurable, Injectable):
+class Agent(ABC, Bootable, Configurable, Injectable):
     """Base class for all agent services providing common graph management functionality.
 
     Defines the interface for agent services with lazy-loaded graph compilation,

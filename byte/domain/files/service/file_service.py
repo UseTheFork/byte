@@ -7,13 +7,12 @@ from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
 
-from byte.core.config.mixins import Configurable
-from byte.core.service.mixins import Bootable, Injectable
+from byte.core.service.base_service import Service
 from byte.domain.files.context_manager import FileContext, FileMode
-from byte.domain.files.discovery_service import FileDiscoveryService
+from byte.domain.files.service.discovery_service import FileDiscoveryService
 
 
-class FileService(Bootable, Configurable, Injectable):
+class FileService(Service):
     """Simplified domain service for file context management with project discovery.
 
     Manages the active set of files available to the AI assistant, with

@@ -2,11 +2,12 @@ from typing import List, Type
 
 from byte.container import Container
 from byte.core.actors.base import Actor
+from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
-from byte.domain.agent.agent_actor import AgentActor
-from byte.domain.agent.coder.service_provider import CoderServiceProvider
-from byte.domain.agent.commit.service_provider import CommitServiceProvider
-from byte.domain.agent.service import AgentService
+from byte.domain.agent.actor.agent_actor import AgentActor
+from byte.domain.agent.base import Agent
+from byte.domain.agent.coder.agent import CoderAgent
+from byte.domain.agent.service.agent_service import AgentService
 
 
 class AgentServiceProvider(ServiceProvider):
@@ -18,23 +19,19 @@ class AgentServiceProvider(ServiceProvider):
     Usage: Automatically registered during bootstrap to enable agent routing
     """
 
-    def __init__(self):
-        super().__init__()
-        self.agent_providers = [
-            CoderServiceProvider(),
-            # AskServiceProvider(),
-            CommitServiceProvider(),
-        ]
+    def services(self) -> List[Type[Service]]:
+        return [AgentService]
 
     def actors(self) -> List[Type[Actor]]:
         return [AgentActor]
 
-    async def register(self, container: "Container") -> None:
-        container.singleton(AgentService)
+    def agents(self) -> List[Type[Agent]]:
+        return [CoderAgent]
 
-        # Register all sub-agents
-        for provider in self.agent_providers:
-            await provider.register(container)
+    async def register(self, container: "Container") -> None:
+        # Create all agents
+        for agent_class in self.agents():
+            container.singleton(agent_class)
 
     async def boot(self, container: "Container") -> None:
         """Boot all sub-agents and register agent switching commands.
@@ -42,20 +39,4 @@ class AgentServiceProvider(ServiceProvider):
         Initializes all registered agents and registers the /agent command for
         switching between different AI agents during runtime.
         """
-        await super().boot(container)
-
-        # Boot all sub-agents
-        for provider in self.agent_providers:
-            await provider.boot(container)
-
-        # Register agent switching commands
-        # command_registry = await container.make(CommandRegistry)
-        # await command_registry.register_slash_command(SwitchAgentCommand(container))
-
-    def provides(self) -> list:
-        """Return list of services provided by this provider."""
-        services = ["agent_service"]
-        # Collect services from all agent providers
-        for provider in self.agent_providers:
-            services.extend(provider.provides())
-        return services
+        pass

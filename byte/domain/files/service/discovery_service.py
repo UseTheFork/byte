@@ -4,11 +4,10 @@ from typing import List, Optional, Set
 
 import pathspec
 
-from byte.core.config.mixins import Configurable
-from byte.core.service.mixins import Bootable
+from byte.core.service.base_service import Service
 
 
-class FileDiscoveryService(Bootable, Configurable):
+class FileDiscoveryService(Service):
     """Service for discovering and filtering project files with gitignore support.
 
     Scans the project directory on boot to build a cached index of all files,

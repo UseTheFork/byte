@@ -7,6 +7,7 @@ from byte.domain.agent.service_provider import AgentServiceProvider
 from byte.domain.cli_input.actor.input_actor import InputActor
 from byte.domain.cli_input.service_provider import CliInputServiceProvider
 from byte.domain.cli_output.service_provider import CliOutputServiceProvider
+from byte.domain.files.service_provider import FileServiceProvider
 from byte.domain.git.service_provider import GitServiceProvider
 from byte.domain.lint.service_provider import LintServiceProvider
 from byte.domain.llm.service_provider import LLMServiceProvider
@@ -44,7 +45,7 @@ async def bootstrap(config: ByteConfg):
         CliOutputServiceProvider(),  # Console and prompt services
         MemoryServiceProvider(),  # Short-term conversation memory
         # KnowledgeServiceProvider(),  # Long-term knowledge storage
-        # FileServiceProvider(),  # File context management
+        FileServiceProvider(),  # File context management
         ToolsServiceProvider(),  # File context management
         LLMServiceProvider(),  # Language model integration
         GitServiceProvider(),  # Git repository operations

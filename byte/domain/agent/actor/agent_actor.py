@@ -3,8 +3,8 @@ import asyncio
 from byte.core.actors.base import Actor
 from byte.core.actors.message import Message, MessageType
 from byte.core.actors.streams import StreamManager
-from byte.domain.agent.coder.service import CoderAgent
-from byte.domain.agent.service import AgentService
+from byte.domain.agent.coder.agent import CoderAgent
+from byte.domain.agent.service.agent_service import AgentService
 from byte.domain.cli_output.actor.rendering_actor import RenderingActor
 
 

@@ -8,10 +8,10 @@ from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode
 from typing_extensions import TypedDict
 
-from byte.domain.agent.base import BaseAgent
+from byte.domain.agent.base import Agent
 from byte.domain.agent.coder.prompts import coder_prompt
 from byte.domain.cli_output.tools import user_confirm, user_input, user_select
-from byte.domain.files.service import FileService
+from byte.domain.files.service.file_service import FileService
 from byte.domain.llm.service.llm_service import LLMService
 from byte.domain.memory.service import MemoryService
 from byte.domain.tools.file_operations import replace_text_in_file
@@ -24,7 +24,7 @@ class CoderState(TypedDict):
     file_context: str
 
 
-class CoderAgent(BaseAgent):
+class CoderAgent(Agent):
     """Domain service for the coder agent specialized in software development.
 
     Pure domain service that handles coding logic without UI concerns.
@@ -84,6 +84,7 @@ class CoderAgent(BaseAgent):
 
     async def _get_file_context(self, state: CoderState) -> dict:
         """Fetch current file context for the agent."""
+
         file_service: FileService = await self.make(FileService)
         file_context = file_service.generate_context_prompt()
         return {"file_context": file_context}

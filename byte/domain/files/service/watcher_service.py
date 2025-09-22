@@ -5,14 +5,13 @@ from typing import Dict, Set
 
 from watchfiles import Change, awatch
 
-from byte.core.config.mixins import Configurable
-from byte.core.service.mixins import Bootable, Injectable
+from byte.core.service.base_service import Service
 from byte.domain.files.context_manager import FileMode
-from byte.domain.files.discovery_service import FileDiscoveryService
-from byte.domain.files.service import FileService
+from byte.domain.files.service.discovery_service import FileDiscoveryService
+from byte.domain.files.service.file_service import FileService
 
 
-class FileWatcherService(Bootable, Configurable, Injectable):
+class FileWatcherService(Service):
     """Service for monitoring file system changes and AI comment detection.
 
     Watches project files for changes, deletions, and AI comment patterns

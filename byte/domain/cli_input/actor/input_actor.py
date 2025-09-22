@@ -92,7 +92,7 @@ class InputActor(Actor):
 
     async def _input_loop(self):
         """Main input gathering loop with registered command routing"""
-        from byte.domain.agent.agent_actor import AgentActor
+        from byte.domain.agent.actor.agent_actor import AgentActor
 
         while self.running:
             try:

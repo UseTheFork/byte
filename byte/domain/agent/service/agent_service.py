@@ -1,15 +1,14 @@
 from typing import Type
 
-from byte.core.config.mixins import Configurable
-from byte.core.service.mixins import Bootable, Injectable
-from byte.domain.agent.base import BaseAgent
-from byte.domain.agent.coder.service import CoderAgent
+from byte.core.service.base_service import Service
+from byte.domain.agent.base import Agent
+from byte.domain.agent.coder.agent import CoderAgent
 
 
-class AgentService(Bootable, Configurable, Injectable):
+class AgentService(Service):
     """Main agent service that routes requests to specialized agents."""
 
-    _current_agent: Type[BaseAgent] = CoderAgent
+    _current_agent: Type[Agent] = CoderAgent
 
     async def boot(self):
         """Boot method to initialize the agent service."""
@@ -24,7 +23,7 @@ class AgentService(Bootable, Configurable, Injectable):
             # AskService,
         ]
 
-    async def route_to_agent(self, agent_type: Type[BaseAgent], request: str):
+    async def route_to_agent(self, agent_type: Type[Agent], request: str):
         """Route request to the specified agent."""
 
         if agent_type not in self._agents:
@@ -41,22 +40,22 @@ class AgentService(Bootable, Configurable, Injectable):
         async for event in agent.stream(request):
             yield event
 
-    def set_active_agent(self, agent_type: Type[BaseAgent]) -> bool:
+    def set_active_agent(self, agent_type: Type[Agent]) -> bool:
         """Switch the active agent."""
         if self._is_valid_agent(agent_type):
             self._current_agent = agent_type
             return True
         return False
 
-    def _is_valid_agent(self, agent_type: Type[BaseAgent]) -> bool:
+    def _is_valid_agent(self, agent_type: Type[Agent]) -> bool:
         """Check if the agent type is valid."""
         return agent_type in self._available_agents
 
-    def get_active_agent(self) -> Type[BaseAgent]:
+    def get_active_agent(self) -> Type[Agent]:
         """Get the currently active agent type."""
         return self._current_agent
 
-    def get_available_agents(self) -> list[Type[BaseAgent]]:
+    def get_available_agents(self) -> list[Type[Agent]]:
         """Get list of available agent types."""
         return self._available_agents
 
