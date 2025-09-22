@@ -1,10 +1,9 @@
-from typing import TYPE_CHECKING
+from typing import List, Type
 
+from byte.container import Container
+from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
-from byte.domain.git.service import GitService
-
-if TYPE_CHECKING:
-    from byte.container import Container
+from byte.domain.git.service.git_service import GitService
 
 
 class GitServiceProvider(ServiceProvider):
@@ -15,21 +14,8 @@ class GitServiceProvider(ServiceProvider):
     Usage: Register with container to enable git service access
     """
 
-    async def register(self, container: "Container") -> None:
-        """Register git services in the container.
-
-        Usage: `provider.register(container)` -> binds git service
-        """
-        # Register git service
-        container.bind(GitService)
-
-    async def boot(self, container: "Container") -> None:
-        """Boot git services.
-
-        Usage: `provider.boot(container)` -> git service becomes available
-        """
-        pass
-
-    def provides(self) -> list:
-        """Return list of services provided by this provider."""
+    def services(self) -> List[Type[Service]]:
         return [GitService]
+
+    async def register(self, container: Container):
+        pass

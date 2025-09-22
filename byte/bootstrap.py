@@ -57,6 +57,7 @@ async def bootstrap(config: ByteConfg):
     # This makes services available for dependency resolution
     for provider in service_providers:
         await provider.register_actors(app)
+        await provider.register_services(app)
         await provider.register(app)
 
     # Phase 2: Boot services after all are registered

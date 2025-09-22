@@ -4,6 +4,7 @@ from typing import List, Type
 from byte.container import Container
 from byte.core.actors.base import Actor
 from byte.core.actors.message import MessageBus
+from byte.core.service.base_service import Service
 
 
 class ServiceProvider(ABC):
@@ -18,6 +19,29 @@ class ServiceProvider(ABC):
         # Optional container reference for providers that need it during initialization
         self.container = None
 
+    def services(self) -> List[Type[Service]]:
+        """Return list of service classes this provider makes available.
+
+        Override this method to specify which service classes should be registered
+        in the container when this provider is initialized. Services returned here
+        will be automatically registered as singletons via register_services().
+        """
+        return []
+
+    async def register_services(self, container: Container):
+        """Register all services returned by services() as singletons in the container.
+
+        Automatically registers each service class returned by the services() method
+        as a singleton binding in the dependency injection container. Services will
+        be instantiated with the container as their first argument when resolved.
+        """
+        services = self.services()
+        if not services:
+            return
+
+        for service_class in services:
+            container.singleton(service_class)
+
     def actors(self) -> List[Type[Actor]]:
         """Return list of actor classes this provider makes available."""
         return []
@@ -29,8 +53,6 @@ class ServiceProvider(ABC):
             return
 
         for actor_class in actors:
-            # Create proper factory that provides all required arguments
-            # Register with proper factory
             container.singleton(actor_class)
 
     async def boot_actors(self, container: Container):

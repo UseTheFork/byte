@@ -8,12 +8,11 @@ from rich.panel import Panel
 from rich.spinner import Spinner
 from rich.text import Text
 
-from byte.core.config.mixins import Configurable
-from byte.core.service.mixins import Bootable, Injectable
-from byte.domain.git.service import GitService
+from byte.core.service.base_service import Service
+from byte.domain.git.service.git_service import GitService
 
 
-class LintService(Bootable, Injectable, Configurable):
+class LintService(Service):
     """Domain service for code linting and formatting operations.
 
     Orchestrates multiple linting commands configured in config.yaml to analyze
@@ -21,6 +20,9 @@ class LintService(Bootable, Injectable, Configurable):
     target only changed files for efficient linting workflows.
     Usage: `await lint_service.lint_changed_files()` -> runs configured linters on git changes
     """
+
+    async def handle(self, **kwargs):
+        await self.lint_changed_files()
 
     async def lint_changed_files(self) -> Dict[str, List[str]]:
         """Run configured linters on git changed files.

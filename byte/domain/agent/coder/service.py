@@ -12,7 +12,7 @@ from byte.domain.agent.base import BaseAgent
 from byte.domain.agent.coder.prompts import coder_prompt
 from byte.domain.cli_output.tools import user_confirm, user_input, user_select
 from byte.domain.files.service import FileService
-from byte.domain.llm.service import LLMService
+from byte.domain.llm.service.llm_service import LLMService
 from byte.domain.memory.service import MemoryService
 from byte.domain.tools.file_operations import replace_text_in_file
 

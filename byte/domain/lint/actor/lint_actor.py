@@ -1,6 +1,6 @@
 from byte.core.actors.base import Actor
 from byte.core.actors.message import Message, MessageType
-from byte.domain.lint.service import LintService
+from byte.domain.lint.service.lint_service import LintService
 
 
 class LintActor(Actor):

@@ -1,17 +1,13 @@
-from typing import TYPE_CHECKING, Any, Dict
+from typing import Any, Dict
 
 from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
 
-from byte.core.config.mixins import Configurable
-from byte.core.service.mixins import Bootable
+from byte.core.service.base_service import Service
 from byte.domain.llm.config import LLMConfig, ModelConfig
 
-if TYPE_CHECKING:
-    pass
 
-
-class LLMService(Bootable, Configurable):
+class LLMService(Service):
     """Base LLM service that all providers extend.
 
     Provides a unified interface for different LLM providers (OpenAI, Anthropic, etc.)

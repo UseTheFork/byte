@@ -4,11 +4,10 @@ from typing import List
 import git
 from git.exc import InvalidGitRepositoryError
 
-from byte.core.config.mixins import Configurable
-from byte.core.service.mixins import Bootable
+from byte.core.service.base_service import Service
 
 
-class GitService(Bootable, Configurable):
+class GitService(Service):
     """Domain service for git repository operations and file tracking.
 
     Provides utilities for discovering changed files, repository status,

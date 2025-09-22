@@ -3,11 +3,10 @@ from typing import List, Optional
 from rich.console import Console
 from rich.prompt import Confirm, Prompt
 
-from byte.core.config.mixins import Configurable
-from byte.core.service.mixins import Bootable, Injectable
+from byte.core.service.base_service import Service
 
 
-class InteractionService(Bootable, Configurable, Injectable):
+class InteractionService(Service):
     """Service for user interactions during agent execution.
 
     Provides standardized methods for getting user input during tool execution

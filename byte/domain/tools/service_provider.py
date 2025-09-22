@@ -1,9 +1,5 @@
-from typing import TYPE_CHECKING
-
+from byte.container import Container
 from byte.core.service_provider import ServiceProvider
-
-if TYPE_CHECKING:
-    from byte.container import Container
 
 
 class ToolsServiceProvider(ServiceProvider):

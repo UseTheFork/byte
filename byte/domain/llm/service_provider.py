@@ -1,8 +1,11 @@
+from typing import List, Type
+
 from rich.console import Console
 
 from byte.container import Container
+from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
-from byte.domain.llm.service import LLMService
+from byte.domain.llm.service.llm_service import LLMService
 
 
 class LLMServiceProvider(ServiceProvider):
@@ -14,12 +17,11 @@ class LLMServiceProvider(ServiceProvider):
     Usage: Register with container to enable AI functionality throughout app
     """
 
-    async def register(self, container: "Container") -> None:
-        """Register LLM services with automatic provider selection.
+    def services(self) -> List[Type[Service]]:
+        return [LLMService]
 
-        Usage: `provider.register(container)` -> configures best available LLM service
-        """
-        container.singleton(LLMService)
+    async def register(self, container: Container):
+        pass
 
     async def boot(self, container: "Container") -> None:
         """Boot LLM services and display configuration information.
@@ -36,7 +38,3 @@ class LLMServiceProvider(ServiceProvider):
         weak_model = llm_service._service_config.weak.model
         console.print(f"├─ [success]Main model:[/success] [info]{main_model}[/info]")
         console.print(f"├─ [success]Weak model:[/success] [info]{weak_model}[/info]")
-
-    def provides(self) -> list:
-        """Return list of services provided by this provider."""
-        return ["llm_service"]

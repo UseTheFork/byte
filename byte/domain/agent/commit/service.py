@@ -9,7 +9,7 @@ from rich.panel import Panel
 from byte.domain.agent.base import BaseAgent, BaseAssistant
 from byte.domain.agent.commit.prompt import commit_prompt
 from byte.domain.cli_input.service.interactions_service import InteractionService
-from byte.domain.llm.service import LLMService
+from byte.domain.llm.service.llm_service import LLMService
 
 
 class CommitService(BaseAgent):
