@@ -2,12 +2,9 @@ from typing import List, Type
 
 from byte.container import Container
 from byte.core.actors.base import Actor
-from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
 from byte.domain.agent.agent_actor import AgentActor
-from byte.domain.agent.ask.service_provider import AskServiceProvider
 from byte.domain.agent.coder.service_provider import CoderServiceProvider
-from byte.domain.agent.commands import SwitchAgentCommand
 from byte.domain.agent.commit.service_provider import CommitServiceProvider
 from byte.domain.agent.service import AgentService
 
@@ -25,7 +22,7 @@ class AgentServiceProvider(ServiceProvider):
         super().__init__()
         self.agent_providers = [
             CoderServiceProvider(),
-            AskServiceProvider(),
+            # AskServiceProvider(),
             CommitServiceProvider(),
         ]
 
@@ -52,8 +49,8 @@ class AgentServiceProvider(ServiceProvider):
             await provider.boot(container)
 
         # Register agent switching commands
-        command_registry = await container.make(CommandRegistry)
-        await command_registry.register_slash_command(SwitchAgentCommand(container))
+        # command_registry = await container.make(CommandRegistry)
+        # await command_registry.register_slash_command(SwitchAgentCommand(container))
 
     def provides(self) -> list:
         """Return list of services provided by this provider."""

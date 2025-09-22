@@ -1,4 +1,4 @@
-from typing import Annotated, Any, AsyncGenerator, Type
+from typing import Annotated, Type
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.runnables import Runnable, RunnableConfig
@@ -9,13 +9,12 @@ from langgraph.prebuilt import ToolNode
 from typing_extensions import TypedDict
 
 from byte.domain.agent.base import BaseAgent
-from byte.domain.agent.coder.prompts import coder_prompt, watch_prompt
-from byte.domain.files.events import CompletionRequested
+from byte.domain.agent.coder.prompts import coder_prompt
+from byte.domain.cli_output.tools import user_confirm, user_input, user_select
 from byte.domain.files.service import FileService
 from byte.domain.llm.service import LLMService
 from byte.domain.memory.service import MemoryService
 from byte.domain.tools.file_operations import replace_text_in_file
-from byte.domain.ui.tools import user_confirm, user_input, user_select
 
 
 class CoderState(TypedDict):
@@ -42,13 +41,6 @@ class CoderAgent(BaseAgent):
     def get_tools(self):
         """Return tools available to the coder agent."""
         return [user_confirm, user_select, user_input, replace_text_in_file]
-
-    async def handle_watch_request(
-        self, event: CompletionRequested
-    ) -> AsyncGenerator[Any, None]:
-        """Handle file watch completion requests."""
-        async for chunk in self.stream(watch_prompt):
-            yield chunk
 
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""

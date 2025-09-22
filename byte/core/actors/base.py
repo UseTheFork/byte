@@ -26,9 +26,12 @@ class Actor(ABC, Bootable, Injectable):
         await self.on_start()
 
         while self.running:
-            # log.info(f"{self.__class__.__name__}: running={self.running}")
             try:
                 # Wait for message with timeout to allow periodic cleanup
+                if self.inbox is None:
+                    await asyncio.sleep(0.1)  # Brief wait for initialization
+                    continue
+
                 message = await asyncio.wait_for(self.inbox.get(), timeout=1.0)
                 await self.handle_message(message)
             except asyncio.TimeoutError:

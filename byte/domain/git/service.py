@@ -1,18 +1,14 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, List
+from typing import List
 
 import git
 from git.exc import InvalidGitRepositoryError
 
 from byte.core.config.mixins import Configurable
 from byte.core.service.mixins import Bootable
-from byte.domain.events.mixins import Eventable
-
-if TYPE_CHECKING:
-    pass
 
 
-class GitService(Bootable, Configurable, Eventable):
+class GitService(Bootable, Configurable):
     """Domain service for git repository operations and file tracking.
 
     Provides utilities for discovering changed files, repository status,

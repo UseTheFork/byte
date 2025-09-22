@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import git
 from pydantic import BaseModel
@@ -9,9 +8,6 @@ from pydantic_settings import (
     SettingsConfigDict,
     YamlConfigSettingsSource,
 )
-
-if TYPE_CHECKING:
-    pass
 
 
 def _find_project_root() -> Path:

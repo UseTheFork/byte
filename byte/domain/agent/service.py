@@ -4,10 +4,9 @@ from byte.core.config.mixins import Configurable
 from byte.core.service.mixins import Bootable, Injectable
 from byte.domain.agent.base import BaseAgent
 from byte.domain.agent.coder.service import CoderAgent
-from byte.domain.events.mixins import Eventable
 
 
-class AgentService(Bootable, Configurable, Injectable, Eventable):
+class AgentService(Bootable, Configurable, Injectable):
     """Main agent service that routes requests to specialized agents."""
 
     _current_agent: Type[BaseAgent] = CoderAgent

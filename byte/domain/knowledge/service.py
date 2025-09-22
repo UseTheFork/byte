@@ -1,12 +1,11 @@
 from typing import Any, Dict, List, Optional
 
 from byte.core.service.mixins import Bootable, Injectable
-from byte.domain.events.mixins import Eventable
 from byte.domain.knowledge.models import KnowledgeItem, ProjectPattern, UserPreference
 from byte.domain.knowledge.store import ByteKnowledgeStore
 
 
-class KnowledgeService(Eventable, Injectable, Bootable):
+class KnowledgeService(Injectable, Bootable):
     """Domain service for long-term knowledge and preference management.
 
     Orchestrates persistent storage of user preferences, project patterns,

@@ -5,7 +5,7 @@ from byte.core.actors.message import Message, MessageType
 from byte.core.actors.streams import StreamManager
 from byte.domain.agent.coder.service import CoderAgent
 from byte.domain.agent.service import AgentService
-from byte.domain.ui.actor.rendering_actor import RenderingActor
+from byte.domain.cli_output.actor.rendering_actor import RenderingActor
 
 
 class AgentActor(Actor):

@@ -6,13 +6,12 @@ from prompt_toolkit.document import Document
 from prompt_toolkit.history import FileHistory
 
 from byte.context import make
-from byte.core.command.registry import CommandRegistry
 from byte.core.config.config import BYTE_DIR
 
 
 class CommandCompleter(Completer):
     def __init__(self):
-        self.command_registry = None
+        self.input_actor = None
 
     def get_completions(self, document: Document, complete_event):
         pass
@@ -20,31 +19,29 @@ class CommandCompleter(Completer):
     async def get_completions_async(
         self, document: Document, complete_event
     ) -> AsyncGenerator[Completion, None]:
-        """Async generator for completions using prompt_toolkit 3.0's native async support."""
-        if not self.command_registry:
-            self.command_registry = await make(CommandRegistry)
+        """Async generator for completions using the InputActor."""
+        from byte.domain.cli_input.actor.input_actor import InputActor
+
+        if not self.input_actor:
+            self.input_actor = await make(InputActor)
 
         text = document.text_before_cursor
 
         if text.startswith("/"):
-            # Parse slash command
+            # Get completions from InputActor
+            completions = await self.input_actor.get_completions(text)
+
+            # Parse to determine what part to replace
             if " " in text:
                 cmd_part, args_part = text.split(" ", 1)
-                cmd_name = cmd_part[1:]  # Remove /
-                command = self.command_registry.get_slash_command(cmd_name)
-                if command:
-                    completions = await command.get_completions(args_part)
-                    # Only replace the args part, not the whole command
-                    for completion in completions:
-                        yield Completion(completion, start_position=-len(args_part))
-                return
+                # Replace only the args part
+                for completion in completions:
+                    yield Completion(completion, start_position=-len(args_part))
             else:
-                # Complete command names
-                cmd_prefix = text[1:]  # Remove /
-                for cmd_name in self.command_registry._slash_commands.keys():
-                    if cmd_name.startswith(cmd_prefix):
-                        yield Completion(cmd_name, start_position=-len(cmd_prefix))
-                return
+                # Replace the command part (minus the /)
+                cmd_prefix = text[1:]
+                for completion in completions:
+                    yield Completion(completion, start_position=-len(cmd_prefix))
 
 
 class PromptHandler:

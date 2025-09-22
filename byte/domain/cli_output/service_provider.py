@@ -6,22 +6,17 @@ from rich.theme import Theme
 from byte.container import Container
 from byte.core.actors.base import Actor
 from byte.core.service_provider import ServiceProvider
-from byte.domain.ui.actor.input_actor import InputActor
-from byte.domain.ui.actor.rendering_actor import RenderingActor
-from byte.domain.ui.interactions import InteractionService
+from byte.domain.cli_output.actor.rendering_actor import RenderingActor
 
 
-class UIServiceProvider(ServiceProvider):
+class CliOutputServiceProvider(ServiceProvider):
     """Service provider for UI system."""
 
     def actors(self) -> List[Type[Actor]]:
-        return [InputActor, RenderingActor]
+        return [RenderingActor]
 
     async def register(self, container: Container) -> None:
         """Register UI services in the container."""
-
-        # Register interaction service for user interactions
-        container.singleton(InteractionService)
 
     async def boot(self, container: Container):
         """Boot UI services."""

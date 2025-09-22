@@ -2,20 +2,17 @@ from rich.console import Console
 
 from byte.container import app
 from byte.core.actors.message import MessageBus
-from byte.core.command.registry import CommandRegistry
 from byte.core.config.config import ByteConfg
-from byte.core.response.service_provider import ResponseServiceProvider
 from byte.domain.agent.service_provider import AgentServiceProvider
-from byte.domain.events.service_provider import EventServiceProvider
-from byte.domain.files.service_provider import FileServiceProvider
+from byte.domain.cli_input.actor.input_actor import InputActor
+from byte.domain.cli_input.service_provider import CliInputServiceProvider
+from byte.domain.cli_output.service_provider import CliOutputServiceProvider
 from byte.domain.git.service_provider import GitServiceProvider
-from byte.domain.knowledge.service_provider import KnowledgeServiceProvider
 from byte.domain.lint.service_provider import LintServiceProvider
 from byte.domain.llm.service_provider import LLMServiceProvider
 from byte.domain.memory.service_provider import MemoryServiceProvider
 from byte.domain.system.service_provider import SystemServiceProvider
 from byte.domain.tools.service_provider import ToolsServiceProvider
-from byte.domain.ui.service_provider import UIServiceProvider
 
 
 async def bootstrap(config: ByteConfg):
@@ -32,7 +29,7 @@ async def bootstrap(config: ByteConfg):
     app.singleton(MessageBus)
 
     # Make the global command registry available through dependency injection
-    app.singleton(CommandRegistry)
+    app.singleton(InputActor)
 
     app.singleton(ByteConfg, lambda: config)
 
@@ -43,12 +40,11 @@ async def bootstrap(config: ByteConfg):
     # may need configuration access during their boot phase
 
     service_providers = [
-        EventServiceProvider(),  # Foundation for domain events
-        ResponseServiceProvider(),  # Agent response handling
-        UIServiceProvider(),  # Console and prompt services
+        CliInputServiceProvider(),  # Console and prompt services
+        CliOutputServiceProvider(),  # Console and prompt services
         MemoryServiceProvider(),  # Short-term conversation memory
-        KnowledgeServiceProvider(),  # Long-term knowledge storage
-        FileServiceProvider(),  # File context management
+        # KnowledgeServiceProvider(),  # Long-term knowledge storage
+        # FileServiceProvider(),  # File context management
         ToolsServiceProvider(),  # File context management
         LLMServiceProvider(),  # Language model integration
         GitServiceProvider(),  # Git repository operations

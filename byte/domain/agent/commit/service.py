@@ -6,12 +6,10 @@ from langgraph.graph.state import CompiledStateGraph
 from rich.console import Console
 from rich.panel import Panel
 
-from byte.core.response.handler import ResponseHandler
 from byte.domain.agent.base import BaseAgent, BaseAssistant
-from byte.domain.agent.commit.events import CommitCreated, PreCommitStarted
 from byte.domain.agent.commit.prompt import commit_prompt
+from byte.domain.cli_input.service.interactions_service import InteractionService
 from byte.domain.llm.service import LLMService
-from byte.domain.ui.interactions import InteractionService
 
 
 class CommitService(BaseAgent):
@@ -85,33 +83,35 @@ class CommitService(BaseAgent):
                 return
 
             # Extract staged changes for AI analysis
-            staged_diff = repo.git.diff("--cached")
+            # staged_diff = repo.git.diff("--cached")
 
             # Emit pre-commit event for other domains to react
-            await self.event(
-                PreCommitStarted(
-                    staged_files=len(repo.index.diff("HEAD")),
-                    diff_size=len(staged_diff),
-                )
-            )
+            # await self.event(
+            #     PreCommitStarted(
+            #         staged_files=len(repo.index.diff("HEAD")),
+            #         diff_size=len(staged_diff),
+            #     )
+            # )
 
-            response_handler = await self.make(ResponseHandler)
+            # response_handler = await self.make(ResponseHandler)
 
-            result_message = await response_handler.handle_stream(
-                self.stream(staged_diff)
-            )
+            # result_message = await response_handler.handle_stream(
+            #     self.stream(staged_diff)
+            # )
+
+            result_message = ""
 
             # Create commit with AI-generated message
-            commit = repo.index.commit(result_message.content)
+            commit = repo.index.commit(result_message)
 
             # Emit event for other domains to react to the commit
-            await self.event(
-                CommitCreated(
-                    commit_hash=commit.hexsha,
-                    message=commit.message.strip(),
-                    files_changed=len(repo.index.diff("HEAD~1")),
-                )
-            )
+            # await self.event(
+            #     CommitCreated(
+            #         commit_hash=commit.hexsha,
+            #         message=commit.message.strip(),
+            #         files_changed=len(repo.index.diff("HEAD~1")),
+            #     )
+            # )
 
             console.print(
                 Panel(

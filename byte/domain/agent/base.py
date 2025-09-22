@@ -7,7 +7,6 @@ from langgraph.graph.state import CompiledStateGraph, Runnable, RunnableConfig
 
 from byte.core.config.mixins import Configurable
 from byte.core.service.mixins import Bootable, Injectable
-from byte.domain.events.mixins import Eventable
 from byte.domain.memory.service import MemoryService
 
 if TYPE_CHECKING:
@@ -43,7 +42,7 @@ class BaseAssistant:
         return {"messages": result}
 
 
-class BaseAgent(ABC, Bootable, Configurable, Injectable, Eventable):
+class BaseAgent(ABC, Bootable, Configurable, Injectable):
     """Base class for all agent services providing common graph management functionality.
 
     Defines the interface for agent services with lazy-loaded graph compilation,

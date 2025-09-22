@@ -1,9 +1,7 @@
 from typing import TYPE_CHECKING
 
 from byte.container import Container
-from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
-from byte.domain.agent.commit.commands import CommitCommand
 from byte.domain.agent.commit.service import CommitService
 
 if TYPE_CHECKING:
@@ -26,21 +24,14 @@ class CommitServiceProvider(ServiceProvider):
         """
         container.singleton(CommitService)
 
-        # Register commit command
-        container.bind(CommitCommand)
-
     async def boot(self, container: "Container") -> None:
         """Boot commit services and register commands with registry.
 
         Usage: `provider.boot(container)` -> `/commit` becomes available to users
         """
-        command_registry = await container.make(CommandRegistry)
+        # command_registry = await container.make(CommandRegistry)
 
-        # Register commit command for user access
-        await command_registry.register_slash_command(
-            await container.make(CommitCommand)
-        )
-
-    def provides(self) -> list:
-        """Return list of services provided by this provider."""
-        return [CommitCommand]
+        # # Register commit command for user access
+        # await command_registry.register_slash_command(
+        #     await container.make(CommitCommand)
+        # )

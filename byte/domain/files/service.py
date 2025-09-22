@@ -9,19 +9,11 @@ from rich.panel import Panel
 
 from byte.core.config.mixins import Configurable
 from byte.core.service.mixins import Bootable, Injectable
-from byte.domain.events.event import Event
-from byte.domain.events.mixins import Eventable
 from byte.domain.files.context_manager import FileContext, FileMode
 from byte.domain.files.discovery_service import FileDiscoveryService
-from byte.domain.files.events import (
-    ContextCleared,
-    FileAdded,
-    FileModeChanged,
-    FileRemoved,
-)
 
 
-class FileService(Bootable, Configurable, Injectable, Eventable):
+class FileService(Bootable, Configurable, Injectable):
     """Simplified domain service for file context management with project discovery.
 
     Manages the active set of files available to the AI assistant, with
@@ -64,7 +56,6 @@ class FileService(Bootable, Configurable, Injectable, Eventable):
                 if path_obj.is_file() and str(path_obj) in discovered_file_paths:
                     key = str(path_obj)
                     self._context_files[key] = FileContext(path=path_obj, mode=mode)
-                    await self.event(FileAdded(file_path=str(path_obj), mode=mode))
                     success_count += 1
 
             return success_count > 0
@@ -80,7 +71,6 @@ class FileService(Bootable, Configurable, Injectable, Eventable):
             self._context_files[key] = FileContext(path=path_obj, mode=mode)
 
             # Emit event for UI updates and other interested components
-            await self.event(FileAdded(file_path=str(path_obj), mode=mode))
             return True
 
     async def remove_file(self, path: Union[str, PathLike]) -> bool:
@@ -125,7 +115,7 @@ class FileService(Bootable, Configurable, Injectable, Eventable):
             # Remove all matching files
             for match_path in matching_paths:
                 del self._context_files[match_path]
-                await self.event(FileRemoved(file_path=match_path))
+                # await self.event(FileRemoved(file_path=match_path))
 
             return True
         else:
@@ -136,7 +126,7 @@ class FileService(Bootable, Configurable, Injectable, Eventable):
             # Only remove if file is in context and in discovery service
             if key in self._context_files and key in discovered_file_paths:
                 del self._context_files[key]
-                await self.event(FileRemoved(file_path=str(path_obj)))
+                # await self.event(FileRemoved(file_path=str(path_obj)))
                 return True
             return False
 
@@ -166,13 +156,13 @@ class FileService(Bootable, Configurable, Injectable, Eventable):
         key = str(path_obj)
 
         if key in self._context_files:
-            old_mode = self._context_files[key].mode
+            # old_mode = self._context_files[key].mode
             self._context_files[key].mode = mode
-            await self.event(
-                FileModeChanged(
-                    file_path=str(path_obj), old_mode=old_mode, new_mode=mode
-                )
-            )
+            # await self.event(
+            #     FileModeChanged(
+            #         file_path=str(path_obj), old_mode=old_mode, new_mode=mode
+            #     )
+            # )
             return True
         return False
 
@@ -233,7 +223,7 @@ Any other messages in the chat may contain outdated versions of the files' conte
         Usage: `await service.clear_context()` -> empty context
         """
         self._context_files.clear()
-        await self.event(ContextCleared())
+        # await self.event(ContextCleared())
 
     # Project file discovery methods
     async def get_project_files(self, extension: Optional[str] = None) -> List[str]:
@@ -270,7 +260,7 @@ Any other messages in the chat may contain outdated versions of the files' conte
         path_obj = Path(path).resolve()
         return str(path_obj) in self._context_files
 
-    async def list_in_context_files(self, event: Event):
+    async def list_in_context_files(self):
         """Display current editable files before each prompt.
 
         Provides visual feedback about which files the AI can modify,
@@ -302,4 +292,4 @@ Any other messages in the chat may contain outdated versions of the files' conte
                 )
             )
 
-        return event
+        return

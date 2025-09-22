@@ -10,7 +10,7 @@ class Configurable:
     container: Optional["Container"]
 
     async def boot_configurable(self) -> None:
-        self._config: ByteConfg = await self.container.make(ByteConfg)
+        self._config: ByteConfg = await self.container.make(ByteConfg)  # pyright: ignore[reportOptionalMemberAccess]
         self._service_config = {}
         await self._configure_service()
 

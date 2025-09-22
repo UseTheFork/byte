@@ -53,6 +53,53 @@ class Message:
     correlation_id: Optional[str] = None
 
 
+class ExecuteCommand(Message):
+    """Message for executing a command via actor system"""
+
+    def __init__(
+        self,
+        command_name: str,
+        args: str,
+        user_input: str,
+        reply_to: Optional[asyncio.Queue] = None,
+    ):
+        super().__init__(
+            type=MessageType.DOMAIN_COMMAND,  # Use existing message type
+            payload={
+                "command_name": command_name,
+                "args": args,
+                "user_input": user_input,
+            },
+            reply_to=reply_to,
+        )
+        self.command_name = command_name
+        self.args = args
+        self.user_input = user_input
+
+
+class GetCompletions(Message):
+    """Message for requesting tab completions"""
+
+    def __init__(self, partial_input: str, reply_to: Optional[asyncio.Queue] = None):
+        super().__init__(
+            type=MessageType.DOMAIN_COMMAND,
+            payload={"partial_input": partial_input},
+            reply_to=reply_to,
+        )
+        self.partial_input = partial_input
+
+
+class CompletionResponse(Message):
+    """Response message containing completions"""
+
+    def __init__(self, completions: list[str]):
+        super().__init__(
+            type=MessageType.AGENT_RESPONSE,  # Reuse existing type
+            payload={"completions": completions},
+        )
+        self.completions = completions
+
+
 class MessageBus(Bootable):
     def __init__(self, container: Optional["Container"] = None):
         super().__init__(container)

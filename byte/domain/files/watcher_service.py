@@ -7,19 +7,12 @@ from watchfiles import Change, awatch
 
 from byte.core.config.mixins import Configurable
 from byte.core.service.mixins import Bootable, Injectable
-from byte.domain.events.mixins import Eventable
 from byte.domain.files.context_manager import FileMode
 from byte.domain.files.discovery_service import FileDiscoveryService
-from byte.domain.files.events import (
-    AICommentDetected,
-    CompletionRequested,
-    FileDeleted,
-    FileModified,
-)
 from byte.domain.files.service import FileService
 
 
-class FileWatcherService(Bootable, Configurable, Injectable, Eventable):
+class FileWatcherService(Bootable, Configurable, Injectable):
     """Service for monitoring file system changes and AI comment detection.
 
     Watches project files for changes, deletions, and AI comment patterns
@@ -122,9 +115,9 @@ class FileWatcherService(Bootable, Configurable, Injectable, Eventable):
                     return  # Not a file we should watch
 
             # Emit file change event
-            await self.event(
-                FileModified(file_path=str(file_path), change_type=change_type)
-            )
+            # await self.event(
+            #     FileModified(file_path=str(file_path), change_type=change_type)
+            # )
 
             if change_type == "deleted":
                 await self._handle_file_deleted(file_path)
@@ -144,7 +137,7 @@ class FileWatcherService(Bootable, Configurable, Injectable, Eventable):
         self._watched_files.discard(file_path)
 
         # Emit deletion event for other services to handle
-        await self.event(FileDeleted(file_path=str(file_path)))
+        # await self.event(FileDeleted(file_path=str(file_path)))
 
         # Remove from file service context if present
         file_service = await self.make(FileService)
@@ -191,13 +184,13 @@ class FileWatcherService(Bootable, Configurable, Injectable, Eventable):
             # Process each match found on this line
             for ai_type, comment_content, _ in all_matches:
                 # Emit AI comment detected event
-                await self.event(
-                    AICommentDetected(
-                        file_path=str(file_path),
-                        comment_content=comment_content,
-                        line_number=line_num,
-                    )
-                )
+                # await self.event(
+                #     AICommentDetected(
+                #         file_path=str(file_path),
+                #         comment_content=comment_content,
+                #         line_number=line_num,
+                #     )
+                # )
 
                 # Handle different AI comment types
                 if ai_type == ":":
@@ -208,25 +201,27 @@ class FileWatcherService(Bootable, Configurable, Injectable, Eventable):
                     await self._auto_add_file_to_context(file_path, FileMode.READ_ONLY)
 
                 if ai_type == "!":
+                    pass
                     # Trigger completion request for coder service
-                    await self.event(
-                        CompletionRequested(
-                            file_path=str(file_path),
-                            task=comment_content,
-                            line_number=line_num,
-                        )
-                    )
+                    # await self.event(
+                    #     CompletionRequested(
+                    #         file_path=str(file_path),
+                    #         task=comment_content,
+                    #         line_number=line_num,
+                    #     )
+                    # )
                 elif ai_type == "?":
+                    pass
                     # Trigger ask request for question answering
-                    from byte.domain.files.events import AskRequested
+                    # from byte.domain.files.events import AskRequested
 
-                    await self.event(
-                        AskRequested(
-                            file_path=str(file_path),
-                            question=comment_content,
-                            line_number=line_num,
-                        )
-                    )
+                    # await self.event(
+                    #     AskRequested(
+                    #         file_path=str(file_path),
+                    #         question=comment_content,
+                    #         line_number=line_num,
+                    #     )
+                    # )
 
     async def _auto_add_file_to_context(
         self, file_path: Path, mode: FileMode = FileMode.EDITABLE
@@ -239,15 +234,15 @@ class FileWatcherService(Bootable, Configurable, Injectable, Eventable):
             await file_service.add_file(file_path, mode)
 
             # Import here to avoid circular imports
-            from byte.domain.system.events import PromptRefresh
+            # from byte.domain.system.events import PromptRefresh
 
             # Trigger prompt refresh so user sees the new file immediately
-            mode_str = "editable" if mode == FileMode.EDITABLE else "read-only"
-            await self.event(
-                PromptRefresh(
-                    reason=f"Added {file_path.name} as {mode_str} due to AI comment"
-                )
-            )
+            # mode_str = "editable" if mode == FileMode.EDITABLE else "read-only"
+            # await self.event(
+            #     PromptRefresh(
+            #         reason=f"Added {file_path.name} as {mode_str} due to AI comment"
+            #     )
+            # )
 
     async def stop_watching(self) -> None:
         """Stop file system monitoring and cleanup resources."""

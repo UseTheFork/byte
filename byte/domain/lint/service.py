@@ -10,7 +10,6 @@ from rich.text import Text
 
 from byte.core.config.mixins import Configurable
 from byte.core.service.mixins import Bootable, Injectable
-from byte.domain.agent.commit.events import PreCommitStarted
 from byte.domain.git.service import GitService
 
 
@@ -198,7 +197,7 @@ class LintService(Bootable, Injectable, Configurable):
         # TODO: Implement linting of specific files
         return {}
 
-    async def handle_pre_commit(self, event: PreCommitStarted) -> None:
+    async def handle_pre_commit(self, event) -> None:
         """Handle pre-commit event by running linters on staged files.
 
         Automatically runs configured linters when a commit process begins,

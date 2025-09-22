@@ -1,7 +1,5 @@
 from byte.container import Container
-from byte.core.command.registry import CommandRegistry
 from byte.core.service_provider import ServiceProvider
-from byte.domain.agent.coder.commands import CoderCommand
 from byte.domain.agent.coder.service import CoderAgent
 
 
@@ -24,20 +22,16 @@ class CoderServiceProvider(ServiceProvider):
         container.singleton(CoderAgent)
 
         # Register coder command
-        container.bind(CoderCommand)
+        # container.bind(CoderCommand)
 
     async def boot(self, container: "Container") -> None:
         """Boot coder services after all providers are registered.
 
         Usage: `provider.boot(container)` -> coder agent ready for development tasks
         """
-        command_registry = await container.make(CommandRegistry)
+        # command_registry = await container.make(CommandRegistry)
 
-        # Register coder command for user access
-        await command_registry.register_slash_command(
-            await container.make(CoderCommand)
-        )
-
-    def provides(self) -> list:
-        """Return list of services provided by this provider."""
-        return [CommandRegistry, CoderCommand]
+        # # Register coder command for user access
+        # await command_registry.register_slash_command(
+        #     await container.make(CoderCommand)
+        # )

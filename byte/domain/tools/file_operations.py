@@ -6,9 +6,9 @@ from rich.panel import Panel
 
 from byte.context import make
 from byte.core.logging import log
+from byte.domain.cli_input.service.interactions_service import InteractionService
 from byte.domain.files.context_manager import FileMode
 from byte.domain.files.service import FileService
-from byte.domain.ui.interactions import InteractionService
 
 
 @tool(parse_docstring=True)
@@ -106,15 +106,13 @@ async def replace_text_in_file(
                 border_style="red",
             )
         )
-        # ai: make the border below blue
-        # ai!
         # Show NEW TEXT in second panel
         console.print(
             Panel(
                 new_string,
                 title=f"[bold green]NEW TEXT - {file_path}[/bold green]",
                 title_align="left",
-                border_style="green",
+                border_style="blue",
             )
         )
 
