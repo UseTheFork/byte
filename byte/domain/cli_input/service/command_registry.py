@@ -4,6 +4,7 @@ from typing import Dict, List, Optional
 from byte.core.actors.message import Message, MessageBus, MessageType
 from byte.core.service.base_service import Service
 from byte.core.service.mixins import Bootable, Injectable
+from byte.domain.system.actor.coordinator_actor import CoordinatorActor
 
 
 class Command(ABC, Bootable, Injectable):
@@ -49,20 +50,22 @@ class Command(ABC, Bootable, Injectable):
         """
         return []
 
-    async def prompt_for_input(self):
-        """Prompt the user for input via the input actor.
+    async def command_completed(self):
+        """Signal that command execution has completed successfully.
 
-        Sends a message to the InputActor to display the input prompt,
-        typically used by commands that need to return control to user input.
-        Usage: `await self.prompt_for_input()` -> shows input prompt to user
+        Sends a COMMAND_COMPLETED message to the CoordinatorActor to transition
+        the application state back to idle, allowing for new user input.
+        Usage: Called automatically at the end of successful command execution
         """
-        from byte.domain.cli_input.actor.input_actor import InputActor
 
         message_bus = await self.make(MessageBus)
 
         await message_bus.send_to(
-            InputActor,
-            Message(type=MessageType.REQUEST_USER_INPUT, payload={}),
+            CoordinatorActor,
+            Message(
+                type=MessageType.COMMAND_COMPLETED,
+                payload={"command_name": self.__class__.__name__},
+            ),
         )
 
 

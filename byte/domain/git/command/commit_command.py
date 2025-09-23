@@ -44,7 +44,6 @@ class CommitCommand(Command):
         # Validate staged changes exist to prevent empty commits
         if not repo.index.diff("HEAD"):
             console.print("[warning]No staged changes to commit.[/warning]")
-            await self.prompt_for_input()
             return
 
         lint_service = await self.make(LintService)
@@ -57,5 +56,3 @@ class CommitCommand(Command):
         commit_message = await commit_agent.execute(staged_diff)
 
         await git_service.commit(commit_message)
-
-        await self.prompt_for_input()

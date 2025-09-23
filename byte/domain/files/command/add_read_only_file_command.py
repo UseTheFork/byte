@@ -28,18 +28,18 @@ class ReadOnlyCommand(Command):
         console = await self.make(Console)
         if not args:
             console.print("Usage: /read-only <file_path>")
-            await self.prompt_for_input()
+            await self.command_completed()
             return
 
         file_service = await self.make(FileService)
         if await file_service.add_file(args, FileMode.READ_ONLY):
-            await self.prompt_for_input()
+            await self.command_completed()
             return
         else:
             console.print(
                 f"[error]Failed to add {args} (file not found or not readable)[/error]"
             )
-            await self.prompt_for_input()
+            await self.command_completed()
             return
 
     async def get_completions(self, text: str) -> List[str]:

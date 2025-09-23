@@ -40,10 +40,6 @@ class CoordinatorActor(Actor):
                 AppState.USER_INPUT_REQUESTED,
                 AppState.SHUTTING_DOWN,
             },
-            AppState.USER_INPUT_REQUESTED: {
-                AppState.EXECUTING_COMMAND,
-                AppState.IDLE,
-            },
             AppState.FILE_WATCHING: {AppState.PROCESSING_INPUT, AppState.IDLE},
             AppState.SHUTTING_DOWN: set(),  # Terminal state
         }
@@ -52,20 +48,26 @@ class CoordinatorActor(Actor):
     async def handle_message(self, message: Message):
         if message.type == MessageType.SHUTDOWN:
             await self._handle_shutdown(message)
+
         elif message.type == MessageType.STATE_CHANGE:
             await self._handle_state_change(message)
+
+        # States Related specifically yo user input.
         elif message.type == MessageType.USER_INPUT:
             await self._transition_to(AppState.PROCESSING_INPUT)
+
         elif message.type == MessageType.START_STREAM:
             await self._transition_to(AppState.AGENT_STREAMING)
+
         elif message.type == MessageType.END_STREAM:
             await self._transition_to(AppState.IDLE)
+
         elif message.type == MessageType.COMMAND_INPUT:
             await self._transition_to(AppState.EXECUTING_COMMAND)
-        elif message.type == MessageType.REQUEST_USER_INPUT:
-            await self._transition_to(AppState.USER_INPUT_REQUESTED)
+
         elif message.type == MessageType.USER_RESPONSE:
             await self._transition_to(AppState.EXECUTING_COMMAND)
+
         elif message.type == MessageType.COMMAND_COMPLETED:
             await self._handle_command_completed(message)
         elif message.type == MessageType.COMMAND_FAILED:
@@ -76,7 +78,7 @@ class CoordinatorActor(Actor):
         # Log success if needed
         command_name = message.payload.get("command_name")
         if command_name:
-            log.info(f"Command '{command_name}' completed successfully")
+            log.debug(f"Command '{command_name}' completed successfully")
 
         # Transition back to idle state
         await self._transition_to(AppState.IDLE)
@@ -120,6 +122,7 @@ class CoordinatorActor(Actor):
 
     async def _transition_to(self, new_state: AppState):
         """Transition to new state if valid"""
+
         if self.current_state == new_state:
             return
 
@@ -127,7 +130,8 @@ class CoordinatorActor(Actor):
             old_state = self.current_state
             self.current_state = new_state
 
-            log.info(old_state, new_state)
+            # log.info(old_state)
+            # log.info(new_state)
 
             # Notify about state change
             await self.broadcast(
@@ -159,8 +163,8 @@ class CoordinatorActor(Actor):
         return [
             MessageType.SHUTDOWN,
             MessageType.STATE_CHANGE,
-            MessageType.USER_INPUT,
             MessageType.START_STREAM,
             MessageType.END_STREAM,
             MessageType.COMMAND_INPUT,
+            MessageType.USER_INPUT,
         ]

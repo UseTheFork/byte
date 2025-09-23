@@ -5,6 +5,7 @@ from byte.core.actors.base import Actor
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli_input.actor.input_actor import InputActor
+from byte.domain.cli_input.actor.user_interaction_actor import UserInteractionActor
 from byte.domain.cli_input.service.interactions_service import InteractionService
 
 
@@ -15,7 +16,7 @@ class CliInputServiceProvider(ServiceProvider):
         return [InteractionService]
 
     def actors(self) -> List[Type[Actor]]:
-        return [InputActor]
+        return [InputActor, UserInteractionActor]
 
     async def register(self, container: Container) -> None:
         """Register UI services in the container."""

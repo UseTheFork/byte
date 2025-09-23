@@ -94,12 +94,14 @@ class UserInteractive:
     async def prompt_for_input(self):
         """Prompt the user for general input via the input actor.
 
-        Sends a request to the InputActor to display the input prompt,
+        Sends a request to the UserInteractionActor to display the input prompt,
         returning control to the user for general text input.
         Usage: `await self.prompt_for_input()` -> shows input prompt to user
         """
         from byte.core.actors.message import Message, MessageBus, MessageType
-        from byte.domain.cli_input.actor.input_actor import InputActor
+        from byte.domain.cli_input.actor.user_interaction_actor import (
+            UserInteractionActor,
+        )
 
         if not self.container:
             raise RuntimeError(
@@ -109,8 +111,8 @@ class UserInteractive:
         message_bus = await self.container.make(MessageBus)
 
         await message_bus.send_to(
-            InputActor,
-            Message(type=MessageType.REQUEST_USER_INPUT, payload={}),
+            UserInteractionActor,
+            Message(type=MessageType.REQUEST_USER_TEXT, payload={}),
         )
 
     async def prompt_for_confirmation(self, message: str, default: bool = True):
@@ -121,7 +123,9 @@ class UserInteractive:
         Usage: `confirmed = await self.prompt_for_confirmation("Delete file?", False)`
         """
         from byte.core.actors.message import Message, MessageBus, MessageType
-        from byte.domain.cli_input.actor.input_actor import InputActor
+        from byte.domain.cli_input.actor.user_interaction_actor import (
+            UserInteractionActor,
+        )
 
         if not self.container:
             raise RuntimeError(
@@ -132,7 +136,7 @@ class UserInteractive:
         message_bus = await self.container.make(MessageBus)
 
         await message_bus.send_to(
-            InputActor,
+            UserInteractionActor,
             Message(
                 type=MessageType.REQUEST_USER_CONFIRM,
                 payload={

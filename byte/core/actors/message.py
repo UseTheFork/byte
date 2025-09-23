@@ -16,7 +16,10 @@ class MessageType(Enum):
     USER_INPUT = "user_input"
     COMMAND_INPUT = "command_input"
 
-    DOMAIN_COMMAND = "domain_command"
+    REQUEST_USER_CONFIRM = "user_confirm"
+    REQUEST_USER_SELECT = "user_select"
+    REQUEST_USER_TEXT = "user_input_text"
+
     COMMAND_COMPLETED = "command_completed"
     COMMAND_FAILED = "command_failed"
 
@@ -48,18 +51,7 @@ class MessageType(Enum):
 
     LINT_CHANGED_FILES = "lint_changed_files"
 
-    # User interaction messages
-    REQUEST_USER_CONFIRM = "user_confirm"
-    REQUEST_USER_SELECT = "user_select"
-    REQUEST_USER_INPUT_TEXT = "user_input_text"
-    REQUEST_USER_INPUT = "request_user_input"
-
     USER_RESPONSE = "user_response"
-
-    # Git domain
-    GIT_STAGE_CHANGES = "git_stage_changes"
-    GIT_COMMIT = "git_commit"
-    GIT_STATUS = "git_status"
 
 
 @dataclass
@@ -68,42 +60,6 @@ class Message:
     payload: Dict[str, Any]
     reply_to: Optional[asyncio.Queue] = None
     correlation_id: Optional[str] = None
-
-
-class ExecuteCommand(Message):
-    """Message for executing a command via actor system"""
-
-    def __init__(
-        self,
-        command_name: str,
-        args: str,
-        user_input: str,
-        reply_to: Optional[asyncio.Queue] = None,
-    ):
-        super().__init__(
-            type=MessageType.DOMAIN_COMMAND,  # Use existing message type
-            payload={
-                "command_name": command_name,
-                "args": args,
-                "user_input": user_input,
-            },
-            reply_to=reply_to,
-        )
-        self.command_name = command_name
-        self.args = args
-        self.user_input = user_input
-
-
-class GetCompletions(Message):
-    """Message for requesting tab completions"""
-
-    def __init__(self, partial_input: str, reply_to: Optional[asyncio.Queue] = None):
-        super().__init__(
-            type=MessageType.DOMAIN_COMMAND,
-            payload={"partial_input": partial_input},
-            reply_to=reply_to,
-        )
-        self.partial_input = partial_input
 
 
 class CompletionResponse(Message):

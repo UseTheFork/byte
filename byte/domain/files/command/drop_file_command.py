@@ -27,17 +27,17 @@ class DropFileCommand(Command):
         console = await self.make(Console)
         if not args:
             console.print("Usage: /drop <file_path>")
-            await self.prompt_for_input()
+            await self.command_completed()
             return
 
         file_service: FileService = await self.make(FileService)
         if await file_service.remove_file(args):
             console.print(f"[success]Removed {args} from context[/success]")
-            await self.prompt_for_input()
+            await self.command_completed()
             return
         else:
             console.print(f"[error]File {args} not found in context[/error]")
-            await self.prompt_for_input()
+            await self.command_completed()
             return
 
     async def get_completions(self, text: str) -> List[str]:

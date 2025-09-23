@@ -1,6 +1,5 @@
 from byte.core.actors.base import Actor
 from byte.core.actors.message import Message, MessageType
-from byte.core.logging import log
 from byte.domain.files.service.file_service import FileService
 from byte.domain.files.service.watcher_service import FileWatcherService
 
@@ -20,7 +19,6 @@ class FileActor(Actor):
 
     async def on_start(self):
         """Initialize file services when actor starts"""
-        log.info("file actor start")
         self.file_service = await self.make(FileService)
         self.watcher_service = await self.make(FileWatcherService)
 

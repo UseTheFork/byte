@@ -1,4 +1,3 @@
-import asyncio
 from pathlib import Path
 from typing import List
 
@@ -7,12 +6,11 @@ from git.exc import InvalidGitRepositoryError
 from rich.console import Console
 from rich.panel import Panel
 
-from byte.core.actors.message import Message, MessageBus, MessageType
 from byte.core.service.base_service import Service
-from byte.domain.cli_input.actor.input_actor import InputActor
+from byte.core.service.mixins import UserInteractive
 
 
-class GitService(Service):
+class GitService(Service, UserInteractive):
     """Domain service for git repository operations and file tracking.
 
     Provides utilities for discovering changed files, repository status,
@@ -81,12 +79,14 @@ class GitService(Service):
 
         try:
             # Create the commit
-            self._repo.index.commit(commit_message)
+            commit = self._repo.index.commit(commit_message)
+            commit_hash = commit.hexsha[:6]
 
             # Display success panel
+            # TODO: Display this better.
             console.print(
                 Panel(
-                    f"Successfully created commit:\n\n{commit_message}",
+                    f"({commit_hash}) {commit_message}",
                     title="[bold green]Commit Created[/bold green]",
                     title_align="left",
                     border_style="green",
@@ -139,24 +139,11 @@ class GitService(Service):
                 )
             )
 
-            message_bus = await self.make(MessageBus)
-            response_queue = asyncio.Queue()
-
-            await message_bus.send_to(
-                InputActor,
-                Message(
-                    type=MessageType.REQUEST_USER_CONFIRM,
-                    payload={
-                        "message": "Add unstaged changes to commit?",
-                        "default": True,
-                    },
-                    reply_to=response_queue,
-                ),
-            )
-
             try:
-                response = await asyncio.wait_for(response_queue.get(), timeout=30.0)
-                user_input = response.payload["input"]
+                user_input = await self.prompt_for_confirmation(
+                    "Add unstaged changes to commit?", True
+                )
+                # response = await asyncio.wait_for(response_queue.get(), timeout=30.0)
             except TimeoutError:
                 user_input = True
 
