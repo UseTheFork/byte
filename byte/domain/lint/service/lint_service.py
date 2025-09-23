@@ -22,7 +22,8 @@ class LintService(Service):
     """
 
     async def handle(self, **kwargs):
-        await self.lint_changed_files()
+        """Handle lint service execution - main entry point for linting operations."""
+        return await self.lint_changed_files()
 
     async def lint_changed_files(self) -> Dict[str, List[str]]:
         """Run configured linters on git changed files.
@@ -33,8 +34,12 @@ class LintService(Service):
         Usage: `results = await lint_service.lint_changed_files()` -> lint changed files
         """
         console: Console = await self.make(Console)
+
         git_service: GitService = await self.make(GitService)
-        changed_files = await git_service.get_changed_files()
+        all_changed_files = await git_service.get_changed_files()
+
+        # Filter out removed files - only lint files that actually exist
+        changed_files = [f for f in all_changed_files if f.exists()]
 
         # Get git root directory for consistent command execution
         repo = await git_service.get_repo()
@@ -198,13 +203,3 @@ class LintService(Service):
         """
         # TODO: Implement linting of specific files
         return {}
-
-    async def handle_pre_commit(self, event) -> None:
-        """Handle pre-commit event by running linters on staged files.
-
-        Automatically runs configured linters when a commit process begins,
-        ensuring code quality before commits are created.
-        Usage: Called automatically when PreCommitStarted event is emitted
-        """
-
-        await self.lint_changed_files()

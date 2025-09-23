@@ -7,6 +7,7 @@ from byte.core.service_provider import ServiceProvider
 from byte.domain.agent.actor.agent_actor import AgentActor
 from byte.domain.agent.base import Agent
 from byte.domain.agent.coder.agent import CoderAgent
+from byte.domain.agent.commit.agent import CommitAgent
 from byte.domain.agent.service.agent_service import AgentService
 
 
@@ -26,7 +27,7 @@ class AgentServiceProvider(ServiceProvider):
         return [AgentActor]
 
     def agents(self) -> List[Type[Agent]]:
-        return [CoderAgent]
+        return [CoderAgent, CommitAgent]
 
     async def register(self, container: "Container") -> None:
         # Create all agents

@@ -1,10 +1,12 @@
 import asyncio
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Optional, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, TypeVar
 
-from byte.container import Container
 from byte.core.service.mixins import Bootable
+
+if TYPE_CHECKING:
+    from byte.container import Container
 
 T = TypeVar("T")
 
@@ -43,6 +45,21 @@ class MessageType(Enum):
     SHUTDOWN = "shutdown"
     STATE_CHANGE = "state_change"
     ERROR = "error"
+
+    LINT_CHANGED_FILES = "lint_changed_files"
+
+    # User interaction messages
+    REQUEST_USER_CONFIRM = "user_confirm"
+    REQUEST_USER_SELECT = "user_select"
+    REQUEST_USER_INPUT_TEXT = "user_input_text"
+    REQUEST_USER_INPUT = "request_user_input"
+
+    USER_RESPONSE = "user_response"
+
+    # Git domain
+    GIT_STAGE_CHANGES = "git_stage_changes"
+    GIT_COMMIT = "git_commit"
+    GIT_STATUS = "git_status"
 
 
 @dataclass

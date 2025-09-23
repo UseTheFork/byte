@@ -3,12 +3,13 @@ import asyncio
 from byte.core.actors.base import Actor
 from byte.core.actors.message import Message, MessageType
 from byte.core.actors.streams import StreamManager
+from byte.core.service.mixins import UserInteractive
 from byte.domain.agent.coder.agent import CoderAgent
 from byte.domain.agent.service.agent_service import AgentService
 from byte.domain.cli_output.actor.rendering_actor import RenderingActor
 
 
-class AgentActor(Actor):
+class AgentActor(Actor, UserInteractive):
     async def boot(self):
         await super().boot()
         self.stream_manager = StreamManager(self.message_bus.get_queue(RenderingActor))
@@ -89,6 +90,7 @@ class AgentActor(Actor):
         finally:
             # Cleanup completed streams periodically
             self.stream_manager.cleanup_completed_streams()
+            await self.prompt_for_input()
 
     async def subscriptions(self):
         return [

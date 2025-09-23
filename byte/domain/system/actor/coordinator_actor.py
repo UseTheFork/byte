@@ -11,6 +11,7 @@ class AppState(Enum):
     AGENT_THINKING = "agent_thinking"
     AGENT_STREAMING = "agent_streaming"
     EXECUTING_COMMAND = "executing_command"
+    USER_INPUT_REQUESTED = "user_input_requested"
     FILE_WATCHING = "file_watching"
     SHUTTING_DOWN = "shutting_down"
 
@@ -36,7 +37,12 @@ class CoordinatorActor(Actor):
             AppState.EXECUTING_COMMAND: {
                 AppState.IDLE,
                 AppState.AGENT_THINKING,
+                AppState.USER_INPUT_REQUESTED,
                 AppState.SHUTTING_DOWN,
+            },
+            AppState.USER_INPUT_REQUESTED: {
+                AppState.EXECUTING_COMMAND,
+                AppState.IDLE,
             },
             AppState.FILE_WATCHING: {AppState.PROCESSING_INPUT, AppState.IDLE},
             AppState.SHUTTING_DOWN: set(),  # Terminal state
@@ -55,6 +61,10 @@ class CoordinatorActor(Actor):
         elif message.type == MessageType.END_STREAM:
             await self._transition_to(AppState.IDLE)
         elif message.type == MessageType.COMMAND_INPUT:
+            await self._transition_to(AppState.EXECUTING_COMMAND)
+        elif message.type == MessageType.REQUEST_USER_INPUT:
+            await self._transition_to(AppState.USER_INPUT_REQUESTED)
+        elif message.type == MessageType.USER_RESPONSE:
             await self._transition_to(AppState.EXECUTING_COMMAND)
         elif message.type == MessageType.COMMAND_COMPLETED:
             await self._handle_command_completed(message)

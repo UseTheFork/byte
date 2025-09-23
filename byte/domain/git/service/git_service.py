@@ -1,10 +1,15 @@
+import asyncio
 from pathlib import Path
 from typing import List
 
 import git
 from git.exc import InvalidGitRepositoryError
+from rich.console import Console
+from rich.panel import Panel
 
+from byte.core.actors.message import Message, MessageBus, MessageType
 from byte.core.service.base_service import Service
+from byte.domain.cli_input.actor.input_actor import InputActor
 
 
 class GitService(Service):
@@ -63,3 +68,66 @@ class GitService(Service):
 
         # Remove duplicates and return
         return list(set(changed_files))
+
+    async def stage_changes(self) -> None:
+        """Check for unstaged changes and offer to add them to the commit.
+
+        Args:
+            repo: Git repository instance
+            console: Rich console for output
+
+        Usage: Called internally during commit process to handle unstaged files
+        """
+        console = await self.make(Console)
+        unstaged_changes = self._repo.index.diff(
+            None
+        )  # None compares working tree to index
+        if unstaged_changes:
+            file_list = []
+            for change in unstaged_changes:
+                change_type = (
+                    "modified"
+                    if change.change_type == "M"
+                    else "new"
+                    if change.change_type == "A"
+                    else "deleted"
+                )
+                file_list.append(f"  • {change.a_path} ({change_type})")
+
+            files_display = "\n".join(file_list)
+            console.print(
+                Panel(
+                    f"Found {len(unstaged_changes)} unstaged changes:\n\n{files_display}",
+                    title="[bold]Unstaged Changes[/bold]",
+                    title_align="left",
+                    border_style="warning",
+                )
+            )
+
+            message_bus = await self.make(MessageBus)
+            response_queue = asyncio.Queue()
+
+            await message_bus.send_to(
+                InputActor,
+                Message(
+                    type=MessageType.REQUEST_USER_CONFIRM,
+                    payload={
+                        "message": "Add unstaged changes to commit?",
+                        "default": True,
+                    },
+                    reply_to=response_queue,
+                ),
+            )
+
+            try:
+                response = await asyncio.wait_for(response_queue.get(), timeout=30.0)
+                user_input = response.payload["input"]
+            except TimeoutError:
+                user_input = True
+
+            if user_input:
+                # Add all unstaged changes
+                self._repo.git.add("--all")
+                console.print(
+                    f"[success]Added {len(unstaged_changes)} unstaged changes to commit[/success]"
+                )

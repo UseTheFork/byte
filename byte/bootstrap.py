@@ -5,6 +5,7 @@ from byte.core.actors.message import MessageBus
 from byte.core.config.config import ByteConfg
 from byte.domain.agent.service_provider import AgentServiceProvider
 from byte.domain.cli_input.actor.input_actor import InputActor
+from byte.domain.cli_input.service.command_registry import CommandRegistry
 from byte.domain.cli_input.service_provider import CliInputServiceProvider
 from byte.domain.cli_output.service_provider import CliOutputServiceProvider
 from byte.domain.files.service_provider import FileServiceProvider
@@ -12,6 +13,7 @@ from byte.domain.git.service_provider import GitServiceProvider
 from byte.domain.lint.service_provider import LintServiceProvider
 from byte.domain.llm.service_provider import LLMServiceProvider
 from byte.domain.memory.service_provider import MemoryServiceProvider
+from byte.domain.system.actor.coordinator_actor import CoordinatorActor
 from byte.domain.system.service_provider import SystemServiceProvider
 from byte.domain.tools.service_provider import ToolsServiceProvider
 
@@ -30,7 +32,10 @@ async def bootstrap(config: ByteConfg):
     app.singleton(MessageBus)
 
     # Make the global command registry available through dependency injection
+    app.singleton(CommandRegistry)
+
     app.singleton(InputActor)
+    app.singleton(CoordinatorActor)
 
     app.singleton(ByteConfg, lambda: config)
 
@@ -59,12 +64,14 @@ async def bootstrap(config: ByteConfg):
     for provider in service_providers:
         await provider.register_actors(app)
         await provider.register_services(app)
+        await provider.register_commands(app)
         await provider.register(app)
 
     # Phase 2: Boot services after all are registered
     # This allows services to safely reference dependencies during initialization
     for provider in service_providers:
         await provider.boot_actors(app)
+        await provider.boot_commands(app)
         await provider.boot(app)
 
     # Store service providers for shutdown

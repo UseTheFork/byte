@@ -1,10 +1,11 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import List, Type
 
 from byte.container import Container
 from byte.core.actors.base import Actor
 from byte.core.actors.message import MessageBus
 from byte.core.service.base_service import Service
+from byte.domain.cli_input.service.command_registry import Command, CommandRegistry
 
 
 class ServiceProvider(ABC):
@@ -74,6 +75,31 @@ class ServiceProvider(ABC):
             for subscription in subscriptions:
                 message_bus.subscribe(actor.__class__, subscription)
 
+    def commands(self) -> List[Type[Command]]:
+        """"""
+        return []
+
+    async def register_commands(self, container: Container):
+        """"""
+        commands = self.commands()
+        if not commands:
+            return
+
+        for command_class in commands:
+            container.bind(command_class)
+
+    async def boot_commands(self, container: Container):
+        """boot all commands from commands()"""
+        commands = self.commands()
+        if not commands:
+            return
+
+        command_registry = await container.make(CommandRegistry)
+
+        for command_class in commands:
+            command = await container.make(command_class)
+            await command_registry.register_slash_command(command)
+
     def set_container(self, container: Container):
         """Set the container instance for providers that need container access.
 
@@ -82,7 +108,6 @@ class ServiceProvider(ABC):
         """
         self.container = container
 
-    @abstractmethod
     async def register(self, container: Container):
         """Register services in the container without initializing them.
 

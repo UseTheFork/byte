@@ -4,8 +4,9 @@ from byte.container import Container
 from byte.core.actors.base import Actor
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
-from byte.domain.cli_input.actor.input_actor import InputActor
+from byte.domain.cli_input.service.command_registry import Command
 from byte.domain.lint.actor.lint_actor import LintActor
+from byte.domain.lint.command.lint_command import LintCommand
 from byte.domain.lint.service.lint_service import LintService
 
 
@@ -24,19 +25,19 @@ class LintServiceProvider(ServiceProvider):
     def actors(self) -> List[Type[Actor]]:
         return [LintActor]
 
+    def commands(self) -> List[Type[Command]]:
+        return [LintCommand]
+
     async def register(self, container: "Container") -> None:
         """Register lint services in the container.
 
         Usage: `provider.register(container)` -> binds lint service and command
         """
-        # Register lint service and command
-        container.singleton(LintService)
+        pass
 
     async def boot(self, container: "Container") -> None:
         """Boot lint services and register commands with registry.
 
         Usage: `provider.boot(container)` -> `/lint` becomes available to users
         """
-
-        input_actor = await container.make(InputActor)
-        await input_actor.register_command_handler("lint", LintActor)
+        pass

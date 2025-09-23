@@ -27,7 +27,7 @@ scripts.byte = "byte.core.cli:cli"
 dev = ["ruff>=0.12.12"]
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = [
