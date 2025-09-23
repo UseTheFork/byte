@@ -7,6 +7,7 @@ from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
 
+from byte.core.actors.message import Message, MessageBus, MessageType
 from byte.core.service.base_service import Service
 from byte.domain.files.context_manager import FileContext, FileMode
 from byte.domain.files.service.discovery_service import FileDiscoveryService
@@ -71,10 +72,28 @@ class FileService(Service):
             key = str(path_obj)
             self._context_files[key] = FileContext(path=path_obj, mode=mode)
 
+            await self._notify_file_added(key, mode)
+
             console.print(f"Added {key} as {mode.value}")
 
             # Emit event for UI updates and other interested components
             return True
+
+    async def _notify_file_added(self, file_path: str, mode: FileMode):
+        """Notify system that a file was added to context"""
+        message_bus = await self.make(MessageBus)
+
+        # Send the file added event
+        await message_bus.broadcast(
+            Message(
+                type=MessageType.FILE_ADDED,
+                payload={
+                    "file_path": file_path,
+                    "mode": mode.value,
+                    "action": "context_added",
+                },
+            )
+        )
 
     async def remove_file(self, path: Union[str, PathLike]) -> bool:
         """Remove a file from active context to reduce noise.

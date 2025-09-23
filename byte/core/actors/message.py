@@ -40,6 +40,10 @@ class MessageType(Enum):
     TOOL_ERROR = "tool_error"
 
     # File system
+    FILE_OPERATION_REQUEST = "file_operation_request"
+    FILE_OPERATION_RESPONSE = "file_operation_response"
+
+    FILE_OPERATIONS_BATCH = "file_operations_batch"
     FILE_CHANGE = "file_change"
     FILE_ADDED = "file_added"
     FILE_REMOVED = "file_removed"

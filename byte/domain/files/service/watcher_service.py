@@ -5,6 +5,7 @@ from typing import Dict, Set
 
 from watchfiles import Change, awatch
 
+from byte.core.actors.message import Message, MessageBus, MessageType
 from byte.core.service.base_service import Service
 from byte.domain.files.context_manager import FileMode
 from byte.domain.files.service.discovery_service import FileDiscoveryService
@@ -226,22 +227,23 @@ class FileWatcherService(Service):
         self, file_path: Path, mode: FileMode = FileMode.EDITABLE
     ) -> None:
         """Automatically add file to context when AI comment is detected."""
-        file_service = await self.make(FileService)
+        # Send request to FileActor instead of direct service call
+        from byte.domain.files.actor.file_actor import FileActor
 
-        # Only add if not already in context
-        if not await file_service.is_file_in_context(file_path):
-            await file_service.add_file(file_path, mode)
+        message_bus = await self.make(MessageBus)
 
-            # Import here to avoid circular imports
-            # from byte.domain.system.events import PromptRefresh
-
-            # Trigger prompt refresh so user sees the new file immediately
-            # mode_str = "editable" if mode == FileMode.EDITABLE else "read-only"
-            # await self.event(
-            #     PromptRefresh(
-            #         reason=f"Added {file_path.name} as {mode_str} due to AI comment"
-            #     )
-            # )
+        await message_bus.send_to(
+            FileActor,
+            Message(
+                type=MessageType.FILE_OPERATION_REQUEST,
+                payload={
+                    "operation": "add",
+                    "path": str(file_path),
+                    "mode": mode.value,
+                    "source": "file_watcher",  # Track the source
+                },
+            ),
+        )
 
     async def stop_watching(self) -> None:
         """Stop file system monitoring and cleanup resources."""

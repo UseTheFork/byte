@@ -1,3 +1,4 @@
+import asyncio
 from enum import Enum
 
 from byte.core.actors.base import Actor
@@ -12,7 +13,7 @@ class AppState(Enum):
     AGENT_STREAMING = "agent_streaming"
     EXECUTING_COMMAND = "executing_command"
     USER_INPUT_REQUESTED = "user_input_requested"
-    FILE_WATCHING = "file_watching"
+    FILE_CONTEXT_UPDATING = "file_context_updating"
     SHUTTING_DOWN = "shutting_down"
 
 
@@ -23,10 +24,11 @@ class CoordinatorActor(Actor):
         self.valid_transitions = {
             AppState.IDLE: {
                 AppState.PROCESSING_INPUT,
-                AppState.FILE_WATCHING,
                 AppState.SHUTTING_DOWN,
                 AppState.EXECUTING_COMMAND,
+                AppState.FILE_CONTEXT_UPDATING,
             },
+            AppState.FILE_CONTEXT_UPDATING: {AppState.IDLE},
             AppState.PROCESSING_INPUT: {
                 AppState.AGENT_THINKING,
                 AppState.EXECUTING_COMMAND,
@@ -38,9 +40,10 @@ class CoordinatorActor(Actor):
                 AppState.IDLE,
                 AppState.AGENT_THINKING,
                 AppState.USER_INPUT_REQUESTED,
+                AppState.FILE_CONTEXT_UPDATING,
                 AppState.SHUTTING_DOWN,
             },
-            AppState.FILE_WATCHING: {AppState.PROCESSING_INPUT, AppState.IDLE},
+            AppState.FILE_CONTEXT_UPDATING: {AppState.IDLE},
             AppState.SHUTTING_DOWN: set(),  # Terminal state
         }
         self.shutdown_requested = False
@@ -48,9 +51,6 @@ class CoordinatorActor(Actor):
     async def handle_message(self, message: Message):
         if message.type == MessageType.SHUTDOWN:
             await self._handle_shutdown(message)
-
-        elif message.type == MessageType.STATE_CHANGE:
-            await self._handle_state_change(message)
 
         # States Related specifically yo user input.
         elif message.type == MessageType.USER_INPUT:
@@ -70,8 +70,12 @@ class CoordinatorActor(Actor):
 
         elif message.type == MessageType.COMMAND_COMPLETED:
             await self._handle_command_completed(message)
+
         elif message.type == MessageType.COMMAND_FAILED:
             await self._handle_command_failed(message)
+
+        elif message.type == MessageType.FILE_OPERATIONS_BATCH:
+            await self._handle_file_operations_batch(message)
 
     async def _handle_command_completed(self, message: Message):
         """Handle successful command completion"""
@@ -110,15 +114,21 @@ class CoordinatorActor(Actor):
             Message(type=MessageType.SHUTDOWN, payload=message.payload)
         )
 
-    async def _handle_state_change(self, message: Message):
-        """Handle explicit state change requests"""
-        new_state_str = message.payload.get("new_state")
-        if new_state_str:
-            try:
-                new_state = AppState(new_state_str)
-                await self._transition_to(new_state)
-            except ValueError:
-                await self.on_error(ValueError(f"Invalid state: {new_state_str}"))
+    async def _handle_file_operations_batch(self, message: Message):
+        """Handle batched file operations as a single coordinated state transition"""
+        operations = message.payload.get("operations", [])
+
+        if not operations:
+            return
+
+        # Single state transition for the entire batch
+        await self._transition_to(AppState.FILE_CONTEXT_UPDATING)
+
+        # Brief processing time to allow UI updates
+        await asyncio.sleep(0.1)
+
+        # Transition back to idle - this restores the prompt
+        await self._transition_to(AppState.IDLE)
 
     async def _transition_to(self, new_state: AppState):
         """Transition to new state if valid"""
@@ -161,11 +171,11 @@ class CoordinatorActor(Actor):
     async def subscriptions(self):
         return [
             MessageType.SHUTDOWN,
-            MessageType.STATE_CHANGE,
             MessageType.START_STREAM,
             MessageType.END_STREAM,
             MessageType.COMMAND_INPUT,
             MessageType.COMMAND_COMPLETED,
             MessageType.COMMAND_FAILED,
+            MessageType.FILE_OPERATIONS_BATCH,
             MessageType.USER_INPUT,
         ]
