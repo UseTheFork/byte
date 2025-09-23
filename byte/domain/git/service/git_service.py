@@ -69,6 +69,41 @@ class GitService(Service):
         # Remove duplicates and return
         return list(set(changed_files))
 
+    async def commit(self, commit_message: str) -> None:
+        """Create a git commit with the provided message.
+
+        Args:
+            commit_message: The commit message to use
+
+        Usage: `await git_service.commit("feat: add new feature")` -> creates commit with message
+        """
+        console = await self.make(Console)
+
+        try:
+            # Create the commit
+            self._repo.index.commit(commit_message)
+
+            # Display success panel
+            console.print(
+                Panel(
+                    f"Successfully created commit:\n\n{commit_message}",
+                    title="[bold green]Commit Created[/bold green]",
+                    title_align="left",
+                    border_style="green",
+                )
+            )
+        except Exception as e:
+            # Display error panel if commit fails
+            console.print(
+                Panel(
+                    f"Failed to create commit: {e!s}",
+                    title="[bold red]Commit Failed[/bold red]",
+                    title_align="left",
+                    border_style="red",
+                )
+            )
+            raise
+
     async def stage_changes(self) -> None:
         """Check for unstaged changes and offer to add them to the commit.
 
