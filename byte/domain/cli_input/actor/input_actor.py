@@ -76,6 +76,7 @@ class InputActor(Actor):
         while self.running:
             if self.current_state == "idle":
                 # Only handle normal input - no complex state switching
+                await asyncio.sleep(0.01)
                 user_input = await self.prompt_session.prompt_async("> ")
 
                 if user_input.startswith("/"):
