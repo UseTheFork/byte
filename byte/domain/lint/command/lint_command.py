@@ -34,5 +34,3 @@ class LintCommand(Command):
 
         lint_service = await self.make(LintService)
         await lint_service.lint_changed_files()
-
-        await self.prompt_for_input()
