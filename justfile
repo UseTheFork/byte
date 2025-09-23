@@ -15,7 +15,12 @@ ai:
 		--git-commit-verify \
 		--read .byte/conventions/COMMENT_STYLEGUIDE.md \
 		--read .byte/conventions/PYTHON_STYLEGUIDE.md \
-		--read .byte/conventions/ARCHITECTURE.md \
+		--file byte/bootstrap.py \
+		--file byte/container.py \
+		--file byte/main.py \
+		--file byte/core/actors/base.py \
+		--file byte/core/actors/message.py \
+		--file byte/core/actors/streams.py \
 		--lint-cmd "just lint" \
 		--add-gitignore-files
 

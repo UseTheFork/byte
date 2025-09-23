@@ -127,6 +127,8 @@ class CoordinatorActor(Actor):
             old_state = self.current_state
             self.current_state = new_state
 
+            log.info(old_state, new_state)
+
             # Notify about state change
             await self.broadcast(
                 Message(
@@ -140,7 +142,7 @@ class CoordinatorActor(Actor):
 
             await self._on_state_enter(new_state, old_state)
         else:
-            print(f"Invalid transition from {self.current_state} to {new_state}")
+            log.error(f"Invalid transition from {self.current_state} to {new_state}")
 
     async def _on_state_enter(self, new_state: AppState, old_state: AppState):
         """Handle state entry logic"""

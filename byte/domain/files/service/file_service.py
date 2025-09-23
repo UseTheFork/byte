@@ -34,6 +34,7 @@ class FileService(Service):
         Usage: `await service.add_file("config.py", FileMode.READ_ONLY)`
         Usage: `await service.add_file("src/*.py", FileMode.EDITABLE)` -> adds all Python files
         """
+        console = await self.make(Console)
         file_discovery = await self.make(FileDiscoveryService)
         discovered_files = await file_discovery.get_files()
         discovered_file_paths = {str(f.resolve()) for f in discovered_files}
@@ -54,6 +55,7 @@ class FileService(Service):
                 # Only add files that are in the discovery service and are actual files
                 if path_obj.is_file() and str(path_obj) in discovered_file_paths:
                     key = str(path_obj)
+                    console.print(f"Added {key} as {mode.value}")
                     self._context_files[key] = FileContext(path=path_obj, mode=mode)
                     success_count += 1
 
@@ -68,6 +70,8 @@ class FileService(Service):
 
             key = str(path_obj)
             self._context_files[key] = FileContext(path=path_obj, mode=mode)
+
+            console.print(f"Added {key} as {mode.value}")
 
             # Emit event for UI updates and other interested components
             return True
