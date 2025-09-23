@@ -1,10 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional
 
-from byte.core.actors.message import Message, MessageBus, MessageType
 from byte.core.service.base_service import Service
 from byte.core.service.mixins import Bootable, Injectable
-from byte.domain.system.actor.coordinator_actor import CoordinatorActor
 
 
 class Command(ABC, Bootable, Injectable):
@@ -49,24 +47,6 @@ class Command(ABC, Bootable, Injectable):
         Usage: return ["file1.py", "file2.py"] for file path completions
         """
         return []
-
-    async def command_completed(self):
-        """Signal that command execution has completed successfully.
-
-        Sends a COMMAND_COMPLETED message to the CoordinatorActor to transition
-        the application state back to idle, allowing for new user input.
-        Usage: Called automatically at the end of successful command execution
-        """
-
-        message_bus = await self.make(MessageBus)
-
-        await message_bus.send_to(
-            CoordinatorActor,
-            Message(
-                type=MessageType.COMMAND_COMPLETED,
-                payload={"command_name": self.__class__.__name__},
-            ),
-        )
 
 
 class CommandRegistry(Service):

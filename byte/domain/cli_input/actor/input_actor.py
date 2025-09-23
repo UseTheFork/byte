@@ -90,6 +90,9 @@ class InputActor(Actor):
         """Send user input to agent actor"""
         from byte.domain.agent.actor.agent_actor import AgentActor
 
+        if not user_input.strip():
+            return
+
         await self.send_to(
             AgentActor,
             Message(
@@ -113,11 +116,20 @@ class InputActor(Actor):
         if command:
             try:
                 await self.broadcast(
-                    Message(type=MessageType.COMMAND_INPUT, payload={})
+                    Message(
+                        type=MessageType.COMMAND_INPUT,
+                        payload={"command_name": command_name},
+                    )
                 )
+                await asyncio.sleep(0.01)
                 await command.execute(args)
-                # Automatically signal completion after successful execution
-                await command.command_completed()
+                # Signal completion after successful execution
+                await self.broadcast(
+                    Message(
+                        type=MessageType.COMMAND_COMPLETED,
+                        payload={"command_name": command_name},
+                    )
+                )
             except Exception as e:
                 console.print(
                     f"[red]Error executing command /{command_name}: {e}[/red]"

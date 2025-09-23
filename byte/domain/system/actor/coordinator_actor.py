@@ -130,8 +130,7 @@ class CoordinatorActor(Actor):
             old_state = self.current_state
             self.current_state = new_state
 
-            # log.info(old_state)
-            # log.info(new_state)
+            log.debug(f"Transition From {old_state} -> {new_state}")
 
             # Notify about state change
             await self.broadcast(
@@ -166,5 +165,7 @@ class CoordinatorActor(Actor):
             MessageType.START_STREAM,
             MessageType.END_STREAM,
             MessageType.COMMAND_INPUT,
+            MessageType.COMMAND_COMPLETED,
+            MessageType.COMMAND_FAILED,
             MessageType.USER_INPUT,
         ]
