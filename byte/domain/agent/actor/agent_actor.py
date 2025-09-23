@@ -3,10 +3,12 @@ import asyncio
 from byte.core.actors.base import Actor
 from byte.core.actors.message import Message, MessageType
 from byte.core.actors.streams import StreamManager
+from byte.core.logging import log
 from byte.core.service.mixins import UserInteractive
 from byte.domain.agent.coder.agent import CoderAgent
 from byte.domain.agent.service.agent_service import AgentService
 from byte.domain.cli_output.actor.rendering_actor import RenderingActor
+from byte.domain.system.actor.coordinator_actor import CoordinatorActor
 
 
 class AgentActor(Actor, UserInteractive):
@@ -29,6 +31,18 @@ class AgentActor(Actor, UserInteractive):
         user_input = message.payload["input"]
         agent_type = message.payload.get("agent_type", "coder")
 
+        await self.send_to(
+            CoordinatorActor,
+            Message(
+                type=MessageType.AGENT_REQUEST,
+                payload={
+                    "action": "start_thinking",
+                    "agent_type": agent_type,
+                    "user_input": user_input,
+                },
+            ),
+        )
+
         # Create new stream for this request
         stream_id = self.stream_manager.create_stream(
             stream_type="agent", agent_type=agent_type, user_input=user_input
@@ -50,6 +64,28 @@ class AgentActor(Actor, UserInteractive):
         if stream_id:
             await self.stream_manager.cancel_stream(stream_id)
 
+    async def _handle_tool_events(self, event: dict):
+        """Detect tool usage from stream events and broadcast appropriate messages"""
+        event_type = event.get("event")
+
+        if event_type == "on_tool_start":
+            tool_name = event.get("name", "Unknown Tool")
+            await self.broadcast(
+                Message(
+                    type=MessageType.TOOL_START,
+                    payload={"tool_name": tool_name, "event_data": event},
+                )
+            )
+
+        elif event_type == "on_tool_end":
+            tool_name = event.get("name", "Unknown Tool")
+            await self.broadcast(
+                Message(
+                    type=MessageType.TOOL_END,
+                    payload={"tool_name": tool_name, "event_data": event},
+                )
+            )
+
     async def _process_agent_request(
         self, stream_id: str, agent_type: str, user_input: str
     ):
@@ -57,6 +93,14 @@ class AgentActor(Actor, UserInteractive):
         try:
             # Start the stream
             await self.stream_manager.start_stream(stream_id)
+
+            await self.send_to(
+                CoordinatorActor,
+                Message(
+                    type=MessageType.START_STREAM,
+                    payload={"stream_id": stream_id, "agent_type": agent_type},
+                ),
+            )
 
             # Get agent service
             agent_service = await self.make(AgentService)
@@ -70,7 +114,10 @@ class AgentActor(Actor, UserInteractive):
             # Process stream events
             final_message = None
             async for event in agent_stream:
+                # log.info(event)
                 await self.stream_manager.process_chunk(stream_id, event)
+
+                await self._handle_tool_events(event)
 
                 # Extract final message if this is the end event
                 if (
@@ -83,10 +130,28 @@ class AgentActor(Actor, UserInteractive):
             # Finish the stream
             await self.stream_manager.finish_stream(stream_id, final_message)
 
+            await self.send_to(
+                CoordinatorActor,
+                Message(
+                    type=MessageType.END_STREAM,
+                    payload={"stream_id": stream_id, "success": True},
+                ),
+            )
+
         except Exception as e:
+            log.error(e)
             # Handle stream error
             if stream_id in self.stream_manager.active_streams:
                 await self.stream_manager.active_streams[stream_id].error(e)
+
+            await self.send_to(
+                CoordinatorActor,
+                Message(
+                    type=MessageType.STREAM_ERROR,
+                    payload={"stream_id": stream_id, "error": str(e)},
+                ),
+            )
+
         finally:
             # Cleanup completed streams periodically
             self.stream_manager.cleanup_completed_streams()

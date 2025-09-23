@@ -218,6 +218,8 @@ class RenderingActor(Actor):
     async def subscriptions(self):
         return [
             MessageType.SHUTDOWN,
+            MessageType.TOOL_START,
+            MessageType.TOOL_END,
             MessageType.START_STREAM,
             MessageType.STREAM_CHUNK,
             MessageType.END_STREAM,

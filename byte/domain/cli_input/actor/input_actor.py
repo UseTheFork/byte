@@ -59,7 +59,6 @@ class InputActor(Actor):
 
     async def handle_message(self, message: Message):
         if message.type == MessageType.STATE_CHANGE:
-            # log.info(message)
             await self._handle_state_change(message)
 
         if message.type == MessageType.USER_INPUT:
@@ -73,10 +72,12 @@ class InputActor(Actor):
         self.current_state = message.payload.get("new_state")
 
     async def _input_loop(self):
+        console = await self.make(Console)
         while self.running:
+            await asyncio.sleep(0.1)
             if self.current_state == "idle":
                 # Only handle normal input - no complex state switching
-                await asyncio.sleep(0.01)
+                console.rule()
                 user_input = await self.prompt_session.prompt_async("> ")
 
                 if user_input.startswith("/"):
@@ -85,17 +86,17 @@ class InputActor(Actor):
                     await self._send_to_agent(user_input)
             else:
                 # Just wait when not in idle state
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(0.5)
 
     async def _send_to_agent(self, user_input: str):
         """Send user input to agent actor"""
-        from byte.domain.agent.actor.agent_actor import AgentActor
 
         if not user_input.strip():
             return
 
-        await self.send_to(
-            AgentActor,
+        # State changes dont happend fast enough
+        self.current_state = ""
+        await self.broadcast(
             Message(
                 type=MessageType.USER_INPUT,
                 payload={"input": user_input},

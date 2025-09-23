@@ -87,7 +87,6 @@ class StreamPipeline:
 
         # Extract text content
         text_content = self._extract_text_content(chunk_data.get("data").get("chunk"))
-        # log.info(text_content)
 
         if text_content:
             self.buffer.append(text_content)

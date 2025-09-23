@@ -34,7 +34,7 @@ class Actor(ABC, Bootable, Injectable):
 
                 message = await asyncio.wait_for(self.inbox.get(), timeout=1.0)
                 await self.handle_message(message)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 # Periodic maintenance
                 await self.on_idle()
             except Exception as e:

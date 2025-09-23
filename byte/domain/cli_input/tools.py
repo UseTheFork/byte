@@ -1,8 +1,11 @@
-from typing import List, Optional
+import asyncio
+from typing import List, Optional, cast
 
 from langchain_core.tools import tool
 
 from byte.context import make
+from byte.core.actors.message import Message, MessageBus, MessageType
+from byte.domain.cli_input.actor.user_interaction_actor import UserInteractionActor
 from byte.domain.cli_input.service.interactions_service import InteractionService
 
 
@@ -18,8 +21,31 @@ async def user_confirm(
         default: Default response if user just presses enter
     """
 
-    interaction_service = await make(InteractionService)
-    return await interaction_service.confirm(message, default)
+    message_bus = await make(MessageBus)
+    if not message_bus:
+        raise RuntimeError(
+            "No Message Bus available - ensure service is properly initialized"
+        )
+
+    response_queue = asyncio.Queue()
+
+    await message_bus.send_to(
+        UserInteractionActor,
+        Message(
+            type=MessageType.REQUEST_USER_CONFIRM,
+            payload={
+                "message": message,
+                "default": default,
+            },
+            reply_to=response_queue,
+        ),
+    )
+
+    try:
+        response = await asyncio.wait_for(response_queue.get(), timeout=30.0)
+        return cast(bool, response.payload["input"])
+    except TimeoutError:
+        return default
 
 
 @tool(parse_docstring=True)

@@ -23,6 +23,8 @@ class InteractionService(Service):
         try:
             console = await self.make(Console)
 
+            console.print()
+
             return Confirm.ask(
                 f"{message}",
                 console=console,

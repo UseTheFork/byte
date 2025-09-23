@@ -56,10 +56,18 @@ class CoordinatorActor(Actor):
         elif message.type == MessageType.USER_INPUT:
             await self._transition_to(AppState.PROCESSING_INPUT)
 
+        elif message.type == MessageType.AGENT_REQUEST:
+            action = message.payload.get("action")
+            if action == "start_thinking":
+                await self._transition_to(AppState.AGENT_THINKING)
+
         elif message.type == MessageType.START_STREAM:
             await self._transition_to(AppState.AGENT_STREAMING)
 
         elif message.type == MessageType.END_STREAM:
+            await self._transition_to(AppState.IDLE)
+
+        elif message.type == MessageType.STREAM_ERROR:
             await self._transition_to(AppState.IDLE)
 
         elif message.type == MessageType.COMMAND_INPUT:

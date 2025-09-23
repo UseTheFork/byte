@@ -10,11 +10,10 @@ from typing_extensions import TypedDict
 
 from byte.domain.agent.base import Agent
 from byte.domain.agent.coder.prompts import coder_prompt
-from byte.domain.cli_output.tools import user_confirm, user_input, user_select
+from byte.domain.cli_input.tools import user_confirm
 from byte.domain.files.service.file_service import FileService
 from byte.domain.llm.service.llm_service import LLMService
 from byte.domain.memory.service import MemoryService
-from byte.domain.tools.file_operations import replace_text_in_file
 
 
 class CoderState(TypedDict):
@@ -40,7 +39,8 @@ class CoderAgent(Agent):
 
     def get_tools(self):
         """Return tools available to the coder agent."""
-        return [user_confirm, user_select, user_input, replace_text_in_file]
+        return [user_confirm]
+        # return [user_confirm, user_select, user_input, replace_text_in_file]
 
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""
