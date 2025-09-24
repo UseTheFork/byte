@@ -1,44 +1,43 @@
 from typing import Type
 
+from langchain_core.runnables.base import RunnableSerializable
+
 from byte.core.service.base_service import Service
 from byte.domain.agent.base import Agent
 from byte.domain.agent.coder.agent import CoderAgent
 
 
 class AgentService(Service):
-    """Main agent service that routes requests to specialized agents."""
+    """Main agent service that provides runnables for streaming."""
 
     _current_agent: Type[Agent] = CoderAgent
 
     async def boot(self):
         """Boot method to initialize the agent service."""
         self._current_agent = CoderAgent  # Set default agent
-        self._agents = {}
+        self._agent_instances = {}
 
         # Available agent types
         self._available_agents = [
             CoderAgent,
             # Add more agents here as they're implemented
-            # DocsService,
-            # AskService,
         ]
 
-    async def route_to_agent(self, agent_type: Type[Agent], request: str):
-        """Route request to the specified agent."""
+    async def get_agent_runnable(self, agent_type: Type[Agent]) -> RunnableSerializable:
+        """Get a runnable for the specified agent class for streaming.
 
-        if agent_type not in self._agents:
+        Usage: runnable = await agent_service.get_agent_runnable(CoderAgent)
+        """
+        if agent_type not in self._agent_instances:
             # Lazy load agent
             if not self._is_valid_agent(agent_type):
                 raise ValueError(f"Unknown agent type: {agent_type}")
 
-            agent_service = await self.make(agent_type)
-            self._agents[agent_type] = agent_service
+            agent_instance = await self.make(agent_type)
+            self._agent_instances[agent_type] = agent_instance
 
-        agent = self._agents[agent_type]
-
-        # Return the async generator directly, don't await it
-        async for event in agent.stream(request):
-            yield event
+        agent = self._agent_instances[agent_type]
+        return await agent.get_agent()
 
     def set_active_agent(self, agent_type: Type[Agent]) -> bool:
         """Switch the active agent."""
@@ -51,7 +50,7 @@ class AgentService(Service):
         """Check if the agent type is valid."""
         return agent_type in self._available_agents
 
-    def get_active_agent(self) -> Type[Agent]:
+    def get_active_agent_type(self) -> Type[Agent]:
         """Get the currently active agent type."""
         return self._current_agent
 
@@ -61,4 +60,4 @@ class AgentService(Service):
 
     def get_active_agent_name(self) -> str:
         """Get the name of the currently active agent for display purposes."""
-        return self._current_agent.__name__.replace("Service", "").lower()
+        return self._current_agent.__name__.replace("Agent", "").lower()

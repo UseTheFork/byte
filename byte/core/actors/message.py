@@ -38,6 +38,7 @@ class MessageType(Enum):
     TOOL_START = "tool_start"
     TOOL_END = "tool_end"
     TOOL_ERROR = "tool_error"
+    TOOL_CALL_CHUNK = "tool_call_chunk"
 
     # File system
     FILE_OPERATION_REQUEST = "file_operation_request"

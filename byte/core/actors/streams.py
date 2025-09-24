@@ -66,27 +66,16 @@ class StreamPipeline:
         ]:
             return
 
-        # {'event': 'on_chat_model_stream', 'data': {'chunk':                 streams.py:70
-        #             AIMessageChunk(content=[{'text': ' concepts\n\nWhat would you like
-        #             me', 'type': 'text', 'index': 0}], additional_kwargs={},
-        #             response_metadata={},
-        #             id='run--4e2b7aef-0ac4-4736-95bb-7377adaa6a70')}, 'run_id':
-        #             '4e2b7aef-0ac4-4736-95bb-7377adaa6a70', 'name': 'ChatAnthropic',
-        #             'tags': ['seq:step:2'], 'metadata': {'thread_id':
-        #             '22c18f71-84a4-42ec-a513-774da8ef51cc', 'langgraph_step': 2,
-        #             'langgraph_node': 'assistant', 'langgraph_triggers':
-        #             ('branch:to:assistant',), 'langgraph_path': ('__pregel_pull',
-        #             'assistant'), 'langgraph_checkpoint_ns':
-        #             'assistant:e10be268-236c-2939-d303-2645a6625a98', 'checkpoint_ns':
-        #             'assistant:e10be268-236c-2939-d303-2645a6625a98', 'ls_provider':
-        #             'anthropic', 'ls_model_name': 'claude-sonnet-4-20250514',
-        #             'ls_model_type': 'chat', 'ls_temperature': 0.1, 'ls_max_tokens':
-        #             1024}, 'parent_ids': ['3ae0338a-0450-4d31-84cf-8277d627cb62',
-        #             '7b6ea15d-3f1e-4454-a46e-c6564258e0bb',
-        #             'ef6ee36c-e5a5-4bcf-8cce-d51d86e8b2e7']}
+        # log.info(chunk_data)
+
+        chunk = chunk_data.get("data", {}).get("chunk")
+
+        # Handle tool call chunks
+        if hasattr(chunk, "tool_call_chunks") and chunk.tool_call_chunks:
+            await self._handle_tool_call_chunks(chunk_data, chunk.tool_call_chunks)
 
         # Extract text content
-        text_content = self._extract_text_content(chunk_data.get("data").get("chunk"))
+        text_content = self._extract_text_content(chunk)
 
         if text_content:
             self.buffer.append(text_content)
@@ -160,6 +149,26 @@ class StreamPipeline:
         """Resume the stream"""
         if self.state == StreamState.PAUSED:
             self.state = StreamState.STREAMING
+
+    async def _handle_tool_call_chunks(self, chunk_data: Any, tool_call_chunks: list):
+        """Handle streaming tool call chunks"""
+        for tool_chunk in tool_call_chunks:
+            # Send tool call chunk message
+            await self.output_queue.put(
+                Message(
+                    type=MessageType.TOOL_CALL_CHUNK,
+                    payload={
+                        "stream_id": self.stream_id,
+                        "tool_name": tool_chunk.get("name"),
+                        "tool_args": tool_chunk.get("args", ""),
+                        "tool_id": tool_chunk.get("id"),
+                        "chunk_index": tool_chunk.get("index"),
+                        "is_partial": True,
+                        "chunk_data": chunk_data,
+                        "timestamp": time.time(),
+                    },
+                )
+            )
 
     def _extract_text_content(self, chunk) -> str:
         """Extract text content from LLM chunk - your existing logic"""
