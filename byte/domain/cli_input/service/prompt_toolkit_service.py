@@ -50,4 +50,7 @@ class PromptToolkitService(Service):
             print(f"Unknown command: /{command_name}")
 
     async def _send_to_agent(self, user_input: str):
+        print(user_input)
+        print(user_input)
+        print(user_input)
         pass

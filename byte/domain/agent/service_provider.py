@@ -4,8 +4,8 @@ from byte.container import Container
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
 from byte.domain.agent.base import Agent
-from byte.domain.agent.coder.agent import CoderAgent
-from byte.domain.agent.commit.agent import CommitAgent
+from byte.domain.agent.implementations.coder.agent import CoderAgent
+from byte.domain.agent.implementations.commit.agent import CommitAgent
 from byte.domain.agent.service.agent_service import AgentService
 
 
@@ -28,11 +28,3 @@ class AgentServiceProvider(ServiceProvider):
         # Create all agents
         for agent_class in self.agents():
             container.singleton(agent_class)
-
-    async def boot(self, container: "Container") -> None:
-        """Boot all sub-agents and register agent switching commands.
-
-        Initializes all registered agents and registers the /agent command for
-        switching between different AI agents during runtime.
-        """
-        pass

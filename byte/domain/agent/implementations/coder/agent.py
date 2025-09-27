@@ -9,10 +9,7 @@ from langgraph.prebuilt import ToolNode
 from typing_extensions import TypedDict
 
 from byte.domain.agent.base import Agent
-from byte.domain.agent.coder.command_parser import CommandParser
-from byte.domain.agent.coder.command_validator import CommandValidator
-from byte.domain.agent.coder.commands import AddFileCommand, ReplaceTextCommand
-from byte.domain.agent.coder.prompts import coder_prompt
+from byte.domain.agent.implementations.coder.prompts import coder_prompt
 from byte.domain.files.service.file_service import FileService
 from byte.domain.llm.service.llm_service import LLMService
 from byte.domain.memory.service import MemoryService
@@ -100,89 +97,17 @@ class CoderAgent(Agent):
 
     async def _parse_commands(self, state: CoderState) -> dict:
         """Parse commands from the last assistant message."""
-        messages = state["messages"]
-        last_message = messages[-1]
+        # messages = state["messages"]
+        # last_message = messages[-1]
 
-        # Get the content from the last message
-        content = ""
-        if hasattr(last_message, "content"):
-            if isinstance(last_message.content, str):
-                content = last_message.content
-            elif isinstance(last_message.content, list):
-                # Handle list content (like from some LLM providers)
-                content = "".join(
-                    [
-                        item.get("text", "") if isinstance(item, dict) else str(item)
-                        for item in last_message.content
-                    ]
-                )
-
-        # Parse commands using the command parser
-        parser = CommandParser()
-        try:
-            parsed_commands = parser.parse_commands(content)
-
-            # Convert Pydantic models to serializable format for state storage
-            return {
-                "parsed_commands": [
-                    {
-                        "command": cmd.command,
-                        "model_data": cmd.dict(),  # Store full Pydantic model data
-                        "model_type": cmd.__class__.__name__,
-                    }
-                    for cmd in parsed_commands
-                ]
-            }
-        except ValueError as e:
-            # Store parsing errors in state for handling
-            return {"parsed_commands": [], "parsing_errors": [str(e)]}
+        pass
 
     async def _validate_commands(self, state: CoderState) -> dict:
         """Validate parsed commands before execution."""
-        parsed_commands_data = state.get("parsed_commands", [])
-        parsing_errors = state.get("parsing_errors", [])
 
-        # If there were parsing errors, return them immediately
-        if parsing_errors:
-            return {"validation_errors": parsing_errors}
+        pass
 
-        # Reconstruct Pydantic models from stored data
-
-        MODEL_REGISTRY = {
-            "ReplaceTextCommand": ReplaceTextCommand,
-            "AddFileCommand": AddFileCommand,
-        }
-
-        commands = []
-        reconstruction_errors = []
-
-        for cmd_data in parsed_commands_data:
-            try:
-                model_type = cmd_data.get("model_type")
-                model_class = MODEL_REGISTRY.get(model_type)
-
-                if not model_class:
-                    reconstruction_errors.append(f"Unknown command type: {model_type}")
-                    continue
-
-                # Reconstruct the Pydantic model
-                command = model_class(**cmd_data["model_data"])
-                commands.append(command)
-
-            except Exception as e:
-                reconstruction_errors.append(f"Failed to reconstruct command: {e}")
-
-        if reconstruction_errors:
-            return {"validation_errors": reconstruction_errors}
-
-        # Get file service for validation
-        file_service: FileService = await self.make(FileService)
-        validator = CommandValidator(file_service)
-
-        # Validate all commands
-        validation_errors = await validator.validate_commands(commands)
-
-        return {"validation_errors": validation_errors}
+        # return {"validation_errors": validation_errors}
 
     def _create_assistant_node(self, runnable: Runnable):
         """Create the assistant node function."""

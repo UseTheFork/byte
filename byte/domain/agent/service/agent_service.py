@@ -4,7 +4,7 @@ from langgraph.graph.state import CompiledStateGraph
 
 from byte.core.service.base_service import Service
 from byte.domain.agent.base import Agent
-from byte.domain.agent.coder.agent import CoderAgent
+from byte.domain.agent.implementations.coder.agent import CoderAgent
 
 
 class AgentService(Service):
