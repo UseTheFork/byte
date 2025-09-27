@@ -5,7 +5,6 @@ from typing import Dict, Set
 
 from watchfiles import Change, awatch
 
-from byte.core.actors.message import Message, MessageBus, MessageType
 from byte.core.service.base_service import Service
 from byte.domain.files.context_manager import FileMode
 from byte.domain.files.service.discovery_service import FileDiscoveryService
@@ -228,22 +227,7 @@ class FileWatcherService(Service):
     ) -> None:
         """Automatically add file to context when AI comment is detected."""
         # Send request to FileActor instead of direct service call
-        from byte.domain.files.actor.file_actor import FileActor
-
-        message_bus = await self.make(MessageBus)
-
-        await message_bus.send_to(
-            FileActor,
-            Message(
-                type=MessageType.FILE_OPERATION_REQUEST,
-                payload={
-                    "operation": "add",
-                    "path": str(file_path),
-                    "mode": mode.value,
-                    "source": "file_watcher",  # Track the source
-                },
-            ),
-        )
+        pass
 
     async def stop_watching(self) -> None:
         """Stop file system monitoring and cleanup resources."""

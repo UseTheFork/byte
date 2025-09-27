@@ -2,8 +2,6 @@ from abc import ABC
 from typing import List, Type
 
 from byte.container import Container
-from byte.core.actors.base import Actor
-from byte.core.actors.message import MessageBus
 from byte.core.service.base_service import Service
 from byte.domain.cli_input.service.command_registry import Command, CommandRegistry
 
@@ -42,38 +40,6 @@ class ServiceProvider(ABC):
 
         for service_class in services:
             container.singleton(service_class)
-
-    def actors(self) -> List[Type[Actor]]:
-        """Return list of actor classes this provider makes available."""
-        return []
-
-    async def register_actors(self, container: Container):
-        """"""
-        actors = self.actors()
-        if not actors:
-            return
-
-        for actor_class in actors:
-            container.singleton(actor_class)
-
-    async def boot_actors(self, container: Container):
-        """boot all actors from actors()"""
-        actors = self.actors()
-        if not actors:
-            return
-
-        message_bus = await container.make(MessageBus)
-
-        for actor_class in actors:
-            # Boot and setup subscriptions
-            actor = await container.make(actor_class)
-
-            subscriptions = await actor.subscriptions()
-            if not subscriptions:
-                continue
-
-            for subscription in subscriptions:
-                message_bus.subscribe(actor.__class__, subscription)
 
     def commands(self) -> List[Type[Command]]:
         """"""

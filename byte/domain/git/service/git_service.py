@@ -139,17 +139,13 @@ class GitService(Service, UserInteractive):
                 )
             )
 
-            try:
-                user_input = await self.prompt_for_confirmation(
-                    "Add unstaged changes to commit?", True
-                )
-                # response = await asyncio.wait_for(response_queue.get(), timeout=30.0)
-            except TimeoutError:
-                user_input = True
+            user_input = await self.prompt_for_confirmation(
+                "Add unstaged changes to commit?", True
+            )
 
-            if user_input:
-                # Add all unstaged changes
-                self._repo.git.add("--all")
-                console.print(
-                    f"[success]Added {len(unstaged_changes)} unstaged changes to commit[/success]"
-                )
+        if user_input:
+            # Add all unstaged changes
+            self._repo.git.add("--all")
+            console.print(
+                f"[success]Added {len(unstaged_changes)} unstaged changes to commit[/success]"
+            )
