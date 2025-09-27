@@ -3,7 +3,6 @@ from langgraph.constants import END
 from langgraph.graph import START, StateGraph
 from langgraph.graph.state import Runnable, RunnableConfig
 
-from byte.core.utils import dump
 from byte.domain.agent.base import Agent, BaseState
 from byte.domain.agent.commit.prompt import commit_prompt
 from byte.domain.llm.service.llm_service import LLMService
@@ -21,30 +20,6 @@ class CommitAgent(Agent):
     def get_state_class(self):
         """Return coder-specific state class."""
         return CommitState
-
-    async def handle(self, staged_diff: str):
-        """Generate an AI-powered commit message from staged git changes.
-
-        Analyzes the provided git diff to understand the changes and generates
-        a concise, conventional commit message that accurately describes the
-        modifications made to the codebase.
-
-        Args:
-            staged_diff: Git diff output showing staged changes to be committed
-
-        Returns:
-            Generated commit message following conventional commit format
-
-        Usage: `message = await commit_agent.execute(git_diff_output)` -> "feat: add user authentication"
-        """
-
-        result: dict = await self.execute({"messages": [("user", staged_diff)]})
-
-        dump(result)
-        dump(result.get("date"))
-        dump(result.get("commit_message"))
-
-        return result.get("commit_message")
 
     async def build(self):
         """Build and compile the coder agent graph with memory and tools.

@@ -1,10 +1,13 @@
+import logging
+
 from rich.console import Console
 
-from byte.core.utils import dd
 from byte.domain.agent.commit.agent import CommitAgent
 from byte.domain.cli_input.service.command_registry import Command
 from byte.domain.git.service.git_service import GitService
 from byte.domain.lint.service.lint_service import LintService
+
+log = logging.getLogger(__name__)
 
 
 class CommitCommand(Command):
@@ -54,7 +57,8 @@ class CommitCommand(Command):
         staged_diff = repo.git.diff("--cached")
 
         commit_agent = await self.make(CommitAgent)
-        commit_message = await commit_agent.handle(staged_diff)
-        dd(commit_message)
+        commit_message: dict = await commit_agent.execute(
+            {"messages": [("user", staged_diff)]}
+        )
 
-        await git_service.commit(commit_message)
+        await git_service.commit(str(commit_message.get("commit_message", "")))

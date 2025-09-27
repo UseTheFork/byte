@@ -5,8 +5,10 @@ from langgraph.graph.message import AnyMessage, add_messages
 from langgraph.graph.state import CompiledStateGraph, Runnable, RunnableConfig
 
 from byte.core.config.mixins import Configurable
-from byte.core.logging import log
 from byte.core.service.mixins import Bootable, Injectable
+from byte.domain.cli_output.service.stream_rendering_service import (
+    StreamRenderingService,
+)
 from byte.domain.memory.service import MemoryService
 
 if TYPE_CHECKING:
@@ -72,28 +74,26 @@ class Agent(ABC, Bootable, Configurable, Injectable):
             mode: The stream mode ("values", "updates", "messages", or "custom")
             chunk: The data chunk from that stream mode
         """
+        stream_rendering_service = await self.make(StreamRenderingService)
         # Filter and process based on mode
         if mode == "messages":
             # Handle LLM token streaming
             message_chunk, metadata = chunk
             if message_chunk.content:
-                # Stream the token content
-                pass
+                await stream_rendering_service.handle_message(chunk)
         elif mode == "updates":
-            log.info(f"-----------------{mode}------------------")
-            log.info(chunk)
             # Handle state updates after each step
             # chunk will be like {'node_name': {'key': 'value'}}
-            pass
+            await stream_rendering_service.handle_update(chunk)
         elif mode == "values":
             # Handle full state after each step
-            log.info(f"-----------------{mode}------------------")
-            log.info(chunk)
+            # log.info(f"-----------------{mode}------------------")
+            # log.info(chunk)
             pass
         elif mode == "custom":
             # Handle custom data from get_stream_writer()
-            log.info(f"-----------------{mode}------------------")
-            log.info(chunk)
+            # log.info(f"-----------------{mode}------------------")
+            # log.info(chunk)
             pass
 
         return chunk
@@ -115,9 +115,7 @@ class Agent(ABC, Bootable, Configurable, Injectable):
             thread_id = memory_service.create_thread()
 
         # Create configuration with thread ID
-        # config = RunnableConfig(
-        #     configurable={"thread_id": thread_id, "container": self.container}
-        # )
+        config = RunnableConfig(configurable={"thread_id": thread_id})
 
         # Create initial state using the agent's state class
         State = self.get_state_class()
@@ -127,9 +125,13 @@ class Agent(ABC, Bootable, Configurable, Injectable):
         graph = await self.get_graph()
 
         async for mode, chunk in graph.astream(
-            initial_state, stream_mode=["values", "updates", "messages", "custom"]
+            input=initial_state,
+            config=config,
+            stream_mode=["values", "updates", "messages", "custom"],
         ):
-            await self._handle_stream_event(mode, chunk)
+            processed_event = await self._handle_stream_event(mode, chunk)
+
+        return processed_event
 
     def get_state_class(self) -> Type[TypedDict]:  # pyright: ignore[reportInvalidTypeForm]
         """Return the state class for this agent.
