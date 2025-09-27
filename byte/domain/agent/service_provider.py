@@ -1,10 +1,8 @@
 from typing import List, Type
 
 from byte.container import Container
-from byte.core.actors.base import Actor
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
-from byte.domain.agent.actor.agent_actor import AgentActor
 from byte.domain.agent.base import Agent
 from byte.domain.agent.coder.agent import CoderAgent
 from byte.domain.agent.commit.agent import CommitAgent
@@ -22,9 +20,6 @@ class AgentServiceProvider(ServiceProvider):
 
     def services(self) -> List[Type[Service]]:
         return [AgentService]
-
-    def actors(self) -> List[Type[Actor]]:
-        return [AgentActor]
 
     def agents(self) -> List[Type[Agent]]:
         return [CoderAgent, CommitAgent]

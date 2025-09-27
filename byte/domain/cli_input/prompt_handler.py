@@ -7,11 +7,12 @@ from prompt_toolkit.history import FileHistory
 
 from byte.context import make
 from byte.core.config.config import BYTE_DIR
+from byte.domain.cli_input.service.command_registry import CommandRegistry
 
 
 class CommandCompleter(Completer):
     def __init__(self):
-        self.input_actor = None
+        self.command_registry = None
 
     def get_completions(self, document: Document, complete_event):
         pass
@@ -20,16 +21,14 @@ class CommandCompleter(Completer):
         self, document: Document, complete_event
     ) -> AsyncGenerator[Completion, None]:
         """Async generator for completions using the InputActor."""
-        from byte.domain.cli_input.actor.input_actor import InputActor
 
-        if not self.input_actor:
-            self.input_actor = await make(InputActor)
+        if not self.command_registry:
+            self.command_registry = await make(CommandRegistry)
 
         text = document.text_before_cursor
 
         if text.startswith("/"):
-            # Get completions from InputActor
-            completions = await self.input_actor.get_completions(text)
+            completions = await self.command_registry.get_slash_completions(text)
 
             # Parse to determine what part to replace
             if " " in text:

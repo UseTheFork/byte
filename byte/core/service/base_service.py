@@ -2,12 +2,12 @@ from abc import ABC
 from typing import TypeVar
 
 from byte.core.config.mixins import Configurable
-from byte.core.service.mixins import Bootable, Injectable
+from byte.core.service.mixins import Bootable, Eventable, Injectable
 
 T = TypeVar("T")
 
 
-class Service(ABC, Bootable, Configurable, Injectable):
+class Service(ABC, Bootable, Configurable, Injectable, Eventable):
     async def handle(self, **kwargs):
         """Handle service-specific operations with flexible parameters.
 

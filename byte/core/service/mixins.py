@@ -1,5 +1,7 @@
 import asyncio
-from typing import TYPE_CHECKING, Optional, Type, TypeVar, cast
+from typing import TYPE_CHECKING, Optional, Type, TypeVar
+
+from byte.core.event_bus import EventBus, Payload
 
 if TYPE_CHECKING:
     from byte.container import Container
@@ -81,6 +83,34 @@ class Injectable:
         return await self.container.make(service_class)
 
 
+class Eventable:
+    """Mixin that provides event emission capabilities through the event bus.
+
+    Enables services to emit events with typed Pydantic payloads through the
+    centralized event system. Events can be processed by registered listeners
+    and transformed through the event pipeline for cross-domain communication.
+    Usage: `class MyService(Eventable): result = await self.emit(payload)`
+    """
+
+    container: Optional["Container"]
+
+    async def emit(self, payload: Payload) -> Payload:
+        """Emit an event payload through the event bus system.
+
+        Resolves the EventBus from the container and emits the payload,
+        allowing registered listeners to process and potentially transform
+        the event data before returning the final result.
+        Usage: `result = await self.emit(Payload("user_action", {"key": "value"}))`
+        """
+        if not self.container:
+            raise RuntimeError(
+                "No container available - ensure service is properly initialized"
+            )
+
+        event_bus = await self.container.make(EventBus)
+        return await event_bus.emit(payload)
+
+
 class UserInteractive:
     """Mixin that provides user interaction capabilities through the input actor.
 
@@ -91,16 +121,15 @@ class UserInteractive:
 
     container: Optional["Container"]
 
-    async def prompt_for_input(self):
+    async def prompt_for_input(self, message):
         """Prompt the user for general input via the input actor.
 
         Sends a request to the UserInteractionActor to display the input prompt,
         returning control to the user for general text input.
         Usage: `await self.prompt_for_input()` -> shows input prompt to user
         """
-        from byte.core.actors.message import Message, MessageBus, MessageType
-        from byte.domain.cli_input.actor.user_interaction_actor import (
-            UserInteractionActor,
+        from byte.domain.cli_input.service.interactions_service import (
+            InteractionService,
         )
 
         if not self.container:
@@ -108,12 +137,8 @@ class UserInteractive:
                 "No container available - ensure service is properly initialized"
             )
 
-        message_bus = await self.container.make(MessageBus)
-
-        await message_bus.send_to(
-            UserInteractionActor,
-            Message(type=MessageType.REQUEST_USER_TEXT, payload={}),
-        )
+        interaction_service = await self.container.make(InteractionService)
+        return await interaction_service.input_text(message)
 
     async def prompt_for_confirmation(self, message: str, default: bool = True):
         """Prompt the user for yes/no confirmation with a custom message.
@@ -122,9 +147,8 @@ class UserInteractive:
         automatic timeout handling. Returns the default value on timeout.
         Usage: `confirmed = await self.prompt_for_confirmation("Delete file?", False)`
         """
-        from byte.core.actors.message import Message, MessageBus, MessageType
-        from byte.domain.cli_input.actor.user_interaction_actor import (
-            UserInteractionActor,
+        from byte.domain.cli_input.service.interactions_service import (
+            InteractionService,
         )
 
         if not self.container:
@@ -132,23 +156,5 @@ class UserInteractive:
                 "No container available - ensure service is properly initialized"
             )
 
-        response_queue = asyncio.Queue()
-        message_bus = await self.container.make(MessageBus)
-
-        await message_bus.send_to(
-            UserInteractionActor,
-            Message(
-                type=MessageType.REQUEST_USER_CONFIRM,
-                payload={
-                    "message": message,
-                    "default": default,
-                },
-                reply_to=response_queue,
-            ),
-        )
-
-        try:
-            response = await asyncio.wait_for(response_queue.get(), timeout=30.0)
-            return cast(bool, response.payload["input"])
-        except TimeoutError:
-            return default
+        interaction_service = await self.container.make(InteractionService)
+        return await interaction_service.confirm(message, default)

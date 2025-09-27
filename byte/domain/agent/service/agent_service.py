@@ -1,6 +1,6 @@
 from typing import Type
 
-from langchain_core.runnables.base import RunnableSerializable
+from langgraph.graph.state import CompiledStateGraph
 
 from byte.core.service.base_service import Service
 from byte.domain.agent.base import Agent
@@ -23,10 +23,10 @@ class AgentService(Service):
             # Add more agents here as they're implemented
         ]
 
-    async def get_agent_runnable(self, agent_type: Type[Agent]) -> RunnableSerializable:
-        """Get a runnable for the specified agent class for streaming.
+    async def get_agent_runnable(self, agent_type: Type[Agent]) -> "CompiledStateGraph":
+        """Get a compiled graph for the specified agent class for streaming.
 
-        Usage: runnable = await agent_service.get_agent_runnable(CoderAgent)
+        Usage: graph = await agent_service.get_agent_runnable(CoderAgent)
         """
         if agent_type not in self._agent_instances:
             # Lazy load agent
@@ -37,7 +37,7 @@ class AgentService(Service):
             self._agent_instances[agent_type] = agent_instance
 
         agent = self._agent_instances[agent_type]
-        return await agent.get_agent()
+        return await agent.get_graph()
 
     def set_active_agent(self, agent_type: Type[Agent]) -> bool:
         """Switch the active agent."""

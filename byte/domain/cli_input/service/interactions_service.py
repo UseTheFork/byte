@@ -31,7 +31,7 @@ class InteractionService(Service):
                 case_sensitive=False,
             )
 
-        except (EOFError, KeyboardInterrupt):
+        except EOFError:
             # Fallback if container/console not available
             return default
 

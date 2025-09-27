@@ -31,6 +31,7 @@ class MessageType(Enum):
     START_STREAM = "start_stream"
     STREAM_CHUNK = "stream_chunk"
     END_STREAM = "end_stream"
+
     STREAM_ERROR = "stream_error"
     CANCEL_STREAM = "cancel_stream"
 

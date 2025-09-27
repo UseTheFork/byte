@@ -22,6 +22,62 @@ Current date: {time}
         ),
         ("placeholder", "{messages}"),
         ("user", "{file_context}"),
+        (
+            "user",
+            """# Response Format
+
+You MUST respond using this exact format. Using Markdown blocks. You can include multiple commands:
+
+---
+# Final Answer
+
+## Command
+```
+replace_text_in_file
+```
+### file_path
+```
+path/to/file.py
+```
+### old_string
+```[langunage]
+exact text to replace
+```
+### new_string
+```[langunage]
+new text to replace it with
+```
+
+## Command
+```
+add_file
+```
+### file_path
+```
+new/file.py
+```
+### new_string
+```[langunage]
+complete file content
+```
+---
+
+## Available Commands
+
+### replace_text_in_file
+- **file_path**: Must be a file from the Editable files context
+- **old_string**: Exact text to find and replace (preserve all whitespace/formatting)
+- **new_string**: Exact replacement text (ensure correct syntax and formatting)
+
+Both strings must match exactly including indentation, newlines, and surrounding code.
+
+### add_file
+- **file_path**: Path where the new file should be created
+- **new_string**: Complete content for the new file (including all formatting and structure)
+
+Creates a new file at the specified path with the given content.
+        """,
+        ),
     ]
 ).partial(time=datetime.now().strftime("%Y-%m-%d"))
 

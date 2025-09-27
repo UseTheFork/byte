@@ -31,7 +31,7 @@ class LeftHeading(Heading):
             # Draw a border around h1s, but keep text left-aligned
             yield Panel(
                 text,
-                box=box.HEAVY,
+                box=box.ROUNDED,
                 style="markdown.h1.border",
             )
         else:
@@ -109,7 +109,7 @@ class MarkdownStream:
             except Exception:
                 pass  # Ignore any errors during cleanup
 
-    def update(self, text, final=False):
+    async def update(self, text, final=False):
         """Update the displayed markdown content.
 
         Args:

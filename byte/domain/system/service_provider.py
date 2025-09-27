@@ -3,10 +3,8 @@ from typing import List, Type
 from rich.console import Console
 
 from byte.container import Container
-from byte.core.actors.base import Actor
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli_input.service.command_registry import Command
-from byte.domain.system.actor.coordinator_actor import CoordinatorActor
 from byte.domain.system.command.exit_command import ExitCommand
 
 
@@ -17,9 +15,6 @@ class SystemServiceProvider(ServiceProvider):
     through the command registry for user interaction via slash commands.
     Usage: Register with container to enable /exit and /help commands
     """
-
-    def actors(self) -> List[Type[Actor]]:
-        return [CoordinatorActor]
 
     def commands(self) -> List[Type[Command]]:
         return [ExitCommand]

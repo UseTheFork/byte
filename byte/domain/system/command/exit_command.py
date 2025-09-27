@@ -1,6 +1,4 @@
-from byte.core.actors.message import Message, MessageBus, MessageType
 from byte.domain.cli_input.service.command_registry import Command
-from byte.domain.system.actor.coordinator_actor import CoordinatorActor
 
 
 class ExitCommand(Command):
@@ -24,10 +22,8 @@ class ExitCommand(Command):
 
         Usage: Called automatically when user types `/exit`
         """
+        print("here")
+        # command_registry = await self.make(PromptToolkitService)
+        # command_registry.prompt_session.app.exit()
 
-        message_bus = await self.make(MessageBus)
-
-        await message_bus.send_to(
-            CoordinatorActor,
-            Message(type=MessageType.SHUTDOWN, payload={"reason": "user_exit_command"}),
-        )
+        pass

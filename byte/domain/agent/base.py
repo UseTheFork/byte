@@ -1,10 +1,46 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import TYPE_CHECKING, Annotated, Any, Optional, Type, TypedDict
 
-from langchain_core.runnables import RunnableSerializable
+from langgraph.graph.message import AnyMessage, add_messages
+from langgraph.graph.state import CompiledStateGraph, Runnable, RunnableConfig
 
 from byte.core.config.mixins import Configurable
+from byte.core.logging import log
 from byte.core.service.mixins import Bootable, Injectable
+from byte.domain.memory.service import MemoryService
+
+if TYPE_CHECKING:
+    from langgraph.graph.state import CompiledStateGraph
+
+
+class BaseState(TypedDict):
+    """Base state that all agents inherit."""
+
+    messages: Annotated[list[AnyMessage], add_messages]
+    file_context: str
+
+
+class BaseAssistant:
+    def __init__(self, runnable: Runnable):
+        self.runnable = runnable
+
+    async def __call__(self, state: BaseState, config: RunnableConfig):
+        while True:
+            result = self.runnable.invoke(state)
+            # If the LLM happens to return an empty response, we will re-prompt it
+            # for an actual response.
+            if not result.tool_calls and (
+                not result.content
+                or (
+                    isinstance(result.content, list)
+                    and not result.content[0].get("text")
+                )
+            ):
+                messages = state["messages"] + [("user", "Respond with a real output.")]
+                state = {**state, "messages": messages}
+            else:
+                break
+        return {"messages": result}
 
 
 class Agent(ABC, Bootable, Configurable, Injectable):
@@ -17,11 +53,10 @@ class Agent(ABC, Bootable, Configurable, Injectable):
     """
 
     name: str = ""
-    _graph: Optional[RunnableSerializable] = None
+    _graph: Optional[CompiledStateGraph] = None
 
     @abstractmethod
-    # TODO: Add what this returns
-    async def build(self) -> RunnableSerializable:
+    async def build(self) -> "CompiledStateGraph":
         """Build and compile the agent graph with memory and tools.
 
         Must be implemented by subclasses to define their specific agent
@@ -30,37 +65,84 @@ class Agent(ABC, Bootable, Configurable, Injectable):
         """
         pass
 
-    async def stream(
+    async def _handle_stream_event(self, mode: str, chunk: Any):
+        """Handle individual stream events for display and final message extraction.
+
+        Args:
+            mode: The stream mode ("values", "updates", "messages", or "custom")
+            chunk: The data chunk from that stream mode
+        """
+        # Filter and process based on mode
+        if mode == "messages":
+            # Handle LLM token streaming
+            message_chunk, metadata = chunk
+            if message_chunk.content:
+                # Stream the token content
+                pass
+        elif mode == "updates":
+            log.info(f"-----------------{mode}------------------")
+            log.info(chunk)
+            # Handle state updates after each step
+            # chunk will be like {'node_name': {'key': 'value'}}
+            pass
+        elif mode == "values":
+            # Handle full state after each step
+            log.info(f"-----------------{mode}------------------")
+            log.info(chunk)
+            pass
+        elif mode == "custom":
+            # Handle custom data from get_stream_writer()
+            log.info(f"-----------------{mode}------------------")
+            log.info(chunk)
+            pass
+
+        return chunk
+
+    async def execute(
         self,
-        request: str,
+        request: Any,
         thread_id: Optional[str] = None,
     ):
-        """Stream coder agent responses for real-time coding assistance.
+        """Stream agent responses using astream_events for comprehensive event handling.
 
-        Yields partial responses as the agent processes coding requests,
-        enabling responsive development workflows and progress indication.
-        Always streams responses for optimal CLI user experience.
-        Usage: `async for chunk in coder_service.stream_code(request): ...`
+        Yields events from the agent graph processing, enabling fine-grained
+        control over streaming display and tool execution visualization.
+        Usage: `async for event in agent.stream(request): ...`
         """
         # Get or create thread ID
-        # if thread_id is None:
-        #     memory_service = await self.make(MemoryService)
-        #     thread_id = memory_service.create_thread()
+        if thread_id is None:
+            memory_service = await self.make(MemoryService)
+            thread_id = memory_service.create_thread()
 
         # Create configuration with thread ID
-        # config = RunnableConfig(configurable={"thread_id": thread_id})
+        # config = RunnableConfig(
+        #     configurable={"thread_id": thread_id, "container": self.container}
+        # )
 
-        # Get the graph and stream coder responses with token-level streaming
-        graph = await self.get_agent()
-        async for events in graph.astream_events(
-            request, include_types=["chat_model", "tool"]
+        # Create initial state using the agent's state class
+        State = self.get_state_class()
+        initial_state = State(**request)
+
+        # Get the graph and stream events
+        graph = await self.get_graph()
+
+        async for mode, chunk in graph.astream(
+            initial_state, stream_mode=["values", "updates", "messages", "custom"]
         ):
-            yield events
+            await self._handle_stream_event(mode, chunk)
+
+    def get_state_class(self) -> Type[TypedDict]:  # pyright: ignore[reportInvalidTypeForm]
+        """Return the state class for this agent.
+
+        Override in subclasses to customize state structure.
+        Usage: `StateClass = self.get_state_class()` -> agent-specific state
+        """
+        return BaseState
 
     def get_tools(self):
         return []
 
-    async def get_agent(self):
+    async def get_graph(self) -> "CompiledStateGraph":
         """Get or create the agent graph with current tools.
 
         Lazy-loads the graph with all registered tools and memory integration.

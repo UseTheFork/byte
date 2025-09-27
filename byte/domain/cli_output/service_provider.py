@@ -1,22 +1,18 @@
-from typing import List, Type
-
 from rich.console import Console
 from rich.theme import Theme
 
 from byte.container import Container
-from byte.core.actors.base import Actor
 from byte.core.service_provider import ServiceProvider
-from byte.domain.cli_output.actor.rendering_actor import RenderingActor
+from byte.domain.cli_output.service.stream_rendering_service import (
+    StreamRenderingService,
+)
 
 
 class CliOutputServiceProvider(ServiceProvider):
     """Service provider for UI system."""
 
-    def actors(self) -> List[Type[Actor]]:
-        return [RenderingActor]
-
-    async def register(self, container: Container) -> None:
-        """Register UI services in the container."""
+    def services(self):
+        return [StreamRenderingService]
 
     async def boot(self, container: Container):
         """Boot UI services."""

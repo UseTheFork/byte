@@ -22,19 +22,14 @@ class ReactiveMarkdownStream(MarkdownStream):
 
     async def update_async(self, text: str, final: bool = False):
         """Async version of update that yields control"""
-        # Process in smaller chunks to avoid blocking
+        # Process all lines at once like the original update method
         lines = self._render_markdown_to_lines(text)
 
-        # Process lines in chunks
-        chunk_size = 20
-        for i in range(0, len(lines), chunk_size):
-            chunk = lines[i : i + chunk_size]
-            await self._process_line_chunk(
-                chunk, final and i + chunk_size >= len(lines)
-            )
+        # Process all lines without chunking
+        await self._process_line_chunk(lines, final)
 
-            # Yield control frequently
-            await asyncio.sleep(0)
+        # Yield control once
+        await asyncio.sleep(0)
 
         if self.update_callback:
             await self.update_callback(self.stream_id, len(lines))
@@ -95,9 +90,9 @@ class RenderingActor(Actor):
         self.spinner: Optional[Live] = None
         self.accumulated_content: str = ""
 
-        # Track tool call state
-        self.active_tool_calls: Dict[str, dict] = {}  # tool_id -> tool_info
-        self.tool_spinner: Optional[Live] = None
+        # Track single tool call state with simple Live display
+        self.active_tool_calls: Dict[str, dict] = {}  # Single tool call tracking
+        self.tool_json_live: Optional[Live] = None
 
     async def handle_message(self, message: Message):
         if message.type == MessageType.SHUTDOWN:
@@ -114,8 +109,6 @@ class RenderingActor(Actor):
             await self._show_tool_usage(message.payload)
         elif message.type == MessageType.TOOL_END:
             await self._hide_tool_usage(message.payload)
-        elif message.type == MessageType.TOOL_CALL_CHUNK:
-            await self._handle_tool_call_chunk(message.payload)
         elif message.type == MessageType.STREAM_ERROR:
             await self._handle_stream_error(message.payload)
 
@@ -206,112 +199,19 @@ class RenderingActor(Actor):
             self.current_stream_id = None
             self.accumulated_content = ""  # Clear accumulated content
 
-    async def _handle_tool_call_chunk(self, payload):
-        """Handle streaming tool call chunks with real-time display"""
-        tool_id = payload.get("tool_id")
-        tool_name = payload.get("tool_name")
-        tool_args = payload.get("tool_args", "")
-        is_partial = payload.get("is_partial", True)
-        call_key = payload.get("call_key")
-
-        # Use call_key if available, otherwise fall back to tool_id
-        key = call_key or tool_id
-        if not key:
-            return
-
-        # Initialize or update tool call tracking
-        if key not in self.active_tool_calls:
-            self.active_tool_calls[key] = {
-                "name": tool_name,
-                "args": "",
-                "status": "building",
-            }
-
-            # Show initial tool call indication
-            if tool_name:
-                await self._show_tool_call_start(tool_name)
-
-        # Update accumulated arguments
-        if tool_args:
-            self.active_tool_calls[key]["args"] = (
-                tool_args  # Use full args, not accumulate
-            )
-
-        # Update name if we didn't have it before
-        if tool_name and not self.active_tool_calls[key]["name"]:
-            self.active_tool_calls[key]["name"] = tool_name
-
-        # Update display with current state
-        await self._update_tool_call_display(key, is_partial)
-
-    async def _show_tool_call_start(self, tool_name: str):
-        """Show that a tool call is starting"""
-        # Pause current stream rendering
-        if self.active_stream:
-            await self.active_stream.update_async(self.accumulated_content, final=True)
-            self.active_stream = None
-
-        # Stop any existing spinner
-        if self.spinner:
-            self.spinner.stop()
-            self.spinner = None
-
-        self.console.print()
-        self.console.print(Rule(f"Calling {tool_name}", align="left", style="blue"))
-
-    async def _update_tool_call_display(self, key: str, is_partial: bool):
-        """Update the tool call display with streaming arguments"""
-        tool_info = self.active_tool_calls[key]
-        tool_name = tool_info["name"] or "Unknown"
-        args = tool_info["args"]
-
-        # Create display text
-        if is_partial and args:
-            # Show partial arguments with typing indicator
-            display_args = self._format_args_for_display(args)
-            display_text = (
-                f"[dim]{tool_name}([/dim][yellow]{display_args}[/yellow][dim]...[/dim]"
-            )
-
-            # Use spinner to show it's still building
-            if not self.tool_spinner:
-                spinner = Spinner("dots", text=display_text)
-                self.tool_spinner = Live(
-                    spinner, console=self.console, transient=True, refresh_per_second=10
-                )
-                self.tool_spinner.start()
-            else:
-                # Update existing spinner
-                self.tool_spinner.update(Spinner("dots", text=display_text))
-        elif not is_partial:
-            # Tool call is complete
-            if self.tool_spinner:
-                self.tool_spinner.stop()
-                self.tool_spinner = None
-
-            # Show final tool call
-            final_args = self._format_args_for_display(args)
-            self.console.print(
-                f"[green]✓[/green] [dim]{tool_name}([/dim][cyan]{final_args}[/cyan][dim])[/dim]"
-            )
-
-            # Clean up
-            del self.active_tool_calls[key]
-
     async def _show_tool_usage(self, payload):
         """Enhanced tool usage display"""
         tool_name = payload.get("tool_name", "Unknown tool")
-
-        # Clean up any partial tool call displays
-        if self.tool_spinner:
-            self.tool_spinner.stop()
-            self.tool_spinner = None
 
         # Finalize current stream
         if self.active_stream:
             await self.active_stream.update_async(self.accumulated_content, final=True)
             self.active_stream = None
             self.accumulated_content = ""
+
+        if self.spinner:
+            self.spinner.stop()
+            self.spinner = None
 
         self.console.print()
         self.console.print(
@@ -322,44 +222,9 @@ class RenderingActor(Actor):
         """Clean up after tool execution"""
         # Clear any remaining tool call state
         self.active_tool_calls.clear()
-        if self.tool_spinner:
-            self.tool_spinner.stop()
-            self.tool_spinner = None
-
-    def _format_args_for_display(self, args_str: str) -> str:
-        """Format tool arguments for display"""
-        if not args_str:
-            return ""
-
-        try:
-            # Try to parse and format as JSON
-            import json
-
-            if args_str.strip().startswith("{") and args_str.strip().endswith("}"):
-                parsed = json.loads(args_str)
-                # Format compactly for display
-                return json.dumps(parsed, separators=(",", ":"))
-        except:  # noqa: E722
-            pass
-
-        # If not valid JSON, just return the string (truncated if too long)
-        if len(args_str) > 100:
-            return args_str[:97] + "..."
-        return args_str
-
-    def _is_valid_json_fragment(self, args_str: str) -> bool:
-        """Check if we have enough of the JSON to display something useful"""
-        if not args_str:
-            return False
-
-        try:
-            # Check if it looks like JSON and has some content
-            stripped = args_str.strip()
-            if stripped.startswith("{") and len(stripped) > 2:
-                return True
-        except:  # noqa: E722
-            pass
-        return False
+        if self.tool_json_live:
+            self.tool_json_live.stop()
+            self.tool_json_live = None
 
     async def _handle_stream_error(self, payload):
         stream_id = payload["stream_id"]
@@ -394,7 +259,6 @@ class RenderingActor(Actor):
             MessageType.SHUTDOWN,
             MessageType.TOOL_START,
             MessageType.TOOL_END,
-            MessageType.TOOL_CALL_CHUNK,
             MessageType.START_STREAM,
             MessageType.STREAM_CHUNK,
             MessageType.END_STREAM,
