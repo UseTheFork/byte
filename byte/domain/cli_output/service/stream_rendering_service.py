@@ -54,7 +54,7 @@ class StreamRenderingService(Service):
         self.current_stream_id = stream_id
         self.accumulated_content = ""  # Reset accumulated content for new stream
 
-        self.console.print(Rule("Agent", align="left"))
+        self.console.print(Rule(f"Agent ({self.current_stream_id})", align="left"))
 
         # Disable spinner for now
         # Start with spinner
