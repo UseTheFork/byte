@@ -15,9 +15,9 @@ ai:
 		--git-commit-verify \
 		--read .byte/conventions/COMMENT_STYLEGUIDE.md \
 		--read .byte/conventions/PYTHON_STYLEGUIDE.md \
-		--file byte/bootstrap.py \
-		--file byte/container.py \
-		--file byte/main.py \
+		--file src/byte/bootstrap.py \
+		--file src/byte/container.py \
+		--file src/byte/main.py \
 		--lint-cmd "just lint" \
 		--add-gitignore-files
 

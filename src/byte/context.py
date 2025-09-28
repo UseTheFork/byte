@@ -18,7 +18,7 @@ def get_container() -> "Container":
     return container
 
 
-async def make(service_class: Type[T]) -> T:
+async def make[T](service_class: Type[T]) -> T:
     """Convenience method to get a service from the current container context."""
     container = get_container()
     return await container.make(service_class)
