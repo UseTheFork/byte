@@ -1,0 +1,4 @@
+{
+	"basedpyright.analysis.autoImportCompletions": true,
+	"basedpyright.importStrategy": "useBundled"
+}

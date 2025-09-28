@@ -1,3 +1,8 @@
+from byte.domain.agent.implementations.coder.edit_format.base import (
+    EditFormat,
+    EditFormatPrompts,
+)
+
 # Credits to: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/coders/editblock_fenced_prompts.py
 edit_format_system = """
 # *SEARCH/REPLACE block* Rules:
@@ -136,3 +141,10 @@ from hello import hello
 """,
     ),
 ]
+
+
+class BlockedFenceEditFormat(EditFormat):
+    def __init__(self):
+        self.prompts = EditFormatPrompts(
+            system=edit_format_system, examples=example_messages
+        )

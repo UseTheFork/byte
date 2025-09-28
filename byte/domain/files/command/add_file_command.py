@@ -1,4 +1,3 @@
-import asyncio
 from typing import List
 
 from rich.console import Console
@@ -32,38 +31,13 @@ class AddFileCommand(Command):
             console.print("Usage: /add <file_path>")
             return
 
-        from byte.core.actors.message import Message, MessageBus, MessageType
-        from byte.domain.files.actor.file_actor import FileActor
+        file_service = await self.make(FileService)
+        result = await file_service.add_file(args, FileMode.EDITABLE)
 
-        message_bus = await self.make(MessageBus)
-        response_queue = asyncio.Queue()
-
-        await message_bus.send_to(
-            FileActor,
-            Message(
-                type=MessageType.FILE_OPERATION_REQUEST,
-                payload={
-                    "operation": "add",
-                    "path": args,
-                    "mode": FileMode.EDITABLE.value,
-                    "source": "command",
-                    "reason": "user_request",
-                },
-                reply_to=response_queue,
-            ),
-        )
-
-        # Wait for response (with timeout)
-        try:
-            response = await asyncio.wait_for(response_queue.get(), timeout=5.0)
-            success = response.payload.get("success", False)
-
-            if not success:
-                console.print(
-                    f"[error]Failed to add {args} (file not found or not readable)[/error]"
-                )
-        except TimeoutError:
-            console.print(f"[error]Timeout adding {args}[/error]")
+        if not result:
+            console.print(
+                f"[error]Failed to add {args} (file not found, not readable, or is already in context)[/error]"
+            )
 
     async def get_completions(self, text: str) -> List[str]:
         """Provide intelligent file path completions from project discovery.

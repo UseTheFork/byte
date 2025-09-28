@@ -24,7 +24,7 @@ dependencies = [
 scripts.byte = "byte.core.cli:cli"
 
 [dependency-groups]
-dev = ["ruff>=0.12.12"]
+dev = ["ruff>=0.12.12", "tomli>=2.2.1"]
 
 [tool.ruff]
 target-version = "py312"
@@ -67,6 +67,7 @@ combine-as-imports = true
 
 [tool.basedpyright]
 include = ["byte"]
+exclude = ["**/node_modules", "**/__pycache__"]
 pythonPlatform = "All"
 pythonVersion = "3.12"
 reportIgnoreCommentWithoutRule = true
@@ -74,7 +75,7 @@ reportUnnecessaryTypeIgnoreComment = "warning"
 typeCheckingMode = "basic"
 
 [[tool.basedpyright.executionEnvironments]]
-root = "examples"
+root = "byte"
 reportUnknownArgumentType = "hint"
 reportUnknownMemberType = "hint"
 reportUnknownVariableType = "hint"

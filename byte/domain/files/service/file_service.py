@@ -35,7 +35,6 @@ class FileService(Service):
         Usage: `await service.add_file("config.py", FileMode.READ_ONLY)`
         Usage: `await service.add_file("src/*.py", FileMode.EDITABLE)` -> adds all Python files
         """
-        console = await self.make(Console)
         file_discovery = await self.make(FileDiscoveryService)
         discovered_files = await file_discovery.get_files()
         discovered_file_paths = {str(f.resolve()) for f in discovered_files}
@@ -56,7 +55,6 @@ class FileService(Service):
                 # Only add files that are in the discovery service and are actual files
                 if path_obj.is_file() and str(path_obj) in discovered_file_paths:
                     key = str(path_obj)
-                    console.print(f"Added {key} as {mode.value}")
                     self._context_files[key] = FileContext(path=path_obj, mode=mode)
                     success_count += 1
 
@@ -70,11 +68,14 @@ class FileService(Service):
                 return False
 
             key = str(path_obj)
+
+            # If the file is already in context, return False
+            if key in self._context_files:
+                return False
+
             self._context_files[key] = FileContext(path=path_obj, mode=mode)
 
             await self._notify_file_added(key, mode)
-
-            console.print(f"Added {key} as {mode.value}")
 
             # Emit event for UI updates and other interested components
             return True
@@ -280,7 +281,7 @@ Any other messages in the chat may contain outdated versions of the files' conte
         path_obj = Path(path).resolve()
         return str(path_obj) in self._context_files
 
-    async def list_in_context_files(self):
+    async def list_in_context_files(self, payload: Optional[Payload] = None):
         """Display current editable files before each prompt.
 
         Provides visual feedback about which files the AI can modify,
@@ -290,17 +291,6 @@ Any other messages in the chat may contain outdated versions of the files' conte
         console = await self.make(Console)
 
         file_service = await self.make(FileService)
-        editable_files = file_service.list_files(FileMode.EDITABLE)
-        if editable_files:
-            file_names = [f"[text]{f.relative_path}[/text]" for f in editable_files]
-            console.print(
-                Panel(
-                    Columns(file_names, equal=True, expand=True),
-                    title=f"[bold success]Editable Files ({len(editable_files)})[/bold success]",
-                    border_style="success",
-                )
-            )
-
         readonly_files = file_service.list_files(FileMode.READ_ONLY)
         if readonly_files:
             file_names = [f"[text]{f.relative_path}[/text]" for f in readonly_files]
@@ -312,4 +302,15 @@ Any other messages in the chat may contain outdated versions of the files' conte
                 )
             )
 
-        return
+        editable_files = file_service.list_files(FileMode.EDITABLE)
+        if editable_files:
+            file_names = [f"[text]{f.relative_path}[/text]" for f in editable_files]
+            console.print(
+                Panel(
+                    Columns(file_names, equal=True, expand=True),
+                    title=f"[bold success]Editable Files ({len(editable_files)})[/bold success]",
+                    border_style="success",
+                )
+            )
+
+        return payload

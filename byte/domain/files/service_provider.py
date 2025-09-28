@@ -3,6 +3,7 @@ from typing import List, Type
 from rich.console import Console
 
 from byte.container import Container
+from byte.core.event_bus import EventBus, EventType
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli_input.service.command_registry import Command
@@ -28,7 +29,19 @@ class FileServiceProvider(ServiceProvider):
         """Boot file services and register commands with registry."""
         # Ensure file discovery is booted first to scan project files
         file_discovery = await container.make(FileDiscoveryService)
-        await file_discovery.ensure_booted()
+
+        # Boots the filewatcher service in to the task manager
+        await container.make(FileWatcherService)
+
+        # Set up event listener for PRE_PROMPT_TOOLKIT
+        event_bus = await container.make(EventBus)
+        file_service = await container.make(FileService)
+
+        # Register listener that calls list_in_context_files before each prompt
+        event_bus.on(
+            EventType.PRE_PROMPT_TOOLKIT.value,
+            file_service.list_in_context_files,
+        )
 
         console = await container.make(Console)
 

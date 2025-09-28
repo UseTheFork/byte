@@ -1,5 +1,4 @@
 from byte.domain.cli_input.service.command_registry import Command
-from byte.domain.files.service.file_service import FileService
 
 
 class ListFilesCommand(Command):
@@ -23,5 +22,4 @@ class ListFilesCommand(Command):
 
         Usage: Called automatically when user types `/ls`
         """
-        file_service = await self.make(FileService)
-        await file_service.list_in_context_files()
+        return

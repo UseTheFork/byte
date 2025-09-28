@@ -43,6 +43,10 @@ class LintConfig(BaseModel):
     commands: List[LintCommand] = []
 
 
+class WatchConfig(BaseModel):
+    enable: bool = True
+
+
 class ByteConfg(BaseSettings):
     model_config = SettingsConfigDict(
         env_nested_delimiter="_",
@@ -57,8 +61,7 @@ class ByteConfg(BaseSettings):
     model: str
 
     lint: LintConfig = LintConfig()
-
-    watch_files: bool = True
+    watch: WatchConfig = WatchConfig()
 
     @classmethod
     def settings_customise_sources(

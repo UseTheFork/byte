@@ -24,20 +24,20 @@ class ReadOnlyCommand(Command):
         return "Add file to context as read-only"
 
     async def execute(self, args: str) -> None:
-        """Add specified file to context with read-only permissions."""
+        """Add specified file to context with editable permissions."""
         console = await self.make(Console)
+
         if not args:
             console.print("Usage: /read-only <file_path>")
             return
 
         file_service = await self.make(FileService)
-        if await file_service.add_file(args, FileMode.READ_ONLY):
-            return
-        else:
+        result = await file_service.add_file(args, FileMode.READ_ONLY)
+
+        if not result:
             console.print(
-                f"[error]Failed to add {args} (file not found or not readable)[/error]"
+                f"[error]Failed to add {args} (file not found, not readable, or is already in context)[/error]"
             )
-            return
 
     async def get_completions(self, text: str) -> List[str]:
         """Provide intelligent file path completions from project discovery.

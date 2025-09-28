@@ -13,6 +13,10 @@ class PromptToolkitService(Service):
     """ """
 
     async def boot(self):
+        # Placeholder for `prompt_async` if we where interupted we restore using the placeholder
+        self.placeholder = None
+        self.interrupted = False
+
         self.completer = CommandCompleter()
 
         self.prompt_session = PromptSession(
@@ -27,13 +31,20 @@ class PromptToolkitService(Service):
 
         await self.emit(payload)
 
-        user_input = await self.prompt_session.prompt_async("> ")
+        # Use placeholder if set, then clear it
+        default = self.placeholder or ""
+        self.placeholder = None
+        self.interrupted = False
 
-        if user_input.startswith("/"):
-            print(user_input)
-            await self._handle_command_input(user_input)
-        else:
-            await self._send_to_agent(user_input)
+        user_input = await self.prompt_session.prompt_async(
+            message="> ", placeholder=default
+        )
+
+        if not self.interrupted:
+            if user_input.startswith("/"):
+                await self._handle_command_input(user_input)
+            else:
+                await self._send_to_agent(user_input)
 
     async def _handle_command_input(self, user_input: str):
         # Parse command name and args
@@ -54,3 +65,9 @@ class PromptToolkitService(Service):
         agent_service = await self.make(AgentService)
         await agent_service.execute_current_agent([("user", user_input)])
         # log.info(result)
+
+    async def interrupt(self):
+        if self.prompt_session and self.prompt_session.app:
+            self.placeholder = self.prompt_session.app.current_buffer.text
+            self.interrupted = True
+            self.prompt_session.app.exit()
