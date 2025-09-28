@@ -75,25 +75,24 @@ class Agent(ABC, Bootable, Configurable, Injectable):
             chunk: The data chunk from that stream mode
         """
         stream_rendering_service = await self.make(StreamRenderingService)
+        # log.info(f"-----------------{mode}------------------")
+
         # Filter and process based on mode
         if mode == "messages":
             # Handle LLM token streaming
-            message_chunk, metadata = chunk
-            if message_chunk.content:
-                await stream_rendering_service.handle_message(chunk)
+            await stream_rendering_service.handle_message(
+                chunk, self.__class__.__name__
+            )
+
         elif mode == "updates":
             # Handle state updates after each step
-            # chunk will be like {'node_name': {'key': 'value'}}
-            await stream_rendering_service.handle_update(chunk)
+            # await stream_rendering_service.handle_update(chunk)
+            pass
         elif mode == "values":
-            # Handle full state after each step
-            # log.info(f"-----------------{mode}------------------")
-            # log.info(chunk)
+            # Handle full state after each step - could be used for progress tracking
             pass
         elif mode == "custom":
             # Handle custom data from get_stream_writer()
-            # log.info(f"-----------------{mode}------------------")
-            # log.info(chunk)
             pass
 
         return chunk
@@ -124,6 +123,9 @@ class Agent(ABC, Bootable, Configurable, Injectable):
         # Get the graph and stream events
         graph = await self.get_graph()
 
+        stream_rendering_service = await self.make(StreamRenderingService)
+        await stream_rendering_service.start_spinner()
+
         async for mode, chunk in graph.astream(
             input=initial_state,
             config=config,
@@ -131,6 +133,7 @@ class Agent(ABC, Bootable, Configurable, Injectable):
         ):
             processed_event = await self._handle_stream_event(mode, chunk)
 
+        await stream_rendering_service.end_stream()
         return processed_event
 
     def get_state_class(self) -> Type[TypedDict]:  # pyright: ignore[reportInvalidTypeForm]

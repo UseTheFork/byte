@@ -54,6 +54,7 @@ class CliOutputServiceProvider(ServiceProvider):
                 "secondary": "#cba6f7",
                 "muted": "#6c7086",
                 "subtle": "#a6adc8",
+                "lavender": "#b4befe",
             }
         )
 

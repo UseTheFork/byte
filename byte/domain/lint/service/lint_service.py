@@ -2,14 +2,16 @@ import asyncio
 from os import PathLike
 from typing import Dict, List, Union
 
-from rich.console import Console
+from rich.console import Console, Group
 from rich.live import Live
 from rich.panel import Panel
-from rich.spinner import Spinner
+from rich.progress import BarColumn, Progress, TaskProgressColumn
+from rich.table import Column
 from rich.text import Text
 
 from byte.core.service.base_service import Service
 from byte.domain.git.service.git_service import GitService
+from byte.domain.lint.types import LintCommand, LintFile
 
 
 class LintService(Service):
@@ -25,11 +27,11 @@ class LintService(Service):
         """Handle lint service execution - main entry point for linting operations."""
         return await self.lint_changed_files()
 
-    async def lint_changed_files(self) -> Dict[str, List[str]]:
+    async def lint_changed_files(self) -> List[LintCommand]:
         """Run configured linters on git changed files.
 
         Returns:
-            Dict mapping command names to lists of issues found
+            List of LintCommand objects with results
 
         Usage: `results = await lint_service.lint_changed_files()` -> lint changed files
         """
@@ -45,75 +47,123 @@ class LintService(Service):
         repo = await git_service.get_repo()
         git_root = repo.working_dir
 
-        results = {}
-
         # Handle commands as a list of command strings
-        if self._config.auto_lint and self._config.lint_commands:
-            spinner = Spinner("dots", text="Running linters...")
-            with Live(spinner, console=console, transient=True, refresh_per_second=10):
-                for i, command_template in enumerate(self._config.lint_commands):
-                    command_name = f"command_{i}"
-                    results[command_name] = []
+        if self._config.lint.enable and self._config.lint.commands:
+            # outer status bar and progress bar
+            status = console.status("Not started")
+            bar_column = BarColumn(bar_width=None, table_column=Column(ratio=2))
+            progress = Progress(
+                bar_column, TaskProgressColumn(), transient=True, expand=True
+            )
+            with Live(
+                Panel(
+                    Group(progress, status),
+                    title="Lint",
+                    title_align="left",
+                    border_style="secondary",
+                ),
+                console=console,
+                transient=True,
+            ):
+                status.update("[bold primary]Start Linting")
 
-                    # Iterate over each changed file
+                # Create array of command/file combinations
+                lint_commands = []
+                total_lint_commands = 0
+                for command in self._config.lint.commands:
+                    lint_files = []
                     for file_path in changed_files:
-                        # Update spinner to show current command and file
-                        spinner.update(
-                            text=f"Running {command_template} on {file_path}"
-                        )
+                        # Check if file should be processed by this command based on extensions
+                        if command.extensions:
+                            # If extensions are specified, only process files with matching extensions
+                            if not any(
+                                str(file_path).endswith(ext)
+                                for ext in command.extensions
+                            ):
+                                continue
+                        # If no extensions specified, process all files
 
-                        # Build the command with the file path
-                        cmd = f"{command_template} {file_path!s}"
-
-                        try:
-                            # Run the command and capture output
-                            process = await asyncio.create_subprocess_shell(
-                                cmd,
-                                stdout=asyncio.subprocess.PIPE,
-                                stderr=asyncio.subprocess.PIPE,
-                                cwd=git_root,
+                        lint_files.append(
+                            LintFile(
+                                file=file_path,
+                                full_command=f"{command.command} {file_path!s}",
+                                exit_code=0,
+                                stdout="",
+                                stderr="",
                             )
+                        )
+                        total_lint_commands += 1
+                    lint_commands.append(
+                        LintCommand(
+                            command=command.command,
+                            results=lint_files,
+                        )
+                    )
 
-                            stdout, stderr = await process.communicate()
-                            exit_code = process.returncode
+                task = progress.add_task("Linting", total=total_lint_commands)
 
-                            # Store the result
-                            result = {
-                                "file": str(file_path),
-                                "command": cmd,
-                                "exit_code": exit_code,
-                                "stdout": stdout.decode("utf-8", errors="ignore"),
-                                "stderr": stderr.decode("utf-8", errors="ignore"),
-                            }
+                for command in lint_commands:
+                    for i, lint_file in enumerate(command.results):
+                        status.update(f"Running {command.command} on {lint_file.file}")
 
-                            results[command_name].append(result)
+                        updated_lint_file = await self._execute_lint_command(
+                            lint_file, git_root
+                        )
+                        command.results[i] = updated_lint_file
 
-                        except Exception as e:
-                            # Handle command execution errors
-                            error_result = {
-                                "file": str(file_path),
-                                "command": cmd,
-                                "exit_code": -1,
-                                "stdout": "",
-                                "stderr": f"Error executing command: {e!s}",
-                            }
-                            results[command_name].append(error_result)
+                        progress.advance(task)
+
+                status.update(
+                    f"[bold primary]Finished linting {len(changed_files)} files"
+                )
 
         # Display summary panel with results
-        self._display_results_summary(console, results)
+        self._display_results_summary(console, lint_commands)
 
-        return results
+        return lint_commands
+
+    async def _execute_lint_command(self, lint_file: LintFile, git_root) -> LintFile:
+        try:
+            # Run the command and capture output
+            process = await asyncio.create_subprocess_shell(
+                lint_file.full_command,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                cwd=git_root,
+            )
+
+            stdout, stderr = await process.communicate()
+            exit_code = process.returncode
+
+            # Return updated LintFile with results
+            return LintFile(
+                file=lint_file.file,
+                full_command=lint_file.full_command,
+                exit_code=exit_code,
+                stdout=stdout.decode("utf-8", errors="ignore"),
+                stderr=stderr.decode("utf-8", errors="ignore"),
+            )
+
+        except Exception as e:
+            # Handle command execution errors
+            return LintFile(
+                file=lint_file.file,
+                full_command=lint_file.full_command,
+                exit_code=-1,
+                stdout="",
+                stderr=f"Error executing command: {e!s}",
+            )
 
     def _display_results_summary(
-        self, console: Console, results: Dict[str, List[str]]
+        self, console: Console, lint_commands: List[LintCommand]
     ) -> None:
         """Display a summary panel of linting results.
 
         Args:
             console: Rich console for output
-            results: Dictionary of linting results by command
+            lint_commands: List of LintCommand objects with results
         """
-        if not results:
+        if not lint_commands:
             return
 
         # Count total files processed and issues found
@@ -121,51 +171,51 @@ class LintService(Service):
         total_issues = 0
         commands_with_issues = []
 
-        for _, command_results in results.items():
-            files_processed = len(command_results)
+        # TODO: Find a better way to display this. Not crazy about it.
+
+        for command in lint_commands:
+            files_processed = len(command.results)
             total_files += files_processed
 
             # Count issues (non-zero exit codes)
             issues_found = sum(
-                1 for result in command_results if result.get("exit_code", 0) != 0
+                1 for lint_file in command.results if lint_file.exit_code != 0
             )
             total_issues += issues_found
 
             if issues_found > 0:
-                # Group issues by command template for better display
-                command_issues = {}
-                command_errors = {}
-                for result in command_results:
-                    if result.get("exit_code", 0) != 0:
-                        cmd = result.get("command", "").split()[0]  # Get base command
-                        file_name = result.get("file", "")
-                        if cmd not in command_issues:
-                            command_issues[cmd] = []
-                            command_errors[cmd] = []
-                        command_issues[cmd].append(file_name)
+                # Collect files with issues for this command
+                files_with_issues = []
+                error_details = []
+
+                for lint_file in command.results:
+                    if lint_file.exit_code != 0:
+                        files_with_issues.append(str(lint_file.file))
 
                         # Collect error details
-                        error_output = result.get("stderr", "").strip()
+                        error_output = lint_file.stderr.strip()
                         if not error_output:
-                            error_output = result.get("stdout", "").strip()
+                            error_output = lint_file.stdout.strip()
                         if error_output:
-                            command_errors[cmd].append(f"{file_name}: {error_output}")
+                            error_details.append(f"{lint_file.file}: {error_output}")
 
-                # Add formatted command issues with errors
-                for cmd, files in command_issues.items():
-                    if len(files) == 1:
-                        commands_with_issues.append(f"{cmd} on {files[0]}")
-                    else:
-                        commands_with_issues.append(f"{cmd} on {len(files)} files")
+                # Add formatted command issues
+                if len(files_with_issues) == 1:
+                    commands_with_issues.append(
+                        f"{command.command} on {files_with_issues[0]}"
+                    )
+                else:
+                    commands_with_issues.append(
+                        f"{command.command} on {len(files_with_issues)} files"
+                    )
 
-                    # Add error details for this command
-                    if command_errors.get(cmd):
-                        for error in command_errors[cmd][:3]:  # Limit to first 3 errors
-                            commands_with_issues.append(f"    {error}")
-                        if len(command_errors[cmd]) > 3:
-                            commands_with_issues.append(
-                                f"    ... and {len(command_errors[cmd]) - 3} more errors"
-                            )
+                # Add error details (limit to first 3)
+                for error in error_details[:3]:
+                    commands_with_issues.append(f"    {error}")
+                if len(error_details) > 3:
+                    commands_with_issues.append(
+                        f"    ... and {len(error_details) - 3} more errors"
+                    )
 
         # Create summary text
         summary_text = Text()
@@ -181,10 +231,9 @@ class LintService(Service):
         # Display panel
         panel = Panel(
             summary_text,
-            title="[bold]Lint Results[/bold]",
+            title="Lint",
             title_align="left",
-            border_style="primary",
-            padding=(0, 1),
+            border_style="secondary",
         )
         console.print(panel)
 

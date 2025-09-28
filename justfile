@@ -18,9 +18,6 @@ ai:
 		--file byte/bootstrap.py \
 		--file byte/container.py \
 		--file byte/main.py \
-		--file byte/core/actors/base.py \
-		--file byte/core/actors/message.py \
-		--file byte/core/actors/streams.py \
 		--lint-cmd "just lint" \
 		--add-gitignore-files
 

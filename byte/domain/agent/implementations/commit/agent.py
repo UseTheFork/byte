@@ -3,7 +3,7 @@ from langgraph.constants import END
 from langgraph.graph import START, StateGraph
 from langgraph.graph.state import Runnable, RunnableConfig
 
-from byte.domain.agent.base import Agent, BaseState
+from byte.domain.agent.implementations.base import Agent, BaseState
 from byte.domain.agent.implementations.commit.prompt import commit_prompt
 from byte.domain.llm.service.llm_service import LLMService
 

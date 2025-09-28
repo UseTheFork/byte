@@ -1,9 +1,7 @@
 from typing import Type
 
-from langgraph.graph.state import CompiledStateGraph
-
 from byte.core.service.base_service import Service
-from byte.domain.agent.base import Agent
+from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.implementations.coder.agent import CoderAgent
 
 
@@ -23,21 +21,18 @@ class AgentService(Service):
             # Add more agents here as they're implemented
         ]
 
-    async def get_agent_runnable(self, agent_type: Type[Agent]) -> "CompiledStateGraph":
-        """Get a compiled graph for the specified agent class for streaming.
+    async def execute_current_agent(self, messages: list) -> dict:
+        """Execute the currently active agent with the provided messages.
 
-        Usage: graph = await agent_service.get_agent_runnable(CoderAgent)
+        Usage: result = await agent_service.execute_current_agent([("user", "Hello")])
         """
-        if agent_type not in self._agent_instances:
-            # Lazy load agent
-            if not self._is_valid_agent(agent_type):
-                raise ValueError(f"Unknown agent type: {agent_type}")
+        if self._current_agent not in self._agent_instances:
+            # Lazy load current agent
+            agent_instance = await self.make(self._current_agent)
+            self._agent_instances[self._current_agent] = agent_instance
 
-            agent_instance = await self.make(agent_type)
-            self._agent_instances[agent_type] = agent_instance
-
-        agent = self._agent_instances[agent_type]
-        return await agent.get_graph()
+        agent = self._agent_instances[self._current_agent]
+        return await agent.execute({"messages": messages})
 
     def set_active_agent(self, agent_type: Type[Agent]) -> bool:
         """Switch the active agent."""

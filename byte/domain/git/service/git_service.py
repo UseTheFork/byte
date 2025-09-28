@@ -143,9 +143,9 @@ class GitService(Service, UserInteractive):
                 "Add unstaged changes to commit?", True
             )
 
-        if user_input:
-            # Add all unstaged changes
-            self._repo.git.add("--all")
-            console.print(
-                f"[success]Added {len(unstaged_changes)} unstaged changes to commit[/success]"
-            )
+            if user_input:
+                # Add all unstaged changes
+                self._repo.git.add("--all")
+                console.print(
+                    f"[success]Added {len(unstaged_changes)} unstaged changes to commit[/success]"
+                )

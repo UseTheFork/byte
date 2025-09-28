@@ -4,6 +4,7 @@ from prompt_toolkit.shortcuts import PromptSession
 from byte.core.config.config import BYTE_DIR
 from byte.core.event_bus import EventType, Payload
 from byte.core.service.base_service import Service
+from byte.domain.agent.service.agent_service import AgentService
 from byte.domain.cli_input.prompt_handler import CommandCompleter
 from byte.domain.cli_input.service.command_registry import CommandRegistry
 
@@ -50,7 +51,6 @@ class PromptToolkitService(Service):
             print(f"Unknown command: /{command_name}")
 
     async def _send_to_agent(self, user_input: str):
-        print(user_input)
-        print(user_input)
-        print(user_input)
-        pass
+        agent_service = await self.make(AgentService)
+        await agent_service.execute_current_agent([("user", user_input)])
+        # log.info(result)

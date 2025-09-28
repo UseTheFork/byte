@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 import git
 from pydantic import BaseModel
@@ -32,6 +33,16 @@ BYTE_DIR.mkdir(exist_ok=True)
 BYTE_CONFIG_FILE = BYTE_DIR / "config.yaml"
 
 
+class LintCommand(BaseModel):
+    command: str
+    extensions: List[str]
+
+
+class LintConfig(BaseModel):
+    enable: bool = True
+    commands: List[LintCommand] = []
+
+
 class ByteConfg(BaseSettings):
     model_config = SettingsConfigDict(
         env_nested_delimiter="_",
@@ -45,8 +56,7 @@ class ByteConfg(BaseSettings):
 
     model: str
 
-    auto_lint: bool = True
-    lint_commands: set[str] = set()
+    lint: LintConfig = LintConfig()
 
     watch_files: bool = True
 

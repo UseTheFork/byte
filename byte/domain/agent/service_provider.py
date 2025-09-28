@@ -3,7 +3,7 @@ from typing import List, Type
 from byte.container import Container
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
-from byte.domain.agent.base import Agent
+from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.agent.implementations.commit.agent import CommitAgent
 from byte.domain.agent.service.agent_service import AgentService
