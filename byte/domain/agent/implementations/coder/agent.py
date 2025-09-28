@@ -7,9 +7,11 @@ from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode
 from typing_extensions import TypedDict
 
+from byte.core.utils import dd
 from byte.domain.agent.implementations.base import Agent, BaseState
+from byte.domain.agent.implementations.coder.edit_format.base import EditFormat
 from byte.domain.agent.implementations.coder.edit_format.editblock_fenced import (
-    edit_format_system,
+    BlockedFenceEditFormat,
 )
 from byte.domain.agent.implementations.coder.prompts import coder_prompt
 from byte.domain.files.service.file_service import FileService
@@ -39,7 +41,12 @@ class CoderAgent(Agent):
     the actor system for clean separation of concerns.
     """
 
-    name: str = "coder"
+    edit_format: EditFormat
+
+    async def boot(self):
+        # TODO: Need to figure out how to specify what what edit_format is currently running.
+
+        self.edit_format = BlockedFenceEditFormat()
 
     def get_state_class(self) -> Type[TypedDict]:  # pyright: ignore[reportInvalidTypeForm]
         """Return coder-specific state class."""
@@ -65,16 +72,14 @@ class CoderAgent(Agent):
         # Add nodes
         graph.add_node("setup_coder", self._setup_coder)
         graph.add_node("assistant", self._create_assistant_node(assistant_runnable))
-        # graph.add_node("parse_commands", self._parse_commands)
-        # graph.add_node("validate_commands", self._validate_commands)
+        graph.add_node("parse_blocks", self._parse_blocks)
         graph.add_node("tools", ToolNode(self.get_tools()))
 
         # Define edges
         graph.add_edge(START, "setup_coder")
         graph.add_edge("setup_coder", "assistant")
-        graph.add_edge("assistant", END)
-        # graph.add_edge("assistant", "parse_commands")
-        # graph.add_edge("parse_commands", "validate_commands")
+        graph.add_edge("assistant", "parse_blocks")
+        graph.add_edge("parse_blocks", END)
 
         # Conditional routing from assistant
         graph.add_conditional_edges(
@@ -82,7 +87,7 @@ class CoderAgent(Agent):
             self._should_continue,
             {
                 "tools": "tools",
-                "end": END,
+                "end": "parse_blocks",
             },
         )
 
@@ -102,24 +107,20 @@ class CoderAgent(Agent):
         file_context = file_service.generate_context_prompt()
         return {
             "file_context": file_context,
-            "edit_format_system": edit_format_system,
+            "edit_format_system": self.edit_format.prompts.system,
             "fence_open": "```",
             "fence_close": "```",
         }
 
-    async def _parse_commands(self, state: CoderState) -> dict:
+    async def _parse_blocks(self, state: CoderState) -> dict:
         """Parse commands from the last assistant message."""
-        # messages = state["messages"]
-        # last_message = messages[-1]
+        messages = state["messages"]
+        last_message = messages[-1]
 
-        pass
+        # self.edit_format.parse_content_to_blocks
+        dd(last_message)
 
-    async def _validate_commands(self, state: CoderState) -> dict:
-        """Validate parsed commands before execution."""
-
-        pass
-
-        # return {"validation_errors": validation_errors}
+        return {}
 
     def _create_assistant_node(self, runnable: Runnable):
         """Create the assistant node function."""

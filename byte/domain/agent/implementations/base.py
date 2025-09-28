@@ -55,7 +55,6 @@ class Agent(ABC, Bootable, Configurable, Injectable):
     Usage: `class MyAgent(BaseAgent): async def build(self): ...`
     """
 
-    name: str = ""
     _graph: Optional[CompiledStateGraph] = None
 
     @abstractmethod
@@ -144,6 +143,20 @@ class Agent(ABC, Bootable, Configurable, Injectable):
             processed_event = await self._handle_stream_event(mode, chunk)
 
         await stream_rendering_service.end_stream()
+
+        # Write processed_event to text file for testing
+        import json
+        from pathlib import Path
+
+        output_file = Path(__file__).parent / "processed_event_output.txt"
+        with open(output_file, "w") as f:
+            f.write(str(processed_event))
+            f.write("\n\n--- JSON representation ---\n")
+            try:
+                f.write(json.dumps(processed_event, indent=2, default=str))
+            except Exception as e:
+                f.write(f"Could not serialize to JSON: {e}")
+
         return processed_event
 
     def get_state_class(self) -> Type[TypedDict]:  # pyright: ignore[reportInvalidTypeForm]

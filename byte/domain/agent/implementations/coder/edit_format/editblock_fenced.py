@@ -148,3 +148,6 @@ class BlockedFenceEditFormat(EditFormat):
         self.prompts = EditFormatPrompts(
             system=edit_format_system, examples=example_messages
         )
+
+    def parse_content_to_blocks(self, content: str):
+        pass
