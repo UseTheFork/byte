@@ -101,11 +101,18 @@ class Agent(ABC, Bootable, Configurable, Injectable):
         self,
         request: Any,
         thread_id: Optional[str] = None,
+        display_mode: str = "verbose",
     ):
         """Stream agent responses using astream_events for comprehensive event handling.
 
         Yields events from the agent graph processing, enabling fine-grained
         control over streaming display and tool execution visualization.
+
+        Args:
+            request: The request data to process
+            thread_id: Optional thread ID for conversation context
+            display_mode: Display mode - "verbose", "thinking", or "silent" (default: "verbose")
+
         Usage: `async for event in agent.stream(request): ...`
         """
         # Get or create thread ID
@@ -124,6 +131,8 @@ class Agent(ABC, Bootable, Configurable, Injectable):
         graph = await self.get_graph()
 
         stream_rendering_service = await self.make(StreamRenderingService)
+        stream_rendering_service.set_display_mode(display_mode)
+
         await stream_rendering_service.start_spinner()
 
         async for mode, chunk in graph.astream(

@@ -32,6 +32,7 @@ class StreamRenderingService(Service):
         self.current_stream_id = ""
         self.accumulated_content = ""
         self.agent_name = ""
+        self.display_mode = "verbose"
         self.spinner = None
         self.active_stream = MarkdownStream()
 
@@ -43,6 +44,9 @@ class StreamRenderingService(Service):
         and content accumulation for smooth rendering.
         Usage: `await service.handle_message((message, metadata), "CoderAgent")` -> processes chunk
         """
+        if self.display_mode != "verbose":
+            return
+
         message_chunk, metadata = chunk
 
         # Set the Agent "class" as the Agent Name
@@ -68,6 +72,7 @@ class StreamRenderingService(Service):
         based on thread IDs, and handles stop conditions for tool usage transitions.
         Usage: Called internally when processing AIMessageChunk instances
         """
+
         # Check if we need to start a new stream
         if (
             metadata.get("thread_id")
@@ -80,15 +85,16 @@ class StreamRenderingService(Service):
             self.accumulated_content += self._extract_content(message_chunk)
             await self._update_active_stream()
 
-        # Check for stream ending conditions
-        if hasattr(message_chunk, "response_metadata") and (
-            message_chunk.response_metadata.get("stop_reason") == "end_turn"
-            or message_chunk.response_metadata.get("stop_reason") == "tool_use"
-        ):
-            await self.end_stream_render()
+        if hasattr(message_chunk, "response_metadata"):
+            # Check for stream ending conditions
+            if (
+                message_chunk.response_metadata.get("stop_reason") == "end_turn"
+                or message_chunk.response_metadata.get("stop_reason") == "tool_use"
+            ):
+                await self.end_stream_render()
 
-            if message_chunk.response_metadata.get("stop_reason") == "tool_use":
-                await self._start_tool_message()
+                if message_chunk.response_metadata.get("stop_reason") == "tool_use":
+                    await self._start_tool_message()
 
     async def _start_tool_message(self):
         """Display tool execution start indicator with visual separation.
@@ -213,12 +219,13 @@ class StreamRenderingService(Service):
         provide visual feedback during AI processing or tool execution phases.
         Usage: Called automatically when AI needs to process or think
         """
-        # Start with spinner
-        spinner = Spinner("dots", text="Thinking...")
-        self.spinner = Live(
-            spinner, console=self.console, transient=True, refresh_per_second=20
-        )
-        self.spinner.start()
+        if self.display_mode in ["verbose", "thinking"]:
+            # Start with spinner
+            spinner = Spinner("dots", text="Thinking...")
+            self.spinner = Live(
+                spinner, console=self.console, transient=True, refresh_per_second=20
+            )
+            self.spinner.start()
 
     async def _update_active_stream(self, final: bool = False):
         """Update the active markdown stream renderer with accumulated content.
@@ -251,3 +258,21 @@ class StreamRenderingService(Service):
         # Insert space before capital letters (except the first one)
         spaced = re.sub(r"(?<!^)(?=[A-Z])", " ", agent_name)
         return spaced
+
+    def set_display_mode(self, mode: str) -> None:
+        """Set the display mode for stream rendering.
+
+        Args:
+            mode: Display mode - must be "verbose", "thinking", or "silent"
+
+        Raises:
+            ValueError: If mode is not one of the valid options
+
+        Usage: `stream_service.set_display_mode("thinking")` -> sets spinner-only mode
+        """
+        valid_modes = ["verbose", "thinking", "silent"]
+        if mode not in valid_modes:
+            raise ValueError(
+                f"Invalid display mode '{mode}'. Must be one of: {valid_modes}"
+            )
+        self.display_mode = mode

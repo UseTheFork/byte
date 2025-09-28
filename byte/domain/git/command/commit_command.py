@@ -58,7 +58,7 @@ class CommitCommand(Command):
 
         commit_agent = await self.make(CommitAgent)
         commit_message: dict = await commit_agent.execute(
-            {"messages": [("user", staged_diff)]}
+            request={"messages": [("user", staged_diff)]}, display_mode="thinking"
         )
 
         await git_service.commit(str(commit_message.get("commit_message", "")))
