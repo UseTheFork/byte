@@ -1,6 +1,10 @@
 import logging
 
 from rich.logging import RichHandler
+from rich.traceback import install
+
+# Set rich as the default traceback handler
+install(show_locals=True)
 
 FORMAT = "%(message)s"
 logging.basicConfig(

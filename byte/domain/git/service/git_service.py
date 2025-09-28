@@ -6,8 +6,8 @@ from git.exc import InvalidGitRepositoryError
 from rich.console import Console
 from rich.panel import Panel
 
+from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
-from byte.core.service.mixins import UserInteractive
 
 
 class GitService(Service, UserInteractive):

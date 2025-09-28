@@ -1,8 +1,8 @@
 import uuid
 from typing import TYPE_CHECKING, List, Optional
 
-from byte.core.config.mixins import Configurable
-from byte.core.service.mixins import Bootable
+from byte.core.mixins.bootable import Bootable
+from byte.core.mixins.configurable import Configurable
 from byte.domain.memory.checkpointer import ByteCheckpointer
 from byte.domain.memory.config import MemoryConfig
 

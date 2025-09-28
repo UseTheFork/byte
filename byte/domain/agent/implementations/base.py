@@ -4,8 +4,9 @@ from typing import TYPE_CHECKING, Annotated, Any, Optional, Type, TypedDict
 from langgraph.graph.message import AnyMessage, add_messages
 from langgraph.graph.state import CompiledStateGraph, Runnable, RunnableConfig
 
-from byte.core.config.mixins import Configurable
-from byte.core.service.mixins import Bootable, Injectable
+from byte.core.mixins.bootable import Bootable
+from byte.core.mixins.configurable import Configurable
+from byte.core.mixins.injectable import Injectable
 from byte.domain.cli_output.service.stream_rendering_service import (
     StreamRenderingService,
 )

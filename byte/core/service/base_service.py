@@ -1,8 +1,10 @@
 from abc import ABC
 from typing import TypeVar
 
-from byte.core.config.mixins import Configurable
-from byte.core.service.mixins import Bootable, Eventable, Injectable
+from byte.core.mixins.bootable import Bootable
+from byte.core.mixins.configurable import Configurable
+from byte.core.mixins.eventable import Eventable
+from byte.core.mixins.injectable import Injectable
 
 T = TypeVar("T")
 

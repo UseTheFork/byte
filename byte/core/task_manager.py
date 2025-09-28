@@ -1,6 +1,6 @@
 import asyncio
 
-from byte.core.service.mixins import Bootable
+from byte.core.mixins.bootable import Bootable
 
 
 class TaskManager(Bootable):
