@@ -3,12 +3,13 @@ from rich.spinner import Spinner
 from rich.text import Text
 
 
+# Credits To https://github.com/charmbracelet/crush/blob/main/internal/tui/components/anim/anim.go
 class RuneSpinner(Spinner):
     """A custom spinner that animates random runes with theme-based colors.
 
     Extends Rich's Spinner to display cycling random characters with gradient colors
     based on the console's theme primary and secondary colors.
-    Usage: `spinner = RuneSpinner("dots", "Thinking...", size=8)`
+    Usage: `spinner = RuneSpinner("Thinking...", size=8)`
     """
 
     def __init__(
@@ -45,7 +46,10 @@ class RuneSpinner(Spinner):
 
         # Calculate frame based on time and speed
         elapsed = (time - self.start_time) * self.speed
-        frame_no = int(elapsed * 15)  # 15 fps for rune cycling
+        frame_no = int(elapsed * 25)  # 15 fps for rune cycling
+
+        # Available theme colors to randomly pick from
+        colors = ["primary", "secondary", "text"]
 
         # Generate animated runes
         animated_chars = []
@@ -55,8 +59,10 @@ class RuneSpinner(Spinner):
             rune_index = seed % len(self.runes)
             char = self.runes[rune_index]
 
-            # Alternate between primary and secondary colors
-            color = "primary" if i % 2 == 0 else "secondary"
+            # Randomly pick color using the same seeding approach for consistency
+            color_seed = (frame_no + i) * 37  # Different prime for color selection
+            color_index = color_seed % len(colors)
+            color = colors[color_index]
             animated_chars.append(f"[{color}]{char}[/{color}]")
 
         spinner_text = "".join(animated_chars)
