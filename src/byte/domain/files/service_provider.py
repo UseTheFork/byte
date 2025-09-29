@@ -31,7 +31,7 @@ class FileServiceProvider(ServiceProvider):
         file_discovery = await container.make(FileDiscoveryService)
 
         # Boots the filewatcher service in to the task manager
-        await container.make(FileWatcherService)
+        file_watcher_service = await container.make(FileWatcherService)
 
         # Set up event listener for PRE_PROMPT_TOOLKIT
         event_bus = await container.make(EventBus)
@@ -41,6 +41,11 @@ class FileServiceProvider(ServiceProvider):
         event_bus.on(
             EventType.PRE_PROMPT_TOOLKIT.value,
             file_service.list_in_context_files,
+        )
+
+        event_bus.on(
+            EventType.POST_PROMPT_TOOLKIT.value,
+            file_watcher_service.modify_user_request,
         )
 
         console = await container.make(Console)

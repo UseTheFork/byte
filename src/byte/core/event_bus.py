@@ -10,8 +10,11 @@ T = TypeVar("T")
 
 class EventType(Enum):
     PRE_PROMPT_TOOLKIT = "pre_prompt_toolkit"
+    POST_PROMPT_TOOLKIT = "post_prompt_toolkit"
 
     FILE_ADDED = "file_added"
+
+    PRE_AGENT_EXECUTION = "pre_agent_execution"
 
 
 @pydantic_dataclass

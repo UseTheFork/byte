@@ -1,11 +1,14 @@
 import re
 from pathlib import Path
-from typing import Set
+from typing import Optional, Set
 
 from watchfiles import Change, awatch
 
+from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
 from byte.core.task_manager import TaskManager
+from byte.domain.agent.implementations.ask.agent import AskAgent
+from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.cli_input.service.prompt_toolkit_service import PromptToolkitService
 from byte.domain.files.context_manager import FileMode
 from byte.domain.files.service.discovery_service import FileDiscoveryService
@@ -111,3 +114,70 @@ class FileWatcherService(Service):
     def get_watched_files(self) -> Set[Path]:
         """Get the current set of files being watched."""
         return self._watched_files.copy()
+
+    async def scan_context_files_for_ai_comments(self) -> Optional[dict]:
+        """Scan all files currently in context for AI comment patterns.
+
+        Returns a dict with prompt and agent info for the first AI comment found, or None if no triggers found.
+        """
+        file_service = await self.make(FileService)
+        context_files = file_service.list_files()  # Get all files in context
+
+        for file_context in context_files:
+            try:
+                content = file_context.get_content()
+                if not content:
+                    continue
+
+                # Check for AI comment patterns
+                for pattern in self._ai_patterns:
+                    for match in pattern.finditer(content):
+                        ai_type = match.group(1).strip() if match.groups() else ":"
+                        ai_instruction = (
+                            match.group(2).strip() if len(match.groups()) > 1 else ""
+                        )
+
+                        # From https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/watch_prompts.py#L6
+
+                        # Return instruction for question or urgent markers
+                        if ai_type in ["?", "!"]:
+                            if ai_type == "!":
+                                # Urgent task - use standard watch prompt with CoderAgent
+                                return {
+                                    "prompt": """I've written your instructions in comments in the code and marked them with "AI"
+        Find them in the code files I've shared with you, and follow their instructions.
+
+        After completing those instructions, also be sure to remove all the "AI" comments from the code too.""",
+                                    "agent_type": CoderAgent,
+                                    "instruction": ai_instruction,
+                                }
+                            elif ai_type == "?":
+                                # Question - modify prompt to answer the question
+                                question_prompt = """I found a question in the code comments that needs to be answered.
+
+Provide a clear, helpful answer based on the code context."""
+                                return {
+                                    "prompt": question_prompt,
+                                    "agent_type": AskAgent,
+                                    "instruction": ai_instruction,
+                                }
+
+            except (FileNotFoundError, PermissionError, UnicodeDecodeError):
+                continue
+
+        return None
+
+    async def modify_user_request(self, payload: Optional[Payload] = None):
+        if payload:
+            interrupted = payload.get("interrupted", False)
+            user_input = payload.get("user_input", "")
+            if interrupted and user_input is None:
+                # Scan context files for AI comments
+                ai_result = await self.scan_context_files_for_ai_comments()
+
+                if ai_result:
+                    payload = payload.set("user_input", ai_result["prompt"])
+                    payload = payload.set("interrupted", False)
+                    payload = payload.set("active_agent", ai_result["agent_type"])
+
+        return payload

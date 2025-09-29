@@ -3,6 +3,7 @@ from prompt_toolkit.shortcuts import PromptSession
 
 from byte.core.config.config import BYTE_DIR
 from byte.core.event_bus import EventType, Payload
+from byte.core.logging import log
 from byte.core.service.base_service import Service
 from byte.domain.agent.service.agent_service import AgentService
 from byte.domain.cli_input.prompt_handler import CommandCompleter
@@ -26,25 +27,56 @@ class PromptToolkitService(Service):
         )
 
     async def execute(self):
-        # Create payload with event type
-        payload = Payload(event_type=EventType.PRE_PROMPT_TOOLKIT, data={})
-
-        await self.emit(payload)
-
         # Use placeholder if set, then clear it
         default = self.placeholder or ""
         self.placeholder = None
         self.interrupted = False
 
-        user_input = await self.prompt_session.prompt_async(
-            message="> ", placeholder=default
+        message = "> "
+
+        # Create payload with event type
+        payload = Payload(
+            event_type=EventType.PRE_PROMPT_TOOLKIT,
+            data={
+                "placeholder": self.placeholder,
+                "interrupted": self.interrupted,
+                "message": message,
+            },
         )
 
-        if not self.interrupted:
+        # Send the payload event and wait for systems to return as needed
+        payload = await self.emit(payload)
+        message = payload.get("message", message)
+
+        user_input = await self.prompt_session.prompt_async(
+            message=message, placeholder=default
+        )
+        # TODO: should we make `user_input` a [("user", user_input)], in this situation.
+
+        agent_service = await self.make(AgentService)
+        active_agent = agent_service.get_active_agent()
+
+        payload = Payload(
+            event_type=EventType.POST_PROMPT_TOOLKIT,
+            data={
+                "user_input": user_input,
+                "interrupted": self.interrupted,
+                "active_agent": active_agent,
+            },
+        )
+        payload = await self.emit(payload)
+
+        interrupted = payload.get("interrupted", self.interrupted)
+        user_input = payload.get("user_input", user_input)
+        active_agent = payload.get("active_agent", active_agent)
+
+        log.debug(payload)
+
+        if not interrupted:
             if user_input.startswith("/"):
                 await self._handle_command_input(user_input)
             else:
-                await self._send_to_agent(user_input)
+                await agent_service.execute_agent([("user", user_input)], active_agent)
 
     async def _handle_command_input(self, user_input: str):
         # Parse command name and args
@@ -60,11 +92,6 @@ class PromptToolkitService(Service):
             await command.execute(args)
         else:
             print(f"Unknown command: /{command_name}")
-
-    async def _send_to_agent(self, user_input: str):
-        agent_service = await self.make(AgentService)
-        await agent_service.execute_current_agent([("user", user_input)])
-        # log.info(result)
 
     async def interrupt(self):
         if self.prompt_session and self.prompt_session.app:

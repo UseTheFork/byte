@@ -3,12 +3,11 @@ from pathlib import Path
 from langgraph.graph.state import RunnableConfig
 
 from byte.domain.agent.nodes.base_node import Node
-from byte.domain.agent.state import BaseState
 from byte.domain.lint.service.lint_service import LintService
 
 
 class LintNode(Node):
-    async def __call__(self, state: BaseState, config: RunnableConfig):
+    async def __call__(self, state, config: RunnableConfig):
         lint_service = await self.make(LintService)
 
         # Extract file paths from parsed blocks

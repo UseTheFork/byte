@@ -306,9 +306,10 @@ class BlockedFenceEditFormat(EditFormat):
         matches = re.findall(pattern, content, re.DOTALL)
 
         for match in matches:
-            file_path, search_content, replace_content = match
+            operation, file_path, search_content, replace_content = match
             blocks.append(
                 SearchReplaceBlock(
+                    operation=operation,
                     file_path=file_path.strip(),
                     search_content=search_content,
                     replace_content=replace_content,

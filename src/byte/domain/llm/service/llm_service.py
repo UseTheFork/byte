@@ -3,6 +3,7 @@ from typing import Any, Dict
 from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
 
+from byte import log
 from byte.core.service.base_service import Service
 from byte.domain.llm.config import LLMConfig, ModelConfig
 
@@ -22,8 +23,8 @@ class LLMService(Service):
     async def _configure_service(self) -> None:
         """Configure LLM service with model settings based on global configuration."""
         if self._config.model == "sonnet":
-            main_model = ModelConfig(model="claude-sonnet-4-20250514")
-            weak_model = ModelConfig(model="claude-3-5-haiku-20241022")
+            main_model = ModelConfig(model="claude-sonnet-4-20250514", max_tokens=64000)
+            weak_model = ModelConfig(model="claude-3-5-haiku-20241022", max_tokens=8192)
 
         self._service_config = LLMConfig(
             model=self._config.model, main=main_model, weak=weak_model
@@ -38,6 +39,9 @@ class LLMService(Service):
         """
 
         # TODO: Need to figure out how to make this handle for other providers.
+        log.debug(kwargs)
+        log.debug(self._service_config.main.__dict__)
+
         if model_type == "main":
             return ChatAnthropic(**self._service_config.main.__dict__, **kwargs)
         elif model_type == "weak":

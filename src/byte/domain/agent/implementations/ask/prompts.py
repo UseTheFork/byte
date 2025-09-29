@@ -3,7 +3,7 @@ from textwrap import dedent
 
 from langchain_core.prompts import ChatPromptTemplate
 
-coder_prompt = ChatPromptTemplate.from_messages(
+ask_prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
@@ -20,7 +20,6 @@ coder_prompt = ChatPromptTemplate.from_messages(
             {edit_format_system}
             """),
         ),
-        ("placeholder", "{examples}"),
         (
             "user",
             dedent("""
@@ -30,6 +29,5 @@ coder_prompt = ChatPromptTemplate.from_messages(
         ),
         ("placeholder", "{messages}"),
         ("user", "{file_context}"),
-        ("placeholder", "{errors}"),
     ]
 ).partial(time=datetime.now().strftime("%Y-%m-%d"))

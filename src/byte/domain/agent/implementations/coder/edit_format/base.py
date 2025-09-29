@@ -16,6 +16,7 @@ class BlockType(Enum):
 
     EDIT = "edit"  # Modify existing file content
     ADD = "add"  # Create new file
+    REMOVE = "remove"  # Remove existing file
 
 
 class BlockStatus(Enum):
@@ -39,6 +40,7 @@ class EditFormatPrompts:
 class SearchReplaceBlock:
     """Represents a single edit operation with file path, search content, and replacement content."""
 
+    operation: str
     file_path: str
     search_content: str
     replace_content: str
@@ -49,7 +51,7 @@ class SearchReplaceBlock:
     def to_search_replace_format(
         self,
         fence: str = "```",
-        file_marker: str = "+++",
+        operation: str = "+++",
         search: str = "<<<<<<< SEARCH",
         divider: str = "=======",
         replace: str = ">>>>>>> REPLACE",
@@ -65,7 +67,7 @@ class SearchReplaceBlock:
         Usage: `formatted = block.to_search_replace_format()` -> formatted block string
         """
         return f"""{fence}
-{file_marker} {self.file_path}
+{operation} {self.file_path}
 {search}
 {self.search_content}
 {divider}
@@ -155,11 +157,21 @@ class EditFormat(ABC, Bootable, Configurable):
         for block in blocks:
             file_path = Path(block.file_path)
 
-            # Set block type based on file existence
-            if file_path.exists():
-                block.block_type = BlockType.EDIT
-            else:
-                block.block_type = BlockType.ADD
+            # Set block type based on operation and file existence
+            if block.operation == "---":
+                # --- operation: remove file or replace entire contents
+                if block.search_content == "" and block.replace_content == "":
+                    block.block_type = BlockType.REMOVE  # Remove file completely
+                elif file_path.exists():
+                    block.block_type = BlockType.EDIT  # Replace entire contents
+                else:
+                    block.block_type = BlockType.ADD  # Create new file
+            else:  # +++ operation
+                # +++ operation: edit existing or create new
+                if file_path.exists():
+                    block.block_type = BlockType.EDIT
+                else:
+                    block.block_type = BlockType.ADD
 
             # Check if file is in read-only context
             file_context = file_service.get_file_context(file_path)
@@ -227,26 +239,38 @@ class EditFormat(ABC, Bootable, Configurable):
 
                 file_path = Path(block.file_path)
 
-                if block.block_type == BlockType.ADD:
-                    # Create new file
+                if block.block_type == BlockType.REMOVE:
+                    # Remove file completely
+                    if file_path.exists():
+                        file_path.unlink()
+
+                elif block.operation == "---":
+                    # --- operation: replace entire file contents
                     file_path.parent.mkdir(parents=True, exist_ok=True)
                     file_path.write_text(block.replace_content, encoding="utf-8")
 
-                elif block.block_type == BlockType.EDIT:
-                    content = file_path.read_text(encoding="utf-8")
+                elif block.operation == "+++":
+                    # +++ operation: edit existing or create new
+                    if block.block_type == BlockType.ADD:
+                        # Create new file
+                        file_path.parent.mkdir(parents=True, exist_ok=True)
+                        file_path.write_text(block.replace_content, encoding="utf-8")
 
-                    # Handle empty search content (append to file)
-                    if not block.search_content:
-                        new_content = content + block.replace_content
-                    else:
-                        # Replace first occurrence of search content
-                        new_content = content.replace(
-                            block.search_content,
-                            block.replace_content,
-                            1,  # Only replace first occurrence
-                        )
+                    elif block.block_type == BlockType.EDIT:
+                        content = file_path.read_text(encoding="utf-8")
 
-                    file_path.write_text(new_content, encoding="utf-8")
+                        # Handle empty search content (append to file)
+                        if not block.search_content:
+                            new_content = content + block.replace_content
+                        else:
+                            # Replace first occurrence of search content
+                            new_content = content.replace(
+                                block.search_content,
+                                block.replace_content,
+                                1,  # Only replace first occurrence
+                            )
+
+                        file_path.write_text(new_content, encoding="utf-8")
 
         except (OSError, UnicodeDecodeError, UnicodeEncodeError):
             # Handle file I/O errors gracefully - blocks retain their original status

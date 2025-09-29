@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Optional, Type
 
 from byte.core.service.base_service import Service
 from byte.domain.agent.implementations.base import Agent
@@ -21,18 +21,27 @@ class AgentService(Service):
             # Add more agents here as they're implemented
         ]
 
-    async def execute_current_agent(self, messages: list) -> dict:
+    async def execute_agent(
+        self, messages: list, agent: Optional[Type[Agent]] = None
+    ) -> dict:
         """Execute the currently active agent with the provided messages.
 
-        Usage: result = await agent_service.execute_current_agent([("user", "Hello")])
-        """
-        if self._current_agent not in self._agent_instances:
-            # Lazy load current agent
-            agent_instance = await self.make(self._current_agent)
-            self._agent_instances[self._current_agent] = agent_instance
+        Args:
+            messages: List of messages to send to the agent
+            agent: Optional specific agent type to execute. If None, uses current agent.
 
-        agent = self._agent_instances[self._current_agent]
-        return await agent.execute({"messages": messages})
+        Usage: result = await agent_service.execute_current_agent([("user", "Hello")])
+        Usage: result = await agent_service.execute_current_agent([("user", "Hello")], CoderAgent)
+        """
+        target_agent = agent if agent is not None else self._current_agent
+
+        if target_agent not in self._agent_instances:
+            # Lazy load target agent
+            agent_instance = await self.make(target_agent)
+            self._agent_instances[target_agent] = agent_instance
+
+        agent_instance = self._agent_instances[target_agent]
+        return await agent_instance.execute({"messages": messages})
 
     def set_active_agent(self, agent_type: Type[Agent]) -> bool:
         """Switch the active agent."""
@@ -40,6 +49,13 @@ class AgentService(Service):
             self._current_agent = agent_type
             return True
         return False
+
+    def get_active_agent(self) -> Type[Agent]:
+        """Get the currently active agent type.
+
+        Usage: current_agent = agent_service.get_active_agent()
+        """
+        return self._current_agent
 
     def _is_valid_agent(self, agent_type: Type[Agent]) -> bool:
         """Check if the agent type is valid."""

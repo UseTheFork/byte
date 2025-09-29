@@ -1,5 +1,6 @@
 from langgraph.graph.state import RunnableConfig
 
+from byte.core.logging import log
 from byte.core.utils import extract_content_from_message
 from byte.domain.agent.implementations.coder.edit_format.base import (
     BlockStatus,
@@ -18,6 +19,7 @@ class ParseBlocksNode(Node):
 
     async def __call__(self, state: BaseState, config: RunnableConfig):
         """Parse commands from the last assistant message."""
+        log.info("ParseBlocksNode")
         messages = state["messages"]
         last_message = messages[-1]
 
@@ -26,6 +28,7 @@ class ParseBlocksNode(Node):
         try:
             parsed_blocks = await self.edit_format.handle(response_text)
         except Exception as e:
+            log.info(e)
             if isinstance(e, PreFlightCheckError):
                 return {
                     "agent_status": "validation_error",

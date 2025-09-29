@@ -21,3 +21,9 @@ class CoderState(BaseState):
     edit_format_system: str
 
     parsed_blocks: list[SearchReplaceBlock]
+
+
+class AskState(CoderState):
+    """"""
+
+    pass
