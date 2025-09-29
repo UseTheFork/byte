@@ -10,7 +10,7 @@ from byte.domain.agent.state import BaseState
 from byte.domain.cli_output.service.stream_rendering_service import (
     StreamRenderingService,
 )
-from byte.domain.memory.service import MemoryService
+from byte.domain.memory.service.memory_service import MemoryService
 
 if TYPE_CHECKING:
     from langgraph.graph.state import CompiledStateGraph
@@ -111,7 +111,7 @@ class Agent(ABC, Bootable, Configurable, Injectable):
         # Get or create thread ID
         if thread_id is None:
             memory_service = await self.make(MemoryService)
-            thread_id = memory_service.create_thread()
+            thread_id = await memory_service.get_or_create_thread()
 
         # Create configuration with thread ID
         config = RunnableConfig(configurable={"thread_id": thread_id})
@@ -146,6 +146,12 @@ class Agent(ABC, Bootable, Configurable, Injectable):
         Usage: `StateClass = self.get_state_class()` -> agent-specific state
         """
         return BaseState
+
+    async def get_checkpointer(self):
+        # Get memory for persistence
+        memory_service = await self.make(MemoryService)
+        checkpointer = await memory_service.get_saver()
+        return checkpointer
 
     def get_tools(self):
         return []

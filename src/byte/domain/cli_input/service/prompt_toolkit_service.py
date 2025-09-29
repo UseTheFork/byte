@@ -3,7 +3,6 @@ from prompt_toolkit.shortcuts import PromptSession
 
 from byte.core.config.config import BYTE_DIR
 from byte.core.event_bus import EventType, Payload
-from byte.core.logging import log
 from byte.core.service.base_service import Service
 from byte.domain.agent.service.agent_service import AgentService
 from byte.domain.cli_input.prompt_handler import CommandCompleter
@@ -70,7 +69,7 @@ class PromptToolkitService(Service):
         user_input = payload.get("user_input", user_input)
         active_agent = payload.get("active_agent", active_agent)
 
-        log.debug(payload)
+        # log.debug(payload)
 
         if not interrupted:
             if user_input.startswith("/"):

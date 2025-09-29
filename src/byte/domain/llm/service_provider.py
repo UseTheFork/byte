@@ -20,9 +20,6 @@ class LLMServiceProvider(ServiceProvider):
     def services(self) -> List[Type[Service]]:
         return [LLMService]
 
-    async def register(self, container: Container):
-        pass
-
     async def boot(self, container: "Container") -> None:
         """Boot LLM services and display configuration information.
 

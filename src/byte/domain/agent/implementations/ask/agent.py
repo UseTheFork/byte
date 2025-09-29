@@ -1,11 +1,11 @@
 from langchain_core.language_models.chat_models import BaseChatModel
 from langgraph.graph import END, START, StateGraph
-from langgraph.prebuilt import ToolNode
 
 from byte.domain.agent.implementations.ask.prompts import ask_prompt
 from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.setup_node import SetupNode
+from byte.domain.agent.nodes.tool_node import ToolNode
 from byte.domain.agent.state import AskState
 from byte.domain.llm.service.llm_service import LLMService
 from byte.domain.mcp.service.mcp_service import MCPService
@@ -37,7 +37,7 @@ class AskAgent(Agent):
         graph.add_node(
             "assistant", await self.make(AssistantNode, runnable=assistant_runnable)
         )
-        graph.add_node("tools", ToolNode(mcp_tools))
+        graph.add_node("tools", await self.make(ToolNode, tools=mcp_tools))
 
         # Define edges
         graph.add_edge(START, "setup")
@@ -53,7 +53,8 @@ class AskAgent(Agent):
         graph.add_edge("tools", "assistant")
 
         # Compile graph with memory and configuration
-        return graph.compile()
+        checkpointer = await self.get_checkpointer()
+        return graph.compile(checkpointer=checkpointer, debug=False)
 
     def route_tools(
         self,

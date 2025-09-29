@@ -1,7 +1,8 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Type
 
+from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
-from byte.domain.memory.service import MemoryService
+from byte.domain.memory.service.memory_service import MemoryService
 
 if TYPE_CHECKING:
     from byte.container import Container
@@ -16,21 +17,8 @@ class MemoryServiceProvider(ServiceProvider):
     Usage: Register with container to enable conversation memory
     """
 
-    async def register(self, container: "Container") -> None:
-        """Register memory services in the container.
-
-        Usage: `provider.register(container)` -> binds memory services
-        """
-        # Register memory service
-        container.singleton(MemoryService)
-
-    async def boot(self, container: "Container") -> None:
-        """Boot memory services after all providers are registered.
-
-        Usage: `provider.boot(container)` -> memory system ready for use
-        """
-        # Memory service is lazy-loaded, no explicit boot needed
-        pass
+    def services(self) -> List[Type[Service]]:
+        return [MemoryService]
 
     async def shutdown(self, container: "Container"):
         """Shutdown memory services and close database connections."""
@@ -40,7 +28,3 @@ class MemoryServiceProvider(ServiceProvider):
                 await memory_service.close()
         except Exception:
             pass  # Ignore cleanup errors during shutdown
-
-    def provides(self) -> list:
-        """Return list of services provided by this provider."""
-        return ["memory_service"]

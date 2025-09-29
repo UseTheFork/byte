@@ -14,6 +14,7 @@ from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.nodes.lint_node import LintNode
 from byte.domain.agent.nodes.parse_blocks_node import ParseBlocksNode
 from byte.domain.agent.nodes.setup_node import SetupNode
+from byte.domain.agent.nodes.tool_node import ToolNode
 from byte.domain.agent.service.agent_service import AgentService
 from byte.domain.cli_input.service.command_registry import Command
 
@@ -37,7 +38,7 @@ class AgentServiceProvider(ServiceProvider):
         return [AskCommand]
 
     def nodes(self) -> List[Type[Node]]:
-        return [SetupNode, AssistantNode, LintNode, ParseBlocksNode]
+        return [SetupNode, AssistantNode, LintNode, ParseBlocksNode, ToolNode]
 
     async def register(self, container: "Container") -> None:
         # Create all agents

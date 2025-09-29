@@ -1,3 +1,4 @@
+import asyncio
 import io
 
 from rich import box
@@ -109,69 +110,127 @@ class MarkdownStream:
             except Exception:
                 pass  # Ignore any errors during cleanup
 
-    async def update(self, text, final=False):
-        """Update the displayed markdown content.
+    async def update(self, text: str, final: bool = False):
+        """Async version of update that yields control"""
+        # Process all lines at once like the original update method
+        lines = self._render_markdown_to_lines(text)
 
-        Args:
-            text (str): The markdown text received so far
-            final (bool): If True, this is the final update and we should clean up
+        # Process all lines without chunking
+        await self._process_line_chunk(lines, final)
 
-        Splits the output into "stable" older lines and the "last few" lines
-        which aren't considered stable. They may shift around as new chunks
-        are appended to the markdown text.
+        # Yield control once
+        await asyncio.sleep(0)
 
-        The stable lines emit to the console above the Live window.
-        The unstable lines emit into the Live window so they can be repainted.
-
-        Markdown going to the console works better in terminal scrollback buffers.
-        The live window doesn't play nice with terminal scrollback.
-        """
-        # On the first call, stop the spinner and start the Live renderer
-        if not getattr(self, "_live_started", False):
+    async def _process_line_chunk(self, lines_chunk, is_final):
+        """Process chunk of lines without blocking"""
+        if not self._live_started:
             self.live = Live(Text(""), refresh_per_second=20)
             self.live.start()
             self._live_started = True
 
-        lines = self._render_markdown_to_lines(text)
+        # lines_chunk contains ALL lines from accumulated content
+        # We need to figure out what's new since last time
+        total_lines = len(lines_chunk)
+        num_already_printed = len(self.printed)
 
-        num_lines = len(lines)
+        if not is_final:
+            # Keep some lines in the live window for updates
+            stable_lines = max(0, total_lines - self.live_window)
+        else:
+            # If final, all lines are stable
+            stable_lines = total_lines
 
-        # How many lines have "left" the live window and are now considered stable?
-        # Or if final, consider all lines to be stable.
-        if not final:
-            num_lines -= self.live_window
+        # Calculate how many new stable lines to print above live window
+        new_stable_count = stable_lines - num_already_printed
 
-        # If we have stable content to display...
-        if final or num_lines > 0:
-            # How many stable lines do we need to newly show above the live window?
-            num_printed = len(self.printed)
-            show = num_lines - num_printed
-
-            # Skip if no new lines to show above live window
-            if show <= 0:
-                return
-
-            # Get the new lines and display them
-            show = lines[num_printed:num_lines]
-            show = "".join(show)
-            show = Text.from_ansi(show)
-            self.live.console.print(show)  # to the console above the live area
+        if new_stable_count > 0:
+            # Print only the NEW stable lines above the live window
+            new_stable_lines = lines_chunk[num_already_printed:stable_lines]
+            stable_text = "".join(new_stable_lines)
+            if stable_text:
+                stable_display = Text.from_ansi(stable_text)
+                self.live.console.print(stable_display)
 
             # Update our record of printed lines
-            self.printed = lines[:num_lines]
+            self.printed = lines_chunk[:stable_lines]
 
-        # Handle final update cleanup
-        if final:
+        # Update live window with remaining unstable lines
+        if not is_final:
+            remaining_lines = lines_chunk[stable_lines:]
+            if remaining_lines:
+                live_text = "".join(remaining_lines)
+                live_display = Text.from_ansi(live_text)
+                self.live.update(live_display)
+
+        if is_final and self.live:
             self.live.update(Text(""))
             self.live.stop()
             self.live = None
-            return
 
-        # Update the live window with remaining lines
-        rest = lines[num_lines:]
-        rest = "".join(rest)
-        rest = Text.from_ansi(rest)
-        self.live.update(rest)
+
+# async def update(self, text, final=False):
+#     """Update the displayed markdown content.
+
+#     Args:
+#         text (str): The markdown text received so far
+#         final (bool): If True, this is the final update and we should clean up
+
+#     Splits the output into "stable" older lines and the "last few" lines
+#     which aren't considered stable. They may shift around as new chunks
+#     are appended to the markdown text.
+
+#     The stable lines emit to the console above the Live window.
+#     The unstable lines emit into the Live window so they can be repainted.
+
+#     Markdown going to the console works better in terminal scrollback buffers.
+#     The live window doesn't play nice with terminal scrollback.
+#     """
+#     # On the first call, stop the spinner and start the Live renderer
+#     if not getattr(self, "_live_started", False):
+#         self.live = Live(Text(""), refresh_per_second=20)
+#         self.live.start()
+#         self._live_started = True
+
+#     lines = self._render_markdown_to_lines(text)
+
+#     num_lines = len(lines)
+
+#     # How many lines have "left" the live window and are now considered stable?
+#     # Or if final, consider all lines to be stable.
+#     if not final:
+#         num_lines -= self.live_window
+
+#     # If we have stable content to display...
+#     if final or num_lines > 0:
+#         # How many stable lines do we need to newly show above the live window?
+#         num_printed = len(self.printed)
+#         show = num_lines - num_printed
+
+#         # Skip if no new lines to show above live window
+#         if show <= 0:
+#             return
+
+#         # Get the new lines and display them
+#         show = lines[num_printed:num_lines]
+#         show = "".join(show)
+#         show = Text.from_ansi(show)
+#         self.live.console.print(show)  # to the console above the live area
+
+#         # Update our record of printed lines
+#         self.printed = lines[:num_lines]
+
+#     # Handle final update cleanup
+#     if final:
+#         self.live.update(Text(""))
+#         self.live.stop()
+#         self.live = None
+#         return
+
+#     # Update the live window with remaining lines
+#     rest = lines[num_lines:]
+#     rest = "".join(rest)
+#     rest = Text.from_ansi(rest)
+#     self.live.update(rest)
 
 
 # class ReactiveMarkdownStream(MarkdownStream):

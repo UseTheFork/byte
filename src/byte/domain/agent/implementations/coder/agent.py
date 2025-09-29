@@ -20,7 +20,6 @@ from byte.domain.agent.nodes.parse_blocks_node import ParseBlocksNode
 from byte.domain.agent.nodes.setup_node import SetupNode
 from byte.domain.agent.state import CoderState
 from byte.domain.llm.service.llm_service import LLMService
-from byte.domain.memory.service import MemoryService
 
 
 class CoderAgent(Agent):
@@ -42,12 +41,6 @@ class CoderAgent(Agent):
     def get_state_class(self) -> Type[TypedDict]:  # pyright: ignore[reportInvalidTypeForm]
         """Return coder-specific state class."""
         return CoderState
-
-    async def get_checkpointer(self):
-        # Get memory for persistence
-        memory_service = await self.make(MemoryService)
-        checkpointer = await memory_service.get_saver()
-        return checkpointer
 
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""

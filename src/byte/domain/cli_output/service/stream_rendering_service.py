@@ -7,6 +7,7 @@ from rich.live import Live
 from rich.rule import Rule
 
 from byte.core.service.base_service import Service
+from byte.core.utils import extract_content_from_message
 from byte.domain.cli_output.rich.rune_spinner import RuneSpinner
 from byte.domain.cli_output.utils.formatters import MarkdownStream
 
@@ -82,7 +83,7 @@ class StreamRenderingService(Service):
 
         # Append message content to accumulated content
         if message_chunk.content:
-            self.accumulated_content += self._extract_content(message_chunk)
+            self.accumulated_content += extract_content_from_message(message_chunk)
             await self._update_active_stream()
 
         if hasattr(message_chunk, "response_metadata"):
@@ -131,7 +132,7 @@ class StreamRenderingService(Service):
         """
         # Fallback for other message types - basic content handling
         if message_chunk.content:
-            content = self._extract_content(message_chunk)
+            content = extract_content_from_message(message_chunk)
             if content:
                 self.accumulated_content += content
                 await self._update_active_stream()
@@ -170,6 +171,7 @@ class StreamRenderingService(Service):
         await self._update_active_stream(final=True)
         self.accumulated_content = ""
         self.active_stream = None
+        self.current_stream_id = None
         await self.stop_spinner()
 
     async def start_stream_render(self, stream_id):
@@ -236,19 +238,6 @@ class StreamRenderingService(Service):
         """
         if self.active_stream:
             await self.active_stream.update(self.accumulated_content, final=final)
-
-    def _extract_content(self, message_chunk):
-        """Extract text content from message chunks with format-aware processing.
-
-        Handles both string content and list-based content formats from different
-        LLM providers, ensuring consistent text extraction across message types.
-        Usage: `content = self._extract_content(chunk)` -> extracted text string
-        """
-        if isinstance(message_chunk.content, str):
-            return message_chunk.content
-        elif isinstance(message_chunk.content, list) and message_chunk.content:
-            return message_chunk.content[0].get("text", "")
-        return ""
 
     def _format_agent_name(self, agent_name: str) -> str:
         """Convert agent class name to readable headline case.

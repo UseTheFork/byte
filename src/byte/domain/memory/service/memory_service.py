@@ -1,8 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING, List, Optional
 
-from byte.core.mixins.bootable import Bootable
-from byte.core.mixins.configurable import Configurable
+from byte.core.service.base_service import Service
 from byte.domain.memory.checkpointer import ByteCheckpointer
 from byte.domain.memory.config import MemoryConfig
 
@@ -10,7 +9,7 @@ if TYPE_CHECKING:
     from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
 
-class MemoryService(Bootable, Configurable):
+class MemoryService(Service):
     """Domain service for managing conversation memory and thread persistence.
 
     Orchestrates short-term memory through LangGraph checkpointers, providing
@@ -21,6 +20,7 @@ class MemoryService(Bootable, Configurable):
 
     _checkpointer: Optional[ByteCheckpointer] = None
     _service_config: MemoryConfig
+    _current_thread_id: Optional[str] = None
 
     async def _configure_service(self) -> None:
         """Configure memory service with database path and retention settings."""
@@ -86,3 +86,29 @@ class MemoryService(Bootable, Configurable):
         """Close memory service resources."""
         if self._checkpointer:
             await self._checkpointer.close()
+
+    async def set_current_thread(self, thread_id: str) -> None:
+        """Set the active thread for the current session.
+
+        Usage: `await memory_service.set_current_thread(thread_id)` -> sets active thread
+        """
+        self._current_thread_id = thread_id
+        # Optionally persist to config or database
+        # await self._persist_current_thread(thread_id)
+
+    def get_current_thread(self) -> Optional[str]:
+        """Get the currently active thread ID.
+
+        Usage: `thread_id = memory_service.get_current_thread()` -> current active thread
+        """
+        return self._current_thread_id
+
+    async def get_or_create_thread(self) -> str:
+        """Get current thread or create a new one if none exists.
+
+        Usage: `thread_id = await memory_service.get_or_create_thread()` -> ensures thread exists
+        """
+        if self._current_thread_id is None:
+            self._current_thread_id = self.create_thread()
+            # await self._persist_current_thread(self._current_thread_id)
+        return self._current_thread_id
