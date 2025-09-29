@@ -8,6 +8,7 @@ dependencies = [
     "aiosqlite>=0.21.0",
     "click>=8.2.1",
     "gitpython>=3.1.45",
+    "langchain-mcp-adapters>=0.1.10",
     "langchain[anthropic,google-genai,openai]>=0.3.27",
     "langgraph>=0.6.7",
     "langgraph-checkpoint-sqlite>=2.0.11",

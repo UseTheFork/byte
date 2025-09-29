@@ -10,6 +10,8 @@ from pydantic_settings import (
     YamlConfigSettingsSource,
 )
 
+from byte.domain.mcp.config import MCPServer
+
 
 def _find_project_root() -> Path:
     """Find git repository root directory.
@@ -62,6 +64,7 @@ class ByteConfg(BaseSettings):
 
     lint: LintConfig = LintConfig()
     watch: WatchConfig = WatchConfig()
+    mcp: List[MCPServer] = []
 
     @classmethod
     def settings_customise_sources(

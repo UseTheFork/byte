@@ -1,13 +1,9 @@
-import logging
-
 from rich.console import Console
 
 from byte.domain.agent.implementations.commit.agent import CommitAgent
 from byte.domain.cli_input.service.command_registry import Command
 from byte.domain.git.service.git_service import GitService
 from byte.domain.lint.service.lint_service import LintService
-
-log = logging.getLogger(__name__)
 
 
 class CommitCommand(Command):

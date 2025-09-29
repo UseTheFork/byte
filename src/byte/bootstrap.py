@@ -12,6 +12,7 @@ from byte.domain.files.service_provider import FileServiceProvider
 from byte.domain.git.service_provider import GitServiceProvider
 from byte.domain.lint.service_provider import LintServiceProvider
 from byte.domain.llm.service_provider import LLMServiceProvider
+from byte.domain.mcp.service_provider import MCPServiceProvider
 from byte.domain.memory.service_provider import MemoryServiceProvider
 from byte.domain.system.service_provider import SystemServiceProvider
 from byte.domain.tools.service_provider import ToolsServiceProvider
@@ -52,6 +53,7 @@ async def bootstrap(config: ByteConfg):
         GitServiceProvider(),  # Git repository operations
         LintServiceProvider(),  # Code linting functionality
         AgentServiceProvider(),  # Agent routing and management
+        MCPServiceProvider(),
         SystemServiceProvider(),  # Core system commands
     ]
 

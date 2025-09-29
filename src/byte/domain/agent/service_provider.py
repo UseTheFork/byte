@@ -3,6 +3,7 @@ from typing import List, Type
 from byte.container import Container
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
+from byte.domain.agent.command.ask_command import AskCommand
 from byte.domain.agent.implementations.ask.agent import AskAgent
 from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.implementations.coder.agent import CoderAgent
@@ -14,6 +15,7 @@ from byte.domain.agent.nodes.lint_node import LintNode
 from byte.domain.agent.nodes.parse_blocks_node import ParseBlocksNode
 from byte.domain.agent.nodes.setup_node import SetupNode
 from byte.domain.agent.service.agent_service import AgentService
+from byte.domain.cli_input.service.command_registry import Command
 
 
 class AgentServiceProvider(ServiceProvider):
@@ -30,6 +32,9 @@ class AgentServiceProvider(ServiceProvider):
 
     def agents(self) -> List[Type[Agent]]:
         return [CoderAgent, CommitAgent, FixerAgent, AskAgent]
+
+    def commands(self) -> List[Type[Command]]:
+        return [AskCommand]
 
     def nodes(self) -> List[Type[Node]]:
         return [SetupNode, AssistantNode, LintNode, ParseBlocksNode]
