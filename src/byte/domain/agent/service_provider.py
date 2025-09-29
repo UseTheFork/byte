@@ -6,6 +6,12 @@ from byte.core.service_provider import ServiceProvider
 from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.agent.implementations.commit.agent import CommitAgent
+from byte.domain.agent.implementations.fixer.agent import FixerAgent
+from byte.domain.agent.nodes.assistant_node import AssistantNode
+from byte.domain.agent.nodes.base_node import Node
+from byte.domain.agent.nodes.lint_node import LintNode
+from byte.domain.agent.nodes.parse_blocks_node import ParseBlocksNode
+from byte.domain.agent.nodes.setup_node import SetupNode
 from byte.domain.agent.service.agent_service import AgentService
 
 
@@ -22,9 +28,16 @@ class AgentServiceProvider(ServiceProvider):
         return [AgentService]
 
     def agents(self) -> List[Type[Agent]]:
-        return [CoderAgent, CommitAgent]
+        return [CoderAgent, CommitAgent, FixerAgent]
+
+    def nodes(self) -> List[Type[Node]]:
+        return [SetupNode, AssistantNode, LintNode, ParseBlocksNode]
 
     async def register(self, container: "Container") -> None:
         # Create all agents
         for agent_class in self.agents():
             container.singleton(agent_class)
+
+        # Create all Nodes
+        for node_class in self.nodes():
+            container.bind(node_class)

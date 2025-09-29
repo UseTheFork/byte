@@ -1,5 +1,5 @@
 import asyncio
-from typing import TYPE_CHECKING, Optional, TypeVar
+from typing import TYPE_CHECKING, Optional, Type, TypeVar
 
 if TYPE_CHECKING:
     from byte.container import Container
@@ -15,21 +15,21 @@ class Bootable:
         self.container = container
         super().__init__()
 
-    async def ensure_booted(self) -> None:
+    async def ensure_booted(self, **kwargs) -> None:
         """Ensure this service is booted before use."""
         if not self._is_booted:
-            await self._async_init()
+            await self._async_init(**kwargs)
 
-    async def _async_init(self) -> None:
+    async def _async_init(self, **kwargs) -> None:
         """Handle async initialization after container is set."""
         if self._is_booted:
             return
 
-        await self._boot_mixins()
-        await self.boot()
+        await self._boot_mixins(**kwargs)
+        await self.boot(**kwargs)
         self._is_booted = True
 
-    async def _boot_mixins(self) -> None:
+    async def _boot_mixins(self, **kwargs) -> None:
         """Automatically boot all mixins that have boot_{mixin_name} methods."""
         for cls in self.__class__.__mro__:
             # Get the class name in lowercase for boot method naming
@@ -41,11 +41,11 @@ class Bootable:
                 boot_method = getattr(self, boot_method_name)
                 if callable(boot_method):
                     if asyncio.iscoroutinefunction(boot_method):
-                        await boot_method()
+                        await boot_method(**kwargs)
                     else:
-                        boot_method()
+                        boot_method(**kwargs)
 
-    async def boot(self) -> None:
+    async def boot(self, **kwargs) -> None:
         """Boot method called after initialization.
 
                 Override this method to perform setup that requires the container
@@ -55,3 +55,14 @@ class Bootable:
         self.container.make("event_dispatcher")`
         """
         pass
+
+    async def make(self, service_class: Type[T], **kwargs) -> T:
+        """Resolve a service from the container.
+
+        Usage: `service = await self.make(ServiceClass)`
+        """
+        if not self.container:
+            raise RuntimeError(
+                "No container available - ensure service is properly initialized"
+            )
+        return await self.container.make(service_class, **kwargs)

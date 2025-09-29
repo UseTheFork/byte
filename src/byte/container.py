@@ -51,7 +51,7 @@ class Container:
 
         self._singletons[service_class] = concrete
 
-    async def make(self, service_class: Type[T]) -> T:
+    async def make(self, service_class: Type[T], **kwargs) -> T:
         """Resolve a service from the container.
 
         Usage:
@@ -64,18 +64,18 @@ class Container:
         # Try to create from singleton bindings
         if service_class in self._singletons:
             factory = self._singletons[service_class]
-            instance = await self._create_instance(factory)
+            instance = await self._create_instance(factory, **kwargs)
             self._instances[service_class] = instance  # Cache it
             return instance
 
         # Try to create from transient bindings
         if service_class in self._transients:
             factory = self._transients[service_class]
-            return await self._create_instance(factory)  # Don't cache
+            return await self._create_instance(factory, **kwargs)  # Don't cache
 
         raise ValueError(f"No binding found for {service_class.__name__}")
 
-    async def _create_instance(self, factory: Callable) -> Any:
+    async def _create_instance(self, factory: Callable, **kwargs) -> Any:
         """Helper to create and boot instances."""
         if asyncio.iscoroutinefunction(factory):
             instance = await factory()
@@ -83,7 +83,7 @@ class Container:
             instance = factory()
 
         if isinstance(instance, Bootable):
-            await instance.ensure_booted()
+            await instance.ensure_booted(**kwargs)
 
         return instance
 

@@ -1,153 +1,338 @@
+import re
+from textwrap import dedent
+from typing import List
+
 from byte.domain.agent.implementations.coder.edit_format.base import (
     EditFormat,
     EditFormatPrompts,
+    SearchReplaceBlock,
+)
+from byte.domain.agent.implementations.coder.edit_format.exceptions import (
+    PreFlightCheckError,
 )
 
 # Credits to: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/coders/editblock_fenced_prompts.py
-edit_format_system = """
-# *SEARCH/REPLACE block* Rules:
+edit_format_system = dedent("""
+    # *SEARCH/REPLACE block* Rules:
 
-Every *SEARCH/REPLACE block* must use this format:
-1. The opening fence and code language, eg: {fence_open}python
-2. The *FULL* file path alone on a line, verbatim. No bold asterisks, no quotes around it, no escaping of characters, etc.
-3. The start of search block: <<<<<<< SEARCH
-4. A contiguous chunk of lines to search for in the existing source code
-5. The dividing line: =======
-6. The lines to replace into the source code
-7. The end of the replace block: >>>>>>> REPLACE
-8. The closing fence: {fence_close}
+    Use *SEARCH/REPLACE blocks* to make precise edits to files. Each block specifies:
+    - **What file** to modify (with full path)
+    - **What content** to find (SEARCH section)
+    - **What to replace** it with (REPLACE section)
 
-Use the *FULL* file path, as shown to you by the user.
+    ## Block Format:
 
-Every *SEARCH* section must *EXACTLY MATCH* the existing file content, character for character, including all comments, docstrings, etc.
-If the file contains code or other data wrapped/escaped in json/xml/quotes or other containers, you need to propose edits to the literal contents of the file, including the container markup.
+    Every *SEARCH/REPLACE block* must use this exact format:
+    1. Opening fence with language: ```python
+    2. Operation type and file path: `+++` or `---` followed by the *FULL* file path
+    3. Search marker: <<<<<<< SEARCH
+    4. Content to find (can be empty)
+    5. Divider: =======
+    6. Content to replace with (can be empty)
+    7. Replace marker: >>>>>>> REPLACE
+    8. Closing fence: ```
 
-*SEARCH/REPLACE* blocks will *only* replace the first match occurrence.
-Including multiple unique *SEARCH/REPLACE* blocks if needed.
-Include enough lines in each SEARCH section to uniquely match each set of lines that need to change.
+    ## Operation Types:
+    - `+++` for **editing** existing files or **creating** new files
+    - `---` for **removing** files or **replacing entire file contents**
 
-Keep *SEARCH/REPLACE* blocks concise.
-Break large *SEARCH/REPLACE* blocks into a series of smaller blocks that each change a small portion of the file.
-Include just the changing lines, and a few surrounding lines if needed for uniqueness.
-Do not include long runs of unchanging lines in *SEARCH/REPLACE* blocks.
+    ## Examples:
 
-Only create *SEARCH/REPLACE* blocks for files that the user has added to the chat!
+    **Create a new file:**
+    ```python
+    +++ mathweb/flask/app.py
+    <<<<<<< SEARCH
+    =======
+    import math
+    from flask import Flask
+    >>>>>>> REPLACE
+    ```
 
-To move code within a file, use 2 *SEARCH/REPLACE* blocks: 1 to delete it from its current location, 1 to insert it in the new location.
+    **Edit existing file content:**
+    ```python
+    +++ mathweb/flask/app.py
+    <<<<<<< SEARCH
+    from flask import Flask
+    =======
+    import math
+    from flask import Flask
+    >>>>>>> REPLACE
+    ```
 
-Pay attention to which filenames the user wants you to edit, especially if they are asking you to create a new file.
+   **Remove entire file:**
+    ```python
+    --- mathweb/flask/app.py
+    <<<<<<< SEARCH
+    =======
+    >>>>>>> REPLACE
+    ```
 
-If you want to put code in a new file, use a *SEARCH/REPLACE block* with:
-- A new file path, including dir name if needed
-- An empty `SEARCH` section
-- The new file's contents in the `REPLACE` section
+    **Replace all file contents:**
+    ```python
+    --- mathweb/flask/app.py
+    <<<<<<< SEARCH
+    =======
+    import math
+    from flask import Flask
+    >>>>>>> REPLACE
+    ```
 
-To rename files which have been added to the chat, use shell commands at the end of your response.
+    ## **CRITICAL RULES:**
 
-If the user just says something like "ok" or "go ahead" or "do that" they probably want you to make SEARCH/REPLACE blocks for the code changes you just proposed.
-The user will say when they've applied your edits. If they haven't explicitly confirmed the edits have been applied, they probably want proper SEARCH/REPLACE blocks.
+    File Paths:
+    - Use the FULL file path exactly as shown by the user
+    - No bold asterisks, quotes, or escaping around the path
 
-ONLY EVER RETURN CODE IN A *SEARCH/REPLACE BLOCK*!
-"""
+    Search Content:
+    - Must EXACTLY MATCH existing file content, character for character
+    - Include all comments, docstrings, whitespace, etc.
+    - If file contains wrapped/escaped content, match the literal file contents
+
+    Block Strategy:
+    - Keep blocks small and focused
+    - Use multiple blocks for multiple changes to the same file
+    - Include enough context lines to make each search unique
+    - Only replace the first occurrence found
+
+    File Operations:
+    - Only edit files that the user has added to the chat
+    - For new files: use +++ with empty SEARCH, content in REPLACE
+    - To move code: use 2 blocks (1 to delete, 1 to insert)
+    - To rename files: use shell commands after your response
+
+    User Intent:
+    - If user says "ok", "go ahead", or "do that" → provide SEARCH/REPLACE blocks
+    - Wait for user confirmation before assuming edits are applied
+    - ONLY EVER RETURN CODE IN A SEARCH/REPLACE BLOCK!""")
 
 # {quad_backtick_reminder}
 
-example_messages = [
+practice_messages = [
     (
         "user",
-        "Change get_factorial() to use math.factorial",
+        """Before we start lets first practice the *SEARCH/REPLACE block* format.
+
+        Change get_factorial() to use math.factorial""",
     ),
     (
         "assistant",
-        """To make this change we need to modify `mathweb/flask/app.py` to:
+        dedent("""
+        To make this change we need to modify `mathweb/flask/app.py` to:
 
-1. Import the math package.
-2. Remove the existing factorial() function.
-3. Update get_factorial() to call math.factorial instead.
+        1. Import the math package.
+        2. Remove the existing factorial() function.
+        3. Update get_factorial() to call math.factorial instead.
 
-Here are the *SEARCH/REPLACE* blocks:
+        Here are the *SEARCH/REPLACE* blocks:
 
-{fence_open}python
-mathweb/flask/app.py
-<<<<<<< SEARCH
-from flask import Flask
-=======
-import math
-from flask import Flask
->>>>>>> REPLACE
-{fence_close}
+        ```python
+        +++ mathweb/flask/app.py
+        <<<<<<< SEARCH
+        from flask import Flask
+        =======
+        import math
+        from flask import Flask
+        >>>>>>> REPLACE
+        ```
 
-{fence_open}python
-mathweb/flask/app.py
-<<<<<<< SEARCH
-def factorial(n):
-    "compute factorial"
+        ```python
+        +++ mathweb/flask/app.py
+        <<<<<<< SEARCH
+        def factorial(n):
+            "compute factorial"
 
-    if n == 0:
-        return 1
-    else:
-        return n * factorial(n-1)
+            if n == 0:
+                return 1
+            else:
+                return n * factorial(n-1)
 
-=======
->>>>>>> REPLACE
-{fence_close}
+        =======
+        >>>>>>> REPLACE
+        ```
 
-{fence_open}python
-mathweb/flask/app.py
-<<<<<<< SEARCH
-    return str(factorial(n))
-=======
-    return str(math.factorial(n))
->>>>>>> REPLACE
-{fence_close}
-<<<<<<< HEAD
-""",
+        ```python
+        +++ mathweb/flask/app.py
+        <<<<<<< SEARCH
+            return str(factorial(n))
+        =======
+            return str(math.factorial(n))
+        >>>>>>> REPLACE
+        ```"""),
     ),
     (
         "user",
-        "Refactor hello() into its own file.",
+        dedent("""
+        Refactor hello() into its own file."""),
     ),
     (
         "assistant",
-        """To make this change we need to modify `main.py` and make a new file `hello.py`:
+        dedent("""
+        To make this change we need to modify `main.py` and make a new file `hello.py`:
 
-1. Make a new hello.py file with hello() in it.
-2. Remove hello() from main.py and replace it with an import.
+        1. Make a new hello.py file with hello() in it.
+        2. Remove hello() from main.py and replace it with an import.
 
-Here are the *SEARCH/REPLACE* blocks:
+        Here are the *SEARCH/REPLACE* blocks:
 
-{fence_open}python
-hello.py
-<<<<<<< SEARCH
-=======
-def hello():
-    "print a greeting"
+        ```python
+        +++ hello.py
+        <<<<<<< SEARCH
+        =======
+        def hello():
+            "print a greeting"
 
-    print("hello")
->>>>>>> REPLACE
-{fence_close}
+            print("hello")
+        >>>>>>> REPLACE
+        ```
 
-{fence_open}python
-main.py
-<<<<<<< SEARCH
-def hello():
-    "print a greeting"
+        ```python
+        +++ main.py
+        <<<<<<< SEARCH
+        def hello():
+            "print a greeting"
 
-    print("hello")
-=======
-from hello import hello
->>>>>>> REPLACE
-{fence_close}
-""",
+            print("hello")
+        =======
+        from hello import hello
+        >>>>>>> REPLACE
+        ```"""),
+    ),
+    ("user", "Remove the old_config.py file that's no longer needed."),
+    (
+        "assistant",
+        dedent("""
+        To remove this file we need to delete `old_config.py`:
+
+        1. Remove the old_config.py file completely from the project.
+
+        Here is the *SEARCH/REPLACE* block:
+
+        ```python
+        --- old_config.py
+        <<<<<<< SEARCH
+        =======
+        >>>>>>> REPLACE
+        ```"""),
+    ),
+    (
+        "user",
+        "Replace all the contents of config.py with a new configuration structure.",
+    ),
+    (
+        "assistant",
+        dedent("""
+        To replace all the contents we need to completely rewrite `config.py`:
+
+        1. Replace the entire contents of config.py with the new configuration structure.
+
+        Here is the *SEARCH/REPLACE* block:
+
+        ```python
+        --- config.py
+        <<<<<<< SEARCH
+        =======
+        import os
+        from dataclasses import dataclass
+
+        @dataclass
+        class AppConfig:
+            debug: bool = False
+            port: int = 8000
+            database_url: str = os.getenv("DATABASE_URL", "sqlite:///app.db")
+        >>>>>>> REPLACE
+        ```"""),
+    ),
+    (
+        "user",
+        "Add error handling to the calculator function and update the docstring.",
+    ),
+    (
+        "assistant",
+        dedent("""
+        To add error handling we need to modify `calculator.py` in two places:
+
+        1. Update the docstring to mention error handling.
+        2. Add try-catch block around the calculation.
+
+        Here are the *SEARCH/REPLACE* blocks:
+
+        ```python
+        +++ calculator.py
+        <<<<<<< SEARCH
+        def calculate(a, b):
+            "Simple calculator function"
+        =======
+        def calculate(a, b):
+            "Simple calculator function with error handling"
+        >>>>>>> REPLACE
+        ```
+
+        ```python
+        +++ calculator.py
+        <<<<<<< SEARCH
+            return a / b
+        =======
+            try:
+                return a / b
+            except ZeroDivisionError:
+                return "Error: Cannot divide by zero"
+        >>>>>>> REPLACE
+        ```"""),
     ),
 ]
 
 
 class BlockedFenceEditFormat(EditFormat):
-    def __init__(self):
+    add_file_marker: str = "+++"
+    remove_file_marker: str = "---"
+    search: str = "<<<<<<< SEARCH"
+    divider: str = "======="
+    replace: str = ">>>>>>> REPLACE"
+
+    async def boot(self):
+        await super().boot()
         self.prompts = EditFormatPrompts(
-            system=edit_format_system, examples=example_messages
+            system=edit_format_system, examples=practice_messages
         )
 
-    def parse_content_to_blocks(self, content: str):
-        pass
+    def parse_content_to_blocks(self, content: str) -> List[SearchReplaceBlock]:
+        """Extract SEARCH/REPLACE blocks from AI response content."""
+
+        blocks = []
+
+        # Pattern to match the entire SEARCH/REPLACE block structure
+        pattern = r"```\w*\n(\+\+\+|---) (.+?)\n<<<<<<< SEARCH\n(.*?)\n=======\n(.*?)\n>>>>>>> REPLACE\n```"
+
+        matches = re.findall(pattern, content, re.DOTALL)
+
+        for match in matches:
+            file_path, search_content, replace_content = match
+            blocks.append(
+                SearchReplaceBlock(
+                    file_path=file_path.strip(),
+                    search_content=search_content,
+                    replace_content=replace_content,
+                )
+            )
+        return blocks
+
+    def pre_flight_check(self, content: str) -> None:
+        """Validate that SEARCH/REPLACE block markers are properly balanced.
+
+        Counts occurrences of all five required markers and raises an exception
+        if they don't match, indicating malformed blocks.
+        """
+        search_count = content.count(self.search)
+        replace_count = content.count(self.replace)
+        divider_count = content.count(self.divider)
+        file_marker_count = content.count(self.add_file_marker) + content.count(
+            self.remove_file_marker
+        )
+
+        if not (search_count == replace_count == divider_count == file_marker_count):
+            raise PreFlightCheckError(
+                f"Malformed SEARCH/REPLACE blocks: "
+                f"SEARCH={search_count}, REPLACE={replace_count}, "
+                f"dividers={divider_count}, file markers={file_marker_count}. "
+                f"All counts must be equal."
+            )
