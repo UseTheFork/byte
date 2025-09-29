@@ -5,9 +5,9 @@ from langchain_core.messages.tool import ToolMessage
 from rich.console import Console
 from rich.live import Live
 from rich.rule import Rule
-from rich.spinner import Spinner
 
 from byte.core.service.base_service import Service
+from byte.domain.cli_output.rich.rune_spinner import RuneSpinner
 from byte.domain.cli_output.utils.formatters import MarkdownStream
 
 
@@ -220,8 +220,8 @@ class StreamRenderingService(Service):
         Usage: Called automatically when AI needs to process or think
         """
         if self.display_mode in ["verbose", "thinking"]:
-            # Start with spinner
-            spinner = Spinner("dots", text="Thinking...")
+            # Start with animated spinner
+            spinner = RuneSpinner(text="Thinking...", size=15)
             self.spinner = Live(
                 spinner, console=self.console, transient=True, refresh_per_second=20
             )
