@@ -46,7 +46,7 @@ class RuneSpinner(Spinner):
 
         # Calculate frame based on time and speed
         elapsed = (time - self.start_time) * self.speed
-        frame_no = int(elapsed * 25)  # 15 fps for rune cycling
+        frame_no = int(elapsed * 25)  # 25 fps for rune cycling
 
         # Available theme colors to randomly pick from
         colors = ["primary", "secondary", "text"]

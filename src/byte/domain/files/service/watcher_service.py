@@ -28,10 +28,11 @@ class FileWatcherService(Service):
         self.task_manager = await self.make(TaskManager)
 
         self._ai_patterns = [
-            re.compile(r"//.*?AI([:|@|!|\?])\s*(.*)$", re.MULTILINE | re.IGNORECASE),
-            re.compile(r"#.*?AI([:|@|!|\?])\s*(.*)$", re.MULTILINE | re.IGNORECASE),
+            re.compile(r"//.*?AI([:|@])\s*(.*)$", re.MULTILINE | re.IGNORECASE),
+            re.compile(r"#.*?AI([:|@])\s*(.*)$", re.MULTILINE | re.IGNORECASE),
+            re.compile(r"--.*?AI([:|@])\s*(.*)$", re.MULTILINE | re.IGNORECASE),
             re.compile(
-                r"<!--.*?AI([:|@|!|\?])\s*(.*?)\s*-->",
+                r"<!--.*?AI([:|@])\s*(.*?)\s*-->",
                 re.MULTILINE | re.DOTALL | re.IGNORECASE,
             ),
         ]
@@ -64,6 +65,16 @@ class FileWatcherService(Service):
     async def _handle_file_change(self, file_path: Path, change_type: Change) -> None:
         """Handle file system changes."""
 
+        # Skip directory changes - we only want to monitor file changes
+        if file_path.is_dir():
+            return
+
+        file_discovery_service = await self.make(FileDiscoveryService)
+
+        # Skip if file is ignored by gitignore patterns
+        if await file_discovery_service._is_ignored(file_path):
+            return
+
         result = False
         if change_type == Change.deleted:
             self._watched_files.discard(file_path)
@@ -81,28 +92,72 @@ class FileWatcherService(Service):
         """Handle file modification by scanning for AI comments."""
         try:
             content = file_path.read_text(encoding="utf-8")
-            return await self._scan_for_ai_comments(file_path, content)
+            ai_result = await self._scan_for_ai_comments(file_path, content)
+
+            if ai_result:
+                # Use the determined file mode from the scan result
+                file_mode = ai_result["file_mode"]
+                auto_add_result = await self._auto_add_file_to_context(
+                    file_path, file_mode
+                )
+                # Return true if file was added OR if there's an action type
+                return auto_add_result or ai_result.get("action_type") is not None
+
+            return False
         except (FileNotFoundError, PermissionError, UnicodeDecodeError):
-            # TODO: Should prob make this a litle smarter
             return False
 
-    async def _scan_for_ai_comments(self, file_path: Path, content: str) -> bool:
-        """Scan file content for AI comment patterns."""
-        result = False
-        for pattern in self._ai_patterns:
-            for match in pattern.finditer(content):
-                ai_type = match.group(1).strip() if match.groups() else ":"
+    async def _scan_for_ai_comments(
+        self, file_path: Path, content: str
+    ) -> Optional[dict]:
+        """Scan file content for AI comment patterns.
 
-                if ai_type == ":":
-                    result = await self._auto_add_file_to_context(
-                        file_path, FileMode.EDITABLE
-                    )
-                elif ai_type == "@":
-                    result = await self._auto_add_file_to_context(
-                        file_path, FileMode.READ_ONLY
-                    )
+        Returns dict with line_nums, comments, and action_type, or None if no AI comments found.
+        """
+        line_nums = []
+        comments = []
+        action_type = None
+        file_mode = FileMode.EDITABLE  # Default to editable
 
-        return result
+        # Scan each line for AI comment patterns
+        for i, line in enumerate(content.splitlines(), 1):
+            # Check each pattern against the current line
+            for pattern in self._ai_patterns:  # Use the plural version
+                if match := pattern.search(line):
+                    comment_text = match.group(0).strip()
+                    ai_marker = match.group(1) if match.groups() else ":"
+
+                    if comment_text:
+                        line_nums.append(i)
+                        comments.append(comment_text)
+
+                        # Determine file mode based on AI marker
+                        if ai_marker == "@":
+                            file_mode = FileMode.READ_ONLY
+                        elif ai_marker == ":":
+                            file_mode = FileMode.EDITABLE
+
+                        # Check the actual comment content for action markers
+                        comment = comment_text.lower()
+                        comment = comment.lstrip("/#-;").strip()
+                        if comment.startswith("ai!") or comment.endswith("ai!"):
+                            action_type = "!"
+                        elif comment.startswith("ai?") or comment.endswith("ai?"):
+                            action_type = "?"
+
+                    break  # Found match on this line, no need to check other patterns
+
+        # Return None if no AI comments found
+        if not line_nums:
+            return None
+
+        return {
+            "line_nums": line_nums,
+            "comments": comments,
+            "action_type": action_type,
+            "file_mode": file_mode,
+            "file_path": file_path,
+        }
 
     async def _auto_add_file_to_context(
         self, file_path: Path, mode: FileMode = FileMode.EDITABLE
@@ -122,48 +177,85 @@ class FileWatcherService(Service):
         """
         file_service = await self.make(FileService)
         context_files = file_service.list_files()  # Get all files in context
+        gathered_comments = []
 
         for file_context in context_files:
-            try:
-                content = file_context.get_content()
-                if not content:
-                    continue
+            content = file_context.get_content()
+            if not content:
+                continue
 
-                # Check for AI comment patterns
-                for pattern in self._ai_patterns:
-                    for match in pattern.finditer(content):
-                        ai_type = match.group(1).strip() if match.groups() else ":"
-                        ai_instruction = (
-                            match.group(2).strip() if len(match.groups()) > 1 else ""
-                        )
+            result = await self._scan_for_ai_comments(file_context.path, content)
+            if result:
+                gathered_comments.append(result)
 
-                        # From https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/watch_prompts.py#L6
+        # From https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/watch_prompts.py#L6
 
-                        # Return instruction for question or urgent markers
-                        if ai_type in ["?", "!"]:
-                            if ai_type == "!":
-                                # Urgent task - use standard watch prompt with CoderAgent
-                                return {
-                                    "prompt": """I've written your instructions in comments in the code and marked them with "AI"
+        if not gathered_comments:
+            return None
+
+        # Process the first AI comment found (prioritize by action type)
+        urgent_comments = [c for c in gathered_comments if c.get("action_type") == "!"]
+        question_comments = [
+            c for c in gathered_comments if c.get("action_type") == "?"
+        ]
+        regular_comments = [
+            c for c in gathered_comments if c.get("action_type") not in ["!", "?"]
+        ]
+
+        # Prioritize urgent (!) comments first, then questions (?), then regular
+        target_comment = None
+        if urgent_comments:
+            target_comment = urgent_comments[0]
+        elif question_comments:
+            target_comment = question_comments[0]
+        elif regular_comments:
+            target_comment = regular_comments[0]
+
+        if target_comment:
+            action_type = target_comment.get("action_type")
+            # TODO: we should prob do somthing with this.
+            # comments_text = " ".join(target_comment.get("comments", []))
+
+            # Extract instruction from the comment text
+            ai_instruction = ""
+            for comment in target_comment.get("comments", []):
+                # Remove comment markers and extract instruction
+                clean_comment = comment.lower().strip()
+                clean_comment = clean_comment.lstrip("/#-;").strip()
+                if clean_comment.startswith("ai"):
+                    ai_instruction = clean_comment[2:].lstrip(":@!?").strip()
+                    break
+
+            if action_type == "!":
+                # Urgent task - use standard watch prompt with CoderAgent
+                return {
+                    "prompt": """I've written your instructions in comments in the code and marked them with
+        "AI"
         Find them in the code files I've shared with you, and follow their instructions.
 
-        After completing those instructions, also be sure to remove all the "AI" comments from the code too.""",
-                                    "agent_type": CoderAgent,
-                                    "instruction": ai_instruction,
-                                }
-                            elif ai_type == "?":
-                                # Question - modify prompt to answer the question
-                                question_prompt = """I found a question in the code comments that needs to be answered.
+        After completing those instructions, also be sure to remove all the "AI" comments from the code
+        too.""",
+                    "agent_type": CoderAgent,
+                    "ai_instruction": ai_instruction,
+                }
+            elif action_type == "?":
+                # Question - modify prompt to answer the question
+                return {
+                    "prompt": """I found a question in the code comments that needs to be answered.
 
-Provide a clear, helpful answer based on the code context."""
-                                return {
-                                    "prompt": question_prompt,
-                                    "agent_type": AskAgent,
-                                    "instruction": ai_instruction,
-                                }
+        Provide a clear, helpful answer based on the code context.""",
+                    "agent_type": AskAgent,
+                    "ai_instruction": ai_instruction,
+                }
+            else:
+                # Regular AI comment - default to coder behavior
+                return {
+                    "prompt": """I found AI instructions in the code comments.
 
-            except (FileNotFoundError, PermissionError, UnicodeDecodeError):
-                continue
+        Please review and follow the instructions found in the code.""",
+                    "agent_type": CoderAgent,
+                    "ai_instruction": ai_instruction,
+                }
 
         return None
 

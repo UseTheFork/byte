@@ -3,7 +3,6 @@ from typing import Any, Dict
 from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
 
-from byte import log
 from byte.core.service.base_service import Service
 from byte.domain.llm.config import LLMConfig, ModelConfig
 
@@ -39,8 +38,6 @@ class LLMService(Service):
         """
 
         # TODO: Need to figure out how to make this handle for other providers.
-        log.debug(kwargs)
-        log.debug(self._service_config.main.__dict__)
 
         if model_type == "main":
             return ChatAnthropic(**self._service_config.main.__dict__, **kwargs)
