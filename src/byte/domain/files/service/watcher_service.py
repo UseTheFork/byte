@@ -100,6 +100,7 @@ class FileWatcherService(Service):
                 auto_add_result = await self._auto_add_file_to_context(
                     file_path, file_mode
                 )
+
                 # Return true if file was added OR if there's an action type
                 return auto_add_result or ai_result.get("action_type") is not None
 
@@ -241,21 +242,14 @@ class FileWatcherService(Service):
             elif action_type == "?":
                 # Question - modify prompt to answer the question
                 return {
-                    "prompt": """I found a question in the code comments that needs to be answered.
+                    "prompt": """I've written a question in the code comments that needs to be answered.
 
         Provide a clear, helpful answer based on the code context.""",
                     "agent_type": AskAgent,
                     "ai_instruction": ai_instruction,
                 }
             else:
-                # Regular AI comment - default to coder behavior
-                return {
-                    "prompt": """I found AI instructions in the code comments.
-
-        Please review and follow the instructions found in the code.""",
-                    "agent_type": CoderAgent,
-                    "ai_instruction": ai_instruction,
-                }
+                return None
 
         return None
 

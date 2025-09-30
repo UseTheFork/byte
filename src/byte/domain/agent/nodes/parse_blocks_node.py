@@ -19,7 +19,6 @@ class ParseBlocksNode(Node):
 
     async def __call__(self, state: BaseState, config: RunnableConfig):
         """Parse commands from the last assistant message."""
-        log.info("ParseBlocksNode")
         messages = state["messages"]
         last_message = messages[-1]
 

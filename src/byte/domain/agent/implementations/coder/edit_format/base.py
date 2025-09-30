@@ -7,6 +7,7 @@ from pydantic.dataclasses import dataclass
 
 from byte.core.mixins.bootable import Bootable
 from byte.core.mixins.configurable import Configurable
+from byte.core.mixins.user_interactive import UserInteractive
 from byte.domain.files.context_manager import FileMode
 from byte.domain.files.service.file_service import FileService
 
@@ -76,7 +77,7 @@ class SearchReplaceBlock:
 {fence}"""
 
 
-class EditFormat(ABC, Bootable, Configurable):
+class EditFormat(ABC, Bootable, Configurable, UserInteractive):
     """"""
 
     prompts: EditFormatPrompts
@@ -242,19 +243,33 @@ class EditFormat(ABC, Bootable, Configurable):
                 if block.block_type == BlockType.REMOVE:
                     # Remove file completely
                     if file_path.exists():
-                        file_path.unlink()
+                        if await self.prompt_for_confirmation(
+                            f"Delete '{file_path}'?",
+                            False,
+                        ):
+                            file_path.unlink()
 
                 elif block.operation == "---":
                     # --- operation: replace entire file contents
                     file_path.parent.mkdir(parents=True, exist_ok=True)
-                    file_path.write_text(block.replace_content, encoding="utf-8")
+                    if await self.prompt_for_confirmation(
+                        f"Replace all contents of '{file_path}'?",
+                        False,
+                    ):
+                        file_path.write_text(block.replace_content, encoding="utf-8")
 
                 elif block.operation == "+++":
                     # +++ operation: edit existing or create new
                     if block.block_type == BlockType.ADD:
                         # Create new file
-                        file_path.parent.mkdir(parents=True, exist_ok=True)
-                        file_path.write_text(block.replace_content, encoding="utf-8")
+                        if await self.prompt_for_confirmation(
+                            f"Create new file '{file_path}'?",
+                            True,
+                        ):
+                            file_path.parent.mkdir(parents=True, exist_ok=True)
+                            file_path.write_text(
+                                block.replace_content, encoding="utf-8"
+                            )
 
                     elif block.block_type == BlockType.EDIT:
                         content = file_path.read_text(encoding="utf-8")
