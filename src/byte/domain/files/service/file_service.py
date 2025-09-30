@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 from rich.columns import Columns
-from rich.console import Console
 from rich.panel import Panel
 
 from byte.core.event_bus import EventType, Payload
@@ -281,36 +280,45 @@ Any other messages in the chat may contain outdated versions of the files' conte
         path_obj = Path(path).resolve()
         return str(path_obj) in self._context_files
 
-    async def list_in_context_files(self, payload: Optional[Payload] = None):
+    async def list_in_context_files(self, payload: Payload):
         """Display current editable files before each prompt.
 
         Provides visual feedback about which files the AI can modify,
         helping users understand the current context state.
         """
 
-        console = await self.make(Console)
+        info_panel = payload.get("info_panel", [])
 
+        read_only_panel = None
         file_service = await self.make(FileService)
         readonly_files = file_service.list_files(FileMode.READ_ONLY)
         if readonly_files:
             file_names = [f"[text]{f.relative_path}[/text]" for f in readonly_files]
-            console.print(
-                Panel(
-                    Columns(file_names, equal=True, expand=True),
-                    title=f"[bold info]Read-only Files ({len(readonly_files)})[/bold info]",
-                    border_style="info",
-                )
+            read_only_panel = Panel(
+                Columns(file_names, equal=True, expand=True),
+                title=f"[bold info]Read-only Files ({len(readonly_files)})[/bold info]",
+                border_style="info",
             )
 
+        editable_panel = None
         editable_files = file_service.list_files(FileMode.EDITABLE)
         if editable_files:
             file_names = [f"[text]{f.relative_path}[/text]" for f in editable_files]
-            console.print(
-                Panel(
-                    Columns(file_names, equal=True, expand=True),
-                    title=f"[bold success]Editable Files ({len(editable_files)})[/bold success]",
-                    border_style="success",
-                )
+            editable_panel = Panel(
+                Columns(file_names, equal=True, expand=True),
+                title=f"[bold success]Editable Files ({len(editable_files)})[/bold success]",
+                border_style="success",
             )
 
-        return payload
+        # Create columns layout with both panels if they exist
+        panels_to_show = []
+        if read_only_panel:
+            panels_to_show.append(read_only_panel)
+        if editable_panel:
+            panels_to_show.append(editable_panel)
+
+        if panels_to_show:
+            columns_panel = Columns(panels_to_show, equal=True, expand=True)
+            info_panel.append(columns_panel)
+
+        return payload.set("info_panel", info_panel)

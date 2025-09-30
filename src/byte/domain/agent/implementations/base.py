@@ -127,13 +127,18 @@ class Agent(ABC, Bootable, Configurable, Injectable):
         stream_rendering_service.set_display_mode(display_mode)
 
         await stream_rendering_service.start_spinner()
-
-        async for mode, chunk in graph.astream(
-            input=initial_state,
-            config=config,
-            stream_mode=["values", "updates", "messages", "custom"],
-        ):
-            processed_event = await self._handle_stream_event(mode, chunk)
+        try:
+            async for mode, chunk in graph.astream(
+                input=initial_state,
+                config=config,
+                stream_mode=["values", "updates", "messages", "custom"],
+            ):
+                processed_event = await self._handle_stream_event(mode, chunk)
+        except KeyboardInterrupt:
+            pass
+            # Handle keyboard interrupt gracefully without exiting the app
+            # await stream_rendering_service.end_stream()
+            # raise KeyboardInterrupt("Agent execution interrupted by user")
 
         await stream_rendering_service.end_stream()
 

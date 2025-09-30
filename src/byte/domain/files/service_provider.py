@@ -52,6 +52,6 @@ class FileServiceProvider(ServiceProvider):
 
         found_files = await file_discovery.get_files()
         console.print(
-            f"├─ [success]Discovered:[/success] [info]{len(found_files)} files[/info]"
+            f"│ [success]Discovered:[/success] [info]{len(found_files)} files[/info]"
         )
-        console.print("│", style="text")
+        console.print("│ ", style="text")

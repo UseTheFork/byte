@@ -27,5 +27,5 @@ class SystemServiceProvider(ServiceProvider):
 
         console = await container.make(Console)
 
-        console.print("│", style="text")
-        console.print("┕─[success]LETS GOOOO!![/success]")
+        console.print("│ ", style="text")
+        console.print("╰── [success]LETS GOOOO!![/success]")

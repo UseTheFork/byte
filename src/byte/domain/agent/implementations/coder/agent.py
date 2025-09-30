@@ -5,7 +5,6 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from typing_extensions import TypedDict
 
-from byte.core.logging import log
 from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.implementations.coder.edit_format.base import (
     EditFormat,
@@ -91,7 +90,7 @@ class CoderAgent(Agent):
         # messages = state["messages"]
         # last_message = messages[-1]
 
-        log.debug(state)
+        # log.debug(state)
 
         if state["agent_status"] == "valid":
             return "lint"

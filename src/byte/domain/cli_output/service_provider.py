@@ -86,5 +86,5 @@ class CliOutputServiceProvider(ServiceProvider):
 
             console.print(styled_line)
 
-        console.print("┌── Booting", style="text")
-        console.print("│", style="text")
+        console.print("╭─ Booting", style="text")
+        console.print("│ ", style="text")
