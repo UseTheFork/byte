@@ -63,6 +63,7 @@ class CliOutputServiceProvider(ServiceProvider):
         console.push_theme(catppuccin_mocha_theme)
 
         # Create diagonal gradient from primary to secondary color
+        # AI: How can we use `console.width` to get the remaning width of the line and at the end of each line print the last charetcor to fill the space ai?
         logo_lines = [
             "░       ░░░  ░░░░  ░░        ░░        ░",
             "▒  ▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒▒▒",
@@ -84,6 +85,22 @@ class CliOutputServiceProvider(ServiceProvider):
                     styled_line += f"[primary]{char}[/primary]"
                 else:
                     styled_line += f"[secondary]{char}[/secondary]"
+
+            # Calculate remaining width and fill with the last character
+            logo_width = len(
+                line
+            )  # Actual character count (Rich styles don't add to width)
+            remaining_width = console.width - logo_width
+
+            if remaining_width > 0:
+                # Use the last character to fill the remaining space
+                last_char = line[-1] if line else " "
+                # Apply the same style as the last character would have
+                last_diagonal_progress = (row_idx + len(line) - 1) / (
+                    len(logo_lines) + len(line) - 2
+                )
+                style = "primary" if last_diagonal_progress < 0.5 else "secondary"
+                styled_line += f"[{style}]{last_char * remaining_width}[/{style}]"
 
             console.print(styled_line)
 

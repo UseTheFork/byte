@@ -1,3 +1,4 @@
+import asyncio
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Optional, Type, TypedDict
 
@@ -134,15 +135,15 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
                 input=initial_state,
                 config=config,
                 stream_mode=["values", "updates", "messages", "custom"],
+                durability="exit",
             ):
                 processed_event = await self._handle_stream_event(mode, chunk)
-        except KeyboardInterrupt:
-            pass
-            # Handle keyboard interrupt gracefully without exiting the app
-            # await stream_rendering_service.end_stream()
-            # raise KeyboardInterrupt("Agent execution interrupted by user")
 
-        await stream_rendering_service.end_stream()
+        except (KeyboardInterrupt, asyncio.CancelledError):
+            # Handle keyboard interrupt gracefully without exiting the app
+            pass
+        finally:
+            await stream_rendering_service.end_stream()
 
         # Create payload with event type
         payload = Payload(

@@ -30,7 +30,7 @@ class StreamRenderingService(Service):
         """
         self.console = await self.make(Console)
 
-        self.current_stream_id = ""
+        self.current_stream_id = None
         self.accumulated_content = ""
         self.agent_name = ""
         self.display_mode = "verbose"

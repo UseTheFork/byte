@@ -1,3 +1,5 @@
+from typing import cast
+
 from langchain_core.messages import AIMessage
 from rich.columns import Columns
 from rich.progress_bar import ProgressBar
@@ -29,7 +31,13 @@ class AgentAnalyticsService(Service):
         processed_event = payload.get("processed_event", {})
 
         if messages := processed_event.get("messages", []):
-            message: AIMessage = messages[-1]
+            message = messages[-1]
+
+            # Check if message is an AIMessage before processing
+            if not isinstance(message, AIMessage):
+                return payload
+
+            message = cast(AIMessage, message)
 
             # Extract usage metadata and total tokens
             usage_metadata = message.usage_metadata
