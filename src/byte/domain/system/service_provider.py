@@ -1,6 +1,7 @@
 from typing import List, Type
 
 from rich.console import Console
+from rich.rule import Rule
 
 from byte.container import Container
 from byte.core.service_provider import ServiceProvider
@@ -28,4 +29,11 @@ class SystemServiceProvider(ServiceProvider):
         console = await container.make(Console)
 
         console.print("│ ", style="text")
-        console.print("╰── [success]LETS GOOOO!![/success]")
+        console.print(
+            Rule(
+                "╰─── //",
+                style="text",
+                align="left",
+                characters="─",
+            )
+        )

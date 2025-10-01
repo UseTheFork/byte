@@ -22,8 +22,16 @@ class LLMService(Service):
     async def _configure_service(self) -> None:
         """Configure LLM service with model settings based on global configuration."""
         if self._config.model == "sonnet":
-            main_model = ModelConfig(model="claude-sonnet-4-20250514", max_tokens=64000)
-            weak_model = ModelConfig(model="claude-3-5-haiku-20241022", max_tokens=8192)
+            main_model = ModelConfig(
+                model="claude-sonnet-4-5-20250929",
+                max_tokens=64000,
+                cost_per_token=(3 / 1000000),
+            )
+            weak_model = ModelConfig(
+                model="claude-3-5-haiku-20241022",
+                max_tokens=8192,
+                cost_per_token=(0.80 / 1000000),
+            )
 
         self._service_config = LLMConfig(
             model=self._config.model, main=main_model, weak=weak_model
@@ -40,9 +48,17 @@ class LLMService(Service):
         # TODO: Need to figure out how to make this handle for other providers.
 
         if model_type == "main":
-            return ChatAnthropic(**self._service_config.main.__dict__, **kwargs)
+            return ChatAnthropic(
+                model_name=self._service_config.main.model,
+                max_tokens=self._service_config.main.max_tokens,
+                **kwargs,
+            )
         elif model_type == "weak":
-            return ChatAnthropic(**self._service_config.weak.__dict__, **kwargs)
+            return ChatAnthropic(
+                model_name=self._service_config.weak.model,
+                max_tokens=self._service_config.weak.max_tokens,
+                **kwargs,
+            )
 
     def get_main_model(self) -> BaseChatModel:
         """Convenience method for accessing the primary model.

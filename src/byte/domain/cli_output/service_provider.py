@@ -1,4 +1,5 @@
 from rich.console import Console
+from rich.rule import Rule
 from rich.theme import Theme
 
 from byte.container import Container
@@ -86,5 +87,14 @@ class CliOutputServiceProvider(ServiceProvider):
 
             console.print(styled_line)
 
-        console.print("╭─ Booting", style="text")
+        console.print()
+
+        console.print(
+            Rule(
+                "╭─ Booting",
+                style="text",
+                align="left",
+                characters="─",
+            )
+        )
         console.print("│ ", style="text")

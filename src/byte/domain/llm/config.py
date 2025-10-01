@@ -7,6 +7,7 @@ class ModelConfig(BaseConfig):
     model: str = ""
     temperature: float = 0.1
     max_tokens: int = 1024
+    cost_per_token: float = 0
 
 
 class LLMConfig(BaseConfig):

@@ -5,6 +5,7 @@ from prompt_toolkit.document import Document
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.shortcuts import PromptSession
 from rich.console import Console, Group
+from rich.rule import Rule
 
 from byte.core.config.config import BYTE_DIR
 from byte.core.event_bus import EventType, Payload
@@ -90,6 +91,15 @@ class PromptToolkitService(Service):
         info_panel = payload.get("info_panel", [])
         message = payload.get("message", message)
 
+        console.print()
+        console.print(
+            Rule(
+                "[primary]/[/primary][secondary]/[/secondary] Byte",
+                style="text",
+                align="left",
+                characters="─",
+            )
+        )
         # Output info panel if it contains content
         if info_panel:
             console.print(Group(*info_panel))
@@ -99,7 +109,6 @@ class PromptToolkitService(Service):
         )
         # TODO: should we make `user_input` a [("user", user_input)], in this situation.
 
-        # AI:
         agent_service = await self.make(AgentService)
         active_agent = agent_service.get_active_agent()
 

@@ -5,6 +5,7 @@ from byte.core.config.config import ByteConfg
 from byte.core.event_bus import EventBus
 from byte.core.task_manager import TaskManager
 from byte.domain.agent.service_provider import AgentServiceProvider
+from byte.domain.analytics.service_provider import AnalyticsProvider
 from byte.domain.cli_input.service.command_registry import CommandRegistry
 from byte.domain.cli_input.service_provider import CliInputServiceProvider
 from byte.domain.cli_output.service_provider import CliOutputServiceProvider
@@ -54,6 +55,7 @@ async def bootstrap(config: ByteConfg):
         LintServiceProvider(),  # Code linting functionality
         AgentServiceProvider(),  # Agent routing and management
         MCPServiceProvider(),
+        AnalyticsProvider(),
         SystemServiceProvider(),  # Core system commands
     ]
 

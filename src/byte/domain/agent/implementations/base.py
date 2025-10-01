@@ -3,8 +3,10 @@ from typing import TYPE_CHECKING, Any, Optional, Type, TypedDict
 
 from langgraph.graph.state import CompiledStateGraph, Runnable, RunnableConfig
 
+from byte.core.event_bus import EventType, Payload
 from byte.core.mixins.bootable import Bootable
 from byte.core.mixins.configurable import Configurable
+from byte.core.mixins.eventable import Eventable
 from byte.core.mixins.injectable import Injectable
 from byte.domain.agent.state import BaseState
 from byte.domain.cli_output.service.stream_rendering_service import (
@@ -39,7 +41,7 @@ class BaseAssistant:
         return {"messages": result}
 
 
-class Agent(ABC, Bootable, Configurable, Injectable):
+class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
     """Base class for all agent services providing common graph management functionality.
 
     Defines the interface for agent services with lazy-loaded graph compilation,
@@ -141,6 +143,14 @@ class Agent(ABC, Bootable, Configurable, Injectable):
             # raise KeyboardInterrupt("Agent execution interrupted by user")
 
         await stream_rendering_service.end_stream()
+
+        # Create payload with event type
+        payload = Payload(
+            event_type=EventType.POST_AGENT_EXECUTION,
+            data={"processed_event": processed_event},
+        )
+
+        await self.emit(payload)
 
         return processed_event
 

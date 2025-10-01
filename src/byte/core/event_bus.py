@@ -15,6 +15,7 @@ class EventType(Enum):
     FILE_ADDED = "file_added"
 
     PRE_AGENT_EXECUTION = "pre_agent_execution"
+    POST_AGENT_EXECUTION = "post_agent_execution"
 
 
 @pydantic_dataclass
