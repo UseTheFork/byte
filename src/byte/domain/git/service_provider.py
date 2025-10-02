@@ -2,7 +2,7 @@ from typing import List, Type
 
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
-from byte.domain.cli_input.service.command_registry import Command
+from byte.domain.cli.service.command_registry import Command
 from byte.domain.git.command.commit_command import CommitCommand
 from byte.domain.git.service.git_service import GitService
 

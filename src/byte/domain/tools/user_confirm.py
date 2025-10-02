@@ -1,7 +1,7 @@
 from langchain_core.tools import tool
 
 from byte.context import make
-from byte.domain.cli_input.service.interactions_service import InteractionService
+from byte.domain.cli.service.interactions_service import InteractionService
 
 
 @tool(parse_docstring=True)

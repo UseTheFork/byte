@@ -2,7 +2,7 @@ from typing import List
 
 from rich.console import Console
 
-from byte.domain.cli_input.service.command_registry import Command
+from byte.domain.cli.service.command_registry import Command
 from byte.domain.files.service.file_service import FileService
 
 

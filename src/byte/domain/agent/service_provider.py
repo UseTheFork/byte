@@ -16,7 +16,7 @@ from byte.domain.agent.nodes.parse_blocks_node import ParseBlocksNode
 from byte.domain.agent.nodes.setup_node import SetupNode
 from byte.domain.agent.nodes.tool_node import ToolNode
 from byte.domain.agent.service.agent_service import AgentService
-from byte.domain.cli_input.service.command_registry import Command
+from byte.domain.cli.service.command_registry import Command
 
 
 class AgentServiceProvider(ServiceProvider):

@@ -8,8 +8,8 @@ from rich.rule import Rule
 
 from byte.core.service.base_service import Service
 from byte.core.utils import extract_content_from_message
-from byte.domain.cli_output.rich.rune_spinner import RuneSpinner
-from byte.domain.cli_output.utils.formatters import MarkdownStream
+from byte.domain.cli.rich.rune_spinner import RuneSpinner
+from byte.domain.cli.utils.formatters import MarkdownStream
 
 
 class StreamRenderingService(Service):

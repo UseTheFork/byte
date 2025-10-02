@@ -8,7 +8,7 @@ from byte.context import container_context
 from byte.core.cli import cli
 from byte.core.config.config import ByteConfg
 from byte.core.task_manager import TaskManager
-from byte.domain.cli_input.service.prompt_toolkit_service import PromptToolkitService
+from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
 
 
 class Byte:

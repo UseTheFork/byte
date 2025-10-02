@@ -11,7 +11,7 @@ from byte.core.config.config import BYTE_DIR
 from byte.core.event_bus import EventType, Payload
 from byte.core.service.base_service import Service
 from byte.domain.agent.service.agent_service import AgentService
-from byte.domain.cli_input.service.command_registry import CommandRegistry
+from byte.domain.cli.service.command_registry import CommandRegistry
 
 
 class CommandCompleter(Completer):

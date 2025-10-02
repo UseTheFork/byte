@@ -1,4 +1,4 @@
-from byte.domain.cli_input.service.command_registry import Command
+from byte.domain.cli.service.command_registry import Command
 
 
 class ExitCommand(Command):

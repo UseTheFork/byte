@@ -10,7 +10,7 @@ from byte.core.service.base_service import Service
 from byte.core.task_manager import TaskManager
 from byte.domain.agent.implementations.ask.agent import AskAgent
 from byte.domain.agent.implementations.coder.agent import CoderAgent
-from byte.domain.cli_input.service.prompt_toolkit_service import PromptToolkitService
+from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
 from byte.domain.files.context_manager import FileMode
 from byte.domain.files.service.discovery_service import FileDiscoveryService
 from byte.domain.files.service.file_service import FileService

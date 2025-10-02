@@ -23,7 +23,7 @@ class UserInteractive:
         returning control to the user for general text input.
         Usage: `await self.prompt_for_input()` -> shows input prompt to user
         """
-        from byte.domain.cli_input.service.interactions_service import (
+        from byte.domain.cli.service.interactions_service import (
             InteractionService,
         )
 
@@ -42,7 +42,7 @@ class UserInteractive:
         automatic timeout handling. Returns the default value on timeout.
         Usage: `confirmed = await self.prompt_for_confirmation("Delete file?", False)`
         """
-        from byte.domain.cli_input.service.interactions_service import (
+        from byte.domain.cli.service.interactions_service import (
             InteractionService,
         )
 

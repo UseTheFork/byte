@@ -6,7 +6,7 @@ from rich.progress_bar import ProgressBar
 
 from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
-from byte.domain.cli_output.rich.panel import Panel
+from byte.domain.cli.rich.panel import Panel
 from byte.domain.llm.service.llm_service import LLMService
 
 

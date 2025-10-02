@@ -6,9 +6,8 @@ from byte.core.event_bus import EventBus
 from byte.core.task_manager import TaskManager
 from byte.domain.agent.service_provider import AgentServiceProvider
 from byte.domain.analytics.service_provider import AnalyticsProvider
-from byte.domain.cli_input.service.command_registry import CommandRegistry
-from byte.domain.cli_input.service_provider import CliInputServiceProvider
-from byte.domain.cli_output.service_provider import CliOutputServiceProvider
+from byte.domain.cli.service.command_registry import CommandRegistry
+from byte.domain.cli.service_provider import CLIServiceProvider
 from byte.domain.edit_format.service_provider import EditFormatProvider
 from byte.domain.files.service_provider import FileServiceProvider
 from byte.domain.git.service_provider import GitServiceProvider
@@ -46,8 +45,7 @@ async def bootstrap(config: ByteConfg):
     # may need configuration access during their boot phase
 
     service_providers = [
-        CliInputServiceProvider(),  # Console and prompt services
-        CliOutputServiceProvider(),  # Console and prompt services
+        CLIServiceProvider(),  # Console and prompt services
         MemoryServiceProvider(),  # Short-term conversation memory
         KnowledgeServiceProvider(),
         FileServiceProvider(),  # File context management

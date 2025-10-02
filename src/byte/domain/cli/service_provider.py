@@ -4,16 +4,18 @@ from rich.theme import Theme
 
 from byte.container import Container
 from byte.core.service_provider import ServiceProvider
-from byte.domain.cli_output.service.stream_rendering_service import (
+from byte.domain.cli.service.interactions_service import InteractionService
+from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
+from byte.domain.cli.service.stream_rendering_service import (
     StreamRenderingService,
 )
 
 
-class CliOutputServiceProvider(ServiceProvider):
+class CLIServiceProvider(ServiceProvider):
     """Service provider for UI system."""
 
     def services(self):
-        return [StreamRenderingService]
+        return [StreamRenderingService, InteractionService, PromptToolkitService]
 
     async def boot(self, container: Container):
         """Boot UI services."""

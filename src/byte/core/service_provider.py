@@ -3,7 +3,7 @@ from typing import List, Type
 
 from byte.container import Container
 from byte.core.service.base_service import Service
-from byte.domain.cli_input.service.command_registry import Command, CommandRegistry
+from byte.domain.cli.service.command_registry import Command, CommandRegistry
 
 
 class ServiceProvider(ABC):

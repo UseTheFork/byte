@@ -7,7 +7,7 @@ from rich.console import Console
 
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
-from byte.domain.cli_output.rich.panel import Panel
+from byte.domain.cli.rich.panel import Panel
 
 
 class GitService(Service, UserInteractive):

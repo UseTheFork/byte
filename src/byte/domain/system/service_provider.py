@@ -7,7 +7,7 @@ from byte.container import Container
 from byte.core.event_bus import EventBus, EventType
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
-from byte.domain.cli_input.service.command_registry import Command
+from byte.domain.cli.service.command_registry import Command
 from byte.domain.system.command.exit_command import ExitCommand
 from byte.domain.system.service.system_context_service import SystemContextService
 

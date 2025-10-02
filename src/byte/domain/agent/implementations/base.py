@@ -10,7 +10,7 @@ from byte.core.mixins.configurable import Configurable
 from byte.core.mixins.eventable import Eventable
 from byte.core.mixins.injectable import Injectable
 from byte.domain.agent.state import BaseState
-from byte.domain.cli_output.service.stream_rendering_service import (
+from byte.domain.cli.service.stream_rendering_service import (
     StreamRenderingService,
 )
 from byte.domain.memory.service.memory_service import MemoryService
