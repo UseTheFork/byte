@@ -12,6 +12,7 @@ from byte.domain.cli_output.service_provider import CliOutputServiceProvider
 from byte.domain.edit_format.service_provider import EditFormatProvider
 from byte.domain.files.service_provider import FileServiceProvider
 from byte.domain.git.service_provider import GitServiceProvider
+from byte.domain.knowledge.service_provider import KnowledgeServiceProvider
 from byte.domain.lint.service_provider import LintServiceProvider
 from byte.domain.llm.service_provider import LLMServiceProvider
 from byte.domain.mcp.service_provider import MCPServiceProvider
@@ -48,7 +49,7 @@ async def bootstrap(config: ByteConfg):
         CliInputServiceProvider(),  # Console and prompt services
         CliOutputServiceProvider(),  # Console and prompt services
         MemoryServiceProvider(),  # Short-term conversation memory
-        # KnowledgeServiceProvider(),  # Long-term knowledge storage
+        KnowledgeServiceProvider(),
         FileServiceProvider(),  # File context management
         ToolsServiceProvider(),  # File context management
         LLMServiceProvider(),  # Language model integration

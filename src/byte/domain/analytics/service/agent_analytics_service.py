@@ -91,7 +91,7 @@ class AgentAnalyticsService(Service):
             total=llm_service._service_config.main.max_tokens,
             completed=self.main_model_context_used,
             width=15,
-            style="success",
+            complete_style="success",
         )
 
         analytics_panel = Panel(

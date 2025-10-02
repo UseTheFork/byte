@@ -322,3 +322,11 @@ Any other messages in the chat may contain outdated versions of the files' conte
             info_panel.append(columns_panel)
 
         return payload.set("info_panel", info_panel)
+
+    async def add_file_context_to_prompt(self, payload: Optional[Payload] = None):
+        if payload:
+            state = payload.get("state", {})
+            state["file_context"] = self.generate_context_prompt()
+            payload = payload.set("state", state)
+
+        return payload

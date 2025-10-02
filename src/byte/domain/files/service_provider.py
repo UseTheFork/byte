@@ -48,6 +48,11 @@ class FileServiceProvider(ServiceProvider):
             file_watcher_service.modify_user_request,
         )
 
+        event_bus.on(
+            EventType.PRE_ASSISTANT_NODE.value,
+            file_service.add_file_context_to_prompt,
+        )
+
         console = await container.make(Console)
 
         found_files = await file_discovery.get_files()

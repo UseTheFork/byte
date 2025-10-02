@@ -1,6 +1,6 @@
-# nodes/assistant_node.py
 from langgraph.graph.state import Runnable
 
+from byte.core.event_bus import EventType, Payload
 from byte.domain.agent.nodes.base_node import Node
 
 
@@ -10,6 +10,18 @@ class AssistantNode(Node):
 
     async def __call__(self, state, config):
         while True:
+            payload = Payload(
+                event_type=EventType.PRE_ASSISTANT_NODE,
+                data={
+                    "state": state,
+                    "config": config,
+                },
+            )
+
+            payload = await self.emit(payload)
+            state = payload.get("state", state)
+            config = payload.get("config", config)
+
             result = await self.runnable.ainvoke(state, config=config)
 
             # Ensure we get a real response

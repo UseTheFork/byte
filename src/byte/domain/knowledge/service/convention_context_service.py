@@ -1,10 +1,12 @@
+from textwrap import dedent
 from typing import List
 
 from byte.core.config.config import BYTE_DIR
+from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
 
 
-class ConventionsService(Service):
+class ConventionContextService(Service):
     """Service for loading and managing project conventions from markdown files."""
 
     conventions: List[str] = []
@@ -27,7 +29,32 @@ class ConventionsService(Service):
             try:
                 content = md_file.read_text(encoding="utf-8")
                 # Format as a document with filename header and separator
-                formatted_doc = f"---\n\n# Convention: {md_file.name}\n\n{content}"
+                formatted_doc = f"## Convention: {md_file.name}\n\n{content}"
                 self.conventions.append(formatted_doc)
             except Exception:
                 pass
+
+    async def add_project_context(self, payload: Payload) -> Payload:
+        """ """
+
+        state = payload.get("state", {})
+        project_inforamtion_and_context = state.get(
+            "project_inforamtion_and_context", []
+        )
+
+        conventions = "\n\n".join(self.conventions)
+
+        project_inforamtion_and_context.append(
+            (
+                "user",
+                dedent(f"""
+                # Coding and Project Conventions
+
+                **Important:** Adhere to the following project-specific conventions. These standards are essential for maintaining code quality and consistency.
+                {conventions}
+                """),
+            )
+        )
+        state["project_inforamtion_and_context"] = project_inforamtion_and_context
+
+        return payload.set("state", state)

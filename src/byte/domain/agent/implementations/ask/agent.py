@@ -12,14 +12,31 @@ from byte.domain.mcp.service.mcp_service import MCPService
 
 
 class AskAgent(Agent):
-    """"""
+    """Domain service for the ask agent specialized in question answering with tools.
+
+    Pure domain service that handles query processing and tool execution without
+    UI concerns. Integrates with MCP tools and the LLM service through the actor
+    system for clean separation of concerns.
+
+    Usage: `agent = await container.make(AskAgent); response = await agent.run(state)`
+    """
 
     def get_state_class(self):
-        """Return coder-specific state class."""
+        """Return ask-specific state class.
+
+        Usage: `state_class = agent.get_state_class()`
+        """
         return AskState
 
     async def build(self):
-        """ """
+        """Build and compile the ask agent graph with memory and MCP tools.
+
+        Creates a graph workflow that processes user queries through setup,
+        assistant, and tool execution nodes with conditional routing based
+        on whether tool calls are required.
+
+        Usage: `graph = await agent.build()`
+        """
 
         mcp_service = await self.make(MCPService)
         mcp_tools = mcp_service.get_tools_for_agent("ask")
@@ -33,9 +50,13 @@ class AskAgent(Agent):
         graph = StateGraph(self.get_state_class())
 
         # Add nodes
-        graph.add_node("setup", await self.make(SetupNode))
         graph.add_node(
-            "assistant", await self.make(AssistantNode, runnable=assistant_runnable)
+            "setup",
+            await self.make(SetupNode, agent=self.__class__.__name__),
+        )
+        graph.add_node(
+            "assistant",
+            await self.make(AssistantNode, runnable=assistant_runnable),
         )
         graph.add_node("tools", await self.make(ToolNode, tools=mcp_tools))
 

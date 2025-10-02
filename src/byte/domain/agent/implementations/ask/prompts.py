@@ -1,4 +1,3 @@
-from datetime import datetime
 from textwrap import dedent
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -20,14 +19,8 @@ ask_prompt = ChatPromptTemplate.from_messages(
             {edit_format_system}
             """),
         ),
-        (
-            "user",
-            dedent("""
-            ## Current Context:
-            Current date: {time}
-            """),
-        ),
+        ("placeholder", "{project_inforamtion_and_context}"),
         ("placeholder", "{messages}"),
         ("user", "{file_context}"),
     ]
-).partial(time=datetime.now().strftime("%Y-%m-%d"))
+)

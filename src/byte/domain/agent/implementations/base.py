@@ -135,7 +135,6 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
                 input=initial_state,
                 config=config,
                 stream_mode=["values", "updates", "messages", "custom"],
-                durability="exit",
             ):
                 processed_event = await self._handle_stream_event(mode, chunk)
 

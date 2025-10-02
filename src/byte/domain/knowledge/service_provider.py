@@ -1,8 +1,12 @@
 from typing import List, Type
 
+from byte.container import Container
+from byte.core.event_bus import EventBus, EventType
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
-from byte.domain.knowledge.service.conventions_service import ConventionsService
+from byte.domain.knowledge.service.convention_context_service import (
+    ConventionContextService,
+)
 
 
 class KnowledgeServiceProvider(ServiceProvider):
@@ -15,7 +19,20 @@ class KnowledgeServiceProvider(ServiceProvider):
     """
 
     def services(self) -> List[Type[Service]]:
-        return [ConventionsService]
+        return [ConventionContextService]
+
+    async def boot(self, container: Container):
+        """Boot file services and register commands with registry."""
+
+        # Set up event listener for PRE_PROMPT_TOOLKIT
+        event_bus = await container.make(EventBus)
+        conventions_service = await container.make(ConventionContextService)
+
+        # Register listener that calls list_in_context_files before each prompt
+        event_bus.on(
+            EventType.PRE_ASSISTANT_NODE.value,
+            conventions_service.add_project_context,
+        )
 
     # async def shutdown(self, container: "Container"):
     #     """Shutdown knowledge services and close database connections."""

@@ -46,10 +46,16 @@ class CoderAgent(Agent):
 
         # Add nodes
         graph.add_node(
-            "setup", await self.make(SetupNode, edit_format=self.edit_format)
+            "setup",
+            await self.make(
+                SetupNode,
+                edit_format=self.edit_format,
+                agent=self.__class__.__name__,
+            ),
         )
         graph.add_node(
-            "assistant", await self.make(AssistantNode, runnable=assistant_runnable)
+            "assistant",
+            await self.make(AssistantNode, runnable=assistant_runnable),
         )
         graph.add_node(
             "parse_blocks",

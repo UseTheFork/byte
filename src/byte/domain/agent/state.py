@@ -10,9 +10,10 @@ class BaseState(TypedDict):
 
     messages: Annotated[list[AnyMessage], add_messages]
 
+    agent: str
+
     agent_status: str
     errors: list[AnyMessage]
-    file_context: str
 
 
 class CoderState(BaseState):
