@@ -4,10 +4,10 @@ from typing import List
 import git
 from git.exc import InvalidGitRepositoryError
 from rich.console import Console
-from rich.panel import Panel
 
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
+from byte.domain.cli_output.rich.panel import Panel
 
 
 class GitService(Service, UserInteractive):
@@ -90,7 +90,6 @@ class GitService(Service, UserInteractive):
                     Panel(
                         f"({commit_hash}) {commit_message}",
                         title="[bold green]Commit Created[/bold green]",
-                        title_align="left",
                         border_style="green",
                     )
                 )
@@ -103,7 +102,6 @@ class GitService(Service, UserInteractive):
                     Panel(
                         f"Failed to create commit: {e!s}",
                         title="[bold red]Commit Failed[/bold red]",
-                        title_align="left",
                         border_style="red",
                     )
                 )

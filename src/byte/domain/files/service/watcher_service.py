@@ -5,6 +5,7 @@ from typing import Optional, Set
 from watchfiles import Change, awatch
 
 from byte.core.event_bus import Payload
+from byte.core.logging import log
 from byte.core.service.base_service import Service
 from byte.core.task_manager import TaskManager
 from byte.domain.agent.implementations.ask.agent import AskAgent
@@ -101,6 +102,8 @@ class FileWatcherService(Service):
                     file_path, file_mode
                 )
 
+                log.info(ai_result)
+
                 # Return true if file was added OR if there's an action type
                 return auto_add_result or ai_result.get("action_type") is not None
 
@@ -146,7 +149,7 @@ class FileWatcherService(Service):
                         elif comment.startswith("ai?") or comment.endswith("ai?"):
                             action_type = "?"
 
-                    break  # Found match on this line, no need to check other patterns
+                    # break  # Found match on this line, no need to check other patterns
 
         # Return None if no AI comments found
         if not line_nums:
