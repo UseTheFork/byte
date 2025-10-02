@@ -2,7 +2,7 @@ import asyncio
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Optional, Type, TypedDict
 
-from langgraph.graph.state import CompiledStateGraph, Runnable, RunnableConfig
+from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 
 from byte.core.event_bus import EventType, Payload
 from byte.core.mixins.bootable import Bootable
@@ -17,29 +17,6 @@ from byte.domain.memory.service.memory_service import MemoryService
 
 if TYPE_CHECKING:
     from langgraph.graph.state import CompiledStateGraph
-
-
-class BaseAssistant:
-    def __init__(self, runnable: Runnable):
-        self.runnable = runnable
-
-    async def __call__(self, state: BaseState, config: RunnableConfig):
-        while True:
-            result = self.runnable.invoke(state)
-            # If the LLM happens to return an empty response, we will re-prompt it
-            # for an actual response.
-            if not result.tool_calls and (
-                not result.content
-                or (
-                    isinstance(result.content, list)
-                    and not result.content[0].get("text")
-                )
-            ):
-                messages = state["messages"] + [("user", "Respond with a real output.")]
-                state = {**state, "messages": messages}
-            else:
-                break
-        return {"messages": result}
 
 
 class Agent(ABC, Bootable, Configurable, Injectable, Eventable):

@@ -1,17 +1,13 @@
 from langchain_core.language_models.chat_models import BaseChatModel
 from langgraph.constants import END
 from langgraph.graph import START, StateGraph
-from langgraph.graph.state import Runnable, RunnableConfig
 
-from byte.domain.agent.implementations.base import Agent, BaseState
+from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.implementations.commit.prompt import commit_prompt
+from byte.domain.agent.nodes.assistant_node import AssistantNode
+from byte.domain.agent.nodes.setup_node import SetupNode
+from byte.domain.agent.state import CommitState
 from byte.domain.llm.service.llm_service import LLMService
-
-
-class CommitState(BaseState):
-    """"""
-
-    commit_message: str
 
 
 class CommitAgent(Agent):
@@ -36,7 +32,16 @@ class CommitAgent(Agent):
         # Create the state graph
         graph = StateGraph(self.get_state_class())
 
-        graph.add_node("assistant", self._create_assistant_node(assistant_runnable))
+        # Add nodes
+        graph.add_node(
+            "setup",
+            await self.make(SetupNode, agent=self.__class__.__name__),
+        )
+        graph.add_node(
+            "assistant",
+            await self.make(AssistantNode, runnable=assistant_runnable),
+        )
+
         graph.add_node("extract_commit", self._extract_commit)
 
         # Define edges
@@ -44,22 +49,14 @@ class CommitAgent(Agent):
         graph.add_edge("assistant", "extract_commit")
         graph.add_edge("extract_commit", END)
 
-        assistant_runnable = commit_prompt | llm
-
         # Compile graph with memory and configuration
         return graph.compile()
 
-    def _create_assistant_node(self, runnable: Runnable):
-        """Create the assistant node function."""
-
-        async def assistant_node(state: BaseState, config: RunnableConfig):
-            result = await runnable.ainvoke(state, config=config)
-            return {"messages": [result]}
-
-        return assistant_node
-
     def _extract_commit(self, state: CommitState):
-        """"""
+        """Extract commit message from assistant response and update state.
+
+        Usage: `result = agent._extract_commit(state)` -> {"commit_message": "fix: ..."}
+        """
         messages = state["messages"]
         last_message = messages[-1]
 

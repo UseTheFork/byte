@@ -230,12 +230,10 @@ class FileWatcherService(Service):
             if action_type == "!":
                 # Urgent task - use standard watch prompt with CoderAgent
                 return {
-                    "prompt": """I've written your instructions in comments in the code and marked them with
-        "AI"
-        Find them in the code files I've shared with you, and follow their instructions.
+                    "prompt": """I've written your instructions in comments in the code and marked them with "AI"
+                    Find them in the code files I've shared with you, and follow their instructions.
 
-        After completing those instructions, also be sure to remove all the "AI" comments from the code
-        too.""",
+                    **IMPORTANT**: After completing those instructions, also be sure to remove all the "AI" comments from the code too.""",
                     "agent_type": CoderAgent,
                     "ai_instruction": ai_instruction,
                 }
@@ -244,7 +242,7 @@ class FileWatcherService(Service):
                 return {
                     "prompt": """I've written a question in the code comments that needs to be answered.
 
-        Provide a clear, helpful answer based on the code context.""",
+                    Provide a clear, concise, helpful answer based on the code context.""",
                     "agent_type": AskAgent,
                     "ai_instruction": ai_instruction,
                 }

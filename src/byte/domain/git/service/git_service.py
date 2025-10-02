@@ -77,32 +77,49 @@ class GitService(Service, UserInteractive):
         """
         console = await self.make(Console)
 
-        try:
-            # Create the commit
-            commit = self._repo.index.commit(commit_message)
-            commit_hash = commit.hexsha[:6]
+        continue_commit = True
 
-            # Display success panel
-            # TODO: Display this better.
-            console.print(
-                Panel(
-                    f"({commit_hash}) {commit_message}",
-                    title="[bold green]Commit Created[/bold green]",
-                    title_align="left",
-                    border_style="green",
+        while continue_commit:
+            try:
+                # Create the commit
+                commit = self._repo.index.commit(commit_message)
+                commit_hash = commit.hexsha[:6]
+
+                # Display success panel
+                console.print(
+                    Panel(
+                        f"({commit_hash}) {commit_message}",
+                        title="[bold green]Commit Created[/bold green]",
+                        title_align="left",
+                        border_style="green",
+                    )
                 )
-            )
-        except Exception as e:
-            # Display error panel if commit fails
-            console.print(
-                Panel(
-                    f"Failed to create commit: {e!s}",
-                    title="[bold red]Commit Failed[/bold red]",
-                    title_align="left",
-                    border_style="red",
+                # Exit loop on successful commit
+                continue_commit = False
+
+            except Exception as e:
+                # Display error panel if commit fails
+                console.print(
+                    Panel(
+                        f"Failed to create commit: {e!s}",
+                        title="[bold red]Commit Failed[/bold red]",
+                        title_align="left",
+                        border_style="red",
+                    )
                 )
-            )
-            raise
+
+                # Prompt user to retry with staging
+                retry = await self.prompt_for_confirmation(
+                    "Stage changes and try again?", default=True
+                )
+
+                if retry:
+                    # Stage changes and retry commit
+                    await self.stage_changes()
+                    # Loop continues for another attempt
+                else:
+                    # User declined retry, exit loop
+                    continue_commit = False
 
     async def stage_changes(self) -> None:
         """Check for unstaged changes and offer to add them to the commit.

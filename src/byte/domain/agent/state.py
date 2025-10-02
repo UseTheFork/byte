@@ -6,7 +6,10 @@ from byte.domain.edit_format.service.edit_format_service import SearchReplaceBlo
 
 
 class BaseState(TypedDict):
-    """Base state that all agents inherit."""
+    """Base state that all agents inherit with messaging and status tracking.
+
+    Usage: `state = BaseState(messages=[], agent="CoderAgent", agent_status="active", errors=[])`
+    """
 
     messages: Annotated[list[AnyMessage], add_messages]
 
@@ -25,6 +28,18 @@ class CoderState(BaseState):
 
 
 class AskState(CoderState):
-    """"""
+    """State for ask/question agent with file context capabilities.
+
+    Usage: `state = AskState(messages=[], agent="AskAgent", ...)`
+    """
 
     pass
+
+
+class CommitState(BaseState):
+    """State for commit agent with generated commit message storage.
+
+    Usage: `state = CommitState(messages=[], agent="CommitAgent", commit_message="")`
+    """
+
+    commit_message: str
