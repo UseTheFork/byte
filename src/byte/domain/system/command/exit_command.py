@@ -22,8 +22,4 @@ class ExitCommand(Command):
 
         Usage: Called automatically when user types `/exit`
         """
-        print("here")
-        # command_registry = await self.make(PromptToolkitService)
-        # command_registry.prompt_session.app.exit()
-
-        pass
+        raise KeyboardInterrupt

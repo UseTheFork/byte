@@ -48,6 +48,7 @@ class AgentAnalyticsService(Service):
 
                 # Extract model name from response metadata
                 model_name = message.response_metadata.get("model_name", "unknown")
+
                 if llm_service._service_config.main.model == model_name:
                     # Update the main model context used with total tokens
                     self.main_model_context_used = total_tokens
