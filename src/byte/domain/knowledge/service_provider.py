@@ -1,10 +1,8 @@
-from typing import TYPE_CHECKING
+from typing import List, Type
 
+from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
-from byte.domain.knowledge.service import KnowledgeService
-
-if TYPE_CHECKING:
-    from byte.container import Container
+from byte.domain.knowledge.service.conventions_service import ConventionsService
 
 
 class KnowledgeServiceProvider(ServiceProvider):
@@ -16,31 +14,14 @@ class KnowledgeServiceProvider(ServiceProvider):
     Usage: Register with container to enable long-term knowledge storage
     """
 
-    async def register(self, container: "Container") -> None:
-        """Register knowledge services in the container.
+    def services(self) -> List[Type[Service]]:
+        return [ConventionsService]
 
-        Usage: `provider.register(container)` -> binds knowledge services
-        """
-        # Register knowledge service
-        container.singleton(KnowledgeService)
-
-    async def boot(self, container: "Container") -> None:
-        """Boot knowledge services after all providers are registered.
-
-        Usage: `provider.boot(container)` -> knowledge system ready for use
-        """
-        # Knowledge service is lazy-loaded, no explicit boot needed
-        pass
-
-    async def shutdown(self, container: "Container"):
-        """Shutdown knowledge services and close database connections."""
-        try:
-            if KnowledgeService in container._instances:
-                knowledge_service = await container.make(KnowledgeService)
-                await knowledge_service.close()
-        except Exception:
-            pass  # Ignore cleanup errors during shutdown
-
-    def provides(self) -> list:
-        """Return list of services provided by this provider."""
-        return [KnowledgeService]
+    # async def shutdown(self, container: "Container"):
+    #     """Shutdown knowledge services and close database connections."""
+    #     try:
+    #         if KnowledgeService in container._instances:
+    #             knowledge_service = await container.make(KnowledgeService)
+    #             await knowledge_service.close()
+    #     except Exception:
+    #         pass  # Ignore cleanup errors during shutdown

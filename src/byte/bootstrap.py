@@ -9,6 +9,7 @@ from byte.domain.analytics.service_provider import AnalyticsProvider
 from byte.domain.cli_input.service.command_registry import CommandRegistry
 from byte.domain.cli_input.service_provider import CliInputServiceProvider
 from byte.domain.cli_output.service_provider import CliOutputServiceProvider
+from byte.domain.edit_format.service_provider import EditFormatProvider
 from byte.domain.files.service_provider import FileServiceProvider
 from byte.domain.git.service_provider import GitServiceProvider
 from byte.domain.lint.service_provider import LintServiceProvider
@@ -56,6 +57,7 @@ async def bootstrap(config: ByteConfg):
         AgentServiceProvider(),  # Agent routing and management
         MCPServiceProvider(),
         AnalyticsProvider(),
+        EditFormatProvider(),
         SystemServiceProvider(),  # Core system commands
     ]
 

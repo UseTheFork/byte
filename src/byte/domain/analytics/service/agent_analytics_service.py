@@ -75,12 +75,12 @@ class AgentAnalyticsService(Service):
             100,
         )
 
-        main_cost = (
+        weak_cost = (
             self.weak_model_tokens_used
             * llm_service._service_config.weak.cost_per_token
         )
 
-        weak_cost = (
+        main_cost = (
             self.main_model_tokens_used
             * llm_service._service_config.main.cost_per_token
         )
@@ -91,6 +91,7 @@ class AgentAnalyticsService(Service):
             total=llm_service._service_config.main.max_tokens,
             completed=self.main_model_context_used,
             width=15,
+            style="success",
         )
 
         analytics_panel = Panel(

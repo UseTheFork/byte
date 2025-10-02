@@ -1,13 +1,17 @@
-from abc import ABC, abstractmethod
+import re
 from enum import Enum
 from pathlib import Path
 from typing import List
 
 from pydantic.dataclasses import dataclass
 
-from byte.core.mixins.bootable import Bootable
-from byte.core.mixins.configurable import Configurable
 from byte.core.mixins.user_interactive import UserInteractive
+from byte.core.service.base_service import Service
+from byte.domain.edit_format.exceptions import PreFlightCheckError
+from byte.domain.edit_format.service.edit_format_prompt import (
+    edit_format_system,
+    practice_messages,
+)
 from byte.domain.files.context_manager import FileMode
 from byte.domain.files.service.file_service import FileService
 
@@ -52,7 +56,7 @@ class SearchReplaceBlock:
     def to_search_replace_format(
         self,
         fence: str = "```",
-        operation: str = "+++",
+        operation: str = "+++++++",
         search: str = "<<<<<<< SEARCH",
         divider: str = "=======",
         replace: str = ">>>>>>> REPLACE",
@@ -77,14 +81,23 @@ class SearchReplaceBlock:
 {fence}"""
 
 
-class EditFormat(ABC, Bootable, Configurable, UserInteractive):
+class EditFormatService(Service, UserInteractive):
     """"""
+
+    add_file_marker: str = "+++++++"
+    remove_file_marker: str = "-------"
+    search: str = "<<<<<<< SEARCH"
+    divider: str = "======="
+    replace: str = ">>>>>>> REPLACE"
 
     prompts: EditFormatPrompts
     edit_blocks: List[SearchReplaceBlock]
 
     async def boot(self):
         self.edit_blocks = []
+        self.prompts = EditFormatPrompts(
+            system=edit_format_system, examples=practice_messages
+        )
 
     async def handle(self, content: str) -> List[SearchReplaceBlock]:
         """Process content by validating and parsing it into SearchReplaceBlock objects.
@@ -109,33 +122,48 @@ class EditFormat(ABC, Bootable, Configurable, UserInteractive):
 
         return blocks
 
-    @abstractmethod
     def parse_content_to_blocks(self, content: str) -> List[SearchReplaceBlock]:
-        """Parse content string into a list of EditBlock objects for find and replace operations.
+        """Extract SEARCH/REPLACE blocks from AI response content."""
 
-        Args:
-            content: Raw content string containing edit instructions
+        blocks = []
 
-        Returns:
-            List of EditBlock objects representing individual edit operations
-        """
-        pass
+        # Pattern to match the entire SEARCH/REPLACE block structure
+        pattern = r"```\w*\n(\+\+\+\+\+\+\+|-------) (.+?)\n<<<<<<< SEARCH\n(.*?)\n=======\n(.*?)\n>>>>>>> REPLACE\n```"
 
-    @abstractmethod
+        matches = re.findall(pattern, content, re.DOTALL)
+
+        for match in matches:
+            operation, file_path, search_content, replace_content = match
+            blocks.append(
+                SearchReplaceBlock(
+                    operation=operation,
+                    file_path=file_path.strip(),
+                    search_content=search_content,
+                    replace_content=replace_content,
+                )
+            )
+        return blocks
+
     def pre_flight_check(self, content: str) -> None:
-        """Validate edit block structure before parsing.
+        """Validate that SEARCH/REPLACE block markers are properly balanced.
 
-        Performs validation checks on the raw content to ensure it contains
-        properly formatted edit blocks. Should raise PreFlightCheckError
-        if validation fails.
-
-        Args:
-            content: Raw content string to validate
-
-        Raises:
-            PreFlightCheckError: If content contains malformed edit blocks
+        Counts occurrences of all five required markers and raises an exception
+        if they don't match, indicating malformed blocks.
         """
-        pass
+        search_count = content.count(self.search)
+        replace_count = content.count(self.replace)
+        divider_count = content.count(self.divider)
+        file_marker_count = content.count(self.add_file_marker) + content.count(
+            self.remove_file_marker
+        )
+
+        if not (search_count == replace_count == divider_count == file_marker_count):
+            raise PreFlightCheckError(
+                f"Malformed SEARCH/REPLACE blocks: "
+                f"SEARCH={search_count}, REPLACE={replace_count}, "
+                f"dividers={divider_count}, file markers={file_marker_count}. "
+                f"All counts must be equal."
+            )
 
     async def mid_flight_check(
         self, blocks: List[SearchReplaceBlock]
@@ -159,7 +187,7 @@ class EditFormat(ABC, Bootable, Configurable, UserInteractive):
             file_path = Path(block.file_path)
 
             # Set block type based on operation and file existence
-            if block.operation == "---":
+            if block.operation == "-------":
                 # --- operation: remove file or replace entire contents
                 if block.search_content == "" and block.replace_content == "":
                     block.block_type = BlockType.REMOVE  # Remove file completely
@@ -249,8 +277,8 @@ class EditFormat(ABC, Bootable, Configurable, UserInteractive):
                         ):
                             file_path.unlink()
 
-                elif block.operation == "---":
-                    # --- operation: replace entire file contents
+                elif block.operation == "-------":
+                    # ------- operation: replace entire file contents
                     file_path.parent.mkdir(parents=True, exist_ok=True)
                     if await self.prompt_for_confirmation(
                         f"Replace all contents of '{file_path}'?",
@@ -258,7 +286,7 @@ class EditFormat(ABC, Bootable, Configurable, UserInteractive):
                     ):
                         file_path.write_text(block.replace_content, encoding="utf-8")
 
-                elif block.operation == "+++":
+                elif block.operation == "+++++++":
                     # +++ operation: edit existing or create new
                     if block.block_type == BlockType.ADD:
                         # Create new file

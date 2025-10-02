@@ -1,17 +1,6 @@
-import re
-from textwrap import dedent
-from typing import List
-
-from byte.domain.agent.implementations.coder.edit_format.base import (
-    EditFormat,
-    EditFormatPrompts,
-    SearchReplaceBlock,
-)
-from byte.domain.agent.implementations.coder.edit_format.exceptions import (
-    PreFlightCheckError,
-)
-
 # Credits to: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/coders/editblock_fenced_prompts.py
+from textwrap import dedent
+
 edit_format_system = dedent("""
     # *SEARCH/REPLACE block* Rules:
 
@@ -24,7 +13,7 @@ edit_format_system = dedent("""
 
     Every *SEARCH/REPLACE block* must use this exact format:
     1. Opening fence with language: ```python
-    2. Operation type and file path: `+++` or `---` followed by the *FULL* file path
+    2. Operation type and file path: `+++++++` or `-------` followed by the *FULL* file path
     3. Search marker: <<<<<<< SEARCH
     4. Content to find (can be empty)
     5. Divider: =======
@@ -33,14 +22,14 @@ edit_format_system = dedent("""
     8. Closing fence: ```
 
     ## Operation Types:
-    - `+++` for **editing** existing files or **creating** new files
-    - `---` for **removing** files or **replacing entire file contents**
+    - `+++++++` for **editing** existing files or **creating** new files
+    - `-------` for **removing** files or **replacing entire file contents**
 
     ## Examples:
 
     **Create a new file:**
     ```python
-    +++ mathweb/flask/app.py
+    +++++++ mathweb/flask/app.py
     <<<<<<< SEARCH
     =======
     import math
@@ -50,7 +39,7 @@ edit_format_system = dedent("""
 
     **Edit existing file content:**
     ```python
-    +++ mathweb/flask/app.py
+    +++++++ mathweb/flask/app.py
     <<<<<<< SEARCH
     from flask import Flask
     =======
@@ -61,7 +50,7 @@ edit_format_system = dedent("""
 
    **Remove entire file:**
     ```python
-    --- mathweb/flask/app.py
+    ------- mathweb/flask/app.py
     <<<<<<< SEARCH
     =======
     >>>>>>> REPLACE
@@ -69,7 +58,7 @@ edit_format_system = dedent("""
 
     **Replace all file contents:**
     ```python
-    --- mathweb/flask/app.py
+    ------- mathweb/flask/app.py
     <<<<<<< SEARCH
     =======
     import math
@@ -96,7 +85,7 @@ edit_format_system = dedent("""
 
     File Operations:
     - Only edit files that the user has added to the chat
-    - For new files: use +++ with empty SEARCH, content in REPLACE
+    - For new files: use +++++++ with empty SEARCH, content in REPLACE
     - To move code: use 2 blocks (1 to delete, 1 to insert)
     - To rename files: use shell commands after your response
 
@@ -126,7 +115,7 @@ practice_messages = [
         Here are the *SEARCH/REPLACE* blocks:
 
         ```python
-        +++ mathweb/flask/app.py
+        +++++++ mathweb/flask/app.py
         <<<<<<< SEARCH
         from flask import Flask
         =======
@@ -136,7 +125,7 @@ practice_messages = [
         ```
 
         ```python
-        +++ mathweb/flask/app.py
+        +++++++ mathweb/flask/app.py
         <<<<<<< SEARCH
         def factorial(n):
             "compute factorial"
@@ -151,7 +140,7 @@ practice_messages = [
         ```
 
         ```python
-        +++ mathweb/flask/app.py
+        +++++++ mathweb/flask/app.py
         <<<<<<< SEARCH
             return str(factorial(n))
         =======
@@ -175,7 +164,7 @@ practice_messages = [
         Here are the *SEARCH/REPLACE* blocks:
 
         ```python
-        +++ hello.py
+        +++++++ hello.py
         <<<<<<< SEARCH
         =======
         def hello():
@@ -186,7 +175,7 @@ practice_messages = [
         ```
 
         ```python
-        +++ main.py
+        +++++++ main.py
         <<<<<<< SEARCH
         def hello():
             "print a greeting"
@@ -208,7 +197,7 @@ practice_messages = [
         Here is the *SEARCH/REPLACE* block:
 
         ```python
-        --- old_config.py
+        ------- old_config.py
         <<<<<<< SEARCH
         =======
         >>>>>>> REPLACE
@@ -228,7 +217,7 @@ practice_messages = [
         Here is the *SEARCH/REPLACE* block:
 
         ```python
-        --- config.py
+        ------- config.py
         <<<<<<< SEARCH
         =======
         import os
@@ -257,7 +246,7 @@ practice_messages = [
         Here are the *SEARCH/REPLACE* blocks:
 
         ```python
-        +++ calculator.py
+        +++++++ calculator.py
         <<<<<<< SEARCH
         def calculate(a, b):
             "Simple calculator function"
@@ -268,7 +257,7 @@ practice_messages = [
         ```
 
         ```python
-        +++ calculator.py
+        +++++++ calculator.py
         <<<<<<< SEARCH
             return a / b
         =======
@@ -280,60 +269,3 @@ practice_messages = [
         ```"""),
     ),
 ]
-
-
-class BlockedFenceEditFormat(EditFormat):
-    add_file_marker: str = "+++"
-    remove_file_marker: str = "---"
-    search: str = "<<<<<<< SEARCH"
-    divider: str = "======="
-    replace: str = ">>>>>>> REPLACE"
-
-    async def boot(self):
-        await super().boot()
-        self.prompts = EditFormatPrompts(
-            system=edit_format_system, examples=practice_messages
-        )
-
-    def parse_content_to_blocks(self, content: str) -> List[SearchReplaceBlock]:
-        """Extract SEARCH/REPLACE blocks from AI response content."""
-
-        blocks = []
-
-        # Pattern to match the entire SEARCH/REPLACE block structure
-        pattern = r"```\w*\n(\+\+\+|---) (.+?)\n<<<<<<< SEARCH\n(.*?)\n=======\n(.*?)\n>>>>>>> REPLACE\n```"
-
-        matches = re.findall(pattern, content, re.DOTALL)
-
-        for match in matches:
-            operation, file_path, search_content, replace_content = match
-            blocks.append(
-                SearchReplaceBlock(
-                    operation=operation,
-                    file_path=file_path.strip(),
-                    search_content=search_content,
-                    replace_content=replace_content,
-                )
-            )
-        return blocks
-
-    def pre_flight_check(self, content: str) -> None:
-        """Validate that SEARCH/REPLACE block markers are properly balanced.
-
-        Counts occurrences of all five required markers and raises an exception
-        if they don't match, indicating malformed blocks.
-        """
-        search_count = content.count(self.search)
-        replace_count = content.count(self.replace)
-        divider_count = content.count(self.divider)
-        file_marker_count = content.count(self.add_file_marker) + content.count(
-            self.remove_file_marker
-        )
-
-        if not (search_count == replace_count == divider_count == file_marker_count):
-            raise PreFlightCheckError(
-                f"Malformed SEARCH/REPLACE blocks: "
-                f"SEARCH={search_count}, REPLACE={replace_count}, "
-                f"dividers={divider_count}, file markers={file_marker_count}. "
-                f"All counts must be equal."
-            )

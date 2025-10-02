@@ -6,18 +6,13 @@ from langgraph.graph.state import CompiledStateGraph
 from typing_extensions import TypedDict
 
 from byte.domain.agent.implementations.base import Agent
-from byte.domain.agent.implementations.coder.edit_format.base import (
-    EditFormat,
-)
-from byte.domain.agent.implementations.coder.edit_format.editblock_fenced import (
-    BlockedFenceEditFormat,
-)
 from byte.domain.agent.implementations.coder.prompts import coder_prompt
 from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.lint_node import LintNode
 from byte.domain.agent.nodes.parse_blocks_node import ParseBlocksNode
 from byte.domain.agent.nodes.setup_node import SetupNode
 from byte.domain.agent.state import CoderState
+from byte.domain.edit_format.service.edit_format_service import EditFormatService
 from byte.domain.llm.service.llm_service import LLMService
 
 
@@ -29,13 +24,10 @@ class CoderAgent(Agent):
     the actor system for clean separation of concerns.
     """
 
-    edit_format: EditFormat
+    edit_format: EditFormatService
 
     async def boot(self):
-        # TODO: Need to figure out how to specify what what edit_format is currently running.
-
-        self.edit_format = BlockedFenceEditFormat(self.container)
-        await self.edit_format.ensure_booted()
+        self.edit_format = await self.make(EditFormatService)
 
     def get_state_class(self) -> Type[TypedDict]:  # pyright: ignore[reportInvalidTypeForm]
         """Return coder-specific state class."""

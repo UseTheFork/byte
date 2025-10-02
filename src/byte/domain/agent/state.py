@@ -2,7 +2,7 @@ from typing import Annotated, TypedDict
 
 from langgraph.graph.message import AnyMessage, add_messages
 
-from byte.domain.agent.implementations.coder.edit_format.base import SearchReplaceBlock
+from byte.domain.edit_format.service.edit_format_service import SearchReplaceBlock
 
 
 class BaseState(TypedDict):

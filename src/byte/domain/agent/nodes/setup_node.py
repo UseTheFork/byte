@@ -2,14 +2,14 @@ from typing import Optional
 
 from langgraph.graph.state import RunnableConfig
 
-from byte.domain.agent.implementations.coder.edit_format.base import EditFormat
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.state import BaseState
+from byte.domain.edit_format.service.edit_format_service import EditFormatService
 from byte.domain.files.service.file_service import FileService
 
 
 class SetupNode(Node):
-    async def boot(self, edit_format: Optional[EditFormat] = None, **kwargs):
+    async def boot(self, edit_format: Optional[EditFormatService] = None, **kwargs):
         self.edit_format = edit_format
 
     async def __call__(self, state: BaseState, config: RunnableConfig):
