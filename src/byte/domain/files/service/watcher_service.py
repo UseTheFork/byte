@@ -5,7 +5,6 @@ from typing import Optional, Set
 from watchfiles import Change, awatch
 
 from byte.core.event_bus import Payload
-from byte.core.logging import log
 from byte.core.service.base_service import Service
 from byte.core.task_manager import TaskManager
 from byte.domain.agent.implementations.ask.agent import AskAgent
@@ -66,7 +65,6 @@ class FileWatcherService(Service):
     async def _handle_file_change(self, file_path: Path, change_type: Change) -> None:
         """Handle file system changes."""
 
-        log.info(file_path)
         # Skip directory changes - we only want to monitor file changes
         if file_path.is_dir():
             return
@@ -102,8 +100,6 @@ class FileWatcherService(Service):
                 auto_add_result = await self._auto_add_file_to_context(
                     file_path, file_mode
                 )
-
-                log.info(ai_result)
 
                 # Return true if file was added OR if there's an action type
                 return auto_add_result or ai_result.get("action_type") is not None

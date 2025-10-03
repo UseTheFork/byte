@@ -5,6 +5,7 @@ from rich.columns import Columns
 from rich.progress_bar import ProgressBar
 
 from byte.core.event_bus import Payload
+from byte.core.logging import log
 from byte.core.service.base_service import Service
 from byte.domain.cli.rich.panel import Panel
 from byte.domain.llm.service.llm_service import LLMService
@@ -48,6 +49,9 @@ class AgentAnalyticsService(Service):
 
                 # Extract model name from response metadata
                 model_name = message.response_metadata.get("model_name", "unknown")
+
+                log.info(model_name)
+                log.info(llm_service._service_config.main.model)
 
                 if llm_service._service_config.main.model == model_name:
                     # Update the main model context used with total tokens
