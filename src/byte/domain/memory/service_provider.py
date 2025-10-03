@@ -2,6 +2,8 @@ from typing import TYPE_CHECKING, List, Type
 
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
+from byte.domain.cli.service.command_registry import Command
+from byte.domain.memory.command.clear_command import ClearCommand
 from byte.domain.memory.service.memory_service import MemoryService
 
 if TYPE_CHECKING:
@@ -19,6 +21,9 @@ class MemoryServiceProvider(ServiceProvider):
 
     def services(self) -> List[Type[Service]]:
         return [MemoryService]
+
+    def commands(self) -> List[Type[Command]]:
+        return [ClearCommand]
 
     async def shutdown(self, container: "Container"):
         """Shutdown memory services and close database connections."""

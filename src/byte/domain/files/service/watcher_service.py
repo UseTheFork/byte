@@ -29,11 +29,11 @@ class FileWatcherService(Service):
         self.task_manager = await self.make(TaskManager)
 
         self._ai_patterns = [
-            re.compile(r"//.*?AI([:|@])\s*(.*)$", re.MULTILINE | re.IGNORECASE),
-            re.compile(r"#.*?AI([:|@])\s*(.*)$", re.MULTILINE | re.IGNORECASE),
-            re.compile(r"--.*?AI([:|@])\s*(.*)$", re.MULTILINE | re.IGNORECASE),
+            re.compile(r"//.*?AI([:|@!?])\s*(.*)$", re.MULTILINE | re.IGNORECASE),
+            re.compile(r"#.*?AI([:|@!?])\s*(.*)$", re.MULTILINE | re.IGNORECASE),
+            re.compile(r"--.*?AI([:|@!?])\s*(.*)$", re.MULTILINE | re.IGNORECASE),
             re.compile(
-                r"<!--.*?AI([:|@])\s*(.*?)\s*-->",
+                r"<!--.*?AI([:|@!?])\s*(.*?)\s*-->",
                 re.MULTILINE | re.DOTALL | re.IGNORECASE,
             ),
         ]
@@ -66,6 +66,7 @@ class FileWatcherService(Service):
     async def _handle_file_change(self, file_path: Path, change_type: Change) -> None:
         """Handle file system changes."""
 
+        log.info(file_path)
         # Skip directory changes - we only want to monitor file changes
         if file_path.is_dir():
             return

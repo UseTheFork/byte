@@ -56,3 +56,4 @@ node_modules
 dist
 
 .byte/*
+.ruff_cache

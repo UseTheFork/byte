@@ -112,3 +112,15 @@ class MemoryService(Service):
             self._current_thread_id = self.create_thread()
             # await self._persist_current_thread(self._current_thread_id)
         return self._current_thread_id
+
+    async def new_thread(self) -> str:
+        """Create a new conversation thread and set it as the current active thread.
+
+        Generates a new unique thread identifier, sets it as the current thread,
+        and returns the ID for immediate use in conversation flows.
+
+        Usage: `thread_id = await memory_service.new_thread()` -> starts fresh conversation
+        """
+        thread_id = self.create_thread()
+        await self.set_current_thread(thread_id)
+        return thread_id
