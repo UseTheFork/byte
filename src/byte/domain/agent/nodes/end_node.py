@@ -26,4 +26,4 @@ class EndNode(Node):
         )
         await self.emit(payload)
 
-        return {}
+        return state
