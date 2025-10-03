@@ -1,3 +1,5 @@
+from rich.console import Console
+
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.memory.service.memory_service import MemoryService
 
@@ -29,5 +31,10 @@ class ClearCommand(Command):
 
         Usage: Called automatically when user types `/clear`
         """
+
         memory_service = await self.make(MemoryService)
         await memory_service.new_thread()
+
+        console = await self.make(Console)
+        # Display success confirmation to user
+        console.print("[success]Conversation history cleared[/success]")

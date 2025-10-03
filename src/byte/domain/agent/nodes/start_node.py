@@ -7,7 +7,7 @@ from byte.domain.agent.state import BaseState
 from byte.domain.edit_format.service.edit_format_service import EditFormatService
 
 
-class SetupNode(Node):
+class StartNode(Node):
     async def boot(
         self,
         agent: str,

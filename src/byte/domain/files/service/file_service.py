@@ -243,7 +243,6 @@ Any other messages in the chat may contain outdated versions of the files' conte
         Usage: `await service.clear_context()` -> empty context
         """
         self._context_files.clear()
-        # await self.event(ContextCleared())
 
     # Project file discovery methods
     async def get_project_files(self, extension: Optional[str] = None) -> List[str]:

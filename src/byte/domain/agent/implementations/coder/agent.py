@@ -8,9 +8,10 @@ from typing_extensions import TypedDict
 from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.implementations.coder.prompts import coder_prompt
 from byte.domain.agent.nodes.assistant_node import AssistantNode
+from byte.domain.agent.nodes.end_node import EndNode
 from byte.domain.agent.nodes.lint_node import LintNode
 from byte.domain.agent.nodes.parse_blocks_node import ParseBlocksNode
-from byte.domain.agent.nodes.setup_node import SetupNode
+from byte.domain.agent.nodes.start_node import StartNode
 from byte.domain.agent.state import CoderState
 from byte.domain.edit_format.service.edit_format_service import EditFormatService
 from byte.domain.llm.service.llm_service import LLMService
@@ -46,11 +47,11 @@ class CoderAgent(Agent):
 
         # Add nodes
         graph.add_node(
-            "setup",
+            "start",
             await self.make(
-                SetupNode,
-                edit_format=self.edit_format,
+                StartNode,
                 agent=self.__class__.__name__,
+                edit_format=self.edit_format,
             ),
         )
         graph.add_node(
@@ -63,9 +64,18 @@ class CoderAgent(Agent):
         )
         graph.add_node("lint", await self.make(LintNode))
 
+        graph.add_node(
+            "end",
+            await self.make(
+                EndNode,
+                agent=self.__class__.__name__,
+                llm=llm,
+            ),
+        )
+
         # Define edges
-        graph.add_edge(START, "setup")
-        graph.add_edge("setup", "assistant")
+        graph.add_edge(START, "start")
+        graph.add_edge("start", "assistant")
         graph.add_edge("assistant", "parse_blocks")
 
         # Conditional routing from assistant
@@ -78,7 +88,8 @@ class CoderAgent(Agent):
             },
         )
 
-        graph.add_edge("lint", END)
+        graph.add_edge("lint", "end")
+        graph.add_edge("end", END)
 
         checkpointer = await self.get_checkpointer()
         return graph.compile(checkpointer=checkpointer, debug=False)

@@ -196,7 +196,10 @@ class PromptToolkitService(Service):
 
         Usage: Called by other services to interrupt the prompt gracefully
         """
-        if self.prompt_session and self.prompt_session.app:
-            self.placeholder = self.prompt_session.app.current_buffer.text
-            self.interrupted = True
-            self.prompt_session.app.exit()
+        try:
+            if self.prompt_session and self.prompt_session.app:
+                self.placeholder = self.prompt_session.app.current_buffer.text
+                self.interrupted = True
+                self.prompt_session.app.exit()
+        except Exception:
+            pass

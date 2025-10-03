@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, List, Optional
 
 from byte.core.service.base_service import Service
 from byte.domain.memory.checkpointer import ByteCheckpointer
-from byte.domain.memory.config import MemoryConfig
 
 if TYPE_CHECKING:
     from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
@@ -19,15 +18,7 @@ class MemoryService(Service):
     """
 
     _checkpointer: Optional[ByteCheckpointer] = None
-    _service_config: MemoryConfig
     _current_thread_id: Optional[str] = None
-
-    async def _configure_service(self) -> None:
-        """Configure memory service with database path and retention settings."""
-
-        self._service_config = MemoryConfig(
-            database_path=self._config.byte_dir / "memory.db"
-        )
 
     async def get_checkpointer(self) -> ByteCheckpointer:
         """Get configured checkpointer instance with lazy initialization.
@@ -35,7 +26,7 @@ class MemoryService(Service):
         Usage: `checkpointer = await memory_service.get_checkpointer()` -> for accessing checkpointer
         """
         if self._checkpointer is None:
-            self._checkpointer = ByteCheckpointer(self._service_config)
+            self._checkpointer = ByteCheckpointer(self._config)
         return self._checkpointer
 
     async def get_saver(self) -> "AsyncSqliteSaver":

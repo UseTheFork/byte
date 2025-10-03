@@ -10,7 +10,10 @@ from pydantic_settings import (
     YamlConfigSettingsSource,
 )
 
+from byte.domain.files.config import FilesConfig
+from byte.domain.lint.config import LintConfig
 from byte.domain.mcp.config import MCPServer
+from byte.domain.memory.config import MemoryConfig
 
 
 def _find_project_root() -> Path:
@@ -35,20 +38,6 @@ BYTE_DIR.mkdir(exist_ok=True)
 BYTE_CONFIG_FILE = BYTE_DIR / "config.yaml"
 
 
-class LintCommand(BaseModel):
-    command: str
-    extensions: List[str]
-
-
-class LintConfig(BaseModel):
-    enable: bool = True
-    commands: List[LintCommand] = []
-
-
-class WatchConfig(BaseModel):
-    enable: bool = True
-
-
 class ByteConfg(BaseSettings):
     model_config = SettingsConfigDict(
         env_nested_delimiter="_",
@@ -63,7 +52,8 @@ class ByteConfg(BaseSettings):
     model: str
 
     lint: LintConfig = LintConfig()
-    watch: WatchConfig = WatchConfig()
+    files: FilesConfig = FilesConfig()
+    memory: MemoryConfig = MemoryConfig()
     mcp: List[MCPServer] = []
 
     @classmethod

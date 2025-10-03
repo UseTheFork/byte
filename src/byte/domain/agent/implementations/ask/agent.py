@@ -4,7 +4,8 @@ from langgraph.graph import END, START, StateGraph
 from byte.domain.agent.implementations.ask.prompts import ask_prompt
 from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.nodes.assistant_node import AssistantNode
-from byte.domain.agent.nodes.setup_node import SetupNode
+from byte.domain.agent.nodes.end_node import EndNode
+from byte.domain.agent.nodes.start_node import StartNode
 from byte.domain.agent.nodes.tool_node import ToolNode
 from byte.domain.agent.state import AskState
 from byte.domain.llm.service.llm_service import LLMService
@@ -51,8 +52,8 @@ class AskAgent(Agent):
 
         # Add nodes
         graph.add_node(
-            "setup",
-            await self.make(SetupNode, agent=self.__class__.__name__),
+            "start",
+            await self.make(StartNode, agent=self.__class__.__name__),
         )
         graph.add_node(
             "assistant",
@@ -60,15 +61,25 @@ class AskAgent(Agent):
         )
         graph.add_node("tools", await self.make(ToolNode, tools=mcp_tools))
 
+        graph.add_node(
+            "end",
+            await self.make(
+                EndNode,
+                agent=self.__class__.__name__,
+                llm=llm,
+            ),
+        )
+
         # Define edges
-        graph.add_edge(START, "setup")
-        graph.add_edge("setup", "assistant")
-        graph.add_edge("assistant", END)
+        graph.add_edge(START, "start")
+        graph.add_edge("start", "assistant")
+        graph.add_edge("assistant", "end")
+        graph.add_edge("end", END)
 
         graph.add_conditional_edges(
             "assistant",
             self.route_tools,
-            {"tools": "tools", END: END},
+            {"tools": "tools", "end": "end"},
         )
 
         graph.add_edge("tools", "assistant")
@@ -94,4 +105,4 @@ class AskAgent(Agent):
 
         if hasattr(ai_message, "tool_calls") and len(ai_message.tool_calls) > 0:
             return "tools"
-        return END
+        return "end"

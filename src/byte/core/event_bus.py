@@ -17,6 +17,8 @@ class EventType(Enum):
     PRE_AGENT_EXECUTION = "pre_agent_execution"
     POST_AGENT_EXECUTION = "post_agent_execution"
 
+    END_NODE = "end_node"
+
     PRE_ASSISTANT_NODE = "pre_assistant_node"
     POST_ASSISTANT_NODE = "post_assistant_node"
 

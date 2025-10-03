@@ -1,10 +1,15 @@
 from typing import List
 
-from byte.core.config.config import BaseConfig
+from pydantic import BaseModel
 
 
-class LintConfig(BaseConfig):
+class LintCommand(BaseModel):
+    command: str
+    extensions: List[str]
+
+
+class LintConfig(BaseModel):
     """Lint domain configuration with validation and defaults."""
 
-    enabled: bool = True
-    commands: List[str] | None = None
+    enable: bool = True
+    commands: List[LintCommand] = []

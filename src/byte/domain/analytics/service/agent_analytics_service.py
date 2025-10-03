@@ -5,7 +5,6 @@ from rich.columns import Columns
 from rich.progress_bar import ProgressBar
 
 from byte.core.event_bus import Payload
-from byte.core.logging import log
 from byte.core.service.base_service import Service
 from byte.domain.cli.rich.panel import Panel
 from byte.domain.llm.service.llm_service import LLMService
@@ -28,10 +27,11 @@ class AgentAnalyticsService(Service):
         self.main_model_tokens_used = 0
         self.weak_model_tokens_used = 0
 
-    async def update_usage_analytics(self, payload: Payload) -> Payload:
-        processed_event = payload.get("processed_event", {})
+    async def update_usage_analytics_hook(self, payload: Payload) -> Payload:
+        state = payload.get("state", {})
+        llm = payload.get("llm", {})
 
-        if messages := processed_event.get("messages", []):
+        if messages := state.get("messages", []):
             message = messages[-1]
 
             # Check if message is an AIMessage before processing
@@ -47,23 +47,17 @@ class AgentAnalyticsService(Service):
 
                 llm_service = await self.make(LLMService)
 
-                # Extract model name from response metadata
-                model_name = message.response_metadata.get("model_name", "unknown")
-
-                log.info(model_name)
-                log.info(llm_service._service_config.main.model)
-
-                if llm_service._service_config.main.model == model_name:
+                if llm_service._service_config.main.model == llm.model:
                     # Update the main model context used with total tokens
                     self.main_model_context_used = total_tokens
                     self.main_model_tokens_used += total_tokens
 
-                if llm_service._service_config.weak.model == model_name:
+                if llm_service._service_config.weak.model == llm.model:
                     self.weak_model_tokens_used += total_tokens
 
         return payload
 
-    async def display_usage_panel(self, payload: Payload) -> Payload:
+    async def usage_panel_hook(self, payload: Payload) -> Payload:
         """Display token usage analytics panel with progress bars.
 
         Shows current token consumption for both main and weak models
