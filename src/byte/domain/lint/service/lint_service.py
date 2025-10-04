@@ -163,7 +163,6 @@ class LintService(Service, UserInteractive):
         )
         console.print(panel)
 
-        # Offer user a chance to fix issues if any were found
         if failed_commands:
             do_lint = await self.prompt_for_confirmation("Attempt to fix lint errors?")
             if do_lint:
@@ -270,6 +269,8 @@ class LintService(Service, UserInteractive):
                 status.update(
                     f"[bold primary]Finished linting {len(changed_files)} files"
                 )
+
+        await asyncio.sleep(0.5)
 
         # Display summary panel with results
         await self._display_results_summary(console, lint_commands)

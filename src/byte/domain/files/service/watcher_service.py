@@ -5,7 +5,6 @@ from typing import List, Optional, Set
 from watchfiles import Change, awatch
 
 from byte.core.event_bus import Payload
-from byte.core.logging import log
 from byte.core.service.base_service import Service
 from byte.core.task_manager import TaskManager
 from byte.domain.agent.implementations.ask.agent import AskAgent
@@ -89,7 +88,6 @@ class FileWatcherService(Service):
         try:
             content = file_path.read_text(encoding="utf-8")
             ai_result = await self._scan_for_ai_comments(file_path, content)
-            log.debug(ai_result)
 
             if ai_result:
                 # Use the determined file mode from the scan result
@@ -125,8 +123,6 @@ class FileWatcherService(Service):
             ai_match = self._check_for_ai_marker(comment_text)
 
             if ai_match:
-                log.info(ai_match)
-
                 line_nums.append(line_num)
                 comments.append(comment_text)
 
@@ -187,7 +183,6 @@ class FileWatcherService(Service):
             return None
 
         marker_char = match.group(1)
-        log.debug(match)
 
         # Determine the marker type (: or @)
         marker = "@" if marker_char == "@" else ":"
