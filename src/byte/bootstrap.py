@@ -18,6 +18,7 @@ from byte.domain.mcp.service_provider import MCPServiceProvider
 from byte.domain.memory.service_provider import MemoryServiceProvider
 from byte.domain.system.service_provider import SystemServiceProvider
 from byte.domain.tools.service_provider import ToolsServiceProvider
+from byte.domain.web.service_provider import WebServiceProvider
 
 
 async def bootstrap(config: ByteConfg):
@@ -57,6 +58,7 @@ async def bootstrap(config: ByteConfg):
         MCPServiceProvider(),
         AnalyticsProvider(),
         EditFormatProvider(),
+        WebServiceProvider(),
         SystemServiceProvider(),  # Core system commands
     ]
 

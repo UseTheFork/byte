@@ -53,3 +53,44 @@ class UserInteractive:
 
         interaction_service = await self.container.make(InteractionService)
         return await interaction_service.confirm(message, default)
+
+    async def prompt_for_select(
+        self, message: str, choices: list[str], default: str | None = None
+    ) -> str:
+        """Prompt the user to select from multiple options.
+
+        Displays a list of choices and waits for user selection with
+        optional default value for timeout or errors.
+        Usage: `choice = await self.prompt_for_select("Pick one:", ["option1", "option2"], "option1")`
+        """
+        from byte.domain.cli.service.interactions_service import (
+            InteractionService,
+        )
+
+        if not self.container:
+            raise RuntimeError(
+                "No container available - ensure service is properly initialized"
+            )
+
+        interaction_service = await self.container.make(InteractionService)
+        return await interaction_service.select(message, choices, default)
+
+    async def prompt_for_select_numbered(
+        self, message: str, choices: list[str], default: int | None = None
+    ) -> str:
+        """Prompt the user to select from numbered options.
+
+        Displays choices as a numbered list and prompts for selection by number.
+        Usage: `choice = await self.prompt_for_select_numbered("Pick one:", ["option1", "option2"], default=1)`
+        """
+        from byte.domain.cli.service.interactions_service import (
+            InteractionService,
+        )
+
+        if not self.container:
+            raise RuntimeError(
+                "No container available - ensure service is properly initialized"
+            )
+
+        interaction_service = await self.container.make(InteractionService)
+        return await interaction_service.select_numbered(message, choices, default)

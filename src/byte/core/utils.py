@@ -1,4 +1,5 @@
 import sys
+from collections.abc import Callable
 
 from rich.pretty import pprint
 
@@ -51,3 +52,33 @@ def extract_content_from_message(message) -> str:
         return message.content[0].get("text", "")
 
     raise ValueError(f"Unable to extract content from message: {type(message.content)}")
+
+
+def value(val, *args, **kwargs):
+    """Return the default value of the given value.
+
+    If the value is callable, invoke it with the provided arguments.
+    Otherwise, return the value as-is.
+    Usage: `result = value(lambda: expensive_operation())` or `result = value(42)`
+    """
+
+    return val(*args, **kwargs) if isinstance(val, Callable) else val
+
+
+def slugify(text: str) -> str:
+    """Convert a string to a URL-safe slug format.
+
+    Converts text to lowercase, replaces non-alphanumeric characters with
+    hyphens, and removes leading/trailing hyphens. Useful for creating
+    keys from URLs or arbitrary text.
+    Usage: `key = slugify("https://example.com/page")` -> "https-example-com-page"
+    """
+    import re
+
+    # Convert to lowercase
+    text = text.lower()
+    # Replace non-alphanumeric characters with hyphens
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    # Remove leading/trailing hyphens
+    text = text.strip("-")
+    return text

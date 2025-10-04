@@ -8,8 +8,6 @@ from rich.pretty import Pretty
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.domain.agent.nodes.base_node import Node
 
-# from langgraph.prebuilt import ToolNode
-
 
 class ToolNode(Node, UserInteractive):
     async def boot(self, tools: list, **kwargs):
@@ -26,8 +24,7 @@ class ToolNode(Node, UserInteractive):
             console = await self.make(Console)
 
             pretty = Pretty(tool_call)
-            panel = Panel(pretty)
-            console.print(panel)
+            console.print(Panel(pretty))
 
             run_tool = await self.prompt_for_confirmation(
                 f"Use {tool_call['name']}", True

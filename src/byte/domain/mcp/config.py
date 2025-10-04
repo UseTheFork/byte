@@ -35,6 +35,15 @@ class AgentToolFilter(BaseModel):
     )
 
 
+class ToolCommandFilter(BaseModel):
+    """Tool filtering configuration for the /tool command."""
+
+    include: Optional[List[str]] = Field(
+        default=None,
+        description="Tools to expose via /tool command (if specified, only these tools will be available)",
+    )
+
+
 class MCPServer(BaseModel):
     """MCP server configuration with connection and agent-specific tool filtering."""
 
@@ -42,4 +51,8 @@ class MCPServer(BaseModel):
     connection: MCPConnection
     agents: Optional[Dict[str, AgentToolFilter]] = Field(
         default=None, description="Agent-specific tool filtering (e.g., 'ask', 'coder')"
+    )
+    tool_command: Optional[ToolCommandFilter] = Field(
+        default=None,
+        description="Tool filtering for /tool command - exposes MCP tools directly to user",
     )

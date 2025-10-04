@@ -179,6 +179,29 @@ class FileDiscoveryService(Service):
             all_matches, key=lambda p: str(p.relative_to(self._config.project_root))
         )
 
+    async def add_file(self, path: Path) -> bool:
+        """Add a newly discovered file to the cache.
+
+        Usage: `discovery.add_file(Path("new_file.py"))` -> adds to cache
+        """
+        if await self._is_ignored(path):
+            return False
+
+        if path.is_file() and path not in self._all_files:
+            self._all_files.add(path)
+            return True
+        return False
+
+    async def remove_file(self, path: Path) -> bool:
+        """Remove a file from the cache when it's deleted.
+
+        Usage: `discovery.remove_file(Path("deleted.py"))` -> removes from cache
+        """
+        if path in self._all_files:
+            self._all_files.discard(path)
+            return True
+        return False
+
     async def refresh(self) -> None:
         """Refresh the file cache by rescanning the project directory.
 

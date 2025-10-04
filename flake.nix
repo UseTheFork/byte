@@ -39,6 +39,7 @@
                   pkgs.pre-commit
 
                   pkgs.uv
+                  pkgs.nodejs
 
                   # Tools / Formaters Linters etc
                   pkgs.alejandra # Nix

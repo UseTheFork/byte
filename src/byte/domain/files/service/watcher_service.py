@@ -1,10 +1,11 @@
 import re
 from pathlib import Path
-from typing import Optional, Set
+from typing import List, Optional, Set
 
 from watchfiles import Change, awatch
 
 from byte.core.event_bus import Payload
+from byte.core.logging import log
 from byte.core.service.base_service import Service
 from byte.core.task_manager import TaskManager
 from byte.domain.agent.implementations.ask.agent import AskAgent
@@ -26,16 +27,6 @@ class FileWatcherService(Service):
         """Initialize file watcher with TaskManager integration."""
         self._watched_files: Set[Path] = set()
         self.task_manager = await self.make(TaskManager)
-
-        self._ai_patterns = [
-            re.compile(r"//.*?AI([:|@!?])\s*(.*)$", re.MULTILINE | re.IGNORECASE),
-            re.compile(r"#.*?AI([:|@!?])\s*(.*)$", re.MULTILINE | re.IGNORECASE),
-            re.compile(r"--.*?AI([:|@!?])\s*(.*)$", re.MULTILINE | re.IGNORECASE),
-            re.compile(
-                r"<!--.*?AI([:|@!?])\s*(.*?)\s*-->",
-                re.MULTILINE | re.DOTALL | re.IGNORECASE,
-            ),
-        ]
 
         await self._start_watching()
 
@@ -71,17 +62,22 @@ class FileWatcherService(Service):
 
         file_discovery_service = await self.make(FileDiscoveryService)
 
-        # Skip if file is ignored by gitignore patterns
-        if await file_discovery_service._is_ignored(file_path):
-            return
-
         result = False
         if change_type == Change.deleted:
+            # Remove from both watcher and discovery caches
             self._watched_files.discard(file_path)
+            await file_discovery_service.remove_file(file_path)
+
             file_service = await self.make(FileService)
             if await file_service.is_file_in_context(file_path):
                 result = await file_service.remove_file(file_path)
-        elif change_type in [Change.added, Change.modified]:
+        elif change_type == Change.added:
+            # Add to discovery cache if not ignored
+            added = await file_discovery_service.add_file(file_path)
+            if added:
+                self._watched_files.add(file_path)
+                result = await self._handle_file_modified(file_path)
+        elif change_type == Change.modified:
             result = await self._handle_file_modified(file_path)
 
         if result:
@@ -93,6 +89,7 @@ class FileWatcherService(Service):
         try:
             content = file_path.read_text(encoding="utf-8")
             ai_result = await self._scan_for_ai_comments(file_path, content)
+            log.debug(ai_result)
 
             if ai_result:
                 # Use the determined file mode from the scan result
@@ -101,8 +98,8 @@ class FileWatcherService(Service):
                     file_path, file_mode
                 )
 
-                # Return true if file was added OR if there's an action type
-                return auto_add_result or ai_result.get("action_type") is not None
+                # Return true if file was added OR if any AI comments were found
+                return auto_add_result or bool(ai_result.get("line_nums"))
 
             return False
         except (FileNotFoundError, PermissionError, UnicodeDecodeError):
@@ -118,37 +115,33 @@ class FileWatcherService(Service):
         line_nums = []
         comments = []
         action_type = None
-        file_mode = FileMode.EDITABLE  # Default to editable
+        file_mode = FileMode.EDITABLE
 
-        # Scan each line for AI comment patterns
-        for i, line in enumerate(content.splitlines(), 1):
-            # Check each pattern against the current line
-            for pattern in self._ai_patterns:  # Use the plural version
-                if match := pattern.search(line):
-                    comment_text = match.group(0).strip()
-                    ai_marker = match.group(1) if match.groups() else ":"
+        # First pass: Extract all comment lines
+        comment_lines = self._extract_comment_lines(content)
 
-                    if comment_text:
-                        line_nums.append(i)
-                        comments.append(comment_text)
+        # Second pass: Check extracted comments for AI markers
+        for line_num, comment_text in comment_lines:
+            ai_match = self._check_for_ai_marker(comment_text)
 
-                        # Determine file mode based on AI marker
-                        if ai_marker == "@":
-                            file_mode = FileMode.READ_ONLY
-                        elif ai_marker == ":":
-                            file_mode = FileMode.EDITABLE
+            if ai_match:
+                log.info(ai_match)
 
-                        # Check the actual comment content for action markers
-                        comment = comment_text.lower()
-                        comment = comment.lstrip("/#-;").strip()
-                        if comment.startswith("ai!") or comment.endswith("ai!"):
-                            action_type = "!"
-                        elif comment.startswith("ai?") or comment.endswith("ai?"):
-                            action_type = "?"
+                line_nums.append(line_num)
+                comments.append(comment_text)
 
-                    # break  # Found match on this line, no need to check other patterns
+                # Determine file mode based on AI marker
+                if ai_match["marker"] == "@":
+                    file_mode = FileMode.READ_ONLY
+                elif ai_match["marker"] == ":":
+                    file_mode = FileMode.EDITABLE
 
-        # Return None if no AI comments found
+                # Track action type (prioritize ! over ?)
+                if ai_match["action"] == "!":
+                    action_type = "!"
+                elif ai_match["action"] == "?" and action_type != "!":
+                    action_type = "?"
+
         if not line_nums:
             return None
 
@@ -159,6 +152,52 @@ class FileWatcherService(Service):
             "file_mode": file_mode,
             "file_path": file_path,
         }
+
+    def _extract_comment_lines(self, content: str) -> List[tuple[int, str]]:
+        """Extract all comment lines from content using common comment patterns.
+
+        Returns list of (line_number, comment_text) tuples.
+        """
+        comment_lines = []
+
+        # Common single-line comment patterns across languages
+        single_line_markers = ["#", "//", "--", ";", "%"]
+
+        for i, line in enumerate(content.splitlines(), 1):
+            stripped_line = line.strip()
+
+            # Check if line starts with any comment marker
+            for marker in single_line_markers:
+                if stripped_line.startswith(marker):
+                    comment_lines.append((i, stripped_line))
+                    break  # Found a comment marker, no need to check others
+
+        return comment_lines
+
+    def _check_for_ai_marker(self, comment_text: str) -> Optional[dict]:
+        """Check if a comment contains an AI marker.
+
+        Returns dict with marker and action type, or None if no AI marker found.
+        """
+        # Pattern to find "AI" followed by a marker (case-insensitive)
+        ai_pattern = re.compile(r"\bAI([:|@!?])", re.IGNORECASE)
+        match = ai_pattern.search(comment_text)
+
+        if not match:
+            return None
+
+        marker_char = match.group(1)
+        log.debug(match)
+
+        # Determine the marker type (: or @)
+        marker = "@" if marker_char == "@" else ":"
+
+        # Determine action type (! or ?)
+        action = None
+        if marker_char in ["!", "?"]:
+            action = marker_char
+
+        return {"marker": marker, "action": action}
 
     async def _auto_add_file_to_context(
         self, file_path: Path, mode: FileMode = FileMode.EDITABLE

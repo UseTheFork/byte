@@ -4,9 +4,12 @@ from byte.container import Container
 from byte.core.event_bus import EventBus, EventType
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
+from byte.domain.cli.service.command_registry import Command
+from byte.domain.knowledge.command.web_command import WebCommand
 from byte.domain.knowledge.service.convention_context_service import (
     ConventionContextService,
 )
+from byte.domain.knowledge.service.session_context_service import SessionContextService
 
 
 class KnowledgeServiceProvider(ServiceProvider):
@@ -19,7 +22,11 @@ class KnowledgeServiceProvider(ServiceProvider):
     """
 
     def services(self) -> List[Type[Service]]:
-        return [ConventionContextService]
+        return [ConventionContextService, SessionContextService]
+
+    def commands(self) -> List[Type[Command]]:
+        """"""
+        return [WebCommand]
 
     async def boot(self, container: Container):
         """Boot file services and register commands with registry."""
@@ -27,11 +34,18 @@ class KnowledgeServiceProvider(ServiceProvider):
         # Set up event listener for PRE_PROMPT_TOOLKIT
         event_bus = await container.make(EventBus)
         conventions_service = await container.make(ConventionContextService)
+        session_context_service = await container.make(SessionContextService)
 
         # Register listener that calls list_in_context_files before each prompt
         event_bus.on(
             EventType.PRE_ASSISTANT_NODE.value,
-            conventions_service.add_project_context,
+            conventions_service.add_project_context_hook,
+        )
+
+        # Register listener that calls list_in_context_files before each prompt
+        event_bus.on(
+            EventType.PRE_ASSISTANT_NODE.value,
+            session_context_service.add_session_context_hook,
         )
 
     # async def shutdown(self, container: "Container"):

@@ -34,7 +34,7 @@ class ConventionContextService(Service):
             except Exception:
                 pass
 
-    async def add_project_context(self, payload: Payload) -> Payload:
+    async def add_project_context_hook(self, payload: Payload) -> Payload:
         """ """
 
         state = payload.get("state", {})

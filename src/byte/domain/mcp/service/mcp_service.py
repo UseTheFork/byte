@@ -1,3 +1,6 @@
+from typing import Dict
+
+from langchain_core.tools import StructuredTool
 from langchain_mcp_adapters.client import MultiServerMCPClient
 
 from byte.core.service.base_service import Service
@@ -13,6 +16,7 @@ class MCPService(Service):
     }
 
     async def boot(self, **kwargs):
+        self._all_tools = {}  # Store filtered tools by agent type
         self._agent_tools = {}  # Store filtered tools by agent type
 
         # Build connections dict from config
@@ -36,6 +40,7 @@ class MCPService(Service):
             client = MultiServerMCPClient(connections)
             tools = await client.get_tools()
 
+            self._all_tools = tools
             # Filter tools for each agent type based on server configuration
             await self._filter_tools_by_agent(tools)
 
@@ -79,3 +84,22 @@ class MCPService(Service):
     def get_tools_for_agent(self, agent_name: str):
         """Get filtered tools for a specific agent type."""
         return self._agent_tools.get(agent_name, [])
+
+    def get_all_tools(self):
+        """Get all available MCP tools without filtering.
+
+        Usage: `tools = mcp_service.get_all_tools()`
+        """
+        return self._all_tools
+
+    def get_all_tools_by_name(self):
+        """Get all available MCP tools as a dictionary keyed by tool name.
+
+        Usage: `tools_dict = mcp_service.get_all_tools_by_name()`
+        """
+        all_tools: Dict[str, StructuredTool] = {}
+        tools = self._all_tools
+        for tool in tools:
+            all_tools[tool.name] = tool
+
+        return all_tools
