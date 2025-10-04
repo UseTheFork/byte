@@ -104,6 +104,8 @@ class AgentAnalyticsService(Service):
             complete_style="success",
         )
 
+        # TODO: maybe add a row with `Tokens: 19k sent, 270 received. Cost: $0.06 message, $0.30 session.`
+
         analytics_panel = Panel(
             Columns(
                 [
