@@ -23,9 +23,7 @@ class AgentAnalyticsService(Service):
         Sets up token tracking and registers the pre-prompt hook to display
         usage statistics before each user interaction.
         """
-        self.main_model_context_used = 0
-        self.main_model_tokens_used = 0
-        self.weak_model_tokens_used = 0
+        self.reset_usage()
 
     async def update_usage_analytics_hook(self, payload: Payload) -> Payload:
         state = payload.get("state", {})
@@ -44,16 +42,20 @@ class AgentAnalyticsService(Service):
             usage_metadata = message.usage_metadata
             if usage_metadata:
                 total_tokens = usage_metadata.get("total_tokens", 0)
+                input_tokens = usage_metadata.get("input_tokens", 0)
+                output_tokens = usage_metadata.get("output_tokens", 0)
 
                 llm_service = await self.make(LLMService)
 
                 if llm_service._service_config.main.model == llm.model:
                     # Update the main model context used with total tokens
-                    self.main_model_context_used = total_tokens
-                    self.main_model_tokens_used += total_tokens
+                    self.model_usage["main"]["context"] = total_tokens
+                    self.model_usage["main"]["total_input"] += input_tokens
+                    self.model_usage["main"]["total_output"] += output_tokens
 
                 if llm_service._service_config.weak.model == llm.model:
-                    self.weak_model_tokens_used += total_tokens
+                    self.model_usage["weak"]["total_input"] += input_tokens
+                    self.model_usage["weak"]["total_output"] += output_tokens
 
         return payload
 
@@ -69,27 +71,36 @@ class AgentAnalyticsService(Service):
 
         # Calculate usage percentages
         main_percentage = min(
-            (self.main_model_context_used / llm_service._service_config.main.max_tokens)
+            (
+                self.model_usage["main"]["context"]
+                / llm_service._service_config.main.max_input_tokens
+            )
             * 100,
             100,
         )
 
         weak_cost = (
-            self.weak_model_tokens_used
-            * llm_service._service_config.weak.cost_per_token
+            self.model_usage["weak"]["total_input"]
+            * llm_service._service_config.weak.input_cost_per_token
+        ) + (
+            self.model_usage["weak"]["total_output"]
+            * llm_service._service_config.weak.output_cost_per_token
         )
 
         main_cost = (
-            self.main_model_tokens_used
-            * llm_service._service_config.main.cost_per_token
+            self.model_usage["main"]["total_input"]
+            * llm_service._service_config.main.input_cost_per_token
+        ) + (
+            self.model_usage["main"]["total_output"]
+            * llm_service._service_config.main.output_cost_per_token
         )
 
         # llm_service._service_config.main.model
 
         progress = ProgressBar(
-            total=llm_service._service_config.main.max_tokens,
-            completed=self.main_model_context_used,
-            width=15,
+            total=llm_service._service_config.main.max_input_tokens,
+            completed=self.model_usage["main"]["context"],
+            width=20,
             complete_style="success",
         )
 
@@ -101,11 +112,11 @@ class AgentAnalyticsService(Service):
                     f"{main_percentage:.1f}%",
                     "|",
                     "Main:",
-                    f"{self.main_model_tokens_used:,}",
+                    f"{self.model_usage['main']['total_input']:,}",
                     f"(${main_cost:.2f})",
                     "|",
                     "Weak:",
-                    f"{self.weak_model_tokens_used:,}",
+                    f"{self.model_usage['weak']['total_input']:,}",
                     f"(${weak_cost:.2f})",
                 ],
                 expand=False,
@@ -122,6 +133,15 @@ class AgentAnalyticsService(Service):
 
         Useful for starting fresh sessions or after reaching certain milestones.
         """
-        self.main_model_context_used = 0
-        self.main_model_tokens_used = 0
-        self.weak_model_tokens_used = 0
+        self.model_usage = {
+            "main": {
+                "context": 0,
+                "total_input": 0,
+                "total_output": 0,
+            },
+            "weak": {
+                "context": 0,
+                "total_input": 0,
+                "total_output": 0,
+            },
+        }

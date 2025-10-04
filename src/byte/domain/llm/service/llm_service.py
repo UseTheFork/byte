@@ -23,14 +23,18 @@ class LLMService(Service):
         """Configure LLM service with model settings based on global configuration."""
         if self._config.model == "sonnet":
             main_model = ModelConfig(
-                model="claude-sonnet-4-5-20250929",
-                max_tokens=64000,
-                cost_per_token=(3 / 1000000),
+                model="claude-sonnet-4-5",
+                max_input_tokens=200000,
+                max_output_tokens=64000,
+                input_cost_per_token=(3 / 1000000),
+                output_cost_per_token=(15 / 1000000),
             )
             weak_model = ModelConfig(
-                model="claude-3-5-haiku-20241022",
-                max_tokens=8192,
-                cost_per_token=(0.80 / 1000000),
+                model="claude-3-5-haiku-latest",
+                max_input_tokens=200000,
+                max_output_tokens=8192,
+                input_cost_per_token=(0.80 / 1000000),
+                output_cost_per_token=(4 / 1000000),
             )
 
         self._service_config = LLMConfig(
@@ -50,13 +54,13 @@ class LLMService(Service):
         if model_type == "main":
             return ChatAnthropic(
                 model_name=self._service_config.main.model,
-                max_tokens=self._service_config.main.max_tokens,
+                max_tokens=self._service_config.main.max_output_tokens,
                 **kwargs,
             )
         elif model_type == "weak":
             return ChatAnthropic(
                 model_name=self._service_config.weak.model,
-                max_tokens=self._service_config.weak.max_tokens,
+                max_tokens=self._service_config.weak.max_output_tokens,
                 **kwargs,
             )
 
