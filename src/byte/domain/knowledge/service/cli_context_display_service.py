@@ -1,4 +1,5 @@
 from rich.columns import Columns
+from rich.markdown import Markdown
 from rich.panel import Panel
 
 from byte.core.event_bus import Payload
@@ -15,34 +16,34 @@ class CLIContextDisplayService(Service):
 
         info_panel = payload.get("info_panel", [])
 
-        context_panel = None
         session_context_service = await self.make(SessionContextService)
         context_items = session_context_service.get_all_context()
-        if context_items:
-            context_names = [f"[text]{key}[/text]" for key in context_items.keys()]
-            context_panel = Panel(
-                Columns(context_names, equal=True, expand=True),
-                title=f"[bold info]Session Context ({len(context_items)})[/bold info]",
-                border_style="info",
-            )
 
-        if context_panel:
-            info_panel.append(context_panel)
-
-        convention_panel = None
         convention_context_service = await self.make(ConventionContextService)
         convention_items = convention_context_service.conventions.all()
+
+        # Build list of markdown sections to include
+        sections = []
+
+        if context_items:
+            context_markdown = "**Session Context**\n" + "\n".join(
+                f"- {key}" for key in context_items.keys()
+            )
+            sections.append(Markdown(context_markdown, justify="left"))
+
         if convention_items:
-            convention_names = [
-                f"[text]{key}[/text]" for key in convention_items.keys()
-            ]
-            convention_panel = Panel(
-                Columns(convention_names, equal=True, expand=True),
-                title=f"[bold info]Conventions ({len(convention_items)})[/bold info]",
+            convention_markdown = "**Conventions**\n" + "\n".join(
+                f"- {key}" for key in convention_items.keys()
+            )
+            sections.append(Markdown(convention_markdown, justify="left"))
+
+        # Create panel with columns if there are any sections
+        if sections:
+            combined_panel = Panel(
+                Columns(sections, equal=True, expand=True),
+                title="Knowledge Context",
                 border_style="info",
             )
-
-        if convention_panel:
-            info_panel.append(convention_panel)
+            info_panel.append(combined_panel)
 
         return payload.set("info_panel", info_panel)
