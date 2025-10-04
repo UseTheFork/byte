@@ -52,6 +52,13 @@ class SessionContextService(Service):
         self.session_context.set({})
         return self
 
+    def get_all_context(self) -> dict[str, str]:
+        """Retrieve all context items from the session store.
+
+        Usage: `all_context = service.get_all_context()`
+        """
+        return self.session_context.all()
+
     async def add_session_context_hook(self, payload: Payload) -> Payload:
         """Inject session context into the prompt state.
 

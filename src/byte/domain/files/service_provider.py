@@ -40,17 +40,17 @@ class FileServiceProvider(ServiceProvider):
         # Register listener that calls list_in_context_files before each prompt
         event_bus.on(
             EventType.PRE_PROMPT_TOOLKIT.value,
-            file_service.list_in_context_files,
+            file_service.list_in_context_files_hook,
         )
 
         event_bus.on(
             EventType.POST_PROMPT_TOOLKIT.value,
-            file_watcher_service.modify_user_request,
+            file_watcher_service.modify_user_request_hook,
         )
 
         event_bus.on(
             EventType.PRE_ASSISTANT_NODE.value,
-            file_service.add_file_context_to_prompt,
+            file_service.add_file_context_to_prompt_hook,
         )
 
         console = await container.make(Console)

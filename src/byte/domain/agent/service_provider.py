@@ -6,6 +6,7 @@ from byte.core.service_provider import ServiceProvider
 from byte.domain.agent.command.ask_command import AskCommand
 from byte.domain.agent.implementations.ask.agent import AskAgent
 from byte.domain.agent.implementations.base import Agent
+from byte.domain.agent.implementations.cleaner.agent import CleanerAgent
 from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.agent.implementations.commit.agent import CommitAgent
 from byte.domain.agent.implementations.fixer.agent import FixerAgent
@@ -33,7 +34,7 @@ class AgentServiceProvider(ServiceProvider):
         return [AgentService]
 
     def agents(self) -> List[Type[Agent]]:
-        return [CoderAgent, CommitAgent, FixerAgent, AskAgent]
+        return [CoderAgent, CommitAgent, FixerAgent, AskAgent, CleanerAgent]
 
     def commands(self) -> List[Type[Command]]:
         return [AskCommand]

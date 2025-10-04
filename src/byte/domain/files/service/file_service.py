@@ -279,7 +279,7 @@ Any other messages in the chat may contain outdated versions of the files' conte
         path_obj = Path(path).resolve()
         return str(path_obj) in self._context_files
 
-    async def list_in_context_files(self, payload: Payload):
+    async def list_in_context_files_hook(self, payload: Payload):
         """Display current editable files before each prompt.
 
         Provides visual feedback about which files the AI can modify,
@@ -322,7 +322,7 @@ Any other messages in the chat may contain outdated versions of the files' conte
 
         return payload.set("info_panel", info_panel)
 
-    async def add_file_context_to_prompt(self, payload: Optional[Payload] = None):
+    async def add_file_context_to_prompt_hook(self, payload: Optional[Payload] = None):
         if payload:
             state = payload.get("state", {})
             state["file_context"] = self.generate_context_prompt()

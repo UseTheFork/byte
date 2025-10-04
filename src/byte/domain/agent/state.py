@@ -43,3 +43,14 @@ class CommitState(BaseState):
     """
 
     commit_message: str
+
+
+class CleanerState(BaseState):
+    """State for cleaner agent with content extraction fields.
+
+    Extends BaseState with fields for content cleaning and information
+    extraction, storing both raw input and cleaned output.
+    Usage: `state = CleanerState(messages=[], cleaned_content="")`
+    """
+
+    cleaned_content: str

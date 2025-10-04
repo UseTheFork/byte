@@ -133,3 +133,41 @@ class InteractionService(Service):
         except Exception:
             # Fallback if container/console not available
             return default
+
+    async def confirm_or_input(
+        self, confirm_message: str, input_message: str, default_confirm: bool = True
+    ) -> tuple[bool, Optional[str]]:
+        """Ask user for confirmation, then prompt for text input if they decline.
+
+        Returns a tuple of (confirmed: bool, text_input: Optional[str]).
+        If user confirms, returns (True, None).
+        If user declines, prompts for text and returns (False, user_input).
+        Usage: `confirmed, text = await interaction_service.confirm_or_input("Use default?", "Enter custom value:")`
+        """
+        try:
+            console: Console = await self.make(Console)
+
+            # First ask for confirmation
+            confirmed = Confirm.ask(
+                prompt=confirm_message,
+                default=default_confirm,
+                console=console,
+                case_sensitive=False,
+            )
+
+            if confirmed:
+                return (True, None)
+
+            # If not confirmed, prompt for text input
+            text_input = Prompt.ask(
+                input_message,
+                console=console,
+            )
+            return (False, text_input)
+
+        except (EOFError, KeyboardInterrupt):
+            # Return default confirmation on interrupt
+            return (default_confirm, None)
+        except Exception:
+            # Fallback if container/console not available
+            return (default_confirm, None)

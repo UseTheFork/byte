@@ -3,6 +3,7 @@ from rich.markdown import Markdown
 
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.utils import slugify
+from byte.domain.agent.implementations.cleaner.agent import CleanerAgent
 from byte.domain.cli.rich.panel import Panel
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.knowledge.service.session_context_service import SessionContextService
@@ -64,8 +65,29 @@ class WebCommand(Command, UserInteractive):
             session_context_service.add_context(key, markdown_content)
 
         elif choice == "Clean with LLM":
-            console.print(
-                "[success]Content will be cleaned with LLM and added to context[/success]"
+            console.print("[info]Cleaning content with LLM...[/info]")
+
+            cleaner_agent = await self.make(CleanerAgent)
+            result = await cleaner_agent.execute(
+                {
+                    "messages": [
+                        (
+                            "user",
+                            f"Please extract only the relevant information from this web content:\n\n{markdown_content}",
+                        )
+                    ],
+                    "project_inforamtion_and_context": [],
+                },
+                display_mode="thinking",
             )
+
+            cleaned_content = result.get("cleaned_content", "")
+
+            if cleaned_content:
+                console.print("[success]Content cleaned and added to context[/success]")
+                key = slugify(args)
+                session_context_service.add_context(key, cleaned_content)
+            else:
+                console.print("[warning]No cleaned content returned[/warning]")
         else:
             console.print("[info]Content not added to context[/info]")

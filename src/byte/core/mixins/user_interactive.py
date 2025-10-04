@@ -94,3 +94,26 @@ class UserInteractive:
 
         interaction_service = await self.container.make(InteractionService)
         return await interaction_service.select_numbered(message, choices, default)
+
+    async def prompt_for_confirm_or_input(
+        self, confirm_message: str, input_message: str, default_confirm: bool = True
+    ) -> tuple[bool, Optional[str]]:
+        """Prompt user for confirmation, then text input if they decline.
+
+        First asks for yes/no confirmation. If user declines, prompts for text input.
+        Returns tuple of (confirmed: bool, text: Optional[str]).
+        Usage: `confirmed, text = await self.prompt_for_confirm_or_input("Use default?", "Enter value:")`
+        """
+        from byte.domain.cli.service.interactions_service import (
+            InteractionService,
+        )
+
+        if not self.container:
+            raise RuntimeError(
+                "No container available - ensure service is properly initialized"
+            )
+
+        interaction_service = await self.container.make(InteractionService)
+        return await interaction_service.confirm_or_input(
+            confirm_message, input_message, default_confirm
+        )

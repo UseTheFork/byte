@@ -6,6 +6,9 @@ from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.knowledge.command.web_command import WebCommand
+from byte.domain.knowledge.service.cli_context_display_service import (
+    CLIContextDisplayService,
+)
 from byte.domain.knowledge.service.convention_context_service import (
     ConventionContextService,
 )
@@ -22,7 +25,11 @@ class KnowledgeServiceProvider(ServiceProvider):
     """
 
     def services(self) -> List[Type[Service]]:
-        return [ConventionContextService, SessionContextService]
+        return [
+            ConventionContextService,
+            SessionContextService,
+            CLIContextDisplayService,
+        ]
 
     def commands(self) -> List[Type[Command]]:
         """"""
@@ -36,6 +43,8 @@ class KnowledgeServiceProvider(ServiceProvider):
         conventions_service = await container.make(ConventionContextService)
         session_context_service = await container.make(SessionContextService)
 
+        cli_context_display_service = await container.make(CLIContextDisplayService)
+
         # Register listener that calls list_in_context_files before each prompt
         event_bus.on(
             EventType.PRE_ASSISTANT_NODE.value,
@@ -46,6 +55,11 @@ class KnowledgeServiceProvider(ServiceProvider):
         event_bus.on(
             EventType.PRE_ASSISTANT_NODE.value,
             session_context_service.add_session_context_hook,
+        )
+
+        event_bus.on(
+            EventType.PRE_PROMPT_TOOLKIT.value,
+            cli_context_display_service.display_context_panel_hook,
         )
 
     # async def shutdown(self, container: "Container"):

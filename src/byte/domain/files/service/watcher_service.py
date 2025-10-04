@@ -290,7 +290,7 @@ class FileWatcherService(Service):
 
         return None
 
-    async def modify_user_request(self, payload: Optional[Payload] = None):
+    async def modify_user_request_hook(self, payload: Optional[Payload] = None):
         if payload:
             interrupted = payload.get("interrupted", False)
             user_input = payload.get("user_input", "")
