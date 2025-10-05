@@ -30,9 +30,7 @@ class ChromiumService(Service):
         """
         options = ChromiumOptions()
         options.add_argument("--headless=new")
-        options.binary_location = (
-            "/etc/profiles/per-user/sincore/bin/google-chrome-stable"
-        )
+        options.binary_location = str(self._config.web.chrome_binary_location)
         options.start_timeout = 20
 
         async with Chrome(options=options) as browser:

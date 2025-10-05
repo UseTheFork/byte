@@ -14,6 +14,7 @@ from byte.domain.files.config import FilesConfig
 from byte.domain.lint.config import LintConfig
 from byte.domain.mcp.config import MCPServer
 from byte.domain.memory.config import MemoryConfig
+from byte.domain.web.config import WebConfig
 
 
 def _find_project_root() -> Path:
@@ -54,6 +55,7 @@ class ByteConfg(BaseSettings):
     lint: LintConfig = LintConfig()
     files: FilesConfig = FilesConfig()
     memory: MemoryConfig = MemoryConfig()
+    web: WebConfig = WebConfig()
     mcp: List[MCPServer] = []
 
     @classmethod

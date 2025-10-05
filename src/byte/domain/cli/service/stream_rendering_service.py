@@ -45,8 +45,6 @@ class StreamRenderingService(Service):
         and content accumulation for smooth rendering.
         Usage: `await service.handle_message((message, metadata), "CoderAgent")` -> processes chunk
         """
-        if self.display_mode != "verbose":
-            return
 
         message_chunk, metadata = chunk
 
@@ -84,7 +82,8 @@ class StreamRenderingService(Service):
         # Append message content to accumulated content
         if message_chunk.content:
             self.accumulated_content += extract_content_from_message(message_chunk)
-            await self._update_active_stream()
+            if self.display_mode == "verbose":
+                await self._update_active_stream()
 
         if hasattr(message_chunk, "response_metadata"):
             # Check for stream ending conditions
@@ -135,7 +134,8 @@ class StreamRenderingService(Service):
             content = extract_content_from_message(message_chunk)
             if content:
                 self.accumulated_content += content
-                await self._update_active_stream()
+                if self.display_mode == "verbose":
+                    await self._update_active_stream()
 
     async def handle_update(self, chunk):
         """Handle state update chunks from LangGraph execution with node transition management.
@@ -168,7 +168,8 @@ class StreamRenderingService(Service):
 
     async def end_stream_render(self):
         """End the current stream rendering and reset accumulated content."""
-        await self._update_active_stream(final=True)
+        if self.display_mode == "verbose":
+            await self._update_active_stream(final=True)
         self.accumulated_content = ""
         self.active_stream = None
         self.current_stream_id = None
@@ -182,14 +183,15 @@ class StreamRenderingService(Service):
         any existing stream before starting the new one.
         Usage: `await service.start_stream_render("thread_123")` -> starts new stream
         """
-        if self.active_stream:
+        if self.active_stream and self.display_mode == "verbose":
             await self._update_active_stream(final=True)
 
         await self.stop_spinner()
 
         self.current_stream_id = stream_id
         self.accumulated_content = ""  # Reset accumulated content for new stream
-        self.active_stream = MarkdownStream()  # Reset the stream renderer
+        if self.display_mode == "verbose":
+            self.active_stream = MarkdownStream()  # Reset the stream renderer
 
         formatted_name = self._format_agent_name(self.agent_name)
         self.console.print(Rule(f"{formatted_name}", align="left"))
@@ -236,7 +238,7 @@ class StreamRenderingService(Service):
         rendering, with optional final flag to indicate stream completion.
         Usage: Called internally during content accumulation and finalization
         """
-        if self.active_stream:
+        if self.active_stream and self.display_mode == "verbose":
             await self.active_stream.update(self.accumulated_content, final=final)
 
     def _format_agent_name(self, agent_name: str) -> str:

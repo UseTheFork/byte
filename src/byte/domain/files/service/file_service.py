@@ -4,10 +4,10 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 from rich.columns import Columns
-from rich.panel import Panel
 
 from byte.core.event_bus import EventType, Payload
 from byte.core.service.base_service import Service
+from byte.domain.cli.rich.panel import Panel
 from byte.domain.files.context_manager import FileContext, FileMode
 from byte.domain.files.service.discovery_service import FileDiscoveryService
 
@@ -295,8 +295,7 @@ Any other messages in the chat may contain outdated versions of the files' conte
             file_names = [f"[text]{f.relative_path}[/text]" for f in readonly_files]
             read_only_panel = Panel(
                 Columns(file_names, equal=True, expand=True),
-                title=f"[bold info]Read-only Files ({len(readonly_files)})[/bold info]",
-                border_style="info",
+                title=f"[primary]Read-only Files ({len(readonly_files)})[/primary]",
             )
 
         editable_panel = None
@@ -305,8 +304,7 @@ Any other messages in the chat may contain outdated versions of the files' conte
             file_names = [f"[text]{f.relative_path}[/text]" for f in editable_files]
             editable_panel = Panel(
                 Columns(file_names, equal=True, expand=True),
-                title=f"[bold success]Editable Files ({len(editable_files)})[/bold success]",
-                border_style="success",
+                title=f"[primary]Editable Files ({len(editable_files)})[/primary]",
             )
 
         # Create columns layout with both panels if they exist

@@ -1,9 +1,8 @@
-from rich.columns import Columns
-from rich.markdown import Markdown
-from rich.panel import Panel
+from rich.table import Table
 
 from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
+from byte.domain.cli.rich.panel import Panel
 from byte.domain.knowledge.service.convention_context_service import (
     ConventionContextService,
 )
@@ -22,28 +21,32 @@ class CLIContextDisplayService(Service):
         convention_context_service = await self.make(ConventionContextService)
         convention_items = convention_context_service.conventions.all()
 
-        # Build list of markdown sections to include
-        sections = []
+        context_markdown = None
+        convention_markdown = None
 
-        if context_items:
-            context_markdown = "**Session Context**\n" + "\n".join(
-                f"- {key}" for key in context_items.keys()
-            )
-            sections.append(Markdown(context_markdown, justify="left"))
+        context_markdown = "[secondary]Session Context[/secondary]\n" + "\n".join(
+            f"{key}" for key in context_items.keys()
+        )
 
-        if convention_items:
-            convention_markdown = "**Conventions**\n" + "\n".join(
-                f"- {key}" for key in convention_items.keys()
-            )
-            sections.append(Markdown(convention_markdown, justify="left"))
+        convention_markdown = "[secondary]Conventions[/secondary]\n" + "\n".join(
+            f"{key}" for key in convention_items.keys()
+        )
+
+        grid = Table.grid(expand=True)
+        grid.add_column(ratio=1)
+        grid.add_column(width=2)
+        grid.add_column(ratio=1)
+        grid.add_row(
+            context_markdown,
+            None,
+            convention_markdown,
+        )
 
         # Create panel with columns if there are any sections
-        if sections:
-            combined_panel = Panel(
-                Columns(sections, equal=True, expand=True),
-                title="Knowledge Context",
-                border_style="info",
-            )
-            info_panel.append(combined_panel)
+        combined_panel = Panel(
+            grid,
+            title="[primary]Knowledge Context[/primary]",
+        )
+        info_panel.append(combined_panel)
 
         return payload.set("info_panel", info_panel)
