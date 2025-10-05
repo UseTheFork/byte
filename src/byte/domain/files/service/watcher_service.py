@@ -235,7 +235,6 @@ class FileWatcherService(Service):
         action_type = None
         ai_instruction = []
 
-        # TODO: Should we only do this by action_type IE only allow comments of one action type.
         for file_context in context_files:
             content = file_context.get_content()
             if not content:

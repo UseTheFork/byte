@@ -3,6 +3,7 @@ from rich.rule import Rule
 from rich.theme import Theme
 
 from byte.container import Container
+from byte.core.config.config import ByteConfg
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli.service.interactions_service import InteractionService
 from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
@@ -65,7 +66,6 @@ class CLIServiceProvider(ServiceProvider):
         console.push_theme(catppuccin_mocha_theme)
 
         # Create diagonal gradient from primary to secondary color
-        # AI: How can we use `console.width` to get the remaning width of the line and at the end of each line print the last charetcor to fill the space ai?
         logo_lines = [
             "░       ░░░  ░░░░  ░░        ░░        ░",
             "▒  ▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒▒▒",
@@ -114,5 +114,7 @@ class CLIServiceProvider(ServiceProvider):
         )
         console.print("│ ", style="text")
 
-
-# AI: What about this
+        config = await container.make(ByteConfg)
+        console.print(
+            f"│ [success]Project Root:[/success] [info]{config.project_root}[/info]"
+        )
