@@ -12,6 +12,8 @@ class EventType(Enum):
     PRE_PROMPT_TOOLKIT = "pre_prompt_toolkit"
     POST_PROMPT_TOOLKIT = "post_prompt_toolkit"
 
+    GENERATE_FILE_CONTEXT = "generate_file_context"
+
     FILE_ADDED = "file_added"
 
     PRE_AGENT_EXECUTION = "pre_agent_execution"

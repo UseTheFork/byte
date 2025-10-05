@@ -196,7 +196,7 @@ class FileService(Service):
         path_obj = Path(path).resolve()
         return self._context_files.get(str(path_obj))
 
-    def generate_context_prompt(self) -> str:
+    async def generate_context_prompt(self) -> str:
         """Generate structured AI prompt context with all active files.
 
         Creates clearly formatted sections distinguishing read-only from
@@ -224,6 +224,9 @@ Any other messages in the chat may contain outdated versions of the files' conte
             for file_ctx in sorted(read_only, key=lambda f: f.relative_path):
                 content = file_ctx.get_content()
                 if content is not None:
+                    content = await self._emit_file_context_event(
+                        file_ctx.relative_path, FileMode.READ_ONLY, content
+                    )
                     context += f"\n{file_ctx.relative_path}:\n```\n{content}\n```\n"
 
         if editable:
@@ -231,9 +234,26 @@ Any other messages in the chat may contain outdated versions of the files' conte
             for file_ctx in sorted(editable, key=lambda f: f.relative_path):
                 content = file_ctx.get_content()
                 if content is not None:
+                    content = await self._emit_file_context_event(
+                        file_ctx.relative_path, FileMode.EDITABLE, content
+                    )
                     context += f"\n{file_ctx.relative_path}:\n```\n{content}\n```\n"
 
         return context
+
+    async def _emit_file_context_event(self, file: str, type, content: str) -> str:
+        """ """
+        payload = Payload(
+            event_type=EventType.GENERATE_FILE_CONTEXT,
+            data={
+                "file": file,
+                "type": type,
+                "content": content,
+            },
+        )
+
+        payload = await self.emit(payload)
+        return payload.get("content", content)
 
     async def clear_context(self):
         """Clear all files from context for fresh start.
@@ -323,7 +343,7 @@ Any other messages in the chat may contain outdated versions of the files' conte
     async def add_file_context_to_prompt_hook(self, payload: Optional[Payload] = None):
         if payload:
             state = payload.get("state", {})
-            state["file_context"] = self.generate_context_prompt()
+            state["file_context"] = await self.generate_context_prompt()
             payload = payload.set("state", state)
 
         return payload

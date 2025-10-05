@@ -44,13 +44,13 @@ class FileServiceProvider(ServiceProvider):
         )
 
         event_bus.on(
-            EventType.POST_PROMPT_TOOLKIT.value,
-            file_watcher_service.modify_user_request_hook,
+            EventType.PRE_ASSISTANT_NODE.value,
+            file_service.add_file_context_to_prompt_hook,
         )
 
         event_bus.on(
-            EventType.PRE_ASSISTANT_NODE.value,
-            file_service.add_file_context_to_prompt_hook,
+            EventType.POST_PROMPT_TOOLKIT.value,
+            file_watcher_service.modify_user_request_hook,
         )
 
         console = await container.make(Console)

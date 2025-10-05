@@ -1,5 +1,6 @@
 import re
 from pathlib import Path
+from textwrap import dedent
 from typing import List, Optional, Set
 
 from watchfiles import Change, awatch
@@ -110,21 +111,19 @@ class FileWatcherService(Service):
 
         Returns dict with line_nums, comments, and action_type, or None if no AI comments found.
         """
-        line_nums = []
         comments = []
         action_type = None
         file_mode = FileMode.EDITABLE
 
         # First pass: Extract all comment lines
-        comment_lines = self._extract_comment_lines(content)
+        comment_blocks = self._extract_comment_lines(content)
 
         # Second pass: Check extracted comments for AI markers
-        for line_num, comment_text in comment_lines:
-            ai_match = self._check_for_ai_marker(comment_text)
+        for comment_block in comment_blocks:
+            ai_match = self._check_for_ai_marker(comment_block)
 
             if ai_match:
-                line_nums.append(line_num)
-                comments.append(comment_text)
+                comments.append(comment_block)
 
                 # Determine file mode based on AI marker
                 if ai_match["marker"] == "@":
@@ -138,43 +137,60 @@ class FileWatcherService(Service):
                 elif ai_match["action"] == "?" and action_type != "!":
                     action_type = "?"
 
-        if not line_nums:
+        if not comments:
             return None
 
         return {
-            "line_nums": line_nums,
             "comments": comments,
             "action_type": action_type,
             "file_mode": file_mode,
             "file_path": file_path,
         }
 
-    def _extract_comment_lines(self, content: str) -> List[tuple[int, str]]:
-        """Extract all comment lines from content using common comment patterns.
+    def _extract_comment_lines(self, content: str) -> List[str]:
+        """Extract comment blocks from content.
 
-        Returns list of (line_number, comment_text) tuples.
+        A comment block is one or more consecutive lines starting with a comment marker.
+        Returns list of (starting_line_number, combined_comment_text) tuples.
         """
-        comment_lines = []
+        comment_blocks = []
 
         # Common single-line comment patterns across languages
         single_line_markers = ["#", "//", "--", ";", "%"]
+
+        current_block = []
 
         for i, line in enumerate(content.splitlines(), 1):
             stripped_line = line.strip()
 
             # Check if line starts with any comment marker
-            for marker in single_line_markers:
-                if stripped_line.startswith(marker):
-                    comment_lines.append((i, stripped_line))
-                    break  # Found a comment marker, no need to check others
+            is_comment = any(
+                stripped_line.startswith(marker) for marker in single_line_markers
+            )
 
-        return comment_lines
+            if is_comment:
+                # Start or continue a comment block
+                current_block.append(stripped_line)
+            else:
+                # Non-comment line - end current block if one exists
+                if current_block:
+                    combined_text = "\n".join(current_block)
+                    comment_blocks.append(combined_text)
+                    current_block = []
+
+        # Don't forget the last block if file ends with comments
+        if current_block:
+            combined_text = "\n".join(current_block)
+            comment_blocks.append(combined_text)
+
+        return comment_blocks
 
     def _check_for_ai_marker(self, comment_text: str) -> Optional[dict]:
         """Check if a comment contains an AI marker.
 
         Returns dict with marker and action type, or None if no AI marker found.
         """
+
         # Pattern to find "AI" followed by a marker (case-insensitive)
         ai_pattern = re.compile(r"\bAI([:|@!?])", re.IGNORECASE)
         match = ai_pattern.search(comment_text)
@@ -189,8 +205,11 @@ class FileWatcherService(Service):
 
         # Determine action type (! or ?)
         action = None
-        if marker_char in ["!", "?"]:
-            action = marker_char
+        comment_text = comment_text.lower().strip()
+        if comment_text.endswith("ai!"):
+            action = "!"
+        elif comment_text.endswith("ai?"):
+            action = "?"
 
         return {"marker": marker, "action": action}
 
@@ -213,7 +232,10 @@ class FileWatcherService(Service):
         file_service = await self.make(FileService)
         context_files = file_service.list_files()  # Get all files in context
         gathered_comments = []
+        action_type = None
+        ai_instruction = []
 
+        # TODO: Should we only do this by action_type IE only allow comments of one action type.
         for file_context in context_files:
             content = file_context.get_content()
             if not content:
@@ -221,69 +243,70 @@ class FileWatcherService(Service):
 
             result = await self._scan_for_ai_comments(file_context.path, content)
             if result:
-                gathered_comments.append(result)
+                # Track action type (prioritize ! over ?)
+                if result["action_type"] == "!":
+                    action_type = "!"
+                elif result["action_type"] == "?" and action_type != "!":
+                    action_type = "?"
 
-        # From https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/watch_prompts.py#L6
+                gathered_comments.append(result)
 
         if not gathered_comments:
             return None
 
-        # Process the first AI comment found (prioritize by action type)
-        urgent_comments = [c for c in gathered_comments if c.get("action_type") == "!"]
-        question_comments = [
-            c for c in gathered_comments if c.get("action_type") == "?"
-        ]
-        regular_comments = [
-            c for c in gathered_comments if c.get("action_type") not in ["!", "?"]
-        ]
+        for single_comment in gathered_comments:
+            comment_action_type = single_comment.get("action_type")
 
-        # Prioritize urgent (!) comments first, then questions (?), then regular
-        target_comment = None
-        if urgent_comments:
-            target_comment = urgent_comments[0]
-        elif question_comments:
-            target_comment = question_comments[0]
-        elif regular_comments:
-            target_comment = regular_comments[0]
+            # Only include comments based on the action type
+            if action_type == comment_action_type:
+                file_path = single_comment.get("file_path")
 
-        if target_comment:
-            action_type = target_comment.get("action_type")
-            # TODO: we should prob do somthing with this.
-            # comments_text = " ".join(target_comment.get("comments", []))
+                ai_instruction.append(f"## File: {file_path}")
+                ai_instruction.append("### Comments")
 
-            # Extract instruction from the comment text
-            ai_instruction = ""
-            for comment in target_comment.get("comments", []):
-                # Remove comment markers and extract instruction
-                clean_comment = comment.lower().strip()
-                clean_comment = clean_comment.lstrip("/#-;").strip()
-                if clean_comment.startswith("ai"):
-                    ai_instruction = clean_comment[2:].lstrip(":@!?").strip()
-                    break
+                # Extract instruction from the comment text
+                for comment in single_comment.get("comments", []):
+                    # Remove comment markers and extract instruction
+                    clean_comment = comment.strip().lstrip("/#-;").strip()
+                    ai_instruction.append(f"{clean_comment.strip()}\n")
 
-            if action_type == "!":
-                # Urgent task - use standard watch prompt with CoderAgent
-                return {
-                    "prompt": """I've written your instructions in comments in the code and marked them with "AI"
-                    Find them in the code files I've shared with you, and follow their instructions.
+        ai_instruction = "\n".join(ai_instruction)
 
-                    **IMPORTANT**: After completing those instructions, also be sure to remove all the "AI" comments from the code too.""",
-                    "agent_type": CoderAgent,
-                    "ai_instruction": ai_instruction,
-                }
-            elif action_type == "?":
-                # Question - modify prompt to answer the question
-                return {
-                    "prompt": """I've written a question in the code comments that needs to be answered.
+        # Credits to https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/watch_prompts.py#L6
 
-                    Provide a clear, concise, helpful answer based on the code context.""",
-                    "agent_type": AskAgent,
-                    "ai_instruction": ai_instruction,
-                }
-            else:
-                return None
+        # AI: How would you improve the `!` action prompt below ai?
 
-        return None
+        if action_type == "!":
+            # Urgent task - use standard watch prompt with CoderAgent
+            return {
+                "prompt": dedent(f"""# Task
+                I've written task instructions in code comments marked with "AI:".
+
+                # Extracted instructions:
+                {ai_instruction}
+
+                > **IMPORTANT**: Execute these instructions following the project's coding standards and conventions. If multiple tasks are present, complete them in the order they appear. After successfully implementing all changes, remove the "AI:" comment markers from the code."""),
+                "agent_type": CoderAgent,
+            }
+        elif action_type == "?":
+            # Question - modify prompt to answer the question
+            return {
+                "prompt": dedent(f"""I've written questions in code comments marked with "AI:".
+
+                Extracted questions:
+                {ai_instruction}
+
+
+                Provide clear, well-structured answers based on the code context. Include:
+                - Direct answer to each question
+                - Relevant code examples or references when applicable
+                - Recommendations or best practices if appropriate"
+
+                Provide a clear, concise, helpful answer based on the code context."""),
+                "agent_type": AskAgent,
+            }
+        else:
+            return None
 
     async def modify_user_request_hook(self, payload: Optional[Payload] = None):
         if payload:

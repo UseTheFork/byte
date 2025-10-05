@@ -193,8 +193,8 @@ class StreamRenderingService(Service):
         if self.display_mode == "verbose":
             self.active_stream = MarkdownStream()  # Reset the stream renderer
 
-        formatted_name = self._format_agent_name(self.agent_name)
-        self.console.print(Rule(f"{formatted_name}", align="left"))
+            formatted_name = self._format_agent_name(self.agent_name)
+            self.console.print(Rule(f"{formatted_name}", align="left"))
 
     async def end_stream(self):
         """Complete the streaming session and clean up all rendering state.

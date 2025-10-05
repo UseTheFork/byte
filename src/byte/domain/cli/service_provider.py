@@ -88,16 +88,12 @@ class CLIServiceProvider(ServiceProvider):
                 else:
                     styled_line += f"[secondary]{char}[/secondary]"
 
-            # Calculate remaining width and fill with the last character
-            logo_width = len(
-                line
-            )  # Actual character count (Rich styles don't add to width)
+            # Fill remaining width with the last character
+            logo_width = len(line)
             remaining_width = console.width - logo_width
 
             if remaining_width > 0:
-                # Use the last character to fill the remaining space
                 last_char = line[-1] if line else " "
-                # Apply the same style as the last character would have
                 last_diagonal_progress = (row_idx + len(line) - 1) / (
                     len(logo_lines) + len(line) - 2
                 )
@@ -117,3 +113,6 @@ class CLIServiceProvider(ServiceProvider):
             )
         )
         console.print("│ ", style="text")
+
+
+# AI: What about this
