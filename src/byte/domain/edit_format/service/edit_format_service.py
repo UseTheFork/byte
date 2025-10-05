@@ -3,8 +3,10 @@ from enum import Enum
 from pathlib import Path
 from typing import List
 
+from langchain_core.messages import AIMessage
 from pydantic.dataclasses import dataclass
 
+from byte.core.event_bus import Payload
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
 from byte.domain.edit_format.exceptions import PreFlightCheckError
@@ -143,6 +145,34 @@ class EditFormatService(Service, UserInteractive):
                 )
             )
         return blocks
+
+    def remove_blocks_from_content(self, content: str) -> str:
+        """Remove SEARCH/REPLACE blocks from content and replace with summary message.
+
+        Identifies all search/replace blocks in the content and replaces them with
+        a concise message indicating changes were applied. Preserves any text
+        outside of the blocks.
+
+        Args:
+            content: Content string containing search/replace blocks
+
+        Returns:
+            str: Content with blocks replaced by summary messages
+
+        Usage: `cleaned = service.remove_blocks_from_content(ai_response)`
+        """
+        # Pattern to match the entire SEARCH/REPLACE block structure
+        pattern = r"```\w*\n(\+\+\+\+\+\+\+|-------) (.+?)\n<<<<<<< SEARCH\n(.*?)\n=======\n(.*?)\n>>>>>>> REPLACE\n```"
+
+        def replacement(match):
+            operation, file_path, _, _ = match.groups()
+
+            return f"*[Changes applied to `{file_path.strip()}` - search/replace block removed]*"
+
+        # Replace all blocks with summary messages
+        cleaned_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
+
+        return cleaned_content
 
     def pre_flight_check(self, content: str) -> None:
         """Validate that SEARCH/REPLACE block markers are properly balanced.
@@ -320,3 +350,32 @@ class EditFormatService(Service, UserInteractive):
             pass
 
         return blocks
+
+    async def replace_blocks_in_historic_messages_hook(
+        self, payload: Payload
+    ) -> Payload:
+        state = payload.get("state", False)
+        messages = state["messages"]
+
+        # Collect all AIMessage indices
+        ai_message_indices = [
+            i for i, msg in enumerate(messages) if isinstance(msg, AIMessage)
+        ]
+
+        # Determine which AIMessages to skip (the last 2)
+        indices_to_skip = (
+            set(ai_message_indices[-2:])
+            if len(ai_message_indices) > 2
+            else set(ai_message_indices)
+        )
+
+        # Iterate through messages in order
+        for index, message in enumerate(messages):
+            # Only process AIMessages that are not in the last 2
+            if isinstance(message, AIMessage) and index not in indices_to_skip:
+                # Remove search/replace blocks and replace with summary
+                messages[index].content = self.remove_blocks_from_content(
+                    str(message.content)
+                )
+
+        return payload

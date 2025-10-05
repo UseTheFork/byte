@@ -141,6 +141,8 @@ class FileWatcherService(Service):
         if not comments:
             return None
 
+        dump(comments)
+
         return {
             "comments": comments,
             "action_type": action_type,
@@ -250,8 +252,6 @@ class FileWatcherService(Service):
                     action_type = "?"
 
                 gathered_comments.append(result)
-
-        dump(gathered_comments)
 
         if not gathered_comments:
             return None
