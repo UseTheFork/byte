@@ -8,6 +8,7 @@ from watchfiles import Change, awatch
 from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
 from byte.core.task_manager import TaskManager
+from byte.core.utils import dump
 from byte.domain.agent.implementations.ask.agent import AskAgent
 from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
@@ -250,6 +251,8 @@ class FileWatcherService(Service):
 
                 gathered_comments.append(result)
 
+        dump(gathered_comments)
+
         if not gathered_comments:
             return None
 
@@ -272,8 +275,6 @@ class FileWatcherService(Service):
         ai_instruction = "\n".join(ai_instruction)
 
         # Credits to https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/watch_prompts.py#L6
-
-        # AI: How would you improve the `!` action prompt below ai?
 
         if action_type == "!":
             # Urgent task - use standard watch prompt with CoderAgent
