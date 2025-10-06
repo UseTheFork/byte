@@ -77,6 +77,7 @@ class LLMConfig(BaseModel):
 
     gemini: LLMProviderConfig = LLMProviderConfig()
     anthropic: LLMProviderConfig = LLMProviderConfig()
+    openai: LLMProviderConfig = LLMProviderConfig()
 
     def __init__(self, **data):
         """Initialize LLM config with automatic API key detection from environment.
@@ -94,6 +95,11 @@ class LLMConfig(BaseModel):
         gemini_key = os.getenv("GEMINI_API_KEY", "")
         if gemini_key:
             self.gemini = LLMProviderConfig(enabled=True, api_key=gemini_key)
+
+        # Auto-detect and configure OpenAI
+        openai_key = os.getenv("OPENAI_API_KEY", "")
+        if openai_key:
+            self.openai = LLMProviderConfig(enabled=True, api_key=openai_key)
 
 
 class ByteConfg(BaseSettings):

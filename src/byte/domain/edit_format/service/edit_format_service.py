@@ -125,17 +125,37 @@ class EditFormatService(Service, UserInteractive):
         return blocks
 
     def parse_content_to_blocks(self, content: str) -> List[SearchReplaceBlock]:
-        """Extract SEARCH/REPLACE blocks from AI response content."""
+        """Extract SEARCH/REPLACE blocks from AI response content.
+
+        Parses code fence blocks containing SEARCH/REPLACE markers and extracts
+        the operation type, file path, search content, and replacement content.
+        Handles empty search/replace sections gracefully.
+
+        Args:
+            content: Raw content string containing SEARCH/REPLACE blocks
+
+        Returns:
+            List of SearchReplaceBlock objects parsed from the content
+
+        Usage: `blocks = service.parse_content_to_blocks(ai_response)`
+        """
 
         blocks = []
 
         # Pattern to match the entire SEARCH/REPLACE block structure
-        pattern = r"```\w*\n(\+\+\+\+\+\+\+|-------) (.+?)\n<<<<<<< SEARCH\n(.*?)\n=======\n(.*?)\n>>>>>>> REPLACE\n```"
+        # The (.*?) captures allow for empty content between markers
+        pattern = r"```\w*\n(\+\+\+\+\+\+\+|-------) (.+?)\n<<<<<<< SEARCH\n(.*?)=======\n(.*?)>>>>>>> REPLACE\n```"
 
         matches = re.findall(pattern, content, re.DOTALL)
 
         for match in matches:
             operation, file_path, search_content, replace_content = match
+
+            # Strip leading/trailing newlines from search and replace content
+            # This handles cases where empty sections have extra newlines
+            search_content = search_content.rstrip("\n").lstrip("\n")
+            replace_content = replace_content.rstrip("\n").lstrip("\n")
+
             blocks.append(
                 SearchReplaceBlock(
                     operation=operation,
@@ -216,6 +236,16 @@ class EditFormatService(Service, UserInteractive):
         for block in blocks:
             file_path = Path(block.file_path)
 
+            # If the path is relative, resolve it against the project root
+            if (
+                not file_path.is_absolute()
+                and self._config
+                and self._config.project_root
+            ):
+                file_path = (self._config.project_root / file_path).resolve()
+            else:
+                file_path = file_path.resolve()
+
             # Set block type based on operation and file existence
             if block.operation == "-------":
                 # --- operation: remove file or replace entire contents
@@ -254,15 +284,13 @@ class EditFormatService(Service, UserInteractive):
                     block.block_status = BlockStatus.SEARCH_NOT_FOUND_ERROR
                     block.status_message = f"Cannot read file: {block.file_path}"
                     continue
-                # TODO: Placeholder for user confirmation on existing files
             else:
                 # File doesn't exist - ensure it's within git root
                 # Get project root from config
                 if self._config and self._config.project_root:
                     try:
-                        file_path.resolve().relative_to(
-                            self._config.project_root.resolve()
-                        )
+                        # Use the resolved file_path for the check
+                        file_path.relative_to(self._config.project_root.resolve())
                     except ValueError:
                         block.block_status = BlockStatus.FILE_OUTSIDE_PROJECT_ERROR
                         block.status_message = (
@@ -298,6 +326,17 @@ class EditFormatService(Service, UserInteractive):
 
                 file_path = Path(block.file_path)
 
+                # If the path is relative, resolve it against the project root
+                if (
+                    not file_path.is_absolute()
+                    and self._config
+                    and self._config.project_root
+                ):
+                    file_path = (self._config.project_root / file_path).resolve()
+                else:
+                    file_path = file_path.resolve()
+
+                # Handle operations based on block type first, not operation string
                 if block.block_type == BlockType.REMOVE:
                     # Remove file completely
                     if file_path.exists():
@@ -307,31 +346,30 @@ class EditFormatService(Service, UserInteractive):
                         ):
                             file_path.unlink()
 
-                elif block.operation == "-------":
-                    # ------- operation: replace entire file contents
-                    file_path.parent.mkdir(parents=True, exist_ok=True)
+                elif block.block_type == BlockType.ADD:
+                    # Create new file (can be from ++++++ or ------- operation)
                     if await self.prompt_for_confirmation(
-                        f"Replace all contents of '{file_path}'?",
-                        False,
+                        f"Create new file '{file_path}'?",
+                        True,
                     ):
+                        file_path.parent.mkdir(parents=True, exist_ok=True)
                         file_path.write_text(block.replace_content, encoding="utf-8")
 
-                elif block.operation == "+++++++":
-                    # +++ operation: edit existing or create new
-                    if block.block_type == BlockType.ADD:
-                        # Create new file
+                elif block.block_type == BlockType.EDIT:
+                    # Edit existing file (can be from ++++++ or ------- operation)
+                    content = file_path.read_text(encoding="utf-8")
+
+                    # For ------- operation with existing file, replace entire contents
+                    if block.operation == "-------":
                         if await self.prompt_for_confirmation(
-                            f"Create new file '{file_path}'?",
-                            True,
+                            f"Replace all contents of '{file_path}'?",
+                            False,
                         ):
-                            file_path.parent.mkdir(parents=True, exist_ok=True)
                             file_path.write_text(
                                 block.replace_content, encoding="utf-8"
                             )
-
-                    elif block.block_type == BlockType.EDIT:
-                        content = file_path.read_text(encoding="utf-8")
-
+                    else:
+                        # For ++++++ operation, do search/replace
                         # Handle empty search content (append to file)
                         if not block.search_content:
                             new_content = content + block.replace_content
