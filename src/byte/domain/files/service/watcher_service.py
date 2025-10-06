@@ -90,7 +90,6 @@ class FileWatcherService(Service):
         try:
             content = file_path.read_text(encoding="utf-8")
             ai_result = await self._scan_for_ai_comments(file_path, content)
-            dump(ai_result)
 
             if ai_result:
                 # Use the determined file mode from the scan result
@@ -100,7 +99,7 @@ class FileWatcherService(Service):
                 )
 
                 # Return true if file was added OR if any AI comments were found
-                return auto_add_result or bool(ai_result.get("line_nums"))
+                return auto_add_result or bool(ai_result.get("action_type"))
 
             return False
         except (FileNotFoundError, PermissionError, UnicodeDecodeError):

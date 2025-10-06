@@ -5,6 +5,8 @@ class ModelConfig(BaseConfig):
     """Configuration for the main LLM model used for primary tasks."""
 
     model: str = ""
+    api_key: str = ""
+
     temperature: float = 0.1
 
     max_input_tokens: int = 200000

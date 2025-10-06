@@ -24,6 +24,7 @@ class LLMService(Service):
         if self._config.model == "sonnet":
             main_model = ModelConfig(
                 model="claude-sonnet-4-5",
+                api_key=self._config.llm.anthropic.api_key,
                 max_input_tokens=200000,
                 max_output_tokens=64000,
                 input_cost_per_token=(3 / 1000000),
@@ -31,6 +32,7 @@ class LLMService(Service):
             )
             weak_model = ModelConfig(
                 model="claude-3-5-haiku-latest",
+                api_key=self._config.llm.anthropic.api_key,
                 max_input_tokens=200000,
                 max_output_tokens=8192,
                 input_cost_per_token=(0.80 / 1000000),
@@ -55,12 +57,14 @@ class LLMService(Service):
             return ChatAnthropic(
                 model_name=self._service_config.main.model,
                 max_tokens=self._service_config.main.max_output_tokens,
+                api_key=self._service_config.main.api_key,
                 **kwargs,
             )
         elif model_type == "weak":
             return ChatAnthropic(
                 model_name=self._service_config.weak.model,
                 max_tokens=self._service_config.weak.max_output_tokens,
+                api_key=self._service_config.weak.api_key,
                 **kwargs,
             )
 
