@@ -589,3 +589,135 @@ class TestEditFormatServiceIntegration:
         assert "new_line1" in final_content
         assert "line2" in final_content
         assert "new_line3" in final_content
+
+    @pytest.mark.asyncio
+    async def test_handle_multiple_blocks_across_multiple_files(
+        self,
+        edit_format_service: EditFormatService,
+        create_test_file,
+        tmp_project_root: Path,
+        monkeypatch,
+    ):
+        """Test handling multiple edit blocks across different files with mixed operations.
+
+        Tests a realistic scenario where:
+        - Multiple edits to the same file (main.py)
+        - Creating a new file (config.py)
+        - Editing a different existing file (utils.py)
+        - All operations should succeed and be applied correctly
+        """
+
+        # Mock user confirmation to always return True
+        async def mock_confirm(message, default):
+            return True
+
+        monkeypatch.setattr(
+            edit_format_service, "prompt_for_confirmation", mock_confirm
+        )
+
+        # Create initial files with content
+        main_content = "import sys\n\ndef main():\n    print('Hello')\n    return 0\n"
+        utils_content = "def helper():\n    pass\n"
+
+        main_file = create_test_file("src/main.py", main_content)
+        utils_file = create_test_file("src/utils.py", utils_content)
+        config_file = tmp_project_root / "src" / "config.py"  # Will be created
+
+        # Content with multiple edits across multiple files
+        content = dedent(f"""
+        I'll make several changes across the project:
+
+        1. First, let's add an import to main.py:
+        ```python
+        +++++++ {main_file}
+        <<<<<<< SEARCH
+        import sys
+        =======
+        import sys
+        import os
+        >>>>>>> REPLACE
+        ```
+
+        2. Now update the main() function in main.py:
+        ```python
+        +++++++ {main_file}
+        <<<<<<< SEARCH
+        def main():
+            print('Hello')
+            return 0
+        =======
+        def main():
+            print('Hello, World!')
+            print(f"Running from: {{os.getcwd()}}")
+            return 0
+        >>>>>>> REPLACE
+        ```
+
+        3. Create a new config.py file:
+        ```python
+        +++++++ {config_file}
+        <<<<<<< SEARCH
+        =======
+        DEBUG = True
+        VERSION = "1.0.0"
+
+        def get_config():
+            return {{"debug": DEBUG, "version": VERSION}}
+        >>>>>>> REPLACE
+        ```
+
+        4. Update the helper function in utils.py:
+        ```python
+        +++++++ {utils_file}
+        <<<<<<< SEARCH
+        def helper():
+            pass
+        =======
+        def helper(data):
+            \"\"\"Process data and return result.\"\"\"
+            return data.upper()
+        >>>>>>> REPLACE
+        ```
+        """)
+
+        blocks = await edit_format_service.handle(content)
+
+        # Verify all blocks were processed
+        assert len(blocks) == 4
+        assert all(b.block_status == BlockStatus.VALID for b in blocks)
+
+        # Verify block types
+        main_blocks = [b for b in blocks if str(main_file) in b.file_path]
+        config_blocks = [b for b in blocks if str(config_file) in b.file_path]
+        utils_blocks = [b for b in blocks if str(utils_file) in b.file_path]
+
+        assert len(main_blocks) == 2  # Two edits to main.py
+        assert len(config_blocks) == 1  # One new file creation
+        assert len(utils_blocks) == 1  # One edit to utils.py
+
+        assert main_blocks[0].block_type == BlockType.EDIT
+        assert main_blocks[1].block_type == BlockType.EDIT
+        assert config_blocks[0].block_type == BlockType.ADD
+        assert utils_blocks[0].block_type == BlockType.EDIT
+
+        # Verify main.py has both changes applied
+        final_main_content = main_file.read_text()
+        assert "import sys" in final_main_content
+        assert "import os" in final_main_content
+        assert "Hello, World!" in final_main_content
+        assert "Running from:" in final_main_content
+        assert "os.getcwd()" in final_main_content
+
+        # Verify config.py was created with correct content
+        assert config_file.exists()
+        final_config_content = config_file.read_text()
+        assert "DEBUG = True" in final_config_content
+        assert 'VERSION = "1.0.0"' in final_config_content
+        assert "def get_config():" in final_config_content
+
+        # Verify utils.py was updated
+        final_utils_content = utils_file.read_text()
+        assert "def helper(data):" in final_utils_content
+        assert "Process data and return result" in final_utils_content
+        assert "return data.upper()" in final_utils_content
+        assert "pass" not in final_utils_content  # Old implementation removed
