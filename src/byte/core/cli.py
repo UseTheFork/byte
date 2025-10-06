@@ -1,5 +1,4 @@
 import click
-from dotenv import load_dotenv
 
 from byte.core.config.config import ByteConfg
 from byte.core.initializer import FirstBootInitializer
@@ -8,8 +7,6 @@ from byte.core.initializer import FirstBootInitializer
 @click.command()
 def cli():
     """Byte CLI Assistant"""
-    load_dotenv()
-
     from byte.main import run
 
     # Check for first boot before bootstrapping

@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List
 
 import git
+from dotenv import load_dotenv
 from pydantic import BaseModel
 from pydantic_settings import (
     BaseSettings,
@@ -11,6 +12,7 @@ from pydantic_settings import (
     YamlConfigSettingsSource,
 )
 
+from byte.core.logging import log
 from byte.domain.files.config import FilesConfig
 from byte.domain.lint.config import LintConfig
 from byte.domain.mcp.config import MCPServer
@@ -38,6 +40,12 @@ BYTE_DIR: Path = PROJECT_ROOT / ".byte"
 BYTE_DIR.mkdir(exist_ok=True)
 
 BYTE_CONFIG_FILE = BYTE_DIR / "config.yaml"
+
+# Load our dotenv
+DOTENV_PATH = PROJECT_ROOT / ".env"
+
+if not load_dotenv(DOTENV_PATH):
+    log.warning(f"No .env file found at {DOTENV_PATH}")
 
 
 def validate_api_keys() -> None:
