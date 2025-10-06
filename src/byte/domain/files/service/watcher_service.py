@@ -90,6 +90,7 @@ class FileWatcherService(Service):
         try:
             content = file_path.read_text(encoding="utf-8")
             ai_result = await self._scan_for_ai_comments(file_path, content)
+            dump(ai_result)
 
             if ai_result:
                 # Use the determined file mode from the scan result

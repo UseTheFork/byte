@@ -12,7 +12,6 @@ from byte.domain.agent.state import BaseState
 from byte.domain.edit_format.service.edit_format_service import EditFormatService
 from byte.domain.llm.service.llm_service import LLMService
 from byte.domain.tools.read_file import read_file
-from byte.domain.tools.ripgrep_search import ripgrep_search
 
 
 class InitilizieAgent(Agent):
@@ -24,7 +23,7 @@ class InitilizieAgent(Agent):
         self.edit_format = await self.make(EditFormatService)
 
     def get_tools(self):
-        return [ripgrep_search, read_file]
+        return [read_file]
 
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""
