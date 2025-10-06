@@ -44,8 +44,6 @@ class TestEditFormatServiceParsing:
 
         blocks = edit_format_service.parse_content_to_blocks(content)
 
-        print(blocks)
-
         assert len(blocks) == 1
         assert blocks[0].operation == "+++++++"
         assert blocks[0].file_path == "src/main.py"

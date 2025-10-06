@@ -38,15 +38,28 @@ class DropFileCommand(Command):
             return
 
     async def get_completions(self, text: str) -> List[str]:
-        """Provide intelligent file path completions from project discovery.
+        """Provide completions showing files currently in the context.
 
-        Uses the same completion logic as AddFileCommand for consistency,
-        suggesting project files that match the input pattern.
+        Returns relative paths of files in context that match the input pattern,
+        allowing users to easily select which files to drop.
+        Usage: Tab completion shows only files currently in AI context
         """
         try:
             file_service = await self.make(FileService)
 
-            matches = await file_service.find_project_files(text)
-            return [f for f in matches if not await file_service.is_file_in_context(f)]
+            # Get all files currently in context
+            context_files = file_service.list_files()
+
+            # Extract relative paths
+            all_context_paths = [f.relative_path for f in context_files]
+
+            # Filter by text pattern if provided
+            if text:
+                text_lower = text.lower()
+                return [
+                    path for path in all_context_paths if text_lower in path.lower()
+                ]
+
+            return all_context_paths
         except Exception:
             return []

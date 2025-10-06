@@ -1,4 +1,10 @@
+from rich.columns import Columns
+from rich.console import Console
+
+from byte.domain.cli.rich.panel import Panel
 from byte.domain.cli.service.command_registry import Command
+from byte.domain.files.context_manager import FileMode
+from byte.domain.files.service.file_service import FileService
 
 
 class ListFilesCommand(Command):
@@ -22,4 +28,38 @@ class ListFilesCommand(Command):
 
         Usage: Called automatically when user types `/ls`
         """
-        return
+        console = await self.make(Console)
+        file_service = await self.make(FileService)
+
+        # Get files by mode
+        read_only_files = file_service.list_files(FileMode.READ_ONLY)
+        editable_files = file_service.list_files(FileMode.EDITABLE)
+
+        # Check if context is empty
+        if not read_only_files and not editable_files:
+            console.print("[info]No files in context[/info]")
+            return
+
+        # Create panels for each file mode
+        panels_to_show = []
+
+        if read_only_files:
+            file_paths = [f"[text]{f.relative_path}[/text]" for f in read_only_files]
+            read_only_panel = Panel(
+                Columns(file_paths, equal=True, expand=True),
+                title=f"Read-Only Files ({len(read_only_files)})",
+            )
+            panels_to_show.append(read_only_panel)
+
+        if editable_files:
+            file_paths = [f"[text]{f.relative_path}[/text]" for f in editable_files]
+            editable_panel = Panel(
+                Columns(file_paths, equal=True, expand=True),
+                title=f"Editable Files ({len(editable_files)})",
+            )
+            panels_to_show.append(editable_panel)
+
+        # Display panels in columns layout
+        if panels_to_show:
+            columns_panel = Columns(panels_to_show, equal=True, expand=True)
+            console.print(columns_panel)

@@ -8,7 +8,6 @@ from watchfiles import Change, awatch
 from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
 from byte.core.task_manager import TaskManager
-from byte.core.utils import dump
 from byte.domain.agent.implementations.ask.agent import AskAgent
 from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
@@ -242,7 +241,7 @@ class FileWatcherService(Service):
                 continue
 
             result = await self._scan_for_ai_comments(file_context.path, content)
-            dump(result)
+
             if result:
                 # Track action type (prioritize ! over ?)
                 if result["action_type"] == "!":
