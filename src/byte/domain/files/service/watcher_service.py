@@ -141,8 +141,6 @@ class FileWatcherService(Service):
         if not comments:
             return None
 
-        dump(comments)
-
         return {
             "comments": comments,
             "action_type": action_type,
@@ -244,6 +242,7 @@ class FileWatcherService(Service):
                 continue
 
             result = await self._scan_for_ai_comments(file_context.path, content)
+            dump(result)
             if result:
                 # Track action type (prioritize ! over ?)
                 if result["action_type"] == "!":

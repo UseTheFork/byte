@@ -2,11 +2,11 @@ import json
 
 from langchain_core.messages import ToolMessage
 from rich.console import Console
-from rich.panel import Panel
 from rich.pretty import Pretty
 
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.domain.agent.nodes.base_node import Node
+from byte.domain.cli.rich.panel import Panel
 
 
 class ToolNode(Node, UserInteractive):
@@ -35,6 +35,17 @@ class ToolNode(Node, UserInteractive):
                     tool_call["args"]
                 )
             else:
+                tool_result = {"result": "User declined tool call."}
+
+            # Display tool result and confirm if it should be added to response
+            result_pretty = Pretty(tool_result)
+            console.print(Panel(result_pretty, title="Tool Result"))
+
+            add_result = await self.prompt_for_confirmation(
+                "Add this result to the response?", True
+            )
+
+            if not add_result:
                 tool_result = {"result": "User declined tool call."}
 
             outputs.append(

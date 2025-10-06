@@ -1,3 +1,4 @@
+import inspect
 import sys
 from collections.abc import Callable
 
@@ -12,11 +13,16 @@ def dump(*args, **kwargs):
     dump(locals())
     dump(globals())
     """
+    # Get caller information
+    frame = inspect.currentframe().f_back
+    filename = frame.f_code.co_filename
+    lineno = frame.f_lineno
+
+    # Print location information
+    print(f"[dim]Debug output from {filename}:{lineno}[/dim]")
+
     if not args and not kwargs:
         # If no arguments, dump the caller's locals
-        import inspect
-
-        frame = inspect.currentframe().f_back
         pprint(frame.f_locals)
     else:
         # Print each argument
