@@ -2,7 +2,7 @@ from textwrap import dedent
 
 from byte.core.utils import extract_content_from_message, get_last_message
 from byte.domain.agent.implementations.coder.agent import CoderAgent
-from byte.domain.agent.implementations.research.agent import InitilizieAgent
+from byte.domain.agent.implementations.research.agent import ResearchAgent
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.files.service.file_service import FileService
 from byte.domain.memory.service.memory_service import MemoryService
@@ -38,7 +38,7 @@ class InitilizieCommand(Command):
         file_service = await self.make(FileService)
         await file_service.clear_context()
 
-        init_agent = await self.make(InitilizieAgent)
+        init_agent = await self.make(ResearchAgent)
         coder_agent = await self.make(CoderAgent)
 
         # Get all project files for the agent to analyze
