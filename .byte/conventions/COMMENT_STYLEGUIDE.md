@@ -42,3 +42,40 @@ Use standard tags to highlight specific information:
 
 - `TODO:` for planned features or improvements.
 - `FIXME:` for known issues that need to be addressed.
+# Comment Style Guide
+
+## General Formatting
+- Use inline comments sparingly; prefer clear code over explanatory comments
+- Start comments with capital letter, end with period for complete sentences
+- Place comments on separate line above code, not trailing
+- Use double-quote docstrings for all modules, classes, and functions
+
+## Docstring Patterns
+- Required for all public classes, methods, and functions
+- Format: Brief summary, blank line, detailed explanation, blank line, usage examples
+- Include type information via type hints, not in docstrings
+- Usage examples should show real-world invocation patterns
+
+Example:
+```python
+async def add_file(self, path: Union[str, PathLike], mode: FileMode) -> bool:
+    """Add a file to the active context for AI awareness.
+
+    Supports wildcard patterns like 'byte/*' to add multiple files at once.
+    Only adds files that are available in the FileDiscoveryService to ensure
+    they are valid project files that respect gitignore patterns.
+    Usage: `await service.add_file("config.py", FileMode.READ_ONLY)`
+    Usage: `await service.add_file("src/*.py", FileMode.EDITABLE)` -> adds all Python files
+    """
+```
+
+## Special Tags
+- `TODO:` - Planned feature or enhancement, include description
+- `FIXME:` - Known bug or issue that needs attention
+- `NOTE:` - Important explanation about non-obvious implementation
+- Avoid `HACK:` and `XXX:` - refactor code instead
+
+## Explain "Why" Not "What"
+- ❌ `# Set the container` (obvious from code)
+- ✅ `# Store reference for complex initialization where container is needed beyond register/boot`
+- Focus on business logic, architectural decisions, and non-obvious requirements

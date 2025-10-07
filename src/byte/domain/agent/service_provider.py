@@ -10,7 +10,7 @@ from byte.domain.agent.implementations.cleaner.agent import CleanerAgent
 from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.agent.implementations.commit.agent import CommitAgent
 from byte.domain.agent.implementations.fixer.agent import FixerAgent
-from byte.domain.agent.implementations.initilizie.agent import InitilizieAgent
+from byte.domain.agent.implementations.research.agent import InitilizieAgent
 from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.nodes.end_node import EndNode

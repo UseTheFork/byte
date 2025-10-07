@@ -1,6 +1,7 @@
 from langchain_core.language_models.chat_models import BaseChatModel
 from langgraph.graph import END, START, StateGraph
 
+from byte.core.utils import get_last_message
 from byte.domain.agent.implementations.ask.prompts import ask_prompt
 from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.nodes.assistant_node import AssistantNode
@@ -96,12 +97,7 @@ class AskAgent(Agent):
         Use in the conditional_edge to route to the ToolNode if the last message
         has tool calls. Otherwise, route to the end.
         """
-        if isinstance(state, list):
-            ai_message = state[-1]
-        elif messages := state.get("messages", []):
-            ai_message = messages[-1]
-        else:
-            raise ValueError(f"No messages found in input state to tool_edge: {state}")
+        ai_message = get_last_message(state)
 
         if hasattr(ai_message, "tool_calls") and len(ai_message.tool_calls) > 0:
             return "tools"

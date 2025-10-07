@@ -1,7 +1,11 @@
-from byte.core.utils import dd
-from byte.domain.agent.implementations.initilizie.agent import InitilizieAgent
+from textwrap import dedent
+
+from byte.core.utils import extract_content_from_message, get_last_message
+from byte.domain.agent.implementations.coder.agent import CoderAgent
+from byte.domain.agent.implementations.research.agent import InitilizieAgent
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.files.service.file_service import FileService
+from byte.domain.memory.service.memory_service import MemoryService
 
 
 class InitilizieCommand(Command):
@@ -20,10 +24,22 @@ class InitilizieCommand(Command):
 
         Usage: `/init` -> analyzes project files and generates style guides
         """
+        # Confirm with user before resetting context and memory
+        confirmed = await self.prompt_for_confirmation(
+            "Running /init will reset context and memory. Continue?", default=False
+        )
+
+        if not confirmed:
+            return
+
+        memory_service = await self.make(MemoryService)
+        await memory_service.new_thread()
 
         file_service = await self.make(FileService)
+        await file_service.clear_context()
 
         init_agent = await self.make(InitilizieAgent)
+        coder_agent = await self.make(CoderAgent)
 
         # Get all project files for the agent to analyze
         project_files = await file_service.get_project_files()
@@ -43,4 +59,20 @@ Please analyze the codebase structure and create appropriate style guides."""
             request={"messages": [("user", user_message)]}
         )
 
-        dd(init_message)
+        ai_message = get_last_message(init_message)
+        message_content = extract_content_from_message(ai_message)
+
+        coder_agent: dict = await coder_agent.execute(
+            request={
+                "messages": [
+                    (
+                        "user",
+                        dedent(f"""
+                        Use the following context to generate a `[project_root]/.byte/conventions/COMMENT_STYLEGUIDE.md`,  `[project_root]/.byte/conventions/[language]_STYLEGUIDE.md`,  `[project_root]/.byte/conventions/PROJECT_TOOLING.md`.
+                        Keep each file to AT MOST 30 lines.
+
+                        {message_content}"""),
+                    )
+                ]
+            }
+        )

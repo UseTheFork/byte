@@ -84,3 +84,52 @@ except (FileNotFoundError, PermissionError, UnicodeDecodeError):
 - **Methods/variables**: snake_case (`add_file`)
 - **Constants**: UPPER_SNAKE_CASE (`FILE_MODE`)
 - **Private members**: Leading underscore (`_files`)
+# Python Style Guide
+
+## General
+- Python 3.12+ required
+- Use tabs for indentation (see .editorconfig)
+- Ruff for linting and formatting (see pyproject.toml)
+- Type hints mandatory for function signatures
+
+## Imports
+- Organize: stdlib, third-party, local (Ruff isort with combine-as-imports)
+- Use absolute imports from `byte.` package root
+- TYPE_CHECKING imports for circular dependencies
+- Example: `from byte.core.service.base_service import Service`
+
+## Naming Conventions
+- Classes: PascalCase (e.g., `FileService`, `CommandRegistry`)
+- Functions/methods: snake_case (e.g., `async def boot()`, `get_graph()`)
+- Private methods: leading underscore (e.g., `_handle_stream_event()`)
+- Constants: UPPER_SNAKE_CASE (rare, prefer config classes)
+- Service/Provider suffix for framework classes
+
+## Async/Await
+- Prefer async/await for I/O operations
+- All service methods should be async
+- Use `await self.make(ServiceClass)` for dependency injection
+- Example: `file_service = await self.make(FileService)`
+
+## Type Hints
+- Required for all function signatures
+- Use `Optional[T]` for nullable, `Union[A, B]` for alternatives
+- Use `List`, `Dict`, `Type` from typing module
+- Example: `async def execute(self, request: Any, thread_id: Optional[str] = None) -> None:`
+
+## Class Design
+- Inherit from base classes: `Service`, `Command`, `Agent`, `Node`
+- Use mixins for cross-cutting concerns: `Bootable`, `Injectable`, `Eventable`, `Configurable`
+- Implement required abstract methods from base classes
+- Override `async def boot()` for initialization logic
+
+## Error Handling
+- Create custom exceptions inheriting from domain-specific base (e.g., `EditFormatError`)
+- Use descriptive exception names (e.g., `ReadOnlyFileError`, `SearchContentNotFoundError`)
+- Handle `KeyboardInterrupt` and `asyncio.CancelledError` gracefully in long-running operations
+
+## Project Structure
+- Domain-driven design: `src/byte/domain/{domain}/`
+- Each domain has: `config.py`, `service_provider.py`, `service/`, `command/`
+- Core framework in `src/byte/core/`
+- Tests mirror source structure in `src/tests/`
