@@ -22,7 +22,6 @@ dependencies = [
     "python-dotenv>=1.1.1",
     "pyyaml>=6.0.2",
     "rich>=14.1.0",
-    "ripgrepy>=2.2.0",
     "watchfiles>=1.1.0",
 ]
 

@@ -38,4 +38,6 @@ class AssistantNode(Node):
             else:
                 break
 
+            await self.emit(payload)
+
         return {"messages": [result]}
