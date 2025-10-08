@@ -10,7 +10,6 @@ from byte.domain.agent.nodes.end_node import EndNode
 from byte.domain.agent.nodes.start_node import StartNode
 from byte.domain.agent.nodes.tool_node import ToolNode
 from byte.domain.agent.state import BaseState
-from byte.domain.edit_format.service.edit_format_service import EditFormatService
 from byte.domain.llm.service.llm_service import LLMService
 from byte.domain.mcp.service.mcp_service import MCPService
 from byte.domain.tools.read_file import read_file
@@ -18,9 +17,13 @@ from byte.domain.tools.ripgrep_search import ripgrep_search
 
 
 class ResearchAgent(Agent):
-    """ """
+    """Domain service for AI-powered code research and information gathering.
 
-    edit_format: EditFormatService
+    Extends Agent to provide research capabilities with tool execution for
+    file searching and reading. Integrates with MCP services for extended
+    tool availability and uses ripgrep for fast codebase searches.
+    Usage: `agent = await container.make(ResearchAgent); result = await agent.execute(state)`
+    """
 
     async def boot(self):
         pass
@@ -48,7 +51,6 @@ class ResearchAgent(Agent):
             await self.make(
                 StartNode,
                 agent=self.__class__.__name__,
-                edit_format=self.edit_format,
             ),
         )
 
@@ -58,7 +60,7 @@ class ResearchAgent(Agent):
         )
         graph.add_node(
             "tools", await self.make(ToolNode, tools=[*self.get_tools(), *mcp_tools])
-        )  # pyright: ignore[reportArgumentType]
+        )
 
         graph.add_node(
             "end",

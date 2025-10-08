@@ -6,7 +6,13 @@ from byte.domain.llm.service.llm_service import LLMService
 
 
 class FixerAgent(CoderAgent):
-    """"""
+    """Domain service for automated code fixing without memory or tool execution.
+
+    Extends CoderAgent to provide stateless code fixing capabilities, optimized
+    for analyzing errors and proposing corrections without persistent state.
+    Disables memory checkpointing and tool execution for focused fix generation.
+    Usage: `agent = await container.make(FixerAgent); result = await agent.execute(state)`
+    """
 
     async def get_checkpointer(self):
         return False

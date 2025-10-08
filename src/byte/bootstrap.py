@@ -10,7 +10,6 @@ from byte.domain.cli.service.command_registry import CommandRegistry
 from byte.domain.cli.service_provider import CLIServiceProvider
 from byte.domain.edit_format.service_provider import EditFormatProvider
 from byte.domain.files.service_provider import FileServiceProvider
-from byte.domain.fixtures.service_provider import FixturesServiceProvider
 from byte.domain.git.service_provider import GitServiceProvider
 from byte.domain.knowledge.service_provider import KnowledgeServiceProvider
 from byte.domain.lint.service_provider import LintServiceProvider
@@ -61,7 +60,6 @@ async def bootstrap(config: ByteConfg):
         EditFormatProvider(),
         WebServiceProvider(),
         SystemServiceProvider(),  # Core system commands
-        FixturesServiceProvider(),
     ]
 
     # Phase 1: Register all service bindings in the container

@@ -29,6 +29,7 @@ scripts.byte = "byte.core.cli:cli"
 
 [dependency-groups]
 dev = [
+    "dill>=0.4.0",
     "grandalf>=0.8",
     "pytest>=8.4.2",
     "pytest-asyncio>=1.2.0",

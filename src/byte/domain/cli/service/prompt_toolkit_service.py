@@ -131,7 +131,7 @@ class PromptToolkitService(Service):
             console.print(Group(*info_panel))
 
         user_input = await self.prompt_session.prompt_async(
-            message=message, placeholder=default
+            message=message, default=default
         )
         # TODO: should we make `user_input` a [("user", user_input)], in this situation.
 
@@ -151,8 +151,6 @@ class PromptToolkitService(Service):
         interrupted = payload.get("interrupted", self.interrupted)
         user_input = payload.get("user_input", user_input)
         active_agent = payload.get("active_agent", active_agent)
-
-        # log.debug(payload)
 
         if not interrupted:
             if user_input.startswith("/"):
