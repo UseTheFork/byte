@@ -5,6 +5,7 @@ serializes them to JSON files organized by agent type, node name, and scenario.
 """
 
 import json
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -40,8 +41,6 @@ class FixtureRecorderService(Service):
 
         if self._config:
             # Read from environment or config
-            import os
-
             self._recording_enabled = (
                 os.getenv("BYTE_RECORD_FIXTURES", "false").lower() == "true"
             )
@@ -83,12 +82,12 @@ class FixtureRecorderService(Service):
         }
 
         # Save the fixture
-        await self._save_fixture("assistant_node", fixture_data, state.get("agent"))
+        await self._save_fixture(fixture_data, state.get("agent"))
 
         return payload
 
     async def _save_fixture(
-        self, node_name: str, fixture_data: Dict[str, Any], agent_name: Optional[str]
+        self, fixture_data: Dict[str, Any], agent_name: Optional[str]
     ) -> None:
         """Save fixture data to an organized JSON file.
 
@@ -103,12 +102,12 @@ class FixtureRecorderService(Service):
         # Determine agent directory name
         if agent_name:
             # Convert 'CoderAgent' to 'coder'
-            agent_dir = agent_name.replace("Agent", "").lower()
+            agent = agent_name.replace("Agent", "").lower()
         else:
-            agent_dir = "unknown"
+            agent = "unknown"
 
         # Create directory structure
-        fixture_dir = self._fixtures_dir / "agent" / agent_dir / node_name
+        fixture_dir = self._fixtures_dir / "recorded"
         fixture_dir.mkdir(parents=True, exist_ok=True)
 
         # Generate filename
@@ -116,7 +115,7 @@ class FixtureRecorderService(Service):
             filename = f"{self._fixture_scenario}.json"
         else:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"recording_{timestamp}_{self._recorded_count}.json"
+            filename = f"recording_{agent}_{timestamp}_{self._recorded_count}.json"
             self._recorded_count += 1
 
         fixture_path = fixture_dir / filename

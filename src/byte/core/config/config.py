@@ -101,6 +101,13 @@ class LLMConfig(BaseModel):
         if openai_key:
             self.openai = LLMProviderConfig(enabled=True, api_key=openai_key)
 
+        # Validate that at least one provider is configured
+        if not (self.anthropic.enabled or self.gemini.enabled or self.openai.enabled):
+            raise ValueError(
+                "Missing required API key. Please set at least one of: "
+                "ANTHROPIC_API_KEY, GEMINI_API_KEY, or OPENAI_API_KEY environment variable."
+            )
+
 
 class ByteConfg(BaseSettings):
     model_config = SettingsConfigDict(
