@@ -1,7 +1,6 @@
 from langgraph.graph.state import Runnable
 
 from byte.core.event_bus import EventType, Payload
-from byte.core.utils.save_fixture import FixtureRecorder
 from byte.domain.agent.nodes.base_node import Node
 
 
@@ -19,7 +18,7 @@ class AssistantNode(Node):
                 },
             )
 
-            FixtureRecorder.pickle_fixture(payload)
+            # FixtureRecorder.pickle_fixture(payload)
 
             payload = await self.emit(payload)
             state = payload.get("state", state)

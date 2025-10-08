@@ -319,6 +319,7 @@ class EditFormatService(Service, UserInteractive):
             List[SearchReplaceBlock]: The original list of blocks with their status information
         """
         try:
+            file_service: FileService = await self.make(FileService)
             for block in blocks:
                 # Only apply blocks that are valid
                 if block.block_status != BlockStatus.VALID:
@@ -346,8 +347,11 @@ class EditFormatService(Service, UserInteractive):
                         ):
                             file_path.unlink()
 
+                            # Remove the deleted file from context
+                            await file_service.remove_file(file_path)
+
                 elif block.block_type == BlockType.ADD:
-                    # Create new file (can be from ++++++ or ------- operation)
+                    # Create new file (can be from + or - operation)
                     if await self.prompt_for_confirmation(
                         f"Create new file '{file_path}'?",
                         True,
@@ -355,8 +359,11 @@ class EditFormatService(Service, UserInteractive):
                         file_path.parent.mkdir(parents=True, exist_ok=True)
                         file_path.write_text(block.replace_content, encoding="utf-8")
 
+                        # Add the newly created file to context as editable
+                        await file_service.add_file(file_path, FileMode.EDITABLE)
+
                 elif block.block_type == BlockType.EDIT:
-                    # Edit existing file (can be from ++++++ or ------- operation)
+                    # Edit existing file (can be from + or - operation)
                     content = file_path.read_text(encoding="utf-8")
 
                     # For ------- operation with existing file, replace entire contents

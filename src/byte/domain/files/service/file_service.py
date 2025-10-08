@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 from rich.columns import Columns
+from rich.console import Console
 
 from byte.core.event_bus import EventType, Payload
 from byte.core.service.base_service import Service
@@ -34,6 +35,7 @@ class FileService(Service):
         Usage: `await service.add_file("config.py", FileMode.READ_ONLY)`
         Usage: `await service.add_file("src/*.py", FileMode.EDITABLE)` -> adds all Python files
         """
+        console = await self.make(Console)
         file_discovery = await self.make(FileDiscoveryService)
         discovered_files = await file_discovery.get_files()
         discovered_file_paths = {str(f.resolve()) for f in discovered_files}
@@ -55,6 +57,16 @@ class FileService(Service):
                 if path_obj.is_file() and str(path_obj) in discovered_file_paths:
                     key = str(path_obj)
                     self._context_files[key] = FileContext(path=path_obj, mode=mode)
+
+                    # Print the file that was added
+                    relative_path = (
+                        str(path_obj.relative_to(self._config.project_root))
+                        if self._config.project_root
+                        else str(path_obj)
+                    )
+                    mode_str = "editable" if mode == FileMode.EDITABLE else "read-only"
+                    console.print(f"[text]Added {relative_path} ({mode_str})[/text]")
+
                     success_count += 1
 
             return success_count > 0
@@ -73,6 +85,15 @@ class FileService(Service):
                 return False
 
             self._context_files[key] = FileContext(path=path_obj, mode=mode)
+
+            # Print the file that was added
+            relative_path = (
+                str(path_obj.relative_to(self._config.project_root))
+                if self._config.project_root
+                else str(path_obj)
+            )
+            mode_str = "editable" if mode == FileMode.EDITABLE else "read-only"
+            console.print(f"[text]Added {relative_path} ({mode_str})[/text]")
 
             await self._notify_file_added(key, mode)
 
