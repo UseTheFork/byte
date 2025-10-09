@@ -4,6 +4,8 @@ from byte.container import Container
 from byte.core.event_bus import EventBus, EventType
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
+from byte.domain.cli.service.command_registry import Command
+from byte.domain.edit_format.command.copy_command import CopyCommand
 from byte.domain.edit_format.service.edit_block_service import EditBlockService
 from byte.domain.edit_format.service.edit_format_service import EditFormatService
 from byte.domain.edit_format.service.shell_command_service import ShellCommandService
@@ -14,6 +16,9 @@ class EditFormatProvider(ServiceProvider):
 
     def services(self) -> List[Type[Service]]:
         return [EditFormatService]
+
+    def commands(self) -> List[Type[Command]]:
+        return [CopyCommand]
 
     async def register(self, container: "Container"):
         """ """

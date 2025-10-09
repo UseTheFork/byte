@@ -9,10 +9,12 @@ from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.implementations.cleaner.agent import CleanerAgent
 from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.agent.implementations.commit.agent import CommitAgent
+from byte.domain.agent.implementations.copy.agent import CopyAgent
 from byte.domain.agent.implementations.fixer.agent import FixerAgent
 from byte.domain.agent.implementations.research.agent import ResearchAgent
 from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.base_node import Node
+from byte.domain.agent.nodes.copy_node import CopyNode
 from byte.domain.agent.nodes.end_node import EndNode
 from byte.domain.agent.nodes.lint_node import LintNode
 from byte.domain.agent.nodes.parse_blocks_node import ParseBlocksNode
@@ -42,13 +44,22 @@ class AgentServiceProvider(ServiceProvider):
             AskAgent,
             CleanerAgent,
             ResearchAgent,
+            CopyAgent,
         ]
 
     def commands(self) -> List[Type[Command]]:
         return [AskCommand]
 
     def nodes(self) -> List[Type[Node]]:
-        return [StartNode, EndNode, AssistantNode, LintNode, ParseBlocksNode, ToolNode]
+        return [
+            StartNode,
+            EndNode,
+            AssistantNode,
+            LintNode,
+            ParseBlocksNode,
+            ToolNode,
+            CopyNode,
+        ]
 
     async def register(self, container: "Container") -> None:
         # Create all agents
