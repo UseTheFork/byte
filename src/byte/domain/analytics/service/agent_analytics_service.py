@@ -153,7 +153,6 @@ class AgentAnalyticsService(Service):
         analytics_panel = Panel(
             Group(grid, grid_cost),
             title="Analytics",
-            border_style="primary",
         )
 
         info_panel.append(analytics_panel)

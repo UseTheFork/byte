@@ -336,7 +336,7 @@ Any other messages in the chat may contain outdated versions of the files' conte
             file_names = [f"[text]{f.relative_path}[/text]" for f in readonly_files]
             read_only_panel = Panel(
                 Columns(file_names, equal=True, expand=True),
-                title=f"[primary]Read-only Files ({len(readonly_files)})[/primary]",
+                title=f"Read-only Files ({len(readonly_files)})",
             )
 
         editable_panel = None
@@ -345,7 +345,7 @@ Any other messages in the chat may contain outdated versions of the files' conte
             file_names = [f"[text]{f.relative_path}[/text]" for f in editable_files]
             editable_panel = Panel(
                 Columns(file_names, equal=True, expand=True),
-                title=f"[primary]Editable Files ({len(editable_files)})[/primary]",
+                title=f"Editable Files ({len(editable_files)})",
             )
 
         # Create columns layout with both panels if they exist

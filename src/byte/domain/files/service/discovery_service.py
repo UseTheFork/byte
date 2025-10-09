@@ -46,19 +46,8 @@ class FileDiscoveryService(Service):
                     # Gracefully handle unreadable gitignore files
                     pass
 
-            # Also load .byte/.ignore file for project-specific ignore patterns
-            byte_ignore_path = self._config.byte_dir / ".ignore"
-            if byte_ignore_path.exists():
-                try:
-                    with open(byte_ignore_path, encoding="utf-8") as f:
-                        patterns.extend(
-                            line.strip()
-                            for line in f
-                            if line.strip() and not line.startswith("#")
-                        )
-                except (OSError, UnicodeDecodeError):
-                    # Gracefully handle unreadable .ignore files
-                    pass
+            # Load ignore patterns from configuration
+            patterns.extend(self._config.files.ignore)
 
         self._gitignore_spec = pathspec.PathSpec.from_lines("gitwildmatch", patterns)
 
