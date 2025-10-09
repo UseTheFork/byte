@@ -13,6 +13,7 @@ from pydantic_settings import (
 )
 
 from byte.core.logging import log
+from byte.domain.edit_format.config import EditFormatConfig
 from byte.domain.files.config import FilesConfig
 from byte.domain.lint.config import LintConfig
 from byte.domain.mcp.config import MCPServer
@@ -125,6 +126,7 @@ class ByteConfg(BaseSettings):
     llm: LLMConfig = LLMConfig()
     lint: LintConfig = LintConfig()
     files: FilesConfig = FilesConfig()
+    edit_format: EditFormatConfig = EditFormatConfig()
     memory: MemoryConfig = MemoryConfig()
     web: WebConfig = WebConfig()
     mcp: List[MCPServer] = []

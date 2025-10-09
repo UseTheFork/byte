@@ -1,4 +1,4 @@
-"""Comprehensive test suite for EditFormatService.
+"""Comprehensive test suite for EditBlockService.
 
 Tests the complete lifecycle of edit format operations including parsing,
 validation, and application of search/replace blocks.
@@ -10,23 +10,21 @@ from textwrap import dedent
 import pytest
 
 from byte.domain.edit_format.exceptions import PreFlightCheckError
+from byte.domain.edit_format.models import BlockType
+from byte.domain.edit_format.service.edit_block_service import EditBlockService
 from byte.domain.edit_format.service.edit_format_service import (
     BlockStatus,
-    BlockType,
-    EditFormatService,
     SearchReplaceBlock,
 )
 from byte.domain.files.context_manager import FileMode
 from byte.domain.files.service.file_service import FileService
 
 
-class TestEditFormatServiceParsing:
+class TestEditBlockServiceParsing:
     """Test suite for parsing SEARCH/REPLACE blocks from content."""
 
     @pytest.mark.asyncio
-    async def test_parse_single_edit_block(
-        self, edit_format_service: EditFormatService
-    ):
+    async def test_parse_single_edit_block(self, edit_format_service: EditBlockService):
         """Test parsing a single edit block with proper formatting."""
         content = dedent("""
         I'll modify the file to add an import.
@@ -52,7 +50,7 @@ class TestEditFormatServiceParsing:
 
     @pytest.mark.asyncio
     async def test_parse_multiple_edit_blocks(
-        self, edit_format_service: EditFormatService
+        self, edit_format_service: EditBlockService
     ):
         """Test parsing multiple SEARCH/REPLACE blocks in sequence."""
         content = dedent("""
@@ -89,9 +87,7 @@ class TestEditFormatServiceParsing:
         assert "return 42" in blocks[1].replace_content
 
     @pytest.mark.asyncio
-    async def test_parse_new_file_creation(
-        self, edit_format_service: EditFormatService
-    ):
+    async def test_parse_new_file_creation(self, edit_format_service: EditBlockService):
         """Test parsing a block for creating a new file (empty SEARCH section)."""
         content = dedent("""
         I'll create a new file.
@@ -117,7 +113,7 @@ class TestEditFormatServiceParsing:
         assert "def hello():" in blocks[0].replace_content
 
     @pytest.mark.asyncio
-    async def test_parse_file_removal(self, edit_format_service: EditFormatService):
+    async def test_parse_file_removal(self, edit_format_service: EditBlockService):
         """Test parsing a block for removing a file."""
         content = dedent("""
         I'll remove the old file.
@@ -139,7 +135,7 @@ class TestEditFormatServiceParsing:
 
     @pytest.mark.asyncio
     async def test_parse_replace_entire_file(
-        self, edit_format_service: EditFormatService
+        self, edit_format_service: EditBlockService
     ):
         """Test parsing a block for replacing entire file contents."""
         content = dedent("""
@@ -162,7 +158,7 @@ class TestEditFormatServiceParsing:
         assert "NEW_CONFIG" in blocks[0].replace_content
 
     @pytest.mark.asyncio
-    async def test_parse_no_blocks(self, edit_format_service: EditFormatService):
+    async def test_parse_no_blocks(self, edit_format_service: EditBlockService):
         """Test parsing content with no SEARCH/REPLACE blocks."""
         content = "This is just some text without any blocks."
 
@@ -171,12 +167,12 @@ class TestEditFormatServiceParsing:
         assert len(blocks) == 0
 
 
-class TestEditFormatServiceValidation:
+class TestEditBlockServiceValidation:
     """Test suite for validation of edit blocks."""
 
     @pytest.mark.asyncio
     async def test_preflight_check_balanced_markers(
-        self, edit_format_service: EditFormatService
+        self, edit_format_service: EditBlockService
     ):
         """Test pre-flight check passes with balanced markers."""
         content = dedent("""
@@ -195,7 +191,7 @@ class TestEditFormatServiceValidation:
 
     @pytest.mark.asyncio
     async def test_preflight_check_unbalanced_markers(
-        self, edit_format_service: EditFormatService
+        self, edit_format_service: EditBlockService
     ):
         """Test pre-flight check fails with unbalanced markers."""
         content = dedent("""
@@ -216,7 +212,7 @@ class TestEditFormatServiceValidation:
     @pytest.mark.asyncio
     async def test_midflight_check_existing_file_valid_search(
         self,
-        edit_format_service: EditFormatService,
+        edit_format_service: EditBlockService,
         create_test_file,
         sample_file_content: str,
     ):
@@ -242,7 +238,7 @@ class TestEditFormatServiceValidation:
     @pytest.mark.asyncio
     async def test_midflight_check_search_not_found(
         self,
-        edit_format_service: EditFormatService,
+        edit_format_service: EditBlockService,
         create_test_file,
         sample_file_content: str,
     ):
@@ -268,7 +264,7 @@ class TestEditFormatServiceValidation:
     @pytest.mark.asyncio
     async def test_midflight_check_new_file_within_project(
         self,
-        edit_format_service: EditFormatService,
+        edit_format_service: EditBlockService,
         tmp_project_root: Path,
     ):
         """Test mid-flight validation passes for new file within project."""
@@ -291,7 +287,7 @@ class TestEditFormatServiceValidation:
     @pytest.mark.asyncio
     async def test_midflight_check_new_file_outside_project(
         self,
-        edit_format_service: EditFormatService,
+        edit_format_service: EditBlockService,
         tmp_path: Path,
     ):
         """Test mid-flight validation fails for new file outside project."""
@@ -321,7 +317,7 @@ class TestEditFormatServiceValidation:
     @pytest.mark.asyncio
     async def test_midflight_check_readonly_file(
         self,
-        edit_format_service: EditFormatService,
+        edit_format_service: EditBlockService,
         file_service: FileService,
         create_test_file,
         sample_file_content: str,
@@ -346,13 +342,13 @@ class TestEditFormatServiceValidation:
         assert "read-only" in validated_blocks[0].status_message.lower()
 
 
-class TestEditFormatServiceBlockTypes:
+class TestEditBlockServiceBlockTypes:
     """Test suite for determining block types correctly."""
 
     @pytest.mark.asyncio
     async def test_block_type_add_for_new_file_with_plus_operation(
         self,
-        edit_format_service: EditFormatService,
+        edit_format_service: EditBlockService,
         tmp_project_root: Path,
     ):
         """Test that +++++++ operation with non-existent file sets BlockType.ADD."""
@@ -373,7 +369,7 @@ class TestEditFormatServiceBlockTypes:
     @pytest.mark.asyncio
     async def test_block_type_edit_for_existing_file_with_plus_operation(
         self,
-        edit_format_service: EditFormatService,
+        edit_format_service: EditBlockService,
         create_test_file,
     ):
         """Test that +++++++ operation with existing file sets BlockType.EDIT."""
@@ -394,7 +390,7 @@ class TestEditFormatServiceBlockTypes:
     @pytest.mark.asyncio
     async def test_block_type_remove_for_minus_operation_empty_content(
         self,
-        edit_format_service: EditFormatService,
+        edit_format_service: EditBlockService,
         create_test_file,
     ):
         """Test that ------- operation with empty search/replace sets BlockType.REMOVE."""
@@ -415,7 +411,7 @@ class TestEditFormatServiceBlockTypes:
     @pytest.mark.asyncio
     async def test_block_type_edit_for_minus_operation_with_content(
         self,
-        edit_format_service: EditFormatService,
+        edit_format_service: EditBlockService,
         create_test_file,
     ):
         """Test that ------- operation with replace content sets BlockType.EDIT (full replacement)."""
@@ -434,12 +430,12 @@ class TestEditFormatServiceBlockTypes:
         assert validated_blocks[0].block_type == BlockType.EDIT
 
 
-class TestEditFormatServiceUtilities:
+class TestEditBlockServiceUtilities:
     """Test suite for utility methods."""
 
     @pytest.mark.asyncio
     async def test_remove_blocks_from_content(
-        self, edit_format_service: EditFormatService
+        self, edit_format_service: EditBlockService
     ):
         """Test that SEARCH/REPLACE blocks are removed and replaced with summary."""
         content = dedent("""
@@ -484,13 +480,13 @@ class TestEditFormatServiceUtilities:
         assert "new" in formatted
 
 
-class TestEditFormatServiceIntegration:
+class TestEditBlockServiceIntegration:
     """Integration tests for the complete edit format workflow."""
 
     @pytest.mark.asyncio
     async def test_handle_complete_workflow_new_file(
         self,
-        edit_format_service: EditFormatService,
+        edit_format_service: EditBlockService,
         tmp_project_root: Path,
         monkeypatch,
     ):
@@ -537,7 +533,7 @@ class TestEditFormatServiceIntegration:
     @pytest.mark.asyncio
     async def test_handle_multiple_blocks_same_file(
         self,
-        edit_format_service: EditFormatService,
+        edit_format_service: EditBlockService,
         create_test_file,
         monkeypatch,
     ):
@@ -591,7 +587,7 @@ class TestEditFormatServiceIntegration:
     @pytest.mark.asyncio
     async def test_handle_multiple_blocks_across_multiple_files(
         self,
-        edit_format_service: EditFormatService,
+        edit_format_service: EditBlockService,
         create_test_file,
         tmp_project_root: Path,
         monkeypatch,

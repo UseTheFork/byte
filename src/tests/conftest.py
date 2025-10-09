@@ -11,7 +11,8 @@ from byte.core.config.config import ByteConfg
 from byte.core.event_bus import EventBus
 from byte.core.task_manager import TaskManager
 from byte.domain.cli.service.command_registry import CommandRegistry
-from byte.domain.edit_format.service.edit_format_service import EditFormatService
+from byte.domain.edit_format.service.edit_block_service import EditBlockService
+from byte.domain.edit_format.service.shell_command_service import ShellCommandService
 from byte.domain.files.service.discovery_service import FileDiscoveryService
 from byte.domain.files.service.file_service import FileService
 
@@ -86,7 +87,8 @@ async def test_container(test_config: ByteConfg) -> AsyncGenerator[Container, No
     container.singleton(FileService)
 
     # Register edit format service
-    container.singleton(EditFormatService)
+    container.singleton(EditBlockService)
+    container.singleton(ShellCommandService)
 
     yield container
 
@@ -99,12 +101,26 @@ async def test_container(test_config: ByteConfg) -> AsyncGenerator[Container, No
 
 
 @pytest_asyncio.fixture
-async def edit_format_service(test_container: Container) -> EditFormatService:
-    """Provide a fully booted EditFormatService instance for testing.
+async def edit_format_service(
+    test_container: Container, tmp_project_root: Path
+) -> EditBlockService:
+    """Provide an initialized EditBlockService instance.
 
-    Usage: `async def test_something(edit_format_service): blocks = await edit_format_service.handle(content)`
+    Usage: `async def test_something(edit_format_service: EditBlockService):`
     """
-    service = await test_container.make(EditFormatService)
+    service = await test_container.make(EditBlockService)
+    return service
+
+
+@pytest_asyncio.fixture
+async def shell_command_service(
+    test_container: Container, tmp_project_root: Path
+) -> ShellCommandService:
+    """Provide an initialized ShellCommandService instance.
+
+    Usage: `async def test_something(shell_command_service: ShellCommandService):`
+    """
+    service = await test_container.make(ShellCommandService)
     return service
 
 
