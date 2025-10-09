@@ -4,7 +4,6 @@ import pyperclip
 from langgraph.graph.state import RunnableConfig
 from rich.columns import Columns
 from rich.console import Console
-from rich.rule import Rule
 from rich.syntax import Syntax
 
 from byte.core.mixins.user_interactive import UserInteractive
@@ -12,6 +11,7 @@ from byte.core.utils import extract_content_from_message
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.state import BaseState
 from byte.domain.cli.rich.panel import Panel
+from byte.domain.cli.rich.rule import Rule
 
 
 class CopyNode(Node, UserInteractive):
@@ -93,7 +93,14 @@ class CopyNode(Node, UserInteractive):
 
         # Configuration for preview display
         max_preview_lines = 5
-        max_line_length = 80
+
+        # Calculate max line length based on console width to fit 2 columns
+        # Account for: panel borders (4 chars per panel), column gap (3 chars), and padding (4 chars per panel)
+        console_width = console.width
+        padding_per_panel = 8  # 4 chars for borders + 4 chars for internal padding
+        column_gap = 3
+        total_overhead = (padding_per_panel * 2) + column_gap
+        max_line_length = max(40, (console_width - total_overhead) // 2)
 
         # Build panels for each code block
         panels = []
@@ -134,7 +141,7 @@ class CopyNode(Node, UserInteractive):
             panel = Panel(
                 syntax,
                 title=f"[bold]{idx + 1}. [{lang}] {len(lines)} lines[/bold]",
-                border_style="blue",
+                border_style="secondary",
             )
             panels.append(panel)
 
@@ -152,7 +159,7 @@ class CopyNode(Node, UserInteractive):
 
         # Display panels in columns (2 columns for better layout)
         console.print()
-        console.print(Rule("[bold]Select a code block to copy[/bold]"))
+        console.print(Rule("Select a code block to copy"))
         console.print()
         console.print(Columns(panels, equal=True, expand=True))
 
