@@ -1,3 +1,5 @@
+from importlib.metadata import PackageNotFoundError, version
+
 from rich.console import Console
 from rich.rule import Rule
 from rich.theme import Theme
@@ -113,6 +115,13 @@ class CLIServiceProvider(ServiceProvider):
             )
         )
         console.print("│ ", style="text")
+
+        try:
+            package_version = version("byte")
+        except PackageNotFoundError:
+            package_version = "dev"
+
+        console.print(f"│ [success]Version:[/success] [info]{package_version}[/info]")
 
         config = await container.make(ByteConfg)
         console.print(

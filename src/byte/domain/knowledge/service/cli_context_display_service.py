@@ -45,7 +45,7 @@ class CLIContextDisplayService(Service):
         # Create panel with columns if there are any sections
         combined_panel = Panel(
             grid,
-            title="[primary]Knowledge Context[/primary]",
+            title="Knowledge Context",
         )
         info_panel.append(combined_panel)
 

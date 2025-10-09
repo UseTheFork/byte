@@ -1,6 +1,6 @@
 [project]
 name = "byte"
-version = "0.1.1"
+version = "0.1.1a"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -91,15 +91,6 @@ executionEnvironments = [
     ] },
     { root = "src" },
 ]
-
-# [[tool.basedpyright.executionEnvironments]]
-# root = "src"
-# reportUnknownArgumentType = "hint"
-# reportUnknownMemberType = "hint"
-# reportUnknownVariableType = "hint"
-# reportMissingImports = "hint"
-# reportMissingTypeStubs = "hint"
-
 
 [build-system]
 requires = ["uv_build>=0.8.10,<0.9.0"]
