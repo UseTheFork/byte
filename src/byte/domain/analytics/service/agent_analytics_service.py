@@ -1,8 +1,9 @@
 from typing import cast
 
 from langchain_core.messages import AIMessage
-from rich.columns import Columns
+from rich.console import Group
 from rich.progress_bar import ProgressBar
+from rich.table import Table
 
 from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
@@ -50,12 +51,18 @@ class AgentAnalyticsService(Service):
                 if llm_service._service_config.main.model == llm.model:
                     # Update the main model context used with total tokens
                     self.model_usage["main"]["context"] = total_tokens
-                    self.model_usage["main"]["total_input"] += input_tokens
-                    self.model_usage["main"]["total_output"] += output_tokens
+                    self.model_usage["main"]["total"]["input"] += input_tokens
+                    self.model_usage["main"]["total"]["output"] += output_tokens
+                    self.model_usage["last"]["input"] = input_tokens
+                    self.model_usage["last"]["output"] = output_tokens
+                    self.model_usage["last"]["type"] = "main"
 
                 if llm_service._service_config.weak.model == llm.model:
-                    self.model_usage["weak"]["total_input"] += input_tokens
-                    self.model_usage["weak"]["total_output"] += output_tokens
+                    self.model_usage["weak"]["total"]["input"] += input_tokens
+                    self.model_usage["weak"]["total"]["output"] += output_tokens
+                    self.model_usage["last"]["input"] = input_tokens
+                    self.model_usage["last"]["output"] = output_tokens
+                    self.model_usage["last"]["type"] = "weak"
 
         return payload
 
@@ -80,18 +87,18 @@ class AgentAnalyticsService(Service):
         )
 
         weak_cost = (
-            self.model_usage["weak"]["total_input"]
+            self.model_usage["weak"]["total"]["input"]
             * llm_service._service_config.weak.input_cost_per_token
         ) + (
-            self.model_usage["weak"]["total_output"]
+            self.model_usage["weak"]["total"]["output"]
             * llm_service._service_config.weak.output_cost_per_token
         )
 
         main_cost = (
-            self.model_usage["main"]["total_input"]
+            self.model_usage["main"]["total"]["input"]
             * llm_service._service_config.main.input_cost_per_token
         ) + (
-            self.model_usage["main"]["total_output"]
+            self.model_usage["main"]["total"]["output"]
             * llm_service._service_config.main.output_cost_per_token
         )
 
@@ -100,29 +107,51 @@ class AgentAnalyticsService(Service):
         progress = ProgressBar(
             total=llm_service._service_config.main.max_input_tokens,
             completed=self.model_usage["main"]["context"],
-            width=20,
             complete_style="success",
         )
 
-        # TODO: maybe add a row with `Tokens: 19k sent, 270 received. Cost: $0.06 message, $0.30 session.`
+        session_cost = main_cost + weak_cost
+
+        # Calculate last message cost based on which model type was used
+        last_message_type = self.model_usage["last"]["type"]
+        if last_message_type == "main":
+            last_message_cost = (
+                self.model_usage["last"]["input"]
+                * llm_service._service_config.main.input_cost_per_token
+            ) + (
+                self.model_usage["last"]["output"]
+                * llm_service._service_config.main.output_cost_per_token
+            )
+        elif last_message_type == "weak":
+            last_message_cost = (
+                self.model_usage["last"]["input"]
+                * llm_service._service_config.weak.input_cost_per_token
+            ) + (
+                self.model_usage["last"]["output"]
+                * llm_service._service_config.weak.output_cost_per_token
+            )
+        else:
+            last_message_cost = 0.0
+
+        last_input = self.humanizer(self.model_usage["last"]["input"])
+        last_output = self.humanizer(self.model_usage["last"]["output"])
+
+        grid = Table.grid(expand=True)
+        grid.add_column()
+        grid.add_column(ratio=1)
+        grid.add_column()
+        grid.add_row("Memory Used ", progress, f" {main_percentage:.1f}%")
+
+        grid_cost = Table.grid(expand=True)
+        grid_cost.add_column()
+        grid_cost.add_column(justify="right")
+        grid_cost.add_row(
+            f"Tokens: {last_input} sent, {last_output} received",
+            f"Cost: ${last_message_cost:.2f} message, ${session_cost:.2f} session.",
+        )
 
         analytics_panel = Panel(
-            Columns(
-                [
-                    "Memory Used:",
-                    progress,
-                    f"{main_percentage:.1f}%",
-                    "|",
-                    "Main:",
-                    f"{self.model_usage['main']['total_input']:,}",
-                    f"(${main_cost:.2f})",
-                    "|",
-                    "Weak:",
-                    f"{self.model_usage['weak']['total_input']:,}",
-                    f"(${weak_cost:.2f})",
-                ],
-                expand=False,
-            ),
+            Group(grid, grid_cost),
             title="Analytics",
             border_style="primary",
         )
@@ -136,14 +165,34 @@ class AgentAnalyticsService(Service):
         Useful for starting fresh sessions or after reaching certain milestones.
         """
         self.model_usage = {
+            "last": {"input": 0, "output": 0, "type": ""},
             "main": {
                 "context": 0,
-                "total_input": 0,
-                "total_output": 0,
+                "total": {
+                    "input": 0,
+                    "output": 0,
+                },
             },
             "weak": {
                 "context": 0,
-                "total_input": 0,
-                "total_output": 0,
+                "total": {
+                    "input": 0,
+                    "output": 0,
+                },
             },
         }
+
+    def humanizer(self, number: int | float) -> str:
+        divisor = 1
+        for suffix in ("K", "M", "B", "T"):
+            divisor *= 1000
+            max_allowed = divisor * 1000
+            quotient, remainder = divmod(number, divisor)
+            if number > max_allowed:
+                continue
+            if quotient:
+                break
+            return str(number)
+        if remaining := (remainder and round(remainder / divisor, 1)):
+            quotient += remaining
+        return f"{quotient}{suffix}"
