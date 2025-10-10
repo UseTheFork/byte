@@ -61,6 +61,9 @@ class CLIServiceProvider(ServiceProvider):
                 "muted": "#6c7086",
                 "subtle": "#a6adc8",
                 "lavender": "#b4befe",
+                "active_border": "#b4befe",
+                "inactive_border": "#6c7086",
+                "bell_border": "#f9e2af",
             }
         )
 

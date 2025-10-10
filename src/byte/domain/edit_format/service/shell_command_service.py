@@ -3,8 +3,12 @@ import subprocess
 from pathlib import Path
 from typing import List
 
+from rich.console import Console
+from rich.syntax import Syntax
+
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
+from byte.domain.cli.rich.panel import Panel
 from byte.domain.edit_format.models import (
     BlockStatus,
     EditFormatPrompts,
@@ -170,13 +174,47 @@ class ShellCommandService(Service, UserInteractive):
                     timeout=300,  # 5 minute timeout
                 )
 
-                # Store execution result
+                # Display the result of the command in a panel
+                console = await self.make(Console)
+
                 if result.returncode == 0:
+                    # Success - show output in green panel
                     block.status_message = f"Success: {result.stdout.strip()}"
+
+                    output = result.stdout.strip()
+                    if output:
+                        syntax = Syntax(
+                            output,
+                            "text",
+                            theme="monokai",
+                            word_wrap=True,
+                        )
+                        panel = Panel(
+                            syntax,
+                            title=f"[bold green]Command Output: {block.command}[/bold green]",
+                            border_style="green",
+                        )
+                        console.print(panel)
                 else:
+                    # Failure - show error in red panel
                     block.status_message = (
                         f"Failed (exit {result.returncode}): {result.stderr.strip()}"
                     )
+
+                    error_output = result.stderr.strip()
+                    if error_output:
+                        syntax = Syntax(
+                            error_output,
+                            "text",
+                            theme="monokai",
+                            word_wrap=True,
+                        )
+                        panel = Panel(
+                            syntax,
+                            title=f"[bold red]Command Failed (exit {result.returncode}): {block.command}[/bold red]",
+                            border_style="red",
+                        )
+                        console.print(panel)
 
             except subprocess.TimeoutExpired:
                 block.status_message = "Command timed out after 5 minutes"

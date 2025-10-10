@@ -16,7 +16,7 @@ class Panel(BasePanel):
 
     This Panel class provides a wrapper around Rich's Panel component with customized
     default values for title alignment (left instead of center) and border style
-    (secondary instead of none).
+    (inactive_border instead of none).
     """
 
     def __init__(
@@ -31,7 +31,7 @@ class Panel(BasePanel):
         safe_box: Optional[bool] = None,
         expand: bool = True,
         style: StyleType = "none",
-        border_style: StyleType = "secondary",
+        border_style: StyleType = "inactive_border",
         width: Optional[int] = None,
         height: Optional[int] = None,
         padding: PaddingDimensions = (0, 1),
