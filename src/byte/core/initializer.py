@@ -18,7 +18,46 @@ class FirstBootInitializer:
         "model": "sonnet",
         "lint": {
             "enabled": True,
+            # "commands": [
+            #     {
+            #         "command": "uv run ruff format --force-exclude --respect-gitignore",
+            #         "extensions": [".py"],
+            #     }
+            # ],
         },
+        "files": {
+            "ignore": [
+                ".ruff_cache",
+                ".idea",
+                ".venv",
+                ".env",
+                ".git/",
+                "__pycache__",
+            ],
+            # "watch": {
+            #     "enabled": True,
+            # },
+        },
+        # "web": {
+        #     "chrome_binary_location": "/usr/bin/google-chrome",
+        # },
+        # "mcp": [
+        #     {
+        #         "name": "docs-mcp-server",
+        #         "connection": {
+        #             "url": "https://docs-mcp-server.mcp.dango.isdelicio.us/mcp",
+        #             "transport": "streamable_http",
+        #         },
+        #         "agents": {
+        #             "ask": {
+        #                 "include": ["search_docs", "list_libraries"],
+        #             },
+        #             "research": {
+        #                 "include": ["search_docs", "list_libraries"],
+        #             },
+        #         },
+        #     },
+        # ],
     }
 
     def __init__(self):
