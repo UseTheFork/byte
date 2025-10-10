@@ -1,6 +1,7 @@
 from datetime import datetime
 from textwrap import dedent
 
+from byte.core.config.config import ByteConfg
 from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
 
@@ -28,16 +29,31 @@ class SystemContextService(Service):
             "project_inforamtion_and_context", []
         )
 
-        project_inforamtion_and_context.append(
-            (
-                "user",
-                dedent(f"""
-                # System Context
+        system_context = []
 
-                Current date: {datetime.now().strftime("%Y-%m-%d")}
-                """),
+        # Check in the config if we have lint commands that should not be suggested.
+        config = await self.make(ByteConfg)
+
+        # Add lint commands context if configured
+        if config.lint.enable and config.lint.commands:
+            system_context.append(
+                "- The user's pre-commit runs these lint commands, don't suggest running them:"
             )
-        )
+            for lint_cmd in config.lint.commands:
+                exts = ", ".join(lint_cmd.extensions)
+                system_context.append(f"  - `{lint_cmd.command}` (for {exts} files)")
+
+        # Build the system context message
+        system_context_message = "\n".join(system_context) if system_context else ""
+
+        context_content = dedent(f"""
+            # System Context
+
+            - Current date: {datetime.now().strftime("%Y-%m-%d")}
+            {system_context_message}
+            """).strip()
+
+        project_inforamtion_and_context.append(("user", context_content))
         state["project_inforamtion_and_context"] = project_inforamtion_and_context
 
         return payload.set("state", state)

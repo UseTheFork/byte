@@ -33,6 +33,7 @@ class FirstBootInitializer:
                 ".env",
                 ".git/",
                 "__pycache__",
+                "node_modules",
             ],
             # "watch": {
             #     "enabled": True,
