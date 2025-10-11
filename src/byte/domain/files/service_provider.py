@@ -13,6 +13,7 @@ from byte.domain.files.command.drop_file_command import DropFileCommand
 from byte.domain.files.command.list_files_command import ListFilesCommand
 from byte.domain.files.service.discovery_service import FileDiscoveryService
 from byte.domain.files.service.file_service import FileService
+from byte.domain.files.service.ignore_service import FileIgnoreService
 from byte.domain.files.service.watcher_service import FileWatcherService
 
 
@@ -20,14 +21,22 @@ class FileServiceProvider(ServiceProvider):
     """Service provider for simplified file functionality with project discovery."""
 
     def services(self) -> List[Type[Service]]:
-        return [FileDiscoveryService, FileService, FileWatcherService]
+        return [
+            FileIgnoreService,
+            FileDiscoveryService,
+            FileService,
+            FileWatcherService,
+        ]
 
     def commands(self) -> List[Type[Command]]:
         return [ListFilesCommand, AddFileCommand, ReadOnlyCommand, DropFileCommand]
 
     async def boot(self, container: Container):
         """Boot file services and register commands with registry."""
-        # Ensure file discovery is booted first to scan project files
+        # Ensure ignore service is booted first for pattern loading
+        await container.make(FileIgnoreService)
+
+        # Then boot file discovery which depends on ignore service
         file_discovery = await container.make(FileDiscoveryService)
 
         # Boots the filewatcher service in to the task manager

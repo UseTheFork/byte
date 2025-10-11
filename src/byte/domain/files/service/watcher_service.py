@@ -14,6 +14,7 @@ from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
 from byte.domain.files.context_manager import FileMode
 from byte.domain.files.service.discovery_service import FileDiscoveryService
 from byte.domain.files.service.file_service import FileService
+from byte.domain.files.service.ignore_service import FileIgnoreService
 
 
 class FileWatcherService(Service):
@@ -27,8 +28,45 @@ class FileWatcherService(Service):
         """Initialize file watcher with TaskManager integration."""
         self._watched_files: Set[Path] = set()
         self.task_manager = await self.make(TaskManager)
-
+        self.ignore_service = await self.make(FileIgnoreService)
         await self._start_watching()
+
+    async def _is_ignored(self, path: Path) -> bool:
+        """Check if a path should be ignored using FileIgnoreService."""
+        ignore_service = await self.make(FileIgnoreService)
+        return await ignore_service.is_ignored(path)
+
+    def _watch_filter(self, change: Change, path: str) -> bool:
+        """Filter function for watchfiles to ignore files based on ignore patterns.
+
+        NOTE: This is a synchronous filter function required by watchfiles library.
+        We cache the ignore service's pathspec for efficient synchronous filtering.
+        Usage: Used internally by awatch to determine which file changes to process.
+        """
+        if not self._config.project_root:
+            return True
+
+        try:
+            # Get the cached pathspec from ignore service
+            # This is safe because _start_watching ensures ignore service is booted
+            spec = self.ignore_service.get_pathspec()
+
+            if not spec:
+                return True
+
+            file_path = Path(path)
+            relative_path = file_path.relative_to(self._config.project_root)
+
+            # Check both file and directory patterns
+            is_ignored = spec.match_file(str(relative_path)) or spec.match_file(
+                str(relative_path) + "/"
+            )
+
+            # Return True to include the file (i.e., not ignored)
+            return not is_ignored
+        except (ValueError, RuntimeError):
+            # Path is outside project root or async error, ignore it
+            return False
 
     async def _start_watching(self) -> None:
         """Start file system monitoring using TaskManager."""
@@ -46,7 +84,9 @@ class FileWatcherService(Service):
     async def _watch_files(self) -> None:
         """Main file watching loop."""
         try:
-            async for changes in awatch(str(self._config.project_root)):
+            async for changes in awatch(
+                str(self._config.project_root), watch_filter=self._watch_filter
+            ):
                 for change_type, file_path_str in changes:
                     file_path = Path(file_path_str)
                     await self._handle_file_change(file_path, change_type)
