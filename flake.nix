@@ -92,6 +92,7 @@
 
                   pkgs.uv
                   pkgs.nodejs
+                  pkgs.prettier
 
                   # Tools / Formaters Linters etc
                   pkgs.alejandra # Nix

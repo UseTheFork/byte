@@ -29,6 +29,7 @@ dependencies = [
 
 scripts.byte = "byte.core.cli:cli"
 
+
 [dependency-groups]
 dev = [
     "dill>=0.4.0",
@@ -38,6 +39,8 @@ dev = [
     "ruff>=0.12.12",
     "tomli>=2.2.1",
 ]
+
+mkdocs = ["mkdocs>=1.6.1", "mkdocs-material>=9.6.21"]
 
 [tool.ruff]
 target-version = "py312"

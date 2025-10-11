@@ -1,0 +1,22 @@
+site_name: Byte Documentation
+repo_url: https://github.com/UseTheFork/byte
+repo_name: UseTheFork/byte
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Quick Start: quickstart.md
+  - Files:
+    - Overview: files/index.md
+    - File Watching: files/file-watching.md
+    - Commands: files/commands.md
+  - About: about.md
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: black
+
+markdown_extensions:
+  - def_list
+  - pymdownx.tasklist:
+      custom_checkbox: true
