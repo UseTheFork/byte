@@ -40,6 +40,9 @@ PROJECT_ROOT = _find_project_root()
 BYTE_DIR: Path = PROJECT_ROOT / ".byte"
 BYTE_DIR.mkdir(exist_ok=True)
 
+BYTE_CACHE_DIR: Path = BYTE_DIR / "cache"
+BYTE_CACHE_DIR.mkdir(exist_ok=True)
+
 BYTE_CONFIG_FILE = BYTE_DIR / "config.yaml"
 
 # Load our dotenv
@@ -120,6 +123,7 @@ class ByteConfg(BaseSettings):
 
     project_root: Path = PROJECT_ROOT
     byte_dir: Path = BYTE_DIR
+    byte_cache_dir: Path = BYTE_CACHE_DIR
 
     model: str
 

@@ -1,12 +1,9 @@
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 import aiosqlite
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
 from byte.core.config.config import ByteConfg
-
-if TYPE_CHECKING:
-    pass
 
 
 class ByteCheckpointer:
@@ -35,9 +32,9 @@ class ByteCheckpointer:
         """Create and configure AsyncSqliteSaver with Byte-specific settings."""
         db_path = self._config.memory.database_path
 
-        # If path is relative, resolve it relative to BYTE_DIR
+        # If path is relative, resolve it relative to BYTE_CACHE_DIR
         if not db_path.is_absolute():
-            db_path = self._config.byte_dir / db_path
+            db_path = self._config.byte_cache_dir / db_path
 
         # Ensure parent directory exists
         db_path.parent.mkdir(parents=True, exist_ok=True)

@@ -7,7 +7,7 @@ from prompt_toolkit.shortcuts import PromptSession
 from rich.console import Console, Group
 from rich.rule import Rule
 
-from byte.core.config.config import BYTE_DIR
+from byte.core.config.config import ByteConfg
 from byte.core.event_bus import EventType, Payload
 from byte.core.service.base_service import Service
 from byte.domain.agent.service.agent_service import AgentService
@@ -77,8 +77,10 @@ class PromptToolkitService(Service):
 
         self.completer = CommandCompleter()
 
+        config = await self.make(ByteConfg)
+
         self.prompt_session = PromptSession(
-            history=FileHistory(BYTE_DIR / ".input_history"),
+            history=FileHistory(config.byte_cache_dir / ".input_history"),
             multiline=False,
             completer=self.completer,
         )
