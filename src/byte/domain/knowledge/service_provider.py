@@ -62,12 +62,3 @@ class KnowledgeServiceProvider(ServiceProvider):
 			EventType.PRE_PROMPT_TOOLKIT.value,
 			cli_context_display_service.display_context_panel_hook,
 		)
-
-	# async def shutdown(self, container: "Container"):
-	#     """Shutdown knowledge services and close database connections."""
-	#     try:
-	#         if KnowledgeService in container._instances:
-	#             knowledge_service = await container.make(KnowledgeService)
-	#             await knowledge_service.close()
-	#     except Exception:
-	#         pass  # Ignore cleanup errors during shutdown

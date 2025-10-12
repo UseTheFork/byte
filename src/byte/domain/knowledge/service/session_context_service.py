@@ -76,12 +76,11 @@ class SessionContextService(Service):
 				(
 					"user",
 					dedent(f"""
-                # Session Context
+					# Session Context
 
-                The following documents and reference materials have been provided by the user to inform your work on this task.
+					The following documents and reference materials have been provided by the user to inform your work on this task.
 
-                {conventions}
-                """),
+					{conventions}"""),
 				)
 			)
 

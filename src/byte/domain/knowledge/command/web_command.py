@@ -73,7 +73,7 @@ class WebCommand(Command, UserInteractive):
 					"messages": [
 						(
 							"user",
-							f"Please extract only the relevant information from this web content:\n\n{markdown_content}",
+							f"# Extract only the relevant information from this web content:\n\n{markdown_content}",
 						)
 					],
 					"project_inforamtion_and_context": [],
@@ -88,6 +88,6 @@ class WebCommand(Command, UserInteractive):
 				key = slugify(args)
 				session_context_service.add_context(key, cleaned_content)
 			else:
-				console.print("[warning]No cleaned content returned[/warning]")
+				console.print("[warn]No cleaned content returned[/warn]")
 		else:
-			console.print("[info]Content not added to context[/info]")
+			console.print("[warn]Content not added to context[/warn]")
