@@ -6,18 +6,18 @@ from pydantic.dataclasses import dataclass
 
 @dataclass
 class LintFile:
-    """Dataclass representing the result of executing a lint command on a specific file."""
+	"""Dataclass representing the result of executing a lint command on a specific file."""
 
-    file: Path
-    full_command: str
-    exit_code: int | None = None
-    stdout: str = ""
-    stderr: str = ""
+	file: Path
+	full_command: str
+	exit_code: int | None = None
+	stdout: str = ""
+	stderr: str = ""
 
 
 @dataclass
 class LintCommand:
-    """Dataclass representing a lint command with results for multiple files."""
+	"""Dataclass representing a lint command with results for multiple files."""
 
-    command: str
-    results: List[LintFile]
+	command: str
+	results: List[LintFile]
