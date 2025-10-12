@@ -48,7 +48,6 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
             chunk: The data chunk from that stream mode
         """
         stream_rendering_service = await self.make(StreamRenderingService)
-        # log.info(f"-----------------{mode}------------------")
 
         # Filter and process based on mode
         if mode == "messages":
