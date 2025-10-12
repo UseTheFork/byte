@@ -49,39 +49,50 @@ line-length = 120
 
 [tool.ruff.lint]
 select = [
+    # keep-sorted start
     "E",
     "F",
-    "I",
-    "LOG",
-    "UP",
-    "T10",
-    "ISC",
-    "ICN",
-    "LOG",
+    "FURB",
     "G",
+    "I",
+    "ICN",
+    "ISC",
+    "LOG",
     "PIE",
     "PT",
     "Q",
     "RSE",
-    "FURB",
     "RUF",
+    "T10",
+    "UP",
+    # keep-sorted end
 ]
 ignore = [
-    "E712",
+    # keep-sorted start
+    "E111",
+    "E114",
+    "E117",
     "E501",
+    "E712",
+    "ISC001",
+    "PIE790",
+    "Q001",
+    "Q002",
+    "Q003",
+    "RUF005",
+    "RUF006",
+    "RUF012",
     "UP006",
     "UP007",
     "UP035",
     "UP045",
-    "PIE790",
-    "RUF005",
-    "RUF006",
-    "RUF012",
-    "ISC001",
+    "W191",
+    # keep-sorted end
 ]
 
 [tool.ruff.format]
 indent-style = "tab"
+line-ending = "lf"
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
@@ -92,6 +103,7 @@ exclude = ["**/node_modules", "**/__pycache__"]
 pythonPlatform = "All"
 pythonVersion = "3.12"
 reportIgnoreCommentWithoutRule = true
+reportRedeclaration = false
 reportUnnecessaryTypeIgnoreComment = "warning"
 typeCheckingMode = "basic"
 
