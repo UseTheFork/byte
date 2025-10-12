@@ -18,54 +18,52 @@ from byte.domain.files.service.watcher_service import FileWatcherService
 
 
 class FileServiceProvider(ServiceProvider):
-    """Service provider for simplified file functionality with project discovery."""
+	"""Service provider for simplified file functionality with project discovery."""
 
-    def services(self) -> List[Type[Service]]:
-        return [
-            FileIgnoreService,
-            FileDiscoveryService,
-            FileService,
-            FileWatcherService,
-        ]
+	def services(self) -> List[Type[Service]]:
+		return [
+			FileIgnoreService,
+			FileDiscoveryService,
+			FileService,
+			FileWatcherService,
+		]
 
-    def commands(self) -> List[Type[Command]]:
-        return [ListFilesCommand, AddFileCommand, ReadOnlyCommand, DropFileCommand]
+	def commands(self) -> List[Type[Command]]:
+		return [ListFilesCommand, AddFileCommand, ReadOnlyCommand, DropFileCommand]
 
-    async def boot(self, container: Container):
-        """Boot file services and register commands with registry."""
-        # Ensure ignore service is booted first for pattern loading
-        await container.make(FileIgnoreService)
+	async def boot(self, container: Container):
+		"""Boot file services and register commands with registry."""
+		# Ensure ignore service is booted first for pattern loading
+		await container.make(FileIgnoreService)
 
-        # Then boot file discovery which depends on ignore service
-        file_discovery = await container.make(FileDiscoveryService)
+		# Then boot file discovery which depends on ignore service
+		file_discovery = await container.make(FileDiscoveryService)
 
-        # Boots the filewatcher service in to the task manager
-        file_watcher_service = await container.make(FileWatcherService)
+		# Boots the filewatcher service in to the task manager
+		file_watcher_service = await container.make(FileWatcherService)
 
-        # Set up event listener for PRE_PROMPT_TOOLKIT
-        event_bus = await container.make(EventBus)
-        file_service = await container.make(FileService)
+		# Set up event listener for PRE_PROMPT_TOOLKIT
+		event_bus = await container.make(EventBus)
+		file_service = await container.make(FileService)
 
-        # Register listener that calls list_in_context_files before each prompt
-        event_bus.on(
-            EventType.PRE_PROMPT_TOOLKIT.value,
-            file_service.list_in_context_files_hook,
-        )
+		# Register listener that calls list_in_context_files before each prompt
+		event_bus.on(
+			EventType.PRE_PROMPT_TOOLKIT.value,
+			file_service.list_in_context_files_hook,
+		)
 
-        event_bus.on(
-            EventType.PRE_ASSISTANT_NODE.value,
-            file_service.add_file_context_to_prompt_hook,
-        )
+		event_bus.on(
+			EventType.PRE_ASSISTANT_NODE.value,
+			file_service.add_file_context_to_prompt_hook,
+		)
 
-        event_bus.on(
-            EventType.POST_PROMPT_TOOLKIT.value,
-            file_watcher_service.modify_user_request_hook,
-        )
+		event_bus.on(
+			EventType.POST_PROMPT_TOOLKIT.value,
+			file_watcher_service.modify_user_request_hook,
+		)
 
-        console = await container.make(Console)
+		console = await container.make(Console)
 
-        found_files = await file_discovery.get_files()
-        console.print(
-            f"│ [success]Discovered:[/success] [info]{len(found_files)} files[/info]"
-        )
-        console.print("│ ", style="text")
+		found_files = await file_discovery.get_files()
+		console.print(f"│ [success]Discovered:[/success] [info]{len(found_files)} files[/info]")
+		console.print("│ ", style="text")
