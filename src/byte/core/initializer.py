@@ -19,10 +19,10 @@ class FirstBootInitializer:
 		"lint": {
 			"enabled": True,
 			# "commands": [
-			#     {
-			#         "command": "uv run ruff format --force-exclude --respect-gitignore",
-			#         "extensions": [".py"],
-			#     }
+			# {
+			# "command": "uv run ruff format --force-exclude --respect-gitignore",
+			# "extensions": [".py"],
+			# }
 			# ],
 		},
 		"files": {
@@ -36,28 +36,28 @@ class FirstBootInitializer:
 				"node_modules",
 			],
 			# "watch": {
-			#     "enabled": True,
+			# "enabled": True,
 			# },
 		},
 		# "web": {
-		#     "chrome_binary_location": "/usr/bin/google-chrome",
+		# "chrome_binary_location": "/usr/bin/google-chrome",
 		# },
 		# "mcp": [
-		#     {
-		#         "name": "docs-mcp-server",
-		#         "connection": {
-		#             "url": "https://docs-mcp-server.mcp.dango.isdelicio.us/mcp",
-		#             "transport": "streamable_http",
-		#         },
-		#         "agents": {
-		#             "ask": {
-		#                 "include": ["search_docs", "list_libraries"],
-		#             },
-		#             "research": {
-		#                 "include": ["search_docs", "list_libraries"],
-		#             },
-		#         },
-		#     },
+		# {
+		# "name": "docs-mcp-server",
+		# "connection": {
+		# "url": "https://docs-mcp-server.mcp.dango.isdelicio.us/mcp",
+		# "transport": "streamable_http",
+		# },
+		# "agents": {
+		# "ask": {
+		# "include": ["search_docs", "list_libraries"],
+		# },
+		# "research": {
+		# "include": ["search_docs", "list_libraries"],
+		# },
+		# },
+		# },
 		# ],
 	}
 
