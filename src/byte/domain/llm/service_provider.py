@@ -31,7 +31,7 @@ class LLMServiceProvider(ServiceProvider):
 		console = await container.make(Console)
 
 		# Display active model configuration for user awareness
-		main_model = llm_service._service_config.main.model
-		weak_model = llm_service._service_config.weak.model
+		main_model = llm_service._service_config.main.params.model
+		weak_model = llm_service._service_config.weak.params.model
 		console.print(f"│ [success]Main model:[/success] [info]{main_model}[/info]")
 		console.print(f"│ [success]Weak model:[/success] [info]{weak_model}[/info]")

@@ -1,10 +1,9 @@
-from typing import Any, Dict
+from typing import Any
 
-from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
 
 from byte.core.service.base_service import Service
-from byte.domain.llm.config import LLMConfig, ModelConfig
+from byte.domain.llm.schemas import AnthropicSchema, GoogleSchema, LLMSchema, OpenAiSchema
 
 
 class LLMService(Service):
@@ -16,55 +15,46 @@ class LLMService(Service):
 	Usage: `service = OpenAILLMService(container)` -> provider-specific implementation
 	"""
 
-	_models: Dict[str, Any] = {}
-	_service_config: LLMConfig
+	_service_config: LLMSchema
 
 	async def _configure_service(self) -> None:
 		"""Configure LLM service with model settings based on global configuration."""
-		if self._config.model == "sonnet":
-			main_model = ModelConfig(
-				model="claude-sonnet-4-5",
+
+		if self._config.llm.model == "anthropic":
+			self._service_config = AnthropicSchema(
 				api_key=self._config.llm.anthropic.api_key,
-				max_input_tokens=200000,
-				max_output_tokens=64000,
-				input_cost_per_token=(3 / 1000000),
-				output_cost_per_token=(15 / 1000000),
-			)
-			weak_model = ModelConfig(
-				model="claude-3-5-haiku-latest",
-				api_key=self._config.llm.anthropic.api_key,
-				max_input_tokens=200000,
-				max_output_tokens=8192,
-				input_cost_per_token=(0.80 / 1000000),
-				output_cost_per_token=(4 / 1000000),
+				provider_params=self._config.llm.anthropic.model_params.copy(),
 			)
 
-		self._service_config = LLMConfig(model=self._config.model, main=main_model, weak=weak_model)
+		if self._config.llm.model == "openai":
+			self._service_config = OpenAiSchema(
+				api_key=self._config.llm.openai.api_key,
+				provider_params=self._config.llm.openai.model_params.copy(),
+			)
+
+		if self._config.llm.model == "gemini":
+			self._service_config = GoogleSchema(
+				api_key=self._config.llm.gemini.api_key,
+				provider_params=self._config.llm.gemini.model_params.copy(),
+			)
 
 	def get_model(self, model_type: str = "main", **kwargs) -> Any:
-		"""Get a model instance with lazy initialization and caching.
+		"""Get a model instance with lazy initialization and caching."""
 
-		Retrieves cached model or creates new one based on configuration,
-		reducing initialization overhead for frequently used models.
-		Usage: `model = service.get_model("main")` -> cached LangChain model instance
-		"""
+		# Merge schema provider_params with call-time kwargs (call-time takes precedence)
+		provider_params = self._service_config.provider_params.copy()
+		provider_params.update(kwargs)
 
-		# TODO: Need to figure out how to make this handle for other providers.
+		# Select model schema
+		model_schema = self._service_config.main if model_type == "main" else self._service_config.weak
 
-		if model_type == "main":
-			return ChatAnthropic(
-				model_name=self._service_config.main.model,
-				max_tokens=self._service_config.main.max_output_tokens,
-				api_key=self._service_config.main.api_key,
-				**kwargs,
-			)
-		elif model_type == "weak":
-			return ChatAnthropic(
-				model_name=self._service_config.weak.model,
-				max_tokens=self._service_config.weak.max_output_tokens,
-				api_key=self._service_config.weak.api_key,
-				**kwargs,
-			)
+		# Instantiate using the stored class reference
+		return self._service_config.model_class(
+			model_name=model_schema.params.model,  # pyright: ignore[reportCallIssue]
+			max_tokens=model_schema.constraints.max_output_tokens,  # pyright: ignore[reportCallIssue]
+			api_key=self._service_config.api_key,  # pyright: ignore[reportCallIssue]
+			**provider_params,
+		)
 
 	def get_main_model(self) -> BaseChatModel:
 		"""Convenience method for accessing the primary model.

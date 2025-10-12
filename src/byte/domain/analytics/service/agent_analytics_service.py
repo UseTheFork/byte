@@ -48,7 +48,7 @@ class AgentAnalyticsService(Service):
 
 				llm_service = await self.make(LLMService)
 
-				if llm_service._service_config.main.model == llm.model:
+				if llm_service._service_config.main.params.model == llm.model:
 					# Update the main model context used with total tokens
 					self.model_usage["main"]["context"] = total_tokens
 					self.model_usage["main"]["total"]["input"] += input_tokens
@@ -57,7 +57,7 @@ class AgentAnalyticsService(Service):
 					self.model_usage["last"]["output"] = output_tokens
 					self.model_usage["last"]["type"] = "main"
 
-				if llm_service._service_config.weak.model == llm.model:
+				if llm_service._service_config.weak.params.model == llm.model:
 					self.model_usage["weak"]["total"]["input"] += input_tokens
 					self.model_usage["weak"]["total"]["output"] += output_tokens
 					self.model_usage["last"]["input"] = input_tokens
@@ -78,22 +78,30 @@ class AgentAnalyticsService(Service):
 
 		# Calculate usage percentages
 		main_percentage = min(
-			(self.model_usage["main"]["context"] / llm_service._service_config.main.max_input_tokens) * 100,
+			(self.model_usage["main"]["context"] / llm_service._service_config.main.constraints.max_input_tokens) * 100,
 			100,
 		)
 
 		weak_cost = (
-			self.model_usage["weak"]["total"]["input"] * llm_service._service_config.weak.input_cost_per_token
-		) + (self.model_usage["weak"]["total"]["output"] * llm_service._service_config.weak.output_cost_per_token)
+			self.model_usage["weak"]["total"]["input"]
+			* llm_service._service_config.weak.constraints.input_cost_per_token
+		) + (
+			self.model_usage["weak"]["total"]["output"]
+			* llm_service._service_config.weak.constraints.output_cost_per_token
+		)
 
 		main_cost = (
-			self.model_usage["main"]["total"]["input"] * llm_service._service_config.main.input_cost_per_token
-		) + (self.model_usage["main"]["total"]["output"] * llm_service._service_config.main.output_cost_per_token)
+			self.model_usage["main"]["total"]["input"]
+			* llm_service._service_config.main.constraints.input_cost_per_token
+		) + (
+			self.model_usage["main"]["total"]["output"]
+			* llm_service._service_config.main.constraints.output_cost_per_token
+		)
 
 		# llm_service._service_config.main.model
 
 		progress = ProgressBar(
-			total=llm_service._service_config.main.max_input_tokens,
+			total=llm_service._service_config.main.constraints.max_input_tokens,
 			completed=self.model_usage["main"]["context"],
 			complete_style="success",
 		)
@@ -104,12 +112,16 @@ class AgentAnalyticsService(Service):
 		last_message_type = self.model_usage["last"]["type"]
 		if last_message_type == "main":
 			last_message_cost = (
-				self.model_usage["last"]["input"] * llm_service._service_config.main.input_cost_per_token
-			) + (self.model_usage["last"]["output"] * llm_service._service_config.main.output_cost_per_token)
+				self.model_usage["last"]["input"] * llm_service._service_config.main.constraints.input_cost_per_token
+			) + (
+				self.model_usage["last"]["output"] * llm_service._service_config.main.constraints.output_cost_per_token
+			)
 		elif last_message_type == "weak":
 			last_message_cost = (
-				self.model_usage["last"]["input"] * llm_service._service_config.weak.input_cost_per_token
-			) + (self.model_usage["last"]["output"] * llm_service._service_config.weak.output_cost_per_token)
+				self.model_usage["last"]["input"] * llm_service._service_config.weak.constraints.input_cost_per_token
+			) + (
+				self.model_usage["last"]["output"] * llm_service._service_config.weak.constraints.output_cost_per_token
+			)
 		else:
 			last_message_cost = 0.0
 
