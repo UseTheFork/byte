@@ -14,41 +14,41 @@ from byte.domain.system.service.system_context_service import SystemContextServi
 
 
 class SystemServiceProvider(ServiceProvider):
-    """Service provider for system-level commands and functionality.
+	"""Service provider for system-level commands and functionality.
 
-    Registers core system commands like exit and help, making them available
-    through the command registry for user interaction via slash commands.
-    Usage: Register with container to enable /exit and /help commands
-    """
+	Registers core system commands like exit and help, making them available
+	through the command registry for user interaction via slash commands.
+	Usage: Register with container to enable /exit and /help commands
+	"""
 
-    def commands(self) -> List[Type[Command]]:
-        return [ExitCommand, InitilizieCommand]
+	def commands(self) -> List[Type[Command]]:
+		return [ExitCommand, InitilizieCommand]
 
-    def services(self) -> List[Type[Service]]:
-        return [SystemContextService]
+	def services(self) -> List[Type[Service]]:
+		return [SystemContextService]
 
-    async def boot(self, container: "Container") -> None:
-        """Boot system services and register commands with registry.
+	async def boot(self, container: "Container") -> None:
+		"""Boot system services and register commands with registry.
 
-        Usage: `provider.boot(container)` -> commands become available as /exit, /help
-        """
+		Usage: `provider.boot(container)` -> commands become available as /exit, /help
+		"""
 
-        event_bus = await container.make(EventBus)
-        system_context_service = await container.make(SystemContextService)
+		event_bus = await container.make(EventBus)
+		system_context_service = await container.make(SystemContextService)
 
-        event_bus.on(
-            EventType.PRE_ASSISTANT_NODE.value,
-            system_context_service.add_system_context,
-        )
+		event_bus.on(
+			EventType.PRE_ASSISTANT_NODE.value,
+			system_context_service.add_system_context,
+		)
 
-        console = await container.make(Console)
+		console = await container.make(Console)
 
-        console.print("│ ", style="text")
-        console.print(
-            Rule(
-                "╰─── //",
-                style="text",
-                align="left",
-                characters="─",
-            )
-        )
+		console.print("│ ", style="text")
+		console.print(
+			Rule(
+				"╰─── //",
+				style="text",
+				align="left",
+				characters="─",
+			)
+		)
