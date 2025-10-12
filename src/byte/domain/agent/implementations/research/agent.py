@@ -37,7 +37,9 @@ class ResearchAgent(Agent):
         # Create the assistant and runnable
         llm_service = await self.make(LLMService)
         llm: BaseChatModel = llm_service.get_main_model()
-        assistant_runnable = research_prompt | llm.bind_tools(self.get_tools())
+        assistant_runnable = research_prompt | llm.bind_tools(
+            self.get_tools(), parallel_tool_calls=False
+        )
 
         mcp_service = await self.make(MCPService)
         mcp_tools = mcp_service.get_tools_for_agent("research")

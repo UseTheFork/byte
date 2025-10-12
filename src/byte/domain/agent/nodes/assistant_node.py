@@ -1,6 +1,7 @@
 from langgraph.graph.state import Runnable
 
 from byte.core.event_bus import EventType, Payload
+from byte.core.logging import log
 from byte.domain.agent.nodes.base_node import Node
 
 
@@ -23,6 +24,10 @@ class AssistantNode(Node):
             payload = await self.emit(payload)
             state = payload.get("state", state)
             config = payload.get("config", config)
+
+            template = self.runnable.get_prompts(config)
+            prompt_value = await template[0].ainvoke(state)
+            log.info(prompt_value)
 
             result = await self.runnable.ainvoke(state, config=config)
 

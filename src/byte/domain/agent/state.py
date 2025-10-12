@@ -12,6 +12,7 @@ class BaseState(TypedDict):
     """
 
     messages: Annotated[list[AnyMessage], add_messages]
+    masked_messages: list[AnyMessage]
 
     agent: str
 

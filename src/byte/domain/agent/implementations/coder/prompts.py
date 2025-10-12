@@ -23,7 +23,7 @@ coder_prompt = ChatPromptTemplate.from_messages(
         ),
         ("placeholder", "{examples}"),
         ("placeholder", "{project_inforamtion_and_context}"),
-        ("placeholder", "{messages}"),
+        ("placeholder", "{masked_messages}"),
         ("user", "{file_context}"),
         ("placeholder", "{errors}"),
     ]

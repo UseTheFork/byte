@@ -46,7 +46,9 @@ class AskAgent(Agent):
         # Create the assistant and runnable
         llm_service = await self.make(LLMService)
         llm: BaseChatModel = llm_service.get_main_model()
-        assistant_runnable = ask_prompt | llm.bind_tools(mcp_tools)
+        assistant_runnable = ask_prompt | llm.bind_tools(
+            mcp_tools, parallel_tool_calls=False
+        )
 
         # Create the state graph
         graph = StateGraph(self.get_state_class())

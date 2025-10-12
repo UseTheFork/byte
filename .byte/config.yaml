@@ -1,0 +1,56 @@
+# code-theme: solarized-dark
+# dark-mode: true
+
+# files:
+  # -max_size_kb
+  # excluded_patterns
+
+model: sonnet
+
+lint:
+  enable: true
+  commands:
+    - command: "uv run ruff format --force-exclude --respect-gitignore"
+      extensions: [".py"]
+    - command: "uv run ruff check --fix --force-exclude"
+      extensions: [".py"]
+    - command: "prettier --write"
+      extensions: [".md"]
+files:
+  ignore:
+    [
+    ".byte/cache",
+    ".ruff_cache",
+    ".idea",
+    ".venv",
+    ".env",
+    ".git/",
+    "__pycache__",
+    "node_modules",
+    ]
+  watch:
+    enable: true
+
+web:
+  chrome_binary_location: /etc/profiles/per-user/sincore/bin/google-chrome-stable
+
+mcp:
+  - name: "docs-mcp-server"
+    connection:
+      url: "https://docs-mcp-server.mcp.dango.isdelicio.us/mcp"
+      transport: "streamable_http"
+    agents:
+      ask:
+        include: ["search_docs", "list_libraries"]
+      research:
+        include: ["search_docs", "list_libraries"]
+
+  # - name: "context7"
+  #   connection:
+  #     url: "https://context7.mcp.dango.isdelicio.us/mcp"
+  #     transport: "streamable_http"
+  #   agents:
+  #     ask:
+  #       include: ["search_docs", "list_libraries"]
+  #     research:
+  #       include: ["search_docs", "list_libraries"]

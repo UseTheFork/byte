@@ -22,6 +22,7 @@ class StartNode(Node):
             "agent": self.agent,
             "agent_status": "",
             "edit_format_system": "",
+            "masked_messages": [],
             "errors": [],
             "examples": [],
         }

@@ -15,12 +15,10 @@ ask_prompt = ChatPromptTemplate.from_messages(
 
             Take requests for changes to the supplied code.
             If the request is ambiguous, ask questions.
-
-            {edit_format_system}
             """),
         ),
         ("placeholder", "{project_inforamtion_and_context}"),
-        ("placeholder", "{messages}"),
+        ("placeholder", "{masked_messages}"),
         ("user", "{file_context}"),
     ]
 )

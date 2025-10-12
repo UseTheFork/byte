@@ -30,3 +30,4 @@ commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
         ("placeholder", "{messages}"),
     ]
 )
+# AI@

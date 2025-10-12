@@ -1,6 +1,6 @@
 from textwrap import dedent
 
-from byte.core.utils import extract_content_from_message, get_last_message
+from byte.core.utils import dd, extract_content_from_message, get_last_message
 from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.agent.implementations.research.agent import ResearchAgent
 from byte.domain.cli.service.command_registry import Command
@@ -38,7 +38,7 @@ class InitilizieCommand(Command):
         file_service = await self.make(FileService)
         await file_service.clear_context()
 
-        init_agent = await self.make(ResearchAgent)
+        research_agent = await self.make(ResearchAgent)
         coder_agent = await self.make(CoderAgent)
 
         # Get all project files for the agent to analyze
@@ -47,20 +47,22 @@ class InitilizieCommand(Command):
         # Create a formatted list of files for the agent
         file_list = "\n".join([f"- {file}" for file in sorted(project_files)])
 
-        user_message = f"""Begin analyzing the codebase to create style guides.
+        user_message = dedent(f"""
+        Analyzing the codebase to create a comment style guide.
 
-Here are all the project files available for analysis:
+        Here are all the project files available for analysis:
+        {file_list}
 
-{file_list}
+        **IMPORTANT: Keep the guide to 20-30 lines**""")
 
-Please analyze the codebase structure and create appropriate style guides."""
-
-        init_message: dict = await init_agent.execute(
+        init_message: dict = await research_agent.execute(
             request={"messages": [("user", user_message)]}
         )
 
         ai_message = get_last_message(init_message)
         message_content = extract_content_from_message(ai_message)
+
+        dd(message_content)
 
         coder_agent: dict = await coder_agent.execute(
             request={
