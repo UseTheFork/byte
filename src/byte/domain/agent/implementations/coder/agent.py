@@ -18,90 +18,90 @@ from byte.domain.llm.service.llm_service import LLMService
 
 
 class CoderAgent(Agent):
-    """Domain service for the coder agent specialized in software development.
+	"""Domain service for the coder agent specialized in software development.
 
-    Pure domain service that handles coding logic without UI concerns.
-    Integrates with file context, memory, and development tools through
-    the actor system for clean separation of concerns.
-    """
+	Pure domain service that handles coding logic without UI concerns.
+	Integrates with file context, memory, and development tools through
+	the actor system for clean separation of concerns.
+	"""
 
-    edit_format: EditFormatService
+	edit_format: EditFormatService
 
-    async def boot(self):
-        self.edit_format = await self.make(EditFormatService)
+	async def boot(self):
+		self.edit_format = await self.make(EditFormatService)
 
-    def get_state_class(self) -> Type[TypedDict]:  # pyright: ignore[reportInvalidTypeForm]
-        """Return coder-specific state class."""
-        return CoderState
+	def get_state_class(self) -> Type[TypedDict]:  # pyright: ignore[reportInvalidTypeForm]
+		"""Return coder-specific state class."""
+		return CoderState
 
-    async def build(self) -> CompiledStateGraph:
-        """Build and compile the coder agent graph with memory and tools."""
+	async def build(self) -> CompiledStateGraph:
+		"""Build and compile the coder agent graph with memory and tools."""
 
-        # Create the assistant and runnable
-        llm_service = await self.make(LLMService)
-        llm: BaseChatModel = llm_service.get_main_model()
-        assistant_runnable = coder_prompt | llm
+		# Create the assistant and runnable
+		llm_service = await self.make(LLMService)
+		llm: BaseChatModel = llm_service.get_main_model()
+		assistant_runnable = coder_prompt | llm
 
-        # Create the state graph
-        graph = StateGraph(self.get_state_class())
+		# Create the state graph
+		graph = StateGraph(self.get_state_class())
 
-        # Add nodes
-        graph.add_node(
-            "start",
-            await self.make(
-                StartNode,
-                agent=self.__class__.__name__,
-                edit_format=self.edit_format,
-            ),
-        )
-        graph.add_node(
-            "assistant",
-            await self.make(AssistantNode, runnable=assistant_runnable),
-        )
-        graph.add_node(
-            "parse_blocks",
-            await self.make(ParseBlocksNode, edit_format=self.edit_format),
-        )
-        graph.add_node("lint", await self.make(LintNode))
+		# Add nodes
+		graph.add_node(
+			"start",
+			await self.make(
+				StartNode,
+				agent=self.__class__.__name__,
+				edit_format=self.edit_format,
+			),
+		)
+		graph.add_node(
+			"assistant",
+			await self.make(AssistantNode, runnable=assistant_runnable),
+		)
+		graph.add_node(
+			"parse_blocks",
+			await self.make(ParseBlocksNode, edit_format=self.edit_format),
+		)
+		graph.add_node("lint", await self.make(LintNode))
 
-        graph.add_node(
-            "end",
-            await self.make(
-                EndNode,
-                agent=self.__class__.__name__,
-                llm=llm,
-            ),
-        )
+		graph.add_node(
+			"end",
+			await self.make(
+				EndNode,
+				agent=self.__class__.__name__,
+				llm=llm,
+			),
+		)
 
-        # Define edges
-        graph.add_edge(START, "start")
-        graph.add_edge("start", "assistant")
-        graph.add_edge("assistant", "parse_blocks")
+		# Define edges
+		graph.add_edge(START, "start")
+		graph.add_edge("start", "assistant")
+		graph.add_edge("assistant", "parse_blocks")
 
-        # Conditional routing from assistant
-        graph.add_conditional_edges(
-            "parse_blocks",
-            self._should_continue,
-            {
-                "assistant": "assistant",
-                "lint": "lint",
-            },
-        )
+		# Conditional routing from assistant
+		graph.add_conditional_edges(
+			"parse_blocks",
+			self._should_continue,
+			{
+				"assistant": "assistant",
+				"lint": "lint",
+			},
+		)
 
-        graph.add_edge("lint", "end")
-        graph.add_edge("end", END)
+		graph.add_edge("lint", "end")
+		graph.add_edge("end", END)
 
-        checkpointer = await self.get_checkpointer()
-        return graph.compile(checkpointer=checkpointer, debug=False)
+		checkpointer = await self.get_checkpointer()
+		return graph.compile(checkpointer=checkpointer, debug=False)
 
-    async def _should_continue(self, state) -> str:
-        """Determine next step based on last message."""
-        # messages = state["messages"]
-        # last_message = messages[-1]
+	async def _should_continue(self, state) -> str:
+		"""Determine next step based on last message."""
+		# messages = state["messages"]
+		# last_message = messages[-1]
 
-        # log.debug(state)
+		# log.debug(state)
 
-        if state["agent_status"] == "valid":
-            return "lint"
+		if state["agent_status"] == "valid":
+			return "lint"
 
-        return "assistant"
+		return "assistant"

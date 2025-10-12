@@ -12,65 +12,65 @@ from byte.domain.llm.service.llm_service import LLMService
 
 
 class CommitAgent(Agent):
-    """Domain service for generating AI-powered git commit messages and creating commits."""
+	"""Domain service for generating AI-powered git commit messages and creating commits."""
 
-    def get_state_class(self):
-        """Return coder-specific state class."""
-        return CommitState
+	def get_state_class(self):
+		"""Return coder-specific state class."""
+		return CommitState
 
-    async def build(self):
-        """Build and compile the coder agent graph with memory and tools.
+	async def build(self):
+		"""Build and compile the coder agent graph with memory and tools.
 
-        Creates a StateGraph optimized for coding tasks with specialized
-        prompts, file context integration, and development-focused routing.
-        Usage: `graph = await builder.build()` -> ready for coding assistance
-        """
+		Creates a StateGraph optimized for coding tasks with specialized
+		prompts, file context integration, and development-focused routing.
+		Usage: `graph = await builder.build()` -> ready for coding assistance
+		"""
 
-        llm_service = await self.make(LLMService)
-        llm: BaseChatModel = llm_service.get_weak_model()
-        assistant_runnable = commit_prompt | llm
+		llm_service = await self.make(LLMService)
+		llm: BaseChatModel = llm_service.get_weak_model()
+		assistant_runnable = commit_prompt | llm
 
-        # Create the state graph
-        graph = StateGraph(self.get_state_class())
+		# Create the state graph
+		graph = StateGraph(self.get_state_class())
 
-        # Add nodes
-        graph.add_node(
-            "start",
-            await self.make(StartNode, agent=self.__class__.__name__),
-        )
+		# Add nodes
+		graph.add_node(
+			"start",
+			await self.make(StartNode, agent=self.__class__.__name__),
+		)
 
-        graph.add_node(
-            "assistant",
-            await self.make(AssistantNode, runnable=assistant_runnable),
-        )
+		graph.add_node(
+			"assistant",
+			await self.make(AssistantNode, runnable=assistant_runnable),
+		)
 
-        graph.add_node(
-            "end",
-            await self.make(
-                EndNode,
-                agent=self.__class__.__name__,
-                llm=llm,
-            ),
-        )
+		graph.add_node(
+			"end",
+			await self.make(
+				EndNode,
+				agent=self.__class__.__name__,
+				llm=llm,
+			),
+		)
 
-        graph.add_node("extract_commit", self._extract_commit)
+		graph.add_node("extract_commit", self._extract_commit)
 
-        # Define edges
-        graph.add_edge(START, "start")
-        graph.add_edge("start", "assistant")
-        graph.add_edge("assistant", "extract_commit")
-        graph.add_edge("extract_commit", "end")
-        graph.add_edge("end", END)
+		# Define edges
+		graph.add_edge(START, "start")
+		graph.add_edge("start", "assistant")
+		graph.add_edge("assistant", "extract_commit")
+		graph.add_edge("extract_commit", "end")
+		graph.add_edge("end", END)
 
-        # Compile graph with memory and configuration
-        return graph.compile()
+		# Compile graph with memory and configuration
+		return graph.compile()
 
-    def _extract_commit(self, state: CommitState):
-        """Extract commit message from assistant response and update state.
+	def _extract_commit(self, state: CommitState):
+		"""Extract commit message from assistant response and update state.
 
-        Usage: `result = agent._extract_commit(state)` -> {"commit_message": "fix: ..."}
-        """
-        messages = state["messages"]
-        last_message = messages[-1]
+		Usage: `result = agent._extract_commit(state)` -> {"commit_message": "fix: ..."}
+		"""
+		messages = state["messages"]
+		last_message = messages[-1]
 
-        return {"commit_message": last_message.content}
+		return {"commit_message": last_message.content}

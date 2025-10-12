@@ -25,47 +25,47 @@ from byte.domain.cli.service.command_registry import Command
 
 
 class AgentServiceProvider(ServiceProvider):
-    """Main service provider for all agent types and routing.
+	"""Main service provider for all agent types and routing.
 
-    Manages registration and initialization of specialized AI agents (coder, docs, ask)
-    and provides the central agent switching functionality. Coordinates between
-    different agent implementations while maintaining a unified interface.
-    Usage: Automatically registered during bootstrap to enable agent routing
-    """
+	Manages registration and initialization of specialized AI agents (coder, docs, ask)
+	and provides the central agent switching functionality. Coordinates between
+	different agent implementations while maintaining a unified interface.
+	Usage: Automatically registered during bootstrap to enable agent routing
+	"""
 
-    def services(self) -> List[Type[Service]]:
-        return [AgentService]
+	def services(self) -> List[Type[Service]]:
+		return [AgentService]
 
-    def agents(self) -> List[Type[Agent]]:
-        return [
-            CoderAgent,
-            CommitAgent,
-            FixerAgent,
-            AskAgent,
-            CleanerAgent,
-            ResearchAgent,
-            CopyAgent,
-        ]
+	def agents(self) -> List[Type[Agent]]:
+		return [
+			CoderAgent,
+			CommitAgent,
+			FixerAgent,
+			AskAgent,
+			CleanerAgent,
+			ResearchAgent,
+			CopyAgent,
+		]
 
-    def commands(self) -> List[Type[Command]]:
-        return [AskCommand]
+	def commands(self) -> List[Type[Command]]:
+		return [AskCommand]
 
-    def nodes(self) -> List[Type[Node]]:
-        return [
-            StartNode,
-            EndNode,
-            AssistantNode,
-            LintNode,
-            ParseBlocksNode,
-            ToolNode,
-            CopyNode,
-        ]
+	def nodes(self) -> List[Type[Node]]:
+		return [
+			StartNode,
+			EndNode,
+			AssistantNode,
+			LintNode,
+			ParseBlocksNode,
+			ToolNode,
+			CopyNode,
+		]
 
-    async def register(self, container: "Container") -> None:
-        # Create all agents
-        for agent_class in self.agents():
-            container.singleton(agent_class)
+	async def register(self, container: "Container") -> None:
+		# Create all agents
+		for agent_class in self.agents():
+			container.singleton(agent_class)
 
-        # Create all Nodes
-        for node_class in self.nodes():
-            container.bind(node_class)
+		# Create all Nodes
+		for node_class in self.nodes():
+			container.bind(node_class)

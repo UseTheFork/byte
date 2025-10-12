@@ -8,5 +8,5 @@ from byte.domain.agent.state import BaseState
 
 
 class Node(ABC, Bootable, Eventable):
-    async def __call__(self, state: BaseState, config: RunnableConfig):
-        pass
+	async def __call__(self, state: BaseState, config: RunnableConfig):
+		pass
