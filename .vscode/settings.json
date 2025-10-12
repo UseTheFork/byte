@@ -1,4 +1,9 @@
 {
 	"basedpyright.analysis.autoImportCompletions": true,
-	"basedpyright.importStrategy": "useBundled"
+	"basedpyright.importStrategy": "useBundled",
+	"[python]": {
+		"editor.insertSpaces": false,
+		"editor.detectIndentation": false,
+		"editor.tabSize": 4
+	}
 }

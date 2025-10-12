@@ -8,30 +8,30 @@ from byte.domain.knowledge.service.session_context_service import SessionContext
 
 
 class ContextListCommand(Command, UserInteractive):
-    """List all session context items currently stored."""
+	"""List all session context items currently stored."""
 
-    @property
-    def name(self) -> str:
-        return "context:ls"
+	@property
+	def name(self) -> str:
+		return "context:ls"
 
-    @property
-    def description(self) -> str:
-        return "List all session context items"
+	@property
+	def description(self) -> str:
+		return "List all session context items"
 
-    async def execute(self, args: str) -> None:
-        """Display all session context keys in a formatted panel.
+	async def execute(self, args: str) -> None:
+		"""Display all session context keys in a formatted panel.
 
-        Usage: `await command.execute("")`
-        """
-        console = await self.make(Console)
+		Usage: `await command.execute("")`
+		"""
+		console = await self.make(Console)
 
-        session_context_service = await self.make(SessionContextService)
-        session_context = session_context_service.get_all_context()
+		session_context_service = await self.make(SessionContextService)
+		session_context = session_context_service.get_all_context()
 
-        context_keys = [f"[text]{key}[/text]" for key in session_context.keys()]
-        context_panel = Panel(
-            Columns(context_keys, equal=True, expand=True),
-            title=f"Session Context Items ({len(session_context)})",
-        )
+		context_keys = [f"[text]{key}[/text]" for key in session_context.keys()]
+		context_panel = Panel(
+			Columns(context_keys, equal=True, expand=True),
+			title=f"Session Context Items ({len(session_context)})",
+		)
 
-        console.print(context_panel)
+		console.print(context_panel)
