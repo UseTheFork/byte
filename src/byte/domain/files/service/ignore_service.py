@@ -3,6 +3,7 @@ from typing import Optional
 
 import pathspec
 
+from byte.core.logging import log
 from byte.core.service.base_service import Service
 
 
@@ -41,6 +42,14 @@ class FileIgnoreService(Service):
 
 			# Load ignore patterns from configuration
 			patterns.extend(self._config.files.ignore)
+
+		# Log all patterns being used for debugging
+		if patterns:
+			log.debug(f"Loaded {len(patterns)} ignore patterns:")
+			for pattern in patterns:
+				log.debug(f"  - {pattern}")
+		else:
+			log.debug("No ignore patterns loaded")
 
 		self._gitignore_spec = pathspec.PathSpec.from_lines("gitwildmatch", patterns)
 

@@ -139,11 +139,11 @@ class FileService(Service):
 				# Convert absolute path back to relative for pattern matching
 				try:
 					relative_path = str(Path(context_path).relative_to(Path.cwd()))
-					if glob.fnmatch.fnmatch(relative_path, path_str) or glob.fnmatch.fnmatch(context_path, path_str):
+					if glob.fnmatch.fnmatch(relative_path, path_str) or glob.fnmatch.fnmatch(context_path, path_str):  # pyright: ignore[reportAttributeAccessIssue]
 						matching_paths.append(context_path)
 				except ValueError:
 					# If can't make relative, try matching absolute path
-					if glob.fnmatch.fnmatch(context_path, path_str):
+					if glob.fnmatch.fnmatch(context_path, path_str):  # pyright: ignore[reportAttributeAccessIssue]
 						matching_paths.append(context_path)
 
 			if not matching_paths:

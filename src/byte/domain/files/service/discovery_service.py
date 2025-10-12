@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from typing import List, Optional, Set
 
+from byte.core.logging import log
 from byte.core.service.base_service import Service
 from byte.domain.files.service.ignore_service import FileIgnoreService
 
@@ -38,6 +39,7 @@ class FileDiscoveryService(Service):
 			for file in files:
 				file_path = root_path / file
 				if not await self._is_ignored(file_path) and file_path.is_file():
+					log.debug(f"Discovered file: {file_path}")
 					self._all_files.add(file_path)
 
 	async def _is_ignored(self, path: Path) -> bool:

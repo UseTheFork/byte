@@ -17,18 +17,17 @@ lint:
     - command: "prettier --write"
       extensions: [".md"]
     - command: "keep-sorted"
+      extensions: ["*"]
 files:
   ignore:
-    [
-    ".byte/cache",
-    ".ruff_cache",
-    ".idea",
-    ".venv",
-    ".env",
-    ".git/",
-    "__pycache__",
-    "node_modules",
-    ]
+    - .byte/cache
+    - .ruff_cache
+    - .idea
+    - .venv
+    - .env
+    - .git
+    - __pycache__
+    - node_modules
   watch:
     enable: true
 
