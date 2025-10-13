@@ -93,7 +93,8 @@ class MarkdownStream:
 		# Render the markdown to a string buffer
 		string_io = io.StringIO()
 		console = Console(file=string_io, force_terminal=True)
-		markdown = NoInsetMarkdown(text, **self.mdargs)
+		markdown = NoInsetMarkdown(text)
+		# markdown = NoInsetMarkdown(text, **self.mdargs)
 		console.print(markdown)
 		output = string_io.getvalue()
 
