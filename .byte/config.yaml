@@ -4,9 +4,8 @@
 # files:
   # -max_size_kb
   # excluded_patterns
-
-model: sonnet
-
+llm:
+  model: anthropic
 lint:
   enable: true
   commands:

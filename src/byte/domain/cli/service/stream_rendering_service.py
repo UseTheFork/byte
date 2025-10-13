@@ -35,7 +35,7 @@ class StreamRenderingService(Service):
 		self.agent_name = ""
 		self.display_mode = "verbose"
 		self.spinner = None
-		self.active_stream = MarkdownStream()
+		self.active_stream = MarkdownStream(mdargs={"syntax_theme": self._config.cli.syntax_theme})
 
 	async def handle_message(self, chunk, agent_name: str):
 		"""Handle streaming message chunks from AI agents with type-specific processing.
@@ -188,7 +188,9 @@ class StreamRenderingService(Service):
 		self.current_stream_id = stream_id
 		self.accumulated_content = ""  # Reset accumulated content for new stream
 		if self.display_mode == "verbose":
-			self.active_stream = MarkdownStream()  # Reset the stream renderer
+			self.active_stream = MarkdownStream(
+				mdargs={"syntax_theme": self._config.cli.syntax_theme}
+			)  # Reset the stream renderer
 
 			formatted_name = self._format_agent_name(self.agent_name)
 			self.console.print(Rule(f"{formatted_name}", align="left"))

@@ -9,6 +9,7 @@ from pydantic_settings import (
 	YamlConfigSettingsSource,
 )
 
+from byte.domain.cli.config import CLIConfig
 from byte.domain.edit_format.config import EditFormatConfig
 from byte.domain.files.config import FilesConfig
 from byte.domain.lint.config import LintConfig
@@ -58,8 +59,7 @@ class ByteConfg(BaseSettings):
 	byte_dir: Path = BYTE_DIR
 	byte_cache_dir: Path = BYTE_CACHE_DIR
 
-	model: str
-
+	cli: CLIConfig = CLIConfig()
 	llm: LLMConfig = LLMConfig()
 	lint: LintConfig = LintConfig()
 	files: FilesConfig = FilesConfig()

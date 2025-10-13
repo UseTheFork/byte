@@ -1,11 +1,14 @@
-from dataclasses import dataclass
+from pydantic import BaseModel, Field
 
 
-@dataclass(frozen=True)
-class UIConfig:
-	"""UI domain configuration with validation and defaults."""
+class CLIConfig(BaseModel):
+	"""CLI domain configuration with validation and defaults."""
 
-	theme: str = "dark"
-	show_file_context: bool = True
-	code_theme: str = "default"
-	dark_mode: bool = True
+	ui_theme: str = Field(
+		default="dark",
+		description="Theme for the general CLI interface (controls colors, formatting, and visual presentation)",
+	)
+	syntax_theme: str = Field(
+		default="github-dark",
+		description="Pygments theme for code block syntax highlighting in CLI output",
+	)
