@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List
 
 import git
+from dotenv import load_dotenv
 from pydantic_settings import (
 	BaseSettings,
 	PydanticBaseSettingsSource,
@@ -45,6 +46,7 @@ BYTE_CONFIG_FILE = BYTE_DIR / "config.yaml"
 
 # Load our dotenv
 DOTENV_PATH = PROJECT_ROOT / ".env"
+load_dotenv(DOTENV_PATH)
 
 
 class ByteConfg(BaseSettings):
