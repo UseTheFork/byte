@@ -25,14 +25,14 @@ Used to provide reference context without allowing modifications. Files are adde
 # AI@ Reference this pattern for other implementations
 
 class BaseHandler:
- def handle(self):
- pass
+def handle(self):
+pass
 
 Behavior:
 
 • File added to context in read-only mode
- • AI can reference the code but cannot propose changes
- • Useful for providing examples or patterns to follow
+• AI can reference the code but cannot propose changes
+• Useful for providing examples or patterns to follow
 
 ─────────────────────────────────────────────────────────────────────────────────────────────────────
 Question marker (AI?)
@@ -50,9 +50,9 @@ file.close()
 Behavior:
 
 • File added to context in read-only mode
- • AI analyzes the code and provides recommendations
- • No code changes are proposed
- • Response includes best practices and alternatives
+• AI analyzes the code and provides recommendations
+• No code changes are proposed
+• Response includes best practices and alternatives
 
 Example AI Response:
 
@@ -61,7 +61,6 @@ Yes, this should definitely use a context manager. The current code has several 
 1. If an exception occurs between open() and close(), the file remains open
 2. Manual resource management is error-prone
 3. Not following Python best practices
-
 
 Recommended approach:
 

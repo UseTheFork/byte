@@ -1,27 +1,75 @@
-site_name: Byte Documentation
-repo_url: https://github.com/UseTheFork/byte
-repo_name: UseTheFork/byte
-nav:
-  - Home: index.md
-  - Installation: installation.md
-  - Quick Start: quickstart.md
-  - Settings: settings.md
-  - Files:
-    - Overview: files/index.md
-    - File Watching: files/file-watching.md
-    - Commands: files/commands.md
-  - About: about.md
+site_name: Byte
 theme:
   name: material
+  features:
+    - navigation.path
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.sections
+    - navigation.indexes
+    - navigation.tracking
+    - content.code.annotate
+    - toc.follow
+    - navigation.footer
+    - navigation.top
+    - content.code.copy
+    - content.tabs.link
   palette:
     scheme: slate
     primary: black
 
+repo_url: https://github.com/UseTheFork/byte
+repo_name: byte
+site_author: UseTheFork
+site_url: https://docs.astral.sh/uv/
+site_dir: docs
+site_description: CLI-powered, human-in-the-loop flow coding agent.
+
 markdown_extensions:
-  - def_list
+  - admonition
+  - pymdownx.details
+  - pymdownx.snippets:
+  - pymdownx.magiclink:
+  - attr_list:
+  - toc:
+      anchorlink: true
+      anchorlink_class: "toclink"
+  - md_in_html:
+  - pymdownx.inlinehilite:
+  - pymdownx.superfences:
+  - markdown.extensions.attr_list:
+  - pymdownx.keys:
   - pymdownx.tasklist:
       custom_checkbox: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Introduction: index.md
+  - Getting Started:
+    - Overview: getting-started/index.md
+    - Installation: getting-started/installation.md
+    - First steps: getting-started/first-steps.md
+    - Features: getting-started/features.md
+  - Concepts:
+    - concepts/index.md
+    - File Watching: concepts/file-watching.md
+  - Reference:
+    - Overview: reference/index.md
+    - Settings: reference/settings.md
+  - Files:
+    - Overview: files/index.md
+    - Commands: files/commands.md
+  - About: about.md
 
 plugins:
 - search
 - mkdocstrings
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
