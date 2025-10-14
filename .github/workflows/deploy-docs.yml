@@ -33,7 +33,7 @@ jobs:
       - name: Install the project
         run: uv sync --all-groups
       - name: Build Mkdocs
-        run: uv run mkdocs --all-groups gh-deploy --force
+        run: uv run --all-groups mkdocs gh-deploy --force
   #     - name: Upload artifact
   #       uses: actions/upload-pages-artifact@v3
   #       with:
