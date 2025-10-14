@@ -41,7 +41,7 @@ dev = [
     "tomli>=2.2.1",
 ]
 
-mkdocs = ["mkdocs>=1.6.1", "mkdocs-material>=9.6.21"]
+mkdocs = ["mkdocs>=1.6.1", "mkdocs-material>=9.6.21", "mkdocstrings>=0.30.1"]
 
 [tool.ruff]
 target-version = "py312"

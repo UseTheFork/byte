@@ -60,7 +60,7 @@ class AskAgent(Agent):
 			"assistant",
 			await self.make(AssistantNode, runnable=assistant_runnable),
 		)
-		graph.add_node("tools", await self.make(ToolNode, tools=mcp_tools))
+		graph.add_node("tools", await self.make(ToolNode, tools=mcp_tools))  # pyright: ignore[reportArgumentType]
 
 		graph.add_node(
 			"end",

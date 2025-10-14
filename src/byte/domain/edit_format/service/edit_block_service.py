@@ -65,7 +65,7 @@ class EditBlockService(Service, UserInteractive):
 		Raises:
 			PreFlightCheckError: If content contains malformed edit blocks
 		"""
-		# self.pre_flight_check(content)
+		self.pre_flight_check(content)
 		blocks = self.parse_content_to_blocks(content)
 		blocks = await self.mid_flight_check(blocks)
 		blocks = await self.apply_blocks(blocks)
@@ -152,6 +152,11 @@ class EditBlockService(Service, UserInteractive):
 		replace_count = content.count(self.replace)
 		divider_count = content.count(self.divider)
 		file_marker_count = content.count(self.add_file_marker) + content.count(self.remove_file_marker)
+
+		if search_count == 0 and replace_count == 0 and divider_count == 0 and file_marker_count == 0:
+			raise PreFlightCheckError(
+				"No SEARCH/REPLACE blocks found in content. AI responses must include properly formatted edit blocks."
+			)
 
 		if not (search_count == replace_count == divider_count == file_marker_count):
 			raise PreFlightCheckError(

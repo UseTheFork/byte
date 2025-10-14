@@ -60,11 +60,9 @@ class MarkdownStream:
 	"""
 
 	live = None  # Rich Live display instance
-	when = 0  # Timestamp of last update
-	min_delay = 1.0 / 20  # Minimum time between updates (20fps)
 	live_window = 6  # Number of lines to keep visible at bottom during streaming
 
-	def __init__(self, mdargs=None):
+	def __init__(self, console: Console, mdargs=None):
 		"""Initialize the markdown stream.
 
 		Args:
@@ -78,6 +76,7 @@ class MarkdownStream:
 			self.mdargs = dict()
 
 		# Defer Live creation until the first update.
+		self.console = console
 		self.live = None
 		self._live_started = False
 
@@ -93,8 +92,7 @@ class MarkdownStream:
 		# Render the markdown to a string buffer
 		string_io = io.StringIO()
 		console = Console(file=string_io, force_terminal=True)
-		markdown = NoInsetMarkdown(text)
-		# markdown = NoInsetMarkdown(text, **self.mdargs)
+		markdown = NoInsetMarkdown(text, **self.mdargs)
 		console.print(markdown)
 		output = string_io.getvalue()
 
@@ -123,7 +121,7 @@ class MarkdownStream:
 	async def _process_line_chunk(self, lines_chunk, is_final):
 		"""Process chunk of lines without blocking"""
 		if not self._live_started:
-			self.live = Live(Text(""), refresh_per_second=20)
+			self.live = Live(Text(""), console=self.console, refresh_per_second=20)
 			self.live.start()
 			self._live_started = True
 

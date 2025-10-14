@@ -14,7 +14,7 @@ def cli():
 	if initializer.is_first_boot():
 		initializer.run_if_needed()
 
-	config = ByteConfg()  # pyright: ignore[reportCallIssue]
+	config = ByteConfg()
 	run(config)
 
 

@@ -3,6 +3,7 @@ from typing import List
 
 import git
 from dotenv import load_dotenv
+from pydantic import Field
 from pydantic_settings import (
 	BaseSettings,
 	PydanticBaseSettingsSource,
@@ -57,9 +58,9 @@ class ByteConfg(BaseSettings):
 		yaml_file=BYTE_CONFIG_FILE,
 	)
 
-	project_root: Path = PROJECT_ROOT
-	byte_dir: Path = BYTE_DIR
-	byte_cache_dir: Path = BYTE_CACHE_DIR
+	project_root: Path = Field(default=PROJECT_ROOT, exclude=True)
+	byte_dir: Path = Field(default=BYTE_DIR, exclude=True)
+	byte_cache_dir: Path = Field(default=BYTE_CACHE_DIR, exclude=True)
 
 	cli: CLIConfig = CLIConfig()
 	llm: LLMConfig = LLMConfig()
