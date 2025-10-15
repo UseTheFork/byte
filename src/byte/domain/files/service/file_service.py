@@ -233,13 +233,18 @@ Any other messages in the chat may contain outdated versions of the files' conte
 		read_only = [f for f in self._context_files.values() if f.mode == FileMode.READ_ONLY]
 		editable = [f for f in self._context_files.values() if f.mode == FileMode.EDITABLE]
 
+		# AI: in the below `context += f"---\nsource:` should we provied any other information to the LLM ai?
 		if read_only:
 			context += "\n\n## READ-ONLY FILES (for reference only):\n\n Any edits to these files will be rejected\n"
 			for file_ctx in sorted(read_only, key=lambda f: f.relative_path):
 				content = file_ctx.get_content()
 				if content is not None:
 					content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.READ_ONLY, content)
-					context += f"\n{file_ctx.relative_path}:\n```\n{content}\n```\n"
+					context += f"""---
+source: {file_ctx.relative_path}
+mode: read-only
+---
+{content}"""
 
 		if editable:
 			context += "\n\n## EDITABLE FILES (can be modified):\n"
@@ -247,7 +252,11 @@ Any other messages in the chat may contain outdated versions of the files' conte
 				content = file_ctx.get_content()
 				if content is not None:
 					content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.EDITABLE, content)
-					context += f"\n{file_ctx.relative_path}:\n```\n{content}\n```\n"
+					context += f"""---
+source: {file_ctx.relative_path}
+mode: editable
+---
+{content}"""
 
 		return context
 

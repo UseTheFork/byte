@@ -1,6 +1,5 @@
 from rich.console import Console
 
-from byte.core.config.config import ByteConfg
 from byte.domain.cli.service.command_registry import Command
 
 
@@ -19,8 +18,3 @@ class StartRecordingCommand(Command):
 		""" """
 		console = await self.make(Console)
 		console.record = True
-
-		config = await self.make(ByteConfg)
-		console = await self.make(Console)
-		console.save_svg(str(config.project_root / "docs" / "images" / "test.svg"), title="")
-		# raise KeyboardInterrupt

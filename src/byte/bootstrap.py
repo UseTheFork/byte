@@ -40,7 +40,7 @@ async def bootstrap(config: ByteConfg):
 
 	app.singleton(ByteConfg, lambda: config)
 
-	console = Console(record=True)
+	console = Console()
 	app.singleton(Console, lambda: console)
 
 	# Order matters: ConfigServiceProvider must be early since other services

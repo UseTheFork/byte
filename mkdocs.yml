@@ -56,7 +56,9 @@ nav:
     - Features: getting-started/features.md
   - Concepts:
     - concepts/index.md
+    - File Context: concepts/file-context.md
     - File Watching: concepts/file-watching.md
+    - Conventions: concepts/conventions.md
   - Reference:
     - Overview: reference/index.md
     - Settings: reference/settings.md

@@ -1,3 +1,4 @@
+from rich import terminal_theme
 from rich.console import Console
 
 from byte.core.config.config import ByteConfg
@@ -17,9 +18,11 @@ class SaveRecordingCommand(Command):
 
 	async def execute(self, args: str) -> None:
 		""" """
-		console = await self.make(Console)
-		console.record = True
-
 		config = await self.make(ByteConfg)
 		console = await self.make(Console)
-		console.save_svg(str(config.project_root / "docs" / "images" / f"{args}.svg"), title="")
+		console.save_svg(
+			str(config.project_root / "docs" / "images" / f"{args}.svg"),
+			title="",
+			theme=terminal_theme.MONOKAI,
+		)
+		console.record = False

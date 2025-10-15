@@ -8,22 +8,20 @@ A human-in-the-loop AI coding agent that keeps you in control. Byte helps you bu
 
 ## What is Byte?
 
-Byte is a CLI coding agent designed for developers who want AI assistance without sacrificing control. Unlike autonomous agent swarms, Byte operates as an interactive partner that requires your approval for every decision.
+Byte is a CLI coding agent designed for developers who want AI assistance without sacrificing control. Unlike autonomous agents that make multiple decisions and tool calls independently, Byte requires your approval for every decision.
 
 **Key Features:**
 
-- **Human approval required** - Review and confirm every change before it's applied
-- **Search/Replace transparency** - See exactly what the agent modifies in your code
-- **Context control** - Manage precisely what information the AI receives
-- **Workflow integration** - Slots into your existing development environment
-- **Smart prompting** - Structured prompts that adapt and evolve with each interaction
-- **Built-in tooling** - Automatic linting, formatting, and testing without extra commands
+- Review and confirm every change before it's applied
+- See exactly what the agent modifies in your code
+- Manage precisely what information the AI receives
+- Slots into your existing development environment
+- Structured prompts that adapt and evolve with each interaction
+- Automatic linting, formatting, and testing without extra commands
 
 ---
 
 ## Design Philosophy
-
-Byte embodies several core principles:
 
 **Transparency First** - You see the complete prompt, not just your input. All interactions are logged for reference and debugging.
 
@@ -50,27 +48,27 @@ $ cd /path/to/your/project
 $ byte
 ```
 
-See the [Installation Guide](getting-started/installation.md) for other installation methods including pip and Nix.
+See the [Installation Guide](<[getting-started/installation.md](https://usethefork.github.io/byte/getting-started/installation/)>) for other installation methods including pip and Nix.
 
 ---
 
-## Why Byte?
+## Why This Approach?
 
 ### Human-in-the-Loop Design
 
-Byte requires your confirmation for all decisions and code changes. If you prefer agents that work autonomously, Byte isn't for you. If you value control and transparency, you'll appreciate the deliberate confirmation flow.
+Every decision and code change requires your confirmation. If you prefer agents that work autonomously, Byte isn't for you. If you value control and transparency, you'll appreciate the deliberate confirmation flow.
 
-### Built for Senior Developers
+### Built for Experienced Developers
 
-Byte targets experienced developers who understand good design principles. This isn't a tool where you provide a specification and it builds the entire feature. Instead, Byte excels at small, incremental changes that keep you in control. Understanding when to refactor, how to structure code, and what constitutes good design remains your responsibility.
+Designed for experienced developers who understand good design principles. This isn't a tool where you provide a specification and it builds the entire feature. Instead, Byte excels at small, incremental changes that keep you in control. Understanding when to refactor, how to structure code, and what constitutes good design remains your responsibility.
 
 ### Search/Replace Over Tools
 
-Instead of giving the AI arbitrary tools, Byte uses explicit Search/Replace blocks. You see the exact changes before they happen, making it easy to cancel or modify the agent's work.
+Instead of giving the AI arbitrary tools, explicit Search/Replace blocks show you the exact changes before they happen, making it easy to cancel or modify the proposed work.
 
 ### Workflow Preservation
 
-Byte doesn't replace your editor. Whether you use Vim, VS Code, Zed, or Cursor, Byte complements your existing workflow as a CLI tool you can invoke when needed.
+Your editor stays central to development. Whether you use Vim, VS Code, or Jetbrains, Byte complements your existing workflow as something you invoke when needed.
 
 ### Context Management
 
@@ -82,7 +80,7 @@ You control exactly what context the LLM receives:
 
 ### Intelligent Prompting
 
-Byte uses structured prompts that adapt with each turn:
+Structured prompts adapt with each turn:
 
 - Previous Search/Replace blocks get removed to maintain focus
 - Instructions follow clear markdown formatting

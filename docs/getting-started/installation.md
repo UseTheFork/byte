@@ -1,14 +1,14 @@
 # Installation
 
-Install Byte to start building with AI-powered coding assistance. Byte is a human-in-the-loop coding agent that runs as a command-line tool.
+Install Byte using your preferred Python package manager. Once installed, you'll have a `byte` command available in your terminal.
 
 ---
 
 ## Installing Byte
 
-### Using uv (Recommended)
+### Using uv
 
-The fastest way to install Byte is with **uv**, a modern Python package installer:
+The fastest installation method uses **uv**, a modern Python package installer:
 
 ```bash
 $ curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -17,7 +17,7 @@ $ uv tool install byte
 
 ### Using pip
 
-Install Byte using pip if you prefer traditional Python tooling:
+Install with pip if you prefer traditional Python tooling:
 
 ```bash
 $ pip install byte
@@ -25,7 +25,7 @@ $ pip install byte
 
 ### Using Nix Flakes
 
-For NixOS users or those with Nix flakes enabled, add Byte to your configuration:
+For NixOS users or those with Nix flakes enabled, add to your configuration:
 
 ```nix
 {
@@ -35,7 +35,7 @@ For NixOS users or those with Nix flakes enabled, add Byte to your configuration
 }
 ```
 
-Include it in your system packages:
+Include in your system packages:
 
 ```nix
 environment.systemPackages = [
@@ -53,20 +53,18 @@ $ nix run github:UseTheFork/byte
 
 ## Verify Installation
 
-Confirm Byte installed successfully:
+Confirm the installation succeeded:
+
+!!! tip
+
+    Before running Byte, you must have at least one of these environment variables set:
+    `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, or `OPENAI_API_KEY`.
+    See [First Steps](first-steps.md) for configuration details.
 
 ```bash
-$ byte --version
+$ byte
 ```
 
-You should see the version number.
+You should see the following screen after startup.
 
----
-
-## Next Steps
-
-Now that Byte is installed, learn how to use it:
-
-- [Getting Started](index.md) - Configure and run your first session
-- [Configuration](../configuration/index.md) - Customize Byte's behavior
-- [Commands](../commands/index.md) - Explore available commands
+![Byte Boot Screen](../images/boot.svg)
