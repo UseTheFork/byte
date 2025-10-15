@@ -1,9 +1,3 @@
-# code-theme: solarized-dark
-# dark-mode: true
-
-# files:
-  # -max_size_kb
-  # excluded_patterns
 llm:
   model: anthropic
 lint:

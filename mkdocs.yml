@@ -59,12 +59,11 @@ nav:
     - File Context: concepts/file-context.md
     - File Watching: concepts/file-watching.md
     - Conventions: concepts/conventions.md
-  - Reference:
+    - Linting: concepts/lint.md
+    - Commit: concepts/commit.md
+  - References:
     - Overview: reference/index.md
     - Settings: reference/settings.md
-  - Files:
-    - Overview: files/index.md
-    - Commands: files/commands.md
   - About: about.md
 
 plugins:

@@ -1,9 +1,5 @@
 # Conventions
 
----
-
-## Overview
-
 Conventions are Markdown files stored in `.byte/conventions/` that describe how code should be written in your project. The AI automatically receives these conventions before generating any code, ensuring consistency across all suggestions and modifications.
 
 ![File context showing read-only and editable files](../images/file-context.svg)
