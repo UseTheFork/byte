@@ -8,6 +8,7 @@ from byte.domain.agent.service_provider import AgentServiceProvider
 from byte.domain.analytics.service_provider import AnalyticsProvider
 from byte.domain.cli.service.command_registry import CommandRegistry
 from byte.domain.cli.service_provider import CLIServiceProvider
+from byte.domain.development.service_provider import DevelopmentProvider
 from byte.domain.edit_format.service_provider import EditFormatProvider
 from byte.domain.files.service_provider import FileServiceProvider
 from byte.domain.git.service_provider import GitServiceProvider
@@ -39,7 +40,7 @@ async def bootstrap(config: ByteConfg):
 
 	app.singleton(ByteConfg, lambda: config)
 
-	console = Console()
+	console = Console(record=True)
 	app.singleton(Console, lambda: console)
 
 	# Order matters: ConfigServiceProvider must be early since other services
@@ -60,6 +61,7 @@ async def bootstrap(config: ByteConfg):
 		EditFormatProvider(),
 		WebServiceProvider(),
 		SystemServiceProvider(),  # Core system commands
+		DevelopmentProvider(),  # Core system commands
 	]
 
 	# Phase 1: Register all service bindings in the container

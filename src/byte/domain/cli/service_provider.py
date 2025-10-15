@@ -103,6 +103,9 @@ class CLIServiceProvider(ServiceProvider):
 
 			console.print(styled_line)
 
+		# config = await container.make(ByteConfg)
+		# console.save_svg(str(config.project_root / "docs" / "images" / "logo.svg"), title="", theme=MONOKAI)
+
 		console.print()
 
 		console.print(

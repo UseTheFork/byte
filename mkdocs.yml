@@ -22,7 +22,7 @@ theme:
 repo_url: https://github.com/UseTheFork/byte
 repo_name: byte
 site_author: UseTheFork
-site_url: https://docs.astral.sh/uv/
+site_url: https://usethefork.github.io/byte/
 site_dir: site/byte
 site_description: CLI-powered, human-in-the-loop flow coding agent.
 

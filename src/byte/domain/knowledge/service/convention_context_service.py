@@ -33,7 +33,7 @@ class ConventionContextService(Service):
 			try:
 				content = md_file.read_text(encoding="utf-8")
 				# Format as a document with filename header and separator
-				formatted_doc = f"## Convention: {md_file.name}\n\n{content}"
+				formatted_doc = f"---\n title: {md_file.name.title()}\nsource: {md_file}\n---\n\n{content}"
 				self.conventions.add(md_file.name, formatted_doc)
 			except Exception:
 				pass
@@ -56,7 +56,7 @@ class ConventionContextService(Service):
 					"user",
 					dedent(f"""
 					# Coding and Project Conventions
-					**Important:** Adhere to the following project-specific conventions. These standards are essential for maintaining code quality and consistency.
+					**Important:** Adhere to the following project-specific conventions.
 					{conventions}
 					"""),
 				)
