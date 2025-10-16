@@ -1,11 +1,9 @@
 import uuid
-from typing import TYPE_CHECKING, List, Optional
+from typing import Optional
+
+from langgraph.checkpoint.memory import InMemorySaver
 
 from byte.core.service.base_service import Service
-from byte.domain.memory.checkpointer import ByteCheckpointer
-
-if TYPE_CHECKING:
-	from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
 
 class MemoryService(Service):
@@ -17,25 +15,25 @@ class MemoryService(Service):
 	Usage: `memory_service.create_thread()` -> new conversation session
 	"""
 
-	_checkpointer: Optional[ByteCheckpointer] = None
+	_checkpointer: Optional[InMemorySaver] = None
 	_current_thread_id: Optional[str] = None
 
-	async def get_checkpointer(self) -> ByteCheckpointer:
+	async def get_checkpointer(self) -> InMemorySaver:
 		"""Get configured checkpointer instance with lazy initialization.
 
 		Usage: `checkpointer = await memory_service.get_checkpointer()` -> for accessing checkpointer
 		"""
 		if self._checkpointer is None:
-			self._checkpointer = ByteCheckpointer(self._config)
+			self._checkpointer = InMemorySaver()
 		return self._checkpointer
 
-	async def get_saver(self) -> "AsyncSqliteSaver":
-		"""Get AsyncSqliteSaver for LangGraph graph compilation.
+	async def get_saver(self) -> InMemorySaver:
+		"""Get InMemorySaver for LangGraph graph compilation.
 
 		Usage: `graph = builder.compile(checkpointer=await memory_service.get_saver())`
 		"""
 		checkpointer = await self.get_checkpointer()
-		return await checkpointer.get_saver()
+		return checkpointer
 
 	def create_thread(self) -> str:
 		"""Create a new conversation thread with unique identifier.
@@ -44,48 +42,12 @@ class MemoryService(Service):
 		"""
 		return str(uuid.uuid4())
 
-	def list_threads(self, limit: int = 50) -> List[str]:
-		"""List recent conversation threads.
-
-		Usage: `threads = memory_service.list_threads()` -> recent thread IDs
-		"""
-		# This would query the checkpointer database for thread IDs
-		# Placeholder implementation
-		return []
-
-	async def delete_thread(self, thread_id: str) -> bool:
-		"""Delete a specific conversation thread and its history.
-
-		Usage: `success = await memory_service.delete_thread(thread_id)` -> cleanup thread
-		"""
-		try:
-			saver = await self.get_saver()
-			await saver.adelete_thread(thread_id)
-			return True
-		except Exception:
-			return False
-
-	async def cleanup_old_threads(self) -> int:
-		"""Remove old threads based on retention policy.
-
-		Usage: `count = await memory_service.cleanup_old_threads()` -> maintenance cleanup
-		"""
-		checkpointer = await self.get_checkpointer()
-		return await checkpointer.cleanup_old_threads()
-
-	async def close(self):
-		"""Close memory service resources."""
-		if self._checkpointer:
-			await self._checkpointer.close()
-
 	async def set_current_thread(self, thread_id: str) -> None:
 		"""Set the active thread for the current session.
 
 		Usage: `await memory_service.set_current_thread(thread_id)` -> sets active thread
 		"""
 		self._current_thread_id = thread_id
-		# Optionally persist to config or database
-		# await self._persist_current_thread(thread_id)
 
 	def get_current_thread(self) -> Optional[str]:
 		"""Get the currently active thread ID.
