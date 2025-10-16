@@ -4,12 +4,12 @@ import pyperclip
 from langgraph.graph.state import RunnableConfig
 from rich.columns import Columns
 from rich.console import Console
-from rich.syntax import Syntax
 
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.utils import extract_content_from_message
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.state import BaseState
+from byte.domain.cli.rich.code_block import CodeBlock
 from byte.domain.cli.rich.panel import Panel
 from byte.domain.cli.rich.rule import Rule
 
@@ -122,14 +122,10 @@ class CopyNode(Node, UserInteractive):
 			if len(lines) > max_preview_lines:
 				preview_content += "\n..."
 
+			# config = await self.make(ByteConfg)
+
 			# Create syntax-highlighted preview
-			syntax = Syntax(
-				preview_content,
-				lang if lang != "text" else "python",
-				theme="monokai",
-				line_numbers=False,
-				word_wrap=True,
-			)
+			syntax = CodeBlock(preview_content, lang if lang != "text" else "python")
 
 			# Create panel for this code block
 			panel = Panel(

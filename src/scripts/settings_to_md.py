@@ -9,13 +9,12 @@ def format_type(type_info: Any) -> str:
 
 	Usage: `format_type({"type": "string"})` -> "string"
 	Usage: `format_type({"type": "array", "items": {"type": "string"}})` -> "array[string]"
-	Usage: `format_type({"enum": ["a", "b"]})` -> `"a" | "b"`
+	Usage: `format_type({"enum": ["a", "b"]})` -> "a, b"
 	"""
 	if isinstance(type_info, dict):
 		if "enum" in type_info:
-			# Handle Literal types by joining enum values
-			values = [f"{v}" for v in type_info["enum"]]
-			return " | ".join(values)
+			# Handle Literal types - use commas to avoid breaking table format
+			return ", ".join(type_info["enum"])
 		elif "type" in type_info:
 			base_type = type_info["type"]
 			if base_type == "array" and "items" in type_info:

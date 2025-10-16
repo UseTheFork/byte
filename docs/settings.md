@@ -4,16 +4,16 @@ This document describes all available configuration options for Byte.
 
 ## Cli
 
-| Field          | Type          | Default | Description                                                                                |
-| -------------- | ------------- | ------- | ------------------------------------------------------------------------------------------ | ---------- | ----- | ------- | --------- | ---- | --------- | --------------------------------------------------------------- |
-| `ui_theme`     | `string`      | `dark`  | Theme for the general CLI interface (controls colors, formatting, and visual presentation) |
-| `syntax_theme` | `github-dark` | `bw`    | sas                                                                                        | staroffice | xcode | monokai | lightbulb | rrt` | `monokai` | Pygments theme for code block syntax highlighting in CLI output |
+| Field          | Type                                                               | Default   | Description                                                                                |
+| -------------- | ------------------------------------------------------------------ | --------- | ------------------------------------------------------------------------------------------ |
+| `ui_theme`     | `string`                                                           | `dark`    | Theme for the general CLI interface (controls colors, formatting, and visual presentation) |
+| `syntax_theme` | `github-dark, bw, sas, staroffice, xcode, monokai, lightbulb, rrt` | `monokai` | Pygments theme for code block syntax highlighting in CLI output                            |
 
 ## Llm
 
-| Field   | Type       | Default | Description |
-| ------- | ---------- | ------- | ----------- | ----------- | ----------------------------------------- |
-| `model` | `anthropic | gemini  | openai`     | `anthropic` | The LLM provider to use for AI operations |
+| Field   | Type                        | Default     | Description                               |
+| ------- | --------------------------- | ----------- | ----------------------------------------- |
+| `model` | `anthropic, gemini, openai` | `anthropic` | The LLM provider to use for AI operations |
 
 ## Llm > Gemini
 
