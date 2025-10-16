@@ -53,9 +53,9 @@ nav:
     - Overview: getting-started/index.md
     - Installation: getting-started/installation.md
     - First steps: getting-started/first-steps.md
-    - Features: getting-started/features.md
   - Concepts:
     - concepts/index.md
+    - Memory & Context: concepts/memory.md
     - File Context: concepts/file-context.md
     - File Watching: concepts/file-watching.md
     - Conventions: concepts/conventions.md
@@ -64,7 +64,6 @@ nav:
   - References:
     - Overview: reference/index.md
     - Settings: reference/settings.md
-  - About: about.md
 
 plugins:
 - search

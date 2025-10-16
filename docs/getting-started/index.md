@@ -4,7 +4,6 @@ To help you get started with Byte, we'll cover a few important topics:
 
 - [Installing Byte](installation.md)
 - [First steps after installation](first-steps.md)
-- [An overview of Byte's features](features.md)
 
 Read on, or jump ahead to another section:
 

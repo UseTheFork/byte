@@ -106,6 +106,7 @@ Byte leverages modern Python tooling and AI frameworks:
 - **LangGraph** - Graph-based agent workflows
 - **Rich** - Beautiful terminal output
 - **Prompt Toolkit** - Interactive command-line interfaces
+- **Catppuccin** - Soothing pastel theme
 
 ---
 
