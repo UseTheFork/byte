@@ -100,7 +100,7 @@ class MarkdownStream:
 			new_stable_lines = lines_chunk[num_already_printed:stable_lines]
 			stable_text = "".join(new_stable_lines)
 			if stable_text:
-				stable_display = str.from_ansi(stable_text)
+				stable_display = str(stable_text)
 				self.live.console.print(stable_display)
 
 			# Update our record of printed lines
@@ -111,7 +111,7 @@ class MarkdownStream:
 			remaining_lines = lines_chunk[stable_lines:]
 			if remaining_lines:
 				live_text = "".join(remaining_lines)
-				live_display = str.from_ansi(live_text)
+				live_display = str(live_text)
 				self.live.update(live_display)
 
 		if is_final and self.live:
