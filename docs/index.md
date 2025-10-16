@@ -125,5 +125,4 @@ Ready to try Byte? Follow these guides:
 
 - [Installation](getting-started/installation.md) - Set up Byte on your system
 - [Getting Started](getting-started/index.md) - Configure and run your first session
-- [Configuration](configuration/index.md) - Customize Byte's behavior
-- [Commands](commands/index.md) - Learn available commands and workflows
+- [Settings](reference/settings.md) - Customize Byte's behavior
