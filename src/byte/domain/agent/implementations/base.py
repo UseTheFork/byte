@@ -9,6 +9,7 @@ from byte.core.mixins.bootable import Bootable
 from byte.core.mixins.configurable import Configurable
 from byte.core.mixins.eventable import Eventable
 from byte.core.mixins.injectable import Injectable
+from byte.domain.agent.schemas import AssistantRunnable
 from byte.domain.agent.state import BaseState
 from byte.domain.cli.service.stream_rendering_service import (
 	StreamRenderingService,
@@ -155,3 +156,13 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
 		if self._graph is None:
 			self._graph = await self.build()
 		return self._graph
+
+	@abstractmethod
+	async def get_assistant_runnable(self) -> AssistantRunnable:
+		"""Get the assistant runnable for this agent.
+
+		Must be implemented by subclasses to return their specific assistant
+		implementation, which defines the core LLM interaction pattern.
+		Usage: Override in subclass to provide domain-specific assistant logic
+		"""
+		pass

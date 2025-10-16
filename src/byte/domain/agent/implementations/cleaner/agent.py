@@ -11,6 +11,7 @@ from byte.domain.agent.implementations.cleaner.prompt import cleaner_prompt
 from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.end_node import EndNode
 from byte.domain.agent.nodes.start_node import StartNode
+from byte.domain.agent.schemas import AssistantRunnable
 from byte.domain.agent.state import CleanerState
 from byte.domain.cli.rich.panel import Panel
 from byte.domain.llm.service.llm_service import LLMService
@@ -38,9 +39,7 @@ class CleanerAgent(Agent, UserInteractive):
 		prompts focused on information extraction and relevance filtering.
 		Usage: `graph = await agent.build()` -> ready for content cleaning
 		"""
-		llm_service = await self.make(LLMService)
-		llm: BaseChatModel = llm_service.get_weak_model()
-		assistant_runnable = cleaner_prompt | llm
+		assistant_runnable = await self.get_assistant_runnable()
 
 		# Create the state graph
 		graph = StateGraph(self.get_state_class())
@@ -53,7 +52,7 @@ class CleanerAgent(Agent, UserInteractive):
 
 		graph.add_node(
 			"assistant",
-			await self.make(AssistantNode, runnable=assistant_runnable),
+			await self.make(AssistantNode, runnable=assistant_runnable.runnable),
 		)
 
 		graph.add_node(
@@ -61,7 +60,7 @@ class CleanerAgent(Agent, UserInteractive):
 			await self.make(
 				EndNode,
 				agent=self.__class__.__name__,
-				llm=llm,
+				llm=assistant_runnable.llm,
 			),
 		)
 
@@ -155,3 +154,12 @@ class CleanerAgent(Agent, UserInteractive):
 
 		# First time through, go to confirmation
 		return "confirm"
+
+	async def get_assistant_runnable(self) -> AssistantRunnable:
+		llm_service = await self.make(LLMService)
+		llm: BaseChatModel = llm_service.get_weak_model()
+
+		return AssistantRunnable(
+			runnable=cleaner_prompt | llm,
+			llm=llm,
+		)

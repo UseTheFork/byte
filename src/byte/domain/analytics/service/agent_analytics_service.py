@@ -173,6 +173,15 @@ class AgentAnalyticsService(Service):
 			},
 		}
 
+	def reset_context(self) -> None:
+		"""Reset context token counters for both main and weak models.
+
+		Clears the current context usage while preserving total session usage.
+		Useful when starting a new conversation or clearing the message history.
+		"""
+		self.model_usage["main"]["context"] = 0
+		self.model_usage["weak"]["context"] = 0
+
 	def humanizer(self, number: int | float) -> str:
 		divisor = 1
 		for suffix in ("K", "M", "B", "T"):

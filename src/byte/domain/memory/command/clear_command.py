@@ -1,5 +1,7 @@
 from rich.console import Console
+from rich.panel import Panel
 
+from byte.domain.analytics.service.agent_analytics_service import AgentAnalyticsService
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.memory.service.memory_service import MemoryService
 
@@ -35,6 +37,9 @@ class ClearCommand(Command):
 		memory_service = await self.make(MemoryService)
 		await memory_service.new_thread()
 
+		agent_analytics_service = await self.make(AgentAnalyticsService)
+		agent_analytics_service.reset_context()
+
 		console = await self.make(Console)
 		# Display success confirmation to user
-		console.print("[success]Conversation history cleared[/success]")
+		console.print(Panel("[success]Conversation history cleared[/success]"))

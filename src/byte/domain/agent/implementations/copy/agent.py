@@ -30,9 +30,7 @@ class CopyAgent(Agent):
 		# Add nodes
 		graph.add_node(
 			"copy",
-			await self.make(
-				CopyNode,
-			),
+			await self.make(CopyNode),
 		)
 
 		# Define edges
@@ -41,3 +39,6 @@ class CopyAgent(Agent):
 
 		checkpointer = await self.get_checkpointer()
 		return graph.compile(checkpointer=checkpointer, debug=False)
+
+	async def get_assistant_runnable(self) -> None:
+		pass

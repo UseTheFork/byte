@@ -7,6 +7,7 @@ from byte.domain.agent.implementations.commit.prompt import commit_prompt
 from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.end_node import EndNode
 from byte.domain.agent.nodes.start_node import StartNode
+from byte.domain.agent.schemas import AssistantRunnable
 from byte.domain.agent.state import CommitState
 from byte.domain.llm.service.llm_service import LLMService
 
@@ -26,9 +27,7 @@ class CommitAgent(Agent):
 		Usage: `graph = await builder.build()` -> ready for coding assistance
 		"""
 
-		llm_service = await self.make(LLMService)
-		llm: BaseChatModel = llm_service.get_weak_model()
-		assistant_runnable = commit_prompt | llm
+		assistant_runnable = await self.get_assistant_runnable()
 
 		# Create the state graph
 		graph = StateGraph(self.get_state_class())
@@ -41,7 +40,7 @@ class CommitAgent(Agent):
 
 		graph.add_node(
 			"assistant",
-			await self.make(AssistantNode, runnable=assistant_runnable),
+			await self.make(AssistantNode, runnable=assistant_runnable.runnable),
 		)
 
 		graph.add_node(
@@ -49,7 +48,7 @@ class CommitAgent(Agent):
 			await self.make(
 				EndNode,
 				agent=self.__class__.__name__,
-				llm=llm,
+				llm=assistant_runnable.llm,
 			),
 		)
 
@@ -74,3 +73,12 @@ class CommitAgent(Agent):
 		last_message = messages[-1]
 
 		return {"commit_message": last_message.content}
+
+	async def get_assistant_runnable(self) -> AssistantRunnable:
+		llm_service = await self.make(LLMService)
+		llm: BaseChatModel = llm_service.get_weak_model()
+
+		return AssistantRunnable(
+			runnable=commit_prompt | llm,
+			llm=llm,
+		)

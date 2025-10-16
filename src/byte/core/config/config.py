@@ -17,7 +17,6 @@ from byte.domain.files.config import FilesConfig
 from byte.domain.lint.config import LintConfig
 from byte.domain.llm.config import LLMConfig
 from byte.domain.mcp.config import MCPServer
-from byte.domain.memory.config import MemoryConfig
 from byte.domain.web.config import WebConfig
 
 
@@ -67,7 +66,6 @@ class ByteConfg(BaseSettings):
 	lint: LintConfig = LintConfig()
 	files: FilesConfig = FilesConfig()
 	edit_format: EditFormatConfig = EditFormatConfig()
-	memory: MemoryConfig = MemoryConfig()
 	web: WebConfig = WebConfig()
 	mcp: List[MCPServer] = []
 

@@ -68,6 +68,6 @@ class RuneSpinner(Spinner):
 		spinner_text = "".join(animated_chars)
 
 		if not self.text:
-			return Text.from_markup(spinner_text)
+			return Text.from_markup(spinner_text)  # pyright: ignore[reportReturnType]
 		else:
-			return Text.from_markup(f"{spinner_text} {self.text}")
+			return Text.from_markup(f"{spinner_text} {self.text}")  # pyright: ignore[reportReturnType]

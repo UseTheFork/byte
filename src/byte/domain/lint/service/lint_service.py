@@ -5,7 +5,6 @@ from typing import List
 
 from rich.console import Console, Group
 from rich.live import Live
-from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.progress import BarColumn, Progress, TaskProgressColumn
 from rich.table import Column
@@ -13,6 +12,7 @@ from rich.table import Column
 from byte import dd
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
+from byte.domain.cli.rich.markdown import Markdown
 from byte.domain.git.service.git_service import GitService
 from byte.domain.lint.types import LintCommand, LintFile
 

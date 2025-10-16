@@ -3,8 +3,9 @@ import io
 
 from rich.console import Console
 from rich.live import Live
-from rich.markdown import Markdown
 from rich.text import Text
+
+from byte.domain.cli.rich.markdown import Markdown
 
 
 class MarkdownStream:

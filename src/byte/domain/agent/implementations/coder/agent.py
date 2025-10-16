@@ -12,6 +12,7 @@ from byte.domain.agent.nodes.end_node import EndNode
 from byte.domain.agent.nodes.lint_node import LintNode
 from byte.domain.agent.nodes.parse_blocks_node import ParseBlocksNode
 from byte.domain.agent.nodes.start_node import StartNode
+from byte.domain.agent.schemas import AssistantRunnable
 from byte.domain.agent.state import CoderState
 from byte.domain.edit_format.service.edit_format_service import EditFormatService
 from byte.domain.llm.service.llm_service import LLMService
@@ -38,9 +39,7 @@ class CoderAgent(Agent):
 		"""Build and compile the coder agent graph with memory and tools."""
 
 		# Create the assistant and runnable
-		llm_service = await self.make(LLMService)
-		llm: BaseChatModel = llm_service.get_main_model()
-		assistant_runnable = coder_prompt | llm
+		assistant_runnable = await self.get_assistant_runnable()
 
 		# Create the state graph
 		graph = StateGraph(self.get_state_class())
@@ -56,7 +55,7 @@ class CoderAgent(Agent):
 		)
 		graph.add_node(
 			"assistant",
-			await self.make(AssistantNode, runnable=assistant_runnable),
+			await self.make(AssistantNode, runnable=assistant_runnable.runnable),
 		)
 		graph.add_node(
 			"parse_blocks",
@@ -69,7 +68,7 @@ class CoderAgent(Agent):
 			await self.make(
 				EndNode,
 				agent=self.__class__.__name__,
-				llm=llm,
+				llm=assistant_runnable.llm,
 			),
 		)
 
@@ -105,3 +104,13 @@ class CoderAgent(Agent):
 			return "lint"
 
 		return "assistant"
+
+	async def get_assistant_runnable(self) -> AssistantRunnable:
+		llm_service = await self.make(LLMService)
+		llm: BaseChatModel = llm_service.get_main_model()
+
+		# Create the assistant runnable with out any tools. So regardless it wont make a tool call even thou we have a tool node.
+		return AssistantRunnable(
+			runnable=coder_prompt | llm,
+			llm=llm,
+		)

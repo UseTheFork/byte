@@ -8,6 +8,7 @@ from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.end_node import EndNode
 from byte.domain.agent.nodes.start_node import StartNode
 from byte.domain.agent.nodes.tool_node import ToolNode
+from byte.domain.agent.schemas import AssistantRunnable
 from byte.domain.agent.state import AskState
 from byte.domain.llm.service.llm_service import LLMService
 from byte.domain.mcp.service.mcp_service import MCPService
@@ -40,13 +41,7 @@ class AskAgent(Agent):
 		Usage: `graph = await agent.build()`
 		"""
 
-		mcp_service = await self.make(MCPService)
-		mcp_tools = mcp_service.get_tools_for_agent("ask")
-
-		# Create the assistant and runnable
-		llm_service = await self.make(LLMService)
-		llm: BaseChatModel = llm_service.get_main_model()
-		assistant_runnable = ask_prompt | llm.bind_tools(mcp_tools, parallel_tool_calls=False)
+		assistant_runnable = await self.get_assistant_runnable()
 
 		# Create the state graph
 		graph = StateGraph(self.get_state_class())
@@ -58,16 +53,16 @@ class AskAgent(Agent):
 		)
 		graph.add_node(
 			"assistant",
-			await self.make(AssistantNode, runnable=assistant_runnable),
+			await self.make(AssistantNode, runnable=assistant_runnable.runnable),
 		)
-		graph.add_node("tools", await self.make(ToolNode, tools=mcp_tools))  # pyright: ignore[reportArgumentType]
+		graph.add_node("tools", await self.make(ToolNode, tools=assistant_runnable.tools))  # pyright: ignore[reportArgumentType]
 
 		graph.add_node(
 			"end",
 			await self.make(
 				EndNode,
 				agent=self.__class__.__name__,
-				llm=llm,
+				llm=assistant_runnable.llm,
 			),
 		)
 
@@ -87,7 +82,7 @@ class AskAgent(Agent):
 
 		# Compile graph with memory and configuration
 		checkpointer = await self.get_checkpointer()
-		return graph.compile(checkpointer=checkpointer, debug=False)
+		return graph.compile(checkpointer=checkpointer)
 
 	def route_tools(
 		self,
@@ -102,3 +97,17 @@ class AskAgent(Agent):
 		if hasattr(ai_message, "tool_calls") and len(ai_message.tool_calls) > 0:
 			return "tools"
 		return "end"
+
+	async def get_assistant_runnable(self) -> AssistantRunnable:
+		llm_service = await self.make(LLMService)
+		llm: BaseChatModel = llm_service.get_main_model()
+
+		mcp_service = await self.make(MCPService)
+		mcp_tools = mcp_service.get_tools_for_agent("ask")
+
+		# Create the assistant runnable with out any tools. So regardless it wont make a tool call even thou we have a tool node.
+		return AssistantRunnable(
+			runnable=ask_prompt | llm.bind_tools(mcp_tools, parallel_tool_calls=False),
+			llm=llm,
+			tools=mcp_tools,
+		)

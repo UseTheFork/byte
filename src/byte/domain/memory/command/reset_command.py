@@ -1,5 +1,6 @@
 from rich.console import Console
 
+from byte.domain.analytics.service.agent_analytics_service import AgentAnalyticsService
 from byte.domain.cli.rich.panel import Panel
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.files.service.file_service import FileService
@@ -38,6 +39,9 @@ class ResetCommand(Command):
 
 		file_service = await self.make(FileService)
 		await file_service.clear_context()
+
+		agent_analytics_service = await self.make(AgentAnalyticsService)
+		agent_analytics_service.reset_context()
 
 		console = await self.make(Console)
 
