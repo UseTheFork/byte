@@ -4,6 +4,7 @@ import io
 from rich.console import Console
 from rich.live import Live
 from rich.markdown import Markdown
+from rich.text import Text
 
 
 class MarkdownStream:
@@ -76,7 +77,7 @@ class MarkdownStream:
 	async def _process_line_chunk(self, lines_chunk, is_final):
 		"""Process chunk of lines without blocking"""
 		if not self._live_started:
-			self.live = Live("", console=self.console, refresh_per_second=20)
+			self.live = Live(Text(""), console=self.console, refresh_per_second=20)
 			self.live.start()
 			self._live_started = True
 
@@ -100,7 +101,7 @@ class MarkdownStream:
 			new_stable_lines = lines_chunk[num_already_printed:stable_lines]
 			stable_text = "".join(new_stable_lines)
 			if stable_text:
-				stable_display = str(stable_text)
+				stable_display = Text.from_ansi(stable_text)
 				self.live.console.print(stable_display)
 
 			# Update our record of printed lines
@@ -111,7 +112,7 @@ class MarkdownStream:
 			remaining_lines = lines_chunk[stable_lines:]
 			if remaining_lines:
 				live_text = "".join(remaining_lines)
-				live_display = str(live_text)
+				live_display = Text.from_ansi(live_text)
 				self.live.update(live_display)
 
 		if is_final and self.live:
