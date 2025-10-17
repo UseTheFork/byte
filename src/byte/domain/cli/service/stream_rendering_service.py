@@ -200,8 +200,7 @@ class StreamRenderingService(Service):
 			)  # Reset the stream renderer
 
 			formatted_name = self._format_agent_name(self.agent_name)
-			self.console.print()
-			self.console.rule(f"{formatted_name}", style="primary")
+			self.console.rule(f"[primary]{formatted_name}[/primary]", style="primary")
 
 	async def end_stream(self):
 		"""Complete the streaming session and clean up all rendering state.

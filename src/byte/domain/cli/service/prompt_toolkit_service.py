@@ -124,6 +124,7 @@ class PromptToolkitService(Service):
 			console.print(Group(*info_panel))
 
 		user_input = await self.prompt_session.prompt_async(message=message, default=default)
+		console.print()
 		# TODO: should we make `user_input` a [("user", user_input)], in this situation.
 
 		agent_service = await self.make(AgentService)
