@@ -149,7 +149,7 @@ class CopyNode(Node, UserInteractive):
 
 		# Display panels in columns (2 columns for better layout)
 		console.print()
-		console.print(console.rule("Select a code block to copy"))
+		console.rule("Select a code block to copy")
 		console.print()
 		console.print(Columns(panels, equal=True, expand=True))
 

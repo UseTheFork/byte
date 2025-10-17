@@ -110,11 +110,10 @@ class CleanerAgent(Agent, UserInteractive):
 		cleaned_content = state.get("cleaned_content", "")
 
 		markdown_rendered = Markdown(cleaned_content)
-		console.print(
-			console.panel(
-				markdown_rendered,
-				title="Cleaned Content",
-			)
+
+		console.print_panel(
+			markdown_rendered,
+			title="Cleaned Content",
 		)
 
 		confirmed, user_input = await self.prompt_for_confirm_or_input(

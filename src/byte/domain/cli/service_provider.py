@@ -1,8 +1,5 @@
 from importlib.metadata import PackageNotFoundError, version
 
-from rich.rule import Rule
-from rich.theme import Theme
-
 from byte.container import Container
 from byte.core.config.config import ByteConfg
 from byte.core.service_provider import ServiceProvider
@@ -23,51 +20,7 @@ class CLIServiceProvider(ServiceProvider):
 	async def boot(self, container: Container):
 		"""Boot UI services."""
 
-		# "pink": "#f5c2e7",
-		# "mauve": "#cba6f7",
-		# "red": "#f38ba8",
-		# "maroon": "#eba0ac",
-		# "peach": "#fab387",
-		# "yellow": "#f9e2af",
-		# "green": "#a6e3a1",
-		# "teal": "#94e2d5",
-		# "sky": "#89dceb",
-		# "sapphire": "#74c7ec",
-		# "blue": "#89b4fa",
-		# "lavender": "#b4befe",
-		# "text": "#cdd6f4",
-		# "subtext1": "#bac2de",
-		# "subtext0": "#a6adc8",
-		# "overlay2": "#9399b2",
-		# "overlay1": "#7f849c",
-		# "overlay0": "#6c7086",
-		# "surface2": "#585b70",
-		# "surface1": "#45475a",
-		# "surface0": "#313244",
-		# "base": "#1e1e2e",
-		# "mantle": "#181825",
-		# "crust": "#11111b",
-
-		catppuccin_mocha_theme = Theme(
-			{
-				"text": "#cdd6f4",
-				"success": "#a6e3a1",
-				"error": "#f38ba8",
-				"warning": "#f9e2af",
-				"info": "#94e2d5",
-				"danger": "#f38ba8",
-				"primary": "#89b4fa",
-				"secondary": "#cba6f7",
-				"muted": "#6c7086",
-				"subtle": "#a6adc8",
-				"lavender": "#b4befe",
-				"active_border": "#b4befe",
-				"inactive_border": "#6c7086",
-			}
-		)
-
 		console = await container.make(ConsoleService)
-		console.console.push_theme(catppuccin_mocha_theme)
 
 		# Create diagonal gradient from primary to secondary color
 		logo_lines = [
@@ -102,19 +55,9 @@ class CLIServiceProvider(ServiceProvider):
 
 			console.print(styled_line)
 
-		# config = await container.make(ByteConfg)
-		# console.save_svg(str(config.project_root / "docs" / "images" / "logo.svg"), title="", theme=MONOKAI)
-
 		console.print()
 
-		console.print(
-			Rule(
-				"╭─ Booting",
-				style="text",
-				align="left",
-				characters="─",
-			)
-		)
+		console.rule("╭─ Booting")
 		console.print("│ ", style="text")
 
 		try:

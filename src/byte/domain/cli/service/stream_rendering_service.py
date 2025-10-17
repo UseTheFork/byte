@@ -104,7 +104,7 @@ class StreamRenderingService(Service):
 		"""
 		# Tool messages might need different visual treatment
 
-		self.console.print(self.console.rule("Using Tool"))
+		self.console.rule("Using Tool")
 
 		# We reset the stream_id here to make it look like a new stream
 		self.current_stream_id = ""
@@ -199,7 +199,8 @@ class StreamRenderingService(Service):
 			)  # Reset the stream renderer
 
 			formatted_name = self._format_agent_name(self.agent_name)
-			self.console.print(self.console.rule(f"{formatted_name}"))
+			self.console.print()
+			self.console.rule(f"{formatted_name}")
 
 	async def end_stream(self):
 		"""Complete the streaming session and clean up all rendering state.

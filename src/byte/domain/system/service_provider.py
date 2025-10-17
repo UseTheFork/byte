@@ -42,11 +42,4 @@ class SystemServiceProvider(ServiceProvider):
 		console = await container.make(ConsoleService)
 
 		console.print("│ ", style="text")
-		console.print(
-			console.rule(
-				"╰─── //",
-				style="text",
-				align="left",
-				characters="─",
-			)
-		)
+		console.rule("╰─── //")

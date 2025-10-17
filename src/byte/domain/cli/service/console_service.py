@@ -2,21 +2,63 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.rule import Rule
 from rich.syntax import Syntax
+from rich.theme import Theme
 
+from byte.core.config.config import ByteConfg
 from byte.core.service.base_service import Service
+from byte.domain.cli.schemas import ByteTheme, ThemeRegistry
 
 
-# AI: should `console` in the below be a property? AI?
 class ConsoleService(Service):
-	""" """
+	"""Console service for terminal output with themed styling."""
 
 	_console: Console
+	_config: ByteConfg
 
 	async def boot(self, **kwargs) -> None:
-		self._console = Console()
+		"""Initialize the console with configured theme.
+
+		Loads the Catppuccin theme variant specified in config and applies
+		Base16 colors to semantic style names for consistent terminal output.
+
+		Usage: Called automatically during service initialization
+		"""
+		self._config = await self.make(ByteConfg)
+
+		# Load the selected Catppuccin theme variant.
+		theme_registry = ThemeRegistry()
+		selected_theme: ByteTheme = theme_registry.get_theme(self._config.cli.ui_theme)
+
+		# Apply Base16 colors to semantic style names.
+		byte_theme = Theme(
+			{
+				"text": selected_theme.base05,  # Default Foreground
+				"success": selected_theme.base0B,  # Green - Strings, Inserted
+				"error": selected_theme.base08,  # Red - Variables, Tags
+				"warning": selected_theme.base0A,  # Yellow - Classes, Bold
+				"info": selected_theme.base0C,  # Teal - Support, Regex
+				"danger": selected_theme.base08,  # Red - Variables, Tags
+				"primary": selected_theme.base0D,  # Blue - Functions, Headings
+				"secondary": selected_theme.base0E,  # Mauve - Keywords, Italic
+				"muted": selected_theme.base03,  # Comments, Invisibles
+				"subtle": selected_theme.base04,  # Dark Foreground
+				"active_border": selected_theme.base07,  # Light Background
+				"inactive_border": selected_theme.base03,  # Comments, Invisibles
+			}
+		)
+		self._console = Console(theme=byte_theme)
 
 	@property
-	def console(self):
+	def console(self) -> Console:
+		"""Access the underlying Rich Console instance for advanced operations.
+
+		Most operations should use the service's wrapper methods (print, panel, etc.),
+		but direct console access is available for advanced features not wrapped by
+		the service API.
+
+		Usage: `service.console.clear()`
+		Usage: `service.console.set_window_title("ByteSmith")`
+		"""
 		return self._console
 
 	@property
@@ -72,6 +114,10 @@ class ConsoleService(Service):
 		kwargs.setdefault("theme", self._config.cli.syntax_theme)
 		return Syntax(*args, **kwargs)
 
+	def print_panel(self, *args, **kwargs):
+		""" """
+		self.console.print(self.panel(*args, **kwargs))
+
 	def panel(self, *args, **kwargs):
 		""" """
 		kwargs.setdefault("title_align", "left")
@@ -81,6 +127,7 @@ class ConsoleService(Service):
 
 	def rule(self, *args, **kwargs):
 		""" """
-		kwargs.setdefault("characters", "-")
+		kwargs.setdefault("style", "text")
+		kwargs.setdefault("characters", "─")
 		kwargs.setdefault("align", "left")
-		return Rule(*args, **kwargs)
+		self.console.print(Rule(*args, **kwargs))

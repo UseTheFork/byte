@@ -26,6 +26,7 @@ files:
 web:
   chrome_binary_location: /etc/profiles/per-user/sincore/bin/google-chrome-stable
 cli:
+  ui_theme: mocha
   syntax_theme: github-dark
 # mcp:
 #   - name: "docs-mcp-server"
