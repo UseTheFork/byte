@@ -134,7 +134,10 @@ class LintService(Service, UserInteractive):
 					commands_with_issues.append(f"... and {len(failed_files) - 3} more files with errors")
 
 		# Create markdown string for summary
-		markdown_content = f"**Files processed:** {total_files}\n\n"
+		num_commands = len(lint_commands)
+		markdown_content = (
+			f"**Files processed:** {total_files} across {num_commands} command{'s' if num_commands != 1 else ''}\n\n"
+		)
 
 		if total_issues == 0:
 			markdown_content += "**No issues found**"
@@ -146,13 +149,10 @@ class LintService(Service, UserInteractive):
 		summary_text = Markdown(markdown_content)
 
 		# Display panel
-		panel = console.panel(
+		console.print_panel(
 			summary_text,
-			title="Lint",
-			title_align="left",
-			border_style="secondary",
+			title="[secondary]Lint[/secondary]",
 		)
-		console.print(panel)
 
 		# TODO: This needs to be completed
 		if failed_commands:
@@ -200,14 +200,12 @@ class LintService(Service, UserInteractive):
 			with Live(
 				console.panel(
 					Group(progress, status),
-					title="Lint",
-					title_align="left",
-					border_style="secondary",
+					title="[secondary]Lint[/secondary]",
 				),
 				console=console.console,
 				transient=True,
 			):
-				status.update("[bold primary]Start Linting")
+				status.update("Start Linting")
 
 				# Create array of command/file combinations
 				lint_commands = []
@@ -250,7 +248,7 @@ class LintService(Service, UserInteractive):
 
 						progress.advance(task)
 
-				status.update(f"[bold primary]Finished linting {len(changed_files)} files")
+				status.update(f"Finished linting {len(changed_files)} files")
 
 		await asyncio.sleep(0.5)
 

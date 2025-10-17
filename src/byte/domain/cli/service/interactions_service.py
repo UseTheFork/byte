@@ -53,7 +53,7 @@ class InteractionService(Service):
 				case_sensitive=False,
 			)
 
-			return result
+			return str(result)
 
 		except (EOFError, KeyboardInterrupt):
 			if default:
@@ -120,7 +120,7 @@ class InteractionService(Service):
 				console=console.console,
 				default=default if default else None,
 			)
-			return result
+			return str(result)
 
 		except (EOFError, KeyboardInterrupt):
 			return default

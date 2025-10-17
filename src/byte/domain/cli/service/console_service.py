@@ -6,6 +6,7 @@ from rich.theme import Theme
 
 from byte.core.config.config import ByteConfg
 from byte.core.service.base_service import Service
+from byte.domain.cli.rich.menu import Menu
 from byte.domain.cli.schemas import ByteTheme, ThemeRegistry
 
 
@@ -186,3 +187,9 @@ class ConsoleService(Service):
 		kwargs.setdefault("characters", "─")
 		kwargs.setdefault("align", "left")
 		self.console.print(Rule(*args, **kwargs))
+
+	def menu(self, *args, **kwargs):
+		""" """
+		kwargs.setdefault("console", self._console)
+		menu = Menu(*args, **kwargs)
+		return menu.ask()
