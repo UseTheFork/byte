@@ -188,8 +188,14 @@ class ConsoleService(Service):
 		kwargs.setdefault("align", "left")
 		self.console.print(Rule(*args, **kwargs))
 
-	def menu(self, *args, **kwargs):
+	def select(self, *args, **kwargs):
 		""" """
 		kwargs.setdefault("console", self._console)
 		menu = Menu(*args, **kwargs)
-		return menu.ask()
+		return menu.select()
+
+	def multiselect(self, *args, **kwargs):
+		""" """
+		kwargs.setdefault("console", self._console)
+		menu = Menu(*args, **kwargs)
+		return menu.multiselect()

@@ -2,38 +2,34 @@ from typing import Optional
 
 import click
 from rich import get_console
-from rich.align import AlignMethod
 from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
 from rich.text import Text
 
-
 # Credits to https://github.com/gbPagano/rich_menu/blob/main/rich_menu/menu.py
+
+
 class Menu:
 	def __init__(
 		self,
 		*options: str,
 		start_index: int = 0,
 		title: str = "",
-		color: str = "primary",
-		align: AlignMethod = "left",
-		selection_char: str = ">",
-		selected_char: str = "*",
+		color: str = "secondary",
 		selected_color: str = "primary",
-		highlight_color: str = "",
 		console: Optional[Console] = None,
 	):
 		self.options = options
 		self.index = start_index
 		self.title = title
 		self.color = color
-		self.align = align
-		self.selection_char = selection_char
-		self.highlight_color = highlight_color
-		self.selected_char = selected_char
 		self.selected_color = selected_color
 		self.selected_options = []
+
+		self.selection_char = "›"  # noqa: RUF001
+
+		self.border_style = "inactive_border"
 
 		self.console = console if console is not None else get_console()
 
@@ -71,33 +67,48 @@ class Menu:
 	def _group(self) -> Panel:
 		menu = Text(justify="left")
 
-		current = Text(self.selection_char + " ", self.color)
-		not_selected = Text(" " * (len(self.selection_char) + 1))
-		selected = Text(self.selected_char + " ", self.selected_color)
+		# Selection char is always in front when current
+		# Circle prefix shows selection state (filled when selected, empty otherwise)
+		selection_prefix = f"{self.selection_char} "
+		empty_prefix = "  "
 
 		for idx, option in enumerate(self.options):
-			if idx == self.index and option in self.selected_options:  # is current selected in multiple selection mode
-				menu.append(Text.assemble(current, Text(option + "\n", self.selected_color)))
-			elif idx == self.index:  # is selected in single mode
-				menu.append(Text.assemble(current, Text(option + "\n", self.highlight_color)))
-			elif option in self.selected_options:  # is selected in multiple selection mode
-				menu.append(Text.assemble(selected, Text(option + "\n", self.selected_color)))
+			if idx == self.index:
+				menu.append(
+					Text.assemble(
+						Text(selection_prefix, self.color),
+						Text("◼  ", self.selected_color),
+						Text(option + "\n", self.selected_color),
+					)
+				)
 			else:
-				menu.append(Text.assemble(not_selected, option + "\n"))
+				# Not current item - no selection char
+				if option in self.selected_options:
+					# Not current but selected - filled circle
+					menu.append(
+						Text.assemble(
+							Text(empty_prefix),
+							Text("◼  ", self.selected_color),
+							Text(option + "\n", self.selected_color),
+						)
+					)
+				else:
+					# Not current and not selected - hollow circle
+					menu.append(Text.assemble(Text(empty_prefix), Text("◻  "), Text(option + "\n")))
 		menu.rstrip()
 
 		return Panel(
 			menu,
-			title=self.title,
+			title=f"[text]{self.title}[/text]",
 			title_align="left",
-			border_style="inactive_border",
+			border_style=self.border_style,
 		)
 
 	def _clean_menu(self):
 		for _ in range(len(self.options) + 3):
 			print("\x1b[A\x1b[K", end="")
 
-	def ask(self, esc: bool = True) -> str:
+	def select(self, esc: bool = True) -> str | None:
 		with Live(self._group, auto_refresh=False, console=self.console) as live:
 			live.update(self._group, refresh=True)
 			while True:
@@ -106,21 +117,23 @@ class Menu:
 					if key == "enter":
 						break
 					elif key == "exit" and esc:
-						exit()
+						self._clean_menu()
+						return None
 
 					self._update_index(key)
 					live.update(self._group, refresh=True)
 				except (KeyboardInterrupt, EOFError):
-					exit()
+					self._clean_menu()
+					return None
 
 		self._clean_menu()
 
 		return self.options[self.index]
 
-	def ask_multiple(
+	def multiselect(
 		self,
 		esc: bool = True,
-	) -> list[str]:
+	) -> list[str] | None:
 		self.selected_options = []
 		with Live(self._group, auto_refresh=False, console=self.console) as live:
 			live.update(self._group, refresh=True)
@@ -130,7 +143,8 @@ class Menu:
 					if key == "enter":
 						break
 					elif key == "exit" and esc:
-						exit()
+						self.selected_options = None
+						break
 					elif key == "down" or key == "up":
 						self._update_index(key)
 					elif key == "space":
@@ -141,7 +155,8 @@ class Menu:
 
 					live.update(self._group, refresh=True)
 				except (KeyboardInterrupt, EOFError):
-					exit()
+					self.selected_options = None
+					break
 
 		self._clean_menu()
 

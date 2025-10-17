@@ -17,9 +17,15 @@ class TestCommand(Command):
 	async def execute(self, args: str) -> None:
 		""" """
 		console = await self.make(ConsoleService)
-		menu = console.menu(
+		menu = console.select(
 			"Option 1",
 			"Option 2",
+			"Option 3",
+			"Option 3",
+			"Option 3",
+			"Option 3",
+			"Option 3",
+			"Option 3",
 			"Option 3",
 			"Exit",
 			title="test",
