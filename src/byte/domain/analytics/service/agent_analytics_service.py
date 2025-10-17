@@ -7,7 +7,7 @@ from rich.table import Table
 
 from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
-from byte.domain.cli.rich.panel import Panel
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.llm.service.llm_service import LLMService
 
 
@@ -72,6 +72,7 @@ class AgentAnalyticsService(Service):
 		Shows current token consumption for both main and weak models
 		with visual progress indicators to help users track their usage.
 		"""
+		console = await self.make(ConsoleService)
 		llm_service = await self.make(LLMService)
 
 		info_panel = payload.get("info_panel", [])
@@ -142,7 +143,7 @@ class AgentAnalyticsService(Service):
 			f"Cost: ${last_message_cost:.2f} message, ${session_cost:.2f} session.",
 		)
 
-		analytics_panel = Panel(
+		analytics_panel = console.panel(
 			Group(grid, grid_cost),
 			title="Analytics",
 		)

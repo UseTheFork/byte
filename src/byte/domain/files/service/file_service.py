@@ -7,7 +7,6 @@ from rich.columns import Columns
 
 from byte.core.event_bus import EventType, Payload
 from byte.core.service.base_service import Service
-from byte.domain.cli.rich.panel import Panel
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.files.context_manager import FileContext, FileMode
 from byte.domain.files.service.discovery_service import FileDiscoveryService
@@ -325,14 +324,17 @@ mode: editable
 		helping users understand the current context state.
 		"""
 
+		console = await self.make(ConsoleService)
+
 		info_panel = payload.get("info_panel", [])
 
 		read_only_panel = None
+
 		file_service = await self.make(FileService)
 		readonly_files = file_service.list_files(FileMode.READ_ONLY)
 		if readonly_files:
 			file_names = [f"[text]{f.relative_path}[/text]" for f in readonly_files]
-			read_only_panel = Panel(
+			read_only_panel = console.panel(
 				Columns(file_names, equal=True, expand=True),
 				title=f"Read-only Files ({len(readonly_files)})",
 			)
@@ -341,7 +343,7 @@ mode: editable
 		editable_files = file_service.list_files(FileMode.EDITABLE)
 		if editable_files:
 			file_names = [f"[text]{f.relative_path}[/text]" for f in editable_files]
-			editable_panel = Panel(
+			editable_panel = console.panel(
 				Columns(file_names, equal=True, expand=True),
 				title=f"Editable Files ({len(editable_files)})",
 			)

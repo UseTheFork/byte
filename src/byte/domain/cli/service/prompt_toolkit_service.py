@@ -5,7 +5,6 @@ from prompt_toolkit.document import Document
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.shortcuts import PromptSession
 from rich.console import Group
-from rich.rule import Rule
 
 from byte.core.config.config import ByteConfg
 from byte.core.event_bus import EventType, Payload
@@ -119,14 +118,7 @@ class PromptToolkitService(Service):
 		message = payload.get("message", message)
 
 		console.print()
-		console.print(
-			Rule(
-				"[primary]/[/primary][secondary]/[/secondary] Byte",
-				style="text",
-				align="left",
-				characters="─",
-			)
-		)
+		console.rule("[primary]/[/primary][secondary]/[/secondary] Byte")
 		# Output info panel if it contains content
 		if info_panel:
 			console.print(Group(*info_panel))
@@ -181,7 +173,7 @@ class PromptToolkitService(Service):
 		if command:
 			await command.execute(args)
 		else:
-			console.print(f"[error]Unknown command: /{command_name}[/error]")
+			console.print_error(f"Unknown command: /{command_name}")
 
 	async def interrupt(self):
 		"""Interrupt the current prompt and preserve user input.

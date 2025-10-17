@@ -8,7 +8,6 @@ from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.utils import extract_content_from_message
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.state import BaseState
-from byte.domain.cli.rich.panel import Panel
 from byte.domain.cli.service.console_service import ConsoleService
 
 
@@ -139,7 +138,7 @@ class CopyNode(Node, UserInteractive):
 			choices.append(f"[{lang}] {len(lines)} lines")
 
 		# Add cancel option
-		cancel_panel = Panel(
+		cancel_panel = console.panel(
 			"[yellow]Don't copy anything[/yellow]",
 			title=f"[bold]{len(code_blocks) + 1}. Cancel[/bold]",
 			border_style="red",

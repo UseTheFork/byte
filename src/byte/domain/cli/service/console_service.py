@@ -77,6 +77,22 @@ class ConsoleService(Service):
 		"""
 		return self._console.height
 
+	def print_error(self, message: str, **kwargs) -> None:
+		"""Print an error message with error styling.
+
+		Wraps the message in [error] tags for consistent error display across
+		the application using the theme's configured error color.
+
+		Usage:
+			`service.print_error("File not found")`
+			`service.print_error("Operation failed", highlight=False)`
+
+		Args:
+			message: Error message to display
+			**kwargs: Additional keyword arguments passed to Console.print()
+		"""
+		self._console.print(f"[error]{message}[/error]", **kwargs)
+
 	def print(self, *args, **kwargs) -> None:
 		"""Print to console with Rich formatting support.
 
@@ -115,18 +131,57 @@ class ConsoleService(Service):
 		return Syntax(*args, **kwargs)
 
 	def print_panel(self, *args, **kwargs):
-		""" """
+		"""Print a themed panel to the console with default styling.
+
+		Creates and immediately prints a panel with left-aligned title/subtitle
+		and inactive border styling. Proxies to panel() then console.print().
+
+		Usage:
+			`service.print_panel("Content", title="Section")`
+			`service.print_panel(rich_object, subtitle="Details")`
+
+		Args:
+			*args: Positional arguments passed to panel()
+			**kwargs: Keyword arguments passed to panel()
+		"""
 		self.console.print(self.panel(*args, **kwargs))
 
 	def panel(self, *args, **kwargs):
-		""" """
+		"""Create a themed Panel component with default styling.
+
+		Configures panel with left-aligned title/subtitle and inactive border
+		style. Returns the panel for further customization or delayed rendering.
+
+		Usage:
+			`panel = service.panel("Content", title="Header")`
+			`panel = service.panel(syntax, border_style="primary")`
+
+		Args:
+			*args: Positional arguments passed to Rich's Panel constructor
+			**kwargs: Keyword arguments passed to Panel, with defaults applied
+
+		Returns:
+			Panel: Configured Rich Panel component ready for rendering
+		"""
 		kwargs.setdefault("title_align", "left")
 		kwargs.setdefault("subtitle_align", "left")
 		kwargs.setdefault("border_style", "inactive_border")
 		return Panel(*args, **kwargs)
 
 	def rule(self, *args, **kwargs):
-		""" """
+		"""Print a horizontal rule with default styling.
+
+		Creates and prints a left-aligned horizontal line separator using
+		the configured text style and box-drawing characters.
+
+		Usage:
+			`service.rule("Section Title")`
+			`service.rule("Step 2", style="primary")`
+
+		Args:
+			*args: Positional arguments passed to Rich's Rule constructor
+			**kwargs: Keyword arguments passed to Rule, with defaults applied
+		"""
 		kwargs.setdefault("style", "text")
 		kwargs.setdefault("characters", "─")
 		kwargs.setdefault("align", "left")
