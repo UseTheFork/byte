@@ -1,8 +1,6 @@
-from rich.console import Console
-
 from byte.domain.analytics.service.agent_analytics_service import AgentAnalyticsService
-from byte.domain.cli.rich.panel import Panel
 from byte.domain.cli.service.command_registry import Command
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.files.service.file_service import FileService
 from byte.domain.memory.service.memory_service import MemoryService
 
@@ -43,7 +41,7 @@ class ResetCommand(Command):
 		agent_analytics_service = await self.make(AgentAnalyticsService)
 		agent_analytics_service.reset_context()
 
-		console = await self.make(Console)
+		console = await self.make(ConsoleService)
 
 		# Display success confirmation to user
-		console.print(Panel("[success]Conversation and file context completely reset[/success]"))
+		console.print(console.panel("[success]Conversation and file context completely reset[/success]"))

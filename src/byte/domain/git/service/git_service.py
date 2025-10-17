@@ -3,11 +3,10 @@ from typing import List
 
 import git
 from git.exc import InvalidGitRepositoryError
-from rich.console import Console
 
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
-from byte.domain.cli.rich.panel import Panel
+from byte.domain.cli.service.console_service import ConsoleService
 
 
 class GitService(Service, UserInteractive):
@@ -75,7 +74,7 @@ class GitService(Service, UserInteractive):
 
 		Usage: `await git_service.commit("feat: add new feature")` -> creates commit with message
 		"""
-		console = await self.make(Console)
+		console = await self.make(ConsoleService)
 
 		continue_commit = True
 
@@ -87,7 +86,7 @@ class GitService(Service, UserInteractive):
 
 				# Display success panel
 				console.print(
-					Panel(
+					console.panel(
 						f"({commit_hash}) {commit_message}",
 						title="[bold green]Commit Created[/bold green]",
 						border_style="green",
@@ -99,7 +98,7 @@ class GitService(Service, UserInteractive):
 			except Exception as e:
 				# Display error panel if commit fails
 				console.print(
-					Panel(
+					console.panel(
 						f"Failed to create commit: {e!s}",
 						title="[bold red]Commit Failed[/bold red]",
 						border_style="red",
@@ -126,7 +125,7 @@ class GitService(Service, UserInteractive):
 
 		Usage: Called internally during commit process to handle unstaged files
 		"""
-		console = await self.make(Console)
+		console = await self.make(ConsoleService)
 		unstaged_changes = self._repo.index.diff(None)  # None compares working tree to index
 		if unstaged_changes:
 			file_list = []
@@ -138,7 +137,7 @@ class GitService(Service, UserInteractive):
 
 			files_display = "\n".join(file_list)
 			console.print(
-				Panel(
+				console.panel(
 					f"Found {len(unstaged_changes)} unstaged changes:\n\n{files_display}",
 					title="[bold]Unstaged Changes[/bold]",
 					title_align="left",

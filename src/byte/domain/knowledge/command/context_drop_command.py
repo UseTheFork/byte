@@ -1,8 +1,7 @@
 from typing import List
 
-from rich.console import Console
-
 from byte.domain.cli.service.command_registry import Command
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.knowledge.service.session_context_service import SessionContextService
 
 
@@ -24,7 +23,7 @@ class ContextDropCommand(Command):
 
 	async def execute(self, args: str) -> None:
 		"""Remove specified item from session context."""
-		console = await self.make(Console)
+		console = await self.make(ConsoleService)
 		if not args:
 			console.print("Usage: /context:drop <context_key>")
 			return

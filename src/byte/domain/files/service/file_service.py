@@ -4,11 +4,11 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 from rich.columns import Columns
-from rich.console import Console
 
 from byte.core.event_bus import EventType, Payload
 from byte.core.service.base_service import Service
 from byte.domain.cli.rich.panel import Panel
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.files.context_manager import FileContext, FileMode
 from byte.domain.files.service.discovery_service import FileDiscoveryService
 
@@ -35,7 +35,7 @@ class FileService(Service):
 		Usage: `await service.add_file("config.py", FileMode.READ_ONLY)`
 		Usage: `await service.add_file("src/*.py", FileMode.EDITABLE)` -> adds all Python files
 		"""
-		console = await self.make(Console)
+		console = await self.make(ConsoleService)
 		file_discovery = await self.make(FileDiscoveryService)
 		discovered_files = await file_discovery.get_files()
 		discovered_file_paths = {str(f.resolve()) for f in discovered_files}

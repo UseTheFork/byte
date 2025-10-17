@@ -3,16 +3,13 @@ import re
 import pyperclip
 from langgraph.graph.state import RunnableConfig
 from rich.columns import Columns
-from rich.console import Console
-from rich.syntax import Syntax
 
-from byte.core.config.config import ByteConfg
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.utils import extract_content_from_message
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.state import BaseState
 from byte.domain.cli.rich.panel import Panel
-from byte.domain.cli.rich.rule import Rule
+from byte.domain.cli.service.console_service import ConsoleService
 
 
 class CopyNode(Node, UserInteractive):
@@ -25,6 +22,7 @@ class CopyNode(Node, UserInteractive):
 
 	async def __call__(self, state: BaseState, config: RunnableConfig):
 		"""Extract code blocks and prompt user to select one for clipboard copy."""
+		console = await self.make(ConsoleService)
 		messages = state["messages"]
 		last_message = messages[-1]
 
@@ -34,7 +32,6 @@ class CopyNode(Node, UserInteractive):
 		code_blocks = self._extract_code_blocks(response_text)
 
 		if not code_blocks:
-			console = await self.make(Console)
 			console.print("[warning]No code blocks found in the last message.[/warning]")
 			return state
 
@@ -44,7 +41,6 @@ class CopyNode(Node, UserInteractive):
 		if selected_block is not None:
 			# Copy to clipboard
 			pyperclip.copy(selected_block["content"])
-			console = await self.make(Console)
 			console.print(f"[success]Copied {selected_block['language']} code block to clipboard![/success]")
 
 		return state
@@ -84,7 +80,7 @@ class CopyNode(Node, UserInteractive):
 		Usage: `block = await self._prompt_user_selection(blocks)`
 		"""
 
-		console = await self.make(Console)
+		console = await self.make(ConsoleService)
 
 		# Configuration for preview display
 		max_preview_lines = 5
@@ -123,19 +119,16 @@ class CopyNode(Node, UserInteractive):
 			if len(lines) > max_preview_lines:
 				preview_content += "\n..."
 
-			config = await self.make(ByteConfg)
-
 			# Create syntax-highlighted preview
-			syntax = Syntax(
+			syntax = console.syntax(
 				preview_content,
 				lang if lang != "text" else "python",
-				theme=config.cli.syntax_theme,
 				line_numbers=False,
 				word_wrap=True,
 			)
 
 			# Create panel for this code block
-			panel = Panel(
+			panel = console.panel(
 				syntax,
 				title=f"{idx + 1}. [{lang}] {len(lines)} lines",
 				border_style="secondary",
@@ -156,7 +149,7 @@ class CopyNode(Node, UserInteractive):
 
 		# Display panels in columns (2 columns for better layout)
 		console.print()
-		console.print(Rule("Select a code block to copy"))
+		console.print(console.rule("Select a code block to copy"))
 		console.print()
 		console.print(Columns(panels, equal=True, expand=True))
 

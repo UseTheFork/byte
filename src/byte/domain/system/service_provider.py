@@ -1,13 +1,11 @@
 from typing import List, Type
 
-from rich.console import Console
-from rich.rule import Rule
-
 from byte.container import Container
 from byte.core.event_bus import EventBus, EventType
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli.service.command_registry import Command
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.system.command.exit_command import ExitCommand
 from byte.domain.system.command.initilizie_command import InitilizieCommand
 from byte.domain.system.service.system_context_service import SystemContextService
@@ -41,11 +39,11 @@ class SystemServiceProvider(ServiceProvider):
 			system_context_service.add_system_context,
 		)
 
-		console = await container.make(Console)
+		console = await container.make(ConsoleService)
 
 		console.print("│ ", style="text")
 		console.print(
-			Rule(
+			console.rule(
 				"╰─── //",
 				style="text",
 				align="left",

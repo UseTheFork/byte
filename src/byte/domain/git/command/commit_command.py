@@ -1,7 +1,6 @@
-from rich.console import Console
-
 from byte.domain.agent.implementations.commit.agent import CommitAgent
 from byte.domain.cli.service.command_registry import Command
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.git.service.git_service import GitService
 from byte.domain.lint.service.lint_service import LintService
 
@@ -35,7 +34,7 @@ class CommitCommand(Command):
 
 		Usage: Called automatically when user types `/commit`
 		"""
-		console = await self.make(Console)
+		console = await self.make(ConsoleService)
 		git_service = await self.make(GitService)
 		await git_service.stage_changes()
 

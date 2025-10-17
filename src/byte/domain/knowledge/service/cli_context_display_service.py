@@ -2,7 +2,7 @@ from rich.table import Table
 
 from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
-from byte.domain.cli.rich.panel import Panel
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.knowledge.service.convention_context_service import (
 	ConventionContextService,
 )
@@ -13,6 +13,7 @@ class CLIContextDisplayService(Service):
 	async def display_context_panel_hook(self, payload: Payload) -> Payload:
 		"""Display session context and convention panels showing all active items."""
 
+		console = await self.make(ConsoleService)
 		info_panel = payload.get("info_panel", [])
 
 		session_context_service = await self.make(SessionContextService)
@@ -43,7 +44,7 @@ class CLIContextDisplayService(Service):
 		)
 
 		# Create panel with columns if there are any sections
-		combined_panel = Panel(
+		combined_panel = console.panel(
 			grid,
 			title="Knowledge Context",
 		)

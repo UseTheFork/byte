@@ -1,12 +1,11 @@
 import json
 
 from langchain_core.messages import ToolMessage
-from rich.console import Console
 from rich.pretty import Pretty
 
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.domain.agent.nodes.base_node import Node
-from byte.domain.cli.rich.panel import Panel
+from byte.domain.cli.service.console_service import ConsoleService
 
 
 class ToolNode(Node, UserInteractive):
@@ -21,10 +20,10 @@ class ToolNode(Node, UserInteractive):
 		outputs = []
 
 		for tool_call in message.tool_calls:
-			console = await self.make(Console)
+			console = await self.make(ConsoleService)
 
 			pretty = Pretty(tool_call)
-			console.print(Panel(pretty))
+			console.print(console.panel(pretty))
 
 			run_tool = await self.prompt_for_confirmation(f"Use {tool_call['name']}", True)
 
@@ -35,7 +34,7 @@ class ToolNode(Node, UserInteractive):
 
 			# Display tool result and confirm if it should be added to response
 			result_pretty = Pretty(tool_result)
-			console.print(Panel(result_pretty, title="Tool Result"))
+			console.print(console.panel(result_pretty, title="Tool Result"))
 
 			add_result = await self.prompt_for_confirmation("Add this result to the response?", True)
 

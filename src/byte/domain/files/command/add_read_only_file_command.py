@@ -1,8 +1,7 @@
 from typing import List
 
-from rich.console import Console
-
 from byte.domain.cli.service.command_registry import Command
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.files.context_manager import FileMode
 from byte.domain.files.service.file_service import FileService
 
@@ -25,7 +24,7 @@ class ReadOnlyCommand(Command):
 
 	async def execute(self, args: str) -> None:
 		"""Add specified file to context with editable permissions."""
-		console = await self.make(Console)
+		console = await self.make(ConsoleService)
 
 		if not args:
 			console.print("Usage: /read-only <file_path>")

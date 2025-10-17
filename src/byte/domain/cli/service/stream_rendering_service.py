@@ -2,13 +2,12 @@ import re
 
 from langchain_core.messages.ai import AIMessageChunk
 from langchain_core.messages.tool import ToolMessage
-from rich.console import Console
 from rich.live import Live
-from rich.rule import Rule
 
 from byte.core.service.base_service import Service
 from byte.core.utils import extract_content_from_message
 from byte.domain.cli.rich.rune_spinner import RuneSpinner
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.cli.utils.formatters import MarkdownStream
 
 
@@ -28,7 +27,7 @@ class StreamRenderingService(Service):
 		the markdown stream renderer for handling AI agent responses.
 		Usage: Called automatically during service container boot process
 		"""
-		self.console = await self.make(Console)
+		self.console = await self.make(ConsoleService)
 
 		self.current_stream_id = None
 		self.accumulated_content = ""
@@ -36,7 +35,7 @@ class StreamRenderingService(Service):
 		self.display_mode = "verbose"
 		self.spinner = None
 		self.active_stream = MarkdownStream(
-			console=self.console,
+			console=self.console.console,
 			mdargs={"code_theme": self._config.cli.syntax_theme},
 		)
 
@@ -105,7 +104,7 @@ class StreamRenderingService(Service):
 		"""
 		# Tool messages might need different visual treatment
 
-		self.console.print(Rule("Using Tool", align="left"))
+		self.console.print(self.console.rule("Using Tool"))
 
 		# We reset the stream_id here to make it look like a new stream
 		self.current_stream_id = ""
@@ -192,7 +191,7 @@ class StreamRenderingService(Service):
 		self.accumulated_content = ""  # Reset accumulated content for new stream
 		if self.display_mode == "verbose":
 			self.active_stream = MarkdownStream(
-				console=self.console,
+				console=self.console.console,
 				mdargs={
 					"code_theme": self._config.cli.syntax_theme,
 					"inline_code_lexer": "text",
@@ -200,7 +199,7 @@ class StreamRenderingService(Service):
 			)  # Reset the stream renderer
 
 			formatted_name = self._format_agent_name(self.agent_name)
-			self.console.print(Rule(f"{formatted_name}", align="left"))
+			self.console.print(self.console.rule(f"{formatted_name}"))
 
 	async def end_stream(self):
 		"""Complete the streaming session and clean up all rendering state.
@@ -232,7 +231,7 @@ class StreamRenderingService(Service):
 		if self.display_mode in ["verbose", "thinking"]:
 			# Start with animated spinner
 			spinner = RuneSpinner(text="Thinking...", size=15)
-			self.spinner = Live(spinner, console=self.console, transient=True, refresh_per_second=20)
+			self.spinner = Live(spinner, console=self.console.console, transient=True, refresh_per_second=20)
 			self.spinner.start()
 
 	async def _update_active_stream(self, final: bool = False):

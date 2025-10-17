@@ -1,11 +1,10 @@
-from rich.console import Console
 from rich.markdown import Markdown
 
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.utils import slugify
 from byte.domain.agent.implementations.cleaner.agent import CleanerAgent
-from byte.domain.cli.rich.panel import Panel
 from byte.domain.cli.service.command_registry import Command
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.knowledge.service.session_context_service import SessionContextService
 from byte.domain.web.service.chromium_service import ChromiumService
 
@@ -37,7 +36,7 @@ class WebCommand(Command, UserInteractive):
 
 		Usage: Called when user types `/web <url>`
 		"""
-		console = await self.make(Console)
+		console = await self.make(ConsoleService)
 
 		session_context_service = await self.make(SessionContextService)
 
@@ -46,7 +45,7 @@ class WebCommand(Command, UserInteractive):
 
 		markdown_rendered = Markdown(markdown_content)
 		console.print(
-			Panel(
+			console.panel(
 				markdown_rendered,
 				title=f"Content: {args}",
 			)

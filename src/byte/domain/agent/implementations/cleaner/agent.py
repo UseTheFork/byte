@@ -2,7 +2,6 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage
 from langgraph.constants import END
 from langgraph.graph import START, StateGraph
-from rich.console import Console
 from rich.markdown import Markdown
 
 from byte.core.mixins.user_interactive import UserInteractive
@@ -13,7 +12,7 @@ from byte.domain.agent.nodes.end_node import EndNode
 from byte.domain.agent.nodes.start_node import StartNode
 from byte.domain.agent.schemas import AssistantRunnable
 from byte.domain.agent.state import CleanerState
-from byte.domain.cli.rich.panel import Panel
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.llm.service.llm_service import LLMService
 
 
@@ -106,13 +105,13 @@ class CleanerAgent(Agent, UserInteractive):
 		Usage: `result = await agent._confirm_content(state)` -> updated state
 		"""
 
-		console = await self.make(Console)
+		console = await self.make(ConsoleService)
 
 		cleaned_content = state.get("cleaned_content", "")
 
 		markdown_rendered = Markdown(cleaned_content)
 		console.print(
-			Panel(
+			console.panel(
 				markdown_rendered,
 				title="Cleaned Content",
 			)

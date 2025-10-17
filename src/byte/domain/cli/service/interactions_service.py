@@ -1,9 +1,9 @@
 from typing import List, Optional
 
-from rich.console import Console
 from rich.prompt import Confirm, Prompt
 
 from byte.core.service.base_service import Service
+from byte.domain.cli.service.console_service import ConsoleService
 
 
 class InteractionService(Service):
@@ -21,12 +21,12 @@ class InteractionService(Service):
 		"""
 
 		try:
-			console = await self.make(Console)
+			console = await self.make(ConsoleService)
 
 			return Confirm.ask(
 				prompt=f"{message}",
 				default=default,
-				console=console,
+				console=console.console,
 				case_sensitive=False,
 			)
 
@@ -43,11 +43,11 @@ class InteractionService(Service):
 			raise ValueError("Choices list cannot be empty")
 
 		try:
-			console: Console = await self.make(Console)
+			console = await self.make(ConsoleService)
 
 			result = Prompt.ask(
 				message,
-				console=console,
+				console=console.console,
 				choices=choices,
 				default=default if default and default in choices else None,
 				case_sensitive=False,
@@ -75,7 +75,7 @@ class InteractionService(Service):
 			raise ValueError("Choices list cannot be empty")
 
 		try:
-			console: Console = await self.make(Console)
+			console = await self.make(ConsoleService)
 
 			# Display numbered options
 			console.print(f"\n{message}")
@@ -89,7 +89,7 @@ class InteractionService(Service):
 			# Prompt for number selection
 			selection = Prompt.ask(
 				"Enter number",
-				console=console,
+				console=console.console,
 				choices=valid_choices,
 				default=default_str,
 			)
@@ -113,11 +113,11 @@ class InteractionService(Service):
 		Usage: `text = await interaction_service.input_text("Enter name:", "default_name")`
 		"""
 		try:
-			console: Console = await self.make(Console)
+			console = await self.make(ConsoleService)
 
 			result = Prompt.ask(
 				message,
-				console=console,
+				console=console.console,
 				default=default if default else None,
 			)
 			return result
@@ -139,13 +139,13 @@ class InteractionService(Service):
 		Usage: `confirmed, text = await interaction_service.confirm_or_input("Use default?", "Enter custom value:")`
 		"""
 		try:
-			console: Console = await self.make(Console)
+			console = await self.make(ConsoleService)
 
 			# First ask for confirmation
 			confirmed = Confirm.ask(
 				prompt=confirm_message,
 				default=default_confirm,
-				console=console,
+				console=console.console,
 				case_sensitive=False,
 			)
 
@@ -155,7 +155,7 @@ class InteractionService(Service):
 			# If not confirmed, prompt for text input
 			text_input = Prompt.ask(
 				input_message,
-				console=console,
+				console=console.console,
 			)
 			return (False, text_input)
 

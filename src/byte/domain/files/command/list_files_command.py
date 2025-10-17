@@ -1,8 +1,7 @@
 from rich.columns import Columns
-from rich.console import Console
 
-from byte.domain.cli.rich.panel import Panel
 from byte.domain.cli.service.command_registry import Command
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.files.context_manager import FileMode
 from byte.domain.files.service.file_service import FileService
 
@@ -28,7 +27,7 @@ class ListFilesCommand(Command):
 
 		Usage: Called automatically when user types `/ls`
 		"""
-		console = await self.make(Console)
+		console = await self.make(ConsoleService)
 		file_service = await self.make(FileService)
 
 		# Get files by mode
@@ -45,7 +44,7 @@ class ListFilesCommand(Command):
 
 		if read_only_files:
 			file_paths = [f"[text]{f.relative_path}[/text]" for f in read_only_files]
-			read_only_panel = Panel(
+			read_only_panel = console.panel(
 				Columns(file_paths, equal=True, expand=True),
 				title=f"Read-Only Files ({len(read_only_files)})",
 			)
@@ -53,7 +52,7 @@ class ListFilesCommand(Command):
 
 		if editable_files:
 			file_paths = [f"[text]{f.relative_path}[/text]" for f in editable_files]
-			editable_panel = Panel(
+			editable_panel = console.panel(
 				Columns(file_paths, equal=True, expand=True),
 				title=f"Editable Files ({len(editable_files)})",
 			)

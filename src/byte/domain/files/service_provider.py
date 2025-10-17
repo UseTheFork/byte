@@ -1,12 +1,11 @@
 from typing import List, Type
 
-from rich.console import Console
-
 from byte.container import Container
 from byte.core.event_bus import EventBus, EventType
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli.service.command_registry import Command
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.files.command.add_file_command import AddFileCommand
 from byte.domain.files.command.add_read_only_file_command import ReadOnlyCommand
 from byte.domain.files.command.drop_file_command import DropFileCommand
@@ -62,7 +61,7 @@ class FileServiceProvider(ServiceProvider):
 			file_watcher_service.modify_user_request_hook,
 		)
 
-		console = await container.make(Console)
+		console = await container.make(ConsoleService)
 
 		found_files = await file_discovery.get_files()
 		console.print(f"│ [success]Discovered:[/success] [info]{len(found_files)} files[/info]")

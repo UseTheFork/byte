@@ -1,12 +1,12 @@
 from importlib.metadata import PackageNotFoundError, version
 
-from rich.console import Console
 from rich.rule import Rule
 from rich.theme import Theme
 
 from byte.container import Container
 from byte.core.config.config import ByteConfg
 from byte.core.service_provider import ServiceProvider
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.cli.service.interactions_service import InteractionService
 from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
 from byte.domain.cli.service.stream_rendering_service import (
@@ -63,12 +63,11 @@ class CLIServiceProvider(ServiceProvider):
 				"lavender": "#b4befe",
 				"active_border": "#b4befe",
 				"inactive_border": "#6c7086",
-				"bell_border": "#f9e2af",
 			}
 		)
 
-		console = await container.make(Console)
-		console.push_theme(catppuccin_mocha_theme)
+		console = await container.make(ConsoleService)
+		console.console.push_theme(catppuccin_mocha_theme)
 
 		# Create diagonal gradient from primary to secondary color
 		logo_lines = [

@@ -3,12 +3,9 @@ import subprocess
 from pathlib import Path
 from typing import List
 
-from rich.console import Console
-from rich.syntax import Syntax
-
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
-from byte.domain.cli.rich.panel import Panel
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.edit_format.models import (
 	BlockStatus,
 	EditFormatPrompts,
@@ -169,7 +166,7 @@ class ShellCommandService(Service, UserInteractive):
 				)
 
 				# Display the result of the command in a panel
-				console = await self.make(Console)
+				console = await self.make(ConsoleService)
 
 				if result.returncode == 0:
 					# Success - show output in green panel
@@ -177,13 +174,12 @@ class ShellCommandService(Service, UserInteractive):
 
 					output = result.stdout.strip()
 					if output:
-						syntax = Syntax(
+						syntax = console.syntax(
 							output,
 							"text",
-							theme="monokai",
 							word_wrap=True,
 						)
-						panel = Panel(
+						panel = console.panel(
 							syntax,
 							title=f"[bold green]Command Output: {block.command}[/bold green]",
 							border_style="green",
@@ -195,13 +191,12 @@ class ShellCommandService(Service, UserInteractive):
 
 					error_output = result.stderr.strip()
 					if error_output:
-						syntax = Syntax(
+						syntax = console.syntax(
 							error_output,
 							"text",
-							theme="monokai",
 							word_wrap=True,
 						)
-						panel = Panel(
+						panel = console.panel(
 							syntax,
 							title=f"[bold red]Command Failed (exit {result.returncode}): {block.command}[/bold red]",
 							border_style="red",

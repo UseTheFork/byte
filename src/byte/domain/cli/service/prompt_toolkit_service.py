@@ -4,7 +4,7 @@ from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.document import Document
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.shortcuts import PromptSession
-from rich.console import Console, Group
+from rich.console import Group
 from rich.rule import Rule
 
 from byte.core.config.config import ByteConfg
@@ -12,6 +12,7 @@ from byte.core.event_bus import EventType, Payload
 from byte.core.service.base_service import Service
 from byte.domain.agent.service.agent_service import AgentService
 from byte.domain.cli.service.command_registry import CommandRegistry
+from byte.domain.cli.service.console_service import ConsoleService
 
 
 class CommandCompleter(Completer):
@@ -92,7 +93,7 @@ class PromptToolkitService(Service):
 
 		Usage: Called by main loop to handle each user interaction
 		"""
-		console = await self.make(Console)
+		console = await self.make(ConsoleService)
 
 		# Use placeholder if set, then clear it
 		default = self.placeholder or ""
@@ -171,7 +172,7 @@ class PromptToolkitService(Service):
 		command_name = parts[0]
 		args = parts[1] if len(parts) > 1 else ""
 
-		console = await self.make(Console)
+		console = await self.make(ConsoleService)
 
 		# Get command registry and execute
 		command_registry = await self.make(CommandRegistry)

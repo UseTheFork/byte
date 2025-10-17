@@ -1,10 +1,9 @@
 from typing import List, Type
 
-from rich.console import Console
-
 from byte.container import Container
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.llm.service.llm_service import LLMService
 
 
@@ -28,7 +27,7 @@ class LLMServiceProvider(ServiceProvider):
 		Usage: Called automatically during application startup
 		"""
 		llm_service = await container.make(LLMService)
-		console = await container.make(Console)
+		console = await container.make(ConsoleService)
 
 		# Display active model configuration for user awareness
 		main_model = llm_service._service_config.main.params.model

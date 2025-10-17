@@ -1,5 +1,3 @@
-from rich.console import Console
-
 from byte.container import app
 from byte.core.config.config import ByteConfg
 from byte.core.event_bus import EventBus
@@ -7,6 +5,7 @@ from byte.core.task_manager import TaskManager
 from byte.domain.agent.service_provider import AgentServiceProvider
 from byte.domain.analytics.service_provider import AnalyticsProvider
 from byte.domain.cli.service.command_registry import CommandRegistry
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.cli.service_provider import CLIServiceProvider
 from byte.domain.development.service_provider import DevelopmentProvider
 from byte.domain.edit_format.service_provider import EditFormatProvider
@@ -38,10 +37,11 @@ async def bootstrap(config: ByteConfg):
 	# Make the global command registry available through dependency injection
 	app.singleton(CommandRegistry)
 
+	# Boot config as early as possible
 	app.singleton(ByteConfg, lambda: config)
 
-	console = Console()
-	app.singleton(Console, lambda: console)
+	# Setup console early
+	app.singleton(ConsoleService)
 
 	# Order matters: ConfigServiceProvider must be early since other services
 	# may need configuration access during their boot phase

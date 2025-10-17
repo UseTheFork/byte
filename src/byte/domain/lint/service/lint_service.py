@@ -3,9 +3,8 @@ from pathlib import Path
 from textwrap import dedent
 from typing import List
 
-from rich.console import Console, Group
+from rich.console import Group
 from rich.live import Live
-from rich.panel import Panel
 from rich.progress import BarColumn, Progress, TaskProgressColumn
 from rich.table import Column
 
@@ -13,6 +12,7 @@ from byte import dd
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
 from byte.domain.cli.rich.markdown import Markdown
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.git.service.git_service import GitService
 from byte.domain.lint.types import LintCommand, LintFile
 
@@ -79,11 +79,11 @@ class LintService(Service, UserInteractive):
 				stderr=f"Error executing command: {e!s}",
 			)
 
-	async def _display_results_summary(self, console: Console, lint_commands: List[LintCommand]) -> None:
+	async def _display_results_summary(self, console: ConsoleService, lint_commands: List[LintCommand]) -> None:
 		"""Display a summary panel of linting results.
 
 		Args:
-			console: Rich console for output
+			console: ConsoleService for output
 			lint_commands: List of LintCommand objects with results
 		"""
 		from byte.domain.agent.implementations.fixer.agent import FixerAgent
@@ -146,7 +146,7 @@ class LintService(Service, UserInteractive):
 		summary_text = Markdown(markdown_content)
 
 		# Display panel
-		panel = Panel(
+		panel = console.panel(
 			summary_text,
 			title="Lint",
 			title_align="left",
@@ -183,7 +183,7 @@ class LintService(Service, UserInteractive):
 
 
 		"""
-		console: Console = await self.make(Console)
+		console = await self.make(ConsoleService)
 
 		git_service: GitService = await self.make(GitService)
 
@@ -194,17 +194,17 @@ class LintService(Service, UserInteractive):
 		# Handle commands as a list of command strings
 		if self._config.lint.enable and self._config.lint.commands:
 			# outer status bar and progress bar
-			status = console.status("Not started")
+			status = console.console.status("Not started")
 			bar_column = BarColumn(bar_width=None, table_column=Column(ratio=2))
 			progress = Progress(bar_column, TaskProgressColumn(), transient=True, expand=True)
 			with Live(
-				Panel(
+				console.panel(
 					Group(progress, status),
 					title="Lint",
 					title_align="left",
 					border_style="secondary",
 				),
-				console=console,
+				console=console.console,
 				transient=True,
 			):
 				status.update("[bold primary]Start Linting")
