@@ -146,6 +146,6 @@ class GitService(Service, UserInteractive):
 				# Add all unstaged changes
 				self._repo.git.add("--all")
 				console.print_panel(
-					f"[success]Added {len(unstaged_changes)} unstaged changes to commit[/success]",
+					f"Added {len(unstaged_changes)} unstaged changes to commit",
 					border_style="success",
 				)
