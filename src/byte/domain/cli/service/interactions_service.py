@@ -45,17 +45,22 @@ class InteractionService(Service):
 		try:
 			console = await self.make(ConsoleService)
 
-			result = Prompt.ask(
-				message,
-				console=console.console,
-				choices=choices,
-				default=default if default and default in choices else None,
-				case_sensitive=False,
-			)
+			# Determine starting index if default provided
+			start_index = 0
+			if default and default in choices:
+				start_index = choices.index(default)
 
-			return str(result)
+			result = console.select(*choices, title=message, start_index=start_index)
 
-		except (EOFError, KeyboardInterrupt):
+			# If user pressed escape, return default or first choice
+			if result is None:
+				if default:
+					return default
+				return choices[0] if choices else ""
+
+			return result
+
+		except EOFError:
 			if default:
 				return default
 			return choices[0] if choices else ""
@@ -77,25 +82,20 @@ class InteractionService(Service):
 		try:
 			console = await self.make(ConsoleService)
 
-			# Display numbered options
-			console.print(f"\n{message}")
-			for idx, choice in enumerate(choices, 1):
-				console.print(f"  {idx}. {choice}")
+			# Determine starting index if default provided (convert 1-based to 0-based)
+			start_index = 0
+			if default and 1 <= default <= len(choices):
+				start_index = default - 1
 
-			# Create valid number choices as strings
-			valid_choices = [str(i) for i in range(1, len(choices) + 1)]
-			default_str = str(default) if default and 1 <= default <= len(choices) else None
+			result = console.select(*choices, title=message, start_index=start_index)
 
-			# Prompt for number selection
-			selection = Prompt.ask(
-				"Enter number",
-				console=console.console,
-				choices=valid_choices,
-				default=default_str,
-			)
+			# If user pressed escape, return default or first choice
+			if result is None:
+				if default and 1 <= default <= len(choices):
+					return choices[default - 1]
+				return choices[0] if choices else ""
 
-			# Return the actual choice string
-			return choices[int(selection) - 1]
+			return result
 
 		except (EOFError, KeyboardInterrupt):
 			if default and 1 <= default <= len(choices):

@@ -7,9 +7,8 @@ from rich.live import Live
 from rich.panel import Panel
 from rich.text import Text
 
+
 # Credits to https://github.com/gbPagano/rich_menu/blob/main/rich_menu/menu.py
-
-
 class Menu:
 	def __init__(
 		self,
