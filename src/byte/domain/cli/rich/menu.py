@@ -17,6 +17,7 @@ class Menu:
 		title: str = "",
 		color: str = "secondary",
 		selected_color: str = "primary",
+		transient: bool = False,
 		console: Optional[Console] = None,
 	):
 		self.options = options
@@ -24,6 +25,7 @@ class Menu:
 		self.title = title
 		self.color = color
 		self.selected_color = selected_color
+		self.transient = transient
 		self.selected_options = []
 
 		self.selection_char = "›"  # noqa: RUF001
@@ -31,6 +33,7 @@ class Menu:
 		self.border_style = "inactive_border"
 
 		self.console = console if console is not None else get_console()
+		self.live: Optional[Live] = None
 
 	def _get_click(self) -> str | None:
 		match click.getchar():
@@ -103,12 +106,9 @@ class Menu:
 			border_style=self.border_style,
 		)
 
-	def _clean_menu(self):
-		for _ in range(len(self.options) + 3):
-			print("\x1b[A\x1b[K", end="")
-
 	def select(self, esc: bool = True) -> str | None:
-		with Live(self._group, auto_refresh=False, console=self.console) as live:
+		with Live(self._group, auto_refresh=False, console=self.console, transient=self.transient) as live:
+			self.live = live
 			live.update(self._group, refresh=True)
 			while True:
 				try:
@@ -116,16 +116,16 @@ class Menu:
 					if key == "enter":
 						break
 					elif key == "exit" and esc:
-						self._clean_menu()
+						self.border_style = "danger"
+						live.update(self._group, refresh=True)
 						return None
 
 					self._update_index(key)
 					live.update(self._group, refresh=True)
 				except (KeyboardInterrupt, EOFError):
-					self._clean_menu()
+					self.border_style = "danger"
+					live.update(self._group, refresh=True)
 					return None
-
-		self._clean_menu()
 
 		return self.options[self.index]
 
@@ -134,7 +134,8 @@ class Menu:
 		esc: bool = True,
 	) -> list[str] | None:
 		self.selected_options = []
-		with Live(self._group, auto_refresh=False, console=self.console) as live:
+		with Live(self._group, auto_refresh=False, console=self.console, transient=self.transient) as live:
+			self.live = live
 			live.update(self._group, refresh=True)
 			while True:
 				try:
@@ -142,6 +143,8 @@ class Menu:
 					if key == "enter":
 						break
 					elif key == "exit" and esc:
+						self.border_style = "danger"
+						live.update(self._group, refresh=True)
 						self.selected_options = None
 						break
 					elif key == "down" or key == "up":
@@ -154,9 +157,9 @@ class Menu:
 
 					live.update(self._group, refresh=True)
 				except (KeyboardInterrupt, EOFError):
+					self.border_style = "danger"
+					live.update(self._group, refresh=True)
 					self.selected_options = None
 					break
-
-		self._clean_menu()
 
 		return self.selected_options
