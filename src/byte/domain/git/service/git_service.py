@@ -53,10 +53,10 @@ class GitService(Service, UserInteractive):
 
 		# Get modified and staged files
 		for item in self._repo.index.diff(None):  # Working tree vs index
-			changed_files.append(Path(item.a_path))
+			changed_files.append(Path(item.a_path))  # pyright: ignore[reportArgumentType]
 
 		for item in self._repo.index.diff("HEAD"):  # Index vs HEAD
-			changed_files.append(Path(item.a_path))
+			changed_files.append(Path(item.a_path))  # pyright: ignore[reportArgumentType]
 
 		# Get untracked files if requested
 		if include_untracked:
@@ -85,24 +85,21 @@ class GitService(Service, UserInteractive):
 				commit_hash = commit.hexsha[:6]
 
 				# Display success panel
-				console.print(
-					console.panel(
-						f"({commit_hash}) {commit_message}",
-						title="[bold green]Commit Created[/bold green]",
-						border_style="green",
-					)
+				console.print_panel(
+					f"({commit_hash}) {commit_message}",
+					title="[success]Commit Created[/success]",
+					border_style="success",
 				)
+
 				# Exit loop on successful commit
 				continue_commit = False
 
 			except Exception as e:
 				# Display error panel if commit fails
-				console.print(
-					console.panel(
-						f"Failed to create commit: {e!s}",
-						title="[bold red]Commit Failed[/bold red]",
-						border_style="red",
-					)
+				console.print_panel(
+					f"Failed to create commit: {e!s}",
+					title="[error]Commit Failed[/error]",
+					border_style="error",
 				)
 
 				# Prompt user to retry with staging
@@ -136,13 +133,11 @@ class GitService(Service, UserInteractive):
 				file_list.append(f"  • {change.a_path} ({change_type})")
 
 			files_display = "\n".join(file_list)
-			console.print(
-				console.panel(
-					f"Found {len(unstaged_changes)} unstaged changes:\n\n{files_display}",
-					title="[bold]Unstaged Changes[/bold]",
-					title_align="left",
-					border_style="warning",
-				)
+
+			console.print_panel(
+				f"Found {len(unstaged_changes)} unstaged changes:\n\n{files_display}",
+				title="[warning]Unstaged Changes[/warning]",
+				border_style="warning",
 			)
 
 			user_input = await self.prompt_for_confirmation("Add unstaged changes to commit?", True)
@@ -150,4 +145,7 @@ class GitService(Service, UserInteractive):
 			if user_input:
 				# Add all unstaged changes
 				self._repo.git.add("--all")
-				console.print(f"[success]Added {len(unstaged_changes)} unstaged changes to commit[/success]")
+				console.print_panel(
+					f"[success]Added {len(unstaged_changes)} unstaged changes to commit[/success]",
+					border_style="success",
+				)

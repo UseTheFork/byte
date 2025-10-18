@@ -135,9 +135,7 @@ class LintService(Service, UserInteractive):
 
 		# Create markdown string for summary
 		num_commands = len(lint_commands)
-		markdown_content = (
-			f"**Files processed:** {total_files} across {num_commands} command{'s' if num_commands != 1 else ''}\n\n"
-		)
+		markdown_content = f"**Files processed:** {total_files} files across {num_commands} command{'s' if num_commands != 1 else ''}\n\n"
 
 		if total_issues == 0:
 			markdown_content += "**No issues found**"
