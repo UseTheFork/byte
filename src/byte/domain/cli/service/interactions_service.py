@@ -23,11 +23,9 @@ class InteractionService(Service):
 		try:
 			console = await self.make(ConsoleService)
 
-			return Confirm.ask(
-				prompt=f"{message}",
+			return console.confirm(
+				message=f"{message}",
 				default=default,
-				console=console.console,
-				case_sensitive=False,
 			)
 
 		except EOFError:

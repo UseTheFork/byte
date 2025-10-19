@@ -281,3 +281,25 @@ class ConsoleService(Service):
 		kwargs.setdefault("console", self._console)
 		menu = Menu(*args, **kwargs)
 		return menu.multiselect()
+
+	def confirm(self, message: str = "Confirm?", default: bool = True, **kwargs) -> bool | None:
+		"""Show a confirmation dialog with Yes/No options.
+
+		Navigate with left/right arrow keys, confirm with Enter, cancel with Esc.
+
+		Args:
+			message: Confirmation question to display
+			default: Default selection - True for Yes, False for No
+			**kwargs: Additional arguments passed to Menu
+
+		Returns:
+			True for Yes, False for No, None if cancelled
+
+		Usage:
+			`if console.confirm("Continue?"): ...`
+			`if console.confirm("Delete file?", default=False): ...`
+		"""
+		kwargs.setdefault("console", self._console)
+		kwargs.setdefault("title", message)
+		menu = Menu("Yes", "No", **kwargs)
+		return menu.confirm(default=default)

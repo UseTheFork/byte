@@ -181,9 +181,9 @@ class LintService(Service, UserInteractive):
 			title="[secondary]Lint[/secondary]",
 		)
 
-		# TODO: This needs to be completed
 		if failed_commands:
-			do_lint = await self.prompt_for_confirmation("Attempt to fix lint errors?")
+			console_service = await self.make(ConsoleService)
+			do_lint = console_service.confirm("Attempt to fix lint errors?")
 			if do_lint:
 				for lint_file in failed_commands:
 					fixer_agent = await self.make(FixerAgent)

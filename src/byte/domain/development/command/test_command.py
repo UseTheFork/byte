@@ -18,6 +18,9 @@ class TestCommand(Command):
 		""" """
 		console = await self.make(ConsoleService)
 
+		# menu = console.confirm("Proceed with operation?")
+		# dd(menu)
+
 		menu = console.multiselect(
 			"Option 1",
 			"Option 2",

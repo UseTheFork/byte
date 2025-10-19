@@ -59,6 +59,14 @@ class MenuState:
 		self.index = (self.index + 1) % len(self.options)
 		self._adjust_window()
 
+	def move_left(self) -> None:
+		"""Move selection left in horizontal menu."""
+		self.index = (self.index - 1) % len(self.options)
+
+	def move_right(self) -> None:
+		"""Move selection right in horizontal menu."""
+		self.index = (self.index + 1) % len(self.options)
+
 	def _adjust_window(self) -> None:
 		"""Adjust the viewing window to keep current selection visible."""
 		# If we have fewer options than window size, show all
@@ -149,6 +157,38 @@ class MenuRenderer:
 		self.state = state
 		self.style = style
 		self.title = title
+
+	def render_horizontal(self) -> Panel:
+		"""Render the menu horizontally for confirm dialogs.
+
+		Creates a horizontal layout with options side-by-side,
+		using filled/hollow squares to show selection state.
+
+		Usage: `panel = renderer.render_horizontal()` -> display horizontal menu
+		"""
+		from rich.text import Text
+
+		# Build horizontal menu line
+		menu_line = Text()
+
+		for idx, option in enumerate(self.state.options):
+			if idx > 0:
+				# Add spacing between options
+				menu_line.append("  /  ", style=self.style.color)
+
+			if idx == self.state.index:
+				# Current selection - filled square
+				menu_line.append(f"{self.style.selected_char} {option}", style=self.style.selected_color)
+			else:
+				# Not selected - hollow square
+				menu_line.append(f"{self.style.unselected_char} {option}", style=self.style.unselected_color)
+
+		return Panel(
+			menu_line,
+			title=f"[{self.style.title_color}]{self.title}[/{self.style.title_color}]",
+			title_align="left",
+			border_style=self.style.border_style,
+		)
 
 	def _get_scrollbar_char(self, row_idx: int, visible_count: int) -> str:
 		"""Get the scrollbar character for a given row.
@@ -432,3 +472,92 @@ class Menu:
 				except (KeyboardInterrupt, EOFError):
 					self._cancel(live)
 					return None
+
+	def confirm(self, default: bool = True, esc: bool = True) -> bool | None:
+		"""Confirmation dialog with Yes/No selection using left/right navigation.
+
+		Navigate with left/right arrow keys or h/l, confirm with Enter,
+		cancel with Esc. Uses horizontal layout with filled/hollow squares.
+
+		Args:
+			default: Default selection - True for Yes, False for No
+			esc: Allow cancellation with Esc key
+
+		Returns:
+			True for Yes, False for No, None if cancelled
+
+		Usage: `confirmed = menu.confirm()` -> get yes/no confirmation
+		Usage: `confirmed = menu.confirm(default=False)` -> default to No
+		"""
+		# Set up Yes/No options with appropriate default
+		self.state.options = ("Yes", "No")
+		self.state.index = 0 if default else 1
+
+		with Live(
+			self.renderer.render_horizontal(),
+			auto_refresh=False,
+			console=self.console,
+			transient=self.transient,
+		) as live:
+			self.live = live
+			live.update(self.renderer.render_horizontal(), refresh=True)
+
+			while True:
+				try:
+					action = self.input_handler.get_action()
+
+					if action == "confirm":
+						selected = self.state.index == 0  # True for Yes, False for No
+						self._finalize_confirm(live, selected)
+						return selected
+
+					if action == "cancel" and esc:
+						self._cancel(live)
+						return None
+
+					if action in ("left", "right"):
+						self._handle_horizontal_navigation(action, live)
+
+				except (KeyboardInterrupt, EOFError):
+					self._cancel(live)
+					return None
+
+	def _handle_horizontal_navigation(self, action: str, live: Live) -> None:
+		"""Handle left/right navigation for horizontal menu.
+
+		Usage: `self._handle_horizontal_navigation("left", live)` -> move left
+		"""
+		if action == "left":
+			self.state.move_left()
+		elif action == "right":
+			self.state.move_right()
+
+		live.update(self.renderer.render_horizontal(), refresh=True)
+
+	def _finalize_confirm(self, live: Live, selected: bool) -> None:
+		"""Finalize confirm dialog after selection.
+
+		Shows only the selected option (Yes or No) with finalized styling.
+
+		Usage: `self._finalize_confirm(live, True)` -> finalize Yes selection
+		"""
+		# Store original state
+		original_options = self.state.options
+		original_style = self.style
+
+		# Update to finalized state
+		self.style = self.style.as_finalized()
+		self.renderer.style = self.style
+
+		# Show only selected option
+		selected_text = "Yes" if selected else "No"
+		self.state.options = (selected_text,)
+		self.state.index = 0
+
+		# Update display with horizontal layout
+		live.update(self.renderer.render_horizontal(), refresh=True)
+
+		# Restore original state
+		self.state.options = original_options
+		self.style = original_style
+		self.renderer.style = self.style
