@@ -180,8 +180,37 @@ class ConsoleService(Service):
 		return Syntax(*args, **kwargs)
 
 	def print_error_panel(self, *args, **kwargs):
-		""" """
+		"""Print a panel with error styling to the console.
+
+		Creates and prints a panel with error border styling for displaying
+		error messages in a visually distinct way.
+
+		Usage:
+			`service.print_error_panel("Error occurred", title="Error")`
+			`service.print_error_panel(error_text, subtitle="Details")`
+
+		Args:
+			*args: Positional arguments passed to panel()
+			**kwargs: Keyword arguments passed to panel(), with error border style default
+		"""
 		kwargs.setdefault("border_style", "error")
+		self.console.print(self.panel(*args, **kwargs))
+
+	def print_success_panel(self, *args, **kwargs):
+		"""Print a panel with success styling to the console.
+
+		Creates and prints a panel with success border styling for displaying
+		success messages in a visually distinct way.
+
+		Usage:
+			`service.print_success_panel("Operation completed", title="Success")`
+			`service.print_success_panel(success_text, subtitle="Details")`
+
+		Args:
+			*args: Positional arguments passed to panel()
+			**kwargs: Keyword arguments passed to panel(), with success border style default
+		"""
+		kwargs.setdefault("border_style", "success")
 		self.console.print(self.panel(*args, **kwargs))
 
 	def print_panel(self, *args, **kwargs):

@@ -85,10 +85,9 @@ class GitService(Service, UserInteractive):
 				commit_hash = commit.hexsha[:6]
 
 				# Display success panel
-				console.print_panel(
+				console.print_success_panel(
 					f"({commit_hash}) {commit_message}",
-					title="[success]Commit Created[/success]",
-					border_style="success",
+					title="Commit Created",
 				)
 
 				# Exit loop on successful commit
@@ -96,11 +95,7 @@ class GitService(Service, UserInteractive):
 
 			except Exception as e:
 				# Display error panel if commit fails
-				console.print_panel(
-					f"Failed to create commit: {e!s}",
-					title="[error]Commit Failed[/error]",
-					border_style="error",
-				)
+				console.print_error_panel(f"Failed to create commit: {e!s}", title="Commit Failed")
 
 				# Prompt user to retry with staging
 				retry = await self.prompt_for_confirmation("Stage changes and try again?", default=True)
@@ -145,7 +140,4 @@ class GitService(Service, UserInteractive):
 			if user_input:
 				# Add all unstaged changes
 				self._repo.git.add("--all")
-				console.print_panel(
-					f"Added {len(unstaged_changes)} unstaged changes to commit",
-					border_style="success",
-				)
+				console.print_success(f"Added {len(unstaged_changes)} unstaged changes to commit")
