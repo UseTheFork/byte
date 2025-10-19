@@ -24,6 +24,7 @@ files:
   watch:
     enable: true
 web:
+  enable: true
   chrome_binary_location: /etc/profiles/per-user/sincore/bin/google-chrome-stable
 cli:
   ui_theme: mocha

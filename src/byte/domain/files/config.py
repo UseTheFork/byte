@@ -4,7 +4,10 @@ from pydantic import BaseModel, Field
 
 
 class WatchConfig(BaseModel):
-	enable: bool = True
+	enable: bool = Field(
+		default=False,
+		description="Enable file watching for AI comment markers (AI:, AI@, AI?, AI!). When enabled, Byte automatically detects changes and processes AI instructions.",
+	)
 
 
 class FilesConfig(BaseModel):

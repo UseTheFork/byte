@@ -78,6 +78,38 @@ class ConsoleService(Service):
 		"""
 		return self._console.height
 
+	def print_success(self, message: str, **kwargs) -> None:
+		"""Print a success message with success styling.
+
+		Wraps the message in [success] tags for consistent success display across
+		the application using the theme's configured success color.
+
+		Usage:
+			`service.print_success("Operation completed successfully")`
+			`service.print_success("File saved", highlight=False)`
+
+		Args:
+			message: Success message to display
+			**kwargs: Additional keyword arguments passed to Console.print()
+		"""
+		self._console.print(f"[success]{message}[/success]", **kwargs)
+
+	def print_warning(self, message: str, **kwargs) -> None:
+		"""Print a warning message with warning styling.
+
+		Wraps the message in [warning] tags for consistent warning display across
+		the application using the theme's configured warning color.
+
+		Usage:
+			`service.print_warning("Operation may take a while")`
+			`service.print_warning("Deprecated feature used", highlight=False)`
+
+		Args:
+			message: Warning message to display
+			**kwargs: Additional keyword arguments passed to Console.print()
+		"""
+		self._console.print(f"[warning]{message}[/warning]", **kwargs)
+
 	def print_error(self, message: str, **kwargs) -> None:
 		"""Print an error message with error styling.
 
@@ -93,6 +125,22 @@ class ConsoleService(Service):
 			**kwargs: Additional keyword arguments passed to Console.print()
 		"""
 		self._console.print(f"[error]{message}[/error]", **kwargs)
+
+	def print_info(self, message: str, **kwargs) -> None:
+		"""Print an informational message with info styling.
+
+		Wraps the message in [info] tags for consistent info display across
+		the application using the theme's configured info color.
+
+		Usage:
+			`service.print_info("Processing file...")`
+			`service.print_info("Loading configuration", highlight=False)`
+
+		Args:
+			message: Informational message to display
+			**kwargs: Additional keyword arguments passed to Console.print()
+		"""
+		self._console.print(f"[info]{message}[/info]", **kwargs)
 
 	def print(self, *args, **kwargs) -> None:
 		"""Print to console with Rich formatting support.
@@ -130,6 +178,11 @@ class ConsoleService(Service):
 		"""
 		kwargs.setdefault("theme", self._config.cli.syntax_theme)
 		return Syntax(*args, **kwargs)
+
+	def print_error_panel(self, *args, **kwargs):
+		""" """
+		kwargs.setdefault("border_style", "error")
+		self.console.print(self.panel(*args, **kwargs))
 
 	def print_panel(self, *args, **kwargs):
 		"""Print a themed panel to the console with default styling.

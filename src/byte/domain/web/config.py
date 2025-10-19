@@ -10,6 +10,11 @@ class WebConfig(BaseModel):
 	binary location and browser behavior customization.
 	"""
 
+	enable: bool = Field(
+		default=False,
+		description="Enable web commands",
+	)
+
 	chrome_binary_location: Path = Field(
 		default=Path("/usr/bin/google-chrome"),
 		description="Path to Chrome/Chromium binary executable for headless browser automation",

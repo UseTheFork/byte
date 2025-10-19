@@ -1,11 +1,11 @@
-from rich.markdown import Markdown
-
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.utils import slugify
 from byte.domain.agent.implementations.cleaner.agent import CleanerAgent
+from byte.domain.cli.rich.markdown import Markdown
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.knowledge.service.session_context_service import SessionContextService
+from byte.domain.web.exceptions import WebNotEnabledException
 from byte.domain.web.service.chromium_service import ChromiumService
 
 
@@ -37,18 +37,22 @@ class WebCommand(Command, UserInteractive):
 		Usage: Called when user types `/web <url>`
 		"""
 		console = await self.make(ConsoleService)
-
 		session_context_service = await self.make(SessionContextService)
 
-		chromium_service = await self.make(ChromiumService)
-		markdown_content = await chromium_service.do_scrape(args)
+		try:
+			chromium_service = await self.make(ChromiumService)
+			markdown_content = await chromium_service.do_scrape(args)
+		except WebNotEnabledException as e:
+			console.print_error_panel(
+				str(e),
+				title="Web Commands Disabled",
+			)
+			return
 
 		markdown_rendered = Markdown(markdown_content)
-		console.print(
-			console.panel(
-				markdown_rendered,
-				title=f"Content: {args}",
-			)
+		console.print_panel(
+			markdown_rendered,
+			title=f"Content: {args}",
 		)
 
 		choice = await self.prompt_for_select_numbered(
@@ -58,13 +62,13 @@ class WebCommand(Command, UserInteractive):
 		)
 
 		if choice == "Yes":
-			console.print("[success]Content added to context[/success]")
+			console.print_success("Content added to context")
 
 			key = slugify(args)
 			session_context_service.add_context(key, markdown_content)
 
 		elif choice == "Clean with LLM":
-			console.print("[info]Cleaning content with LLM...[/info]")
+			console.print_info("Cleaning content with LLM...")
 
 			cleaner_agent = await self.make(CleanerAgent)
 			result = await cleaner_agent.execute(
@@ -83,10 +87,10 @@ class WebCommand(Command, UserInteractive):
 			cleaned_content = result.get("cleaned_content", "")
 
 			if cleaned_content:
-				console.print("[success]Content cleaned and added to context[/success]")
+				console.print_success("Content cleaned and added to context")
 				key = slugify(args)
 				session_context_service.add_context(key, cleaned_content)
 			else:
-				console.print("[warn]No cleaned content returned[/warn]")
+				console.print_warning("No cleaned content returned")
 		else:
-			console.print("[warn]Content not added to context[/warn]")
+			console.print_warning("Content not added to context")

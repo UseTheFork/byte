@@ -4,6 +4,7 @@ from pydoll.browser.chromium import Chrome
 from pydoll.browser.options import ChromiumOptions
 
 from byte.core.service.base_service import Service
+from byte.domain.web.exceptions import WebNotEnabledException
 
 
 class ChromiumService(Service):
@@ -14,9 +15,6 @@ class ChromiumService(Service):
 	Usage: `markdown = await chromium_service.do_scrape("https://example.com")` -> scraped content as markdown
 	"""
 
-	async def boot(self, **kwargs):
-		pass
-
 	async def do_scrape(self, url: str) -> str:
 		"""Scrape a webpage and convert it to markdown format.
 
@@ -26,8 +24,15 @@ class ChromiumService(Service):
 		Returns:
 			Markdown-formatted content from the webpage
 
+		Raises:
+			WebNotEnabledException: If web commands are not enabled in config
+
 		Usage: `content = await chromium_service.do_scrape("https://example.com")` -> markdown string
 		"""
+		# Check if web commands are enabled in configuration
+		if not self._config.web.enable:
+			raise WebNotEnabledException
+
 		options = ChromiumOptions()
 		options.add_argument("--headless=new")
 		options.binary_location = str(self._config.web.chrome_binary_location)
