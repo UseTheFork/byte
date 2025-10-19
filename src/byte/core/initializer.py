@@ -51,6 +51,9 @@ class FirstBootInitializer:
 			"enabled": False,
 			"chrome_binary_location": "/usr/bin/google-chrome",
 		},
+		"edit_format": {
+			"enable_shell_commands": False,
+		},
 		# "mcp": [
 		# {
 		# "name": "docs-mcp-server",

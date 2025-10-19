@@ -50,7 +50,7 @@ class UserInteractive:
 		interaction_service = await self.container.make(InteractionService)
 		return await interaction_service.confirm(message, default)
 
-	async def prompt_for_select(self, message: str, choices: list[str], default: str | None = None) -> str:
+	async def prompt_for_select(self, message: str, choices: list[str], default: str | None = None) -> str | None:
 		"""Prompt the user to select from multiple options.
 
 		Displays a list of choices and waits for user selection with
@@ -67,7 +67,9 @@ class UserInteractive:
 		interaction_service = await self.container.make(InteractionService)
 		return await interaction_service.select(message, choices, default)
 
-	async def prompt_for_select_numbered(self, message: str, choices: list[str], default: int | None = None) -> str:
+	async def prompt_for_select_numbered(
+		self, message: str, choices: list[str], default: int | None = None
+	) -> str | None:
 		"""Prompt the user to select from numbered options.
 
 		Displays choices as a numbered list and prompts for selection by number.
