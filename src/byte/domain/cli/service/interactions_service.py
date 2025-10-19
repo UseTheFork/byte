@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from rich.prompt import Confirm, Prompt
+from rich.prompt import Prompt
 
 from byte.core.service.base_service import Service
 from byte.domain.cli.service.console_service import ConsoleService
@@ -14,7 +14,7 @@ class InteractionService(Service):
 	Usage: `await interaction_service.confirm("Delete this file?")` -> bool response
 	"""
 
-	async def confirm(self, message: str, default: bool = False) -> bool:
+	async def confirm(self, message: str, default: bool = False) -> bool | None:
 		"""Ask user for yes/no confirmation with default value.
 
 		Usage: `confirmed = await interaction_service.confirm("Proceed?", default=True)`
@@ -32,7 +32,7 @@ class InteractionService(Service):
 			# Fallback if container/console not available
 			return default
 
-	async def select(self, message: str, choices: List[str], default: Optional[str] = None) -> str:
+	async def select(self, message: str, choices: List[str], default: Optional[str] = None) -> str | None:
 		"""Ask user to select from multiple options.
 
 		Usage: `choice = await interaction_service.select("Pick one:", ["a", "b", "c"])`
@@ -68,7 +68,7 @@ class InteractionService(Service):
 				return default
 			return choices[0] if choices else ""
 
-	async def select_numbered(self, message: str, choices: List[str], default: Optional[int] = None) -> str:
+	async def select_numbered(self, message: str, choices: List[str], default: Optional[int] = None) -> str | None:
 		"""Ask user to select from numbered options.
 
 		Displays choices as a numbered list and prompts for selection by number.
@@ -137,20 +137,14 @@ class InteractionService(Service):
 		Usage: `confirmed, text = await interaction_service.confirm_or_input("Use default?", "Enter custom value:")`
 		"""
 		try:
-			console = await self.make(ConsoleService)
-
 			# First ask for confirmation
-			confirmed = Confirm.ask(
-				prompt=confirm_message,
-				default=default_confirm,
-				console=console.console,
-				case_sensitive=False,
-			)
+			confirmed = await self.confirm(confirm_message, default=default_confirm)
 
 			if confirmed:
 				return (True, None)
 
 			# If not confirmed, prompt for text input
+			console = await self.make(ConsoleService)
 			text_input = Prompt.ask(
 				input_message,
 				console=console.console,
