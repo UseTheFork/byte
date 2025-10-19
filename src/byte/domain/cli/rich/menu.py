@@ -14,6 +14,7 @@ class MenuStyle(BaseModel):
 
 	color: str = Field(default="secondary", description="Color for non-selected items")
 	selected_color: str = Field(default="primary", description="Color for selected/highlighted items")
+	unselected_color: str = Field(default="text", description="Color for unselected items in multiselect")
 	title_color: str = Field(default="text", description="Color for panel title")
 	border_style: str = Field(default="active_border", description="Border style for the menu panel")
 	selection_char: str = Field(default="›", description="Character shown next to current item")  # noqa: RUF001
@@ -233,8 +234,8 @@ class MenuRenderer:
 					# Not selected and not current - hollow circle
 					grid.add_row(
 						f"{empty_prefix}",
-						f"{self.style.unselected_char}",
-						f"{option}",
+						f"[{self.style.unselected_color}]{self.style.unselected_char}[/{self.style.unselected_color}]",
+						f"[{self.style.unselected_color}]{option}[/{self.style.unselected_color}]",
 						scrollbar_char,
 					)
 
@@ -310,9 +311,15 @@ class Menu:
 	def _cancel(self, live: Live) -> None:
 		"""Handle menu cancellation with danger styling.
 
+		Sets border to danger, title to error, and all options to muted color.
+
 		Usage: `self._cancel(live)` -> show cancelled state
 		"""
 		self.style.border_style = "danger"
+		self.style.title_color = "error"
+		self.style.color = "muted"
+		self.style.selected_color = "muted"
+		self.style.unselected_color = "muted"
 		self.renderer.style = self.style
 		self._update_display(live)
 
