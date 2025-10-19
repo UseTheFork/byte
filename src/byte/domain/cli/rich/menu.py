@@ -41,18 +41,36 @@ class MenuStyle(BaseModel):
 class MenuState:
 	"""Manages menu selection state and navigation logic."""
 
-	def __init__(self, options: tuple[str, ...], start_index: int = 0):
+	def __init__(self, options: tuple[str, ...], start_index: int = 0, window_size: int = 5):
 		self.options = options
 		self.index = start_index
 		self.selected_options: list[str] = []
+		self.window_size = window_size
+		self.window_start = 0
 
 	def move_up(self) -> None:
 		"""Move selection up, wrapping to bottom if at top."""
 		self.index = (self.index - 1) % len(self.options)
+		self._adjust_window()
 
 	def move_down(self) -> None:
 		"""Move selection down, wrapping to top if at bottom."""
 		self.index = (self.index + 1) % len(self.options)
+		self._adjust_window()
+
+	def _adjust_window(self) -> None:
+		"""Adjust the viewing window to keep current selection visible."""
+		# If we have fewer options than window size, show all
+		if len(self.options) <= self.window_size:
+			self.window_start = 0
+			return
+
+		# Keep selection in middle of window when possible
+		ideal_start = self.index - self.window_size // 2
+
+		# Clamp to valid range
+		max_start = len(self.options) - self.window_size
+		self.window_start = max(0, min(ideal_start, max_start))
 
 	def toggle_selection(self) -> None:
 		"""Toggle selection of current option in multiselect mode."""
@@ -66,6 +84,31 @@ class MenuState:
 	def current_option(self) -> str:
 		"""Get the currently highlighted option."""
 		return self.options[self.index]
+
+	@property
+	def visible_options(self) -> tuple[tuple[int, str], ...]:
+		"""Get the currently visible options with their absolute indices.
+
+		Returns:
+			Tuple of (absolute_index, option) pairs for visible options.
+
+		Usage: `for idx, option in state.visible_options: ...`
+		"""
+		if len(self.options) <= self.window_size:
+			return tuple(enumerate(self.options))
+
+		end = min(self.window_start + self.window_size, len(self.options))
+		return tuple((i, self.options[i]) for i in range(self.window_start, end))
+
+	@property
+	def can_scroll_up(self) -> bool:
+		"""Check if there are more options above the current window."""
+		return self.window_start > 0
+
+	@property
+	def can_scroll_down(self) -> bool:
+		"""Check if there are more options below the current window."""
+		return len(self.options) > self.window_start + self.window_size
 
 
 class MenuInputHandler:
@@ -106,10 +149,44 @@ class MenuRenderer:
 		self.style = style
 		self.title = title
 
+	def _get_scrollbar_char(self, row_idx: int, visible_count: int) -> str:
+		"""Get the scrollbar character for a given row.
+
+		Creates a visual scrollbar showing position in the full list.
+		Uses █ for the thumb position and │ for the track.
+
+		Args:
+			row_idx: Current row index (0 to visible_count-1)
+			visible_count: Number of visible rows
+
+		Returns:
+			Scrollbar character for this row
+
+		Usage: `char = self._get_scrollbar_char(2, 5)` -> get scrollbar for row 2
+		"""
+		# If all options fit, no scrollbar needed
+		if len(self.state.options) <= self.state.window_size:
+			return ""
+
+		# Calculate thumb position and size
+		total_options = len(self.state.options)
+
+		# Calculate where the thumb should be positioned (0 to visible_count-1)
+		# The thumb represents the current window position in the full list
+		scroll_ratio = self.state.window_start / (total_options - self.state.window_size)
+		thumb_position = int(scroll_ratio * (visible_count - 1))
+
+		# Draw the scrollbar
+		if row_idx == thumb_position:
+			return f"[{self.style.color}]█[/{self.style.color}]"
+		else:
+			return f"[{self.style.color}]░[/{self.style.color}]"
+
 	def render(self) -> Panel:
 		"""Render the menu as a Rich Panel.
 
 		Creates a table grid with current selection, indicators, and options.
+		Shows a scrollbar in the fourth column when there are more options than fit.
 
 		Usage: `panel = renderer.render()` -> display menu
 		"""
@@ -120,20 +197,27 @@ class MenuRenderer:
 		grid.add_column()
 		# Third column: option text
 		grid.add_column(ratio=1)
-		# Fourth column: empty for scrolling
+		# Fourth column: scrollbar
 		grid.add_column(justify="right")
 
 		selection_prefix = f"{self.style.selection_char} "
 		empty_prefix = "  "
 
-		for idx, option in enumerate(self.state.options):
-			if idx == self.state.index:
+		# Get visible options with their absolute indices
+		visible_options = self.state.visible_options
+		visible_count = len(visible_options)
+
+		for row_idx, (absolute_idx, option) in enumerate(visible_options):
+			# Get scrollbar character for this row
+			scrollbar_char = self._get_scrollbar_char(row_idx, visible_count)
+
+			if absolute_idx == self.state.index:
 				# Current item - show selection char and highlight
 				grid.add_row(
 					f"[{self.style.color}]{selection_prefix}[/{self.style.color}]",
 					f"[{self.style.selected_color}]{self.style.selected_char}  [/{self.style.selected_color}]",
 					f"[{self.style.selected_color}]{option}[/{self.style.selected_color}]",
-					"",
+					scrollbar_char,
 				)
 			else:
 				# Not current item
@@ -143,7 +227,7 @@ class MenuRenderer:
 						f"{empty_prefix}",
 						f"[{self.style.selected_color}]{self.style.selected_char}  [/{self.style.selected_color}]",
 						f"[{self.style.selected_color}]{option}[/{self.style.selected_color}]",
-						"",
+						scrollbar_char,
 					)
 				else:
 					# Not selected and not current - hollow circle
@@ -151,7 +235,7 @@ class MenuRenderer:
 						f"{empty_prefix}",
 						f"{self.style.unselected_char}",
 						f"{option}",
-						"",
+						scrollbar_char,
 					)
 
 		return Panel(
@@ -178,8 +262,9 @@ class Menu:
 		selected_color: str = "primary",
 		transient: bool = False,
 		console: Optional[Console] = None,
+		window_size: int = 5,
 	):
-		self.state = MenuState(options, start_index)
+		self.state = MenuState(options, start_index, window_size)
 		self.style = MenuStyle(
 			color=color,
 			selected_color=selected_color,
