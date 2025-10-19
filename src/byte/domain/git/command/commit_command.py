@@ -1,3 +1,4 @@
+from byte.core.exceptions import ByteConfigException
 from byte.domain.agent.implementations.commit.agent import CommitAgent
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.cli.service.console_service import ConsoleService
@@ -34,26 +35,34 @@ class CommitCommand(Command):
 
 		Usage: Called automatically when user types `/commit`
 		"""
-		console = await self.make(ConsoleService)
-		git_service = await self.make(GitService)
-		await git_service.stage_changes()
+		try:
+			console = await self.make(ConsoleService)
+			git_service = await self.make(GitService)
+			await git_service.stage_changes()
 
-		repo = await git_service.get_repo()
+			repo = await git_service.get_repo()
 
-		# Validate staged changes exist to prevent empty commits
-		if not repo.index.diff("HEAD"):
-			console.print("[warning]No staged changes to commit.[/warning]")
+			# Validate staged changes exist to prevent empty commits
+			if not repo.index.diff("HEAD"):
+				console.print_warning("No staged changes to commit.")
+				return
+
+			lint_service = await self.make(LintService)
+			await lint_service()
+
+			# Extract staged changes for AI analysis
+			staged_diff = repo.git.diff("--cached")
+
+			commit_agent = await self.make(CommitAgent)
+			commit_message: dict = await commit_agent.execute(
+				request={"messages": [("user", staged_diff)]}, display_mode="thinking"
+			)
+
+			await git_service.commit(str(commit_message.get("commit_message", "")))
+		except ByteConfigException as e:
+			console = await self.make(ConsoleService)
+			console.print_error_panel(
+				str(e),
+				title="Configuration Error",
+			)
 			return
-
-		lint_service = await self.make(LintService)
-		await lint_service.lint_changed_files()
-
-		# Extract staged changes for AI analysis
-		staged_diff = repo.git.diff("--cached")
-
-		commit_agent = await self.make(CommitAgent)
-		commit_message: dict = await commit_agent.execute(
-			request={"messages": [("user", staged_diff)]}, display_mode="thinking"
-		)
-
-		await git_service.commit(str(commit_message.get("commit_message", "")))

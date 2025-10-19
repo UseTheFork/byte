@@ -1,4 +1,6 @@
+from byte.core.exceptions import ByteConfigException
 from byte.domain.cli.service.command_registry import Command
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.git.service.git_service import GitService
 from byte.domain.lint.service.lint_service import LintService
 
@@ -28,8 +30,16 @@ class LintCommand(Command):
 		Usage: Called by command processor when user types `/lint [args]`
 		"""
 
-		git_service = await self.make(GitService)
-		await git_service.stage_changes()
+		try:
+			git_service = await self.make(GitService)
+			await git_service.stage_changes()
 
-		lint_service = await self.make(LintService)
-		await lint_service.lint_changed_files()
+			lint_service = await self.make(LintService)
+			await lint_service()
+		except ByteConfigException as e:
+			console = await self.make(ConsoleService)
+			console.print_error_panel(
+				str(e),
+				title="Configuration Error",
+			)
+			return

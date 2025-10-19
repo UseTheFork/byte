@@ -1,7 +1,7 @@
-from byte.core.exceptions import ByteException
+from byte.core.exceptions import ByteConfigException
 
 
-class WebNotEnabledException(ByteException):
+class WebNotEnabledException(ByteConfigException):
 	"""Raised when attempting to use web commands while web features are disabled.
 
 	Web commands require a Chrome/Chromium binary and must be enabled in settings.

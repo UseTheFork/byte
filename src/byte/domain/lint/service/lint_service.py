@@ -14,6 +14,7 @@ from byte.core.service.base_service import Service
 from byte.domain.cli.rich.markdown import Markdown
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.git.service.git_service import GitService
+from byte.domain.lint.exceptions import LintConfigException
 from byte.domain.lint.types import LintCommand, LintFile
 
 
@@ -26,8 +27,36 @@ class LintService(Service, UserInteractive):
 	Usage: `await lint_service.lint_changed_files()` -> runs configured linters on git changes
 	"""
 
+	async def validate(self) -> bool:
+		"""Validate lint service configuration before execution.
+
+		Checks that linting is enabled and at least one lint command is configured.
+		Raises LintConfigException if configuration is invalid.
+
+		Returns:
+			True if validation passes.
+
+		Raises:
+			LintConfigException: If linting is disabled or no commands configured.
+
+		Usage: `await service.validate()` -> ensure lint config is valid
+		"""
+		if not self._config.lint.enable:
+			raise LintConfigException(
+				"Linting is disabled. Set 'lint.enable' to true in your .byte/config.yaml to use lint commands."
+			)
+
+		if not self._config.lint.commands:
+			raise LintConfigException(
+				"No lint commands configured. Add commands to 'lint.commands' in your .byte/config.yaml. "
+				"See docs/reference/settings.md for configuration examples."
+			)
+
+		return True
+
 	async def handle(self, **kwargs):
 		"""Handle lint service execution - main entry point for linting operations."""
+
 		return await self.lint_changed_files()
 
 	async def lint_changed_files(self) -> List[LintCommand]:
@@ -135,7 +164,7 @@ class LintService(Service, UserInteractive):
 
 		# Create markdown string for summary
 		num_commands = len(lint_commands)
-		markdown_content = f"**Files processed:** {total_files} files across {num_commands} command{'s' if num_commands != 1 else ''}\n\n"
+		markdown_content = f"**Files processed:** {total_files} executions across {num_commands} command{'s' if num_commands != 1 else ''}\n\n"
 
 		if total_issues == 0:
 			markdown_content += "**No issues found**"
@@ -248,7 +277,7 @@ class LintService(Service, UserInteractive):
 
 				status.update(f"Finished linting {len(changed_files)} files")
 
-		await asyncio.sleep(0.5)
+		await asyncio.sleep(0.2)
 
 		# Display summary panel with results
 		await self._display_results_summary(console, lint_commands)
