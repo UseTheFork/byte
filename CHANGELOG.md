@@ -4,6 +4,7 @@
 
 - Prepare release 0.1.8 with updated workflows and package configuration
 - Update PyPI release workflow configuration
+
 ## [0.1.8] - 2025-10-20
 
 ### ⚙️ Miscellaneous Tasks
@@ -12,12 +13,14 @@
 - Consolidate workflows by removing duplicate publish-to-pypi.yml
 - Update package name to byte-ai-cli in project configuration
 - Update release workflow for PyPI publication
+
 ## [0.1.7] - 2025-10-20
 
 ### ⚙️ Miscellaneous Tasks
 
 - Update project development status classifier
 - Update project version to 0.1.7 and add changelog
+
 ## [0.1.6] - 2025-10-20
 
 ### 🚀 Features
