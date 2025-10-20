@@ -42,6 +42,7 @@ For complete configuration details, see the [Settings Reference](../reference/se
 After displaying the content, you have three options:
 
 ## Yes
+
 Add raw markdown directly to context
 
 ```
@@ -54,6 +55,7 @@ Add this content to the LLM context?
 The content is stored with a key derived from the URL slug for easy reference.
 
 ## Clean with LLM
+
 Use AI to extract relevant information
 
 The cleaner agent:
@@ -64,6 +66,7 @@ The cleaner agent:
 - Adds cleaned version to context
 
 ## No
+
 Discard the content
 
 The scraped content is not added to the context.
