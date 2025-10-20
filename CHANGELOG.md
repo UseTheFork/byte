@@ -3,6 +3,7 @@
 ### ⚙️ Miscellaneous Tasks
 
 - Update project development status classifier
+
 ## [0.1.6] - 2025-10-20
 
 ### 🚀 Features
