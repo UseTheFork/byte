@@ -1,7 +1,6 @@
 from langchain_core.language_models.chat_models import BaseChatModel
 from langgraph.graph import END, START, StateGraph
 
-from byte.core.utils import get_last_message
 from byte.domain.agent.implementations.ask.prompts import ask_prompt
 from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.nodes.assistant_node import AssistantNode
@@ -48,17 +47,17 @@ class AskAgent(Agent):
 
 		# Add nodes
 		graph.add_node(
-			"start",
+			"start_node",
 			await self.make(StartNode, agent=self.__class__.__name__),
 		)
 		graph.add_node(
-			"assistant",
+			"assistant_node",
 			await self.make(AssistantNode, runnable=assistant_runnable.runnable),
 		)
-		graph.add_node("tools", await self.make(ToolNode, tools=assistant_runnable.tools))  # pyright: ignore[reportArgumentType]
+		graph.add_node("tools_node", await self.make(ToolNode, tools=assistant_runnable.tools))  # pyright: ignore[reportArgumentType]
 
 		graph.add_node(
-			"end",
+			"end_node",
 			await self.make(
 				EndNode,
 				agent=self.__class__.__name__,
@@ -67,36 +66,16 @@ class AskAgent(Agent):
 		)
 
 		# Define edges
-		graph.add_edge(START, "start")
-		graph.add_edge("start", "assistant")
-		graph.add_edge("assistant", "end")
-		graph.add_edge("end", END)
+		graph.add_edge(START, "start_node")
+		graph.add_edge("start_node", "assistant_node")
+		graph.add_edge("assistant_node", "end_node")
+		graph.add_edge("end_node", END)
 
-		graph.add_conditional_edges(
-			"assistant",
-			self.route_tools,
-			{"tools": "tools", "end": "end"},
-		)
-
-		graph.add_edge("tools", "assistant")
+		graph.add_edge("tools_node", "assistant_node")
 
 		# Compile graph with memory and configuration
 		checkpointer = await self.get_checkpointer()
 		return graph.compile(checkpointer=checkpointer)
-
-	def route_tools(
-		self,
-		state: AskState,
-	):
-		"""
-		Use in the conditional_edge to route to the ToolNode if the last message
-		has tool calls. Otherwise, route to the end.
-		"""
-		ai_message = get_last_message(state)
-
-		if hasattr(ai_message, "tool_calls") and len(ai_message.tool_calls) > 0:
-			return "tools"
-		return "end"
 
 	async def get_assistant_runnable(self) -> AssistantRunnable:
 		llm_service = await self.make(LLMService)

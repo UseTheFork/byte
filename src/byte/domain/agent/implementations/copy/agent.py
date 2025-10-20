@@ -29,13 +29,13 @@ class CopyAgent(Agent):
 
 		# Add nodes
 		graph.add_node(
-			"copy",
+			"copy_node",
 			await self.make(CopyNode),
 		)
 
 		# Define edges
-		graph.add_edge(START, "copy")
-		graph.add_edge("copy", END)
+		graph.add_edge(START, "copy_node")
+		graph.add_edge("copy_node", END)
 
 		checkpointer = await self.get_checkpointer()
 		return graph.compile(checkpointer=checkpointer, debug=False)

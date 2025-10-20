@@ -19,6 +19,9 @@ class BaseState(TypedDict):
 	agent_status: str
 	errors: list[AnyMessage]
 
+	# TODO: This should be a str or a pydantic base model
+	extracted_content: str
+
 
 class CoderState(BaseState):
 	"""Coder-specific state with file context."""

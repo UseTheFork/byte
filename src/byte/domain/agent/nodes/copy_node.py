@@ -2,6 +2,7 @@ import re
 
 import pyperclip
 from langgraph.graph.state import RunnableConfig
+from langgraph.types import Command
 from rich.columns import Columns
 
 from byte.core.mixins.user_interactive import UserInteractive
@@ -31,8 +32,8 @@ class CopyNode(Node, UserInteractive):
 		code_blocks = self._extract_code_blocks(response_text)
 
 		if not code_blocks:
-			console.print("[warning]No code blocks found in the last message.[/warning]")
-			return state
+			console.print_warning("No code blocks found in the last message.")
+			return Command(goto="end_node", update=state)
 
 		# Display truncated previews and let user select
 		selected_block = await self._prompt_user_selection(code_blocks)
@@ -40,9 +41,9 @@ class CopyNode(Node, UserInteractive):
 		if selected_block is not None:
 			# Copy to clipboard
 			pyperclip.copy(selected_block["content"])
-			console.print(f"[success]Copied {selected_block['language']} code block to clipboard![/success]")
+			console.print_success(f"Copied {selected_block['language']} code block to clipboard!")
 
-		return state
+		return Command(goto="end_node", update=state)
 
 	def _extract_code_blocks(self, content: str) -> list[dict[str, str]]:
 		"""Extract all code blocks from content with their language identifiers.

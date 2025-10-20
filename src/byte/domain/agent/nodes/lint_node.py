@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from langgraph.graph.state import RunnableConfig
+from langgraph.types import Command
 
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.lint.service.lint_service import LintService
@@ -15,4 +16,4 @@ class LintNode(Node):
 
 		await lint_service.lint_files(file_paths)
 
-		return {}
+		return Command(goto="end_node")

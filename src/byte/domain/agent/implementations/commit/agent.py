@@ -6,6 +6,7 @@ from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.implementations.commit.prompt import commit_prompt
 from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.end_node import EndNode
+from byte.domain.agent.nodes.extract_node import ExtractNode
 from byte.domain.agent.nodes.start_node import StartNode
 from byte.domain.agent.schemas import AssistantRunnable
 from byte.domain.agent.state import CommitState
@@ -34,17 +35,22 @@ class CommitAgent(Agent):
 
 		# Add nodes
 		graph.add_node(
-			"start",
+			"start_node",
 			await self.make(StartNode, agent=self.__class__.__name__),
 		)
 
 		graph.add_node(
-			"assistant",
+			"extract_node",
+			await self.make(ExtractNode),
+		)
+
+		graph.add_node(
+			"assistant_node",
 			await self.make(AssistantNode, runnable=assistant_runnable.runnable),
 		)
 
 		graph.add_node(
-			"end",
+			"end_node",
 			await self.make(
 				EndNode,
 				agent=self.__class__.__name__,
@@ -52,14 +58,14 @@ class CommitAgent(Agent):
 			),
 		)
 
-		graph.add_node("extract_commit", self._extract_commit)
+		graph.add_node("extract_commit_node", self._extract_commit)
 
 		# Define edges
-		graph.add_edge(START, "start")
-		graph.add_edge("start", "assistant")
-		graph.add_edge("assistant", "extract_commit")
-		graph.add_edge("extract_commit", "end")
-		graph.add_edge("end", END)
+		graph.add_edge(START, "start_node")
+		graph.add_edge("start_node", "assistant_node")
+		graph.add_edge("assistant_node", "extract_node")
+		graph.add_edge("extract_node", "end_node")
+		graph.add_edge("end_node", END)
 
 		# Compile graph with memory and configuration
 		return graph.compile()

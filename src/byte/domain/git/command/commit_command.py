@@ -58,7 +58,7 @@ class CommitCommand(Command):
 				request={"messages": [("user", staged_diff)]}, display_mode="thinking"
 			)
 
-			await git_service.commit(str(commit_message.get("commit_message", "")))
+			await git_service.commit(str(commit_message.get("extracted_content", "")))
 		except ByteConfigException as e:
 			console = await self.make(ConsoleService)
 			console.print_error_panel(

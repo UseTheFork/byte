@@ -1,4 +1,5 @@
-from langgraph.graph.state import RunnableConfig
+from langgraph.graph.state import END, RunnableConfig
+from langgraph.types import Command
 
 from byte.core.event_bus import EventType, Payload
 from byte.domain.agent.nodes.base_node import Node
@@ -26,4 +27,4 @@ class EndNode(Node):
 		)
 		await self.emit(payload)
 
-		return state
+		return Command(goto=END, update=state)

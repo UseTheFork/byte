@@ -139,6 +139,10 @@ class FirstBootInitializer:
 		conventions_dir = BYTE_CONFIG_FILE.parent / "conventions"
 		conventions_dir.mkdir(exist_ok=True)
 
+		# Create context directory for style guides and project context
+		context_dir = BYTE_CONFIG_FILE.parent / "context"
+		context_dir.mkdir(exist_ok=True)
+
 		# Create cache directory for temporary files
 		BYTE_CACHE_DIR.mkdir(exist_ok=True)
 

@@ -1,4 +1,5 @@
 from langgraph.graph.state import Runnable
+from langgraph.types import Command
 
 from byte.core.event_bus import EventType, Payload
 from byte.core.logging import log
@@ -38,9 +39,11 @@ class AssistantNode(Node):
 				# Re-prompt for actual response
 				messages = state["messages"] + [("user", "Respond with a real output.")]
 				state = {**state, "messages": messages}
+			elif result.tool_calls and len(result.tool_calls) > 0:
+				return Command(goto="tools_node", update={"messages": [result]})
 			else:
 				break
 
 			await self.emit(payload)
 
-		return {"messages": [result]}
+		return Command(goto="end_node", update={"messages": [result]})

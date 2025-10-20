@@ -46,7 +46,7 @@ class CoderAgent(Agent):
 
 		# Add nodes
 		graph.add_node(
-			"start",
+			"start_node",
 			await self.make(
 				StartNode,
 				agent=self.__class__.__name__,
@@ -54,17 +54,17 @@ class CoderAgent(Agent):
 			),
 		)
 		graph.add_node(
-			"assistant",
+			"assistant_node",
 			await self.make(AssistantNode, runnable=assistant_runnable.runnable),
 		)
 		graph.add_node(
-			"parse_blocks",
+			"parse_blocks_node",
 			await self.make(ParseBlocksNode, edit_format=self.edit_format),
 		)
-		graph.add_node("lint", await self.make(LintNode))
+		graph.add_node("lint_node", await self.make(LintNode))
 
 		graph.add_node(
-			"end",
+			"end_node",
 			await self.make(
 				EndNode,
 				agent=self.__class__.__name__,
@@ -73,37 +73,15 @@ class CoderAgent(Agent):
 		)
 
 		# Define edges
-		graph.add_edge(START, "start")
-		graph.add_edge("start", "assistant")
-		graph.add_edge("assistant", "parse_blocks")
+		graph.add_edge(START, "start_node")
+		graph.add_edge("start_node", "assistant_node")
+		graph.add_edge("assistant_node", "parse_blocks_node")
 
-		# Conditional routing from assistant
-		graph.add_conditional_edges(
-			"parse_blocks",
-			self._should_continue,
-			{
-				"assistant": "assistant",
-				"lint": "lint",
-			},
-		)
-
-		graph.add_edge("lint", "end")
-		graph.add_edge("end", END)
+		graph.add_edge("lint_node", "end_node")
+		graph.add_edge("end_node", END)
 
 		checkpointer = await self.get_checkpointer()
 		return graph.compile(checkpointer=checkpointer, debug=False)
-
-	async def _should_continue(self, state) -> str:
-		"""Determine next step based on last message."""
-		# messages = state["messages"]
-		# last_message = messages[-1]
-
-		# log.debug(state)
-
-		if state["agent_status"] == "valid":
-			return "lint"
-
-		return "assistant"
 
 	async def get_assistant_runnable(self) -> AssistantRunnable:
 		llm_service = await self.make(LLMService)

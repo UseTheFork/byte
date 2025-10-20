@@ -1,4 +1,5 @@
 from langgraph.graph.state import RunnableConfig
+from langgraph.types import Command
 
 from byte.core.logging import log
 from byte.core.utils import extract_content_from_message
@@ -50,9 +51,6 @@ class ParseBlocksNode(Node):
 			error_message = f"The following {failed_count} *SEARCH/REPLACE blocks* failed. Check the file content and try again. The other {valid_count} *SEARCH/REPLACE blocks* succeeded.\n\n"
 			error_message += "\n\n".join(validation_errors)
 
-			return {
-				"agent_status": "validation_error",
-				"errors": [("user", error_message)],
-			}
+			return Command(goto="assistant_node", update={"errors": [("user", error_message)]})
 
-		return {"agent_status": "valid", "parsed_blocks": parsed_blocks}
+		return Command(goto="lint_node", update={"parsed_blocks": parsed_blocks})

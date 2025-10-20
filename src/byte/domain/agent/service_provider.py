@@ -16,6 +16,7 @@ from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.nodes.copy_node import CopyNode
 from byte.domain.agent.nodes.end_node import EndNode
+from byte.domain.agent.nodes.extract_node import ExtractNode
 from byte.domain.agent.nodes.lint_node import LintNode
 from byte.domain.agent.nodes.parse_blocks_node import ParseBlocksNode
 from byte.domain.agent.nodes.start_node import StartNode
@@ -38,6 +39,7 @@ class AgentServiceProvider(ServiceProvider):
 
 	def agents(self) -> List[Type[Agent]]:
 		return [
+			# keep-sorted start
 			CoderAgent,
 			CommitAgent,
 			FixerAgent,
@@ -45,6 +47,7 @@ class AgentServiceProvider(ServiceProvider):
 			CleanerAgent,
 			ResearchAgent,
 			CopyAgent,
+			# keep-sorted end
 		]
 
 	def commands(self) -> List[Type[Command]]:
@@ -52,13 +55,16 @@ class AgentServiceProvider(ServiceProvider):
 
 	def nodes(self) -> List[Type[Node]]:
 		return [
+			# keep-sorted start
 			StartNode,
 			EndNode,
 			AssistantNode,
 			LintNode,
 			ParseBlocksNode,
+			ExtractNode,
 			ToolNode,
 			CopyNode,
+			# keep-sorted end
 		]
 
 	async def register(self, container: "Container") -> None:

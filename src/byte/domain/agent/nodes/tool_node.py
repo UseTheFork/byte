@@ -1,6 +1,7 @@
 import json
 
 from langchain_core.messages import ToolMessage
+from langgraph.types import Command
 from rich.pretty import Pretty
 
 from byte.core.mixins.user_interactive import UserInteractive
@@ -48,4 +49,6 @@ class ToolNode(Node, UserInteractive):
 					tool_call_id=tool_call["id"],
 				)
 			)
-		return {"messages": outputs}
+
+		# Tools always go back to the `assistant_node`
+		return Command(goto="assistant_node", update={"messages": outputs})
