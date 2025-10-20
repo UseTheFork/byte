@@ -88,7 +88,8 @@
                 packages = [
 
                   pkgs.just # Command Runner
-                  pkgs.pre-commit
+                  pkgs.pre-commit # Pre-ommit hooks
+                  pkgs.git-cliff # Changelog generator
 
                   pkgs.uv
                   pkgs.nodejs

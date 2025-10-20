@@ -1,6 +1,6 @@
 [project]
 name = "byte"
-version = "0.1.6"
+version = "0.1.7"
 description = "A human-in-the-loop AI coding agent that keeps you in control."
 readme = "README.md"
 requires-python = ">=3.12"
