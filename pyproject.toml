@@ -5,7 +5,6 @@ description = "A human-in-the-loop AI coding agent that keeps you in control."
 readme = "README.md"
 requires-python = ">=3.12"
 classifiers = [
-    "Development Status :: 4 - Alpha",
     "Environment :: Console",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
