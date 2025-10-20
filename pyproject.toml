@@ -1,5 +1,5 @@
 [project]
-name = "byte"
+name = "byte-ai-cli"
 version = "0.1.7"
 description = "A human-in-the-loop AI coding agent that keeps you in control."
 readme = "README.md"
@@ -45,6 +45,8 @@ Homepage = "https://github.com/UseTheFork/byte"
 [project.scripts]
 byte = "byte.core.cli:cli"
 
+[tool.uv.build-backend]
+module-name = "byte"
 
 [dependency-groups]
 dev = [
