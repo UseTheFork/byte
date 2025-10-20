@@ -12,7 +12,7 @@ from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.end_node import EndNode
 from byte.domain.agent.nodes.extract_node import ExtractNode
 from byte.domain.agent.nodes.start_node import StartNode
-from byte.domain.agent.schemas import AssistantRunnable
+from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.agent.state import BaseState
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.llm.service.llm_service import LLMService
@@ -33,35 +33,15 @@ class CleanerAgent(Agent, UserInteractive):
 		prompts focused on information extraction and relevance filtering.
 		Usage: `graph = await agent.build()` -> ready for content cleaning
 		"""
-		assistant_runnable = await self.get_assistant_runnable()
 
 		# Create the state graph
 		graph = StateGraph(self.get_state_class())
 
 		# Add nodes
-		graph.add_node(
-			"start_node",
-			await self.make(StartNode, agent=self.__class__.__name__),
-		)
-
-		graph.add_node(
-			"assistant_node",
-			await self.make(AssistantNode, runnable=assistant_runnable.runnable),
-		)
-
-		graph.add_node(
-			"extract_node",
-			await self.make(ExtractNode, runnable=assistant_runnable.runnable),
-		)
-
-		graph.add_node(
-			"end_node",
-			await self.make(
-				EndNode,
-				agent=self.__class__.__name__,
-				llm=assistant_runnable.llm,
-			),
-		)
+		graph.add_node("start_node", await self.make(StartNode))
+		graph.add_node("assistant_node", await self.make(AssistantNode))
+		graph.add_node("extract_node", await self.make(ExtractNode))
+		graph.add_node("end_node", await self.make(EndNode))
 
 		graph.add_node("confirm_content_node", self._confirm_content)
 
@@ -112,11 +92,15 @@ class CleanerAgent(Agent, UserInteractive):
 
 			return Command(goto="assistant_node", update={"messages": [error_message]})
 
-	async def get_assistant_runnable(self) -> AssistantRunnable:
+	async def get_assistant_runnable(self) -> AssistantContextSchema:
 		llm_service = await self.make(LLMService)
-		llm: BaseChatModel = llm_service.get_weak_model()
+		main: BaseChatModel = llm_service.get_main_model()
+		weak: BaseChatModel = llm_service.get_weak_model()
 
-		return AssistantRunnable(
-			runnable=cleaner_prompt | llm,
-			llm=llm,
+		return AssistantContextSchema(
+			mode="weak",
+			prompt=cleaner_prompt,
+			main=main,
+			weak=weak,
+			agent=self.__class__.__name__,
 		)

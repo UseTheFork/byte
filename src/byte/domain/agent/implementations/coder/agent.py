@@ -12,7 +12,7 @@ from byte.domain.agent.nodes.end_node import EndNode
 from byte.domain.agent.nodes.lint_node import LintNode
 from byte.domain.agent.nodes.parse_blocks_node import ParseBlocksNode
 from byte.domain.agent.nodes.start_node import StartNode
-from byte.domain.agent.schemas import AssistantRunnable
+from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.agent.state import CoderState
 from byte.domain.edit_format.service.edit_format_service import EditFormatService
 from byte.domain.llm.service.llm_service import LLMService
@@ -38,9 +38,6 @@ class CoderAgent(Agent):
 	async def build(self) -> CompiledStateGraph:
 		"""Build and compile the coder agent graph with memory and tools."""
 
-		# Create the assistant and runnable
-		assistant_runnable = await self.get_assistant_runnable()
-
 		# Create the state graph
 		graph = StateGraph(self.get_state_class())
 
@@ -49,13 +46,12 @@ class CoderAgent(Agent):
 			"start_node",
 			await self.make(
 				StartNode,
-				agent=self.__class__.__name__,
 				edit_format=self.edit_format,
 			),
 		)
 		graph.add_node(
 			"assistant_node",
-			await self.make(AssistantNode, runnable=assistant_runnable.runnable),
+			await self.make(AssistantNode),
 		)
 		graph.add_node(
 			"parse_blocks_node",
@@ -67,8 +63,6 @@ class CoderAgent(Agent):
 			"end_node",
 			await self.make(
 				EndNode,
-				agent=self.__class__.__name__,
-				llm=assistant_runnable.llm,
 			),
 		)
 
@@ -83,12 +77,16 @@ class CoderAgent(Agent):
 		checkpointer = await self.get_checkpointer()
 		return graph.compile(checkpointer=checkpointer, debug=False)
 
-	async def get_assistant_runnable(self) -> AssistantRunnable:
+	async def get_assistant_runnable(self) -> AssistantContextSchema:
 		llm_service = await self.make(LLMService)
-		llm: BaseChatModel = llm_service.get_main_model()
+		main: BaseChatModel = llm_service.get_main_model()
+		weak: BaseChatModel = llm_service.get_weak_model()
 
 		# Create the assistant runnable with out any tools. So regardless it wont make a tool call even thou we have a tool node.
-		return AssistantRunnable(
-			runnable=coder_prompt | llm,
-			llm=llm,
+		return AssistantContextSchema(
+			mode="main",
+			prompt=coder_prompt,
+			main=main,
+			weak=weak,
+			agent=self.__class__.__name__,
 		)

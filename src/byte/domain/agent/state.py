@@ -8,7 +8,7 @@ from byte.domain.edit_format.service.edit_format_service import SearchReplaceBlo
 class BaseState(TypedDict):
 	"""Base state that all agents inherit with messaging and status tracking.
 
-	Usage: `state = BaseState(messages=[], agent="CoderAgent", agent_status="active", errors=[])`
+	Usage: `state = BaseState(messages=[], agent="CoderAgent", errors=[])`
 	"""
 
 	messages: Annotated[list[AnyMessage], add_messages]
@@ -16,8 +16,8 @@ class BaseState(TypedDict):
 
 	agent: str
 
-	agent_status: str
 	errors: list[AnyMessage]
+	examples: list[AnyMessage]
 
 	# TODO: This should be a str or a pydantic base model
 	extracted_content: str

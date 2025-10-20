@@ -9,7 +9,7 @@ from byte.core.mixins.bootable import Bootable
 from byte.core.mixins.configurable import Configurable
 from byte.core.mixins.eventable import Eventable
 from byte.core.mixins.injectable import Injectable
-from byte.domain.agent.schemas import AssistantRunnable
+from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.agent.state import BaseState
 from byte.domain.cli.service.stream_rendering_service import (
 	StreamRenderingService,
@@ -110,6 +110,7 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
 				input=initial_state,
 				config=config,
 				stream_mode=["values", "updates", "messages", "custom"],
+				context=await self.get_assistant_runnable(),
 			):
 				processed_event = await self._handle_stream_event(mode, chunk)
 
@@ -158,7 +159,7 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
 		return self._graph
 
 	@abstractmethod
-	async def get_assistant_runnable(self) -> AssistantRunnable:
+	async def get_assistant_runnable(self) -> AssistantContextSchema:
 		"""Get the assistant runnable for this agent.
 
 		Must be implemented by subclasses to return their specific assistant

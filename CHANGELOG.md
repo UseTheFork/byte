@@ -205,7 +205,7 @@
 - Update config structure and CLI configuration settings
 - Use rich Text for improved markdown stream rendering
 - Replace ByteCheckpointer with InMemorySaver in memory service
-- Simplify agent architecture with new AssistantRunnable schema
+- Simplify agent architecture with new AssistantContextSchema schema
 - Extract console service and replace rich.console usage
 - Remove custom rich panel and rule classes, consolidate styling in console service
 - Improve console rendering and add newline after user input

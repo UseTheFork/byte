@@ -8,7 +8,7 @@ from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.end_node import EndNode
 from byte.domain.agent.nodes.extract_node import ExtractNode
 from byte.domain.agent.nodes.start_node import StartNode
-from byte.domain.agent.schemas import AssistantRunnable
+from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.agent.state import CommitState
 from byte.domain.llm.service.llm_service import LLMService
 
@@ -28,36 +28,14 @@ class CommitAgent(Agent):
 		Usage: `graph = await builder.build()` -> ready for coding assistance
 		"""
 
-		assistant_runnable = await self.get_assistant_runnable()
-
 		# Create the state graph
 		graph = StateGraph(self.get_state_class())
 
 		# Add nodes
-		graph.add_node(
-			"start_node",
-			await self.make(StartNode, agent=self.__class__.__name__),
-		)
-
-		graph.add_node(
-			"extract_node",
-			await self.make(ExtractNode),
-		)
-
-		graph.add_node(
-			"assistant_node",
-			await self.make(AssistantNode, runnable=assistant_runnable.runnable),
-		)
-
-		graph.add_node(
-			"end_node",
-			await self.make(
-				EndNode,
-				agent=self.__class__.__name__,
-				llm=assistant_runnable.llm,
-			),
-		)
-
+		graph.add_node("start_node", await self.make(StartNode))
+		graph.add_node("extract_node", await self.make(ExtractNode))
+		graph.add_node("assistant_node", await self.make(AssistantNode))
+		graph.add_node("end_node", await self.make(EndNode))
 		graph.add_node("extract_commit_node", self._extract_commit)
 
 		# Define edges
@@ -80,11 +58,15 @@ class CommitAgent(Agent):
 
 		return {"commit_message": last_message.content}
 
-	async def get_assistant_runnable(self) -> AssistantRunnable:
+	async def get_assistant_runnable(self) -> AssistantContextSchema:
 		llm_service = await self.make(LLMService)
-		llm: BaseChatModel = llm_service.get_weak_model()
+		main: BaseChatModel = llm_service.get_main_model()
+		weak: BaseChatModel = llm_service.get_weak_model()
 
-		return AssistantRunnable(
-			runnable=commit_prompt | llm,
-			llm=llm,
+		return AssistantContextSchema(
+			mode="weak",
+			prompt=commit_prompt,
+			main=main,
+			weak=weak,
+			agent=self.__class__.__name__,
 		)
