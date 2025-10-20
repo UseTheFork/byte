@@ -16,7 +16,7 @@ from byte.domain.edit_format.service.edit_format_service import (
 	BlockStatus,
 	SearchReplaceBlock,
 )
-from byte.domain.files.context_manager import FileMode
+from byte.domain.files.schemas import FileMode
 from byte.domain.files.service.file_service import FileService
 
 

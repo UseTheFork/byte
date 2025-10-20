@@ -61,6 +61,7 @@ nav:
     - Conventions: concepts/conventions.md
     - Linting: concepts/lint.md
     - Commit: concepts/commit.md
+    - Web: concepts/web.md
   - References:
     - Overview: reference/index.md
     - Settings: reference/settings.md

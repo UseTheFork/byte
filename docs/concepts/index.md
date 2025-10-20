@@ -8,6 +8,7 @@ Byte's design revolves around key principles that work together to provide a pow
 - [Conventions](conventions.md) - Project-specific coding standards and style guides
 - [Linting](lint.md) - Automated code quality checks and fixes
 - [Commit](commit.md) - AI-powered commit message generation
+- [Web](web.md) - Scrape webpages and convert to markdown for LLM context
 
 Read on to explore these concepts in depth, or jump ahead to:
 

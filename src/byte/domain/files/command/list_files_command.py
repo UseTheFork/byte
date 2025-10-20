@@ -2,7 +2,7 @@ from rich.columns import Columns
 
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.files.context_manager import FileMode
+from byte.domain.files.schemas import FileMode
 from byte.domain.files.service.file_service import FileService
 
 

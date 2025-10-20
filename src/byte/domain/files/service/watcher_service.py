@@ -11,7 +11,7 @@ from byte.core.task_manager import TaskManager
 from byte.domain.agent.implementations.ask.agent import AskAgent
 from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
-from byte.domain.files.context_manager import FileMode
+from byte.domain.files.schemas import FileMode
 from byte.domain.files.service.discovery_service import FileDiscoveryService
 from byte.domain.files.service.file_service import FileService
 from byte.domain.files.service.ignore_service import FileIgnoreService
@@ -29,6 +29,9 @@ class FileWatcherService(Service):
 		self._watched_files: Set[Path] = set()
 		self.task_manager = await self.make(TaskManager)
 		self.ignore_service = await self.make(FileIgnoreService)
+		self.file_discovery = await self.make(FileDiscoveryService)
+		self.file_service = await self.make(FileService)
+
 		await self._start_watching()
 
 	async def _is_ignored(self, path: Path) -> bool:
@@ -68,12 +71,15 @@ class FileWatcherService(Service):
 
 	async def _start_watching(self) -> None:
 		"""Start file system monitoring using TaskManager."""
-		if not self._config.project_root or not self._config.project_root.exists():
+		if (
+			not self._config.project_root
+			or not self._config.project_root.exists()
+			or not self._config.files.watch.enable
+		):
 			return
 
 		# Get files to watch
-		file_discovery = await self.make(FileDiscoveryService)
-		discovered_files = await file_discovery.get_files()
+		discovered_files = await self.file_discovery.get_files()
 		self._watched_files = set(discovered_files)
 
 		# Start watching with TaskManager
@@ -96,20 +102,19 @@ class FileWatcherService(Service):
 		if file_path.is_dir():
 			return
 
-		file_discovery_service = await self.make(FileDiscoveryService)
+		self.file_discovery_service = await self.make(FileDiscoveryService)
 
 		result = False
 		if change_type == Change.deleted:
 			# Remove from both watcher and discovery caches
 			self._watched_files.discard(file_path)
-			await file_discovery_service.remove_file(file_path)
+			await self.file_discovery_service.remove_file(file_path)
 
-			file_service = await self.make(FileService)
-			if await file_service.is_file_in_context(file_path):
-				result = await file_service.remove_file(file_path)
+			if await self.file_service.is_file_in_context(file_path):
+				result = await self.file_service.remove_file(file_path)
 		elif change_type == Change.added:
 			# Add to discovery cache if not ignored
-			added = await file_discovery_service.add_file(file_path)
+			added = await self.file_discovery_service.add_file(file_path)
 			if added:
 				self._watched_files.add(file_path)
 				result = await self._handle_file_modified(file_path)

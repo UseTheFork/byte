@@ -1,10 +1,10 @@
-from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Optional
 
+from pydantic.dataclasses import dataclass
 
-# TODO: This needs to be converted to pydantic and moved to models
+
 class FileMode(Enum):
 	"""File access mode for AI context management."""
 
@@ -12,7 +12,7 @@ class FileMode(Enum):
 	EDITABLE = "editable"
 
 
-@dataclass(frozen=True)
+@dataclass
 class FileContext:
 	"""Immutable file context containing path and access mode information."""
 

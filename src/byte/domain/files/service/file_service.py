@@ -8,7 +8,7 @@ from rich.columns import Columns
 from byte.core.event_bus import EventType, Payload
 from byte.core.service.base_service import Service
 from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.files.context_manager import FileContext, FileMode
+from byte.domain.files.schemas import FileContext, FileMode
 from byte.domain.files.service.discovery_service import FileDiscoveryService
 
 
@@ -193,13 +193,7 @@ class FileService(Service):
 		key = str(path_obj)
 
 		if key in self._context_files:
-			# old_mode = self._context_files[key].mode
 			self._context_files[key].mode = mode
-			# await self.event(
-			#     FileModeChanged(
-			#         file_path=str(path_obj), old_mode=old_mode, new_mode=mode
-			#     )
-			# )
 			return True
 		return False
 
@@ -232,7 +226,6 @@ Any other messages in the chat may contain outdated versions of the files' conte
 		read_only = [f for f in self._context_files.values() if f.mode == FileMode.READ_ONLY]
 		editable = [f for f in self._context_files.values() if f.mode == FileMode.EDITABLE]
 
-		# AI: in the below `context += f"---\nsource:` should we provied any other information to the LLM ai?
 		if read_only:
 			context += "\n\n## READ-ONLY FILES (for reference only):\n\n Any edits to these files will be rejected\n"
 			for file_ctx in sorted(read_only, key=lambda f: f.relative_path):

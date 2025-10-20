@@ -18,7 +18,7 @@ from byte.domain.edit_format.service.edit_block_prompt import (
 	edit_format_system,
 	practice_messages,
 )
-from byte.domain.files.context_manager import FileMode
+from byte.domain.files.schemas import FileMode
 from byte.domain.files.service.file_service import FileService
 
 
