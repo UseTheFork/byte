@@ -103,6 +103,7 @@ class EventBus:
 					current_payload = result
 
 			except Exception as e:
+				# TODO: Make this use Logguru.
 				print(f"Error in event listener for '{event_name}': {e}")
 
 		return current_payload

@@ -53,10 +53,10 @@ class GitService(Service, UserInteractive):
 
 		# Get modified and staged files
 		for item in self._repo.index.diff(None):  # Working tree vs index
-			changed_files.append(Path(item.a_path))  # pyright: ignore[reportArgumentType]
+			changed_files.append(Path(item.a_path))
 
 		for item in self._repo.index.diff("HEAD"):  # Index vs HEAD
-			changed_files.append(Path(item.a_path))  # pyright: ignore[reportArgumentType]
+			changed_files.append(Path(item.a_path))
 
 		# Get untracked files if requested
 		if include_untracked:

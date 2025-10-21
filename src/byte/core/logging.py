@@ -28,7 +28,7 @@ config = {
 		{"sink": LOG_FILE, "level": "DEBUG", "serialize": False, "backtrace": True},
 	],
 }
-logger.configure(**config)  # pyright: ignore[reportArgumentType]
+logger.configure(**config)
 
 
 log = logger
