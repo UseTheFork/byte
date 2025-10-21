@@ -1,5 +1,4 @@
 from pathlib import Path
-from textwrap import dedent
 
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
@@ -20,17 +19,7 @@ class LintNode(Node):
 
 		do_fix, failed_commands = await lint_service.display_results_summary(lint_commands)
 		if do_fix:
-			lint_errors = []
-			for lint_file in failed_commands:
-				error_msg = lint_file.stderr.strip() or lint_file.stdout.strip()
-				lint_error_message = dedent(f"""
-					<lint_error: source={lint_file.file}>
-					{error_msg}
-					</lint_error>""")
-				lint_errors.append(lint_error_message)
-
-			joined_lint_errors = "**Fix The Following Lint Errors**\n\n" + "\n\n".join(lint_errors)
-
+			joined_lint_errors = lint_service.format_lint_errors(failed_commands)
 			return Command(goto="assistant_node", update={"errors": [("user", joined_lint_errors)]})
 
 		return Command(goto="end_node")

@@ -1,5 +1,7 @@
 from byte.core.exceptions import ByteConfigException
+from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.agent.implementations.commit.agent import CommitAgent
+from byte.domain.agent.service.agent_service import AgentService
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.git.service.git_service import GitService
@@ -48,7 +50,13 @@ class CommitCommand(Command):
 				return
 
 			lint_service = await self.make(LintService)
-			await lint_service()
+			lint_commands = await lint_service()
+
+			do_fix, failed_commands = await lint_service.display_results_summary(lint_commands)
+			if do_fix:
+				joined_lint_errors = lint_service.format_lint_errors(failed_commands)
+				agent_service = await self.make(AgentService)
+				await agent_service.execute_agent({"errors": joined_lint_errors}, CoderAgent)
 
 			# Extract staged changes for AI analysis
 			staged_diff = repo.git.diff("--cached")

@@ -1,5 +1,6 @@
 import asyncio
 from pathlib import Path
+from textwrap import dedent
 from typing import List
 
 from rich.console import Group
@@ -184,20 +185,6 @@ class LintService(Service, UserInteractive):
 				return (False, failed_commands)
 			else:
 				return (True, failed_commands)
-			# if do_lint:
-			# 	for lint_file in failed_commands:
-			# 		fixer_agent = await self.make(FixerAgent)
-			# 		error_msg = lint_file.stderr.strip() or lint_file.stdout.strip()
-			# 		lint_error_message = dedent(f"""
-			# 		# Fix The Folllwing Lint Error
-			# 		File: {lint_file.file}
-
-			# 		Error:
-			# 		```
-			# 		{error_msg}
-			# 		```""")
-			# 		fixer_agent = await fixer_agent.execute(request={"messages": [("user", lint_error_message)]})
-			# 		dd(fixer_agent)
 
 		return (False, [])
 
@@ -282,3 +269,26 @@ class LintService(Service, UserInteractive):
 		await asyncio.sleep(0.2)
 
 		return lint_commands
+
+	def format_lint_errors(self, failed_commands: List[LintFile]) -> str:
+		"""Format lint errors into a string for AI consumption.
+
+		Args:
+			failed_commands: List of LintFile objects that failed linting
+
+		Returns:
+			Formatted string with lint errors wrapped in XML-style tags
+
+		Usage: `error_msg = service.format_lint_errors(failed_files)` -> format for AI
+		"""
+		lint_errors = []
+		for lint_file in failed_commands:
+			error_msg = lint_file.stderr.strip() or lint_file.stdout.strip()
+			lint_error_message = dedent(f"""
+				<lint_error: source={lint_file.file}>
+				{error_msg}
+				</lint_error>""")
+			lint_errors.append(lint_error_message)
+
+		joined_lint_errors = "**Fix The Following Lint Errors**\n\n" + "\n\n".join(lint_errors)
+		return joined_lint_errors

@@ -31,4 +31,4 @@ class AskCommand(Command):
 		Usage: Called automatically when user types `/ask <question>`
 		"""
 		agent_service = await self.make(AgentService)
-		await agent_service.execute_agent([("user", args)], AskAgent)
+		await agent_service.execute_agent({"messages": [("user", args)]}, AskAgent)

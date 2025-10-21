@@ -4,6 +4,7 @@ from rich.table import Table
 
 from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
+from byte.core.utils import dump
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.llm.service.llm_service import LLMService
 
@@ -41,6 +42,7 @@ class AgentAnalyticsService(Service):
 			self.model_usage["last"]["output"] = llm_weak_usage.output_tokens
 			self.model_usage["last"]["type"] = "weak"
 
+		dump(self.model_usage)
 		return payload
 
 	async def usage_panel_hook(self, payload: Payload) -> Payload:

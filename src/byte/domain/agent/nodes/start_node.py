@@ -22,7 +22,6 @@ class StartNode(Node):
 			"agent": runtime.context.agent,
 			"edit_format_system": "",
 			"masked_messages": [],
-			"errors": [],
 			"examples": [],
 		}
 

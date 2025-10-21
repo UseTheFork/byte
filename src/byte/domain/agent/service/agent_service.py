@@ -21,15 +21,15 @@ class AgentService(Service):
 			# Add more agents here as they're implemented
 		]
 
-	async def execute_agent(self, messages: list, agent: Optional[Type[Agent]] = None) -> dict:
-		"""Execute the currently active agent with the provided messages.
+	async def execute_agent(self, inputs: dict, agent: Optional[Type[Agent]] = None) -> dict:
+		"""Execute the currently active agent with the provided inputs.
 
 		Args:
-			messages: List of messages to send to the agent
+			inputs: Dictionary containing the agent inputs
 			agent: Optional specific agent type to execute. If None, uses current agent.
 
-		Usage: result = await agent_service.execute_current_agent([("user", "Hello")])
-		Usage: result = await agent_service.execute_current_agent([("user", "Hello")], CoderAgent)
+		Usage: result = await agent_service.execute_current_agent({"messages": [("user", "Hello")]})
+		Usage: result = await agent_service.execute_current_agent({"messages": [("user", "Hello")]}, CoderAgent)
 		"""
 		target_agent = agent if agent is not None else self._current_agent
 
@@ -39,7 +39,7 @@ class AgentService(Service):
 			self._agent_instances[target_agent] = agent_instance
 
 		agent_instance = self._agent_instances[target_agent]
-		return await agent_instance.execute({"messages": messages})
+		return await agent_instance.execute(inputs)
 
 	def set_active_agent(self, agent_type: Type[Agent]) -> bool:
 		"""Switch the active agent."""

@@ -1,5 +1,7 @@
 from byte.core.exceptions import ByteConfigException
 from byte.core.logging import log
+from byte.domain.agent.implementations.coder.agent import CoderAgent
+from byte.domain.agent.service.agent_service import AgentService
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.git.service.git_service import GitService
@@ -40,7 +42,9 @@ class LintCommand(Command):
 
 			do_fix, failed_commands = await lint_service.display_results_summary(lint_commands)
 			if do_fix:
-				pass
+				joined_lint_errors = lint_service.format_lint_errors(failed_commands)
+				agent_service = await self.make(AgentService)
+				await agent_service.execute_agent({"errors": joined_lint_errors}, CoderAgent)
 
 		except ByteConfigException as e:
 			log.exception(e)
