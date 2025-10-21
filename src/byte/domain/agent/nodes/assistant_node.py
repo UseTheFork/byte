@@ -1,6 +1,7 @@
 from textwrap import dedent
+from typing import cast
 
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.runnables import Runnable
 from langgraph.runtime import Runtime
 from langgraph.types import Command
@@ -8,7 +9,7 @@ from langgraph.types import Command
 from byte.core.event_bus import EventType, Payload
 from byte.core.logging import log
 from byte.domain.agent.nodes.base_node import Node
-from byte.domain.agent.schemas import AssistantContextSchema
+from byte.domain.agent.schemas import AssistantContextSchema, TokenUsageSchema
 
 
 class AssistantNode(Node):
@@ -38,7 +39,6 @@ class AssistantNode(Node):
 
 		return runnable
 
-	# ai: have the below method also take a `mode` varible that we pass as part of the data in the Payload.
 	async def _gather_reinforcement(self, mode: str) -> list[HumanMessage]:
 		"""Gather reinforcement messages from various domains.
 
@@ -65,8 +65,12 @@ class AssistantNode(Node):
 		reinforcement_messages = reinforcement_payload.get("reinforcement", [])
 
 		if reinforcement_messages:
-			combined_content = "\n".join(reinforcement_messages)
-			return [HumanMessage(combined_content)]
+			combined_content = "\n".join(f"- {msg}" for msg in reinforcement_messages)
+			final_message = dedent(f"""
+			<reminders>
+			{combined_content}
+			</reminders>""")
+			return [HumanMessage(final_message)]
 
 		return []
 
@@ -201,6 +205,30 @@ class AssistantNode(Node):
 
 			result = await runnable.ainvoke(state, config=config)
 
+			result = cast(AIMessage, result)
+
+			# Create token usage schemas based on which AI mode was used
+			if result.usage_metadata:
+				usage_metadata = result.usage_metadata
+				if runtime.context.mode == "main":
+					main_usage = TokenUsageSchema(
+						input_tokens=usage_metadata.get("input_tokens", 0),
+						output_tokens=usage_metadata.get("output_tokens", 0),
+						total_tokens=usage_metadata.get("total_tokens", 0),
+					)
+					weak_usage = TokenUsageSchema()
+				else:
+					main_usage = TokenUsageSchema()
+					weak_usage = TokenUsageSchema(
+						input_tokens=usage_metadata.get("input_tokens", 0),
+						output_tokens=usage_metadata.get("output_tokens", 0),
+						total_tokens=usage_metadata.get("total_tokens", 0),
+					)
+			else:
+				# No usage metadata available, initialize with zeros
+				main_usage = TokenUsageSchema()
+				weak_usage = TokenUsageSchema()
+
 			# Ensure we get a real response
 			if not result.tool_calls and (
 				not result.content or (isinstance(result.content, list) and not result.content[0].get("text"))
@@ -209,10 +237,24 @@ class AssistantNode(Node):
 				messages = state["messages"] + [("user", "Respond with a real output.")]
 				state = {**state, "messages": messages}
 			elif result.tool_calls and len(result.tool_calls) > 0:
-				return Command(goto="tools_node", update={"messages": [result]})
+				return Command(
+					goto="tools_node",
+					update={
+						"messages": [result],
+						"llm_main_usage": main_usage,
+						"llm_weak_usage": weak_usage,
+					},
+				)
 			else:
 				break
 
 			await self.emit(payload)
 
-		return Command(goto="end_node", update={"messages": [result]})
+		return Command(
+			goto="end_node",
+			update={
+				"messages": [result],
+				"llm_main_usage": main_usage,
+				"llm_weak_usage": weak_usage,
+			},
+		)

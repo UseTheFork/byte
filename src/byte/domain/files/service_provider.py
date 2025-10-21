@@ -61,6 +61,12 @@ class FileServiceProvider(ServiceProvider):
 			file_watcher_service.modify_user_request_hook,
 		)
 
+		# Register listener that calls list_in_context_files before each prompt
+		event_bus.on(
+			EventType.GATHER_REINFORCEMENT.value,
+			file_watcher_service.add_reinforcement_hook,
+		)
+
 		console = await container.make(ConsoleService)
 
 		found_files = await file_discovery.get_files()

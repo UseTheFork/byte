@@ -15,8 +15,6 @@ class EndNode(Node):
 			data={
 				"state": state,
 				"agent": runtime.context.agent,
-				# TODO: This needs to be updated to get the main llm for this node.
-				"llm": runtime.context.main,
 			},
 		)
 		await self.emit(payload)

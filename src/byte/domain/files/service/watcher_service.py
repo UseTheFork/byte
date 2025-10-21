@@ -347,10 +347,20 @@ class FileWatcherService(Service):
 			# Scan context files for AI comments
 			ai_result = await self.scan_context_files_for_ai_comments()
 
-			# AI:
 			if ai_result:
 				payload.set("user_input", ai_result["prompt"])
 				payload.set("interrupted", False)
 				payload.set("active_agent", ai_result["agent_type"])
+
+		return payload
+
+	async def add_reinforcement_hook(self, payload: Payload) -> Payload:
+		prompt_toolkit_service = await self.make(PromptToolkitService)
+		if prompt_toolkit_service.is_interrupted():
+			reinforcement_list = payload.get("reinforcement", [])
+			reinforcement_list.extend(
+				'After successfully implementing all changes, remove the "AI:" comment markers from the code.'
+			)
+			payload.set("reinforcement", reinforcement_list)
 
 		return payload

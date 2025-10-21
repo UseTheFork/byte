@@ -1,6 +1,3 @@
-from typing import cast
-
-from langchain_core.messages import AIMessage
 from rich.console import Group
 from rich.progress_bar import ProgressBar
 from rich.table import Table
@@ -28,41 +25,21 @@ class AgentAnalyticsService(Service):
 
 	async def update_usage_analytics_hook(self, payload: Payload) -> Payload:
 		state = payload.get("state", {})
-		llm = payload.get("llm", {})
 
-		if messages := state.get("messages", []):
-			message = messages[-1]
+		if llm_main_usage := state.get("llm_main_usage", None):
+			self.model_usage["main"]["context"] = llm_main_usage.total_tokens
+			self.model_usage["main"]["total"]["input"] += llm_main_usage.input_tokens
+			self.model_usage["main"]["total"]["output"] += llm_main_usage.output_tokens
+			self.model_usage["last"]["input"] = llm_main_usage.input_tokens
+			self.model_usage["last"]["output"] = llm_main_usage.output_tokens
+			self.model_usage["last"]["type"] = "main"
 
-			# Check if message is an AIMessage before processing
-			if not isinstance(message, AIMessage):
-				return payload
-
-			message = cast(AIMessage, message)
-
-			# Extract usage metadata and total tokens
-			usage_metadata = message.usage_metadata
-			if usage_metadata:
-				total_tokens = usage_metadata.get("total_tokens", 0)
-				input_tokens = usage_metadata.get("input_tokens", 0)
-				output_tokens = usage_metadata.get("output_tokens", 0)
-
-				llm_service = await self.make(LLMService)
-
-				if llm_service._service_config.main.params.model == llm.model:
-					# Update the main model context used with total tokens
-					self.model_usage["main"]["context"] = total_tokens
-					self.model_usage["main"]["total"]["input"] += input_tokens
-					self.model_usage["main"]["total"]["output"] += output_tokens
-					self.model_usage["last"]["input"] = input_tokens
-					self.model_usage["last"]["output"] = output_tokens
-					self.model_usage["last"]["type"] = "main"
-
-				if llm_service._service_config.weak.params.model == llm.model:
-					self.model_usage["weak"]["total"]["input"] += input_tokens
-					self.model_usage["weak"]["total"]["output"] += output_tokens
-					self.model_usage["last"]["input"] = input_tokens
-					self.model_usage["last"]["output"] = output_tokens
-					self.model_usage["last"]["type"] = "weak"
+		if llm_weak_usage := state.get("llm_weak_usage", None):
+			self.model_usage["weak"]["total"]["input"] += llm_weak_usage.input_tokens
+			self.model_usage["weak"]["total"]["output"] += llm_weak_usage.output_tokens
+			self.model_usage["last"]["input"] = llm_weak_usage.input_tokens
+			self.model_usage["last"]["output"] = llm_weak_usage.output_tokens
+			self.model_usage["last"]["type"] = "weak"
 
 		return payload
 

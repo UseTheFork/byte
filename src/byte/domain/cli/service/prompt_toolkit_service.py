@@ -191,3 +191,13 @@ class PromptToolkitService(Service):
 				self.prompt_session.app.exit()
 		except Exception:
 			pass
+
+	def is_interrupted(self) -> bool:
+		"""Check if the current prompt has been interrupted.
+
+		Returns True if interrupt() was called and the prompt was interrupted,
+		False otherwise. Useful for other services to check interrupt state.
+
+		Usage: `if await prompt_service.is_interrupted(): ...`
+		"""
+		return self.interrupted

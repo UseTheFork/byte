@@ -29,3 +29,17 @@ class AssistantContextSchema:
 	weak: BaseChatModel  # Reference to the weak LLM for simple operations
 	agent: str  # Agent class name for identification
 	tools: Optional[List[BaseTool]] = Field(default=None)  # Tools bound to LLM, if any
+
+
+@dataclass
+class TokenUsageSchema:
+	"""Token usage tracking for LLM interactions.
+
+	Tracks input, output, and total tokens consumed during LLM operations.
+
+	Usage: `usage = TokenUsageSchema(input_tokens=2897, output_tokens=229, total_tokens=3126)`
+	"""
+
+	input_tokens: int = 0
+	output_tokens: int = 0
+	total_tokens: int = 0

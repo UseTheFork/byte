@@ -22,7 +22,7 @@ class FirstBootInitializer:
 	# This will be written to .byte/config.yaml
 	CONFIG_TEMPLATE = {
 		"llm": {
-			"model": "sonnet",
+			"model": "anthropic",
 		},
 		"lint": {
 			"enabled": False,

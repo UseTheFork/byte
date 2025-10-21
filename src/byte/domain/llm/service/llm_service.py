@@ -79,6 +79,7 @@ class LLMService(Service):
 
 		Usage: `payload = await service.add_reinforcement_hook(payload)`
 		"""
+		# TODO: should we also check what agent this is?
 		mode = payload.get("mode", "main")
 
 		# Select model schema based on mode
@@ -89,10 +90,14 @@ class LLMService(Service):
 		# Check reinforcement mode and add messages accordingly
 		if model_schema.behavior.reinforcement_mode.value == "eager":
 			# Add strong reinforcement for eager mode
-			reinforcement.append("IMPORTANT: Follow all instructions precisely and use the exact format specified.")
+			reinforcement.append(
+				"IMPORTANT: Pay careful attention to the scope of the user's request. \n Do what they ask, but no more. \n Do not improve, comment, fix or modify unrelated parts of the code in any way!"
+			)
 		elif model_schema.behavior.reinforcement_mode.value == "lazy":
 			# Add gentle reinforcement for lazy mode
-			reinforcement.append("Remember to follow the specified format in your response.")
+			reinforcement.append(
+				"IMPORTANT: You are diligent and tireless!\n You NEVER leave comments describing code without implementing it!\n You always COMPLETELY IMPLEMENT the needed code!"
+			)
 
 		# Get existing list and extend with reinforcement messages
 		reinforcement_list = payload.get("reinforcement", [])
