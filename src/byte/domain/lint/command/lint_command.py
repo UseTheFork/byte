@@ -1,4 +1,5 @@
 from byte.core.exceptions import ByteConfigException
+from byte.core.logging import log
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.git.service.git_service import GitService
@@ -35,8 +36,14 @@ class LintCommand(Command):
 			await git_service.stage_changes()
 
 			lint_service = await self.make(LintService)
-			await lint_service()
+			lint_commands = await lint_service()
+
+			do_fix, failed_commands = await lint_service.display_results_summary(lint_commands)
+			if do_fix:
+				pass
+
 		except ByteConfigException as e:
+			log.exception(e)
 			console = await self.make(ConsoleService)
 			console.print_error_panel(
 				str(e),

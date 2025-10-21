@@ -32,5 +32,3 @@ coder_prompt = ChatPromptTemplate.from_messages(
 		("placeholder", "{errors}"),
 	]
 )
-
-# Instructions

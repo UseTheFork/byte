@@ -1,6 +1,5 @@
 import asyncio
 from pathlib import Path
-from textwrap import dedent
 from typing import List
 
 from rich.console import Group
@@ -8,7 +7,6 @@ from rich.live import Live
 from rich.progress import BarColumn, Progress, TaskProgressColumn
 from rich.table import Column
 
-from byte import dd
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
 from byte.domain.cli.rich.markdown import Markdown
@@ -108,17 +106,15 @@ class LintService(Service, UserInteractive):
 				stderr=f"Error executing command: {e!s}",
 			)
 
-	async def _display_results_summary(self, console: ConsoleService, lint_commands: List[LintCommand]) -> None:
+	async def display_results_summary(self, lint_commands: List[LintCommand]) -> tuple[bool, list]:
 		"""Display a summary panel of linting results.
 
 		Args:
-			console: ConsoleService for output
 			lint_commands: List of LintCommand objects with results
 		"""
-		from byte.domain.agent.implementations.fixer.agent import FixerAgent
 
 		if not lint_commands:
-			return
+			return (False, [])
 
 		# Count total files processed and issues found
 		total_files = 0
@@ -175,6 +171,7 @@ class LintService(Service, UserInteractive):
 
 		summary_text = Markdown(markdown_content)
 
+		console = await self.make(ConsoleService)
 		# Display panel
 		console.print_panel(
 			summary_text,
@@ -182,22 +179,27 @@ class LintService(Service, UserInteractive):
 		)
 
 		if failed_commands:
-			console_service = await self.make(ConsoleService)
-			do_lint = console_service.confirm("Attempt to fix lint errors?")
-			if do_lint:
-				for lint_file in failed_commands:
-					fixer_agent = await self.make(FixerAgent)
-					error_msg = lint_file.stderr.strip() or lint_file.stdout.strip()
-					lint_error_message = dedent(f"""
-					# Fix The Folllwing Lint Error
-					File: {lint_file.file}
+			do_lint = console.confirm("Attempt to fix lint errors?")
+			if do_lint is False or do_lint is None:
+				return (False, failed_commands)
+			else:
+				return (True, failed_commands)
+			# if do_lint:
+			# 	for lint_file in failed_commands:
+			# 		fixer_agent = await self.make(FixerAgent)
+			# 		error_msg = lint_file.stderr.strip() or lint_file.stdout.strip()
+			# 		lint_error_message = dedent(f"""
+			# 		# Fix The Folllwing Lint Error
+			# 		File: {lint_file.file}
 
-					Error:
-					```
-					{error_msg}
-					```""")
-					fixer_agent = await fixer_agent.execute(request={"messages": [("user", lint_error_message)]})
-					dd(fixer_agent)
+			# 		Error:
+			# 		```
+			# 		{error_msg}
+			# 		```""")
+			# 		fixer_agent = await fixer_agent.execute(request={"messages": [("user", lint_error_message)]})
+			# 		dd(fixer_agent)
+
+		return (False, [])
 
 	async def lint_files(self, changed_files: List[Path]) -> List[LintCommand]:
 		"""Run configured linters on specified files.
@@ -278,8 +280,5 @@ class LintService(Service, UserInteractive):
 				status.update(f"Finished linting {len(changed_files)} files")
 
 		await asyncio.sleep(0.2)
-
-		# Display summary panel with results
-		await self._display_results_summary(console, lint_commands)
 
 		return lint_commands

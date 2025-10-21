@@ -7,6 +7,7 @@ from byte.container import Container
 from byte.context import container_context
 from byte.core.cli import cli
 from byte.core.config.config import ByteConfg
+from byte.core.logging import log
 from byte.core.task_manager import TaskManager
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
@@ -30,7 +31,7 @@ class Byte:
 		self.task_manager = await self.container.make(TaskManager)
 
 	async def run(self):
-		"""Foo"""
+		""" """
 		await self.initialize()
 		try:
 			await self._main_loop()
@@ -47,14 +48,18 @@ class Byte:
 				await input_service.execute()
 			except KeyboardInterrupt:
 				break
-			except Exception:
-				# TODO: This should only `print_exception` if in devmode.
+			except Exception as e:
+				log.exception(e)
 				console = await self.container.make(ConsoleService)
-				console.console.print_exception(show_locals=True)
+				console.print_error_panel(
+					str(e),
+					title="Exception",
+				)
+				# console.console.print_exception(show_locals=True)
 
 
 async def main(config: ByteConfg):
-	"""Simplified application entry point using actor system."""
+	"""Application entry point"""
 	container = await bootstrap(config)
 	container_context.set(container)
 
