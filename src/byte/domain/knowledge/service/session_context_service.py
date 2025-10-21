@@ -63,27 +63,23 @@ class SessionContextService(Service):
 		"""Inject session context into the prompt state.
 
 		Aggregates all stored context items and adds them to the
-		project_inforamtion_and_context list for inclusion in the prompt.
+		session_docs list for inclusion in the prompt.
 		Usage: `result = await service.add_session_context_hook(payload)`
 		"""
-		state = payload.get("state", {})
-		project_inforamtion_and_context = state.get("project_inforamtion_and_context", [])
-
 		if self.session_context.is_not_empty():
-			conventions = "\n\n".join(self.session_context.all().values())
-
-			project_inforamtion_and_context.append(
-				(
-					"user",
+			# Format each context item with its own tags
+			formatted_contexts = []
+			for key, content in self.session_context.all().items():
+				formatted_contexts.append(
 					dedent(f"""
-					# Session Context
-
-					The following documents and reference materials have been provided by the user to inform your work on this task.
-
-					{conventions}"""),
+					<session_context: key={key} >
+					{content}
+					</session_context>""")
 				)
-			)
 
-		state["project_inforamtion_and_context"] = project_inforamtion_and_context
+			# Get existing list and extend with formatted contexts
+			session_docs_list = payload.get("session_docs", [])
+			session_docs_list.extend(formatted_contexts)
+			payload.set("session_docs", session_docs_list)
 
-		return payload.set("state", state)
+		return payload

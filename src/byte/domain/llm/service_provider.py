@@ -1,6 +1,7 @@
 from typing import List, Type
 
 from byte.container import Container
+from byte.core.event_bus import EventBus, EventType
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli.service.console_service import ConsoleService
@@ -26,6 +27,7 @@ class LLMServiceProvider(ServiceProvider):
 		helping users understand which AI capabilities are available.
 		Usage: Called automatically during application startup
 		"""
+		event_bus = await container.make(EventBus)
 		llm_service = await container.make(LLMService)
 		console = await container.make(ConsoleService)
 
@@ -34,3 +36,9 @@ class LLMServiceProvider(ServiceProvider):
 		weak_model = llm_service._service_config.weak.params.model
 		console.print(f"│ [success]Main model:[/success] [info]{main_model}[/info]")
 		console.print(f"│ [success]Weak model:[/success] [info]{weak_model}[/info]")
+
+		# Register listener that calls list_in_context_files before each prompt
+		event_bus.on(
+			EventType.GATHER_REINFORCEMENT.value,
+			llm_service.add_reinforcement_hook,
+		)

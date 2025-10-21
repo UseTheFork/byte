@@ -340,17 +340,17 @@ class FileWatcherService(Service):
 		else:
 			return None
 
-	async def modify_user_request_hook(self, payload: Optional[Payload] = None):
-		if payload:
-			interrupted = payload.get("interrupted", False)
-			user_input = payload.get("user_input", "")
-			if interrupted and user_input is None:
-				# Scan context files for AI comments
-				ai_result = await self.scan_context_files_for_ai_comments()
+	async def modify_user_request_hook(self, payload: Payload) -> Payload:
+		interrupted = payload.get("interrupted", False)
+		user_input = payload.get("user_input", "")
+		if interrupted and user_input is None:
+			# Scan context files for AI comments
+			ai_result = await self.scan_context_files_for_ai_comments()
 
-				if ai_result:
-					payload = payload.set("user_input", ai_result["prompt"])
-					payload = payload.set("interrupted", False)
-					payload = payload.set("active_agent", ai_result["agent_type"])
+			# AI:
+			if ai_result:
+				payload.set("user_input", ai_result["prompt"])
+				payload.set("interrupted", False)
+				payload.set("active_agent", ai_result["agent_type"])
 
 		return payload

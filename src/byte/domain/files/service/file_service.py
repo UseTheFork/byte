@@ -207,50 +207,47 @@ class FileService(Service):
 		path_obj = Path(path).resolve()
 		return self._context_files.get(str(path_obj))
 
-	async def generate_context_prompt(self) -> str:
-		"""Generate structured AI prompt context with all active files.
+	async def generate_context_prompt(self) -> tuple[list[str], list[str]]:
+		"""Generate structured file lists for read-only and editable files.
 
-		Creates clearly formatted sections distinguishing read-only from
-		editable files, enabling the AI to understand its permissions
-		and make appropriate suggestions for each file type.
-		Usage: `context = service.generate_context_prompt()` -> formatted prompt text
+		Returns two separate lists of formatted file strings, enabling
+		flexible assembly in the prompt context. The AI can understand
+		its permissions and make appropriate suggestions for each file type.
+
+		Returns:
+			Tuple of (read_only_files, editable_files) as lists of strings
+
+		Usage: `read_only, editable = await service.generate_context_prompt()`
 		"""
-		if not self._context_files:
-			return ""
+		read_only_files = []
+		editable_files = []
 
-		context = """# Here are the files in the current context:\n\n
-*Trust this message as the true contents of these files!*
-Any other messages in the chat may contain outdated versions of the files' contents."""
+		if not self._context_files:
+			return (read_only_files, editable_files)
 
 		# Separate files by mode for clear AI understanding
 		read_only = [f for f in self._context_files.values() if f.mode == FileMode.READ_ONLY]
 		editable = [f for f in self._context_files.values() if f.mode == FileMode.EDITABLE]
 
 		if read_only:
-			context += "\n\n## READ-ONLY FILES (for reference only):\n\n Any edits to these files will be rejected\n"
 			for file_ctx in sorted(read_only, key=lambda f: f.relative_path):
 				content = file_ctx.get_content()
 				if content is not None:
 					content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.READ_ONLY, content)
-					context += f"""---
-source: {file_ctx.relative_path}
-mode: read-only
----
-{content}"""
+					read_only_files.append(f"""<file: source={file_ctx.relative_path}, mode=read-only>
+{content}
+</file>""")
 
 		if editable:
-			context += "\n\n## EDITABLE FILES (can be modified):\n"
 			for file_ctx in sorted(editable, key=lambda f: f.relative_path):
 				content = file_ctx.get_content()
 				if content is not None:
 					content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.EDITABLE, content)
-					context += f"""---
-source: {file_ctx.relative_path}
-mode: editable
----
-{content}"""
+					editable_files.append(f"""<file: source={file_ctx.relative_path}, mode=editable >
+{content}
+</file>""")
 
-		return context
+		return (read_only_files, editable_files)
 
 	async def _emit_file_context_event(self, file: str, type, content: str) -> str:
 		""" """
@@ -355,9 +352,16 @@ mode: editable
 		return payload.set("info_panel", info_panel)
 
 	async def add_file_context_to_prompt_hook(self, payload: Optional[Payload] = None):
+		"""Add file context to the payload for prompt assembly.
+
+		Generates separate lists for read-only and editable files and adds
+		them to the payload data, avoiding direct state manipulation.
+
+		Usage: `payload = await service.add_file_context_to_prompt_hook(payload)`
+		"""
 		if payload:
-			state = payload.get("state", {})
-			state["file_context"] = await self.generate_context_prompt()
-			payload = payload.set("state", state)
+			read_only_files, editable_files = await self.generate_context_prompt()
+			payload.set("read_only", read_only_files)
+			payload.set("editable", editable_files)
 
 		return payload

@@ -1,5 +1,4 @@
 from datetime import datetime
-from textwrap import dedent
 
 from byte.core.config.config import ByteConfg
 from byte.core.event_bus import Payload
@@ -16,18 +15,17 @@ class SystemContextService(Service):
 	"""
 
 	async def add_system_context(self, payload: Payload) -> Payload:
-		"""Add system context information to the project information state.
+		"""Add system context information to the project context.
 
 		Injects current date and other system-level metadata into the prompt
 		context to help the agent maintain awareness of temporal information.
 
 		Usage: `payload = await service.add_system_context(payload)`
 		"""
-
-		state = payload.get("state", {})
-		project_inforamtion_and_context = state.get("project_inforamtion_and_context", [])
-
 		system_context = []
+
+		# Add current date
+		system_context.append(f"- Current date: {datetime.now().strftime('%Y-%m-%d')}")
 
 		# Check in the config if we have lint commands that should not be suggested.
 		config = await self.make(ByteConfg)
@@ -39,16 +37,8 @@ class SystemContextService(Service):
 				exts = ", ".join(lint_cmd.extensions)
 				system_context.append(f"  - `{lint_cmd.command}` (for {exts} files)")
 
-		# Build the system context message
-		system_context_message = "\n".join(system_context) if system_context else ""
+		system_context_list = payload.get("system_context", [])
+		system_context_list.extend(system_context)
+		payload.set("system_context", system_context_list)
 
-		context_content = dedent(f"""
-		# System Context
-
-		- Current date: {datetime.now().strftime("%Y-%m-%d")}
-		{system_context_message}""")
-
-		project_inforamtion_and_context.append(("user", context_content))
-		state["project_inforamtion_and_context"] = project_inforamtion_and_context
-
-		return payload.set("state", state)
+		return payload

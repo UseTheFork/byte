@@ -8,6 +8,7 @@ from byte.context import container_context
 from byte.core.cli import cli
 from byte.core.config.config import ByteConfg
 from byte.core.task_manager import TaskManager
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
 
 
@@ -46,8 +47,10 @@ class Byte:
 				await input_service.execute()
 			except KeyboardInterrupt:
 				break
-			except Exception as e:
-				print(f"Error: {e}")
+			except Exception:
+				# TODO: This should only `print_exception` if in devmode.
+				console = await self.container.make(ConsoleService)
+				console.console.print_exception(show_locals=True)
 
 
 async def main(config: ByteConfg):

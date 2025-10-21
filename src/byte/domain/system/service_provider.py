@@ -35,7 +35,7 @@ class SystemServiceProvider(ServiceProvider):
 		system_context_service = await container.make(SystemContextService)
 
 		event_bus.on(
-			EventType.PRE_ASSISTANT_NODE.value,
+			EventType.GATHER_PROJECT_CONTEXT.value,
 			system_context_service.add_system_context,
 		)
 

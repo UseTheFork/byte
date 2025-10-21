@@ -10,9 +10,6 @@ from byte.domain.cli.service.console_service import ConsoleService
 
 
 class ToolNode(Node, UserInteractive):
-	async def boot(self, tools: list, **kwargs):
-		self.tools_by_name = {tool.name: tool for tool in tools}
-
 	async def __call__(self, inputs):
 		if messages := inputs.get("messages", []):
 			message = messages[-1]

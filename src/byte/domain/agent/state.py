@@ -2,6 +2,7 @@ from typing import Annotated, TypedDict
 
 from langgraph.graph.message import AnyMessage, add_messages
 
+from byte.domain.agent.reducers import replace_list
 from byte.domain.edit_format.service.edit_format_service import SearchReplaceBlock
 
 
@@ -16,7 +17,7 @@ class BaseState(TypedDict):
 
 	agent: str
 
-	errors: list[AnyMessage]
+	errors: Annotated[list[AnyMessage], replace_list]
 	examples: list[AnyMessage]
 
 	# TODO: This should be a str or a pydantic base model

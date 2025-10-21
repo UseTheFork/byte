@@ -2,6 +2,7 @@ from typing import Any
 
 from langchain_core.language_models import BaseChatModel
 
+from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
 from byte.domain.llm.schemas import AnthropicSchema, GoogleSchema, LLMSchema, OpenAiSchema
 
@@ -69,3 +70,33 @@ class LLMService(Service):
 		Usage: `weak_model = service.get_weak_model()` -> faster/cheaper model
 		"""
 		return self.get_model("weak")
+
+	async def add_reinforcement_hook(self, payload: Payload) -> Payload:
+		"""Add reinforcement messages based on model's reinforcement mode.
+
+		Checks the reinforcement mode of the model being used and adds
+		appropriate reinforcement messages if configured.
+
+		Usage: `payload = await service.add_reinforcement_hook(payload)`
+		"""
+		mode = payload.get("mode", "main")
+
+		# Select model schema based on mode
+		model_schema = self._service_config.main if mode == "main" else self._service_config.weak
+
+		reinforcement = []
+
+		# Check reinforcement mode and add messages accordingly
+		if model_schema.behavior.reinforcement_mode.value == "eager":
+			# Add strong reinforcement for eager mode
+			reinforcement.append("IMPORTANT: Follow all instructions precisely and use the exact format specified.")
+		elif model_schema.behavior.reinforcement_mode.value == "lazy":
+			# Add gentle reinforcement for lazy mode
+			reinforcement.append("Remember to follow the specified format in your response.")
+
+		# Get existing list and extend with reinforcement messages
+		reinforcement_list = payload.get("reinforcement", [])
+		reinforcement_list.extend(reinforcement)
+		payload.set("reinforcement", reinforcement_list)
+
+		return payload

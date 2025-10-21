@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Any, Dict, Type
 
 from langchain_anthropic import ChatAnthropic
@@ -6,6 +7,18 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 from pydantic import Field
 from pydantic.dataclasses import dataclass
+
+
+class ReinforcementMode(str, Enum):
+	"""Strategy for adding reinforcement messages to model prompts.
+
+	Controls whether and how strongly to reinforce instructions to ensure
+	the model follows guidelines and produces desired output format.
+	"""
+
+	NONE = "none"
+	LAZY = "lazy"
+	EAGER = "eager"
 
 
 @dataclass
@@ -41,11 +54,24 @@ class ModelParams:
 
 
 @dataclass
+class ModelBehavior:
+	"""Behavioral configuration for model prompt engineering and output handling.
+
+	Defines ByteSmith-specific behaviors that control how prompts are constructed
+	and how the model is guided, separate from LangChain model parameters.
+	Usage: `behavior = ModelBehavior(reinforcement_mode=ReinforcementMode.EAGER)`
+	"""
+
+	reinforcement_mode: ReinforcementMode = ReinforcementMode.NONE
+
+
+@dataclass
 class ModelSchema:
 	"""Configuration for the main LLM model used for primary tasks."""
 
 	params: ModelParams = Field(default_factory=ModelParams)
 	constraints: ModelConstraints = Field(default_factory=ModelConstraints)
+	behavior: ModelBehavior = Field(default_factory=ModelBehavior)
 
 
 @dataclass
@@ -86,6 +112,9 @@ class AnthropicSchema(LLMSchema):
 				input_cost_per_token=0.000003,
 				output_cost_per_token=0.000015,
 			),
+			behavior=ModelBehavior(
+				reinforcement_mode=ReinforcementMode.EAGER,
+			),
 		)
 	)
 	weak: ModelSchema = Field(
@@ -99,6 +128,9 @@ class AnthropicSchema(LLMSchema):
 				max_output_tokens=8192,
 				input_cost_per_token=(0.80 / 1000000),
 				output_cost_per_token=(4 / 1000000),
+			),
+			behavior=ModelBehavior(
+				reinforcement_mode=ReinforcementMode.NONE,
 			),
 		)
 	)
@@ -127,6 +159,9 @@ class OpenAiSchema(LLMSchema):
 				output_cost_per_token=(10 / 1000000),
 				input_cost_per_token_cached=(0.125 / 1000000),
 			),
+			behavior=ModelBehavior(
+				reinforcement_mode=ReinforcementMode.NONE,
+			),
 		)
 	)
 	weak: ModelSchema = Field(
@@ -141,6 +176,9 @@ class OpenAiSchema(LLMSchema):
 				input_cost_per_token=(0.25 / 1000000),
 				output_cost_per_token=(2 / 1000000),
 				input_cost_per_token_cached=(0.025 / 1000000),
+			),
+			behavior=ModelBehavior(
+				reinforcement_mode=ReinforcementMode.NONE,
 			),
 		)
 	)
@@ -169,6 +207,9 @@ class GoogleSchema(LLMSchema):
 				output_cost_per_token=(15 / 1000000),
 				input_cost_per_token_cached=(0.25 / 1000000),
 			),
+			behavior=ModelBehavior(
+				reinforcement_mode=ReinforcementMode.NONE,
+			),
 		)
 	)
 	weak: ModelSchema = Field(
@@ -183,6 +224,9 @@ class GoogleSchema(LLMSchema):
 				input_cost_per_token=(0.3 / 1000000),
 				output_cost_per_token=(2.5 / 1000000),
 				input_cost_per_token_cached=(0.03 / 1000000),
+			),
+			behavior=ModelBehavior(
+				reinforcement_mode=ReinforcementMode.NONE,
 			),
 		)
 	)

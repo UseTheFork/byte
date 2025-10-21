@@ -48,13 +48,13 @@ class KnowledgeServiceProvider(ServiceProvider):
 
 		# Register listener that calls list_in_context_files before each prompt
 		event_bus.on(
-			EventType.PRE_ASSISTANT_NODE.value,
+			EventType.GATHER_PROJECT_CONTEXT.value,
 			conventions_service.add_project_context_hook,
 		)
 
 		# Register listener that calls list_in_context_files before each prompt
 		event_bus.on(
-			EventType.PRE_ASSISTANT_NODE.value,
+			EventType.GATHER_PROJECT_CONTEXT.value,
 			session_context_service.add_session_context_hook,
 		)
 

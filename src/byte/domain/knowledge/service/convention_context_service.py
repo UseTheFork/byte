@@ -29,39 +29,26 @@ class ConventionContextService(Service):
 			return
 
 		# Iterate over all .md files in the conventions directory
+
 		for md_file in sorted(conventions_dir.glob(pattern="*.md", case_sensitive=False)):
 			try:
 				content = md_file.read_text(encoding="utf-8")
 				# Format as a document with filename header and separator
-				formatted_doc = f"---\n title: {md_file.name.title()}\nsource: {md_file}\n---\n\n{content}"
+				formatted_doc = dedent(f"""
+				<convention: title={md_file.name.title()}, source={md_file} >
+				{content}
+				</convention>""")
 				self.conventions.add(md_file.name, formatted_doc)
 			except Exception:
 				pass
 
 	async def add_project_context_hook(self, payload: Payload) -> Payload:
-		"""Inject convention context into the prompt state.
-
-		Aggregates all stored convention documents and adds them to the
-		project_inforamtion_and_context list for inclusion in the prompt.
-		Usage: `result = await service.add_project_context_hook(payload)`
-		"""
-		state = payload.get("state", {})
-		project_inforamtion_and_context = state.get("project_inforamtion_and_context", [])
-
 		if self.conventions.is_not_empty():
 			conventions = "\n\n".join(self.conventions.all().values())
 
-			project_inforamtion_and_context.append(
-				(
-					"user",
-					dedent(f"""
-					# Coding and Project Conventions
-					**Important:** Adhere to the following project-specific conventions.
-					{conventions}
-					"""),
-				)
-			)
+			# Get existing list and append
+			conventions_list = payload.get("conventions", [])
+			conventions_list.append(conventions)
+			payload.set("conventions", conventions_list)
 
-		state["project_inforamtion_and_context"] = project_inforamtion_and_context
-
-		return payload.set("state", state)
+		return payload

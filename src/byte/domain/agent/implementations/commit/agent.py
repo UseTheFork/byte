@@ -36,7 +36,6 @@ class CommitAgent(Agent):
 		graph.add_node("extract_node", await self.make(ExtractNode))
 		graph.add_node("assistant_node", await self.make(AssistantNode))
 		graph.add_node("end_node", await self.make(EndNode))
-		graph.add_node("extract_commit_node", self._extract_commit)
 
 		# Define edges
 		graph.add_edge(START, "start_node")
@@ -47,16 +46,6 @@ class CommitAgent(Agent):
 
 		# Compile graph with memory and configuration
 		return graph.compile()
-
-	def _extract_commit(self, state: CommitState):
-		"""Extract commit message from assistant response and update state.
-
-		Usage: `result = agent._extract_commit(state)` -> {"commit_message": "fix: ..."}
-		"""
-		messages = state["messages"]
-		last_message = messages[-1]
-
-		return {"commit_message": last_message.content}
 
 	async def get_assistant_runnable(self) -> AssistantContextSchema:
 		llm_service = await self.make(LLMService)

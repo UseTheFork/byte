@@ -3,7 +3,7 @@ import time
 from enum import Enum
 from typing import Any, Callable, Dict, List, TypeVar
 
-from pydantic.dataclasses import dataclass as pydantic_dataclass
+from byte.core.array_store import ArrayStore
 
 T = TypeVar("T")
 
@@ -24,34 +24,50 @@ class EventType(Enum):
 	PRE_ASSISTANT_NODE = "pre_assistant_node"
 	POST_ASSISTANT_NODE = "post_assistant_node"
 
+	GATHER_PROJECT_CONTEXT = "gather_project_context"
+	GATHER_FILE_CONTEXT = "gather_file_context"
+	GATHER_REINFORCEMENT = "gather_reinforcement"
 
-@pydantic_dataclass
+
 class Payload:
-	"""Generic event payload that can carry any data."""
+	"""Generic event payload that can carry any data using ArrayStore."""
 
-	event_type: EventType
-	data: Dict[str, Any]
-	timestamp: float = 0.0
+	def __init__(
+		self,
+		event_type: EventType,
+		data: ArrayStore | dict[str, Any] | None = None,
+		timestamp: float | None = None,
+	):
+		"""Initialize a Payload with event type and optional data.
 
-	def __post_init__(self):
-		if self.timestamp == 0.0:
-			self.timestamp = time.time()
+		Usage: `payload = Payload(EventType.FILE_ADDED, {"path": "file.py"})`
+		"""
+		self.event_type = event_type
+		self.timestamp = timestamp if timestamp is not None else time.time()
+
+		# Ensure data is an ArrayStore instance
+		if data is None:
+			self.data = ArrayStore()
+		elif isinstance(data, ArrayStore):
+			self.data = data
+		elif isinstance(data, dict):
+			self.data = ArrayStore(data)
+		else:
+			self.data = ArrayStore()
 
 	def get(self, key: str, default: Any = None) -> Any:
 		"""Get data value with optional default."""
 		return self.data.get(key, default)
 
 	def set(self, key: str, value: Any) -> "Payload":
-		"""Return new Payload with updated data."""
-		new_data = self.data.copy()
-		new_data[key] = value
-		return Payload(event_type=self.event_type, data=new_data, timestamp=self.timestamp)
+		"""Update the data store with a key-value pair and return self."""
+		self.data.add(key, value)
+		return self
 
 	def update(self, updates: Dict[str, Any]) -> "Payload":
-		"""Return new Payload with multiple updates."""
-		new_data = self.data.copy()
-		new_data.update(updates)
-		return Payload(event_type=self.event_type, data=new_data, timestamp=self.timestamp)
+		"""Merge multiple updates into the data store and return self."""
+		self.data.merge(updates)
+		return self
 
 
 class EventBus:

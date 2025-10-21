@@ -349,7 +349,9 @@ class EditBlockService(Service, UserInteractive):
 
 		state["masked_messages"] = masked_messages
 
-		return payload.set("state", state)
+		payload = payload.set("state", state)
+
+		return payload
 
 
 # from langchain_core.messages import BaseMessage, convert_to_messages

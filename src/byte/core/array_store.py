@@ -1,7 +1,6 @@
 from typing import Any, Optional
 
 from byte.core.mixins.conditionable import Conditionable
-from byte.core.utils import value
 
 
 class ArrayStore(Conditionable):
@@ -25,7 +24,7 @@ class ArrayStore(Conditionable):
 
 		Usage: `store.add("key", "value")` or `store.add("key", lambda: compute())`
 		"""
-		self._data[key] = value(val)
+		self._data[key] = val
 		return self
 
 	def get(self, key: str, default: Any = None) -> Any:
