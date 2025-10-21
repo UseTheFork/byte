@@ -188,7 +188,7 @@ wheels = [
 
 [[package]]
 name = "byte-ai-cli"
-version = "0.1.9"
+version = "0.1.10"
 source = { editable = "." }
 dependencies = [
     { name = "aiosqlite" },

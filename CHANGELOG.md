@@ -1,10 +1,28 @@
+## [0.1.10] - 2025-10-21
+
+### 🚀 Features
+
+- Simplify agent architecture with context-based schema
+- Modify event handling to support more flexible context gathering
+
+### 🚜 Refactor
+
+- Simplify agent state management and graph navigation
+- Remove pyright ignore comments and simplify logging configuration
+
+### 📚 Documentation
+
+- Update CHANGELOG.md with latest release notes
+
+### ⚙️ Miscellaneous Tasks
+
+- Prepare release 0.1.9 with updated package version
 ## [0.1.9] - 2025-10-20
 
 ### ⚙️ Miscellaneous Tasks
 
 - Prepare release 0.1.8 with updated workflows and package configuration
 - Update PyPI release workflow configuration
-
 ## [0.1.8] - 2025-10-20
 
 ### ⚙️ Miscellaneous Tasks
@@ -13,14 +31,12 @@
 - Consolidate workflows by removing duplicate publish-to-pypi.yml
 - Update package name to byte-ai-cli in project configuration
 - Update release workflow for PyPI publication
-
 ## [0.1.7] - 2025-10-20
 
 ### ⚙️ Miscellaneous Tasks
 
 - Update project development status classifier
 - Update project version to 0.1.7 and add changelog
-
 ## [0.1.6] - 2025-10-20
 
 ### 🚀 Features
@@ -205,7 +221,7 @@
 - Update config structure and CLI configuration settings
 - Use rich Text for improved markdown stream rendering
 - Replace ByteCheckpointer with InMemorySaver in memory service
-- Simplify agent architecture with new AssistantContextSchema schema
+- Simplify agent architecture with new AssistantRunnable schema
 - Extract console service and replace rich.console usage
 - Remove custom rich panel and rule classes, consolidate styling in console service
 - Improve console rendering and add newline after user input
