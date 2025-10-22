@@ -15,6 +15,7 @@ from byte.domain.edit_format.service.edit_block_service import EditBlockService
 from byte.domain.edit_format.service.shell_command_service import ShellCommandService
 from byte.domain.files.service.discovery_service import FileDiscoveryService
 from byte.domain.files.service.file_service import FileService
+from byte.domain.memory.service.memory_service import MemoryService
 
 
 @pytest.fixture(scope="session")
@@ -89,6 +90,8 @@ async def test_container(test_config: ByteConfg) -> AsyncGenerator[Container, No
 	# Register edit format service
 	container.singleton(EditBlockService)
 	container.singleton(ShellCommandService)
+
+	container.singleton(MemoryService)
 
 	yield container
 
