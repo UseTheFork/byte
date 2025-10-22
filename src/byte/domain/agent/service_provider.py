@@ -11,6 +11,7 @@ from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.agent.implementations.commit.agent import CommitAgent
 from byte.domain.agent.implementations.copy.agent import CopyAgent
 from byte.domain.agent.implementations.research.agent import ResearchAgent
+from byte.domain.agent.implementations.subprocess.agent import SubprocessAgent
 from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.nodes.copy_node import CopyNode
@@ -19,6 +20,7 @@ from byte.domain.agent.nodes.extract_node import ExtractNode
 from byte.domain.agent.nodes.lint_node import LintNode
 from byte.domain.agent.nodes.parse_blocks_node import ParseBlocksNode
 from byte.domain.agent.nodes.start_node import StartNode
+from byte.domain.agent.nodes.subprocess_node import SubprocessNode
 from byte.domain.agent.nodes.tool_node import ToolNode
 from byte.domain.agent.service.agent_service import AgentService
 from byte.domain.cli.service.command_registry import Command
@@ -45,6 +47,7 @@ class AgentServiceProvider(ServiceProvider):
 			CleanerAgent,
 			ResearchAgent,
 			CopyAgent,
+			SubprocessAgent,
 			# keep-sorted end
 		]
 
@@ -62,6 +65,7 @@ class AgentServiceProvider(ServiceProvider):
 			ExtractNode,
 			ToolNode,
 			CopyNode,
+			SubprocessNode,
 			# keep-sorted end
 		]
 

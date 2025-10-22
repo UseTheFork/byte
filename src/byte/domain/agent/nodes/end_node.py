@@ -10,13 +10,14 @@ from byte.domain.agent.state import BaseState
 
 class EndNode(Node):
 	async def __call__(self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]):
-		payload = Payload(
-			event_type=EventType.END_NODE,
-			data={
-				"state": state,
-				"agent": runtime.context.agent,
-			},
-		)
-		await self.emit(payload)
+		if runtime is not None and runtime.context is not None:
+			payload = Payload(
+				event_type=EventType.END_NODE,
+				data={
+					"state": state,
+					"agent": runtime.context.agent,
+				},
+			)
+			await self.emit(payload)
 
 		return Command(goto=END, update=state)

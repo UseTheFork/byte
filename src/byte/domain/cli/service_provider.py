@@ -9,13 +9,19 @@ from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
 from byte.domain.cli.service.stream_rendering_service import (
 	StreamRenderingService,
 )
+from byte.domain.cli.service.subprocess_service import SubprocessService
 
 
 class CLIServiceProvider(ServiceProvider):
 	"""Service provider for UI system."""
 
 	def services(self):
-		return [StreamRenderingService, InteractionService, PromptToolkitService]
+		return [
+			StreamRenderingService,
+			InteractionService,
+			PromptToolkitService,
+			SubprocessService,
+		]
 
 	async def boot(self, container: Container):
 		"""Boot UI services."""

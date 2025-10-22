@@ -59,3 +59,9 @@ class CleanerState(BaseState):
 	"""
 
 	cleaned_content: str
+
+
+class SubprocessState(BaseState):
+	""" """
+
+	command: str

@@ -23,7 +23,7 @@ class AssistantContextSchema:
 	Usage: `ToolNode(tools=config.tools) if config.tools else None`
 	"""
 
-	mode: Literal["main", "weak"]  # Which AI model the runnable uses
+	mode: Literal["main", "weak"]  # Which model the runnable uses
 	prompt: BasePromptTemplate  # The prompt | llm chain to execute
 	main: BaseChatModel  # Reference to the main LLM for complex reasoning
 	weak: BaseChatModel  # Reference to the weak LLM for simple operations

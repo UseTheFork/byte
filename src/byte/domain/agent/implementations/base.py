@@ -1,6 +1,6 @@
 import asyncio
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Optional, Type, TypedDict
+from typing import TYPE_CHECKING, Any, Literal, Optional, Type, TypedDict
 
 from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 
@@ -72,7 +72,7 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
 		self,
 		request: dict,
 		thread_id: Optional[str] = None,
-		display_mode: str = "verbose",
+		display_mode: Literal["verbose", "thinking", "silent"] = "verbose",
 	):
 		"""Stream agent responses using astream_events for comprehensive event handling.
 

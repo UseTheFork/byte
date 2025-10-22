@@ -9,6 +9,7 @@ from rich.console import Group
 from byte.core.config.config import ByteConfg
 from byte.core.event_bus import EventType, Payload
 from byte.core.service.base_service import Service
+from byte.domain.agent.implementations.subprocess.agent import SubprocessAgent
 from byte.domain.agent.service.agent_service import AgentService
 from byte.domain.cli.service.command_registry import CommandRegistry
 from byte.domain.cli.service.console_service import ConsoleService
@@ -147,10 +148,12 @@ class PromptToolkitService(Service):
 		if not interrupted:
 			if user_input.startswith("/"):
 				await self._handle_command_input(user_input)
+			elif user_input.startswith("!"):
+				await self._handle_subcommand_input(user_input)
 			else:
 				# Only execute agent if user provided non-empty input
 				if user_input.strip():
-					await agent_service.execute_agent([("user", user_input)], active_agent)
+					await agent_service.execute_agent({"messages": [("user", user_input)]}, active_agent)
 
 	async def _handle_command_input(self, user_input: str):
 		"""Parse and execute slash commands.
@@ -175,6 +178,21 @@ class PromptToolkitService(Service):
 			await command.execute(args)
 		else:
 			console.print_error(f"Unknown command: /{command_name}")
+
+	async def _handle_subcommand_input(self, user_input: str):
+		"""Parse and execute subcommands starting with !.
+
+		Args:
+			user_input: Raw user input starting with !
+
+		Usage: Called internally when user input starts with !
+		"""
+
+		user_input = user_input[1:]
+
+		subprocess_agent = await self.make(SubprocessAgent)
+		await subprocess_agent.execute({"command": user_input}, display_mode="silent")
+		# TODO: Should we execute somthing after this?
 
 	async def interrupt(self):
 		"""Interrupt the current prompt and preserve user input.

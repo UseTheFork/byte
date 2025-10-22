@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Optional
 
 from pydantic.dataclasses import dataclass
 
@@ -154,3 +154,19 @@ class ThemeRegistry:
 			ByteTheme: The requested Catppuccin theme instance
 		"""
 		return getattr(self, variant)
+
+
+@dataclass(frozen=True)
+class SubprocessResult:
+	"""Result of a subprocess execution.
+
+	Contains the exit code, stdout, and stderr from running a subprocess command.
+
+	Usage: `result = SubprocessResult(exit_code=0, stdout="output", stderr="")`
+	"""
+
+	exit_code: int
+	stdout: str
+	stderr: str
+	command: str
+	cwd: Optional[str] = None
