@@ -2,8 +2,7 @@ from typing import Annotated, TypedDict
 
 from langgraph.graph.message import AnyMessage, add_messages
 
-from byte.domain.agent.reducers import add_token_usage, replace_list
-from byte.domain.agent.schemas import TokenUsageSchema
+from byte.domain.agent.reducers import replace_list
 from byte.domain.edit_format.service.edit_format_service import SearchReplaceBlock
 
 
@@ -23,9 +22,6 @@ class BaseState(TypedDict):
 
 	# TODO: This should be a str or a pydantic base model
 	extracted_content: str
-
-	llm_main_usage: Annotated[TokenUsageSchema, add_token_usage]
-	llm_weak_usage: Annotated[TokenUsageSchema, add_token_usage]
 
 
 class CoderState(BaseState):

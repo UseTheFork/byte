@@ -10,7 +10,6 @@ from byte.domain.agent.implementations.cleaner.agent import CleanerAgent
 from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.agent.implementations.commit.agent import CommitAgent
 from byte.domain.agent.implementations.copy.agent import CopyAgent
-from byte.domain.agent.implementations.fixer.agent import FixerAgent
 from byte.domain.agent.implementations.research.agent import ResearchAgent
 from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.base_node import Node
@@ -42,7 +41,6 @@ class AgentServiceProvider(ServiceProvider):
 			# keep-sorted start
 			CoderAgent,
 			CommitAgent,
-			FixerAgent,
 			AskAgent,
 			CleanerAgent,
 			ResearchAgent,

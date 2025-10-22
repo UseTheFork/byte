@@ -70,7 +70,7 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
 
 	async def execute(
 		self,
-		request: Any,
+		request: dict,
 		thread_id: Optional[str] = None,
 		display_mode: str = "verbose",
 	):
@@ -96,7 +96,7 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
 
 		# Create initial state using the agent's state class
 		State = self.get_state_class()
-		initial_state = State(**request)
+		initial_state = State(request)
 
 		# Get the graph and stream events
 		graph = await self.get_graph()

@@ -10,6 +10,7 @@ from byte.core.event_bus import EventType, Payload
 from byte.core.logging import log
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.schemas import AssistantContextSchema, TokenUsageSchema
+from byte.domain.analytics.service.agent_analytics_service import AgentAnalyticsService
 
 
 class AssistantNode(Node):
@@ -175,6 +176,31 @@ class AssistantNode(Node):
 
 		return [HumanMessage(project_inforamtion_and_context)]
 
+	async def _track_token_usage(self, result: AIMessage, mode: str) -> None:
+		"""Track token usage from AI response and update analytics.
+
+		Extracts usage metadata from the AI message and records it in the
+		analytics service based on the current AI mode (main or weak).
+
+		Args:
+			result: The AI message containing usage metadata
+			mode: The AI mode being used ("main" or "weak")
+
+		Usage: `await self._track_token_usage(result, runtime.context.mode)`
+		"""
+		if result.usage_metadata:
+			usage_metadata = result.usage_metadata
+			usage = TokenUsageSchema(
+				input_tokens=usage_metadata.get("input_tokens", 0),
+				output_tokens=usage_metadata.get("output_tokens", 0),
+				total_tokens=usage_metadata.get("total_tokens", 0),
+			)
+			agent_analytics_service = await self.make(AgentAnalyticsService)
+			if mode == "main":
+				await agent_analytics_service.update_main_usage(usage)
+			else:
+				await agent_analytics_service.update_weak_usage(usage)
+
 	async def __call__(self, state, config, runtime: Runtime[AssistantContextSchema]):
 		while True:
 			state["project_inforamtion_and_context"] = await self._gather_project_context()
@@ -206,28 +232,7 @@ class AssistantNode(Node):
 			result = await runnable.ainvoke(state, config=config)
 
 			result = cast(AIMessage, result)
-
-			# Create token usage schemas based on which AI mode was used
-			if result.usage_metadata:
-				usage_metadata = result.usage_metadata
-				if runtime.context.mode == "main":
-					main_usage = TokenUsageSchema(
-						input_tokens=usage_metadata.get("input_tokens", 0),
-						output_tokens=usage_metadata.get("output_tokens", 0),
-						total_tokens=usage_metadata.get("total_tokens", 0),
-					)
-					weak_usage = TokenUsageSchema()
-				else:
-					main_usage = TokenUsageSchema()
-					weak_usage = TokenUsageSchema(
-						input_tokens=usage_metadata.get("input_tokens", 0),
-						output_tokens=usage_metadata.get("output_tokens", 0),
-						total_tokens=usage_metadata.get("total_tokens", 0),
-					)
-			else:
-				# No usage metadata available, initialize with zeros
-				main_usage = TokenUsageSchema()
-				weak_usage = TokenUsageSchema()
+			await self._track_token_usage(result, runtime.context.mode)
 
 			# Ensure we get a real response
 			if not result.tool_calls and (
@@ -239,11 +244,7 @@ class AssistantNode(Node):
 			elif result.tool_calls and len(result.tool_calls) > 0:
 				return Command(
 					goto="tools_node",
-					update={
-						"messages": [result],
-						"llm_main_usage": main_usage,
-						"llm_weak_usage": weak_usage,
-					},
+					update={"messages": [result]},
 				)
 			else:
 				break
@@ -252,9 +253,5 @@ class AssistantNode(Node):
 
 		return Command(
 			goto="end_node",
-			update={
-				"messages": [result],
-				"llm_main_usage": main_usage,
-				"llm_weak_usage": weak_usage,
-			},
+			update={"messages": [result]},
 		)

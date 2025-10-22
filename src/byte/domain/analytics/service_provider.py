@@ -36,9 +36,3 @@ class AnalyticsProvider(ServiceProvider):
 			EventType.PRE_PROMPT_TOOLKIT.value,
 			agent_analytics_service.usage_panel_hook,
 		)
-
-		# Register listener to update analytics after agent completion
-		event_bus.on(
-			EventType.END_NODE.value,
-			agent_analytics_service.update_usage_analytics_hook,
-		)

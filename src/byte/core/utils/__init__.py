@@ -13,13 +13,25 @@ def dump(*args, **kwargs):
 	dump(locals())
 	dump(globals())
 	"""
-	# Get caller information
+
+	# Get caller information and build call stack
 	frame = inspect.currentframe().f_back
 	filename = frame.f_code.co_filename
 	lineno = frame.f_lineno
 
+	# Trace the call stack
+	call_chain = []
+	current_frame = frame
+	while current_frame is not None:
+		frame_info = f"{current_frame.f_code.co_filename}:{current_frame.f_lineno} in {current_frame.f_code.co_name}()"
+		call_chain.append(frame_info)
+		current_frame = current_frame.f_back
+
 	# Print location information
-	print(f"[dim]Debug output from {filename}:{lineno}[/dim]")
+	pprint(f"Debug output from {filename}:{lineno}")
+	pprint("Call chain:")
+	for i, call in enumerate(call_chain):
+		pprint(f"  {i}: {call}")
 
 	if not args and not kwargs:
 		# If no arguments, dump the caller's locals
