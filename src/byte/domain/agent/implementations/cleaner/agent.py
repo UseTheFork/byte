@@ -39,7 +39,7 @@ class CleanerAgent(Agent, UserInteractive):
 
 		# Add nodes
 		graph.add_node("start_node", await self.make(StartNode))
-		graph.add_node("assistant_node", await self.make(AssistantNode))
+		graph.add_node("assistant_node", await self.make(AssistantNode, goto="extract_node"))
 		graph.add_node("extract_node", await self.make(ExtractNode))
 		graph.add_node("end_node", await self.make(EndNode))
 

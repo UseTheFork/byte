@@ -11,10 +11,12 @@ from byte.core.config.config import ByteConfg
 from byte.core.event_bus import EventBus
 from byte.core.task_manager import TaskManager
 from byte.domain.cli.service.command_registry import CommandRegistry
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.edit_format.service.edit_block_service import EditBlockService
 from byte.domain.edit_format.service.shell_command_service import ShellCommandService
 from byte.domain.files.service.discovery_service import FileDiscoveryService
 from byte.domain.files.service.file_service import FileService
+from byte.domain.files.service.ignore_service import FileIgnoreService
 from byte.domain.memory.service.memory_service import MemoryService
 
 
@@ -79,6 +81,8 @@ async def test_container(test_config: ByteConfg) -> AsyncGenerator[Container, No
 	# Register core services
 	container.singleton(EventBus)
 	container.singleton(TaskManager)
+
+	container.singleton(ConsoleService)
 	container.singleton(CommandRegistry)
 	container.singleton(ByteConfg, lambda: test_config)
 	container.singleton(Console, lambda: Console())
@@ -86,6 +90,7 @@ async def test_container(test_config: ByteConfg) -> AsyncGenerator[Container, No
 	# Register file-related services
 	container.singleton(FileDiscoveryService)
 	container.singleton(FileService)
+	container.singleton(FileIgnoreService)
 
 	# Register edit format service
 	container.singleton(EditBlockService)

@@ -11,9 +11,17 @@ from byte.core.logging import log
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.schemas import AssistantContextSchema, TokenUsageSchema
 from byte.domain.analytics.service.agent_analytics_service import AgentAnalyticsService
+from byte.domain.cli.service.console_service import ConsoleService
 
 
 class AssistantNode(Node):
+	async def boot(
+		self,
+		goto: str = "end_node",
+		**kwargs,
+	):
+		self.goto = goto
+
 	def _create_runnable(self, context: AssistantContextSchema) -> Runnable:
 		"""Create the runnable chain from context configuration.
 
@@ -108,20 +116,11 @@ class AssistantNode(Node):
 
 		if read_only_files:
 			read_only_content = "\n".join(read_only_files)
-			file_context_content += dedent(f"""
-			<read_only_files>
-			**Any edits to these files will be rejected**
-			{read_only_content}
-			</read_only_files>
-			""")
+			file_context_content += f"""<read_only_files>\n**Any edits to these files will be rejected**\n{read_only_content}\n</read_only_files>\n\n"""
 
 		if editable_files:
 			editable_content = "\n".join(editable_files)
-			file_context_content += dedent(f"""
-			<editable_files>
-			{editable_content}
-			</editable_files>
-			""")
+			file_context_content += f"""<editable_files>\n{editable_content}\n</editable_files>\n"""
 
 		return [HumanMessage(file_context_content)] if file_context_content else []
 
@@ -241,6 +240,11 @@ class AssistantNode(Node):
 				# Re-prompt for actual response
 				messages = state["messages"] + [("user", "Respond with a real output.")]
 				state = {**state, "messages": messages}
+				console = await self.make(ConsoleService)
+				console.print_warning_panel(
+					"AI did not provide proper output. Requesting a valid response...", title="Warning"
+				)
+
 			elif result.tool_calls and len(result.tool_calls) > 0:
 				return Command(
 					goto="tools_node",
@@ -252,6 +256,6 @@ class AssistantNode(Node):
 			await self.emit(payload)
 
 		return Command(
-			goto="end_node",
+			goto=self.goto,
 			update={"messages": [result]},
 		)

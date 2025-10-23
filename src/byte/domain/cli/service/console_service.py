@@ -196,6 +196,23 @@ class ConsoleService(Service):
 		kwargs.setdefault("border_style", "error")
 		self.console.print(self.panel(*args, **kwargs))
 
+	def print_warning_panel(self, *args, **kwargs):
+		"""Print a panel with warning styling to the console.
+
+		Creates and prints a panel with warning border styling for displaying
+		warning messages in a visually distinct way.
+
+		Usage:
+			`service.print_warning_panel("Warning message", title="Warning")`
+			`service.print_warning_panel(warning_text, subtitle="Details")`
+
+		Args:
+			*args: Positional arguments passed to panel()
+			**kwargs: Keyword arguments passed to panel(), with warning border style default
+		"""
+		kwargs.setdefault("border_style", "warning")
+		self.console.print(self.panel(*args, **kwargs))
+
 	def print_success_panel(self, *args, **kwargs):
 		"""Print a panel with success styling to the console.
 

@@ -336,9 +336,10 @@ class EditBlockService(Service, UserInteractive):
 		# Create masked_messages list identical to messages except for processed AIMessages
 		masked_messages = []
 		for index, message in enumerate(messages):
-			# Only process AIMessages that are not in the last 2
+			# Only process AIMessages that are not the last message
+			is_last_message = index == len(messages) - 1
 
-			if isinstance(message, AIMessage) and not isinstance(message.content, list):
+			if isinstance(message, AIMessage) and not isinstance(message.content, list) and not is_last_message:
 				# Create a copy of the message with blocks removed
 				masked_content = self.remove_blocks_from_content(str(message.content))
 				masked_message = AIMessage(content=masked_content)
@@ -352,6 +353,3 @@ class EditBlockService(Service, UserInteractive):
 		payload = payload.set("state", state)
 
 		return payload
-
-
-# from langchain_core.messages import BaseMessage, convert_to_messages

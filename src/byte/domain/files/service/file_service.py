@@ -234,18 +234,18 @@ class FileService(Service):
 				content = file_ctx.get_content()
 				if content is not None:
 					content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.READ_ONLY, content)
-					read_only_files.append(f"""<file: source={file_ctx.relative_path}, mode=read-only>
-{content}
-</file>""")
+					read_only_files.append(
+						f"""<file: source={file_ctx.relative_path}, mode=read-only>\n{content}\n</file>"""
+					)
 
 		if editable:
 			for file_ctx in sorted(editable, key=lambda f: f.relative_path):
 				content = file_ctx.get_content()
 				if content is not None:
 					content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.EDITABLE, content)
-					editable_files.append(f"""<file: source={file_ctx.relative_path}, mode=editable >
-{content}
-</file>""")
+					editable_files.append(
+						f"""<file: source={file_ctx.relative_path}, mode=editable>\n{content}\n</file>"""
+					)
 
 		return (read_only_files, editable_files)
 
