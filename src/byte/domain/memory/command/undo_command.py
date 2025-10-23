@@ -29,12 +29,12 @@ class UndoCommand(Command):
 		success = await memory_service.undo_last_step()
 
 		if success:
-			console.print_panel(
-				"[success]Successfully undone last step[/success]",
+			console.print_success_panel(
+				"Successfully undone last step",
 				title="Undo",
 			)
 		else:
-			console.print_panel(
-				"[error]Cannot undo: no previous checkpoint available[/error]",
+			console.print_error_panel(
+				"Cannot undo: no previous checkpoint available",
 				title="Undo Failed",
 			)
