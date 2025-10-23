@@ -4,6 +4,7 @@
 # git-cliff --tag {version} -o
 
 
-# git tag v1.0.0 -m "first release, yay!"
+# git tag v0.1.11
+# git push --tags
 
 # t
