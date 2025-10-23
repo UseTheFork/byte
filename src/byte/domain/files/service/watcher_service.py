@@ -6,6 +6,7 @@ from typing import List, Optional, Set
 from watchfiles import Change, awatch
 
 from byte.core.event_bus import Payload
+from byte.core.logging import log
 from byte.core.service.base_service import Service
 from byte.core.task_manager import TaskManager
 from byte.domain.agent.implementations.ask.agent import AskAgent
@@ -93,6 +94,7 @@ class FileWatcherService(Service):
 					file_path = Path(file_path_str)
 					await self._handle_file_change(file_path, change_type)
 		except Exception as e:
+			log.exception(e)
 			print(f"File watcher error: {e}")
 
 	async def _handle_file_change(self, file_path: Path, change_type: Change) -> None:

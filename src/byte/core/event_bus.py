@@ -4,6 +4,7 @@ from enum import Enum
 from typing import Any, Callable, Dict, List, TypeVar
 
 from byte.core.array_store import ArrayStore
+from byte.core.logging import log
 
 T = TypeVar("T")
 
@@ -103,7 +104,7 @@ class EventBus:
 					current_payload = result
 
 			except Exception as e:
-				# TODO: Make this use Logguru.
+				log.exception(e)
 				print(f"Error in event listener for '{event_name}': {e}")
 
 		return current_payload
