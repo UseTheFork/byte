@@ -9,7 +9,7 @@ from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.agent.state import BaseState
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.edit_format.exceptions import PreFlightCheckError
-from byte.domain.edit_format.models import BlockStatus
+from byte.domain.edit_format.schemas import BlockStatus
 from byte.domain.edit_format.service.edit_format_service import (
 	EditFormatService,
 )

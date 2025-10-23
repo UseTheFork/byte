@@ -8,7 +8,7 @@ from byte.core.event_bus import Payload
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
 from byte.domain.edit_format.exceptions import PreFlightCheckError
-from byte.domain.edit_format.models import (
+from byte.domain.edit_format.schemas import (
 	BlockStatus,
 	BlockType,
 	EditFormatPrompts,
@@ -333,13 +333,16 @@ class EditBlockService(Service, UserInteractive):
 		state = payload.get("state", False)
 		messages = state["messages"]
 
+		# Get mask_message_count from config
+		mask_count = self._config.edit_format.mask_message_count if self._config else 1
+
 		# Create masked_messages list identical to messages except for processed AIMessages
 		masked_messages = []
 		for index, message in enumerate(messages):
-			# Only process AIMessages that are not the last message
-			is_last_message = index == len(messages) - 1
+			# Only process AIMessages that are not in the last N messages (where N = mask_message_count)
+			is_within_mask_range = index >= len(messages) - mask_count
 
-			if isinstance(message, AIMessage) and not isinstance(message.content, list) and not is_last_message:
+			if isinstance(message, AIMessage) and not isinstance(message.content, list) and not is_within_mask_range:
 				# Create a copy of the message with blocks removed
 				masked_content = self.remove_blocks_from_content(str(message.content))
 				masked_message = AIMessage(content=masked_content)

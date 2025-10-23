@@ -25,7 +25,7 @@ class FirstBootInitializer:
 			"model": "anthropic",
 		},
 		"lint": {
-			"enabled": False,
+			"enable": False,
 			"commands": [
 				{
 					"command": "uv run ruff format --force-exclude --respect-gitignore",
@@ -44,15 +44,16 @@ class FirstBootInitializer:
 				"node_modules",
 			],
 			"watch": {
-				"enabled": False,
+				"enable": False,
 			},
 		},
 		"web": {
-			"enabled": False,
+			"enable": False,
 			"chrome_binary_location": "/usr/bin/google-chrome",
 		},
 		"edit_format": {
 			"enable_shell_commands": False,
+			"mask_message_count": 1,
 		},
 		# "mcp": [
 		# {

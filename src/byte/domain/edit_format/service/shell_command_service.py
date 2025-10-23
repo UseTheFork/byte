@@ -6,7 +6,7 @@ from typing import List
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
 from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.edit_format.models import (
+from byte.domain.edit_format.schemas import (
 	BlockStatus,
 	EditFormatPrompts,
 	ShellCommandBlock,

@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from byte.domain.edit_format.models import BlockStatus, ShellCommandBlock
+from byte.domain.edit_format.schemas import BlockStatus, ShellCommandBlock
 from byte.domain.edit_format.service.shell_command_service import ShellCommandService
 
 

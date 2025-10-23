@@ -10,7 +10,7 @@ from textwrap import dedent
 import pytest
 
 from byte.domain.edit_format.exceptions import PreFlightCheckError
-from byte.domain.edit_format.models import BlockType
+from byte.domain.edit_format.schemas import BlockType
 from byte.domain.edit_format.service.edit_block_service import EditBlockService
 from byte.domain.edit_format.service.edit_format_service import (
 	BlockStatus,
