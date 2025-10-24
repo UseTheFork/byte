@@ -2,14 +2,7 @@ from pathlib import Path
 from typing import List
 
 import git
-from dotenv import load_dotenv
-from pydantic import Field
-from pydantic_settings import (
-	BaseSettings,
-	PydanticBaseSettingsSource,
-	SettingsConfigDict,
-	YamlConfigSettingsSource,
-)
+from pydantic import BaseModel, Field
 
 from byte.domain.cli.config import CLIConfig
 from byte.domain.edit_format.config import EditFormatConfig
@@ -46,20 +39,13 @@ BYTE_CONFIG_FILE = BYTE_DIR / "config.yaml"
 
 # Load our dotenv
 DOTENV_PATH = PROJECT_ROOT / ".env"
-load_dotenv(DOTENV_PATH)
 
 
-class ByteConfg(BaseSettings):
-	model_config = SettingsConfigDict(
-		env_nested_delimiter="_",
-		env_nested_max_split=1,
-		env_prefix="BYTE_",
-		yaml_file=BYTE_CONFIG_FILE,
-	)
-
+class ByteConfg(BaseModel):
 	project_root: Path = Field(default=PROJECT_ROOT, exclude=True)
 	byte_dir: Path = Field(default=BYTE_DIR, exclude=True)
 	byte_cache_dir: Path = Field(default=BYTE_CACHE_DIR, exclude=True)
+	dotenv_loaded: bool = Field(default=False, exclude=True, description="Whether a .env file was successfully loaded")
 
 	cli: CLIConfig = CLIConfig()
 	llm: LLMConfig = LLMConfig()
@@ -68,14 +54,3 @@ class ByteConfg(BaseSettings):
 	edit_format: EditFormatConfig = EditFormatConfig()
 	web: WebConfig = WebConfig()
 	mcp: List[MCPServer] = []
-
-	@classmethod
-	def settings_customise_sources(
-		cls,
-		settings_cls: type[BaseSettings],
-		init_settings: PydanticBaseSettingsSource,
-		env_settings: PydanticBaseSettingsSource,
-		dotenv_settings: PydanticBaseSettingsSource,
-		file_secret_settings: PydanticBaseSettingsSource,
-	) -> tuple[PydanticBaseSettingsSource, ...]:
-		return (YamlConfigSettingsSource(settings_cls),)

@@ -21,20 +21,10 @@ class EditFormatProvider(ServiceProvider):
 	"""
 
 	def services(self) -> List[Type[Service]]:
-		return [EditFormatService]
+		return [EditFormatService, EditBlockService, ShellCommandService]
 
 	def commands(self) -> List[Type[Command]]:
 		return [CopyCommand]
-
-	async def register(self, container: "Container"):
-		"""Register edit block and shell command services in the container.
-
-		Binds non-singleton services that handle parsing, validating, and
-		executing SEARCH/REPLACE blocks and shell commands from AI responses.
-		Usage: Called during provider registration phase
-		"""
-		container.bind(EditBlockService)
-		container.bind(ShellCommandService)
 
 	async def boot(self, container: Container):
 		"""Boot edit services and register event listeners for message preprocessing.

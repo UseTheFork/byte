@@ -1,11 +1,10 @@
 from typing import List, Type
 
 from byte.container import Container
-from byte.core.event_bus import EventBus, EventType
+from byte.core.event_bus import EventBus, EventType, Payload
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli.service.command_registry import Command
-from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.files.command.add_file_command import AddFileCommand
 from byte.domain.files.command.add_read_only_file_command import ReadOnlyCommand
 from byte.domain.files.command.drop_file_command import DropFileCommand
@@ -36,7 +35,7 @@ class FileServiceProvider(ServiceProvider):
 		await container.make(FileIgnoreService)
 
 		# Then boot file discovery which depends on ignore service
-		file_discovery = await container.make(FileDiscoveryService)
+		await container.make(FileDiscoveryService)
 
 		# Boots the filewatcher service in to the task manager
 		file_watcher_service = await container.make(FileWatcherService)
@@ -67,8 +66,19 @@ class FileServiceProvider(ServiceProvider):
 			file_watcher_service.add_reinforcement_hook,
 		)
 
-		console = await container.make(ConsoleService)
+		event_bus.on(
+			EventType.POST_BOOT.value,
+			self.boot_messages,
+		)
 
-		found_files = await file_discovery.get_files()
-		console.print(f"│ [success]Discovered:[/success] [info]{len(found_files)} files[/info]")
-		console.print("│ ", style="text")
+	async def boot_messages(self, payload: Payload) -> Payload:
+		container: Container = payload.get("container", False)
+		if container:
+			file_discovery = await container.make(FileDiscoveryService)
+			messages = payload.get("messages", [])
+			found_files = await file_discovery.get_files()
+			messages.append(f"[muted]Files Discovered:[/muted] [primary]{len(found_files)}[/primary]")
+
+			payload.set("messages", messages)
+
+		return payload

@@ -1,7 +1,7 @@
 from typing import List, Type
 
 from byte.container import Container
-from byte.core.event_bus import EventBus, EventType
+from byte.core.event_bus import EventBus, EventType, Payload
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli.service.command_registry import Command
@@ -32,7 +32,7 @@ class SystemServiceProvider(ServiceProvider):
 			SystemContextService,
 		]
 
-	async def boot(self, container: "Container") -> None:
+	async def boot(self, container: Container) -> None:
 		"""Boot system services and register commands with registry.
 
 		Usage: `provider.boot(container)` -> commands become available as /exit, /help
@@ -46,7 +46,22 @@ class SystemServiceProvider(ServiceProvider):
 			system_context_service.add_system_context,
 		)
 
-		console = await container.make(ConsoleService)
+		# Emit our post boot message to gather all needed info.
+		payload = await event_bus.emit(
+			payload=Payload(
+				event_type=EventType.POST_BOOT,
+				data={
+					"messages": [],
+					"container": container,
+				},
+			)
+		)
 
-		console.print("│ ", style="text")
-		console.rule("╰─── //")
+		console = await container.make(ConsoleService)
+		messages = payload.get("messages", [])
+
+		# Join all message strings into a single string with newlines
+		panel_content = "\n".join(messages)
+
+		# Display the assembled messages inside a panel
+		console.print_panel(panel_content, border_style="primary")

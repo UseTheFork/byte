@@ -1,13 +1,16 @@
 import shutil
-from typing import Optional
+from pathlib import Path
+from typing import Literal, Optional
 
 import yaml
 from rich.console import Console
 
-from byte.core.config.config import BYTE_CACHE_DIR, BYTE_CONFIG_FILE
+from byte.core.config.config import BYTE_CACHE_DIR, BYTE_CONFIG_FILE, ByteConfg
+from byte.domain.cli.rich.menu import Menu
+from byte.domain.llm.config import LLMConfig
 
 
-class FirstBootInitializer:
+class FirstBootService:
 	"""Handle first-time setup and configuration for Byte.
 
 	Detects if this is the first run and guides users through initial
@@ -17,65 +20,6 @@ class FirstBootInitializer:
 	"""
 
 	_console: Console | None = None
-
-	# Default configuration template for first boot
-	# This will be written to .byte/config.yaml
-	CONFIG_TEMPLATE = {
-		"llm": {
-			"model": "anthropic",
-		},
-		"lint": {
-			"enable": False,
-			"commands": [
-				{
-					"command": "uv run ruff format --force-exclude --respect-gitignore",
-					"extensions": [".py"],
-				}
-			],
-		},
-		"files": {
-			"ignore": [
-				".ruff_cache",
-				".idea",
-				".venv",
-				".env",
-				".git/",
-				"__pycache__",
-				"node_modules",
-			],
-			"watch": {
-				"enable": False,
-			},
-		},
-		"web": {
-			"enable": False,
-			"chrome_binary_location": "/usr/bin/google-chrome",
-		},
-		"edit_format": {
-			"enable_shell_commands": False,
-			"mask_message_count": 1,
-		},
-		# "mcp": [
-		# {
-		# "name": "docs-mcp-server",
-		# "connection": {
-		# "url": "https://docs-mcp-server.mcp.dango.isdelicio.us/mcp",
-		# "transport": "streamable_http",
-		# },
-		# "agents": {
-		# "ask": {
-		# "include": ["search_docs", "list_libraries"],
-		# },
-		# "research": {
-		# "include": ["search_docs", "list_libraries"],
-		# },
-		# },
-		# },
-		# ],
-	}
-
-	def __init__(self):
-		pass
 
 	def is_first_boot(self) -> bool:
 		"""Check if this is the first time Byte is being run.
@@ -111,13 +55,23 @@ class FirstBootInitializer:
 		# Set up all Byte directories
 		self._setup_byte_directories()
 
+		# Initialize LLM configuration
+		llm_model = self._init_llm()
+
+		# Build config with selected LLM model
+		config = ByteConfg()
+		config.llm.model = llm_model
+
+		# Initialize files configuration
+		config = self._init_files(config)
+
 		# Initialize web configuration
-		config = self._init_web(self.CONFIG_TEMPLATE)
+		config = self._init_web(config)
 
 		# Write the configuration template to the YAML file
 		with open(BYTE_CONFIG_FILE, "w") as f:
 			yaml.dump(
-				config,
+				config.model_dump(mode="json"),
 				f,
 				default_flow_style=False,
 				sort_keys=False,
@@ -149,7 +103,52 @@ class FirstBootInitializer:
 
 		self.print_success("Created Byte directories")
 
-	def _init_web(self, config: dict) -> dict:
+	def _init_llm(self) -> Literal["anthropic", "gemini", "openai"]:
+		"""Initialize LLM configuration by asking user to choose a provider.
+
+		Only shows providers that are enabled (have API keys set).
+		Returns the selected provider name.
+		Usage: `model = initializer._init_llm()` -> "anthropic"
+		"""
+		# Create temporary LLMConfig to detect which providers are enabled
+		llm_config = LLMConfig()
+
+		# Build list of enabled providers
+		enabled_providers = []
+		if llm_config.anthropic.enabled:
+			enabled_providers.append("anthropic")
+		if llm_config.gemini.enabled:
+			enabled_providers.append("gemini")
+		if llm_config.openai.enabled:
+			enabled_providers.append("openai")
+
+		# If no providers are enabled, this shouldn't happen due to LLMConfig validation
+		# but handle it gracefully
+		if not enabled_providers:
+			self.print_error("No LLM providers detected. Please set an API key environment variable.")
+			return "anthropic"
+
+		# If only one provider is enabled, use it automatically
+		if len(enabled_providers) == 1:
+			selected = enabled_providers[0]
+			self.print_success(f"Using {selected} as LLM provider\n")
+			return selected
+
+		# Multiple providers available - ask user to choose
+		self.print_info("Multiple LLM providers detected. Please choose one:\n")
+		menu = Menu(*enabled_providers, title="Select LLM Provider")
+		selected = menu.select()
+
+		if selected is None:
+			# User cancelled - default to first available
+			selected = enabled_providers[0]
+			self.print_warning(f"No selection made, defaulting to {selected}\n")
+		else:
+			self.print_success(f"Selected {selected} as LLM provider\n")
+
+		return selected
+
+	def _init_web(self, config: ByteConfg) -> ByteConfg:
 		"""Initialize web configuration by detecting Chrome or Chromium binary.
 
 		Attempts to locate google-chrome first, then falls back to chromium.
@@ -161,9 +160,9 @@ class FirstBootInitializer:
 			chrome_path = self.find_binary("chromium")
 
 		if chrome_path is not None:
-			config["web"]["chrome_binary_location"] = chrome_path
-			config["web"]["enabled"] = True
-			browser_name = "Chrome" if "chrome" in chrome_path else "Chromium"
+			config.web.chrome_binary_location = chrome_path
+			config.web.enable = True
+			browser_name = "Chrome" if "chrome" in str(chrome_path) else "Chromium"
 			self.print_success(f"Found {browser_name} at {chrome_path}")
 			self.print_success("Web commands enabled\n")
 		else:
@@ -172,14 +171,34 @@ class FirstBootInitializer:
 
 		return config
 
-	def find_binary(self, binary_name: str) -> Optional[str]:
+	def _init_files(self, config: ByteConfg) -> ByteConfg:
+		"""Initialize files configuration by asking if user wants to enable file watching.
+
+		Prompts user with a confirmation dialog. If confirmed, sets watch.enable to true.
+		Usage: `config = initializer._init_files(config)`
+		"""
+
+		menu = Menu(title="Enable file watching for AI comment markers (AI:, AI@, AI?, AI!)?")
+		enable_watch = menu.confirm(default=False)
+
+		if enable_watch:
+			config.files.watch.enable = True
+			self.print_success("File watching enabled\n")
+		else:
+			config.files.watch.enable = False
+			self.print_info("File watching disabled\n")
+
+		return config
+
+	def find_binary(self, binary_name: str) -> Optional[Path]:
 		"""Find the full path to a binary using which.
 
 		Returns the absolute path to the binary if found, None otherwise.
 		Usage: `chrome_path = initializer.find_binary("google-chrome")`
-		Usage: `python_path = initializer.find_binary("python3")` -> "/usr/bin/python3"
+		Usage: `python_path = initializer.find_binary("python3")` -> Path("/usr/bin/python3")
 		"""
-		return shutil.which(binary_name)
+		result = shutil.which(binary_name)
+		return Path(result) if result else None
 
 	def print_info(self, message: str) -> None:
 		"""Print an informational message with two leading spaces for alignment.

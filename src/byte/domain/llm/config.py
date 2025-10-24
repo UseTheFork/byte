@@ -25,12 +25,11 @@ class LLMConfig(BaseModel):
 	anthropic: LLMProviderConfig = LLMProviderConfig()
 	openai: LLMProviderConfig = LLMProviderConfig()
 
-	def __init__(self, **data):
+	def model_post_init(self, __context):
 		"""Initialize LLM config with automatic API key detection from environment.
 
 		Usage: `llm_config = LLMConfig()`
 		"""
-		super().__init__(**data)
 
 		# Auto-detect and configure Anthropic
 		anthropic_key = os.getenv("ANTHROPIC_API_KEY", "")

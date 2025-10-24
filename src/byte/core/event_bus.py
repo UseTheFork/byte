@@ -10,6 +10,8 @@ T = TypeVar("T")
 
 
 class EventType(Enum):
+	POST_BOOT = "post_boot"
+
 	PRE_PROMPT_TOOLKIT = "pre_prompt_toolkit"
 	POST_PROMPT_TOOLKIT = "post_prompt_toolkit"
 

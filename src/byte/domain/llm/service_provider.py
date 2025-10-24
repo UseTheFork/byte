@@ -1,10 +1,9 @@
 from typing import List, Type
 
 from byte.container import Container
-from byte.core.event_bus import EventBus, EventType
+from byte.core.event_bus import EventBus, EventType, Payload
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
-from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.llm.service.llm_service import LLMService
 
 
@@ -29,16 +28,30 @@ class LLMServiceProvider(ServiceProvider):
 		"""
 		event_bus = await container.make(EventBus)
 		llm_service = await container.make(LLMService)
-		console = await container.make(ConsoleService)
-
-		# Display active model configuration for user awareness
-		main_model = llm_service._service_config.main.params.model
-		weak_model = llm_service._service_config.weak.params.model
-		console.print(f"│ [success]Main model:[/success] [info]{main_model}[/info]")
-		console.print(f"│ [success]Weak model:[/success] [info]{weak_model}[/info]")
 
 		# Register listener that calls list_in_context_files before each prompt
 		event_bus.on(
 			EventType.GATHER_REINFORCEMENT.value,
 			llm_service.add_reinforcement_hook,
 		)
+
+		event_bus.on(
+			EventType.POST_BOOT.value,
+			self.boot_messages,
+		)
+
+	async def boot_messages(self, payload: Payload) -> Payload:
+		container: Container = payload.get("container", False)
+		if container:
+			llm_service = await container.make(LLMService)
+			# Display active model configuration for user awareness
+			main_model = llm_service._service_config.main.params.model
+			weak_model = llm_service._service_config.weak.params.model
+
+			messages = payload.get("messages", [])
+			messages.append(f"[muted]Main model:[/muted] [primary]{main_model}[/primary]")
+			messages.append(f"[muted]Weak model:[/muted] [primary]{weak_model}[/primary]")
+
+			payload.set("messages", messages)
+
+		return payload

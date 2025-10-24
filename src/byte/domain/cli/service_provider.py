@@ -2,6 +2,7 @@ from importlib.metadata import PackageNotFoundError, version
 
 from byte.container import Container
 from byte.core.config.config import ByteConfg
+from byte.core.event_bus import EventBus, EventType, Payload
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.cli.service.interactions_service import InteractionService
@@ -25,53 +26,67 @@ class CLIServiceProvider(ServiceProvider):
 
 	async def boot(self, container: Container):
 		"""Boot UI services."""
+		event_bus = await container.make(EventBus)
 
-		console = await container.make(ConsoleService)
+		event_bus.on(
+			EventType.POST_BOOT.value,
+			self.boot_messages,
+		)
 
-		# Create diagonal gradient from primary to secondary color
-		logo_lines = [
-			"░       ░░░  ░░░░  ░░        ░░        ░",
-			"▒  ▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒▒▒",
-			"▓       ▓▓▓▓▓    ▓▓▓▓▓▓▓  ▓▓▓▓▓      ▓▓▓",
-			"█  ████  █████  ████████  █████  ███████",
-			"█       ██████  ████████  █████        █",
-		]
+	async def boot_messages(self, payload: Payload) -> Payload:
+		container: Container = payload.get("container", False)
+		if container:
+			config = await container.make(ByteConfg)
+			console = await container.make(ConsoleService)
+			messages = payload.get("messages", [])
 
-		for row_idx, line in enumerate(logo_lines):
-			styled_line = ""
-			for col_idx, char in enumerate(line):
-				# Calculate diagonal position (0.0 = top-left, 1.0 = bottom-right)
-				diagonal_progress = (row_idx + col_idx) / (len(logo_lines) + len(line) - 2)
+			# Create diagonal gradient from primary to secondary color
+			logo_lines = [
+				"░       ░░░  ░░░░  ░░        ░░        ░",
+				"▒  ▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒▒▒",
+				"▓       ▓▓▓▓▓    ▓▓▓▓▓▓▓  ▓▓▓▓▓      ▓▓▓",
+				"█  ████  █████  ████████  █████  ███████",
+				"█       ██████  ████████  █████        █",
+			]
 
-				# Use primary for first half, secondary for second half of diagonal
-				if diagonal_progress < 0.5:
-					styled_line += f"[primary]{char}[/primary]"
-				else:
-					styled_line += f"[secondary]{char}[/secondary]"
+			for row_idx, line in enumerate(logo_lines):
+				styled_line = ""
+				for col_idx, char in enumerate(line):
+					# Calculate diagonal position (0.0 = top-left, 1.0 = bottom-right)
+					diagonal_progress = (row_idx + col_idx) / (len(logo_lines) + len(line) - 2)
 
-			# Fill remaining width with the last character
-			logo_width = len(line)
-			remaining_width = console.width - logo_width
+					# Use primary for first half, secondary for second half of diagonal
+					if diagonal_progress < 0.5:
+						styled_line += f"[primary]{char}[/primary]"
+					else:
+						styled_line += f"[secondary]{char}[/secondary]"
 
-			if remaining_width > 0:
-				last_char = line[-1] if line else " "
-				last_diagonal_progress = (row_idx + len(line) - 1) / (len(logo_lines) + len(line) - 2)
-				style = "primary" if last_diagonal_progress < 0.5 else "secondary"
-				styled_line += f"[{style}]{last_char * remaining_width}[/{style}]"
+				# Fill remaining width with the last character
+				logo_width = len(line)
+				remaining_width = console.width - logo_width - 4
 
-			console.print(styled_line)
+				if remaining_width > 0:
+					last_char = line[-1] if line else " "
+					last_diagonal_progress = (row_idx + len(line) - 1) / (len(logo_lines) + len(line) - 2)
+					style = "primary" if last_diagonal_progress < 0.5 else "secondary"
+					styled_line += f"[{style}]{last_char * remaining_width}[/{style}]"
 
-		console.print()
+				messages.append(styled_line)
 
-		console.rule("╭─ Booting")
-		console.print("│ ", style="text")
+			# Add a break betwean the logo and the rest of the content
+			messages.append("")
 
-		try:
-			package_version = version("byte")
-		except PackageNotFoundError:
-			package_version = "dev"
+			try:
+				package_version = version("byte-ai-cli")
+			except PackageNotFoundError:
+				package_version = "dev"
+			messages.append(f"[muted]Version:[/muted] [primary]{package_version}[/primary]")
 
-		console.print(f"│ [success]Version:[/success] [info]{package_version}[/info]")
+			if config.dotenv_loaded:
+				messages.append(f"[muted]Env File Found:[/muted] [primary]{config.dotenv_loaded}[/primary]")
 
-		config = await container.make(ByteConfg)
-		console.print(f"│ [success]Project Root:[/success] [info]{config.project_root}[/info]")
+			messages.append(f"[muted]Project Root:[/muted] [primary]{config.project_root}[/primary]")
+
+			payload.set("messages", messages)
+
+		return payload
