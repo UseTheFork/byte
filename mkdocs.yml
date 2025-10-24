@@ -53,6 +53,7 @@ nav:
     - Overview: getting-started/index.md
     - Installation: getting-started/installation.md
     - First steps: getting-started/first-steps.md
+    - Example Flow: getting-started/example-flow.md
   - Concepts:
     - concepts/index.md
     - Memory & Context: concepts/memory.md

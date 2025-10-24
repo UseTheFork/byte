@@ -2,8 +2,11 @@ from bs4 import BeautifulSoup
 from markdownify import markdownify as md
 from pydoll.browser.chromium import Chrome
 from pydoll.browser.options import ChromiumOptions
+from rich.live import Live
 
 from byte.core.service.base_service import Service
+from byte.domain.cli.rich.rune_spinner import RuneSpinner
+from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.web.exceptions import WebNotEnabledException
 
 
@@ -33,23 +36,33 @@ class ChromiumService(Service):
 		if not self._config.web.enable:
 			raise WebNotEnabledException
 
+		console = await self.make(ConsoleService)
+
 		options = ChromiumOptions()
 		options.add_argument("--headless=new")
 		options.binary_location = str(self._config.web.chrome_binary_location)
 		options.start_timeout = 20
 
-		async with Chrome(options=options) as browser:
-			tab = await browser.start()
-			await tab.go_to(url)
+		spinner = RuneSpinner(text=f"Scraping {url}...", size=15)
 
-			html_content = await tab.execute_script("return document.body.innerHTML")
+		with Live(spinner, console=console.console, transient=True, refresh_per_second=20):
+			async with Chrome(options=options) as browser:
+				spinner.text = "Opening browser..."
+				tab = await browser.start()
 
-			html_content = html_content.get("result", {}).get("result", {}).get("value", "")
+				spinner.text = f"Loading {url}..."
+				await tab.go_to(url)
 
-			soup = BeautifulSoup(
-				html_content,
-				"html.parser",
-			)
-			markdown_content = md(str(soup))
+				spinner.text = "Extracting content..."
+				html_content = await tab.execute_script("return document.body.innerHTML")
 
-			return markdown_content
+				spinner.text = "Converting to markdown..."
+				html_content = html_content.get("result", {}).get("result", {}).get("value", "")
+
+				soup = BeautifulSoup(
+					html_content,
+					"html.parser",
+				)
+				markdown_content = md(str(soup))
+
+				return markdown_content

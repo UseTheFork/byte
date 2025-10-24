@@ -20,6 +20,7 @@ class FilesConfig(BaseModel):
 			".venv",
 			".env",
 			".git",
+			".pytest_cache",
 			"__pycache__",
 			"node_modules",
 			"dist",
