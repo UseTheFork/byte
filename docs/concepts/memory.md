@@ -2,7 +2,7 @@
 
 Byte's approach to memory and context is designed to keep conversations focused, reduce token usage, and encourage best practices through deliberate constraints. Understanding how Byte manages context helps you work more effectively with the AI.
 
-![File context showing read-only and editable files](../images/file-context.svg)
+![File context showing read-only and editable files](../images/file-context.png)
 
 ---
 

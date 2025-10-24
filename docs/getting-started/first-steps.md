@@ -86,7 +86,7 @@ The AI needs to know about files before suggesting changes:
 /add src/main.py
 ```
 
-![Adding a file to context](../images/file-add.svg)
+![Adding a file to context](../images/file-add.png)
 
 ### Making Changes
 

@@ -67,4 +67,4 @@ $ byte
 
 You should see the following screen after startup.
 
-![Byte Boot Screen](../images/boot.svg)
+![Byte Boot Screen](../images/boot.png)

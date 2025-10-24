@@ -4,9 +4,11 @@ from typing import Literal, Optional
 
 import yaml
 from rich.console import Console
+from rich.theme import Theme
 
 from byte.core.config.config import BYTE_CACHE_DIR, BYTE_CONFIG_FILE, ByteConfg
 from byte.domain.cli.rich.menu import Menu
+from byte.domain.cli.schemas import ByteTheme, ThemeRegistry
 from byte.domain.llm.config import LLMConfig
 
 
@@ -46,7 +48,28 @@ class FirstBootService:
 		Creates the default configuration file from the template.
 		"""
 
-		self._console = Console()
+		# Load the selected Catppuccin theme variant.
+		theme_registry = ThemeRegistry()
+		selected_theme: ByteTheme = theme_registry.get_theme("mocha")
+
+		init_theme = Theme(
+			{
+				"text": selected_theme.base05,  # Default Foreground
+				"success": selected_theme.base0B,  # Green - Strings, Inserted
+				"error": selected_theme.base08,  # Red - Variables, Tags
+				"warning": selected_theme.base0A,  # Yellow - Classes, Bold
+				"info": selected_theme.base0C,  # Teal - Support, Regex
+				"danger": selected_theme.base08,  # Red - Variables, Tags
+				"primary": selected_theme.base0D,  # Blue - Functions, Headings
+				"secondary": selected_theme.base0E,  # Mauve - Keywords, Italic
+				"muted": selected_theme.base03,  # Comments, Invisibles
+				"subtle": selected_theme.base04,  # Dark Foreground
+				"active_border": selected_theme.base07,  # Light Background
+				"inactive_border": selected_theme.base03,  # Comments, Invisibles
+			}
+		)
+
+		self._console = Console(theme=init_theme)
 
 		# Display welcome message for first boot
 		self.print_info("\n[bold cyan]Welcome to Byte![/bold cyan]")
@@ -136,7 +159,7 @@ class FirstBootService:
 
 		# Multiple providers available - ask user to choose
 		self.print_info("Multiple LLM providers detected. Please choose one:\n")
-		menu = Menu(*enabled_providers, title="Select LLM Provider")
+		menu = Menu(*enabled_providers, title="Select LLM Provider", console=self._console)
 		selected = menu.select()
 
 		if selected is None:
@@ -151,11 +174,11 @@ class FirstBootService:
 	def _init_web(self, config: ByteConfg) -> ByteConfg:
 		"""Initialize web configuration by detecting Chrome or Chromium binary.
 
-		Attempts to locate google-chrome first, then falls back to chromium.
+		Attempts to locate google-chrome-stable first, then falls back to chromium.
 		Updates the chrome_binary_location in the web config section.
 		Usage: `config = initializer._init_web(config)`
 		"""
-		chrome_path = self.find_binary("google-chrome")
+		chrome_path = self.find_binary("google-chrome-stable")
 		if chrome_path is None:
 			chrome_path = self.find_binary("chromium")
 
@@ -178,7 +201,7 @@ class FirstBootService:
 		Usage: `config = initializer._init_files(config)`
 		"""
 
-		menu = Menu(title="Enable file watching for AI comment markers (AI:, AI@, AI?, AI!)?")
+		menu = Menu(title="Enable file watching for AI comment markers (AI:, AI@, AI?, AI!)?", console=self._console)
 		enable_watch = menu.confirm(default=False)
 
 		if enable_watch:

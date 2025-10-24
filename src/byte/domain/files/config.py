@@ -13,6 +13,16 @@ class WatchConfig(BaseModel):
 class FilesConfig(BaseModel):
 	watch: WatchConfig = WatchConfig()
 	ignore: List[str] = Field(
-		default=[],
+		default=[
+			".byte/cache",
+			".ruff_cache",
+			".idea",
+			".venv",
+			".env",
+			".git",
+			"__pycache__",
+			"node_modules",
+			"dist",
+		],
 		description="List of gitignore-style patterns to exclude from file discovery. Patterns support wildcards and are combined with .gitignore rules.",
 	)

@@ -8,7 +8,7 @@ class LLMProviderConfig(BaseModel):
 	"""Configuration for a specific LLM provider."""
 
 	enabled: bool = Field(default=False, description="Whether this LLM provider is enabled and available for use")
-	api_key: str = Field(default="", description="API key for authenticating with the LLM provider")
+	api_key: str = Field(default="", description="API key for authenticating with the LLM provider", exclude=True)
 	model_params: Dict[str, Any] = Field(
 		default_factory=dict, description="Additional parameters to pass to the model initialization"
 	)
