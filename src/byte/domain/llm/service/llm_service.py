@@ -30,7 +30,7 @@ class LLMService(Service):
 		if self._config.llm.model == "openai":
 			self._service_config = OpenAiSchema(
 				api_key=self._config.llm.openai.api_key,
-				provider_params={"stream_usage": True, **self._config.llm.openai.model_params.copy()},
+				provider_params=self._config.llm.openai.model_params.copy(),
 			)
 
 		if self._config.llm.model == "gemini":
@@ -49,11 +49,13 @@ class LLMService(Service):
 		# Select model schema
 		model_schema = self._service_config.main if model_type == "main" else self._service_config.weak
 
+		params_dict = model_schema.params.model_dump(exclude_none=True)
+
 		# Instantiate using the stored class reference
 		return self._service_config.model_class(
-			model_name=model_schema.params.model,  # pyright: ignore[reportCallIssue]
 			max_tokens=model_schema.constraints.max_output_tokens,  # pyright: ignore[reportCallIssue]
 			api_key=self._service_config.api_key,  # pyright: ignore[reportCallIssue]
+			**params_dict,
 			**provider_params,
 		)
 

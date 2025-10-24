@@ -5,8 +5,7 @@ from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
-from pydantic import Field
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel, Field
 
 
 class ReinforcementMode(str, Enum):
@@ -21,8 +20,7 @@ class ReinforcementMode(str, Enum):
 	EAGER = "eager"
 
 
-@dataclass
-class ModelConstraints:
+class ModelConstraints(BaseModel):
 	"""Operational constraints and cost specifications for an LLM model.
 
 	Defines the capacity limits and economic factors that constrain model usage,
@@ -40,8 +38,7 @@ class ModelConstraints:
 	cache_read_input_token_cost: float = 0
 
 
-@dataclass
-class ModelParams:
+class ModelParams(BaseModel):
 	"""Configuration parameters for LLM model initialization.
 
 	Defines the runtime parameters used to configure and authenticate with
@@ -51,10 +48,10 @@ class ModelParams:
 
 	model: str = ""
 	temperature: float = 0.1
+	stream_usage: bool | None = None
 
 
-@dataclass
-class ModelBehavior:
+class ModelBehavior(BaseModel):
 	"""Behavioral configuration for model prompt engineering and output handling.
 
 	Defines ByteSmith-specific behaviors that control how prompts are constructed
@@ -65,8 +62,7 @@ class ModelBehavior:
 	reinforcement_mode: ReinforcementMode = ReinforcementMode.NONE
 
 
-@dataclass
-class ModelSchema:
+class ModelSchema(BaseModel):
 	"""Configuration for the main LLM model used for primary tasks."""
 
 	params: ModelParams = Field(default_factory=ModelParams)
@@ -74,8 +70,7 @@ class ModelSchema:
 	behavior: ModelBehavior = Field(default_factory=ModelBehavior)
 
 
-@dataclass
-class LLMSchema:
+class LLMSchema(BaseModel):
 	"""Base schema for LLM provider configuration with dual-model support.
 
 	Defines the structure for LLM providers that use a main model for complex tasks
@@ -90,7 +85,6 @@ class LLMSchema:
 	weak: ModelSchema = Field(default_factory=ModelSchema)
 
 
-@dataclass
 class AnthropicSchema(LLMSchema):
 	"""Anthropic-specific LLM configuration with Claude model defaults.
 
@@ -136,7 +130,6 @@ class AnthropicSchema(LLMSchema):
 	)
 
 
-@dataclass
 class OpenAiSchema(LLMSchema):
 	"""OpenAI-specific LLM configuration with GPT model defaults.
 
@@ -151,6 +144,7 @@ class OpenAiSchema(LLMSchema):
 			params=ModelParams(
 				model="gpt-5",
 				temperature=0.1,
+				stream_usage=True,
 			),
 			constraints=ModelConstraints(
 				max_input_tokens=400000,
@@ -169,6 +163,7 @@ class OpenAiSchema(LLMSchema):
 			params=ModelParams(
 				model="gpt-5-mini",
 				temperature=0.1,
+				stream_usage=True,
 			),
 			constraints=ModelConstraints(
 				max_input_tokens=400000,
@@ -184,7 +179,6 @@ class OpenAiSchema(LLMSchema):
 	)
 
 
-@dataclass
 class GoogleSchema(LLMSchema):
 	"""Google-specific LLM configuration with Gemini model defaults.
 
@@ -215,7 +209,7 @@ class GoogleSchema(LLMSchema):
 	weak: ModelSchema = Field(
 		default_factory=lambda: ModelSchema(
 			params=ModelParams(
-				model="gemini-2.5-flash",
+				model="gemini-2.5-flash-lite",
 				temperature=0.1,
 			),
 			constraints=ModelConstraints(
