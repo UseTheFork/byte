@@ -24,7 +24,7 @@ conventional_commits = true
 
 [bump]
 # Features always bump minor version (0.1.0 -> 0.2.0)
-features_always_bump_minor = true
+features_always_bump_minor = false
 # Breaking changes always bump major (including 0.x -> 1.0)
 breaking_always_bump_major = true
 # Initial version for the project

@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.1] - 2025-10-24
+
+### 🚀 Features
+
+- Switch default LLM to openai and enable streaming
+
+### 🚜 Refactor
+
+- Convert LLM schemas to Pydantic and pass model params
+
+### ⚙️ Miscellaneous Tasks
+
+- Update project version to 0.2.0 and add git-cliff configuration
 ## [0.2.0] - 2025-10-24
 
 ### 🚀 Features
@@ -31,7 +44,6 @@ All notable changes to this project will be documented in this file.
 - Bump version to 0.1.11 and update CHANGELOG.md
 - Update release script comments with tag and push commands
 - Refactor configuration loading and first boot initialization
-
 ## [0.1.11] - 2025-10-22
 
 ### 🚀 Features
@@ -49,7 +61,6 @@ All notable changes to this project will be documented in this file.
 ### ⚙️ Miscellaneous Tasks
 
 - Add placeholder comment in release script
-
 ## [0.1.10] - 2025-10-21
 
 ### 🚀 Features
@@ -71,14 +82,12 @@ All notable changes to this project will be documented in this file.
 
 - Prepare release 0.1.9 with updated package version
 - Update CHANGELOG.md with recent release notes
-
 ## [0.1.9] - 2025-10-20
 
 ### ⚙️ Miscellaneous Tasks
 
 - Prepare release 0.1.8 with updated workflows and package configuration
 - Update PyPI release workflow configuration
-
 ## [0.1.8] - 2025-10-20
 
 ### ⚙️ Miscellaneous Tasks
@@ -87,14 +96,12 @@ All notable changes to this project will be documented in this file.
 - Consolidate workflows by removing duplicate publish-to-pypi.yml
 - Update package name to byte-ai-cli in project configuration
 - Update release workflow for PyPI publication
-
 ## [0.1.7] - 2025-10-20
 
 ### ⚙️ Miscellaneous Tasks
 
 - Update project development status classifier
 - Update project version to 0.1.7 and add changelog
-
 ## [0.1.6] - 2025-10-20
 
 ### 🚀 Features
