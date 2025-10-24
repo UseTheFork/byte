@@ -30,7 +30,7 @@ class LLMService(Service):
 		if self._config.llm.model == "openai":
 			self._service_config = OpenAiSchema(
 				api_key=self._config.llm.openai.api_key,
-				provider_params=self._config.llm.openai.model_params.copy(),
+				provider_params={"stream_usage": True, **self._config.llm.openai.model_params.copy()},
 			)
 
 		if self._config.llm.model == "gemini":

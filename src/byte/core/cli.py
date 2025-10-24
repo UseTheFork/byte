@@ -11,7 +11,7 @@ def cli():
 	"""Byte CLI Assistant"""
 	from byte.main import run
 
-	found_dotenv = load_dotenv(DOTENV_PATH)
+	found_dotenv = load_dotenv(DOTENV_PATH, override=True)
 
 	# Check for first boot before bootstrapping
 	initializer = FirstBootService()

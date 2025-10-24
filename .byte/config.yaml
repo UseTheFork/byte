@@ -1,5 +1,5 @@
 llm:
-  model: anthropic
+  model: openai
 lint:
   enable: true
   commands:

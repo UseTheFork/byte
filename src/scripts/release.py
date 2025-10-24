@@ -21,4 +21,5 @@
 # Update uv version
 # uv version {version}
 
+# finally
 # git push --tags

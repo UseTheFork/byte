@@ -106,6 +106,7 @@ Byte leverages modern Python tooling and AI frameworks:
 - **LangGraph** - Graph-based agent workflows
 - **Rich** - Beautiful terminal output
 - **Prompt Toolkit** - Interactive command-line interfaces
+- **pydoll** - Chrome controller
 - **Catppuccin** - Soothing pastel theme
 
 ---
@@ -116,13 +117,3 @@ Byte draws inspiration from excellent projects in the coding agent space:
 
 - [Aider](http://aider.chat/) - The pioneering CLI coding agent that proved the concept
 - [Charm's Crush](https://github.com/charmbracelet/crush) - Elegant terminal agent
-
----
-
-## License
-
-[License information to be added]
-
-## Contributing
-
-[Contribution guidelines to be added]
