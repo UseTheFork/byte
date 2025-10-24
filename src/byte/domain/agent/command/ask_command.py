@@ -16,6 +16,10 @@ class AskCommand(Command):
 		return "ask"
 
 	@property
+	def category(self) -> str:
+		return "Agent"
+
+	@property
 	def description(self) -> str:
 		return "Ask the AI agent a question or request assistance"
 

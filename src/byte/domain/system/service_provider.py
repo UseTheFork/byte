@@ -8,7 +8,6 @@ from byte.domain.cli.service.command_registry import Command
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.memory.command.undo_command import UndoCommand
 from byte.domain.system.command.exit_command import ExitCommand
-from byte.domain.system.command.initilizie_command import InitilizieCommand
 from byte.domain.system.service.system_context_service import SystemContextService
 
 
@@ -23,7 +22,6 @@ class SystemServiceProvider(ServiceProvider):
 	def commands(self) -> List[Type[Command]]:
 		return [
 			ExitCommand,
-			InitilizieCommand,
 			UndoCommand,
 		]
 

@@ -22,6 +22,10 @@ class WebCommand(Command, UserInteractive):
 		return "web"
 
 	@property
+	def category(self) -> str:
+		return "Session Context"
+
+	@property
 	def description(self) -> str:
 		return "Scrape a webpage and convert it to markdown"
 

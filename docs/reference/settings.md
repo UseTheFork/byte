@@ -1,19 +1,21 @@
 # Byte Configuration Settings
 
-This document describes all available configuration options for Byte.
+Byte's configuration system uses a YAML file located at `.byte/config.yaml` to control all aspects of the application's behavior. Configuration is organized into logical sections covering CLI behavior, LLM providers, file handling, and feature-specific settings.
+
+---
 
 ## Cli
 
-| Field          | Type          | Default | Description                                                                                |
-| -------------- | ------------- | ------- | ------------------------------------------------------------------------------------------ | ---------- | ----- | ------- | --------- | ---- | --------- | --------------------------------------------------------------- |
-| `ui_theme`     | `string`      | `dark`  | Theme for the general CLI interface (controls colors, formatting, and visual presentation) |
-| `syntax_theme` | `github-dark` | `bw`    | sas                                                                                        | staroffice | xcode | monokai | lightbulb | rrt` | `monokai` | Pygments theme for code block syntax highlighting in CLI output |
+| Field          | Type                                                               | Default   | Description                                                                                                    |
+| -------------- | ------------------------------------------------------------------ | --------- | -------------------------------------------------------------------------------------------------------------- |
+| `ui_theme`     | `mocha, macchiato, latte, frappe`                                  | `mocha`   | Catppuccin theme variant for the CLI interface (mocha/macchiato are dark, latte is light, frappe is cool dark) |
+| `syntax_theme` | `github-dark, bw, sas, staroffice, xcode, monokai, lightbulb, rrt` | `monokai` | Pygments theme for code block syntax highlighting in CLI output                                                |
 
 ## Llm
 
-| Field   | Type       | Default | Description |
-| ------- | ---------- | ------- | ----------- | ----------- | ----------------------------------------- |
-| `model` | `anthropic | gemini  | openai`     | `anthropic` | The LLM provider to use for AI operations |
+| Field   | Type                        | Default     | Description                               |
+| ------- | --------------------------- | ----------- | ----------------------------------------- |
+| `model` | `anthropic, gemini, openai` | `anthropic` | The LLM provider to use for AI operations |
 
 ## Llm > Gemini
 
@@ -55,32 +57,26 @@ This document describes all available configuration options for Byte.
 
 ## Files
 
-| Field    | Type            | Default | Description                                                                                                                         |
-| -------- | --------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `ignore` | `array[string]` | `[]`    | List of gitignore-style patterns to exclude from file discovery. Patterns support wildcards and are combined with .gitignore rules. |
+| Field    | Type            | Default                                                                                                                    | Description                                                                                                                         |
+| -------- | --------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `ignore` | `array[string]` | `['.byte/cache', '.ruff_cache', '.idea', '.venv', '.env', '.git', '.pytest_cache', '__pycache__', 'node_modules', 'dist']` | List of gitignore-style patterns to exclude from file discovery. Patterns support wildcards and are combined with .gitignore rules. |
 
 ## Files > Watch
 
-| Field    | Type      | Default | Description |
-| -------- | --------- | ------- | ----------- |
-| `enable` | `boolean` | `true`  |             |
+| Field    | Type      | Default | Description                                                                                                                                       |
+| -------- | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `enable` | `boolean` | `false` | Enable file watching for AI comment markers (AI:, AI@, AI?, AI!). When enabled, Byte automatically detects changes and processes AI instructions. |
 
 ## Edit_Format
 
-| Field                   | Type      | Default | Description                                                                                                     |
-| ----------------------- | --------- | ------- | --------------------------------------------------------------------------------------------------------------- |
-| `enable_shell_commands` | `boolean` | `true`  | Enable execution of shell commands from AI responses. When disabled, shell command blocks will not be executed. |
-
-## Memory
-
-| Field                   | Type      | Default     | Description |
-| ----------------------- | --------- | ----------- | ----------- |
-| `database_path`         | `string`  | `memory.db` |             |
-| `thread_retention_days` | `integer` | `30`        |             |
-| `enable_compression`    | `boolean` | `true`      |             |
+| Field                   | Type      | Default | Description                                                                                                                                               |
+| ----------------------- | --------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `enable_shell_commands` | `boolean` | `false` | Enable execution of shell commands from AI responses. When disabled, shell command blocks will not be executed.                                           |
+| `mask_message_count`    | `integer` | `1`     | Number of recent AI messages to exclude from masking. Messages older than this count will have their SEARCH/REPLACE blocks removed to reduce token usage. |
 
 ## Web
 
-| Field                    | Type     | Default                  | Description                                                               |
-| ------------------------ | -------- | ------------------------ | ------------------------------------------------------------------------- |
-| `chrome_binary_location` | `string` | `/usr/bin/google-chrome` | Path to Chrome/Chromium binary executable for headless browser automation |
+| Field                    | Type      | Default                  | Description                                                               |
+| ------------------------ | --------- | ------------------------ | ------------------------------------------------------------------------- |
+| `enable`                 | `boolean` | `false`                  | Enable web commands                                                       |
+| `chrome_binary_location` | `string`  | `/usr/bin/google-chrome` | Path to Chrome/Chromium binary executable for headless browser automation |

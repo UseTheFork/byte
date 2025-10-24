@@ -19,6 +19,10 @@ class ListFilesCommand(Command):
 		return "ls"
 
 	@property
+	def category(self) -> str:
+		return "Files"
+
+	@property
 	def description(self) -> str:
 		return "List all files currently in the AI context"
 

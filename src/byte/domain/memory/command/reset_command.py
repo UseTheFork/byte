@@ -18,6 +18,10 @@ class ResetCommand(Command):
 		return "reset"
 
 	@property
+	def category(self) -> str:
+		return "Memory"
+
+	@property
 	def description(self) -> str:
 		return "Reset conversation history and clear file context completely"
 

@@ -66,6 +66,7 @@ nav:
   - References:
     - Overview: reference/index.md
     - Settings: reference/settings.md
+    - Commands: reference/commands.md
 
 plugins:
 - search

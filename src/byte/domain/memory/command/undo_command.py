@@ -15,6 +15,10 @@ class UndoCommand(Command):
 		return "undo"
 
 	@property
+	def category(self) -> str:
+		return "Memory"
+
+	@property
 	def description(self) -> str:
 		return "Undo the last conversation step"
 

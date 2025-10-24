@@ -26,6 +26,15 @@ class Command(ABC, Bootable, Injectable, Configurable, UserInteractive):
 		pass
 
 	@property
+	def category(self) -> str:
+		"""Category for grouping in documentation.
+
+		Override to organize commands into specific categories in generated docs.
+		Usage: return "File Management" for file-related commands
+		"""
+		return "General"
+
+	@property
 	@abstractmethod
 	def description(self) -> str:
 		"""Human-readable description for help system.

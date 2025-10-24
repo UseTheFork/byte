@@ -19,6 +19,10 @@ class ReadOnlyCommand(Command):
 		return "read-only"
 
 	@property
+	def category(self) -> str:
+		return "Files"
+
+	@property
 	def description(self) -> str:
 		return "Add file to context as read-only"
 

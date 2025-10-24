@@ -18,6 +18,10 @@ class ContextDropCommand(Command):
 		return "context:drop"
 
 	@property
+	def category(self) -> str:
+		return "Session Context"
+
+	@property
 	def description(self) -> str:
 		return "Remove item from session context"
 

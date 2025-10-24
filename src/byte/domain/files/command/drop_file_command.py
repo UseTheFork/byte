@@ -18,6 +18,10 @@ class DropFileCommand(Command):
 		return "drop"
 
 	@property
+	def category(self) -> str:
+		return "Files"
+
+	@property
 	def description(self) -> str:
 		return "Remove file from context"
 

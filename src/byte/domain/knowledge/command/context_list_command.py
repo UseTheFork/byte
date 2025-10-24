@@ -14,6 +14,10 @@ class ContextListCommand(Command, UserInteractive):
 		return "context:ls"
 
 	@property
+	def category(self) -> str:
+		return "Session Context"
+
+	@property
 	def description(self) -> str:
 		return "List all session context items"
 

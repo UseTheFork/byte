@@ -19,6 +19,10 @@ class ClearCommand(Command):
 		return "clear"
 
 	@property
+	def category(self) -> str:
+		return "Memory"
+
+	@property
 	def description(self) -> str:
 		return "Clear conversation history and start a new thread"
 

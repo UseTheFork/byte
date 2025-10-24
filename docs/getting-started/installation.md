@@ -12,7 +12,7 @@ The fastest installation method uses **uv**, a modern Python package installer:
 
 ```bash
 $ curl -LsSf https://astral.sh/uv/install.sh | sh
-$ uv tool install byte
+$ uv tool install byte-ai-cli
 ```
 
 ### Using pip
@@ -20,7 +20,7 @@ $ uv tool install byte
 Install with pip if you prefer traditional Python tooling:
 
 ```bash
-$ pip install byte
+$ pip install byte-ai-cli
 ```
 
 ### Using Nix Flakes

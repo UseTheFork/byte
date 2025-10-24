@@ -2,7 +2,7 @@
 
 Byte's linting system automatically runs configured code quality tools on your files to identify and fix issues. It integrates seamlessly with your workflow, running linters on changed files or specific contexts with a simple command.
 
-![Lint process showing progress and results](../images/lint.svg)
+![Lint process showing progress and results](../images/commit_lint.png)
 
 ---
 

@@ -140,7 +140,11 @@ def schema_to_markdown(schema: Dict[str, Any]) -> str:
 	# Add header
 	sections.append("# Byte Configuration Settings")
 	sections.append("")
-	sections.append("This document describes all available configuration options for Byte.")
+	sections.append(
+		"Byte's configuration system uses a YAML file located at `.byte/config.yaml` to control all aspects of the application's behavior. Configuration is organized into logical sections covering CLI behavior, LLM providers, file handling, and feature-specific settings."
+	)
+	sections.append("")
+	sections.append("---")
 	sections.append("")
 
 	# Process each top-level property that's not excluded
@@ -187,7 +191,7 @@ def main():
 	docs_dir = Path(__file__).parent.parent.parent / "docs"
 	docs_dir.mkdir(exist_ok=True)
 
-	output_file = docs_dir / "settings.md"
+	output_file = docs_dir / "reference" / "settings.md"
 	output_file.write_text(markdown, encoding="utf-8")
 
 	print(f"Settings documentation written to {output_file}")
