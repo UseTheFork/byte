@@ -51,8 +51,10 @@ module-name = "byte"
 
 [dependency-groups]
 dev = [
+    "basedpyright>=1.32.1",
     "dill>=0.4.0",
     "grandalf>=0.8",
+    "jedi-language-server>=0.46.0",
     "pytest>=8.4.2",
     "pytest-asyncio>=1.2.0",
     "ruff>=0.12.12",

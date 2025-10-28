@@ -1,6 +1,6 @@
 # Byte
 
-<p align="center"><img alt="Byte Logo" src="docs/images/logo.svg" /></p>
+<p align="center"><img alt="Byte Logo" src="https://raw.githubusercontent.com/usethefork/byte/main/docs/images/logo.svg" /></p>
 
 A human-in-the-loop AI coding agent that keeps you in control. Byte helps you build through natural conversation while maintaining full visibility and approval over every change.
 
@@ -19,6 +19,8 @@ Byte is a CLI coding agent designed for developers who want AI assistance withou
 - Structured prompts that adapt and evolve with each interaction
 - Automatic linting, formatting, and testing without extra commands
 
+For complete documentation, visit **[usethefork.github.io/byte](https://usethefork.github.io/byte/)**.
+
 ---
 
 ## Design Philosophy
@@ -35,20 +37,7 @@ Byte is a CLI coding agent designed for developers who want AI assistance withou
 
 ## Quick Start
 
-Get started with Byte in three steps:
-
-```bash
-# Install with uv
-$ uv tool install byte
-
-# Navigate to your project
-$ cd /path/to/your/project
-
-# Run Byte
-$ byte
-```
-
-See the [Installation Guide](<[getting-started/installation.md](https://usethefork.github.io/byte/getting-started/installation/)>) for other installation methods including pip and Nix.
+See the [Installation Guide](https://usethefork.github.io/byte/getting-started/installation/) for installation methods including uv, pip and Nix.
 
 ---
 
@@ -101,13 +90,13 @@ Model Context Protocol (MCP) tools are available but tightly controlled. Manuall
 
 Byte leverages modern Python tooling and AI frameworks:
 
-- **uv** - Fast Python package management
-- **LangChain** - AI framework for language models
-- **LangGraph** - Graph-based agent workflows
-- **Rich** - Beautiful terminal output
-- **Prompt Toolkit** - Interactive command-line interfaces
-- **pydoll** - Chrome controller
-- **Catppuccin** - Soothing pastel theme
+- **[uv](https://docs.astral.sh/uv/)** - Fast Python package management
+- **[LangChain](https://www.langchain.com/)** - AI framework for language models
+- **[LangGraph](https://langchain-ai.github.io/langgraph/)** - Graph-based agent workflows
+- **[Rich](https://rich.readthedocs.io/)** - Beautiful terminal output
+- **[Prompt Toolkit](https://python-prompt-toolkit.readthedocs.io/)** - Interactive command-line interfaces
+- **[pydoll](https://pydoll.tech/)** - Browser automation and control
+- **[Catppuccin](https://catppuccin.com/)** - Soothing pastel theme
 
 ---
 

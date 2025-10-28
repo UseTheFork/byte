@@ -1,21 +1,27 @@
 import json
 
 from langchain_core.messages import ToolMessage
+from langgraph.runtime import Runtime
 from langgraph.types import Command
 from rich.pretty import Pretty
 
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.domain.agent.nodes.base_node import Node
+from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.cli.service.console_service import ConsoleService
 
 
 class ToolNode(Node, UserInteractive):
-	async def __call__(self, inputs):
+	async def __call__(self, inputs, runtime: Runtime[AssistantContextSchema]):
 		if messages := inputs.get("messages", []):
 			message = messages[-1]
 		else:
 			raise ValueError("No message found in input")
 		outputs = []
+
+		tools = runtime.context.tools
+		# Build a mapping of tool names to tool instances
+		tools_by_name = {tool.name: tool for tool in tools}
 
 		for tool_call in message.tool_calls:
 			console = await self.make(ConsoleService)
@@ -26,7 +32,7 @@ class ToolNode(Node, UserInteractive):
 			run_tool = await self.prompt_for_confirmation(f"Use {tool_call['name']}", True)
 
 			if run_tool:
-				tool_result = await self.tools_by_name[tool_call["name"]].ainvoke(tool_call["args"])
+				tool_result = await tools_by_name[tool_call["name"]].ainvoke(tool_call["args"])
 			else:
 				tool_result = {"result": "User declined tool call."}
 

@@ -2,18 +2,17 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
-from byte.core.utils import get_last_message
 from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.implementations.research.prompts import research_prompt
 from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.end_node import EndNode
 from byte.domain.agent.nodes.start_node import StartNode
 from byte.domain.agent.nodes.tool_node import ToolNode
-from byte.domain.agent.state import BaseState
+from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.llm.service.llm_service import LLMService
-from byte.domain.mcp.service.mcp_service import MCPService
-from byte.domain.tools.read_file import read_file
-from byte.domain.tools.ripgrep_search import ripgrep_search
+from byte.domain.lsp.tools.find_references import find_references
+from byte.domain.lsp.tools.get_definition import get_definition
+from byte.domain.lsp.tools.get_hover_info import get_hover_info
 
 
 class ResearchAgent(Agent):
@@ -25,77 +24,45 @@ class ResearchAgent(Agent):
 	Usage: `agent = await container.make(ResearchAgent); result = await agent.execute(state)`
 	"""
 
-	async def boot(self):
-		pass
-
 	def get_tools(self):
-		return [ripgrep_search, read_file]
+		return [find_references, get_definition, get_hover_info]
+		# return [ripgrep_search, read_file]
 
 	async def build(self) -> CompiledStateGraph:
 		"""Build and compile the coder agent graph with memory and tools."""
 
 		# Create the assistant and runnable
-		llm_service = await self.make(LLMService)
-		llm: BaseChatModel = llm_service.get_main_model()
-		assistant_runnable = research_prompt | llm.bind_tools(self.get_tools(), parallel_tool_calls=False)
-
-		mcp_service = await self.make(MCPService)
-		mcp_tools = mcp_service.get_tools_for_agent("research")
-
-		# Create the state graph
 		graph = StateGraph(self.get_state_class())
 
 		# Add nodes
-		graph.add_node(
-			"start",
-			await self.make(
-				StartNode,
-				agent=self.__class__.__name__,
-			),
-		)
+		graph.add_node("start_node", await self.make(StartNode))
+		graph.add_node("assistant_node", await self.make(AssistantNode))
+		graph.add_node("tools_node", await self.make(ToolNode))
 
-		graph.add_node(
-			"assistant",
-			await self.make(AssistantNode, runnable=assistant_runnable),
-		)
-		graph.add_node("tools", await self.make(ToolNode, tools=[*self.get_tools(), *mcp_tools]))
-
-		graph.add_node(
-			"end",
-			await self.make(
-				EndNode,
-				agent=self.__class__.__name__,
-				llm=llm,
-			),
-		)
+		graph.add_node("end_node", await self.make(EndNode))
 
 		# Define edges
-		graph.add_edge(START, "start")
-		graph.add_edge("start", "assistant")
-		graph.add_edge("assistant", "end")
+		graph.add_edge(START, "start_node")
+		graph.add_edge("start_node", "assistant_node")
+		graph.add_edge("assistant_node", "end_node")
+		graph.add_edge("end_node", END)
 
-		# Conditional routing from assistant
-		graph.add_conditional_edges(
-			"assistant",
-			self.route_tools,
-			{"tools": "tools", "end": "end"},
+		graph.add_edge("tools_node", "assistant_node")
+
+		# Compile graph with memory and configuration
+		checkpointer = await self.get_checkpointer()
+		return graph.compile(checkpointer=checkpointer)
+
+	async def get_assistant_runnable(self) -> AssistantContextSchema:
+		llm_service = await self.make(LLMService)
+		main: BaseChatModel = llm_service.get_main_model()
+		weak: BaseChatModel = llm_service.get_weak_model()
+
+		return AssistantContextSchema(
+			mode="main",
+			prompt=research_prompt,
+			main=main,
+			weak=weak,
+			agent=self.__class__.__name__,
+			tools=self.get_tools(),
 		)
-
-		graph.add_edge("tools", "assistant")
-		graph.add_edge("end", END)
-
-		return graph.compile()
-
-	def route_tools(
-		self,
-		state: BaseState,
-	):
-		"""
-		Use in the conditional_edge to route to the ToolNode if the last message
-		has tool calls. Otherwise, route to the end.
-		"""
-		ai_message = get_last_message(state)
-
-		if hasattr(ai_message, "tool_calls") and len(ai_message.tool_calls) > 0:
-			return "tools"
-		return "end"

@@ -9,6 +9,7 @@ from byte.domain.edit_format.config import EditFormatConfig
 from byte.domain.files.config import FilesConfig
 from byte.domain.lint.config import LintConfig
 from byte.domain.llm.config import LLMConfig
+from byte.domain.lsp.config import LSPConfig
 from byte.domain.mcp.config import MCPServer
 from byte.domain.web.config import WebConfig
 
@@ -49,6 +50,7 @@ class ByteConfg(BaseModel):
 
 	cli: CLIConfig = CLIConfig()
 	llm: LLMConfig = LLMConfig()
+	lsp: LSPConfig = LSPConfig()
 	lint: LintConfig = LintConfig()
 	files: FilesConfig = FilesConfig()
 	edit_format: EditFormatConfig = EditFormatConfig()

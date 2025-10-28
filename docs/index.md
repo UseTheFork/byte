@@ -101,12 +101,13 @@ Model Context Protocol (MCP) tools are available but tightly controlled. Manuall
 
 Byte leverages modern Python tooling and AI frameworks:
 
-- **uv** - Fast Python package management
-- **LangChain** - AI framework for language models
-- **LangGraph** - Graph-based agent workflows
-- **Rich** - Beautiful terminal output
-- **Prompt Toolkit** - Interactive command-line interfaces
-- **Catppuccin** - Soothing pastel theme
+- **[uv](https://docs.astral.sh/uv/)** - Fast Python package management
+- **[LangChain](https://www.langchain.com/)** - AI framework for language models
+- **[LangGraph](https://langchain-ai.github.io/langgraph/)** - Graph-based agent workflows
+- **[Rich](https://rich.readthedocs.io/)** - Beautiful terminal output
+- **[Prompt Toolkit](https://python-prompt-toolkit.readthedocs.io/)** - Interactive command-line interfaces
+- **[pydoll](https://pydoll.tech/)** - Browser automation and control
+- **[Catppuccin](https://catppuccin.com/)** - Soothing pastel theme
 
 ---
 
