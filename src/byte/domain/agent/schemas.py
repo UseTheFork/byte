@@ -8,6 +8,22 @@ from pydantic.dataclasses import dataclass
 
 
 @dataclass
+class ConstraintSchema:
+	"""User-defined constraint to guide agent behavior during execution.
+
+	Constraints are suggestions or actions the agent should avoid or follow based on
+	user feedback, such as declined tool calls or rejected suggestions.
+
+	Usage: `constraint = ConstraintSchema(type="avoid", description="Do not suggest using ripgrep_search")`
+	Usage: `constraint = ConstraintSchema(type="require", description="Always use type hints", source="user_input")`
+	"""
+
+	type: Literal["avoid", "require"]  # Whether this is something to avoid or something required
+	description: str  # Human-readable constraint description
+	source: Optional[str] = Field(default=None)  # Where the constraint originated (e.g., "declined_tool", "user_input")
+
+
+@dataclass
 class AssistantContextSchema:
 	"""Configuration for agent assistant including LLM, runnable chain, and tools.
 

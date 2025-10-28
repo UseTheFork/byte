@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Literal, Optional, Type, TypedDict
 from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 
 from byte.core.event_bus import EventType, Payload
+from byte.core.logging import log
 from byte.core.mixins.bootable import Bootable
 from byte.core.mixins.configurable import Configurable
 from byte.core.mixins.eventable import Eventable
@@ -49,6 +50,9 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
 			chunk: The data chunk from that stream mode
 		"""
 		stream_rendering_service = await self.make(StreamRenderingService)
+
+		log.info(mode)
+		log.info(chunk)
 
 		# Filter and process based on mode
 		if mode == "messages":

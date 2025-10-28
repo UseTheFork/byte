@@ -1,4 +1,4 @@
-from byte.domain.agent.schemas import TokenUsageSchema
+from byte.domain.agent.schemas import ConstraintSchema
 
 
 def replace_list(left: list | None, right: list) -> list:
@@ -13,19 +13,14 @@ def replace_list(left: list | None, right: list) -> list:
 	return right
 
 
-def add_token_usage(left: TokenUsageSchema | None, right: TokenUsageSchema) -> TokenUsageSchema:
-	"""Reducer that accumulates token usage by adding counts together.
+def add_constraints(left: list[ConstraintSchema] | None, right: list[ConstraintSchema]) -> list[ConstraintSchema]:
+	"""Reducer that accumulates user-defined constraints for the current invocation.
 
-	Combines input_tokens, output_tokens, and total_tokens from both schemas.
-	Used with Annotated to track cumulative token usage across multiple LLM calls.
+	Constraints are suggestions or actions the agent should avoid or follow based on
+	user feedback (e.g., declined tool calls, rejected edits).
 
-	Usage: `llm_main_usage: Annotated[TokenUsageSchema, add_token_usage]`
+	Usage: `constraints: Annotated[list[ConstraintSchema], add_constraints]`
 	"""
 	if left is None:
 		return right
-
-	return TokenUsageSchema(
-		input_tokens=left.input_tokens + right.input_tokens,
-		output_tokens=left.output_tokens + right.output_tokens,
-		total_tokens=right.total_tokens,
-	)
+	return left + right

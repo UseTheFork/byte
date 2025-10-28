@@ -351,17 +351,52 @@ class FileService(Service):
 
 		return payload.set("info_panel", info_panel)
 
-	async def add_file_context_to_prompt_hook(self, payload: Optional[Payload] = None):
-		"""Add file context to the payload for prompt assembly.
+	async def generate_context_prompt_with_line_numbers(self) -> tuple[list[str], list[str]]:
+		"""Generate structured file lists with line numbers for read-only and editable files.
 
-		Generates separate lists for read-only and editable files and adds
-		them to the payload data, avoiding direct state manipulation.
+		Similar to generate_context_prompt but includes line numbers for each line,
+		making it easier for the research agent to identify specific lines when
+		using LSP tools that require line numbers.
 
-		Usage: `payload = await service.add_file_context_to_prompt_hook(payload)`
+		Returns:
+			Tuple of (read_only_files, editable_files) as lists of strings with line numbers
+
+		Usage: `read_only, editable = await service.generate_context_prompt_with_line_numbers()`
 		"""
-		if payload:
-			read_only_files, editable_files = await self.generate_context_prompt()
-			payload.set("read_only", read_only_files)
-			payload.set("editable", editable_files)
+		read_only_files = []
+		editable_files = []
 
-		return payload
+		if not self._context_files:
+			return (read_only_files, editable_files)
+
+		# Separate files by mode for clear AI understanding
+		read_only = [f for f in self._context_files.values() if f.mode == FileMode.READ_ONLY]
+		editable = [f for f in self._context_files.values() if f.mode == FileMode.EDITABLE]
+
+		if read_only:
+			for file_ctx in sorted(read_only, key=lambda f: f.relative_path):
+				content = file_ctx.get_content()
+				if content is not None:
+					content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.READ_ONLY, content)
+					# Add line numbers to content
+					lines = content.splitlines()
+					numbered_lines = [f"{i:4d} | {line}" for i, line in enumerate(lines)]
+					numbered_content = "\n".join(numbered_lines)
+					read_only_files.append(
+						f"""<file: source={file_ctx.relative_path}, mode=read-only>\n{numbered_content}\n</file>"""
+					)
+
+		if editable:
+			for file_ctx in sorted(editable, key=lambda f: f.relative_path):
+				content = file_ctx.get_content()
+				if content is not None:
+					content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.EDITABLE, content)
+					# Add line numbers to content
+					lines = content.splitlines()
+					numbered_lines = [f"{i + 1:4d} | {line}" for i, line in enumerate(lines)]
+					numbered_content = "\n".join(numbered_lines)
+					editable_files.append(
+						f"""<file: source={file_ctx.relative_path}, mode=editable>\n{numbered_content}\n</file>"""
+					)
+
+		return (read_only_files, editable_files)

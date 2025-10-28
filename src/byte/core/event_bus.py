@@ -28,7 +28,6 @@ class EventType(Enum):
 	POST_ASSISTANT_NODE = "post_assistant_node"
 
 	GATHER_PROJECT_CONTEXT = "gather_project_context"
-	GATHER_FILE_CONTEXT = "gather_file_context"
 	GATHER_REINFORCEMENT = "gather_reinforcement"
 
 

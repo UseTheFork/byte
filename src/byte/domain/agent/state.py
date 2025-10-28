@@ -2,7 +2,8 @@ from typing import Annotated, TypedDict
 
 from langgraph.graph.message import AnyMessage, add_messages
 
-from byte.domain.agent.reducers import replace_list
+from byte.domain.agent.reducers import add_constraints, replace_list
+from byte.domain.agent.schemas import ConstraintSchema
 from byte.domain.edit_format.service.edit_format_service import SearchReplaceBlock
 
 
@@ -13,6 +14,7 @@ class BaseState(TypedDict):
 	"""
 
 	messages: Annotated[list[AnyMessage], add_messages]
+	constraints: Annotated[list[ConstraintSchema], add_constraints]
 	masked_messages: list[AnyMessage]
 
 	agent: str

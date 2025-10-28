@@ -23,6 +23,7 @@ class StartNode(Node):
 			"edit_format_system": "",
 			"masked_messages": [],
 			"examples": [],
+			"donts": [],
 		}
 
 		if self.edit_format is not None:

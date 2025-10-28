@@ -6,6 +6,7 @@ from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.implementations.research.prompts import research_prompt
 from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.end_node import EndNode
+from byte.domain.agent.nodes.extract_node import ExtractNode
 from byte.domain.agent.nodes.start_node import StartNode
 from byte.domain.agent.nodes.tool_node import ToolNode
 from byte.domain.agent.schemas import AssistantContextSchema
@@ -24,6 +25,10 @@ class ResearchAgent(Agent):
 	Usage: `agent = await container.make(ResearchAgent); result = await agent.execute(state)`
 	"""
 
+	# Research agent dosent use or update the main memory even thou it gets the current checkpointer state.
+	async def get_checkpointer(self):
+		return None
+
 	def get_tools(self):
 		return [find_references, get_definition, get_hover_info]
 		# return [ripgrep_search, read_file]
@@ -36,7 +41,8 @@ class ResearchAgent(Agent):
 
 		# Add nodes
 		graph.add_node("start_node", await self.make(StartNode))
-		graph.add_node("assistant_node", await self.make(AssistantNode))
+		graph.add_node("assistant_node", await self.make(AssistantNode, goto="extract_node"))
+		graph.add_node("extract_node", await self.make(ExtractNode, schema="session_context"))
 		graph.add_node("tools_node", await self.make(ToolNode))
 
 		graph.add_node("end_node", await self.make(EndNode))
@@ -44,7 +50,9 @@ class ResearchAgent(Agent):
 		# Define edges
 		graph.add_edge(START, "start_node")
 		graph.add_edge("start_node", "assistant_node")
-		graph.add_edge("assistant_node", "end_node")
+
+		graph.add_edge("extract_node", "end_node")
+
 		graph.add_edge("end_node", END)
 
 		graph.add_edge("tools_node", "assistant_node")

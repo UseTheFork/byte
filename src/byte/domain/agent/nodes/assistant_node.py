@@ -9,9 +9,9 @@ from langgraph.types import Command
 from byte.core.event_bus import EventType, Payload
 from byte.core.logging import log
 from byte.domain.agent.nodes.base_node import Node
-from byte.domain.agent.schemas import AssistantContextSchema, TokenUsageSchema
-from byte.domain.analytics.service.agent_analytics_service import AgentAnalyticsService
+from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.cli.service.console_service import ConsoleService
+from byte.domain.files.service.file_service import FileService
 
 
 class AssistantNode(Node):
@@ -83,7 +83,7 @@ class AssistantNode(Node):
 
 		return []
 
-	async def _gather_file_context(self) -> list[HumanMessage]:
+	async def _gather_file_context(self, with_line_numbers=False) -> list[HumanMessage]:
 		"""Gather file context including read-only and editable files.
 
 		Emits GATHER_FILE_CONTEXT event and formats the response into
@@ -94,18 +94,14 @@ class AssistantNode(Node):
 
 		Usage: `file_messages = await self._gather_file_context()`
 		"""
-		file_context = Payload(
-			event_type=EventType.GATHER_FILE_CONTEXT,
-			data={
-				"read_only": [],
-				"editable": [],
-			},
-		)
-		file_context = await self.emit(file_context)
+		file_service = await self.make(FileService)
+
+		if with_line_numbers:
+			read_only_files, editable_files = await file_service.generate_context_prompt_with_line_numbers()
+		else:
+			read_only_files, editable_files = await file_service.generate_context_prompt()
 
 		file_context_content = ""
-		read_only_files = file_context.get("read_only", [])
-		editable_files = file_context.get("editable", [])
 
 		if read_only_files or editable_files:
 			file_context_content = dedent("""
@@ -123,6 +119,58 @@ class AssistantNode(Node):
 			file_context_content += f"""<editable_files>\n{editable_content}\n</editable_files>\n"""
 
 		return [HumanMessage(file_context_content)] if file_context_content else []
+
+	async def _gather_constraints(self, state) -> list[HumanMessage]:
+		"""Gather user-defined constraints from state.
+
+		Assembles constraints that guide agent behavior, such as avoided
+		tool calls or required actions based on user feedback.
+
+		Args:
+			state: The current state containing constraints list
+
+		Returns:
+			List containing a single HumanMessage with formatted constraints, or empty list
+
+		Usage: `constraint_messages = await self._gather_constraints(state)`
+		"""
+		constraints = state.get("constraints", [])
+
+		if not constraints:
+			return []
+
+		# Group constraints by type
+		avoid_constraints = [c for c in constraints if c.type == "avoid"]
+		require_constraints = [c for c in constraints if c.type == "require"]
+
+		constraints_content = ""
+
+		if avoid_constraints:
+			avoid_items = "\n".join(f"- {c.description}" for c in avoid_constraints)
+			constraints_content += dedent(f"""
+			**Things to Avoid:**
+			<avoid>
+			{avoid_items}
+			</avoid>
+			""")
+
+		if require_constraints:
+			require_items = "\n".join(f"- {c.description}" for c in require_constraints)
+			constraints_content += dedent(f"""
+			**Requirements:**
+			<require>
+			{require_items}
+			</require>
+			""")
+
+		if constraints_content:
+			final_message = dedent(f"""
+			<constraints>
+			{constraints_content.strip()}
+			</constraints>""")
+			return [HumanMessage(final_message)]
+
+		return []
 
 	async def _gather_project_context(self) -> list[HumanMessage]:
 		"""Gather project context including conventions and session documents.
@@ -175,36 +223,13 @@ class AssistantNode(Node):
 
 		return [HumanMessage(project_inforamtion_and_context)]
 
-	async def _track_token_usage(self, result: AIMessage, mode: str) -> None:
-		"""Track token usage from AI response and update analytics.
-
-		Extracts usage metadata from the AI message and records it in the
-		analytics service based on the current AI mode (main or weak).
-
-		Args:
-			result: The AI message containing usage metadata
-			mode: The AI mode being used ("main" or "weak")
-
-		Usage: `await self._track_token_usage(result, runtime.context.mode)`
-		"""
-		if result.usage_metadata:
-			usage_metadata = result.usage_metadata
-			usage = TokenUsageSchema(
-				input_tokens=usage_metadata.get("input_tokens", 0),
-				output_tokens=usage_metadata.get("output_tokens", 0),
-				total_tokens=usage_metadata.get("total_tokens", 0),
-			)
-			agent_analytics_service = await self.make(AgentAnalyticsService)
-			if mode == "main":
-				await agent_analytics_service.update_main_usage(usage)
-			else:
-				await agent_analytics_service.update_weak_usage(usage)
-
 	async def __call__(self, state, config, runtime: Runtime[AssistantContextSchema]):
 		while True:
 			state["project_inforamtion_and_context"] = await self._gather_project_context()
 			state["file_context"] = await self._gather_file_context()
+			state["file_context_with_line_numbers"] = await self._gather_file_context(True)
 			state["reinforcement"] = await self._gather_reinforcement(runtime.context.mode)
+			state["constraints_context"] = await self._gather_constraints(state)
 
 			payload = Payload(
 				event_type=EventType.PRE_ASSISTANT_NODE,
