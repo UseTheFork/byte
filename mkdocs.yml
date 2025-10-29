@@ -63,6 +63,7 @@ nav:
     - Linting: concepts/lint.md
     - Commit: concepts/commit.md
     - Web: concepts/web.md
+    - LSP: concepts/lsp.md
   - References:
     - Overview: reference/index.md
     - Settings: reference/settings.md

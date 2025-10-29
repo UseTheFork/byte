@@ -2,6 +2,7 @@ from typing import List, Type
 
 from byte.container import Container
 from byte.core.config.config import ByteConfg
+from byte.core.event_bus import EventBus, EventType, Payload
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli.service.command_registry import Command
@@ -30,6 +31,25 @@ class LSPServiceProvider(ServiceProvider):
 		if config.lsp.enable:
 			# Boots the LSPs and starts them in the background.
 			await container.make(LSPService)
+			event_bus = await container.make(EventBus)
+
+			event_bus.on(
+				EventType.POST_BOOT.value,
+				self.boot_messages,
+			)
+
+	async def boot_messages(self, payload: Payload) -> Payload:
+		container: Container = payload.get("container", False)
+		if container:
+			lsp_service = await container.make(LSPService)
+			running_count = len(lsp_service.clients)
+
+			messages = payload.get("messages", [])
+			messages.append(f"[muted]LSP servers running:[/muted] [primary]{running_count}[/primary]")
+
+			payload.set("messages", messages)
+
+		return payload
 
 	async def shutdown(self, container: Container) -> None:
 		"""Shutdown all LSP servers gracefully."""

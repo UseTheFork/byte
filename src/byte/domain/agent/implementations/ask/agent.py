@@ -10,7 +10,6 @@ from byte.domain.agent.nodes.tool_node import ToolNode
 from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.agent.state import AskState
 from byte.domain.llm.service.llm_service import LLMService
-from byte.domain.mcp.service.mcp_service import MCPService
 
 
 class AskAgent(Agent):
@@ -67,9 +66,6 @@ class AskAgent(Agent):
 		main: BaseChatModel = llm_service.get_main_model()
 		weak: BaseChatModel = llm_service.get_weak_model()
 
-		mcp_service = await self.make(MCPService)
-		mcp_tools = mcp_service.get_tools_for_agent("ask")
-
 		# test: RunnableSerializable[dict[Any, Any], BaseMessage] = ask_prompt | main
 		# main.bind_tools(mcp_tools, parallel_tool_calls=False)
 
@@ -79,5 +75,4 @@ class AskAgent(Agent):
 			main=main,
 			weak=weak,
 			agent=self.__class__.__name__,
-			tools=mcp_tools,
 		)
