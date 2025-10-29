@@ -45,7 +45,7 @@ class LintService(Service, UserInteractive):
 				"Linting is disabled. Set 'lint.enable' to true in your .byte/config.yaml to use lint commands."
 			)
 
-		if not self._config.lint.commands:
+		if len(self._config.lint.commands) == 0:
 			raise LintConfigException(
 				"No lint commands configured. Add commands to 'lint.commands' in your .byte/config.yaml. "
 				"See docs/reference/settings.md for configuration examples."
@@ -136,7 +136,8 @@ class LintService(Service, UserInteractive):
 				failed_commands.extend(failed_files)
 
 				# Add command header
-				commands_with_issues.append(f"# **{command.command}** ({len(failed_files)} files)\n")
+				command_str = " ".join(command.command)
+				commands_with_issues.append(f"# **{command_str}** ({len(failed_files)} files)\n")
 
 				# Add individual file errors with cleaner formatting
 				for lint_file in failed_files[:3]:  # Show first 3 files
@@ -236,10 +237,11 @@ class LintService(Service, UserInteractive):
 								continue
 						# If no extensions specified, process all files
 
+						full_command = " ".join(command.command + [str(file_path)])
 						lint_files.append(
 							LintFile(
 								file=file_path,
-								full_command=f"{command.command} {file_path!s}",
+								full_command=full_command,
 								exit_code=0,
 								stdout="",
 								stderr="",
@@ -257,7 +259,8 @@ class LintService(Service, UserInteractive):
 
 				for command in lint_commands:
 					for i, lint_file in enumerate(command.results):
-						status.update(f"Running {command.command} on {lint_file.file}")
+						command_str = " ".join(command.command)
+						status.update(f"Running {command_str} on {lint_file.file}")
 
 						updated_lint_file = await self._execute_lint_command(lint_file, git_root)
 						command.results[i] = updated_lint_file

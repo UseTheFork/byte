@@ -19,5 +19,5 @@ class LintFile:
 class LintCommand:
 	"""Dataclass representing a lint command with results for multiple files."""
 
-	command: str
+	command: List[str]
 	results: List[LintFile]
