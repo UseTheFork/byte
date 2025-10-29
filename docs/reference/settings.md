@@ -41,6 +41,14 @@ Byte's configuration system uses a YAML file located at `.byte/config.yaml` to c
 | `api_key`      | `string`  | -       | API key for authenticating with the LLM provider           |
 | `model_params` | `object`  | -       | Additional parameters to pass to the model initialization  |
 
+## Lsp
+
+| Field     | Type      | Default | Description                                 |
+| --------- | --------- | ------- | ------------------------------------------- |
+| `enable`  | `boolean` | `false` | Enable or disable LSP functionality         |
+| `timeout` | `integer` | `30`    | Timeout in seconds for LSP requests         |
+| `servers` | `object`  | -       | Map of server names to their configurations |
+
 ## Lint
 
 | Field      | Type                 | Default | Description                                                        |

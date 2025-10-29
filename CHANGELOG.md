@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.2] - 2025-10-29
+
+### 🚀 Features
+
+- Add LSP support with Jedi language server for Python
+
+### 🚜 Refactor
+
+- Restructure research agent and extract node for better context handling
+- Reorder placeholders in ask prompt and extract prompt templates
+
+### ⚙️ Miscellaneous Tasks
+
+- Update project version to 0.2.1 and modify configuration
+
 ## [0.2.1] - 2025-10-24
 
 ### 🚀 Features

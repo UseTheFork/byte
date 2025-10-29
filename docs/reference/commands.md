@@ -12,6 +12,8 @@ Byte provides a comprehensive set of commands for interacting with your codebase
 
 `/ask` - Ask the AI agent a question or request assistance
 
+`/research` - Research codebase patterns and gather insights
+
 ## Files
 
 `/add` - Add file to context as editable
