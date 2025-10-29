@@ -104,6 +104,7 @@ class ExtractNode(Node, UserInteractive):
 
 		if self.schema == "text":
 			output = extract_content_from_message(last_message)
+			return Command(goto=self.goto, update={"extracted_content": output})
 
 		if self.schema == "session_context":
 			weak_model = runtime.context.weak
