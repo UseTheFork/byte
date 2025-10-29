@@ -11,7 +11,7 @@ class ContextListCommand(Command, UserInteractive):
 
 	@property
 	def name(self) -> str:
-		return "context:ls"
+		return "ctx:ls"
 
 	@property
 	def category(self) -> str:

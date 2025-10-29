@@ -14,9 +14,6 @@ class ConfigLoaderService:
 	Usage: `config_dict = loader()` -> {"llm": {...}, "files": {...}}
 	"""
 
-	def __init__(self):
-		pass
-
 	def __call__(self) -> Dict[str, Any]:
 		"""Load configuration from BYTE_CONFIG_FILE.
 

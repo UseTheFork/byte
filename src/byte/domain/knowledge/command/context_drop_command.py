@@ -15,7 +15,7 @@ class ContextDropCommand(Command):
 
 	@property
 	def name(self) -> str:
-		return "context:drop"
+		return "ctx:drop"
 
 	@property
 	def category(self) -> str:

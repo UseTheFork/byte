@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 import git
 from pydantic import BaseModel, Field
@@ -10,7 +9,6 @@ from byte.domain.files.config import FilesConfig
 from byte.domain.lint.config import LintConfig
 from byte.domain.llm.config import LLMConfig
 from byte.domain.lsp.config import LSPConfig
-from byte.domain.mcp.config import MCPServer
 from byte.domain.web.config import WebConfig
 
 
@@ -55,4 +53,3 @@ class ByteConfg(BaseModel):
 	files: FilesConfig = FilesConfig()
 	edit_format: EditFormatConfig = EditFormatConfig()
 	web: WebConfig = WebConfig()
-	mcp: List[MCPServer] = []

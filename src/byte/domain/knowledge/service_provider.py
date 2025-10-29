@@ -5,6 +5,7 @@ from byte.core.event_bus import EventBus, EventType
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli.service.command_registry import Command
+from byte.domain.knowledge.command.context_add_file_command import ContextAddFileCommand
 from byte.domain.knowledge.command.context_drop_command import ContextDropCommand
 from byte.domain.knowledge.command.context_list_command import ContextListCommand
 from byte.domain.knowledge.command.web_command import WebCommand
@@ -34,7 +35,12 @@ class KnowledgeServiceProvider(ServiceProvider):
 		]
 
 	def commands(self) -> List[Type[Command]]:
-		return [WebCommand, ContextListCommand, ContextDropCommand]
+		return [
+			WebCommand,
+			ContextListCommand,
+			ContextDropCommand,
+			ContextAddFileCommand,
+		]
 
 	async def boot(self, container: Container):
 		"""Boot file services and register commands with registry."""
