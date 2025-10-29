@@ -6,6 +6,7 @@ from byte.domain.agent.implementations.research.agent import ResearchAgent
 from byte.domain.agent.nodes.extract_node import SessionContextFormatter
 from byte.domain.agent.service.agent_service import AgentService
 from byte.domain.cli.service.command_registry import Command
+from byte.domain.knowledge.model.session_context import SessionContextModel
 from byte.domain.knowledge.service.session_context_service import SessionContextService
 from byte.domain.memory.service.memory_service import MemoryService
 
@@ -28,7 +29,7 @@ class ResearchCommand(Command):
 
 	@property
 	def description(self) -> str:
-		return "Research codebase patterns and gather insights"
+		return "Execute research agent to gather codebase insights, analyze patterns, and save detailed findings to session context for other agents"
 
 	async def execute(self, args: str) -> None:
 		"""Execute research agent with the given query.
@@ -57,4 +58,5 @@ class ResearchCommand(Command):
 		extracted_content = cast(SessionContextFormatter, agent_result.get("extracted_content"))
 
 		session_context_service = await self.make(SessionContextService)
-		session_context_service.add_context(extracted_content.name, extracted_content.content)
+		model = SessionContextModel(type="agent", key=extracted_content.name, content=extracted_content.content)
+		session_context_service.add_context(model)

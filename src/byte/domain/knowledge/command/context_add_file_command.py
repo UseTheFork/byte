@@ -3,6 +3,7 @@ from pathlib import Path
 from byte.core.config.config import ByteConfg
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.cli.service.console_service import ConsoleService
+from byte.domain.knowledge.model.session_context import SessionContextModel
 from byte.domain.knowledge.service.session_context_service import SessionContextService
 
 
@@ -62,5 +63,6 @@ class ContextAddFileCommand(Command):
 
 		# Add to context using the file path as the key
 		context_key = str(file_path.relative_to(config.project_root))
-		session_context_service.add_context(context_key, content)
+		model = SessionContextModel(type="file", key=context_key, content=content)
+		session_context_service.add_context(model)
 		console.print(f"[success]Added {context_key} to session context[/success]")

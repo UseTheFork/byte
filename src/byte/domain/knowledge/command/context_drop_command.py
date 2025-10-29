@@ -23,7 +23,7 @@ class ContextDropCommand(Command):
 
 	@property
 	def description(self) -> str:
-		return "Remove item from session context"
+		return "Remove items from session context to clean up and reduce noise, improving AI focus on current task"
 
 	async def execute(self, args: str) -> None:
 		"""Remove specified item from session context."""

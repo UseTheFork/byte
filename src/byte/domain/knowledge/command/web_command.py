@@ -5,6 +5,7 @@ from byte.domain.agent.implementations.cleaner.agent import CleanerAgent
 from byte.domain.cli.rich.markdown import Markdown
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.cli.service.console_service import ConsoleService
+from byte.domain.knowledge.model.session_context import SessionContextModel
 from byte.domain.knowledge.service.session_context_service import SessionContextService
 from byte.domain.web.service.chromium_service import ChromiumService
 
@@ -27,7 +28,7 @@ class WebCommand(Command, UserInteractive):
 
 	@property
 	def description(self) -> str:
-		return "Scrape a webpage and convert it to markdown"
+		return "Fetch webpage using headless Chrome, convert HTML to markdown, display for review, and optionally add to LLM context"
 
 	async def execute(self, args: str) -> None:
 		"""Execute the web scraping command.
@@ -69,7 +70,8 @@ class WebCommand(Command, UserInteractive):
 			console.print_success("Content added to context")
 
 			key = slugify(args)
-			session_context_service.add_context(key, markdown_content)
+			model = SessionContextModel(type="web", key=key, content=markdown_content)
+			session_context_service.add_context(model)
 
 		elif choice == "Clean with LLM":
 			console.print_info("Cleaning content with LLM...")
@@ -93,7 +95,8 @@ class WebCommand(Command, UserInteractive):
 			if cleaned_content:
 				console.print_success("Content cleaned and added to context")
 				key = slugify(args)
-				session_context_service.add_context(key, cleaned_content)
+				model = SessionContextModel(type="web", key=key, content=cleaned_content)
+				session_context_service.add_context(model)
 			else:
 				console.print_warning("No cleaned content returned")
 		else:

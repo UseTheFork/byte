@@ -1,8 +1,10 @@
 from textwrap import dedent
+from typing import Optional
 
 from byte.core.array_store import ArrayStore
 from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
+from byte.domain.knowledge.model.session_context import SessionContextModel
 
 
 class SessionContextService(Service):
@@ -21,12 +23,12 @@ class SessionContextService(Service):
 		"""
 		self.session_context = ArrayStore()
 
-	def add_context(self, key: str, content: str) -> "SessionContextService":
+	def add_context(self, model: SessionContextModel) -> "SessionContextService":
 		"""Add a context item to the session store.
 
-		Usage: `service.add_context("style_guide", "Follow PEP 8...")`
+		Usage: `service.add_context(SessionContextModel(type="file", key="style_guide", content="Follow PEP 8..."))`
 		"""
-		self.session_context.add(key, content)
+		self.session_context.add(model.key, model)
 		return self
 
 	def remove_context(self, key: str) -> "SessionContextService":
@@ -37,12 +39,12 @@ class SessionContextService(Service):
 		self.session_context.remove(key)
 		return self
 
-	def get_context(self, key: str, default: str = "") -> str:
+	def get_context(self, key: str) -> Optional[SessionContextModel]:
 		"""Retrieve a specific context item from the store.
 
-		Usage: `content = service.get_context("style_guide", "default text")`
+		Usage: `model = service.get_context("style_guide")`
 		"""
-		return self.session_context.get(key, default)
+		return self.session_context.get(key, None)
 
 	def clear_context(self) -> "SessionContextService":
 		"""Clear all context items from the session store.
@@ -52,7 +54,7 @@ class SessionContextService(Service):
 		self.session_context.set({})
 		return self
 
-	def get_all_context(self) -> dict[str, str]:
+	def get_all_context(self) -> dict[str, SessionContextModel]:
 		"""Retrieve all context items from the session store.
 
 		Usage: `all_context = service.get_all_context()`
@@ -69,11 +71,11 @@ class SessionContextService(Service):
 		if self.session_context.is_not_empty():
 			# Format each context item with its own tags
 			formatted_contexts = []
-			for key, content in self.session_context.all().items():
+			for key, model in self.session_context.all().items():
 				formatted_contexts.append(
 					dedent(f"""
-					<session_context: key={key} >
-					{content}
+					<session_context: type={model.type}, key={key} >
+					{model.content}
 					</session_context>""")
 				)
 
