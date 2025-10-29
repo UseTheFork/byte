@@ -15,8 +15,6 @@ from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.agent.state import BaseState
 
 # TODO: This dosent feel like the right place for this.
-
-
 extract_prompt = ChatPromptTemplate.from_messages(
 	[
 		(
@@ -43,7 +41,6 @@ extract_prompt = ChatPromptTemplate.from_messages(
 			),
 		),
 		("placeholder", "{messages}"),
-		# ("user", "{last_message}"),
 	]
 )
 
