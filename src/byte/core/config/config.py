@@ -18,7 +18,6 @@ def _find_project_root() -> Path:
 	Raises InvalidGitRepositoryError if not in a git repository.
 	"""
 	try:
-		# Use git library to find repository root
 		repo = git.Repo(search_parent_directories=True)
 		return Path(repo.working_dir)
 	except git.InvalidGitRepositoryError:
@@ -46,6 +45,7 @@ class ByteConfg(BaseModel):
 	byte_cache_dir: Path = Field(default=BYTE_CACHE_DIR, exclude=True)
 	dotenv_loaded: bool = Field(default=False, exclude=True, description="Whether a .env file was successfully loaded")
 
+	# keep-sorted start
 	cli: CLIConfig = CLIConfig()
 	llm: LLMConfig = LLMConfig()
 	lsp: LSPConfig = LSPConfig()
@@ -53,3 +53,4 @@ class ByteConfg(BaseModel):
 	files: FilesConfig = FilesConfig()
 	edit_format: EditFormatConfig = EditFormatConfig()
 	web: WebConfig = WebConfig()
+	# keep-sorted end

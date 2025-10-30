@@ -80,9 +80,9 @@ Structured prompts adapt with each turn:
 
 Linting, formatting, and testing run automatically after code changes are applied. Configure your tools once and they work seamlessly in the background without requiring agent interaction.
 
-### Controlled MCP Integration
+<!-- ### Controlled MCP Integration
 
-Model Context Protocol (MCP) tools are available but tightly controlled. Manually run tools or restrict which agents can access specific capabilities.
+Model Context Protocol (MCP) tools are available but tightly controlled. Manually run tools or restrict which agents can access specific capabilities. -->
 
 ---
 

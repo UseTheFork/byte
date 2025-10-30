@@ -120,14 +120,14 @@ combine-as-imports = true
 
 [tool.basedpyright]
 # keep-sorted start
-include = ["src"]
 exclude = ["**/node_modules", "**/__pycache__"]
+include = ["src"]
 pythonPlatform = "All"
 pythonVersion = "3.12"
-reportIgnoreCommentWithoutRule = true
-reportRedeclaration = false
 reportArgumentType = false
 reportAttributeAccessIssue = false
+reportIgnoreCommentWithoutRule = true
+reportRedeclaration = false
 reportUnnecessaryTypeIgnoreComment = "warning"
 typeCheckingMode = "basic"
 # keep-sorted end

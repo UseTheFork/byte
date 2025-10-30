@@ -42,34 +42,36 @@ class AgentServiceProvider(ServiceProvider):
 	def agents(self) -> List[Type[Agent]]:
 		return [
 			# keep-sorted start
-			CoderAgent,
-			CommitAgent,
 			AskAgent,
 			CleanerAgent,
-			ResearchAgent,
+			CoderAgent,
+			CommitAgent,
 			CopyAgent,
+			ResearchAgent,
 			SubprocessAgent,
 			# keep-sorted end
 		]
 
 	def commands(self) -> List[Type[Command]]:
 		return [
+			# keep-sorted start
 			AskCommand,
 			ResearchCommand,
+			# keep-sorted end
 		]
 
 	def nodes(self) -> List[Type[Node]]:
 		return [
 			# keep-sorted start
-			StartNode,
-			EndNode,
 			AssistantNode,
+			CopyNode,
+			EndNode,
+			ExtractNode,
 			LintNode,
 			ParseBlocksNode,
-			ExtractNode,
-			ToolNode,
-			CopyNode,
+			StartNode,
 			SubprocessNode,
+			ToolNode,
 			# keep-sorted end
 		]
 
