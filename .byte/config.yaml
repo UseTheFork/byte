@@ -3,14 +3,14 @@ llm:
 lint:
   enable: true
   commands:
-    - command: "uv run ruff format --force-exclude --respect-gitignore"
-      extensions: [".py"]
-    - command: "uv run ruff check --fix --force-exclude"
-      extensions: [".py"]
-    - command: "prettier --write"
-      extensions: [".md"]
-    - command: "keep-sorted"
-      extensions: ["*"]
+    - command: ["uv", "run", "ruff", "format", "--force-exclude", "--respect-gitignore"]
+      languages: ["python"]
+    - command: ["uv", "run", "ruff", "check", "--fix", "--force-exclude"]
+      languages: ["python"]
+    - command: ["prettier", "--write"]
+      languages: ["markdown"]
+    - command: ["keep-sorted"]
+      languages: ["*"]
 files:
   ignore:
     - .byte/cache

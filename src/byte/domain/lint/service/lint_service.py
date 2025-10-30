@@ -8,8 +8,10 @@ from rich.live import Live
 from rich.progress import BarColumn, Progress, TaskProgressColumn
 from rich.table import Column
 
+from byte.core.logging import log
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
+from byte.core.utils import get_language_from_filename
 from byte.domain.cli.rich.markdown import Markdown
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.git.service.git_service import GitService
@@ -230,12 +232,19 @@ class LintService(Service, UserInteractive):
 				for command in self._config.lint.commands:
 					lint_files = []
 					for file_path in changed_files:
-						# Check if file should be processed by this command based on extensions
-						if command.extensions:
-							# If extensions are specified, only process files with matching extensions
-							if not any(str(file_path).endswith(ext) for ext in command.extensions):
-								continue
-						# If no extensions specified, process all files
+						# Get the language for this file using Pygments
+						file_language = get_language_from_filename(str(file_path))
+
+						# Check if file should be processed by this command based on language
+						if command.languages:
+							# If "*" is in languages, process all files
+							if "*" not in command.languages:
+								# If languages are specified, only process files with matching language (case-insensitive)
+								if not file_language or file_language.lower() not in [
+									lang.lower() for lang in command.languages
+								]:
+									continue
+						# If no languages specified, process all files
 
 						full_command = " ".join(command.command + [str(file_path)])
 						lint_files.append(
@@ -261,6 +270,7 @@ class LintService(Service, UserInteractive):
 					for i, lint_file in enumerate(command.results):
 						command_str = " ".join(command.command)
 						status.update(f"Running {command_str} on {lint_file.file}")
+						log.info(f"Executing lint command: {command_str} on {lint_file.file}")
 
 						updated_lint_file = await self._execute_lint_command(lint_file, git_root)
 						command.results[i] = updated_lint_file

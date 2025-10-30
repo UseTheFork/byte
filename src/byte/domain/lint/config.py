@@ -7,8 +7,8 @@ class LintCommand(BaseModel):
 	command: List[str] = Field(
 		description="Command and arguments to execute for linting (e.g., ['ruff', 'check', '--fix'])"
 	)
-	extensions: List[str] = Field(
-		description="List of file extensions to run this command on (e.g., ['.py', '.pyi']). Empty list means all files."
+	languages: List[str] = Field(
+		description="List of language names this command handles (e.g., ['Python', 'Python 3']). Empty list means all files."
 	)
 
 
