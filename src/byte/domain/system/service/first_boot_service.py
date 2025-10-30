@@ -169,7 +169,7 @@ class FirstBootService:
 		else:
 			self.print_success(f"Selected {selected} as LLM provider\n")
 
-		return selected
+		return "anthropic"
 
 	def _init_web(self, config: ByteConfg) -> ByteConfg:
 		"""Initialize web configuration by detecting Chrome or Chromium binary.

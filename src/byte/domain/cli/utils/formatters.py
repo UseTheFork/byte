@@ -103,7 +103,8 @@ class MarkdownStream:
 			stable_text = "".join(new_stable_lines)
 			if stable_text:
 				stable_display = Text.from_ansi(stable_text)
-				self.live.console.print(stable_display)
+				if self.live and self.live.console:
+					self.live.console.print(stable_display)
 
 			# Update our record of printed lines
 			self.printed = lines_chunk[:stable_lines]
@@ -114,7 +115,8 @@ class MarkdownStream:
 			if remaining_lines:
 				live_text = "".join(remaining_lines)
 				live_display = Text.from_ansi(live_text)
-				self.live.update(live_display)
+				if self.live:
+					self.live.update(live_display)
 
 		if is_final and self.live:
 			self.live.update("")

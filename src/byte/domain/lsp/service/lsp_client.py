@@ -533,6 +533,8 @@ class LSPClient:
 		"""Read and log stderr from the LSP server."""
 		try:
 			while True:
+				if self.process is None or self.process.stderr is None:
+					break
 				line = await self.process.stderr.readline()
 				if not line:
 					break
@@ -546,6 +548,9 @@ class LSPClient:
 			# Read headers
 			headers = {}
 			while True:
+				if self.reader is None:
+					log.warning(f"[LSP {self.name}] Reader is None")
+					return None
 				line = await self.reader.readline()
 				if not line:
 					log.warning(f"[LSP {self.name}] EOF while reading headers")

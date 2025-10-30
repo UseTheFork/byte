@@ -260,7 +260,13 @@ class AssistantNode(Node):
 
 			# Ensure we get a real response
 			if not result.tool_calls and (
-				not result.content or (isinstance(result.content, list) and not result.content[0].get("text"))
+				not result.content
+				or (
+					isinstance(result.content, list)
+					and len(result.content) > 0
+					and isinstance(result.content[0], dict)
+					and not result.content[0].get("text")
+				)
 			):
 				# Re-prompt for actual response
 				messages = state["messages"] + [("user", "Respond with a real output.")]

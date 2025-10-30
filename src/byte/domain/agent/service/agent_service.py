@@ -65,7 +65,7 @@ class AgentService(Service):
 
 	def get_available_agents(self) -> list[Type[Agent]]:
 		"""Get list of available agent types."""
-		return self._available_agents
+		return self._available_agents  # pyright: ignore[reportReturnType]
 
 	def get_active_agent_name(self) -> str:
 		"""Get the name of the currently active agent for display purposes."""

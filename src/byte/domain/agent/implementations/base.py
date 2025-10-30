@@ -100,7 +100,7 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
 
 		# Create initial state using the agent's state class
 		State = self.get_state_class()
-		initial_state = State(request)
+		initial_state = State(request)  # pyright: ignore[reportCallIssue]
 
 		# Get the graph and stream events
 		graph = await self.get_graph()

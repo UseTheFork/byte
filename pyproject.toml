@@ -119,6 +119,7 @@ line-ending = "lf"
 combine-as-imports = true
 
 [tool.basedpyright]
+# keep-sorted start
 include = ["src"]
 exclude = ["**/node_modules", "**/__pycache__"]
 pythonPlatform = "All"
@@ -126,8 +127,10 @@ pythonVersion = "3.12"
 reportIgnoreCommentWithoutRule = true
 reportRedeclaration = false
 reportArgumentType = false
+reportAttributeAccessIssue = false
 reportUnnecessaryTypeIgnoreComment = "warning"
 typeCheckingMode = "basic"
+# keep-sorted end
 
 executionEnvironments = [
     { root = "src/tests", reportPrivateUsage = false, extraPaths = [

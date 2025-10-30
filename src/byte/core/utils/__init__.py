@@ -17,9 +17,9 @@ def dump(*args, **kwargs):
 	"""
 
 	# Get caller information and build call stack
-	frame = inspect.currentframe().f_back
-	filename = frame.f_code.co_filename
-	lineno = frame.f_lineno
+	frame = inspect.currentframe().f_back  # pyright: ignore[reportOptionalMemberAccess]
+	filename = frame.f_code.co_filename  # pyright: ignore[reportOptionalMemberAccess]
+	lineno = frame.f_lineno  # pyright: ignore[reportOptionalMemberAccess]
 
 	# Trace the call stack
 	call_chain = []
@@ -37,7 +37,7 @@ def dump(*args, **kwargs):
 
 	if not args and not kwargs:
 		# If no arguments, dump the caller's locals
-		pprint(frame.f_locals)
+		pprint(frame.f_locals)  # pyright: ignore[reportOptionalMemberAccess]
 	else:
 		# Print each argument
 		for arg in args:
