@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 from byte.core.logging import log
 from byte.core.service.base_service import Service
 from byte.core.task_manager import TaskManager
+from byte.core.utils import get_language_from_filename
 from byte.domain.lsp.schemas import (
 	CompletionItem,
 	Diagnostic,
@@ -17,20 +18,21 @@ class LSPService(Service):
 	"""Service for managing multiple LSP servers and providing code intelligence.
 
 	Manages LSP client lifecycle, routes requests to appropriate servers based on
-	file extensions, and provides a unified interface for code intelligence features.
+	file languages, and provides a unified interface for code intelligence features.
 	Usage: `hover = await lsp_service.get_hover(file_path, line, char)` -> hover info
 	"""
 
 	async def boot(self) -> None:
 		"""Initialize LSP service with configured servers."""
 		self.clients: Dict[str, LSPClient] = {}
-		self.extension_map: Dict[str, str] = {}
+		self.language_map: Dict[str, str] = {}
 		self.task_manager = await self.make(TaskManager)
 
-		# Build extension to server name mapping
+		# Build language to server name mapping
 		for server_name, server_config in self._config.lsp.servers.items():
-			for ext in server_config.file_extensions:
-				self.extension_map[ext] = server_name
+			for language in server_config.languages:
+				# Store languages in lowercase for case-insensitive matching
+				self.language_map[language.lower()] = server_name
 
 		# Start LSP servers in background if enabled
 		if self._config.lsp.enable:
@@ -210,11 +212,18 @@ class LSPService(Service):
 		if not self._config.lsp.enable:
 			return None
 
-		# Determine server from file extension
-		extension = file_path.suffix.lstrip(".")
-		server_name = self.extension_map.get(extension)
+		# Get the language for this file using Pygments
+		file_language = get_language_from_filename(str(file_path))
+
+		if not file_language:
+			log.debug(f"Could not determine language for file: {file_path}")
+			return None
+
+		# Determine server from file language (case-insensitive)
+		server_name = self.language_map.get(file_language.lower())
 
 		if not server_name or server_name not in self._config.lsp.servers:
+			log.debug(f"No LSP server configured for language '{file_language}' (file: {file_path})")
 			return None
 
 		# Return existing client if available
@@ -235,9 +244,14 @@ class LSPService(Service):
 			# Read file content
 			content = file_path.read_text(encoding="utf-8")
 
-			# Determine language ID from extension
-			extension = file_path.suffix.lstrip(".")
-			language_id = extension
+			# Determine language ID from filename
+			file_language = get_language_from_filename(str(file_path))
+			if not file_language:
+				# Fallback to extension if language detection fails
+				language_id = file_path.suffix.lstrip(".")
+			else:
+				# Use lowercase language name as language ID
+				language_id = file_language.lower()
 
 			# Notify server about the document
 			await client.did_open(file_path, content, language_id)

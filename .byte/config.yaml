@@ -36,4 +36,4 @@ lsp:
   servers:
     python:
       command: ["uv", "run", "jedi-language-server"]
-      file_extensions: ["py", "pyi"]
+      languages: ["python"]

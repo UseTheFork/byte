@@ -9,8 +9,8 @@ class LSPServerConfig(BaseModel):
 	command: List[str] = Field(
 		description="Command and arguments to start the LSP server (e.g., ['typescript-language-server', '--stdio'])"
 	)
-	file_extensions: List[str] = Field(
-		description="List of file extensions this server handles (e.g., ['ts', 'tsx', 'js', 'jsx'])"
+	languages: List[str] = Field(
+		description="List of language names this server handles (e.g., ['typescript', 'javascript']). Empty list means all files."
 	)
 	initialization_options: Optional[Dict[str, Any]] = Field(
 		default=None, description="Optional initialization options to pass to the LSP server"
