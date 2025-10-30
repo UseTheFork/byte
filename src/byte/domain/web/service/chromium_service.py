@@ -1,5 +1,6 @@
+from typing import List
+
 from bs4 import BeautifulSoup
-from markdownify import markdownify as md
 from pydoll.browser.chromium import Chrome
 from pydoll.browser.options import ChromiumOptions
 from rich.live import Live
@@ -8,6 +9,12 @@ from byte.core.service.base_service import Service
 from byte.domain.cli.rich.rune_spinner import RuneSpinner
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.web.exceptions import WebNotEnabledException
+from byte.domain.web.parser.base import BaseWebParser
+from byte.domain.web.parser.generic_parser import GenericParser
+from byte.domain.web.parser.gitbook_parser import GitBookParser
+from byte.domain.web.parser.github_parser import GitHubParser
+from byte.domain.web.parser.mkdocs_parser import MkDocsParser
+from byte.domain.web.parser.readthedocs_parser import ReadTheDocsParser
 
 
 class ChromiumService(Service):
@@ -17,6 +24,16 @@ class ChromiumService(Service):
 	to markdown format using BeautifulSoup and markdownify.
 	Usage: `markdown = await chromium_service.do_scrape("https://example.com")` -> scraped content as markdown
 	"""
+
+	async def boot(self) -> None:
+		"""Initialize the service with available parsers."""
+		self.parsers: List[BaseWebParser] = [
+			ReadTheDocsParser(),
+			GitBookParser(),
+			GitHubParser(),
+			MkDocsParser(),
+			GenericParser(),
+		]
 
 	async def do_scrape(self, url: str) -> str:
 		"""Scrape a webpage and convert it to markdown format.
@@ -63,6 +80,14 @@ class ChromiumService(Service):
 					html_content,
 					"html.parser",
 				)
-				markdown_content = md(str(soup))
 
-				return markdown_content
+				# Try to find a suitable parser for this content
+				parser = None
+				for p in self.parsers:
+					if p.can_parse(soup, url):
+						parser = p
+						break
+
+				spinner.text = f"Parsing with {parser.__class__.__name__}..."
+				text_content = parser.parse(soup)  # pyright: ignore[reportOptionalMemberAccess]
+				return text_content
