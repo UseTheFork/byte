@@ -3,7 +3,6 @@ import re
 import pyperclip
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
-from rich.columns import Columns
 
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.utils import extract_content_from_message
@@ -85,13 +84,11 @@ class CopyNode(Node, UserInteractive):
 		# Configuration for preview display
 		max_preview_lines = 5
 
-		# Calculate max line length based on console width to fit 2 columns
-		# Account for: panel borders (4 chars per panel), column gap (3 chars), and padding (4 chars per panel)
+		# Calculate max line length based on console width for single column
+		# Account for: panel borders (4 chars) and padding (4 chars)
 		console_width = console.width
 		padding_per_panel = 8  # 4 chars for borders + 4 chars for internal padding
-		column_gap = 3
-		total_overhead = (padding_per_panel * 2) + column_gap
-		max_line_length = max(40, (console_width - total_overhead) // 2)
+		max_line_length = max(40, console_width - padding_per_panel)
 
 		# Build panels for each code block
 		panels = []
@@ -147,23 +144,24 @@ class CopyNode(Node, UserInteractive):
 		panels.append(cancel_panel)
 		choices.append("[Cancel] Don't copy anything")
 
-		# Display panels in columns (2 columns for better layout)
+		# Display panels in single column
 		console.print()
 		console.rule("Select a code block to copy")
 		console.print()
-		console.print(Columns(panels, equal=True, expand=True))
+		for panel in panels:
+			console.print(panel)
 
-		# Prompt user to select
-		selected = await self.prompt_for_select_numbered(
+		# Prompt user to select by index number
+		selected_idx = await self.prompt_for_int(
 			"\nEnter number to copy",
-			choices,
+			min_value=1,
+			max_value=len(choices),
 			default=None,
 		)
 
-		# If user selected cancel or invalid choice
-		if selected == choices[-1] or selected not in choices:
+		# If user didn't provide a selection or selected cancel
+		if selected_idx is None or selected_idx == len(choices):
 			return None
 
-		# Return the selected block
-		selected_idx = choices.index(selected)
-		return code_blocks[selected_idx]
+		# Return the selected block (convert from 1-indexed to 0-indexed)
+		return code_blocks[selected_idx - 1]

@@ -26,7 +26,6 @@ class LSPServiceProvider(ServiceProvider):
 		return []
 
 	async def boot(self, container: Container):
-		""""""
 		config = await container.make(ByteConfg)
 		if config.lsp.enable:
 			# Boots the LSPs and starts them in the background.

@@ -4,6 +4,7 @@ import git
 from pydantic import BaseModel, Field
 
 from byte.domain.cli.config import CLIConfig
+from byte.domain.development.config import DevelopmentConfig
 from byte.domain.edit_format.config import EditFormatConfig
 from byte.domain.files.config import FilesConfig
 from byte.domain.lint.config import LintConfig
@@ -47,10 +48,11 @@ class ByteConfg(BaseModel):
 
 	# keep-sorted start
 	cli: CLIConfig = CLIConfig()
+	development: DevelopmentConfig = Field(default_factory=DevelopmentConfig, exclude=True)
+	edit_format: EditFormatConfig = EditFormatConfig()
+	files: FilesConfig = FilesConfig()
+	lint: LintConfig = LintConfig()
 	llm: LLMConfig = LLMConfig()
 	lsp: LSPConfig = LSPConfig()
-	lint: LintConfig = LintConfig()
-	files: FilesConfig = FilesConfig()
-	edit_format: EditFormatConfig = EditFormatConfig()
 	web: WebConfig = WebConfig()
 	# keep-sorted end
