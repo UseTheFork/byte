@@ -119,13 +119,19 @@ class LSPClient:
 
 		# Terminate process
 		if self.process:
-			self.process.terminate()
 			try:
-				await asyncio.wait_for(self.process.wait(), timeout=5.0)
-			except TimeoutError:
-				self.process.kill()
-			except Exception:
-				pass
+				if self.process.returncode is None:
+					self.process.terminate()
+					await asyncio.wait_for(self.process.wait(), timeout=5.0)
+			except (ProcessLookupError, TimeoutError):
+				# Process already gone or timeout - try kill
+				try:
+					if self.process.returncode is None:
+						self.process.kill()
+				except ProcessLookupError:
+					pass  # Already dead
+			except Exception as e:
+				log.debug(f"[LSP {self.name}] Process cleanup error: {e}")
 
 		self.state = LspServerState.STOPPED
 

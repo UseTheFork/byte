@@ -152,16 +152,16 @@ class CopyNode(Node, UserInteractive):
 			console.print(panel)
 
 		# Prompt user to select by index number
-		selected_idx = await self.prompt_for_int(
-			"\nEnter number to copy",
-			min_value=1,
-			max_value=len(choices),
+		selected_choice = await self.prompt_for_select_numbered(
+			"Enter number to copy",
+			choices=choices,
 			default=None,
 		)
 
 		# If user didn't provide a selection or selected cancel
-		if selected_idx is None or selected_idx == len(choices):
+		if selected_choice is None or selected_choice == choices[-1]:
 			return None
 
-		# Return the selected block (convert from 1-indexed to 0-indexed)
-		return code_blocks[selected_idx - 1]
+		# Find the index of the selected choice and return the corresponding block
+		selected_idx = choices.index(selected_choice)
+		return code_blocks[selected_idx]

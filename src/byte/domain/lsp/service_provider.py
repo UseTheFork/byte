@@ -5,6 +5,7 @@ from byte.core.config.config import ByteConfg
 from byte.core.event_bus import EventBus, EventType, Payload
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
+from byte.core.task_manager import TaskManager
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.lsp.service.lsp_service import LSPService
 
@@ -40,8 +41,9 @@ class LSPServiceProvider(ServiceProvider):
 	async def boot_messages(self, payload: Payload) -> Payload:
 		container: Container = payload.get("container", False)
 		if container:
-			lsp_service = await container.make(LSPService)
-			running_count = len(lsp_service.clients)
+			task_manager = await container.make(TaskManager)
+
+			running_count = sum(1 for name in task_manager._tasks.keys() if name.startswith("lsp_server_"))
 
 			messages = payload.get("messages", [])
 			messages.append(f"[muted]LSP servers running:[/muted] [primary]{running_count}[/primary]")

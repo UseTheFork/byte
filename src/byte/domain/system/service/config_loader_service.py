@@ -94,7 +94,7 @@ class ConfigLoaderService:
 
 		yaml_config = self._load_yaml_config()
 
-		config = ByteConfg(*yaml_config)
+		config = ByteConfg(**yaml_config)
 		config = self._apply_system_config(config)
 		config = self._apply_environment_overrides(config)
 		config = self._load_llm_api_keys(config)

@@ -234,8 +234,9 @@ class FileService(Service):
 				content = file_ctx.get_content()
 				if content is not None:
 					content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.READ_ONLY, content)
+					language = file_ctx.language
 					read_only_files.append(
-						f"""<file: source={file_ctx.relative_path}, language={file_ctx.language}, mode=read-only>\n{content}\n</file>"""
+						f"""<file: source={file_ctx.relative_path}, language={language}, mode=read-only>\n{content}\n</file>"""
 					)
 
 		if editable:
@@ -243,8 +244,9 @@ class FileService(Service):
 				content = file_ctx.get_content()
 				if content is not None:
 					content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.EDITABLE, content)
+					language = file_ctx.language
 					editable_files.append(
-						f"""<file: source={file_ctx.relative_path}, language={file_ctx.language}, mode=editable>\n{content}\n</file>"""
+						f"""<file: source={file_ctx.relative_path}, language={language}, mode=editable>\n{content}\n</file>"""
 					)
 
 		return (read_only_files, editable_files)
@@ -382,7 +384,7 @@ class FileService(Service):
 					lines = content.splitlines()
 					numbered_lines = [f"{i:4d} | {line}" for i, line in enumerate(lines)]
 					numbered_content = "\n".join(numbered_lines)
-					language = file_ctx.language or "text"
+					language = file_ctx.language
 					read_only_files.append(
 						f"""<file: source={file_ctx.relative_path}, language={language}, mode=read-only>\n{numbered_content}\n</file>"""
 					)
@@ -396,7 +398,7 @@ class FileService(Service):
 					lines = content.splitlines()
 					numbered_lines = [f"{i + 1:4d} | {line}" for i, line in enumerate(lines)]
 					numbered_content = "\n".join(numbered_lines)
-					language = file_ctx.language or "text"
+					language = file_ctx.language
 					editable_files.append(
 						f"""<file: source={file_ctx.relative_path}, language={language}, mode=editable>\n{numbered_content}\n</file>"""
 					)

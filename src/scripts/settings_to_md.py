@@ -149,6 +149,10 @@ def schema_to_markdown(schema: Dict[str, Any]) -> str:
 
 	# Process each top-level property that's not excluded
 	for field_name, prop in schema.get("properties", {}).items():
+		# Skip excluded fields (development and system are marked with exclude=True)
+		if prop.get("exclude", False):
+			continue
+
 		# Skip if field doesn't have a $ref (not a nested config object)
 		if "$ref" not in prop:
 			continue

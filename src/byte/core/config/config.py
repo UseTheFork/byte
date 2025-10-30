@@ -49,12 +49,12 @@ class ByteConfg(BaseModel):
 
 	# keep-sorted start
 	cli: CLIConfig = CLIConfig()
-	system: SystemConfig = Field(default_factory=SystemConfig, exclude=True)
 	development: DevelopmentConfig = Field(default_factory=DevelopmentConfig, exclude=True)
 	edit_format: EditFormatConfig = EditFormatConfig()
 	files: FilesConfig = FilesConfig()
 	lint: LintConfig = LintConfig()
 	llm: LLMConfig = LLMConfig()
 	lsp: LSPConfig = LSPConfig()
+	system: SystemConfig = Field(default_factory=SystemConfig, exclude=True)
 	web: WebConfig = WebConfig()
 	# keep-sorted end
