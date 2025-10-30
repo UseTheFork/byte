@@ -1,7 +1,7 @@
 import click
 from dotenv import load_dotenv
 
-from byte.core.config.config import DOTENV_PATH, ByteConfg
+from byte.core.config.config import DOTENV_PATH
 from byte.domain.system.service.config_loader_service import ConfigLoaderService
 from byte.domain.system.service.first_boot_service import FirstBootService
 
@@ -19,8 +19,9 @@ def cli():
 		initializer.run_if_needed()
 
 	loader = ConfigLoaderService()
-	config_dict = loader()
-	config = ByteConfg(**config_dict, dotenv_loaded=found_dotenv)
+	config = loader()
+	config.dotenv_loaded = found_dotenv
+
 	run(config)
 
 

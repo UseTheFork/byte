@@ -1,5 +1,3 @@
-from importlib.metadata import PackageNotFoundError, version
-
 from byte.container import Container
 from byte.core.config.config import ByteConfg
 from byte.core.event_bus import EventBus, EventType, Payload
@@ -76,11 +74,7 @@ class CLIServiceProvider(ServiceProvider):
 			# Add a break betwean the logo and the rest of the content
 			messages.append("")
 
-			try:
-				package_version = version("byte-ai-cli")
-			except PackageNotFoundError:
-				package_version = "dev"
-			messages.append(f"[muted]Version:[/muted] [primary]{package_version}[/primary]")
+			messages.append(f"[muted]Version:[/muted] [primary]{config.system.version}[/primary]")
 
 			if config.dotenv_loaded:
 				messages.append(f"[muted]Env File Found:[/muted] [primary]{config.dotenv_loaded}[/primary]")

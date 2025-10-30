@@ -8,7 +8,7 @@ from rich.columns import Columns
 from byte.core.event_bus import EventType, Payload
 from byte.core.service.base_service import Service
 from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.files.schemas import FileContext, FileMode
+from byte.domain.files.models import FileContext, FileMode
 from byte.domain.files.service.discovery_service import FileDiscoveryService
 
 
@@ -235,7 +235,7 @@ class FileService(Service):
 				if content is not None:
 					content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.READ_ONLY, content)
 					read_only_files.append(
-						f"""<file: source={file_ctx.relative_path}, mode=read-only>\n{content}\n</file>"""
+						f"""<file: source={file_ctx.relative_path}, language={file_ctx.language}, mode=read-only>\n{content}\n</file>"""
 					)
 
 		if editable:
@@ -244,7 +244,7 @@ class FileService(Service):
 				if content is not None:
 					content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.EDITABLE, content)
 					editable_files.append(
-						f"""<file: source={file_ctx.relative_path}, mode=editable>\n{content}\n</file>"""
+						f"""<file: source={file_ctx.relative_path}, language={file_ctx.language}, mode=editable>\n{content}\n</file>"""
 					)
 
 		return (read_only_files, editable_files)
@@ -382,8 +382,9 @@ class FileService(Service):
 					lines = content.splitlines()
 					numbered_lines = [f"{i:4d} | {line}" for i, line in enumerate(lines)]
 					numbered_content = "\n".join(numbered_lines)
+					language = file_ctx.language or "text"
 					read_only_files.append(
-						f"""<file: source={file_ctx.relative_path}, mode=read-only>\n{numbered_content}\n</file>"""
+						f"""<file: source={file_ctx.relative_path}, language={language}, mode=read-only>\n{numbered_content}\n</file>"""
 					)
 
 		if editable:
@@ -395,8 +396,9 @@ class FileService(Service):
 					lines = content.splitlines()
 					numbered_lines = [f"{i + 1:4d} | {line}" for i, line in enumerate(lines)]
 					numbered_content = "\n".join(numbered_lines)
+					language = file_ctx.language or "text"
 					editable_files.append(
-						f"""<file: source={file_ctx.relative_path}, mode=editable>\n{numbered_content}\n</file>"""
+						f"""<file: source={file_ctx.relative_path}, language={language}, mode=editable>\n{numbered_content}\n</file>"""
 					)
 
 		return (read_only_files, editable_files)

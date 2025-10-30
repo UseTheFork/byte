@@ -10,6 +10,7 @@ from byte.domain.files.config import FilesConfig
 from byte.domain.lint.config import LintConfig
 from byte.domain.llm.config import LLMConfig
 from byte.domain.lsp.config import LSPConfig
+from byte.domain.system.config import SystemConfig
 from byte.domain.web.config import WebConfig
 
 
@@ -48,6 +49,7 @@ class ByteConfg(BaseModel):
 
 	# keep-sorted start
 	cli: CLIConfig = CLIConfig()
+	system: SystemConfig = Field(default_factory=SystemConfig, exclude=True)
 	development: DevelopmentConfig = Field(default_factory=DevelopmentConfig, exclude=True)
 	edit_format: EditFormatConfig = EditFormatConfig()
 	files: FilesConfig = FilesConfig()

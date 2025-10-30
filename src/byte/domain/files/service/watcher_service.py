@@ -12,7 +12,7 @@ from byte.core.task_manager import TaskManager
 from byte.domain.agent.implementations.ask.agent import AskAgent
 from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
-from byte.domain.files.schemas import FileMode
+from byte.domain.files.model.file_model import FileMode
 from byte.domain.files.service.discovery_service import FileDiscoveryService
 from byte.domain.files.service.file_service import FileService
 from byte.domain.files.service.ignore_service import FileIgnoreService

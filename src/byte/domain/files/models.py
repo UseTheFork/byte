@@ -2,7 +2,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional
 
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel
+
+from byte.core.utils import get_language_from_filename
 
 
 class FileMode(Enum):
@@ -12,12 +14,19 @@ class FileMode(Enum):
 	EDITABLE = "editable"
 
 
-@dataclass
-class FileContext:
+class FileContext(BaseModel):
 	"""Immutable file context containing path and access mode information."""
 
 	path: Path
 	mode: FileMode
+
+	@property
+	def language(self) -> str:
+		"""Get the programming language of the file based on its filename.
+
+		Usage: `file_context.language` -> 'Python' or 'text'
+		"""
+		return get_language_from_filename(str(self.path)) or "text"
 
 	@property
 	def relative_path(self) -> str:

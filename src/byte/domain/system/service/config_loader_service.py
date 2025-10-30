@@ -1,4 +1,5 @@
 import os
+from importlib.metadata import PackageNotFoundError, version
 
 import yaml
 
@@ -24,6 +25,19 @@ class ConfigLoaderService:
 			config = yaml.safe_load(f)
 
 		return config if config is not None else {}
+
+	def _apply_system_config(self, config: ByteConfg) -> ByteConfg:
+		"""Apply system-level configuration settings.
+
+		Usage: `config = self._apply_system_config(config)`
+		"""
+
+		try:
+			config.system.version = version("byte-ai-cli")
+		except PackageNotFoundError:
+			pass
+
+		return config
 
 	def _apply_environment_overrides(self, config: ByteConfg) -> ByteConfg:
 		"""Apply environment variable overrides to configuration.
@@ -81,6 +95,7 @@ class ConfigLoaderService:
 		yaml_config = self._load_yaml_config()
 
 		config = ByteConfg(*yaml_config)
+		config = self._apply_system_config(config)
 		config = self._apply_environment_overrides(config)
 		config = self._load_llm_api_keys(config)
 
