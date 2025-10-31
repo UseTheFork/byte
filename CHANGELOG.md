@@ -2,12 +2,40 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2025-10-31
+
+### 🚀 Features
+
+- Add Pygments for language detection and improve linting configuration
+- Add web content parsing infrastructure with multiple specialized parsers
+
+### 🚜 Refactor
+
+- Remove MCP service provider and related configurations
+- Update session context handling with new SessionContextModel
+- Update lint configuration to support list-based command definition
+- Update LSP and lint configurations to use language-based mapping
+- Add pyright ignore comments and improve error handling
+- Sort and organize imports and configurations
+- Restructure config loading and LLM provider configuration
+- Update config and file handling with system version and language detection
+
+### 📚 Documentation
+
+- Add LSP documentation and configuration details
+- Update settings documentation with config changes and improvements
+- Update commands reference with improved descriptions and formatting
+
+### ⚙️ Miscellaneous Tasks
+
+- Update project version to 0.2.3 and modify configuration
+- Update CHANGELOG.md with version and configuration changes
+- Reorganize logo and asset files, update references
 ## [0.2.3] - 2025-10-29
 
 ### ⚙️ Miscellaneous Tasks
 
 - Update project version to 0.2.2 and modify configuration
-
 ## [0.2.2] - 2025-10-29
 
 ### 🚀 Features
@@ -22,7 +50,6 @@ All notable changes to this project will be documented in this file.
 ### ⚙️ Miscellaneous Tasks
 
 - Update project version to 0.2.1 and modify configuration
-
 ## [0.2.1] - 2025-10-24
 
 ### 🚀 Features
@@ -36,7 +63,6 @@ All notable changes to this project will be documented in this file.
 ### ⚙️ Miscellaneous Tasks
 
 - Update project version to 0.2.0 and add git-cliff configuration
-
 ## [0.2.0] - 2025-10-24
 
 ### 🚀 Features
@@ -66,7 +92,6 @@ All notable changes to this project will be documented in this file.
 - Bump version to 0.1.11 and update CHANGELOG.md
 - Update release script comments with tag and push commands
 - Refactor configuration loading and first boot initialization
-
 ## [0.1.11] - 2025-10-22
 
 ### 🚀 Features
@@ -84,7 +109,6 @@ All notable changes to this project will be documented in this file.
 ### ⚙️ Miscellaneous Tasks
 
 - Add placeholder comment in release script
-
 ## [0.1.10] - 2025-10-21
 
 ### 🚀 Features
@@ -106,14 +130,12 @@ All notable changes to this project will be documented in this file.
 
 - Prepare release 0.1.9 with updated package version
 - Update CHANGELOG.md with recent release notes
-
 ## [0.1.9] - 2025-10-20
 
 ### ⚙️ Miscellaneous Tasks
 
 - Prepare release 0.1.8 with updated workflows and package configuration
 - Update PyPI release workflow configuration
-
 ## [0.1.8] - 2025-10-20
 
 ### ⚙️ Miscellaneous Tasks
@@ -122,14 +144,12 @@ All notable changes to this project will be documented in this file.
 - Consolidate workflows by removing duplicate publish-to-pypi.yml
 - Update package name to byte-ai-cli in project configuration
 - Update release workflow for PyPI publication
-
 ## [0.1.7] - 2025-10-20
 
 ### ⚙️ Miscellaneous Tasks
 
 - Update project development status classifier
 - Update project version to 0.1.7 and add changelog
-
 ## [0.1.6] - 2025-10-20
 
 ### 🚀 Features
