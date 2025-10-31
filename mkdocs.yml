@@ -1,6 +1,8 @@
 site_name: Byte
 theme:
   name: material
+  logo: images/assets/logo-square.svg
+  favicon: images/assets/favicon.ico
   features:
     - navigation.path
     - navigation.instant

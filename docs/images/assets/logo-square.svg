@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Outer terminal shape -->
+  <rect x="16" y="16" width="480" height="480" rx="32" fill="#0c0c0c" stroke="rgba(255,255,255,0.35)" stroke-width="4" />
+
+  <!-- Centered, thicker slashes -->
+  <rect x="185" y="100" width="42" height="312" transform="rotate(15 206 256)" fill="#89b4fa" />
+  <rect x="285" y="100" width="42" height="312" transform="rotate(15 306 256)" fill="#cba6f7" />
+</svg>

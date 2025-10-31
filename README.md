@@ -1,6 +1,6 @@
 # Byte
 
-<p align="center"><img alt="Byte Logo" src="https://raw.githubusercontent.com/usethefork/byte/main/docs/images/logo.svg" /></p>
+<p align="center"><img alt="Byte Logo" src="https://raw.githubusercontent.com/usethefork/byte/main/docs/images/assets/logo.svg" /></p>
 
 A human-in-the-loop AI coding agent that keeps you in control. Byte helps you build through natural conversation while maintaining full visibility and approval over every change.
 
