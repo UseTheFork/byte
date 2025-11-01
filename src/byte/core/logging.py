@@ -1,10 +1,6 @@
 from pathlib import Path
 
 from loguru import logger
-from rich.traceback import install
-
-# Set rich as the default traceback handler
-install(show_locals=True)
 
 
 def _get_log_file_path() -> Path:

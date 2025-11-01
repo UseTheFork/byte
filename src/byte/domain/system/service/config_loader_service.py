@@ -4,6 +4,7 @@ from importlib.metadata import PackageNotFoundError, version
 import yaml
 
 from byte.core.config.config import BYTE_CONFIG_FILE, ByteConfg
+from byte.domain.system.config import PathsConfig
 
 
 class ConfigLoaderService:
@@ -36,6 +37,17 @@ class ConfigLoaderService:
 			config.system.version = version("byte-ai-cli")
 		except PackageNotFoundError:
 			pass
+
+		config.system.paths = PathsConfig(
+			cache=config.byte_dir / "cache",
+			session_context=config.byte_dir / "session_context",
+			conventions=config.byte_dir / "conventions",
+		)
+
+		# Create the directories
+		config.system.paths.session_context.mkdir(exist_ok=True)
+		config.system.paths.cache.mkdir(exist_ok=True)
+		config.system.paths.conventions.mkdir(exist_ok=True)
 
 		return config
 
