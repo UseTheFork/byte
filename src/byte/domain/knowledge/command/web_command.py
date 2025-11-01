@@ -5,7 +5,7 @@ from byte.domain.agent.implementations.cleaner.agent import CleanerAgent
 from byte.domain.cli.rich.markdown import Markdown
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.knowledge.model.session_context import SessionContextModel
+from byte.domain.knowledge.models import SessionContextModel
 from byte.domain.knowledge.service.session_context_service import SessionContextService
 from byte.domain.web.service.chromium_service import ChromiumService
 
@@ -70,7 +70,7 @@ class WebCommand(Command, UserInteractive):
 			console.print_success("Content added to context")
 
 			key = slugify(args)
-			model = SessionContextModel(type="web", key=key, content=markdown_content)
+			model = await self.make(SessionContextModel, type="web", key=key, content=markdown_content)
 			session_context_service.add_context(model)
 
 		elif choice == "Clean with LLM":
@@ -95,7 +95,7 @@ class WebCommand(Command, UserInteractive):
 			if cleaned_content:
 				console.print_success("Content cleaned and added to context")
 				key = slugify(args)
-				model = SessionContextModel(type="web", key=key, content=cleaned_content)
+				model = await self.make(SessionContextModel, type="web", key=key, content=cleaned_content)
 				session_context_service.add_context(model)
 			else:
 				console.print_warning("No cleaned content returned")

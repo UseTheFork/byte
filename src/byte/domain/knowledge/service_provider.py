@@ -9,6 +9,7 @@ from byte.domain.knowledge.command.context_add_file_command import ContextAddFil
 from byte.domain.knowledge.command.context_drop_command import ContextDropCommand
 from byte.domain.knowledge.command.context_list_command import ContextListCommand
 from byte.domain.knowledge.command.web_command import WebCommand
+from byte.domain.knowledge.models import SessionContextModel
 from byte.domain.knowledge.service.cli_context_display_service import (
 	CLIContextDisplayService,
 )
@@ -41,6 +42,9 @@ class KnowledgeServiceProvider(ServiceProvider):
 			ContextDropCommand,
 			ContextAddFileCommand,
 		]
+
+	async def register(self, container: Container):
+		container.bind(SessionContextModel)
 
 	async def boot(self, container: Container):
 		"""Boot file services and register commands with registry."""

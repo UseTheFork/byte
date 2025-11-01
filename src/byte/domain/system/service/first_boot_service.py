@@ -6,7 +6,7 @@ import yaml
 from rich.console import Console
 from rich.theme import Theme
 
-from byte.core.config.config import BYTE_CACHE_DIR, BYTE_CONFIG_FILE, ByteConfg
+from byte.core.config.config import BYTE_CACHE_DIR, BYTE_CONFIG_FILE, PROJECT_ROOT, ByteConfg
 from byte.domain.cli.rich.menu import Menu
 from byte.domain.cli.schemas import ByteTheme, ThemeRegistry
 from byte.domain.llm.config import LLMConfig
@@ -77,6 +77,7 @@ class FirstBootService:
 
 		# Set up all Byte directories
 		self._setup_byte_directories()
+		self._setup_gitignore()
 
 		# Initialize LLM configuration
 		llm_model = self._init_llm()
@@ -125,6 +126,52 @@ class FirstBootService:
 		BYTE_CACHE_DIR.mkdir(exist_ok=True)
 
 		self.print_success("Created Byte directories")
+
+	def _setup_gitignore(self):
+		"""Ensure .gitignore exists and contains byte cache and session patterns.
+
+		Usage: `config = self._apply_gitignore_config(config)`
+		"""
+		gitignore_path = PROJECT_ROOT / ".gitignore"
+
+		byte_patterns = [".byte/cache/*", ".byte/session_context/*"]
+
+		# Check if .gitignore exists
+		if gitignore_path.exists():
+			# Read existing content
+			content = gitignore_path.read_text()
+
+			# Check which patterns are missing
+			missing_patterns = [pattern for pattern in byte_patterns if pattern not in content]
+
+			if missing_patterns:
+				# Ask user if they want to add missing patterns to gitignore
+				patterns_str = ", ".join(missing_patterns)
+				menu = Menu(title=f"Add {patterns_str} to .gitignore?", console=self._console)
+				add_to_gitignore = menu.confirm(default=True)
+
+				if add_to_gitignore:
+					# Add missing patterns
+					with open(gitignore_path, "a") as f:
+						# Add newline if file doesn't end with one
+						if content and not content.endswith("\n"):
+							f.write("\n")
+						f.writelines(f"{pattern}\n" for pattern in missing_patterns)
+					self.print_success(f"Added {patterns_str} to .gitignore\n")
+				else:
+					self.print_info("Skipped adding patterns to .gitignore\n")
+		else:
+			# Ask user if they want to create .gitignore with byte patterns
+			menu = Menu(title="Create .gitignore with .byte patterns?", console=self._console)
+			create_gitignore = menu.confirm(default=True)
+
+			if create_gitignore:
+				# Create .gitignore with byte patterns
+				gitignore_content = "\n".join(byte_patterns) + "\n"
+				gitignore_path.write_text(gitignore_content)
+				self.print_success("Created .gitignore with .byte patterns\n")
+			else:
+				self.print_info("Skipped creating .gitignore\n")
 
 	def _init_llm(self) -> Literal["anthropic", "gemini", "openai"]:
 		"""Initialize LLM configuration by asking user to choose a provider.

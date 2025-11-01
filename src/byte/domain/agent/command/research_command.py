@@ -6,7 +6,7 @@ from byte.domain.agent.implementations.research.agent import ResearchAgent
 from byte.domain.agent.nodes.extract_node import SessionContextFormatter
 from byte.domain.agent.service.agent_service import AgentService
 from byte.domain.cli.service.command_registry import Command
-from byte.domain.knowledge.model.session_context import SessionContextModel
+from byte.domain.knowledge.models import SessionContextModel
 from byte.domain.knowledge.service.session_context_service import SessionContextService
 from byte.domain.memory.service.memory_service import MemoryService
 
@@ -58,5 +58,7 @@ class ResearchCommand(Command):
 		extracted_content = cast(SessionContextFormatter, agent_result.get("extracted_content"))
 
 		session_context_service = await self.make(SessionContextService)
-		model = SessionContextModel(type="agent", key=extracted_content.name, content=extracted_content.content)
+		model = await self.make(
+			SessionContextModel, type="agent", key=extracted_content.name, content=extracted_content.content
+		)
 		session_context_service.add_context(model)

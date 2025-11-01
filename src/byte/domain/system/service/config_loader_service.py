@@ -1,4 +1,5 @@
 import os
+import shutil
 from importlib.metadata import PackageNotFoundError, version
 
 import yaml
@@ -45,7 +46,12 @@ class ConfigLoaderService:
 		)
 
 		# Create the directories
+
+		# Delete and recreate session_context to ensure it's empty on each boot
+		if config.system.paths.session_context.exists():
+			shutil.rmtree(config.system.paths.session_context)
 		config.system.paths.session_context.mkdir(exist_ok=True)
+
 		config.system.paths.cache.mkdir(exist_ok=True)
 		config.system.paths.conventions.mkdir(exist_ok=True)
 

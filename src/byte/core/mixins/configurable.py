@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 class Configurable:
 	container: Optional["Container"]
 
-	async def boot_configurable(self) -> None:
+	async def boot_configurable(self, **kwargs) -> None:
 		self._config: ByteConfg = await self.container.make(ByteConfg)  # pyright: ignore[reportOptionalMemberAccess]
 		self._service_config = {}
 		await self._configure_service()

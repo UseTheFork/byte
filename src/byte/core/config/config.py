@@ -35,6 +35,9 @@ BYTE_DIR.mkdir(exist_ok=True)
 BYTE_CACHE_DIR: Path = BYTE_DIR / "cache"
 BYTE_CACHE_DIR.mkdir(exist_ok=True)
 
+BYTE_SESSION_DIR: Path = BYTE_DIR / "session_context"
+BYTE_SESSION_DIR.mkdir(exist_ok=True)
+
 BYTE_CONFIG_FILE = BYTE_DIR / "config.yaml"
 
 # Load our dotenv

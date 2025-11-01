@@ -4,7 +4,7 @@ from typing import Optional
 from byte.core.array_store import ArrayStore
 from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
-from byte.domain.knowledge.model.session_context import SessionContextModel
+from byte.domain.knowledge.models import SessionContextModel
 
 
 class SessionContextService(Service):
@@ -36,6 +36,9 @@ class SessionContextService(Service):
 
 		Usage: `service.remove_context("old_convention")`
 		"""
+		model = self.session_context.get(key)
+		if model:
+			model.delete()
 		self.session_context.remove(key)
 		return self
 
@@ -51,6 +54,8 @@ class SessionContextService(Service):
 
 		Usage: `service.clear_context()`
 		"""
+		for _, model in self.session_context.all().items():
+			model.delete()
 		self.session_context.set({})
 		return self
 

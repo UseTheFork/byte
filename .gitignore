@@ -56,4 +56,5 @@ node_modules
 dist
 
 .byte/cache/*
+.byte/session_context/*
 .ruff_cache
