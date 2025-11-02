@@ -3,7 +3,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
 from byte.domain.agent.implementations.base import Agent
-from byte.domain.agent.implementations.coder.prompts import coder_prompt
+from byte.domain.agent.implementations.coder.prompt import coder_prompt
 from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.end_node import EndNode
 from byte.domain.agent.nodes.lint_node import LintNode

@@ -7,6 +7,7 @@ from byte.core.utils import extract_content_from_message, get_last_message
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.agent.state import BaseState
+from byte.domain.cli.service.console_service import ConsoleService
 
 
 class ValidationNode(Node, UserInteractive):
@@ -78,6 +79,13 @@ class ValidationNode(Node, UserInteractive):
 
 		if validation_errors:
 			error_message = "# Fix the following issues:\n" + "\n".join(f"- {error}" for error in validation_errors)
+
+			console = await self.make(ConsoleService)
+			console.print_warning_panel(
+				f"{len(validation_errors)} validation error(s) found. Requesting corrections.",
+				title="Validation Failed",
+			)
+
 			return Command(goto="assistant_node", update={"errors": error_message})
 
 		return Command(goto=self.goto)

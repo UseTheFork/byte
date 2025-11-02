@@ -80,6 +80,15 @@ class ConventionCommand(Command, UserInteractive):
 		"""
 
 		focus_messages = {
+			"Documentation": ConventionFocus(
+				focus_message=(
+					"Generate a documentation convention focusing on: "
+					"documentation structure and format (e.g., MkDocs), "
+					"content organization, writing style and tone, "
+					"code example standards, and documentation maintenance practices."
+				),
+				file_name="DOCUMENTATION_STANDARDS.md",
+			),
 			"Language Style Guide": ConventionFocus(
 				focus_message=(
 					"Generate a language style guide convention focusing on: "
@@ -111,6 +120,24 @@ class ConventionCommand(Command, UserInteractive):
 					"async/await patterns, dependency injection, and recurring code structures."
 				),
 				file_name="CODE_PATTERNS.md",
+			),
+			"Frontend Code Patterns": ConventionFocus(
+				focus_message=(
+					"Generate a frontend code patterns convention focusing on: "
+					"component structure and organization, state management patterns, "
+					"UI/UX patterns, event handling, API integration patterns, "
+					"and frontend-specific design patterns."
+				),
+				file_name="FRONTEND_CODE_PATTERNS.md",
+			),
+			"Backend Code Patterns": ConventionFocus(
+				focus_message=(
+					"Generate a backend code patterns convention focusing on: "
+					"API design patterns, database access patterns, service layer organization, "
+					"authentication and authorization patterns, error handling and logging, "
+					"and backend-specific architectural patterns."
+				),
+				file_name="BACKEND_CODE_PATTERNS.md",
 			),
 		}
 

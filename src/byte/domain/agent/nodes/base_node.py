@@ -4,13 +4,14 @@ from langchain_core.messages import AIMessage
 from langgraph.graph.state import RunnableConfig
 
 from byte.core.mixins.bootable import Bootable
+from byte.core.mixins.configurable import Configurable
 from byte.core.mixins.eventable import Eventable
 from byte.domain.agent.schemas import TokenUsageSchema
 from byte.domain.agent.state import BaseState
 from byte.domain.analytics.service.agent_analytics_service import AgentAnalyticsService
 
 
-class Node(ABC, Bootable, Eventable):
+class Node(ABC, Bootable, Configurable, Eventable):
 	async def __call__(self, state: BaseState, config: RunnableConfig):
 		pass
 

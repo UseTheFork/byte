@@ -316,11 +316,10 @@ class AssistantNode(Node):
 
 			runnable = self._create_runnable(runtime.context)
 
-			# TODO: This should only fire when in debug
-			# if log.opt(lazy=True).debug("Message data: {}", expensive_func)
-			template = runnable.get_prompts(config)
-			prompt_value = await template[0].ainvoke(agent_state)
-			log.info(prompt_value)
+			if self._config.development.enable:
+				template = runnable.get_prompts(config)
+				prompt_value = await template[0].ainvoke(agent_state)
+				log.info(prompt_value)
 
 			result = await runnable.ainvoke(agent_state, config=config)
 
@@ -342,7 +341,7 @@ class AssistantNode(Node):
 				agent_state = {**agent_state, "messages": messages}
 				console = await self.make(ConsoleService)
 				console.print_warning_panel(
-					"AI did not provide proper output. Requesting a valid response...", title="Warning"
+					"AI did not provide proper output. Requesting a valid response.", title="Warning"
 				)
 
 			elif result.tool_calls and len(result.tool_calls) > 0:

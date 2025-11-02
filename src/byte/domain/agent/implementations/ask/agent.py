@@ -1,7 +1,7 @@
 from langchain_core.language_models.chat_models import BaseChatModel
 from langgraph.graph import END, START, StateGraph
 
-from byte.domain.agent.implementations.ask.prompts import ask_prompt
+from byte.domain.agent.implementations.ask.prompt import ask_prompt
 from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.end_node import EndNode
