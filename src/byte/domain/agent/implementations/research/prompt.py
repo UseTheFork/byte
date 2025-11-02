@@ -40,5 +40,6 @@ research_prompt = ChatPromptTemplate.from_messages(
 		("placeholder", "{constraints_context}"),
 		("placeholder", "{masked_messages}"),
 		("user", "{file_context_with_line_numbers}"),
+		("placeholder", "{errors}"),
 	]
 )
