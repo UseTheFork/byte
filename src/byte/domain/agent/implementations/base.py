@@ -1,6 +1,6 @@
 import asyncio
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Literal, Optional, Type, TypedDict
+from typing import TYPE_CHECKING, Any, Literal, Optional
 
 from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 
@@ -99,8 +99,7 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
 		config = RunnableConfig(configurable={"thread_id": thread_id})
 
 		# Create initial state using the agent's state class
-		State = self.get_state_class()
-		initial_state = State(request)  # pyright: ignore[reportCallIssue]
+		initial_state = BaseState(request)
 
 		# Get the graph and stream events
 		graph = await self.get_graph()
@@ -133,14 +132,6 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
 		await self.emit(payload)
 
 		return processed_event
-
-	def get_state_class(self) -> Type[TypedDict]:  # pyright: ignore[reportInvalidTypeForm]
-		"""Return the state class for this agent.
-
-		Override in subclasses to customize state structure.
-		Usage: `StateClass = self.get_state_class()` -> agent-specific state
-		"""
-		return BaseState
 
 	async def get_checkpointer(self):
 		# Get memory for persistence

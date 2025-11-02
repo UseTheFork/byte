@@ -10,6 +10,7 @@ from byte.domain.agent.nodes.extract_node import ExtractNode
 from byte.domain.agent.nodes.start_node import StartNode
 from byte.domain.agent.nodes.validation_node import ValidationNode
 from byte.domain.agent.schemas import AssistantContextSchema
+from byte.domain.agent.state import BaseState
 from byte.domain.llm.service.llm_service import LLMService
 
 
@@ -36,7 +37,7 @@ class ConventionAgent(Agent):
 		"""
 
 		# Create the state graph
-		graph = StateGraph(self.get_state_class())
+		graph = StateGraph(BaseState)
 
 		# Add nodes
 		graph.add_node("start_node", await self.make(StartNode))

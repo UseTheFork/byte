@@ -10,6 +10,7 @@ from byte.core.event_bus import EventType, Payload
 from byte.core.logging import log
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.schemas import AssistantContextSchema
+from byte.domain.agent.state import BaseState
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.files.service.file_service import FileService
 
@@ -284,22 +285,25 @@ class AssistantNode(Node):
 
 		return [HumanMessage(project_inforamtion_and_context)]
 
-	async def __call__(self, state, config, runtime: Runtime[AssistantContextSchema]):
+	async def __call__(self, state: BaseState, config, runtime: Runtime[AssistantContextSchema]):
 		while True:
-			state["project_inforamtion_and_context"] = await self._gather_project_context()
-			state["project_hierarchy"] = await self._gather_project_hierarchy()
-			state["file_context"] = await self._gather_file_context()
-			state["file_context_with_line_numbers"] = await self._gather_file_context(True)
-			state["reinforcement"] = await self._gather_reinforcement(runtime.context.mode)
-			state["constraints_context"] = await self._gather_constraints(state)
+			agent_state = {**state}
+			agent_state["project_inforamtion_and_context"] = await self._gather_project_context()
+			agent_state["project_hierarchy"] = await self._gather_project_hierarchy()
+			agent_state["file_context"] = await self._gather_file_context()
+			agent_state["file_context_with_line_numbers"] = await self._gather_file_context(True)
+			agent_state["reinforcement"] = await self._gather_reinforcement(runtime.context.mode)
+			agent_state["constraints_context"] = await self._gather_constraints(state)
 
 			if state.get("errors", None) is not None:
-				state["errors"] = await self._gather_errors(state)
+				agent_state["errors"] = await self._gather_errors(agent_state)
+			else:
+				agent_state["errors"] = []
 
 			payload = Payload(
 				event_type=EventType.PRE_ASSISTANT_NODE,
 				data={
-					"state": state,
+					"state": agent_state,
 					"config": config,
 				},
 			)
@@ -307,7 +311,7 @@ class AssistantNode(Node):
 			# FixtureRecorder.pickle_fixture(payload)
 
 			payload = await self.emit(payload)
-			state = payload.get("state", state)
+			agent_state = payload.get("state", agent_state)
 			config = payload.get("config", config)
 
 			runnable = self._create_runnable(runtime.context)
@@ -315,10 +319,10 @@ class AssistantNode(Node):
 			# TODO: This should only fire when in debug
 			# if log.opt(lazy=True).debug("Message data: {}", expensive_func)
 			template = runnable.get_prompts(config)
-			prompt_value = await template[0].ainvoke(state)
+			prompt_value = await template[0].ainvoke(agent_state)
 			log.info(prompt_value)
 
-			result = await runnable.ainvoke(state, config=config)
+			result = await runnable.ainvoke(agent_state, config=config)
 
 			result = cast(AIMessage, result)
 			await self._track_token_usage(result, runtime.context.mode)
@@ -334,8 +338,8 @@ class AssistantNode(Node):
 				)
 			):
 				# Re-prompt for actual response
-				messages = state["messages"] + [("user", "Respond with a real output.")]
-				state = {**state, "messages": messages}
+				messages = agent_state["messages"] + [("user", "Respond with a real output.")]
+				agent_state = {**agent_state, "messages": messages}
 				console = await self.make(ConsoleService)
 				console.print_warning_panel(
 					"AI did not provide proper output. Requesting a valid response...", title="Warning"

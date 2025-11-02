@@ -1,12 +1,8 @@
-from typing import Type
-
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
-from typing_extensions import TypedDict
 
 from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.nodes.copy_node import CopyNode
-from byte.domain.agent.state import CoderState
 
 
 class CopyAgent(Agent):
@@ -16,10 +12,6 @@ class CopyAgent(Agent):
 	the last AI response to the system clipboard using pyperclip.
 	Usage: Invoked via `/copy` command in the CLI
 	"""
-
-	def get_state_class(self) -> Type[TypedDict]:  # pyright: ignore[reportInvalidTypeForm]
-		"""Return coder-specific state class."""
-		return CoderState
 
 	async def build(self) -> CompiledStateGraph:
 		"""Build and compile the coder agent graph with memory and tools."""

@@ -10,6 +10,7 @@ from byte.domain.agent.nodes.extract_node import ExtractNode
 from byte.domain.agent.nodes.start_node import StartNode
 from byte.domain.agent.nodes.tool_node import ToolNode
 from byte.domain.agent.schemas import AssistantContextSchema
+from byte.domain.agent.state import BaseState
 from byte.domain.llm.service.llm_service import LLMService
 from byte.domain.lsp.tools.find_references import find_references
 from byte.domain.lsp.tools.get_definition import get_definition
@@ -37,7 +38,7 @@ class ResearchAgent(Agent):
 		"""Build and compile the coder agent graph with memory and tools."""
 
 		# Create the assistant and runnable
-		graph = StateGraph(self.get_state_class())
+		graph = StateGraph(BaseState)
 
 		# Add nodes
 		graph.add_node("start_node", await self.make(StartNode))

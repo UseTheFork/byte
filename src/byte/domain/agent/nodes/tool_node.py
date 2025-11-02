@@ -10,12 +10,13 @@ from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.utils import get_last_message
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.schemas import AssistantContextSchema, ConstraintSchema
+from byte.domain.agent.state import BaseState
 from byte.domain.cli.rich.markdown import Markdown
 from byte.domain.cli.service.console_service import ConsoleService
 
 
 class ToolNode(Node, UserInteractive):
-	async def __call__(self, state, runtime: Runtime[AssistantContextSchema]):
+	async def __call__(self, state: BaseState, runtime: Runtime[AssistantContextSchema]):
 		message = get_last_message(state["messages"])
 
 		outputs = []

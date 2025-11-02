@@ -4,7 +4,7 @@ from langgraph.graph.state import CompiledStateGraph
 from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.nodes.end_node import EndNode
 from byte.domain.agent.nodes.subprocess_node import SubprocessNode
-from byte.domain.agent.state import SubprocessState
+from byte.domain.agent.state import BaseState
 
 
 class SubprocessAgent(Agent):
@@ -12,14 +12,11 @@ class SubprocessAgent(Agent):
 	Usage: Invoked via `!` command in the CLI
 	"""
 
-	def get_state_class(self):
-		return SubprocessState
-
 	async def build(self) -> CompiledStateGraph:
 		"""Build and compile the coder agent graph with memory and tools."""
 
 		# Create the state graph
-		graph = StateGraph(self.get_state_class())
+		graph = StateGraph(BaseState)
 
 		# Add nodes
 		graph.add_node(

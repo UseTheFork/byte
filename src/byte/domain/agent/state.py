@@ -10,7 +10,7 @@ from byte.domain.edit_format.service.edit_format_service import SearchReplaceBlo
 class BaseState(TypedDict):
 	"""Base state that all agents inherit with messaging and status tracking.
 
-	Usage: `state = BaseState(messages=[], agent="CoderAgent", errors=[])`
+	Usage: `state = BaseState(messages=[], agent="CoderAgent")`
 	"""
 
 	messages: Annotated[list[AnyMessage], add_messages]
@@ -24,34 +24,9 @@ class BaseState(TypedDict):
 
 	extracted_content: str
 
-
-class CoderState(BaseState):
-	"""Coder-specific state with file context."""
-
+	# These are specific to Coder
 	edit_format_system: str
-
 	parsed_blocks: list[SearchReplaceBlock]
 
-
-class AskState(CoderState):
-	"""State for ask/question agent with file context capabilities.
-
-	Usage: `state = AskState(messages=[], agent="AskAgent", ...)`
-	"""
-
-	pass
-
-
-class CommitState(BaseState):
-	"""State for commit agent with generated commit message storage.
-
-	Usage: `state = CommitState(messages=[], agent="CommitAgent", commit_message="")`
-	"""
-
-	commit_message: str
-
-
-class SubprocessState(BaseState):
-	""" """
-
+	# This is specific to subprocess
 	command: str

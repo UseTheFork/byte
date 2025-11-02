@@ -3,7 +3,7 @@ from langgraph.types import Command
 
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.domain.agent.nodes.base_node import Node
-from byte.domain.agent.state import SubprocessState
+from byte.domain.agent.state import BaseState
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.cli.service.subprocess_service import SubprocessService
 
@@ -16,7 +16,7 @@ class SubprocessNode(Node, UserInteractive):
 	Usage: Used in SubprocessAgent workflow via `!command` syntax
 	"""
 
-	async def __call__(self, state: SubprocessState, config: RunnableConfig):
+	async def __call__(self, state: BaseState, config: RunnableConfig):
 		"""Execute subprocess command and optionally add results to messages.
 
 		Args:

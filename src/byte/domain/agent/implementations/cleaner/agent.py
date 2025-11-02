@@ -35,7 +35,7 @@ class CleanerAgent(Agent, UserInteractive):
 		"""
 
 		# Create the state graph
-		graph = StateGraph(self.get_state_class())
+		graph = StateGraph(BaseState)
 
 		# Add nodes
 		graph.add_node("start_node", await self.make(StartNode))
