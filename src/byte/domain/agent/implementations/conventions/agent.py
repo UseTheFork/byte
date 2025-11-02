@@ -3,24 +3,36 @@ from langgraph.constants import END
 from langgraph.graph import START, StateGraph
 
 from byte.domain.agent.implementations.base import Agent
-from byte.domain.agent.implementations.commit.prompt import commit_prompt
+from byte.domain.agent.implementations.conventions.prompt import conventions_prompt
 from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.end_node import EndNode
 from byte.domain.agent.nodes.extract_node import ExtractNode
 from byte.domain.agent.nodes.start_node import StartNode
+from byte.domain.agent.nodes.validation_node import ValidationNode
 from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.llm.service.llm_service import LLMService
 
 
-class CommitAgent(Agent):
-	"""Domain service for generating AI-powered git commit messages and creating commits."""
+class ConventionAgent(Agent):
+	"""Agent for generating project convention documents by analyzing codebase patterns.
+
+	Analyzes the codebase to extract and document conventions such as style guides,
+	architecture patterns, comment standards, and code patterns. Uses validation
+	to ensure generated conventions meet quality standards before extraction.
+	Usage: `agent = await container.make(ConventionAgent); result = await agent.execute(request)`
+	"""
 
 	async def build(self):
-		"""Build and compile the coder agent graph with memory and tools.
+		"""Build and compile the convention agent graph with validation and extraction.
 
-		Creates a StateGraph optimized for coding tasks with specialized
-		prompts, file context integration, and development-focused routing.
-		Usage: `graph = await builder.build()` -> ready for coding assistance
+		Creates a graph that processes user requests through the assistant, validates
+		the response against constraints (e.g., max lines), and extracts the formatted
+		convention document for saving to the conventions directory.
+
+		Returns:
+			CompiledStateGraph ready for execution
+
+		Usage: `graph = await agent.build()` -> returns compiled graph
 		"""
 
 		# Create the state graph
@@ -28,14 +40,24 @@ class CommitAgent(Agent):
 
 		# Add nodes
 		graph.add_node("start_node", await self.make(StartNode))
+		graph.add_node("assistant_node", await self.make(AssistantNode, goto="validation_node"))
+		graph.add_node(
+			"validation_node",
+			await self.make(
+				ValidationNode,
+				goto="extract_node",
+				max_lines=50,
+			),
+		)
 		graph.add_node("extract_node", await self.make(ExtractNode))
-		graph.add_node("assistant_node", await self.make(AssistantNode, goto="extract_node"))
+
 		graph.add_node("end_node", await self.make(EndNode))
 
 		# Define edges
 		graph.add_edge(START, "start_node")
 		graph.add_edge("start_node", "assistant_node")
-		graph.add_edge("assistant_node", "extract_node")
+		graph.add_edge("assistant_node", "validation_node")
+		graph.add_edge("validation_node", "extract_node")
 		graph.add_edge("extract_node", "end_node")
 		graph.add_edge("end_node", END)
 
@@ -48,8 +70,8 @@ class CommitAgent(Agent):
 		weak: BaseChatModel = llm_service.get_weak_model()
 
 		return AssistantContextSchema(
-			mode="weak",
-			prompt=commit_prompt,
+			mode="main",
+			prompt=conventions_prompt,
 			main=main,
 			weak=weak,
 			agent=self.__class__.__name__,

@@ -13,6 +13,8 @@ class SessionContextModel(Bootable, Configurable, Injectable):
 	Similar to FileContext pattern for consistent file handling.
 	"""
 
+	# TODO: This should use kwargs the right way...
+	# schema: Literal["text", "session_context"] = "text",
 	async def boot(self, **kwargs) -> None:
 		self.type: Literal["web", "file", "agent"] = type
 		self.key: str = kwargs.get("key")

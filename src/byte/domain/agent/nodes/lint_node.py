@@ -20,6 +20,6 @@ class LintNode(Node):
 		do_fix, failed_commands = await lint_service.display_results_summary(lint_commands)
 		if do_fix:
 			joined_lint_errors = lint_service.format_lint_errors(failed_commands)
-			return Command(goto="assistant_node", update={"errors": [("user", joined_lint_errors)]})
+			return Command(goto="assistant_node", update={"errors": joined_lint_errors})
 
 		return Command(goto="end_node")

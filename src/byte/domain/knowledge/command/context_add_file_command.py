@@ -61,8 +61,11 @@ class ContextAddFileCommand(Command):
 			console.print(f"[error]Error reading file: {e!s}[/error]")
 			return
 
-		# Add to context using the file path as the key
 		context_key = str(file_path.relative_to(config.project_root))
+
+		# Add YAML header with file path
+		yaml_header = f"---\nfile_path: {context_key}\n---\n\n"
+		content = yaml_header + content
 		model = await self.make(SessionContextModel, type="file", key=context_key, content=content)
 		session_context_service.add_context(model)
 		console.print(f"[success]Added {context_key} to session context[/success]")

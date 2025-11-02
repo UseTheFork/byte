@@ -83,6 +83,46 @@ class AssistantNode(Node):
 
 		return []
 
+	async def _gather_project_hierarchy(self) -> list[HumanMessage]:
+		"""Gather project hierarchy for LLM understanding of project structure.
+
+		Uses FileService to generate a concise tree-like representation
+		of the project's directory structure and important files.
+
+		Returns:
+			List containing a single HumanMessage with formatted project hierarchy
+
+		Usage: `hierarchy_messages = await self._gather_project_hierarchy()`
+		"""
+		file_service = await self.make(FileService)
+		hierarchy = await file_service.generate_project_hierarchy()
+
+		if hierarchy:
+			hierarchy_content = f"<project_hierarchy>\n{hierarchy}\n</project_hierarchy>"
+			return [HumanMessage(hierarchy_content)]
+
+		return []
+
+	async def _gather_project_hierarchy(self) -> list[HumanMessage]:
+		"""Gather project hierarchy for LLM understanding of project structure.
+
+		Uses FileService to generate a concise tree-like representation
+		of the project's directory structure and important files.
+
+		Returns:
+			List containing a single HumanMessage with formatted project hierarchy
+
+		Usage: `hierarchy_messages = await self._gather_project_hierarchy()`
+		"""
+		file_service = await self.make(FileService)
+		hierarchy = await file_service.generate_project_hierarchy()
+
+		if hierarchy:
+			hierarchy_content = f"<project_hierarchy>\n{hierarchy}\n</project_hierarchy>"
+			return [HumanMessage(hierarchy_content)]
+
+		return []
+
 	async def _gather_file_context(self, with_line_numbers=False) -> list[HumanMessage]:
 		"""Gather file context including read-only and editable files.
 
@@ -119,6 +159,27 @@ class AssistantNode(Node):
 			file_context_content += f"""<editable_files>\n{editable_content}\n</editable_files>\n"""
 
 		return [HumanMessage(file_context_content)] if file_context_content else []
+
+	async def _gather_errors(self, state) -> list[HumanMessage]:
+		"""Gather error messages from state for re-prompting the assistant.
+
+		Formats validation or other errors into a user message that will
+		be added to the conversation to guide the assistant's correction.
+
+		Args:
+			state: The current state containing errors
+
+		Returns:
+			List containing a single HumanMessage with error content, or empty list
+
+		Usage: `error_messages = await self._gather_errors(state)`
+		"""
+		errors = state.get("errors", None)
+
+		if errors is None:
+			return []
+
+		return [HumanMessage(errors)]
 
 	async def _gather_constraints(self, state) -> list[HumanMessage]:
 		"""Gather user-defined constraints from state.
@@ -226,10 +287,14 @@ class AssistantNode(Node):
 	async def __call__(self, state, config, runtime: Runtime[AssistantContextSchema]):
 		while True:
 			state["project_inforamtion_and_context"] = await self._gather_project_context()
+			state["project_hierarchy"] = await self._gather_project_hierarchy()
 			state["file_context"] = await self._gather_file_context()
 			state["file_context_with_line_numbers"] = await self._gather_file_context(True)
 			state["reinforcement"] = await self._gather_reinforcement(runtime.context.mode)
 			state["constraints_context"] = await self._gather_constraints(state)
+
+			if state.get("errors", None) is not None:
+				state["errors"] = await self._gather_errors(state)
 
 			payload = Payload(
 				event_type=EventType.PRE_ASSISTANT_NODE,
@@ -279,7 +344,10 @@ class AssistantNode(Node):
 			elif result.tool_calls and len(result.tool_calls) > 0:
 				return Command(
 					goto="tools_node",
-					update={"messages": [result]},
+					update={
+						"messages": [result],
+						"errors": None,
+					},
 				)
 			else:
 				break
@@ -288,5 +356,8 @@ class AssistantNode(Node):
 
 		return Command(
 			goto=self.goto,
-			update={"messages": [result]},
+			update={
+				"messages": [result],
+				"errors": None,
+			},
 		)

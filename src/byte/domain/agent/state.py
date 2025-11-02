@@ -2,7 +2,7 @@ from typing import Annotated, TypedDict
 
 from langgraph.graph.message import AnyMessage, add_messages
 
-from byte.domain.agent.reducers import add_constraints, replace_list
+from byte.domain.agent.reducers import add_constraints
 from byte.domain.agent.schemas import ConstraintSchema
 from byte.domain.edit_format.service.edit_format_service import SearchReplaceBlock
 
@@ -19,10 +19,9 @@ class BaseState(TypedDict):
 
 	agent: str
 
-	errors: Annotated[list[AnyMessage], replace_list]
+	errors: str | None
 	examples: list[AnyMessage]
 
-	# TODO: This should be a str or a pydantic base model
 	extracted_content: str
 
 
@@ -50,17 +49,6 @@ class CommitState(BaseState):
 	"""
 
 	commit_message: str
-
-
-class CleanerState(BaseState):
-	"""State for cleaner agent with content extraction fields.
-
-	Extends BaseState with fields for content cleaning and information
-	extraction, storing both raw input and cleaned output.
-	Usage: `state = CleanerState(messages=[], cleaned_content="")`
-	"""
-
-	cleaned_content: str
 
 
 class SubprocessState(BaseState):

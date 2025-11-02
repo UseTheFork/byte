@@ -1,5 +1,9 @@
 from typing import TYPE_CHECKING, Optional, TypeVar
 
+from byte.domain.cli.service.interactions_service import (
+	InteractionService,
+)
+
 if TYPE_CHECKING:
 	from byte.container import Container
 
@@ -23,9 +27,6 @@ class UserInteractive:
 		returning control to the user for general text input.
 		Usage: `await self.prompt_for_input()` -> shows input prompt to user
 		"""
-		from byte.domain.cli.service.interactions_service import (
-			InteractionService,
-		)
 
 		if not self.container:
 			raise RuntimeError("No container available - ensure service is properly initialized")
@@ -40,9 +41,6 @@ class UserInteractive:
 		automatic timeout handling. Returns the default value on timeout.
 		Usage: `confirmed = await self.prompt_for_confirmation("Delete file?", False)`
 		"""
-		from byte.domain.cli.service.interactions_service import (
-			InteractionService,
-		)
 
 		if not self.container:
 			raise RuntimeError("No container available - ensure service is properly initialized")
@@ -57,9 +55,6 @@ class UserInteractive:
 		optional default value for timeout or errors.
 		Usage: `choice = await self.prompt_for_select("Pick one:", ["option1", "option2"], "option1")`
 		"""
-		from byte.domain.cli.service.interactions_service import (
-			InteractionService,
-		)
 
 		if not self.container:
 			raise RuntimeError("No container available - ensure service is properly initialized")
@@ -75,9 +70,6 @@ class UserInteractive:
 		Displays choices as a numbered list and prompts for selection by number.
 		Usage: `choice = await self.prompt_for_select_numbered("Pick one:", ["option1", "option2"], default=1)`
 		"""
-		from byte.domain.cli.service.interactions_service import (
-			InteractionService,
-		)
 
 		if not self.container:
 			raise RuntimeError("No container available - ensure service is properly initialized")
@@ -94,9 +86,6 @@ class UserInteractive:
 		Returns tuple of (confirmed: bool, text: Optional[str]).
 		Usage: `confirmed, text = await self.prompt_for_confirm_or_input("Use default?", "Enter value:")`
 		"""
-		from byte.domain.cli.service.interactions_service import (
-			InteractionService,
-		)
 
 		if not self.container:
 			raise RuntimeError("No container available - ensure service is properly initialized")

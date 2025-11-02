@@ -251,6 +251,75 @@ class FileService(Service):
 
 		return (read_only_files, editable_files)
 
+	async def generate_project_hierarchy(self, max_depth: int = 3) -> str:
+		"""Generate a concise project hierarchy for LLM understanding.
+
+		Creates a tree-like structure showing directories and important files,
+		with special attention to root-level configuration files. Limits depth
+		to avoid overwhelming the context with too much detail.
+
+		Args:
+			max_depth: Maximum directory depth to traverse (default: 3)
+
+		Returns:
+			Formatted string representing the project structure
+
+		Usage: `hierarchy = await service.generate_project_hierarchy()` -> tree structure
+		"""
+		if not self._config.project_root:
+			return "No project root configured"
+
+		file_discovery = await self.make(FileDiscoveryService)
+		all_files = await file_discovery.get_files()
+
+		# Build directory structure
+		dir_structure: Dict[Path, List[Path]] = {}
+		root_files: List[Path] = []
+
+		for file_path in all_files:
+			try:
+				relative = file_path.relative_to(self._config.project_root)
+				parts = relative.parts
+
+				# Check if it's a root file - include all root files
+				if len(parts) == 1:
+					root_files.append(relative)
+				else:
+					# Only track up to max_depth
+					if len(parts) <= max_depth:
+						parent = Path(*parts[:-1])
+						if parent not in dir_structure:
+							dir_structure[parent] = []
+						dir_structure[parent].append(relative)
+			except ValueError:
+				continue
+
+		# Build the hierarchy string
+		lines = ["Project Structure:", ""]
+
+		# Add root files first
+		if root_files:
+			for file in sorted(root_files):
+				lines.append(f"├── {file}")
+			lines.append("")
+
+		# Add directories with file counts
+		dirs_by_depth: Dict[int, List[Path]] = {}
+		for dir_path in dir_structure.keys():
+			depth = len(dir_path.parts)
+			if depth not in dirs_by_depth:
+				dirs_by_depth[depth] = []
+			dirs_by_depth[depth].append(dir_path)
+
+		# Sort and display directories by depth
+		for depth in sorted(dirs_by_depth.keys()):
+			for dir_path in sorted(dirs_by_depth[depth]):
+				indent = "│   " * (depth - 1) + "├── "
+				file_count = len(dir_structure[dir_path])
+				lines.append(f"{indent}{dir_path.parts[-1]}/ ({file_count} files)")
+
+		return "\n".join(lines)
+
 	async def _emit_file_context_event(self, file: str, type, content: str) -> str:
 		""" """
 		payload = Payload(

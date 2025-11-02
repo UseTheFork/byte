@@ -31,7 +31,7 @@ cli:
   ui_theme: mocha
   syntax_theme: github-dark
 lsp:
-  enable: true
+  enable: false
   timeout: 30
   servers:
     python:

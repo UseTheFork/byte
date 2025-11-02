@@ -4,12 +4,14 @@ from byte.container import Container
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
 from byte.domain.agent.command.ask_command import AskCommand
+from byte.domain.agent.command.convention_command import ConventionCommand
 from byte.domain.agent.command.research_command import ResearchCommand
 from byte.domain.agent.implementations.ask.agent import AskAgent
 from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.implementations.cleaner.agent import CleanerAgent
 from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.agent.implementations.commit.agent import CommitAgent
+from byte.domain.agent.implementations.conventions.agent import ConventionAgent
 from byte.domain.agent.implementations.copy.agent import CopyAgent
 from byte.domain.agent.implementations.research.agent import ResearchAgent
 from byte.domain.agent.implementations.subprocess.agent import SubprocessAgent
@@ -23,6 +25,7 @@ from byte.domain.agent.nodes.parse_blocks_node import ParseBlocksNode
 from byte.domain.agent.nodes.start_node import StartNode
 from byte.domain.agent.nodes.subprocess_node import SubprocessNode
 from byte.domain.agent.nodes.tool_node import ToolNode
+from byte.domain.agent.nodes.validation_node import ValidationNode
 from byte.domain.agent.service.agent_service import AgentService
 from byte.domain.cli.service.command_registry import Command
 
@@ -49,6 +52,7 @@ class AgentServiceProvider(ServiceProvider):
 			CopyAgent,
 			ResearchAgent,
 			SubprocessAgent,
+			ConventionAgent,
 			# keep-sorted end
 		]
 
@@ -57,6 +61,7 @@ class AgentServiceProvider(ServiceProvider):
 			# keep-sorted start
 			AskCommand,
 			ResearchCommand,
+			ConventionCommand,
 			# keep-sorted end
 		]
 
@@ -72,10 +77,11 @@ class AgentServiceProvider(ServiceProvider):
 			StartNode,
 			SubprocessNode,
 			ToolNode,
+			ValidationNode,
 			# keep-sorted end
 		]
 
-	async def register(self, container: "Container") -> None:
+	async def register(self, container: Container) -> None:
 		# Create all agents
 		for agent_class in self.agents():
 			container.singleton(agent_class)

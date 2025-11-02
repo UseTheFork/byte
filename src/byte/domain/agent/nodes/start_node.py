@@ -24,6 +24,7 @@ class StartNode(Node):
 			"masked_messages": [],
 			"examples": [],
 			"donts": [],
+			"errors": None,
 		}
 
 		if self.edit_format is not None:
