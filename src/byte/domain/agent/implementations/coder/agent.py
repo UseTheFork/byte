@@ -1,4 +1,4 @@
-from langchain_core.language_models.chat_models import BaseChatModel
+from langchain.chat_models import BaseChatModel
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 

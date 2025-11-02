@@ -21,10 +21,6 @@ dependencies = [
     "beautifulsoup4>=4.14.2",
     "click>=8.2.1",
     "gitpython>=3.1.45",
-    "langchain-mcp-adapters>=0.1.10",
-    "langchain[anthropic,google-genai,openai]>=0.3.27",
-    "langgraph>=0.6.7",
-    "langgraph-checkpoint-sqlite>=2.0.11",
     "markdownify>=1.2.0",
     "pathspec>=0.12.1",
     "prompt-toolkit>=3.0.52",
@@ -37,8 +33,13 @@ dependencies = [
     "rich>=14.1.0",
     "watchfiles>=1.1.0",
     "loguru>=0.7.3",
-    "langchain-google-genai>=2.1.10",
     "pygments>=2.19.2",
+    "langchain>=1.0.3",
+    "langchain-openai>=1.0.1",
+    "langchain-anthropic>=1.0.1",
+    "langchain-google-genai>=3.0.0",
+    "langgraph>=1.0.2",
+    "langchain-core>=1.0.2",
 ]
 
 [project.urls]

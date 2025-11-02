@@ -1,5 +1,5 @@
-from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_core.messages import HumanMessage
+from langchain.chat_models import BaseChatModel
+from langchain.messages import HumanMessage
 from langgraph.constants import END
 from langgraph.graph import START, StateGraph
 from langgraph.types import Command

@@ -1,8 +1,8 @@
 from typing import List, Literal, Optional
 
-from langchain_core.language_models.chat_models import BaseChatModel
+from langchain.chat_models import BaseChatModel
+from langchain.tools import BaseTool
 from langchain_core.prompts import BasePromptTemplate
-from langchain_core.tools import BaseTool
 from pydantic import Field
 from pydantic.dataclasses import dataclass
 
