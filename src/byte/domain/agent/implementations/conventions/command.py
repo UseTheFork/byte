@@ -16,6 +16,16 @@ class ConventionFocus(BaseModel):
 
 
 FOCUS_MESSAGES = {
+	"Project Tooling": ConventionFocus(
+		focus_message=(
+			"Generate a project tooling convention focusing on: "
+			"build systems and package managers (e.g., npm, composer, yarn, uv), "
+			"bundlers and dev tools (e.g., vite, webpack), "
+			"task runners, linting and formatting tools, "
+			"and tooling configuration standards."
+		),
+		file_name="PROJECT_TOOLING.md",
+	),
 	"Documentation": ConventionFocus(
 		focus_message=(
 			"Generate a documentation convention focusing on: "

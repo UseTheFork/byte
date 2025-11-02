@@ -28,10 +28,10 @@ src/byte/
 class FileServiceProvider(ServiceProvider):
     def services(self) -> List[Type[Service]]:
         return [FileService, FileDiscoveryService]  # Auto-registered as singletons
-    
+
     def commands(self) -> List[Type[Command]]:
         return [AddFileCommand, DropFileCommand]  # Auto-registered & booted
-    
+
     async def boot(self, container: Container):
         # Phase 2: Wire dependencies, register event listeners
         event_bus = await container.make(EventBus)

@@ -5,13 +5,13 @@ from langgraph.graph.message import RemoveMessage
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 from rich.pretty import Pretty
+from rich.text import Text
 
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.utils import get_last_message
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.schemas import AssistantContextSchema, ConstraintSchema
 from byte.domain.agent.state import BaseState
-from byte.domain.cli.rich.markdown import Markdown
 from byte.domain.cli.service.console_service import ConsoleService
 
 
@@ -59,7 +59,7 @@ class ToolNode(Node, UserInteractive):
 				)
 
 			# Display tool result and confirm if it should be added to response
-			result_pretty = Markdown(tool_result)
+			result_pretty = Text(tool_result)
 			console.print_panel(result_pretty, title="Tool Result")
 
 			add_result = await self.prompt_for_confirmation("Add this result to the response?", True)
