@@ -49,10 +49,10 @@ class AgentServiceProvider(ServiceProvider):
 			CleanerAgent,
 			CoderAgent,
 			CommitAgent,
+			ConventionAgent,
 			CopyAgent,
 			ResearchAgent,
 			SubprocessAgent,
-			ConventionAgent,
 			# keep-sorted end
 		]
 
@@ -60,8 +60,8 @@ class AgentServiceProvider(ServiceProvider):
 		return [
 			# keep-sorted start
 			AskCommand,
-			ResearchCommand,
 			ConventionCommand,
+			ResearchCommand,
 			# keep-sorted end
 		]
 
