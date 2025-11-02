@@ -10,9 +10,7 @@ from byte.domain.agent.state import BaseState
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.edit_format.exceptions import PreFlightCheckError
 from byte.domain.edit_format.schemas import BlockStatus
-from byte.domain.edit_format.service.edit_format_service import (
-	EditFormatService,
-)
+from byte.domain.edit_format.service.edit_format_service import EditFormatService
 
 
 class ParseBlocksNode(Node):
@@ -31,7 +29,7 @@ class ParseBlocksNode(Node):
 		except Exception as e:
 			if isinstance(e, PreFlightCheckError):
 				console.print_warning_panel("Pre-flight check failed. Requesting corrections...", title="Parse Error")
-				return Command(goto="assistant_node", update={"errors": [("user", str(e))]})
+				return Command(goto="assistant_node", update={"errors": str(e)})
 
 			log.exception(e)
 			raise
@@ -56,6 +54,6 @@ class ParseBlocksNode(Node):
 				f"{failed_count} block(s) failed validation. Requesting corrections...", title="Validation Error"
 			)
 
-			return Command(goto="assistant_node", update={"errors": [("user", error_message)]})
+			return Command(goto="assistant_node", update={"errors": error_message})
 
 		return Command(goto="lint_node", update={"parsed_blocks": parsed_blocks})

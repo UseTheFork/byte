@@ -1,6 +1,6 @@
 import asyncio
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Literal, Optional
+from typing import Any, Literal, Optional
 
 from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 
@@ -17,9 +17,6 @@ from byte.domain.cli.service.stream_rendering_service import (
 )
 from byte.domain.memory.service.memory_service import MemoryService
 
-if TYPE_CHECKING:
-	from langgraph.graph.state import CompiledStateGraph
-
 
 class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
 	"""Base class for all agent services providing common graph management functionality.
@@ -33,7 +30,7 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
 	_graph: Optional[CompiledStateGraph] = None
 
 	@abstractmethod
-	async def build(self) -> "CompiledStateGraph":
+	async def build(self) -> CompiledStateGraph:
 		"""Build and compile the agent graph with memory and tools.
 
 		Must be implemented by subclasses to define their specific agent
@@ -142,7 +139,7 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
 	def get_tools(self):
 		return []
 
-	async def get_graph(self) -> "CompiledStateGraph":
+	async def get_graph(self) -> CompiledStateGraph:
 		"""Get or create the agent graph with current tools.
 
 		Lazy-loads the graph with all registered tools and memory integration.

@@ -1,5 +1,6 @@
+from typing import cast
+
 from langgraph.graph.state import RunnableConfig
-from typing_extensions import cast
 
 from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.agent.implementations.research.agent import ResearchAgent
