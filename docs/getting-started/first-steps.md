@@ -52,15 +52,20 @@ Launch Byte from your project directory:
 $ byte
 ```
 
-On first run, Byte creates:
+On first run, Byte's `FirstBootService` will guide you through initial setup:
+
+1. **Choose LLM Provider** - Select your preferred AI provider (Anthropic, Gemini, or OpenAI)
+2. **Configure Web Commands** - Automatically detects Chrome/Chromium for web scraping
+3. **Enable File Watching** - Optionally enable automatic detection of AI comment markers
+4. **Setup .gitignore** - Adds `.byte/cache` and `.byte/session_context` patterns
+
+The service creates:
 
 - `.byte/` directory in your project root
-- `config.yaml` with default configuration
-- Cache and history directories
-
-!!! tip
-
-    Add `.byte/cache` to your `.gitignore` to exclude temporary files and chat history.
+- `config.yaml` with your selected configuration
+- `conventions/` directory for project-specific coding standards
+- `context/` directory for session context
+- `cache/` directory for temporary files
 
 ---
 
