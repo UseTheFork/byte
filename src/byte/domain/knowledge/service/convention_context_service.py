@@ -1,7 +1,6 @@
 from textwrap import dedent
 
 from byte.core.array_store import ArrayStore
-from byte.core.config.config import BYTE_DIR
 from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
 
@@ -23,13 +22,12 @@ class ConventionContextService(Service):
 		Usage: `await service.boot()`
 		"""
 		self.conventions = ArrayStore()
-		conventions_dir = BYTE_DIR / "conventions"
+		conventions_dir = self._config.system.paths.conventions
 
 		if not conventions_dir.exists() or not conventions_dir.is_dir():
 			return
 
 		# Iterate over all .md files in the conventions directory
-
 		for md_file in sorted(conventions_dir.glob(pattern="*.md", case_sensitive=False)):
 			try:
 				content = md_file.read_text(encoding="utf-8")

@@ -4,6 +4,8 @@ from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.utils import slugify
 from byte.domain.agent.implementations.conventions.agent import ConventionAgent
 from byte.domain.cli.service.command_registry import Command
+from byte.domain.cli.service.console_service import ConsoleService
+from byte.domain.knowledge.service.convention_context_service import ConventionContextService
 
 
 class ConventionFocus(BaseModel):
@@ -166,3 +168,12 @@ class ConventionCommand(Command, UserInteractive):
 		convention_file_path = self._config.system.paths.conventions / focus.file_name
 		convention_file_path.parent.mkdir(parents=True, exist_ok=True)
 		convention_file_path.write_text(convention["extracted_content"])
+
+		# refresh the Conventions in the session by `rebooting` the Service
+		convention_context_service = await self.make(ConventionContextService)
+		await convention_context_service.boot()
+		console = await self.make(ConsoleService)
+		console.print_success_panel(
+			"Convention document generated and saved to\n\nThe convention has been loaded into the session context and is now available for AI reference.",
+			title="Convention Generated",
+		)

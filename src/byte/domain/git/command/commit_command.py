@@ -65,6 +65,9 @@ class CommitCommand(Command):
 			# Extract staged changes for AI analysis
 			staged_diff = repo.git.diff("--cached")
 
+			# TODO: need to implment `count_tokens_approximately`
+			# tokens = count_tokens_approximately([("user", staged_diff)])
+
 			commit_agent = await self.make(CommitAgent)
 			commit_message: dict = await commit_agent.execute(
 				request={"messages": [("user", staged_diff)]}, display_mode="thinking"
