@@ -12,6 +12,9 @@ class LintNode(Node):
 	async def __call__(self, state: BaseState, config: RunnableConfig):
 		lint_service = await self.make(LintService)
 
+		if not self._config.lint.enable:
+			return Command(goto="end_node")
+
 		# Extract file paths from parsed blocks
 		file_paths = [Path(block.file_path) for block in state["parsed_blocks"]]
 

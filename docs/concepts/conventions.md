@@ -8,9 +8,37 @@ Conventions are Markdown files stored in `.byte/conventions/` that describe how 
 
 ## Creating Conventions
 
-### Convention Files
+### Using the Convention Command
 
-Store convention documents as Markdown files in `.byte/conventions/`:
+Byte can automatically generate convention documents by analyzing your codebase:
+
+```
+> /convention
+```
+
+The command will:
+
+1. Prompt you to select a convention type (style guide, architecture, etc.)
+2. Analyze your codebase to extract relevant patterns
+3. Generate a focused convention document
+4. Save it to `.byte/conventions/`
+5. Load it into the current session
+
+Available convention types include:
+
+- **Language Style Guide** - Naming, formatting, type hints, imports
+- **Project Architecture** - Directory structure, module organization, design patterns
+- **Comment Standards** - Docstring format, inline comments, documentation practices
+- **Code Patterns** - Design patterns, error handling, async/await usage
+- **Project Tooling** - Build systems, package managers, dev tools
+- **Documentation** - Documentation structure, writing style, examples
+- **Frontend Code Patterns** - Component structure, state management, UI patterns
+- **Backend Code Patterns** - API design, database access, service layer organization
+- **Other** - Custom convention with your own focus
+
+### Manual Convention Files
+
+You can also manually create convention documents as Markdown files in `.byte/conventions/`:
 
 ### File Format
 
@@ -36,37 +64,14 @@ All public functions require docstrings with usage examples.
 
 ### Automatic Loading
 
-When Byte starts, it:
+When Byte starts or when you generate a new convention, it:
 
 1. Scans `.byte/conventions/` for all `.md` files
 2. Loads each file's content
 3. Formats them with metadata (filename and source path)
 4. Stores them in memory for quick access
 
-### Injection into Prompts
-
-Before each AI interaction, Byte injects all conventions into the prompt:
-
-```
-# Coding and Project Conventions
-**Important:** Adhere to the following project-specific conventions.
-
----
-title: Python_Style.md
-source: .byte/conventions/python_style.md
----
-
-[convention content]
-
----
-title: Api_Design.md
-source: .byte/conventions/api_design.md
----
-
-[convention content]
-```
-
-This ensures the AI always has context about your project's standards.
+Newly generated conventions are immediately available in the current session without restarting Byte.
 
 ---
 

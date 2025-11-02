@@ -39,7 +39,6 @@ class AskAgent(Agent):
 		graph.add_node("start_node", await self.make(StartNode))
 		graph.add_node("assistant_node", await self.make(AssistantNode))
 		graph.add_node("tools_node", await self.make(ToolNode))
-
 		graph.add_node("end_node", await self.make(EndNode))
 
 		# Define edges
