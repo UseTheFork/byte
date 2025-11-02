@@ -9,7 +9,6 @@ from rich.theme import Theme
 from byte.core.config.config import BYTE_CACHE_DIR, BYTE_CONFIG_FILE, PROJECT_ROOT, ByteConfg
 from byte.domain.cli.rich.menu import Menu
 from byte.domain.cli.schemas import ByteTheme, ThemeRegistry
-from byte.domain.llm.config import LLMConfig
 
 
 class FirstBootService:
@@ -180,43 +179,27 @@ class FirstBootService:
 		Returns the selected provider name.
 		Usage: `model = initializer._init_llm()` -> "anthropic"
 		"""
-		# Create temporary LLMConfig to detect which providers are enabled
-		llm_config = LLMConfig()
 
 		# Build list of enabled providers
-		enabled_providers = []
-		if llm_config.anthropic.enabled:
-			enabled_providers.append("anthropic")
-		if llm_config.gemini.enabled:
-			enabled_providers.append("gemini")
-		if llm_config.openai.enabled:
-			enabled_providers.append("openai")
-
-		# If no providers are enabled, this shouldn't happen due to LLMConfig validation
-		# but handle it gracefully
-		if not enabled_providers:
-			self.print_error("No LLM providers detected. Please set an API key environment variable.")
-			return "anthropic"
-
-		# If only one provider is enabled, use it automatically
-		if len(enabled_providers) == 1:
-			selected = enabled_providers[0]
-			self.print_success(f"Using {selected} as LLM provider\n")
-			return selected
+		providers = [
+			"anthropic",
+			"gemini",
+			"openai",
+		]
 
 		# Multiple providers available - ask user to choose
-		self.print_info("Multiple LLM providers detected. Please choose one:\n")
-		menu = Menu(*enabled_providers, title="Select LLM Provider", console=self._console)
+		self.print_info("Please choose a default provider:\n")
+		menu = Menu(*providers, title="Select LLM Provider", console=self._console)
 		selected = menu.select()
 
 		if selected is None:
 			# User cancelled - default to first available
-			selected = enabled_providers[0]
+			selected = providers[0]
 			self.print_warning(f"No selection made, defaulting to {selected}\n")
 		else:
 			self.print_success(f"Selected {selected} as LLM provider\n")
 
-		return "anthropic"
+		return selected  # pyright: ignore[reportReturnType]
 
 	def _init_web(self, config: ByteConfg) -> ByteConfg:
 		"""Initialize web configuration by detecting Chrome or Chromium binary.

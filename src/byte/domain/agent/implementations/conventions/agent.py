@@ -47,7 +47,7 @@ class ConventionAgent(Agent):
 			await self.make(
 				ValidationNode,
 				goto="extract_node",
-				max_lines=50,
+				max_lines=75,
 			),
 		)
 		graph.add_node("extract_node", await self.make(ExtractNode))

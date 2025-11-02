@@ -251,15 +251,16 @@ class FileService(Service):
 
 		return (read_only_files, editable_files)
 
-	async def generate_project_hierarchy(self, max_depth: int = 3) -> str:
+	async def generate_project_hierarchy(self, max_depth: int = 8, max_files_per_dir: int = 5) -> str:
 		"""Generate a concise project hierarchy for LLM understanding.
 
-		Creates a tree-like structure showing directories and important files,
-		with special attention to root-level configuration files. Limits depth
-		to avoid overwhelming the context with too much detail.
+		Creates a tree-like structure showing directories and a sample of files,
+		with special attention to root-level configuration files. Shows a limited
+		number of files per directory with a count of additional files.
 
 		Args:
-			max_depth: Maximum directory depth to traverse (default: 3)
+			max_depth: Maximum directory depth to traverse (default: 8)
+			max_files_per_dir: Maximum number of files to show per directory (default: 5)
 
 		Returns:
 			Formatted string representing the project structure
@@ -285,12 +286,11 @@ class FileService(Service):
 				if len(parts) == 1:
 					root_files.append(relative)
 				else:
-					# Only track up to max_depth
-					if len(parts) <= max_depth:
-						parent = Path(*parts[:-1])
-						if parent not in dir_structure:
-							dir_structure[parent] = []
-						dir_structure[parent].append(relative)
+					# Track all files regardless of depth
+					parent = Path(*parts[:-1])
+					if parent not in dir_structure:
+						dir_structure[parent] = []
+					dir_structure[parent].append(relative)
 			except ValueError:
 				continue
 
@@ -303,7 +303,7 @@ class FileService(Service):
 				lines.append(f"├── {file}")
 			lines.append("")
 
-		# Add directories with file counts
+		# Add directories with limited file samples
 		dirs_by_depth: Dict[int, List[Path]] = {}
 		for dir_path in dir_structure.keys():
 			depth = len(dir_path.parts)
@@ -313,10 +313,28 @@ class FileService(Service):
 
 		# Sort and display directories by depth
 		for depth in sorted(dirs_by_depth.keys()):
+			if depth > max_depth:
+				continue
+
 			for dir_path in sorted(dirs_by_depth[depth]):
 				indent = "│   " * (depth - 1) + "├── "
-				file_count = len(dir_structure[dir_path])
-				lines.append(f"{indent}{dir_path.parts[-1]}/ ({file_count} files)")
+				files = sorted(dir_structure[dir_path])
+				total_files = len(files)
+
+				# Show directory with total file count
+				lines.append(f"{indent}{dir_path.parts[-1]}/ ({total_files} files)")
+
+				# Show sample of files
+				files_to_show = files[:max_files_per_dir]
+				file_indent = "│   " * depth + "├── "
+
+				for file in files_to_show:
+					lines.append(f"{file_indent}{file.name}")
+
+				# Add "X more files" message if there are more
+				remaining = total_files - len(files_to_show)
+				if remaining > 0:
+					lines.append(f"{file_indent}... {remaining} more files")
 
 		return "\n".join(lines)
 

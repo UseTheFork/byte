@@ -104,26 +104,6 @@ class AssistantNode(Node):
 
 		return []
 
-	async def _gather_project_hierarchy(self) -> list[HumanMessage]:
-		"""Gather project hierarchy for LLM understanding of project structure.
-
-		Uses FileService to generate a concise tree-like representation
-		of the project's directory structure and important files.
-
-		Returns:
-			List containing a single HumanMessage with formatted project hierarchy
-
-		Usage: `hierarchy_messages = await self._gather_project_hierarchy()`
-		"""
-		file_service = await self.make(FileService)
-		hierarchy = await file_service.generate_project_hierarchy()
-
-		if hierarchy:
-			hierarchy_content = f"<project_hierarchy>\n{hierarchy}\n</project_hierarchy>"
-			return [HumanMessage(hierarchy_content)]
-
-		return []
-
 	async def _gather_file_context(self, with_line_numbers=False) -> list[HumanMessage]:
 		"""Gather file context including read-only and editable files.
 
