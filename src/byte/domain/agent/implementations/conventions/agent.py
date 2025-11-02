@@ -8,9 +8,11 @@ from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.end_node import EndNode
 from byte.domain.agent.nodes.extract_node import ExtractNode
 from byte.domain.agent.nodes.start_node import StartNode
+from byte.domain.agent.nodes.tool_node import ToolNode
 from byte.domain.agent.nodes.validation_node import ValidationNode
 from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.agent.state import BaseState
+from byte.domain.files.tools.read_files import read_files
 from byte.domain.llm.service.llm_service import LLMService
 
 
@@ -22,6 +24,13 @@ class ConventionAgent(Agent):
 	to ensure generated conventions meet quality standards before extraction.
 	Usage: `agent = await container.make(ConventionAgent); result = await agent.execute(request)`
 	"""
+
+	# Convention agent dosent use or update the main memory.
+	async def get_checkpointer(self):
+		return None
+
+	def get_tools(self):
+		return [read_files]
 
 	async def build(self):
 		"""Build and compile the convention agent graph with validation and extraction.
@@ -50,8 +59,9 @@ class ConventionAgent(Agent):
 				max_lines=75,
 			),
 		)
-		graph.add_node("extract_node", await self.make(ExtractNode))
 
+		graph.add_node("extract_node", await self.make(ExtractNode))
+		graph.add_node("tools_node", await self.make(ToolNode))
 		graph.add_node("end_node", await self.make(EndNode))
 
 		# Define edges
@@ -61,6 +71,8 @@ class ConventionAgent(Agent):
 		graph.add_edge("validation_node", "extract_node")
 		graph.add_edge("extract_node", "end_node")
 		graph.add_edge("end_node", END)
+
+		graph.add_edge("tools_node", "assistant_node")
 
 		# Compile graph with memory and configuration
 		return graph.compile()
@@ -76,4 +88,5 @@ class ConventionAgent(Agent):
 			main=main,
 			weak=weak,
 			agent=self.__class__.__name__,
+			tools=self.get_tools(),
 		)

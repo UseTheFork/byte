@@ -13,6 +13,11 @@ def replace_list(left: list | None, right: list) -> list:
 	return right
 
 
+def replace_str(left: str | None, right: str | None) -> str | None:
+	"""Reducer that"""
+	return right
+
+
 def add_constraints(left: list[ConstraintSchema] | None, right: list[ConstraintSchema]) -> list[ConstraintSchema]:
 	"""Reducer that accumulates user-defined constraints for the current invocation.
 

@@ -29,6 +29,7 @@ conventions_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
 				- Include "why" behind conventions when it's not obvious
 				- Avoid generic advice - be specific to this codebase
 				- Format code examples with proper syntax highlighting
+				- Never use XML-style tags in your responses (e.g., <file>, <search>, <replace>). These are for internal parsing only.
 				</rules>
 
 				<format>
@@ -48,6 +49,7 @@ conventions_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
 				"""
 			),
 		),
+		("placeholder", "{project_inforamtion_and_context}"),
 		("placeholder", "{project_hierarchy}"),
 		("user", "{file_context_with_line_numbers}"),
 		("placeholder", "{messages}"),
