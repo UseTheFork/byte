@@ -15,7 +15,7 @@ class LintCommand(BaseModel):
 class LintConfig(BaseModel):
 	"""Lint domain configuration with validation and defaults."""
 
-	enable: bool = Field(default=True, description="Enable or disable the linting functionality")
+	enable: bool = Field(default=False, description="Enable or disable the linting functionality")
 	commands: List[LintCommand] = Field(
 		default=[], description="List of lint commands to run on files with their target extensions"
 	)
