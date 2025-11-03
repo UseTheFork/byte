@@ -5,7 +5,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.traceback import install
 
-from byte.core.config.config import DOTENV_PATH
+from byte.core.config.config import DOTENV_PATH, CLIArgs
 from byte.domain.system.service.config_loader_service import ConfigLoaderService
 from byte.domain.system.service.first_boot_service import FirstBootService
 
@@ -36,12 +36,13 @@ def cli(read_only: tuple[str, ...], add: tuple[str, ...]):
 		initializer.run_if_needed()
 
 	try:
-		loader = ConfigLoaderService()
+		cli_args = CLIArgs(
+			read_only_files=list(read_only),
+			editable_files=list(add),
+		)
+		loader = ConfigLoaderService(cli_args)
 		config = loader()
 		config.dotenv_loaded = found_dotenv
-
-		config.boot.read_only_files = list(read_only)
-		config.boot.editable_files = list(add)
 
 		run(config)
 	except ValidationError as e:

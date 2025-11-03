@@ -4,7 +4,7 @@ from importlib.metadata import PackageNotFoundError, version
 
 import yaml
 
-from byte.core.config.config import BYTE_CONFIG_FILE, ByteConfg
+from byte.core.config.config import BYTE_CONFIG_FILE, ByteConfg, CLIArgs
 from byte.domain.system.config import PathsConfig
 
 
@@ -13,9 +13,12 @@ class ConfigLoaderService:
 
 	Loads the BYTE_CONFIG_FILE and returns a dictionary that can be
 	passed to ByteConfig for initialization.
-	Usage: `loader = ConfigLoaderService()`
+	Usage: `loader = ConfigLoaderService(cli_args)`
 	Usage: `config_dict = loader()` -> {"llm": {...}, "files": {...}}
 	"""
+
+	def __init__(self, cli_args: CLIArgs | None = None):
+		self.cli_args = cli_args or CLIArgs()
 
 	def _load_yaml_config(self) -> dict:
 		"""Load and parse YAML configuration file.
@@ -103,6 +106,23 @@ class ConfigLoaderService:
 
 		return config
 
+	def _load_boot_config(self, config: ByteConfg) -> ByteConfg:
+		"""Load boot configuration from CLI arguments.
+
+		Merges boot config from YAML with CLI arguments, removing duplicates.
+		Usage: `config = self._load_boot_config(config)`
+		"""
+
+		# Merge read_only_files from YAML and CLI, removing duplicates
+		read_only_files = list(set(config.boot.read_only_files + self.cli_args.read_only_files))
+		config.boot.read_only_files = read_only_files
+
+		# Merge editable_files from YAML and CLI, removing duplicates
+		editable_files = list(set(config.boot.editable_files + self.cli_args.editable_files))
+		config.boot.editable_files = editable_files
+
+		return config
+
 	def __call__(self) -> ByteConfg:
 		"""Load configuration from BYTE_CONFIG_FILE.
 
@@ -116,5 +136,6 @@ class ConfigLoaderService:
 		config = self._apply_system_config(config)
 		config = self._apply_environment_overrides(config)
 		config = self._load_llm_api_keys(config)
+		config = self._load_boot_config(config)
 
 		return config

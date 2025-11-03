@@ -44,6 +44,12 @@ BYTE_CONFIG_FILE = BYTE_DIR / "config.yaml"
 DOTENV_PATH = PROJECT_ROOT / ".env"
 
 
+class CLIArgs(BaseModel):
+	read_only_files: list[str] = Field(default_factory=list, description="Files to add to read-only context")
+	editable_files: list[str] = Field(default_factory=list, description="Files to add to editable context")
+
+
+# TODO: should this be moved to a boot domain or to the syste, domain?
 class BootConfg(BaseModel):
 	read_only_files: list[str] = Field(default_factory=list, description="Files to add to read-only context")
 	editable_files: list[str] = Field(default_factory=list, description="Files to add to editable context")
@@ -56,7 +62,7 @@ class ByteConfg(BaseModel):
 	dotenv_loaded: bool = Field(default=False, exclude=True, description="Whether a .env file was successfully loaded")
 
 	# keep-sorted start
-	boot: BootConfg = Field(default_factory=BootConfg, exclude=True)
+	boot: BootConfg = Field(default_factory=BootConfg)
 	cli: CLIConfig = Field(default_factory=CLIConfig)
 	development: DevelopmentConfig = Field(default_factory=DevelopmentConfig, exclude=True)
 	edit_format: EditFormatConfig = Field(default_factory=EditFormatConfig)
