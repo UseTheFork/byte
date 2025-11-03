@@ -37,3 +37,11 @@ lsp:
     python:
       command: ["uv", "run", "jedi-language-server"]
       languages: ["python"]
+boot:
+  read_only_files:
+    - src/byte/bootstrap.py
+    - src/byte/container.py
+    - src/byte/core/cli.py
+    - src/byte/core/config/config.py
+    - src/byte/main.py
+    - src/tests/conftest.py

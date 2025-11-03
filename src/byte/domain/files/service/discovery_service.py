@@ -49,7 +49,8 @@ class FileDiscoveryService(Service):
 		filtering across all file operations.
 		"""
 		ignore_service = await self.make(FileIgnoreService)
-		return await ignore_service.is_ignored(path)
+		is_ignored = await ignore_service.is_ignored(path)
+		return is_ignored
 
 	async def get_files(self, extension: Optional[str] = None) -> List[Path]:
 		"""Get all discovered files, optionally filtered by extension.

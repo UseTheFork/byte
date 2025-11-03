@@ -19,6 +19,7 @@ from byte.domain.edit_format.service.edit_block_prompt import (
 	practice_messages,
 )
 from byte.domain.files.models import FileMode
+from byte.domain.files.service.discovery_service import FileDiscoveryService
 from byte.domain.files.service.file_service import FileService
 
 
@@ -258,6 +259,7 @@ class EditBlockService(Service, UserInteractive):
 			List[SearchReplaceBlock]: The original list of blocks with their status information
 		"""
 		try:
+			file_discovery_service: FileDiscoveryService = await self.make(FileDiscoveryService)
 			file_service: FileService = await self.make(FileService)
 			for block in blocks:
 				# Only apply blocks that are valid
@@ -283,6 +285,7 @@ class EditBlockService(Service, UserInteractive):
 							file_path.unlink()
 
 							# Remove the deleted file from context
+							await file_discovery_service.remove_file(file_path)
 							await file_service.remove_file(file_path)
 
 				elif block.block_type == BlockType.ADD:
@@ -295,6 +298,7 @@ class EditBlockService(Service, UserInteractive):
 						file_path.write_text(block.replace_content, encoding="utf-8")
 
 						# Add the newly created file to context as editable
+						await file_discovery_service.add_file(file_path)
 						await file_service.add_file(file_path, FileMode.EDITABLE)
 
 				elif block.block_type == BlockType.EDIT:

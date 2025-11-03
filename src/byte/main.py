@@ -11,6 +11,7 @@ from byte.core.logging import log
 from byte.core.task_manager import TaskManager
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
+from byte.domain.files.models import FileMode
 from byte.domain.files.service.file_service import FileService
 
 
@@ -37,15 +38,11 @@ class Byte:
 
 		# Add read-only files from boot config
 		if config.boot.read_only_files:
-			from byte.domain.files.models import FileMode
-
 			for file_path in config.boot.read_only_files:
 				await file_service.add_file(file_path, FileMode.READ_ONLY)
 
 		# Add editable files from boot config
 		if config.boot.editable_files:
-			from byte.domain.files.models import FileMode
-
 			for file_path in config.boot.editable_files:
 				await file_service.add_file(file_path, FileMode.EDITABLE)
 

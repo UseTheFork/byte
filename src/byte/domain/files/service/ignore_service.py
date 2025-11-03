@@ -66,10 +66,22 @@ class FileIgnoreService(Service):
 
 		try:
 			relative_path = path.relative_to(self._config.project_root)
-			# Check both file and directory patterns
-			return self._gitignore_spec.match_file(str(relative_path)) or self._gitignore_spec.match_file(
-				str(relative_path) + "/"
-			)
+			relative_str = str(relative_path)
+
+			# Check if the path itself matches
+			if self._gitignore_spec.match_file(relative_str) or self._gitignore_spec.match_file(relative_str + "/"):
+				return True
+
+			# Check if any parent directory matches an ignore pattern
+			# This handles files inside ignored directories like __pycache__/file.pyc
+			for parent in relative_path.parents:
+				if parent == Path("."):
+					break
+				parent_str = str(parent)
+				if self._gitignore_spec.match_file(parent_str) or self._gitignore_spec.match_file(parent_str + "/"):
+					return True
+
+			return False
 		except ValueError:
 			# Path is outside project root, consider it ignored
 			return True
