@@ -44,6 +44,11 @@ BYTE_CONFIG_FILE = BYTE_DIR / "config.yaml"
 DOTENV_PATH = PROJECT_ROOT / ".env"
 
 
+class BootConfg(BaseModel):
+	read_only_files: list[str] = Field(default_factory=list, description="Files to add to read-only context")
+	editable_files: list[str] = Field(default_factory=list, description="Files to add to editable context")
+
+
 class ByteConfg(BaseModel):
 	project_root: Path = Field(default=PROJECT_ROOT, exclude=True)
 	byte_dir: Path = Field(default=BYTE_DIR, exclude=True)
@@ -51,13 +56,14 @@ class ByteConfg(BaseModel):
 	dotenv_loaded: bool = Field(default=False, exclude=True, description="Whether a .env file was successfully loaded")
 
 	# keep-sorted start
-	cli: CLIConfig = CLIConfig()
+	boot: BootConfg = Field(default_factory=BootConfg, exclude=True)
+	cli: CLIConfig = Field(default_factory=CLIConfig)
 	development: DevelopmentConfig = Field(default_factory=DevelopmentConfig, exclude=True)
-	edit_format: EditFormatConfig = EditFormatConfig()
-	files: FilesConfig = FilesConfig()
-	lint: LintConfig = LintConfig()
-	llm: LLMConfig = LLMConfig()
-	lsp: LSPConfig = LSPConfig()
+	edit_format: EditFormatConfig = Field(default_factory=EditFormatConfig)
+	files: FilesConfig = Field(default_factory=FilesConfig)
+	lint: LintConfig = Field(default_factory=LintConfig)
+	llm: LLMConfig = Field(default_factory=LLMConfig)
+	lsp: LSPConfig = Field(default_factory=LSPConfig)
 	system: SystemConfig = Field(default_factory=SystemConfig, exclude=True)
-	web: WebConfig = WebConfig()
+	web: WebConfig = Field(default_factory=WebConfig)
 	# keep-sorted end

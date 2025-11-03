@@ -11,7 +11,17 @@ from byte.domain.system.service.first_boot_service import FirstBootService
 
 
 @click.command()
-def cli():
+@click.option(
+	"--read-only",
+	multiple=True,
+	help="Add files to read-only context (can be specified multiple times)",
+)
+@click.option(
+	"--add",
+	multiple=True,
+	help="Add files to editable context (can be specified multiple times)",
+)
+def cli(read_only: tuple[str, ...], add: tuple[str, ...]):
 	"""Byte CLI Assistant"""
 	from byte.main import run
 
@@ -29,6 +39,9 @@ def cli():
 		loader = ConfigLoaderService()
 		config = loader()
 		config.dotenv_loaded = found_dotenv
+
+		config.boot.read_only_files = list(read_only)
+		config.boot.editable_files = list(add)
 
 		run(config)
 	except ValidationError as e:

@@ -29,15 +29,12 @@ class FileService(Service):
 		"""Add a file to the active context for AI awareness.
 
 		Supports wildcard patterns like 'byte/*' to add multiple files at once.
-		Only adds files that are available in the FileDiscoveryService to ensure
-		they are valid project files that respect gitignore patterns.
+		Automatically discovers new files that aren't in the cache yet.
 		Usage: `await service.add_file("config.py", FileMode.READ_ONLY)`
 		Usage: `await service.add_file("src/*.py", FileMode.EDITABLE)` -> adds all Python files
 		"""
 		console = await self.make(ConsoleService)
 		file_discovery = await self.make(FileDiscoveryService)
-		discovered_files = await file_discovery.get_files()
-		discovered_file_paths = {str(f.resolve()) for f in discovered_files}
 
 		path_str = str(path)
 
@@ -52,8 +49,11 @@ class FileService(Service):
 			for match_path in matching_paths:
 				path_obj = Path(match_path).resolve()
 
-				# Only add files that are in the discovery service and are actual files
-				if path_obj.is_file() and str(path_obj) in discovered_file_paths:
+				if path_obj.is_file():
+					# Try to add to discovery cache if not already there
+					await file_discovery.add_file(path_obj)
+
+					# Now add to context
 					key = str(path_obj)
 					self._context_files[key] = FileContext(path=path_obj, mode=mode)
 
@@ -73,9 +73,11 @@ class FileService(Service):
 			# Handle single file path
 			path_obj = Path(path).resolve()
 
-			# Only add if file is in the discovery service
-			if not path_obj.is_file() or str(path_obj) not in discovered_file_paths:
+			if not path_obj.is_file():
 				return False
+
+			# Try to add to discovery cache if not already there
+			await file_discovery.add_file(path_obj)
 
 			key = str(path_obj)
 
@@ -151,6 +153,7 @@ class FileService(Service):
 			# Remove all matching files
 			for match_path in matching_paths:
 				del self._context_files[match_path]
+				await file_discovery.remove_file(Path(match_path))
 				# await self.event(FileRemoved(file_path=match_path))
 
 			return True
@@ -162,6 +165,7 @@ class FileService(Service):
 			# Only remove if file is in context and in discovery service
 			if key in self._context_files and key in discovered_file_paths:
 				del self._context_files[key]
+				await file_discovery.remove_file(path_obj)
 				# await self.event(FileRemoved(file_path=str(path_obj)))
 				return True
 			return False

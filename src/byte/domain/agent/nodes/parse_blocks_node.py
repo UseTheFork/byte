@@ -8,7 +8,7 @@ from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.agent.state import BaseState
 from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.edit_format.exceptions import PreFlightCheckError
+from byte.domain.edit_format.exceptions import NoBlocksFoundError, PreFlightCheckError
 from byte.domain.edit_format.schemas import BlockStatus
 from byte.domain.edit_format.service.edit_format_service import EditFormatService
 
@@ -27,6 +27,9 @@ class ParseBlocksNode(Node):
 		try:
 			parsed_blocks = await self.edit_format.handle(response_text)
 		except Exception as e:
+			if isinstance(e, NoBlocksFoundError):
+				return Command(goto="end_node")
+
 			if isinstance(e, PreFlightCheckError):
 				console.print_warning_panel("Pre-flight check failed. Requesting corrections...", title="Parse Error")
 				return Command(goto="assistant_node", update={"errors": str(e)})

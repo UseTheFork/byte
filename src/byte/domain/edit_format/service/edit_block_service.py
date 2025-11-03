@@ -7,7 +7,7 @@ from langchain_core.messages import AIMessage
 from byte.core.event_bus import Payload
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
-from byte.domain.edit_format.exceptions import PreFlightCheckError
+from byte.domain.edit_format.exceptions import NoBlocksFoundError, PreFlightCheckError
 from byte.domain.edit_format.schemas import (
 	BlockStatus,
 	BlockType,
@@ -154,7 +154,7 @@ class EditBlockService(Service, UserInteractive):
 		file_marker_count = content.count(self.add_file_marker) + content.count(self.remove_file_marker)
 
 		if search_count == 0 and replace_count == 0 and divider_count == 0 and file_marker_count == 0:
-			raise PreFlightCheckError(
+			raise NoBlocksFoundError(
 				"No SEARCH/REPLACE blocks found in content. AI responses must include properly formatted edit blocks."
 			)
 

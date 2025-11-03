@@ -14,6 +14,16 @@ class PreFlightCheckError(EditFormatError):
 	pass
 
 
+class NoBlocksFoundError(EditFormatError):
+	"""Exception raised when no SEARCH/REPLACE blocks are found in content.
+
+	This indicates the AI response did not contain any edit blocks,
+	which may be intentional (e.g., conversational response only).
+	"""
+
+	pass
+
+
 class ReadOnlyFileError(EditFormatError):
 	"""Exception raised when attempting to edit a read-only file.
 
