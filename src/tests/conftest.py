@@ -8,7 +8,6 @@ import pytest_asyncio
 from byte.bootstrap import bootstrap
 from byte.container import Container
 from byte.core.config.config import ByteConfg
-from byte.core.task_manager import TaskManager
 from byte.domain.edit_format.service.edit_block_service import EditBlockService
 from byte.domain.edit_format.service.shell_command_service import ShellCommandService
 from byte.domain.files.service.file_service import FileService
@@ -70,16 +69,18 @@ async def test_container(test_config: ByteConfg) -> AsyncGenerator[Container, No
 
 	Usage: `async def test_something(test_container): service = await test_container.make(MyService)`
 	"""
+	from byte.bootstrap import shutdown
+	from byte.container import app
+
+	# Reset the global container before each test to ensure isolation
+	app.reset()
+
 	container = await bootstrap(test_config)
 
 	yield container
 
-	# Cleanup: shutdown task manager
-	try:
-		task_manager = await container.make(TaskManager)
-		await task_manager.shutdown()
-	except:  # noqa: E722
-		pass
+	# Cleanup: shutdown all services and reset container
+	await shutdown(container)
 
 
 @pytest_asyncio.fixture
