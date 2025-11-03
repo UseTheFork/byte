@@ -89,3 +89,6 @@ async def shutdown(container):
 		# Shutdown in reverse order (opposite of boot)
 		for provider in reversed(container._service_providers):
 			await provider.shutdown(container)
+
+	# Reset the global app container to ensure clean state
+	app.reset()

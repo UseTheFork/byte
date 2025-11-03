@@ -83,6 +83,16 @@ class Container:
 
 		return instance
 
+	def reset(self) -> None:
+		"""Reset the container state, clearing all bindings and instances.
+
+		Usage: `container.reset()` -> clears all state for fresh start
+		"""
+		self._singletons.clear()
+		self._transients.clear()
+		self._instances.clear()
+		self._service_providers.clear()
+
 
 # Global application container instance
 # Using a global container simplifies service access across the application
