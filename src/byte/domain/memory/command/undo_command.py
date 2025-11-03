@@ -58,20 +58,45 @@ class UndoCommand(Command):
 			messages_to_remove = messages[last_human_index:]
 			remove_messages = [RemoveMessage(id=message.id) for message in messages_to_remove]
 
-			# Count messages by type
-			message_counts = {}
-			for message in messages_to_remove:
+			# Display message previews
+			max_preview_lines = 5
+			console.print()
+			console.rule("Messages to Remove")
+			console.print()
+
+			for idx, message in enumerate(messages_to_remove):
 				message_type = type(message).__name__
-				message_counts[message_type] = message_counts.get(message_type, 0) + 1
+				content = str(message.content) if hasattr(message, "content") else str(message)
 
-			# Display message counts in a panel
-			count_text = "\n".join([f"{msg_type}: {count}" for msg_type, count in message_counts.items()])
+				# Get first few lines for preview
+				lines = content.split("\n")
+				preview_lines = lines[:max_preview_lines]
+
+				# Truncate long lines based on console width
+				console_width = console.width
+				max_line_length = max(40, console_width - 8)
+				truncated_lines = []
+				for line in preview_lines:
+					if len(line) > max_line_length:
+						truncated_lines.append(line[:max_line_length] + "...")
+					else:
+						truncated_lines.append(line)
+
+				preview_content = "\n".join(truncated_lines)
+
+				# Add ellipsis if there are more lines
+				if len(lines) > max_preview_lines:
+					preview_content += "\n..."
+
+				# Create panel for this message
+				panel = console.panel(
+					preview_content,
+					title=f"{idx + 1}. {message_type} ({len(lines)} lines)",
+					border_style="secondary",
+				)
+				console.print(panel)
+
 			num_messages = len(messages_to_remove)
-			console.print_panel(
-				count_text,
-				title="Messages to Remove",
-			)
-
 			confirmed = console.confirm(
 				f"Remove {num_messages} message{'s' if num_messages != 1 else ''}?", default=True
 			)
