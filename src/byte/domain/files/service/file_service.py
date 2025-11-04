@@ -163,7 +163,6 @@ class FileService(Service):
 		# Sort by relative path for consistent, user-friendly ordering
 		return sorted(files, key=lambda f: f.relative_path)
 
-	# TODO: This needs to be completed and added as a command
 	async def set_file_mode(self, path: Union[str, PathLike], mode: FileMode) -> bool:
 		"""Change file access mode between read-only and editable.
 
@@ -175,7 +174,9 @@ class FileService(Service):
 		key = str(path_obj)
 
 		if key in self._context_files:
-			self._context_files[key].mode = mode
+			# Create a new FileContext with the updated mode
+			old_context = self._context_files[key]
+			self._context_files[key] = FileContext(path=old_context.path, mode=mode)
 			return True
 		return False
 

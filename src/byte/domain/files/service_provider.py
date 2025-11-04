@@ -9,6 +9,7 @@ from byte.domain.files.command.add_file_command import AddFileCommand
 from byte.domain.files.command.add_read_only_file_command import ReadOnlyCommand
 from byte.domain.files.command.drop_file_command import DropFileCommand
 from byte.domain.files.command.list_files_command import ListFilesCommand
+from byte.domain.files.command.switch_mode_command import SwitchModeCommand
 from byte.domain.files.service.discovery_service import FileDiscoveryService
 from byte.domain.files.service.file_service import FileService
 from byte.domain.files.service.ignore_service import FileIgnoreService
@@ -27,7 +28,7 @@ class FileServiceProvider(ServiceProvider):
 		]
 
 	def commands(self) -> List[Type[Command]]:
-		return [ListFilesCommand, AddFileCommand, ReadOnlyCommand, DropFileCommand]
+		return [ListFilesCommand, AddFileCommand, ReadOnlyCommand, DropFileCommand, SwitchModeCommand]
 
 	async def boot(self, container: Container):
 		"""Boot file services and register commands with registry."""
