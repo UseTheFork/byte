@@ -7,6 +7,7 @@ from rich.columns import Columns
 
 from byte.core.event_bus import EventType, Payload
 from byte.core.service.base_service import Service
+from byte.core.utils import list_to_multiline_text
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.files.models import FileContext, FileMode
 from byte.domain.files.service.discovery_service import FileDiscoveryService
@@ -224,8 +225,17 @@ class FileService(Service):
                         BoundaryType.FILE,
                         meta={"source": file_ctx.relative_path, "language": language, "mode": "read-only"},
                     )
-                    closing = Boundary.close(BoundaryType.FILE)
-                    read_only_files.append(f"{opening}\n{content}\n{closing}")
+                    read_only_files.append(
+                        list_to_multiline_text(
+                            [
+                                f"{opening}",
+                                f"```{language}",
+                                f"{content}",
+                                "```",
+                                Boundary.close(BoundaryType.FILE),
+                            ]
+                        )
+                    )
 
         if editable:
             for file_ctx in sorted(editable, key=lambda f: f.relative_path):
@@ -237,8 +247,17 @@ class FileService(Service):
                         BoundaryType.FILE,
                         meta={"source": file_ctx.relative_path, "language": language, "mode": "editable"},
                     )
-                    closing = Boundary.close(BoundaryType.FILE)
-                    editable_files.append(f"{opening}\n{content}\n{closing}")
+                    editable_files.append(
+                        list_to_multiline_text(
+                            [
+                                f"{opening}",
+                                f"```{language}",
+                                f"{content}",
+                                "```",
+                                Boundary.close(BoundaryType.FILE),
+                            ]
+                        )
+                    )
 
         return (read_only_files, editable_files)
 

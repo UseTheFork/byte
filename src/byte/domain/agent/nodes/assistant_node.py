@@ -218,7 +218,7 @@ class AssistantNode(Node):
             avoid_items = "\n".join(f"- {c.description}" for c in avoid_constraints)
             constraints_content += list_to_multiline_text(
                 [
-                    "**Things to Avoid:**",
+                    Boundary.notice("Things to Avoid"),
                     Boundary.open(BoundaryType.CONSTRAINTS, meta={"type": "avoid"}),
                     f"{avoid_items}",
                     Boundary.close(BoundaryType.CONSTRAINTS),
@@ -229,8 +229,8 @@ class AssistantNode(Node):
             require_items = "\n".join(f"- {c.description}" for c in require_constraints)
             constraints_content += list_to_multiline_text(
                 [
-                    "**Requirements:**",
-                    Boundary.open(BoundaryType.CONSTRAINTS, meta={"type": "require"}),
+                    Boundary.notice("Requirements"),
+                    Boundary.open(BoundaryType.CONSTRAINTS, meta={"type": "requirements"}),
                     f"{require_items}",
                     Boundary.close(BoundaryType.CONSTRAINTS),
                 ]
