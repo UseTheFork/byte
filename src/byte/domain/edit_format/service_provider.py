@@ -6,7 +6,8 @@ from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.edit_format.command.copy_command import CopyCommand
-from byte.domain.edit_format.service.edit_block_service import EditBlockService
+from byte.domain.edit_format.parser.pseudo_xml.service import PseudoXmlParserService
+from byte.domain.edit_format.parser.search_replace.service import SearchReplaceBlockParserService
 from byte.domain.edit_format.service.edit_format_service import EditFormatService
 from byte.domain.edit_format.service.shell_command_service import ShellCommandService
 
@@ -21,7 +22,12 @@ class EditFormatProvider(ServiceProvider):
 	"""
 
 	def services(self) -> List[Type[Service]]:
-		return [EditFormatService, EditBlockService, ShellCommandService]
+		return [
+			EditFormatService,
+			SearchReplaceBlockParserService,
+			PseudoXmlParserService,
+			ShellCommandService,
+		]
 
 	def commands(self) -> List[Type[Command]]:
 		return [CopyCommand]
@@ -34,7 +40,7 @@ class EditFormatProvider(ServiceProvider):
 		before passing context to the AI agent.
 		Usage: Called during provider boot phase
 		"""
-		edit_format_service = await container.make(EditBlockService)
+		edit_format_service = await container.make(SearchReplaceBlockParserService)
 
 		event_bus = await container.make(EventBus)
 		event_bus.on(

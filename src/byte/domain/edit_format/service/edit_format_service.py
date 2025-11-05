@@ -4,16 +4,12 @@ from byte.core.config.config import ByteConfg
 from byte.core.logging import log
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
+from byte.domain.edit_format.parser.search_replace.service import SearchReplaceBlockParserService
 from byte.domain.edit_format.schemas import (
 	BlockStatus,
 	EditFormatPrompts,
 	SearchReplaceBlock,
 )
-from byte.domain.edit_format.service.edit_block_prompt import (
-	edit_format_system,
-	practice_messages,
-)
-from byte.domain.edit_format.service.edit_block_service import EditBlockService
 from byte.domain.edit_format.service.shell_command_prompt import (
 	shell_command_system,
 	shell_practice_messages,
@@ -34,17 +30,20 @@ class EditFormatService(Service, UserInteractive):
 	async def boot(self):
 		"""Initialize service with appropriate prompts based on configuration."""
 		config = await self.make(ByteConfg)
+		self.edit_block_service = await self.make(SearchReplaceBlockParserService)
 
 		if config.edit_format.enable_shell_commands:
 			# Combine system prompts to provide AI with both edit and shell capabilities
-			combined_system = f"{edit_format_system}\n\n{shell_command_system}"
+			combined_system = f"{self.edit_block_service.prompts.system}\n\n{shell_command_system}"
 
 			# Combine practice messages to show examples of both edit blocks and shell commands
-			combined_examples = practice_messages + shell_practice_messages
+			combined_examples = self.edit_block_service.prompts.examples + shell_practice_messages
 
 			self.prompts = EditFormatPrompts(system=combined_system, examples=combined_examples)
 		else:
-			self.prompts = EditFormatPrompts(system=edit_format_system, examples=practice_messages)
+			self.prompts = EditFormatPrompts(
+				system=self.edit_block_service.prompts.system, examples=self.edit_block_service.prompts.examples
+			)
 
 	async def handle(self, content: str) -> List[SearchReplaceBlock]:
 		"""Process content by validating, parsing, and applying edit blocks and shell commands.
@@ -64,14 +63,12 @@ class EditFormatService(Service, UserInteractive):
 
 		Usage: `blocks = await service.handle(ai_response)`
 		"""
-		config = await self.make(ByteConfg)
-		edit_block_service = await self.make(EditBlockService)
 
 		# Process file edit blocks
-		blocks = await edit_block_service.handle(content)
+		blocks = await self.edit_block_service.handle(content)
 
 		# Only execute shell commands if enabled and all edit blocks succeeded
-		if config.edit_format.enable_shell_commands:
+		if self._config.edit_format.enable_shell_commands:
 			all_edits_valid = all(b.block_status == BlockStatus.VALID for b in blocks)
 
 			if all_edits_valid:

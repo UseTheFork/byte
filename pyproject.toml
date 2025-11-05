@@ -114,7 +114,7 @@ ignore = [
 ]
 
 [tool.ruff.format]
-indent-style = "tab"
+indent-style = "space"
 line-ending = "lf"
 
 [tool.ruff.lint.isort]
