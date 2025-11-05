@@ -7,15 +7,15 @@ from langchain_core.messages import AIMessage
 from byte.core.event_bus import Payload
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
-from byte.domain.edit_format.schemas import (
+from byte.domain.files.models import FileMode
+from byte.domain.files.service.discovery_service import FileDiscoveryService
+from byte.domain.files.service.file_service import FileService
+from byte.domain.prompt_format.schemas import (
     BlockStatus,
     BlockType,
     EditFormatPrompts,
     SearchReplaceBlock,
 )
-from byte.domain.files.models import FileMode
-from byte.domain.files.service.discovery_service import FileDiscoveryService
-from byte.domain.files.service.file_service import FileService
 
 
 class BaseParserService(Service, UserInteractive, ABC):

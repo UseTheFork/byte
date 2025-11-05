@@ -6,6 +6,12 @@ from pydantic.dataclasses import dataclass
 class BoundaryType(str, Enum):
     """Type of boundary marker for content sections."""
 
+    ROLE = "role"
+    TASK = "task"
+    RULES = "rules"
+    GOAL = "goal"
+    RESPONSE_FORMAT = "response_format"
+
     CONVENTION = "convention"
     FILE = "file"
     SEARCH = "search"

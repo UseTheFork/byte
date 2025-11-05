@@ -1,6 +1,8 @@
 from langchain_core.prompts import ChatPromptTemplate
 
 from byte.core.utils.list_to_multiline_text import list_to_multiline_text
+from byte.domain.prompt_format.schemas import BoundaryType
+from byte.domain.prompt_format.utils import Boundary
 
 coder_prompt = ChatPromptTemplate.from_messages(
     [
@@ -8,21 +10,21 @@ coder_prompt = ChatPromptTemplate.from_messages(
             "system",
             list_to_multiline_text(
                 [
-                    "<role>",
+                    Boundary.open(BoundaryType.ROLE),
                     "Act as an expert software developer.",
-                    "</role>",
+                    Boundary.close(BoundaryType.ROLE),
                     "",
-                    "<rules>",
+                    Boundary.open(BoundaryType.RULES),
                     "- Always use best practices when coding",
                     "- Respect and use existing conventions, libraries, etc that are already present in the code base",
                     "- Take requests for changes to the supplied code",
                     "- If the request is ambiguous, ask clarifying questions before proceeding",
                     "- Keep changes simple don't build more then what is asked for",
-                    "</rules>",
+                    Boundary.close(BoundaryType.RULES),
                     "",
-                    "<response_requirements>",
+                    Boundary.open(BoundaryType.RESPONSE_FORMAT),
                     "{edit_format_system}",
-                    "</response_requirements>",
+                    Boundary.close(BoundaryType.RESPONSE_FORMAT),
                 ]
             ),
         ),

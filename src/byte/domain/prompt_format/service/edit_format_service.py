@@ -4,17 +4,17 @@ from byte.core.config.config import ByteConfg
 from byte.core.logging import log
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
-from byte.domain.edit_format.parser.search_replace.service import SearchReplaceBlockParserService
-from byte.domain.edit_format.schemas import (
+from byte.domain.prompt_format.parser.search_replace.service import SearchReplaceBlockParserService
+from byte.domain.prompt_format.schemas import (
     BlockStatus,
     EditFormatPrompts,
     SearchReplaceBlock,
 )
-from byte.domain.edit_format.service.shell_command_prompt import (
+from byte.domain.prompt_format.service.shell_command_prompt import (
     shell_command_system,
     shell_practice_messages,
 )
-from byte.domain.edit_format.service.shell_command_service import ShellCommandService
+from byte.domain.prompt_format.service.shell_command_service import ShellCommandService
 
 
 class EditFormatService(Service, UserInteractive):

@@ -5,14 +5,14 @@ from byte.core.event_bus import EventBus, EventType
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli.service.command_registry import Command
-from byte.domain.edit_format.command.copy_command import CopyCommand
-from byte.domain.edit_format.parser.pseudo_xml.service import PseudoXmlParserService
-from byte.domain.edit_format.parser.search_replace.service import SearchReplaceBlockParserService
-from byte.domain.edit_format.service.edit_format_service import EditFormatService
-from byte.domain.edit_format.service.shell_command_service import ShellCommandService
+from byte.domain.prompt_format.command.copy_command import CopyCommand
+from byte.domain.prompt_format.parser.pseudo_xml.service import PseudoXmlParserService
+from byte.domain.prompt_format.parser.search_replace.service import SearchReplaceBlockParserService
+from byte.domain.prompt_format.service.edit_format_service import EditFormatService
+from byte.domain.prompt_format.service.shell_command_service import ShellCommandService
 
 
-class EditFormatProvider(ServiceProvider):
+class PromptFormatProvider(ServiceProvider):
     """Service provider for edit format and code block processing functionality.
 
     Registers services for parsing and applying SEARCH/REPLACE blocks and shell

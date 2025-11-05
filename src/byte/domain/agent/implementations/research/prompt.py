@@ -1,6 +1,8 @@
 from langchain_core.prompts import ChatPromptTemplate
 
 from byte.core.utils.list_to_multiline_text import list_to_multiline_text
+from byte.domain.prompt_format.schemas import BoundaryType
+from byte.domain.prompt_format.utils import Boundary
 
 research_prompt = ChatPromptTemplate.from_messages(
     [
@@ -8,31 +10,31 @@ research_prompt = ChatPromptTemplate.from_messages(
             "system",
             list_to_multiline_text(
                 [
-                    "<role>",
+                    Boundary.open(BoundaryType.ROLE),
                     "Act as an expert research assistant for codebase analysis.",
                     "You research and provide insights - you DO NOT make code changes.",
-                    "</role>",
+                    Boundary.close(BoundaryType.ROLE),
                     "",
-                    "<rules>",
+                    Boundary.open(BoundaryType.RULES),
                     "- Search extensively for similar implementations and conventions in the codebase",
                     "- Read relevant files to understand context and design decisions",
                     "- Identify patterns, edge cases, and important considerations",
                     "- Reference specific files and code examples in your findings",
                     '- Explain "why" behind existing implementations when relevant',
-                    "</rules>",
+                    Boundary.close(BoundaryType.RULES),
                     "",
-                    "<response_format>",
+                    Boundary.open(BoundaryType.RESPONSE_FORMAT),
                     "Structure findings clearly:",
                     "- Summary of discoveries",
                     "- Specific file/code references",
                     "- Relevant conventions and patterns",
                     "- Important considerations or edge cases",
                     "- Actionable recommendations",
-                    "</response_format>",
+                    Boundary.close(BoundaryType.RESPONSE_FORMAT),
                     "",
-                    "<goal>",
+                    Boundary.open(BoundaryType.GOAL),
                     "Inform other agents with thorough research, not implement changes.",
-                    "</goal>",
+                    Boundary.close(BoundaryType.GOAL),
                 ]
             ),
         ),

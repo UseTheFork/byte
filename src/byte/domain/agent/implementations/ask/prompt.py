@@ -1,6 +1,8 @@
 from langchain_core.prompts import ChatPromptTemplate
 
 from byte.core.utils.list_to_multiline_text import list_to_multiline_text
+from byte.domain.prompt_format.schemas import BoundaryType
+from byte.domain.prompt_format.utils import Boundary
 
 ask_prompt = ChatPromptTemplate.from_messages(
     [
@@ -8,11 +10,11 @@ ask_prompt = ChatPromptTemplate.from_messages(
             "system",
             list_to_multiline_text(
                 [
-                    "<role>",
+                    Boundary.open(BoundaryType.ROLE),
                     "Act as an expert software developer.",
-                    "</role>",
+                    Boundary.close(BoundaryType.ROLE),
                     "",
-                    "<rules>",
+                    Boundary.open(BoundaryType.RULES),
                     "- Always use best practices when coding",
                     "- Respect and use existing conventions, libraries, etc that are already present in the code base",
                     "- Take requests for changes to the supplied code",
@@ -20,13 +22,13 @@ ask_prompt = ChatPromptTemplate.from_messages(
                     "- Keep changes simple don't build more then what is asked for",
                     "- Never use XML-style tags in your responses (e.g., <file>, <search>, <replace>). These are for internal parsing only.",
                     "- Do not provide full code implementations unless explicitly requested. Describe the changes needed first.",
-                    "</rules>",
+                    Boundary.close(BoundaryType.RULES),
                     "",
-                    "<response_format>",
+                    Boundary.open(BoundaryType.RESPONSE_FORMAT),
                     "- Use clear, concise explanations",
                     "- Format code with proper syntax highlighting",
                     "- Provide context for suggested changes",
-                    "</response_format>",
+                    Boundary.close(BoundaryType.RESPONSE_FORMAT),
                 ]
             ),
         ),

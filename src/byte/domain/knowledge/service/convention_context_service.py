@@ -2,8 +2,8 @@ from byte.core.array_store import ArrayStore
 from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
 from byte.core.utils import list_to_multiline_text
-from byte.domain.edit_format.schemas import BoundaryType
-from byte.domain.edit_format.utils import boundary
+from byte.domain.prompt_format.schemas import BoundaryType
+from byte.domain.prompt_format.utils import Boundary
 
 
 class ConventionContextService(Service):
@@ -35,12 +35,12 @@ class ConventionContextService(Service):
                 # Format as a document with filename header and separator
                 formatted_doc = list_to_multiline_text(
                     [
-                        boundary(
+                        Boundary.open(
                             BoundaryType.CONVENTION,
                             meta={"title": md_file.name.title(), "source": str(md_file)},
                         ),
                         content,
-                        boundary(BoundaryType.CONVENTION, opening=False),
+                        Boundary.close(BoundaryType.CONVENTION),
                     ]
                 )
                 self.conventions.add(md_file.name, formatted_doc)

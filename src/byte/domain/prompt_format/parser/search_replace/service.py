@@ -2,10 +2,10 @@ import re
 from pathlib import Path
 from typing import List
 
-from byte.domain.edit_format.exceptions import NoBlocksFoundError, PreFlightCheckError
-from byte.domain.edit_format.parser.base import BaseParserService
-from byte.domain.edit_format.parser.search_replace.prompt import edit_format_system, practice_messages
-from byte.domain.edit_format.schemas import (
+from byte.domain.prompt_format.exceptions import NoBlocksFoundError, PreFlightCheckError
+from byte.domain.prompt_format.parser.base import BaseParserService
+from byte.domain.prompt_format.parser.search_replace.prompt import edit_format_system, practice_messages
+from byte.domain.prompt_format.schemas import (
     BlockType,
     EditFormatPrompts,
     SearchReplaceBlock,
