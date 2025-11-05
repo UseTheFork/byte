@@ -59,7 +59,7 @@ class SearchReplaceBlockParserService(BaseParserService):
 
         # Pattern to match the entire SEARCH/REPLACE block structure
         # The (.*?) captures allow for empty content between markers
-        pattern = r"```\w*\n(\+\+\+\+\+\+\+|-------) (.+?)\n<<<<<<<SEARCH\n(.*?)=======\n(.*?)>>>>>>> REPLACE\n```"
+        pattern = r"```\w*\n(\+\+\+\+\+\+\+|-------) (.+?)\n<<<<<<< SEARCH\n(.*?)=======\n(.*?)>>>>>>> REPLACE\n```"
 
         matches = re.findall(pattern, content, re.DOTALL)
 
@@ -106,7 +106,7 @@ class SearchReplaceBlockParserService(BaseParserService):
             )
         return blocks
 
-    def remove_blocks_from_content(self, content: str) -> str:
+    async def remove_blocks_from_content(self, content: str) -> str:
         """Remove SEARCH/REPLACE blocks from content and replace with summary message.
 
         Identifies all search/replace blocks in the content and replaces them with

@@ -3,6 +3,16 @@ from enum import Enum
 from pydantic.dataclasses import dataclass
 
 
+class BoundaryType(str, Enum):
+	"""Type of boundary marker for content sections."""
+
+	CONVENTION = "convention"
+	FILE = "file"
+	SEARCH = "search"
+	REPLACE = "replace"
+	EXAMPLE = "example"
+
+
 class BlockType(Enum):
     """Type of edit block operation."""
 

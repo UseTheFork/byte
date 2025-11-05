@@ -1,8 +1,15 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
 class EditFormatConfig(BaseModel):
     """Configuration for edit format operations and shell command execution."""
+
+    edit_format_type: Literal["search_replace", "diff"] = Field(
+        default="search_replace",
+        description="Type of edit format to use for code modifications. Options: 'search_replace' for SEARCH/REPLACE blocks, 'diff' for unified diff format, for complete file replacement.",
+    )
 
     enable_shell_commands: bool = Field(
         default=False,
