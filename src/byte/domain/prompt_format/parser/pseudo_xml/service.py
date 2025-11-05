@@ -1,10 +1,12 @@
 import re
+from pathlib import Path
 from typing import List
 
 from byte.domain.prompt_format.exceptions import NoBlocksFoundError, PreFlightCheckError
 from byte.domain.prompt_format.parser.base import BaseParserService
 from byte.domain.prompt_format.parser.pseudo_xml.prompt import edit_format_system, practice_messages
 from byte.domain.prompt_format.schemas import (
+    BlockType,
     EditFormatPrompts,
     SearchReplaceBlock,
 )
@@ -58,18 +60,39 @@ class PseudoXmlParserService(BaseParserService):
         matches = re.findall(pattern, content, re.DOTALL)
 
         for match in matches:
-            file_path, _, search_content, replace_content = match
+            file_path, operation, search_content, replace_content = match
 
             # Strip leading/trailing whitespace from search and replace content
             # This handles cases where empty sections have extra whitespace
             search_content = search_content.strip()
             replace_content = replace_content.strip()
 
+            # Determine block type based on operation and file existence
+            file_path_obj = Path(file_path.strip())
+            if not file_path_obj.is_absolute() and self._config and self._config.project_root:
+                file_path_obj = (self._config.project_root / file_path_obj).resolve()
+            else:
+                file_path_obj = file_path_obj.resolve()
+
+            # Map operation string to BlockType
+            if operation == "delete":
+                block_type = BlockType.REMOVE
+            elif operation == "replace":
+                block_type = BlockType.REPLACE
+            elif operation == "create":
+                block_type = BlockType.ADD
+            elif operation == "edit":
+                block_type = BlockType.EDIT
+            else:
+                # Default to EDIT for unknown operations
+                block_type = BlockType.EDIT
+
             blocks.append(
                 SearchReplaceBlock(
                     file_path=file_path.strip(),
                     search_content=search_content,
                     replace_content=replace_content,
+                    block_type=block_type,
                 )
             )
         return blocks

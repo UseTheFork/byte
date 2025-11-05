@@ -4,7 +4,7 @@ from byte.core.config.config import ByteConfg
 from byte.core.logging import log
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
-from byte.domain.prompt_format.parser.search_replace.service import SearchReplaceBlockParserService
+from byte.domain.prompt_format.parser.pseudo_xml.service import PseudoXmlParserService
 from byte.domain.prompt_format.schemas import (
     BlockStatus,
     EditFormatPrompts,
@@ -30,7 +30,7 @@ class EditFormatService(Service, UserInteractive):
     async def boot(self):
         """Initialize service with appropriate prompts based on configuration."""
         config = await self.make(ByteConfg)
-        self.edit_block_service = await self.make(SearchReplaceBlockParserService)
+        self.edit_block_service = await self.make(PseudoXmlParserService)
 
         if config.edit_format.enable_shell_commands:
             # Combine system prompts to provide AI with both edit and shell capabilities
