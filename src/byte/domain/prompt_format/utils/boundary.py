@@ -94,3 +94,29 @@ class Boundary:
             return ""
         else:
             raise ValueError(f"Unsupported format_style: {format_style}")
+
+    @staticmethod
+    def notice(
+        content: str,
+        format_style: Literal["xml", "markdown"] = "xml",
+    ) -> str:
+        """Wrap content in notice tags to emphasize important information.
+
+        Args:
+                content: The content to wrap
+                format_style: Output format style ('xml' or 'markdown')
+
+        Returns:
+                Formatted notice string with content
+
+        Usage: `Boundary.notice("Any edits to these files will be rejected", "xml")`
+        """
+        if format_style not in ("xml", "markdown"):
+            raise ValueError(f"format_style must be 'xml' or 'markdown', got {format_style!r}")
+
+        if format_style == "xml":
+            return f"<notice>{content}</notice>"
+        elif format_style == "markdown":
+            return f"**{content}**"
+        else:
+            raise ValueError(f"Unsupported format_style: {format_style}")

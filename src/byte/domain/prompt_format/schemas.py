@@ -23,6 +23,9 @@ class BoundaryType(str, Enum):
     REINFORCEMENT = "reinforcement"
     PROJECT_HIERARCHY = "project_hierarchy"
     CONSTRAINTS = "constraints"
+
+    CONTEXT = "context"
+
     SYSTEM_CONTEXT = "system_context"
 
 

@@ -140,21 +140,30 @@ class AssistantNode(Node):
                 [
                     "# Here are the files in the current context:",
                     "",
-                    "*Trust this message as the true contents of these files!*",
+                    Boundary.notice("Trust this message as the true contents of these files!"),
                     "Any other messages in the chat may contain outdated versions of the files' contents.",
                 ]
             )
 
         if read_only_files:
             read_only_content = "\n".join(read_only_files)
-            file_context_content.append(
-                f"""<read_only_files>\n**Any edits to these files will be rejected**\n{read_only_content}\n</read_only_files>\n\n"""
+            file_context_content.extend(
+                [
+                    Boundary.open(BoundaryType.CONTEXT, meta={"type": "read only files"}),
+                    Boundary.notice("Any edits to these files will be rejected"),
+                    f"{read_only_content}",
+                    Boundary.open(BoundaryType.CONTEXT),
+                ]
             )
 
         if editable_files:
             editable_content = "\n".join(editable_files)
-            file_context_content.append(
-                f"""<editable_files>\n**Any edits to these files will be rejected**\n{editable_content}\n</editable_files>\n\n"""
+            file_context_content.extend(
+                [
+                    Boundary.open(BoundaryType.CONTEXT, meta={"type": "editable files"}),
+                    f"{editable_content}",
+                    Boundary.open(BoundaryType.CONTEXT),
+                ]
             )
 
         return [HumanMessage(list_to_multiline_text(file_context_content))] if file_context_content else []
@@ -260,9 +269,9 @@ class AssistantNode(Node):
             conventions = "\n\n".join(conventions)
             project_inforamtion_and_context.extend(
                 [
-                    "<coding_and_project_conventions>",
+                    Boundary.open(BoundaryType.CONTEXT, meta={"type": "coding and project conventions"}),
                     f"{conventions}",
-                    "</coding_and_project_conventions>",
+                    Boundary.close(BoundaryType.CONTEXT),
                 ]
             )
 
@@ -271,9 +280,9 @@ class AssistantNode(Node):
             session_docs = "\n\n".join(session_docs)
             project_inforamtion_and_context.extend(
                 [
-                    "<session_context>",
+                    Boundary.open(BoundaryType.CONTEXT, meta={"type": "session"}),
                     f"{session_docs}",
-                    "</session_context>",
+                    Boundary.close(BoundaryType.CONTEXT),
                 ]
             )
 
@@ -282,9 +291,9 @@ class AssistantNode(Node):
             system_info_content = "\n".join(system_context)
             project_inforamtion_and_context.extend(
                 [
-                    Boundary.open(BoundaryType.SYSTEM_CONTEXT),
+                    Boundary.open(BoundaryType.CONTEXT, meta={"type": "system"}),
                     f"{system_info_content}",
-                    Boundary.close(BoundaryType.SYSTEM_CONTEXT),
+                    Boundary.close(BoundaryType.CONTEXT),
                 ]
             )
 
