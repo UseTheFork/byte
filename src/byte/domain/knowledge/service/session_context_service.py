@@ -5,6 +5,8 @@ from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
 from byte.core.utils.list_to_multiline_text import list_to_multiline_text
 from byte.domain.knowledge.models import SessionContextModel
+from byte.domain.prompt_format.schemas import BoundaryType
+from byte.domain.prompt_format.utils import Boundary
 
 
 class SessionContextService(Service):
@@ -80,9 +82,12 @@ class SessionContextService(Service):
                 formatted_contexts.append(
                     list_to_multiline_text(
                         [
-                            f"<session_context: type={model.type}, key={key} >",
-                            f"{model.content}",
-                            "</session_context>",
+                            Boundary.open(
+                                BoundaryType.SESSION_CONTEXT,
+                                meta={"type": model.type, "key": key},
+                            ),
+                            model.content,
+                            Boundary.close(BoundaryType.SESSION_CONTEXT),
                         ]
                     )
                 )

@@ -17,6 +17,8 @@ from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.git.service.git_service import GitService
 from byte.domain.lint.exceptions import LintConfigException
 from byte.domain.lint.types import LintCommand, LintFile
+from byte.domain.prompt_format.schemas import BoundaryType
+from byte.domain.prompt_format.utils.boundary import Boundary
 
 
 class LintService(Service, UserInteractive):
@@ -290,18 +292,19 @@ class LintService(Service, UserInteractive):
                 failed_commands: List of LintFile objects that failed linting
 
         Returns:
-                Formatted string with lint errors wrapped in XML-style tags
+                Formatted string with lint errors wrapped in boundary tags
 
         Usage: `error_msg = service.format_lint_errors(failed_files)` -> format for AI
         """
         lint_errors = []
         for lint_file in failed_commands:
             error_msg = lint_file.stderr.strip() or lint_file.stdout.strip()
+
             lint_error_message = list_to_multiline_text(
                 [
-                    f"<lint_error: source={lint_file.file}>",
+                    Boundary.open(BoundaryType.ERROR, meta={"type": "lint", "source": str(lint_file.file)}),
                     f"{error_msg}",
-                    "</lint_error>",
+                    Boundary.close(BoundaryType.ERROR),
                 ]
             )
             lint_errors.append(lint_error_message)

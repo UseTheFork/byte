@@ -12,11 +12,18 @@ class BoundaryType(str, Enum):
     GOAL = "goal"
     RESPONSE_FORMAT = "response_format"
 
+    ERROR = "error"
+
     CONVENTION = "convention"
+    SESSION_CONTEXT = "session_context"
     FILE = "file"
     SEARCH = "search"
     REPLACE = "replace"
     EXAMPLE = "example"
+    REINFORCEMENT = "reinforcement"
+    PROJECT_HIERARCHY = "project_hierarchy"
+    CONSTRAINTS = "constraints"
+    SYSTEM_CONTEXT = "system_context"
 
 
 class BlockType(Enum):

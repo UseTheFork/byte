@@ -13,6 +13,8 @@ from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.agent.state import BaseState
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.files.service.file_service import FileService
+from byte.domain.prompt_format.schemas import BoundaryType
+from byte.domain.prompt_format.utils import Boundary
 
 
 class AssistantNode(Node):
@@ -78,9 +80,9 @@ class AssistantNode(Node):
             combined_content = "\n".join(f"- {msg}" for msg in reinforcement_messages)
             final_message = list_to_multiline_text(
                 [
-                    "<reminders>",
+                    Boundary.open(BoundaryType.REINFORCEMENT),
                     f"{combined_content}",
-                    "</reminders>",
+                    Boundary.close(BoundaryType.REINFORCEMENT),
                 ]
             )
             return [HumanMessage(final_message)]
@@ -104,9 +106,9 @@ class AssistantNode(Node):
         if hierarchy:
             hierarchy_content = list_to_multiline_text(
                 [
-                    "<project_hierarchy>",
+                    Boundary.open(BoundaryType.PROJECT_HIERARCHY),
                     f"{hierarchy}",
-                    "</project_hierarchy>",
+                    Boundary.close(BoundaryType.PROJECT_HIERARCHY),
                 ]
             )
             return [HumanMessage(hierarchy_content)]
@@ -208,9 +210,9 @@ class AssistantNode(Node):
             constraints_content += list_to_multiline_text(
                 [
                     "**Things to Avoid:**",
-                    "<avoid>",
+                    Boundary.open(BoundaryType.CONSTRAINTS, meta={"type": "avoid"}),
                     f"{avoid_items}",
-                    "</avoid>",
+                    Boundary.close(BoundaryType.CONSTRAINTS),
                 ]
             )
 
@@ -219,20 +221,14 @@ class AssistantNode(Node):
             constraints_content += list_to_multiline_text(
                 [
                     "**Requirements:**",
-                    "<require>",
+                    Boundary.open(BoundaryType.CONSTRAINTS, meta={"type": "require"}),
                     f"{require_items}",
-                    "</require>",
+                    Boundary.close(BoundaryType.CONSTRAINTS),
                 ]
             )
 
         if constraints_content:
-            final_message = list_to_multiline_text(
-                [
-                    "<constraints>",
-                    f"{constraints_content.strip()}",
-                    "</constraints>",
-                ]
-            )
+            final_message = constraints_content.strip()
             return [HumanMessage(final_message)]
 
         return []
@@ -286,9 +282,9 @@ class AssistantNode(Node):
             system_info_content = "\n".join(system_context)
             project_inforamtion_and_context.extend(
                 [
-                    "<system_context>",
+                    Boundary.open(BoundaryType.SYSTEM_CONTEXT),
                     f"{system_info_content}",
-                    "</system_context>",
+                    Boundary.close(BoundaryType.SYSTEM_CONTEXT),
                 ]
             )
 

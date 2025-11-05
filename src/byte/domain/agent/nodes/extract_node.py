@@ -13,30 +13,33 @@ from byte.core.utils.list_to_multiline_text import list_to_multiline_text
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.agent.state import BaseState
+from byte.domain.prompt_format.schemas import BoundaryType
+from byte.domain.prompt_format.utils import Boundary
 
 # TODO: This dosent feel like the right place for this.
+
 extract_prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
             list_to_multiline_text(
                 [
-                    "<role>",
+                    Boundary.open(BoundaryType.ROLE),
                     "Act as a content formatter that structures research findings into a standardized format.",
-                    "</role>",
+                    Boundary.close(BoundaryType.ROLE),
                     "",
-                    "<rules>",
+                    Boundary.open(BoundaryType.RULES),
                     "- Extract the research findings from the assistant's response",
                     "- Format the content according to the provided schema",
                     "- Preserve all important details, file references, and code examples",
                     "- Ensure the name is descriptive and follows snake_case convention",
                     "- Keep the content well-structured and readable",
-                    "</rules>",
+                    Boundary.close(BoundaryType.RULES),
                     "",
-                    "<goal>",
+                    Boundary.open(BoundaryType.GOAL),
                     "Transform the research agent's response into a structured document that can be",
                     "saved to the session context with a clear name and organized content.",
-                    "</goal>",
+                    Boundary.close(BoundaryType.GOAL),
                 ]
             ),
         ),
