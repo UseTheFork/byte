@@ -4,13 +4,13 @@ from pydantic.dataclasses import dataclass
 
 
 class BoundaryType(str, Enum):
-	"""Type of boundary marker for content sections."""
+    """Type of boundary marker for content sections."""
 
-	CONVENTION = "convention"
-	FILE = "file"
-	SEARCH = "search"
-	REPLACE = "replace"
-	EXAMPLE = "example"
+    CONVENTION = "convention"
+    FILE = "file"
+    SEARCH = "search"
+    REPLACE = "replace"
+    EXAMPLE = "example"
 
 
 class BlockType(Enum):
