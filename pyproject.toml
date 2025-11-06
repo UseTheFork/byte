@@ -40,6 +40,7 @@ dependencies = [
     "langchain-google-genai>=3.0.0",
     "langgraph>=1.0.2",
     "langchain-core>=1.0.2",
+    "dill>=0.4.0",
 ]
 
 [project.urls]
@@ -54,7 +55,6 @@ module-name = "byte"
 [dependency-groups]
 dev = [
     "basedpyright>=1.32.1",
-    "dill>=0.4.0",
     "grandalf>=0.8",
     "jedi-language-server>=0.46.0",
     "pytest>=8.4.2",
