@@ -16,6 +16,7 @@ class BoundaryType(str, Enum):
 
     CONVENTION = "convention"
     SESSION_CONTEXT = "session_context"
+    SHELL_COMMAND = "shell_command"
     FILE = "file"
     SEARCH = "search"
     REPLACE = "replace"
@@ -53,6 +54,9 @@ class EditFormatPrompts:
 
     system: str
     examples: list[tuple[str, str]]
+
+    # shell_system: str
+    # shell_examples: list[tuple[str, str]]
 
 
 @dataclass

@@ -116,6 +116,51 @@ edit_format_system = list_to_multiline_text(
     ]
 )
 
+shell_command_system = list_to_multiline_text(
+    [
+        "# *Shell Command Block* Rules:",
+        "Use *Shell Command blocks* to execute shell commands AFTER file edits are applied.",
+        "",
+        "Just suggest shell commands this way, not example code.",
+        "Only suggest complete shell commands that are ready to execute, without placeholders.",
+        "Only suggest at most a few shell commands at a time, not more than 1-3, one per line.",
+        "Do not suggest multi-line shell commands.",
+        "All shell commands will run from the root directory of the user's project.",
+        "",
+        "## Block Format:",
+        "",
+        "```sh",
+        Boundary.open(BoundaryType.SHELL_COMMAND),
+        "command to execute",
+        Boundary.close(BoundaryType.SHELL_COMMAND),
+        "```",
+        "Or:",
+        "```bash",
+        Boundary.open(BoundaryType.SHELL_COMMAND),
+        "command to execute",
+        "second command to execute",
+        Boundary.close(BoundaryType.SHELL_COMMAND),
+        "```",
+        "",
+        "## **CRITICAL RULES:**",
+        "",
+        "When to Use:",
+        "- If you changed a CLI program, suggest the command to run it to see the new behavior.",
+        "- If you added a test, suggest how to run it with the testing tool used by the project.",
+        "- If your code changes add new dependencies, suggest the command to install them.",
+        "- Never edit files with shell commands (echo, sed, >>) - use SEARCH/REPLACE instead",
+        "",
+        "Safety:",
+        "- Commands require user confirmation before execution",
+        "- Dangerous operations prompt for explicit approval",
+        "",
+        "Execution:",
+        "- Execute AFTER all SEARCH/REPLACE blocks succeed",
+        "- Execute sequentially in order they appear",
+        "- If file edits fail, shell commands are skipped",
+    ]
+)
+
 practice_messages = [
     (
         "user",
@@ -325,3 +370,11 @@ practice_messages = [
         ),
     ),
 ]
+
+
+# pseudo_xml_prompts = EditFormatPrompts(
+#     system=edit_format_system,
+#     examples=practice_messages,
+#     shell_system=shell_command_system,
+#     shell_examples=[],
+# )

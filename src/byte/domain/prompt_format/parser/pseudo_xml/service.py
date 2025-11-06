@@ -33,6 +33,35 @@ class PseudoXmlParserService(BaseParserService):
         self.edit_blocks = []
         self.prompts = EditFormatPrompts(system=edit_format_system, examples=practice_messages)
 
+    async def remove_blocks_from_content(self, content: str) -> str:
+        """Remove pseudo-XML blocks from content and replace with summary message.
+
+        Identifies all pseudo-XML file blocks in the content and replaces them with
+        a concise message indicating changes were applied. Preserves any text
+        outside of the blocks.
+
+        Args:
+                content: Content string containing pseudo-XML blocks
+
+        Returns:
+                str: Content with blocks replaced by summary messages
+
+        Usage: `cleaned = service.remove_blocks_from_content(ai_response)`
+        """
+        # Pattern to match pseudo-XML file blocks
+        pattern = (
+            r'<file\s+path="([^"]+)"\s+operation="[^"]+"\s*>\s*<search>.*?</search>\s*<replace>.*?</replace>\s*</file>'
+        )
+
+        def replacement(match):
+            file_path = match.group(1)
+            return f"*[Changes applied to `{file_path.strip()}` - block removed]*"
+
+        # Replace all blocks with summary messages
+        cleaned_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
+
+        return cleaned_content
+
     async def parse_content_to_blocks(self, content: str) -> List[SearchReplaceBlock]:
         """Extract SEARCH/REPLACE blocks from AI response content.
 

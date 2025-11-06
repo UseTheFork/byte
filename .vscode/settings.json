@@ -1,10 +1,5 @@
 {
-	"basedpyright.analysis.autoImportCompletions": true,
-	"basedpyright.importStrategy": "useBundled",
-	"basedpyright.analysis.diagnosticMode": "workspace",
-	"[python]": {
-		"editor.insertSpaces": false,
-		"editor.detectIndentation": false,
-		"editor.tabSize": 4
-	}
+  "basedpyright.analysis.autoImportCompletions": true,
+  "basedpyright.importStrategy": "useBundled",
+  "basedpyright.analysis.diagnosticMode": "workspace"
 }

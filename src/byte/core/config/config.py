@@ -64,12 +64,12 @@ class ByteConfg(BaseModel):
     # keep-sorted start
     boot: BootConfg = Field(default_factory=BootConfg)
     cli: CLIConfig = Field(default_factory=CLIConfig)
-    development: DevelopmentConfig = Field(default_factory=DevelopmentConfig, exclude=True)
+    development: DevelopmentConfig = Field(default_factory=DevelopmentConfig)
     edit_format: EditFormatConfig = Field(default_factory=EditFormatConfig)
     files: FilesConfig = Field(default_factory=FilesConfig)
-    lint: LintConfig = Field(default_factory=LintConfig)
+    lint: LintConfig = Field(default_factory=LintConfig, description="Code linting and formatting configuration")
     llm: LLMConfig = Field(default_factory=LLMConfig)
     lsp: LSPConfig = Field(default_factory=LSPConfig)
-    system: SystemConfig = Field(default_factory=SystemConfig, exclude=True)
+    system: SystemConfig = Field(default_factory=SystemConfig)
     web: WebConfig = Field(default_factory=WebConfig)
     # keep-sorted end
