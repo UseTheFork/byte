@@ -3,12 +3,10 @@ from byte.core.utils.extract_content_from_message import extract_content_from_me
 from byte.core.utils.get_language_from_filename import get_language_from_filename
 from byte.core.utils.get_last_message import get_last_message
 from byte.core.utils.list_to_multiline_text import list_to_multiline_text
-from byte.core.utils.save_fixture import FixtureRecorder
 from byte.core.utils.slugify import slugify
 from byte.core.utils.value import value
 
 __all__ = [
-    "FixtureRecorder",
     "dd",
     "dump",
     "extract_content_from_message",
