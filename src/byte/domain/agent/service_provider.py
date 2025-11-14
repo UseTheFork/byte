@@ -55,8 +55,8 @@ class AgentServiceProvider(ServiceProvider):
             ConventionAgent,
             CopyAgent,
             ResearchAgent,
-            SubprocessAgent,
             ShowAgent,
+            SubprocessAgent,
             # keep-sorted end
         ]
 
@@ -79,11 +79,11 @@ class AgentServiceProvider(ServiceProvider):
             ExtractNode,
             LintNode,
             ParseBlocksNode,
+            ShowNode,
             StartNode,
             SubprocessNode,
             ToolNode,
             ValidationNode,
-            ShowNode,
             # keep-sorted end
         ]
 
