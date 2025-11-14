@@ -33,7 +33,7 @@ ask_prompt = ChatPromptTemplate.from_messages(
             ),
         ),
         ("placeholder", "{project_inforamtion_and_context}"),
-        ("user", "{file_context}"),
+        ("placeholder", "{file_context}"),
         ("placeholder", "{masked_messages}"),
     ]
 )

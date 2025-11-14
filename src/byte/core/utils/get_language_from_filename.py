@@ -16,6 +16,6 @@ def get_language_from_filename(filename: str) -> str | None:
 
     try:
         lexer = get_lexer_for_filename(filename)
-        return lexer.name
+        return lexer.name.lower()
     except ClassNotFound:
         return None

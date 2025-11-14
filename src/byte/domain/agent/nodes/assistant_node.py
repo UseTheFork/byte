@@ -6,7 +6,6 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.core.event_bus import EventType, Payload
-from byte.core.logging import log
 from byte.core.utils.list_to_multiline_text import list_to_multiline_text
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.schemas import AssistantContextSchema
@@ -14,6 +13,7 @@ from byte.domain.agent.state import BaseState
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.files.service.file_service import FileService
 from byte.domain.prompt_format.schemas import BoundaryType
+from byte.domain.prompt_format.service.edit_format_service import EditFormatService
 from byte.domain.prompt_format.utils import Boundary
 
 
@@ -299,41 +299,64 @@ class AssistantNode(Node):
 
         return [HumanMessage(list_to_multiline_text(project_inforamtion_and_context))]
 
+    async def _gather_edit_format(self) -> tuple[str, list[tuple[str, str]]]:
+        """Gather edit format system prompt and examples for the assistant.
+
+        Retrieves the configured edit format prompts from EditFormatService,
+        which may include both file edit blocks and shell command capabilities
+        depending on configuration.
+
+        Returns:
+                Tuple containing (system_prompt, examples) where system_prompt is the
+                instruction text and examples is a list of (user, assistant) message pairs
+
+        Usage: `system_prompt, examples = await self._gather_edit_format()`
+        """
+        edit_format_service = await self.make(EditFormatService)
+
+        return (edit_format_service.prompts.system, edit_format_service.prompts.examples)
+
+    async def _generate_agent_state(self, state: BaseState, config, runtime: Runtime[AssistantContextSchema]) -> tuple:
+        agent_state = {**state}
+
+        edit_format_system, edit_format_examples = await self._gather_edit_format()
+        agent_state["edit_format_system"] = edit_format_system
+        agent_state["examples"] = edit_format_examples
+
+        agent_state["project_inforamtion_and_context"] = await self._gather_project_context()
+        agent_state["project_hierarchy"] = await self._gather_project_hierarchy()
+        agent_state["file_context"] = await self._gather_file_context()
+        agent_state["file_context_with_line_numbers"] = await self._gather_file_context(True)
+        agent_state["reinforcement"] = await self._gather_reinforcement(runtime.context.mode)
+        agent_state["constraints_context"] = await self._gather_constraints(state)
+
+        if state.get("errors", None) is not None:
+            agent_state["errors"] = await self._gather_errors(agent_state)
+        else:
+            agent_state["errors"] = []
+
+        payload = Payload(
+            event_type=EventType.PRE_ASSISTANT_NODE,
+            data={
+                "state": agent_state,
+                "config": config,
+            },
+        )
+
+        # FixtureRecorder.pickle_fixture(payload)
+
+        payload = await self.emit(payload)
+        agent_state = payload.get("state", agent_state)
+
+        config = payload.get("config", config)
+
+        return (agent_state, config)
+
     async def __call__(self, state: BaseState, config, runtime: Runtime[AssistantContextSchema]):
         while True:
-            agent_state = {**state}
-            agent_state["project_inforamtion_and_context"] = await self._gather_project_context()
-            agent_state["project_hierarchy"] = await self._gather_project_hierarchy()
-            agent_state["file_context"] = await self._gather_file_context()
-            agent_state["file_context_with_line_numbers"] = await self._gather_file_context(True)
-            agent_state["reinforcement"] = await self._gather_reinforcement(runtime.context.mode)
-            agent_state["constraints_context"] = await self._gather_constraints(state)
-
-            if state.get("errors", None) is not None:
-                agent_state["errors"] = await self._gather_errors(agent_state)
-            else:
-                agent_state["errors"] = []
-
-            payload = Payload(
-                event_type=EventType.PRE_ASSISTANT_NODE,
-                data={
-                    "state": agent_state,
-                    "config": config,
-                },
-            )
-
-            # FixtureRecorder.pickle_fixture(payload)
-
-            payload = await self.emit(payload)
-            agent_state = payload.get("state", agent_state)
-            config = payload.get("config", config)
+            agent_state, config = await self._generate_agent_state(state, config, runtime)
 
             runnable = self._create_runnable(runtime.context)
-
-            if self._config.development.enable:
-                template = runnable.get_prompts(config)
-                prompt_value = await template[0].ainvoke(agent_state)
-                log.info(prompt_value)
 
             result = await runnable.ainvoke(agent_state, config=config)
 
@@ -368,8 +391,6 @@ class AssistantNode(Node):
                 )
             else:
                 break
-
-            await self.emit(payload)
 
         return Command(
             goto=self.goto,

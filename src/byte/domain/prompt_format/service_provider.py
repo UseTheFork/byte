@@ -30,7 +30,9 @@ class PromptFormatProvider(ServiceProvider):
         ]
 
     def commands(self) -> List[Type[Command]]:
-        return [CopyCommand]
+        return [
+            CopyCommand,
+        ]
 
     async def boot(self, container: Container):
         """Boot edit services and register event listeners for message preprocessing.

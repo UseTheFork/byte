@@ -39,7 +39,9 @@ class ConventionContextService(Service):
                             BoundaryType.CONVENTION,
                             meta={"title": md_file.name.title(), "source": str(md_file)},
                         ),
+                        "```markdown",
                         content,
+                        "```",
                         Boundary.close(BoundaryType.CONVENTION),
                     ]
                 )
