@@ -2,6 +2,68 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1] - 2025-11-14
+
+### 🚀 Features
+
+- Add convention generation command and agent implementation
+- Add convention context refresh and improve commit command with token counting placeholder
+- Add project architecture documentation and file reading tool
+- Add convention generation command and update agent graph compilation
+- Add errors placeholder to research agent prompt template
+- Add CLI options for read-only and editable file contexts
+- Add comprehensive file context configuration tests for boot config
+- Add read-only files config, pytest config, and enhance file discovery and services
+- Add comprehensive file service and ignore service tests
+- Add switch mode command for toggling file modes
+- Add show command and agent for displaying conversation history
+
+### 🚜 Refactor
+
+- Improve error handling and add system paths configuration
+- Restructure session context model with file-based persistence
+- Reorder agents and commands alphabetically
+- Remove unused state classes and simplify agent state management
+- Rename prompts.py files to prompt.py for consistency
+- Simplify type imports and remove unused undo_last_step method
+- Extract constants and improve project hierarchy generation
+- Simplify container setup by using bootstrap method in tests
+- Change default linting configuration to disabled
+- Update copy agent graph with end node
+- Update config loading to support CLI file arguments
+- Improve message removal preview with detailed panel display
+- Modularize utils and improve edit format configuration
+- Rename EditFormatProvider to PromptFormatProvider
+- Update prompt formatting with boundary utility across multiple services
+- Update boundary and context handling in assistant node
+- Replace SearchReplaceBlockParserService with PseudoXmlParserService
+- Update boundary and file handling with improved formatting
+- Remove unused dill dependency and commented-out code
+
+### 📚 Documentation
+
+- Update first-run setup documentation with detailed service workflow
+- Update settings documentation generation script
+- Format markdown tables for improved readability
+- Update commands and settings documentation with new details
+- Clean up markdown formatting in commands and settings reference
+
+### 🎨 Styling
+
+- Convert indent style from tab to space in config files
+- Fix indentation in BoundaryType enum
+
+### 🧪 Testing
+
+- Add comprehensive tests for FirstBootService
+
+### ⚙️ Miscellaneous Tasks
+
+- Update project version to 0.3.0 and modify CHANGELOG.md
+- Update CHANGELOG.md with version and configuration changes
+- Upgrade langchain  / graph to v 1
+- Remove .coverage file from version control
+- Add .coverage to .gitignore
 ## [0.3.0] - 2025-10-31
 
 ### 🚀 Features
@@ -31,13 +93,11 @@ All notable changes to this project will be documented in this file.
 - Update project version to 0.2.3 and modify configuration
 - Update CHANGELOG.md with version and configuration changes
 - Reorganize logo and asset files, update references
-
 ## [0.2.3] - 2025-10-29
 
 ### ⚙️ Miscellaneous Tasks
 
 - Update project version to 0.2.2 and modify configuration
-
 ## [0.2.2] - 2025-10-29
 
 ### 🚀 Features
@@ -52,7 +112,6 @@ All notable changes to this project will be documented in this file.
 ### ⚙️ Miscellaneous Tasks
 
 - Update project version to 0.2.1 and modify configuration
-
 ## [0.2.1] - 2025-10-24
 
 ### 🚀 Features
@@ -66,7 +125,6 @@ All notable changes to this project will be documented in this file.
 ### ⚙️ Miscellaneous Tasks
 
 - Update project version to 0.2.0 and add git-cliff configuration
-
 ## [0.2.0] - 2025-10-24
 
 ### 🚀 Features
@@ -96,7 +154,6 @@ All notable changes to this project will be documented in this file.
 - Bump version to 0.1.11 and update CHANGELOG.md
 - Update release script comments with tag and push commands
 - Refactor configuration loading and first boot initialization
-
 ## [0.1.11] - 2025-10-22
 
 ### 🚀 Features
@@ -114,7 +171,6 @@ All notable changes to this project will be documented in this file.
 ### ⚙️ Miscellaneous Tasks
 
 - Add placeholder comment in release script
-
 ## [0.1.10] - 2025-10-21
 
 ### 🚀 Features
@@ -136,14 +192,12 @@ All notable changes to this project will be documented in this file.
 
 - Prepare release 0.1.9 with updated package version
 - Update CHANGELOG.md with recent release notes
-
 ## [0.1.9] - 2025-10-20
 
 ### ⚙️ Miscellaneous Tasks
 
 - Prepare release 0.1.8 with updated workflows and package configuration
 - Update PyPI release workflow configuration
-
 ## [0.1.8] - 2025-10-20
 
 ### ⚙️ Miscellaneous Tasks
@@ -152,14 +206,12 @@ All notable changes to this project will be documented in this file.
 - Consolidate workflows by removing duplicate publish-to-pypi.yml
 - Update package name to byte-ai-cli in project configuration
 - Update release workflow for PyPI publication
-
 ## [0.1.7] - 2025-10-20
 
 ### ⚙️ Miscellaneous Tasks
 
 - Update project development status classifier
 - Update project version to 0.1.7 and add changelog
-
 ## [0.1.6] - 2025-10-20
 
 ### 🚀 Features
