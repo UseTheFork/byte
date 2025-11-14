@@ -4,11 +4,9 @@ Byte provides a comprehensive set of commands for interacting with your codebase
 
 ---
 
-
 ## System
 
 `!<command>` - Execute a shell command and optionally add output to conversation context
-
 
 ## Agent
 
@@ -19,7 +17,6 @@ Byte provides a comprehensive set of commands for interacting with your codebase
 `/research` - Execute research agent to gather codebase insights, analyze patterns, and save detailed findings to session context for other agents
 
 `/show` - Display the current conversation history and context
-
 
 ## Files
 
@@ -33,7 +30,6 @@ Byte provides a comprehensive set of commands for interacting with your codebase
 
 `/switch` - Switch file mode between editable and read-only
 
-
 ## General
 
 `/commit` - Create an AI-powered git commit with automatic staging and linting
@@ -44,7 +40,6 @@ Byte provides a comprehensive set of commands for interacting with your codebase
 
 `/lint` - Run configured linters on changed files or current context
 
-
 ## Memory
 
 `/clear` - Clear conversation history and start a new thread
@@ -52,7 +47,6 @@ Byte provides a comprehensive set of commands for interacting with your codebase
 `/reset` - Reset conversation history and clear file context completely
 
 `/undo` - Undo the last conversation step by removing the most recent human message and all subsequent agent responses from the current thread
-
 
 ## Session Context
 
@@ -63,4 +57,3 @@ Byte provides a comprehensive set of commands for interacting with your codebase
 `/ctx:ls` - List all session context items
 
 `/web` - Fetch webpage using headless Chrome, convert HTML to markdown, display for review, and optionally add to LLM context
-
