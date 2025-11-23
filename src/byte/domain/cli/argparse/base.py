@@ -13,4 +13,5 @@ class ByteArgumentParser(ArgumentParser):
         """Initialize parser with exit_on_error=False and add_help=False by default."""
         kwargs.setdefault("exit_on_error", False)
         kwargs.setdefault("add_help", False)
+        # kwargs.setdefault("usage", "/%(prog)s [options]")
         super().__init__(*args, **kwargs)
