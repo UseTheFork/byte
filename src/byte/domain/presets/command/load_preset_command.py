@@ -48,7 +48,8 @@ class LoadPresetCommand(Command):
 
         # Validate preset ID and retrieve preset configuration
         config = await self.make(ByteConfg)
-        preset = next((p for p in config.presets if p.id == args), None)
+        if config.presets:
+            preset = next((p for p in config.presets if p.id == args), None)
 
         if preset is None:
             console.print_error(f"Preset '{args}' not found")
@@ -100,7 +101,8 @@ class LoadPresetCommand(Command):
         Usage: return ["foo", "bar"] for available preset IDs
         """
         config = await self.make(ByteConfg)
-        preset_ids = [preset.id for preset in config.presets]
+        if config.presets:
+            preset_ids = [preset.id for preset in config.presets]
 
         # Filter preset IDs that start with the input text
         return [preset_id for preset_id in preset_ids if preset_id.startswith(text)]

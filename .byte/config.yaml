@@ -45,6 +45,7 @@ lsp:
       
 presets:
   - id: command
+    load_on_boot: true
     conventions:
       - CODE_STYLEGUIDE.md
       - COMMENT_STYLEGUIDE.md

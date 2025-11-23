@@ -12,54 +12,54 @@ from byte.domain.system.service.system_context_service import SystemContextServi
 
 
 class SystemServiceProvider(ServiceProvider):
-	"""Service provider for system-level commands and functionality.
+    """Service provider for system-level commands and functionality.
 
-	Registers core system commands like exit and help, making them available
-	through the command registry for user interaction via slash commands.
-	Usage: Register with container to enable /exit and /help commands
-	"""
+    Registers core system commands like exit and help, making them available
+    through the command registry for user interaction via slash commands.
+    Usage: Register with container to enable /exit and /help commands
+    """
 
-	def commands(self) -> List[Type[Command]]:
-		return [
-			ExitCommand,
-			UndoCommand,
-		]
+    def commands(self) -> List[Type[Command]]:
+        return [
+            ExitCommand,
+            UndoCommand,
+        ]
 
-	def services(self) -> List[Type[Service]]:
-		return [
-			SystemContextService,
-		]
+    def services(self) -> List[Type[Service]]:
+        return [
+            SystemContextService,
+        ]
 
-	async def boot(self, container: Container) -> None:
-		"""Boot system services and register commands with registry.
+    async def boot(self, container: Container) -> None:
+        """Boot system services and register commands with registry.
 
-		Usage: `provider.boot(container)` -> commands become available as /exit, /help
-		"""
+        Usage: `provider.boot(container)` -> commands become available as /exit, /help
+        """
 
-		event_bus = await container.make(EventBus)
-		system_context_service = await container.make(SystemContextService)
+        event_bus = await container.make(EventBus)
+        system_context_service = await container.make(SystemContextService)
 
-		event_bus.on(
-			EventType.GATHER_PROJECT_CONTEXT.value,
-			system_context_service.add_system_context,
-		)
+        event_bus.on(
+            EventType.GATHER_PROJECT_CONTEXT.value,
+            system_context_service.add_system_context,
+        )
 
-		# Emit our post boot message to gather all needed info.
-		payload = await event_bus.emit(
-			payload=Payload(
-				event_type=EventType.POST_BOOT,
-				data={
-					"messages": [],
-					"container": container,
-				},
-			)
-		)
+        # Emit our post boot message to gather all needed info.
+        payload = await event_bus.emit(
+            payload=Payload(
+                event_type=EventType.POST_BOOT,
+                data={
+                    "messages": [],
+                    "container": container,
+                },
+            )
+        )
 
-		console = await container.make(ConsoleService)
-		messages = payload.get("messages", [])
+        console = await container.make(ConsoleService)
+        messages = payload.get("messages", [])
 
-		# Join all message strings into a single string with newlines
-		panel_content = "\n".join(messages)
+        # Join all message strings into a single string with newlines
+        panel_content = "\n".join(messages)
 
-		# Display the assembled messages inside a panel
-		console.print_panel(panel_content, border_style="primary")
+        # Display the assembled messages inside a panel
+        console.print_panel(panel_content, border_style="primary")
