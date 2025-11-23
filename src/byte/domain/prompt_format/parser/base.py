@@ -2,9 +2,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List
 
-from langchain_core.messages import AIMessage
+from langchain_core.messages import AIMessage, BaseMessage
 
-from byte.core.event_bus import Payload
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
 from byte.domain.files.models import FileMode
@@ -206,10 +205,7 @@ class BaseParserService(Service, UserInteractive, ABC):
 
         return blocks
 
-    async def replace_blocks_in_historic_messages_hook(self, payload: Payload) -> Payload:
-        state = payload.get("state", False)
-        messages = state["messages"]
-
+    async def replace_blocks_in_historic_messages_hook(self, messages: list[BaseMessage]) -> list[BaseMessage]:
         # Get mask_message_count from config
         mask_count = self._config.edit_format.mask_message_count if self._config else 1
 
@@ -228,8 +224,4 @@ class BaseParserService(Service, UserInteractive, ABC):
                 # Keep original message unchanged
                 masked_messages.append(message)
 
-        state["masked_messages"] = masked_messages
-
-        payload = payload.set("state", state)
-
-        return payload
+        return masked_messages

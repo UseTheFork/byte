@@ -1,7 +1,5 @@
 from typing import List, Type
 
-from byte.container import Container
-from byte.core.event_bus import EventBus, EventType
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli.service.command_registry import Command
@@ -33,19 +31,3 @@ class PromptFormatProvider(ServiceProvider):
         return [
             CopyCommand,
         ]
-
-    async def boot(self, container: Container):
-        """Boot edit services and register event listeners for message preprocessing.
-
-        Initializes the edit block service and registers an event listener that
-        replaces edit blocks in historic messages with their applied results
-        before passing context to the AI agent.
-        Usage: Called during provider boot phase
-        """
-        edit_format_service = await container.make(SearchReplaceBlockParserService)
-
-        event_bus = await container.make(EventBus)
-        event_bus.on(
-            EventType.PRE_ASSISTANT_NODE.value,
-            edit_format_service.replace_blocks_in_historic_messages_hook,
-        )

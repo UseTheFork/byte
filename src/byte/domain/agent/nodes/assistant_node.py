@@ -1,6 +1,6 @@
 from typing import cast
 
-from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_core.runnables import Runnable
 from langgraph.runtime import Runtime
 from langgraph.types import Command
@@ -316,6 +316,31 @@ class AssistantNode(Node):
 
         return (edit_format_service.prompts.system, edit_format_service.prompts.examples)
 
+    async def _gather_masked_messages(self, state) -> list[BaseMessage]:
+        """Gather masked messages with edit blocks removed from message history.
+
+        Processes historical messages to remove edit block content, keeping only
+        the most recent N messages (configured by mask_message_count) with their
+        original edit blocks intact. This prevents token bloat from repeated
+        edit instructions in conversation history.
+
+        Args:
+            state: The current state containing message history
+
+        Returns:
+            List of BaseMessage objects with edit blocks masked in older messages
+
+        Usage: `masked_messages = await self._gather_masked_messages(state)`
+        """
+        # Don't mask messages when we're in error recovery mode
+        if state.get("errors") is not None:
+            return state.get("messages", [])
+
+        edit_format_service = await self.make(EditFormatService)
+        messages = state.get("messages", [])
+
+        return await edit_format_service.edit_block_service.replace_blocks_in_historic_messages_hook(messages)
+
     async def _generate_agent_state(self, state: BaseState, config, runtime: Runtime[AssistantContextSchema]) -> tuple:
         agent_state = {**state}
 
@@ -329,6 +354,8 @@ class AssistantNode(Node):
         agent_state["file_context_with_line_numbers"] = await self._gather_file_context(True)
         agent_state["reinforcement"] = await self._gather_reinforcement(runtime.context.mode)
         agent_state["constraints_context"] = await self._gather_constraints(state)
+
+        agent_state["masked_messages"] = await self._gather_masked_messages(state)
 
         if state.get("errors", None) is not None:
             agent_state["errors"] = await self._gather_errors(agent_state)
