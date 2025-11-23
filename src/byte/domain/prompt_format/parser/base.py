@@ -205,23 +205,45 @@ class BaseParserService(Service, UserInteractive, ABC):
 
         return blocks
 
-    async def replace_blocks_in_historic_messages_hook(self, messages: list[BaseMessage]) -> list[BaseMessage]:
-        # Get mask_message_count from config
-        mask_count = self._config.edit_format.mask_message_count if self._config else 1
+    async def replace_blocks_in_historic_messages_hook(
+        self, messages: list[BaseMessage], mask_message_count: int | None = None
+    ) -> list[BaseMessage]:
+        # Get mask_message_count from parameter or fall back to config
+        mask_count = (
+            mask_message_count
+            if mask_message_count is not None
+            else (self._config.edit_format.mask_message_count if self._config else 1)
+        )
+
+        # Count total AIMessages to determine which ones are in the last N
+        ai_message_indices = [i for i, msg in enumerate(messages) if isinstance(msg, AIMessage)]
+        total_ai_messages = len(ai_message_indices)
+
+        # Determine the threshold: AIMessages at or after this index should not be masked
+        ai_messages_to_preserve = min(mask_count, total_ai_messages)
+        preserve_from_ai_index = total_ai_messages - ai_messages_to_preserve
 
         # Create masked_messages list identical to messages except for processed AIMessages
         masked_messages = []
-        for index, message in enumerate(messages):
-            # Only process AIMessages that are not in the last N messages (where N = mask_message_count)
-            is_within_mask_range = index >= len(messages) - mask_count
+        ai_message_counter = 0
 
-            if isinstance(message, AIMessage) and not isinstance(message.content, list) and not is_within_mask_range:
-                # Create a copy of the message with blocks removed
-                masked_content = await self.remove_blocks_from_content(str(message.content))
-                masked_message = AIMessage(content=masked_content)
-                masked_messages.append(masked_message)
+        for message in messages:
+            if isinstance(message, AIMessage):
+                # Check if this AIMessage is within the last N AIMessages
+                is_within_mask_range = ai_message_counter >= preserve_from_ai_index
+
+                if not isinstance(message.content, list) and not is_within_mask_range:
+                    # Create a copy of the message with blocks removed
+                    masked_content = await self.remove_blocks_from_content(str(message.content))
+                    masked_message = AIMessage(content=masked_content)
+                    masked_messages.append(masked_message)
+                else:
+                    # Keep original message unchanged
+                    masked_messages.append(message)
+
+                ai_message_counter += 1
             else:
-                # Keep original message unchanged
+                # Keep non-AIMessages unchanged
                 masked_messages.append(message)
 
         return masked_messages

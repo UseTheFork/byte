@@ -332,12 +332,12 @@ class AssistantNode(Node):
 
         Usage: `masked_messages = await self._gather_masked_messages(state)`
         """
-        # Don't mask messages when we're in error recovery mode
-        if state.get("errors") is not None:
-            return state.get("messages", [])
-
         edit_format_service = await self.make(EditFormatService)
         messages = state.get("messages", [])
+
+        # We mask a lot less messages in this case.
+        if state.get("errors") is not None:
+            return await edit_format_service.edit_block_service.replace_blocks_in_historic_messages_hook(messages, 5)
 
         return await edit_format_service.edit_block_service.replace_blocks_in_historic_messages_hook(messages)
 
