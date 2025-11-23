@@ -1,79 +1,74 @@
-name: Build and Publish to PyPI
+
+name: Release
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 1.0.0)'
+        required: true
+        type: string
 
 permissions:
-  contents: read
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
-  build:
-    name: Build distribution 📦
+  prepare-release:
+    name: Prepare Release
     runs-on: ubuntu-latest
-
+    
     steps:
     - uses: actions/checkout@v4
-
+    
+    - name: Configure Git
+      run: |
+        git config user.name github-actions[bot]
+        git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+    
     - name: Install uv
       uses: astral-sh/setup-uv@v6
-
-    - name: Build a binary wheel and a source tarball
-      run: uv build
-
-    - name: Store the distribution packages
-      uses: actions/upload-artifact@v4
       with:
-        name: python-package-distributions
-        path: dist/
+        enable-cache: true
 
-  publish-to-pypi:
-    name: Publish Python 🐍 distribution 📦 to PyPI
-    if: startsWith(github.ref, 'refs/tags/')  # only publish to PyPI on tag pushes
-    needs:
-    - build
-    runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://test.pypi.org/p/byte-ai-cli/
-    permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
+    - name: Install the project
+      run: uv sync --all-groups
+    
+    - name: Update version
+      run: uv version ${{ inputs.version }}
+    
+    - name: Generate commands documentation
+      run: uv run python src/scripts/commands_to_md.py
+    
+    - name: Generate settings documentation
+      run: uv run python src/scripts/settings_to_md.py
+    
+    - name: Commit changes
+      run: |
+        git add .
+        git commit -m "chore: prepare release v${{ inputs.version }}"
+        git push
+    
+    - name: Create tag
+      run: |
+        git tag v${{ inputs.version }}
+        git push origin v${{ inputs.version }}
 
-    steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v4
-      with:
-        name: python-package-distributions
-    - name: Publish distribution 📦 to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        packages-dir: .
-
-  github-release:
-    name: Sign the Python 🐍 distribution 📦 with Sigstore and upload them to GitHub Release
-    needs:
-    - publish-to-pypi
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: write  # IMPORTANT: mandatory for making GitHub Releases
-      id-token: write  # IMPORTANT: mandatory for sigstore
-
-    steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v4
-      with:
-        name: python-package-distributions
-    - name: Sign the dists with Sigstore
-      uses: sigstore/gh-action-sigstore-python@v3.0.0
-      with:
-        inputs: >-
-          ./*.tar.gz
-          ./*.whl
     - name: Create GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
-      run: >-
-        gh release upload
-        '${{ github.ref_name }}' *
-        --repo '${{ github.repository }}' 
+      run: |
+        gh release create v${{ inputs.version }} \
+          --title "v${{ inputs.version }}" \
+          --generate-notes 
+
+  release-pypi:
+    name: Release to PyPI
+    needs: prepare-release
+    uses: ./.github/workflows/release-pypi.yml
+
+  deploy-docs:
+    name: Deploy Documentation
+    needs: prepare-release
+    uses: ./.github/workflows/deploy-docs.yml
