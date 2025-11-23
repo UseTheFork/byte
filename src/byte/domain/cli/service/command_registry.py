@@ -61,7 +61,17 @@ class Command(ABC, Bootable, Injectable, Configurable, UserInteractive):
         pass
 
     async def handle(self, args: str) -> None:
-        """ """
+        """Parse and execute the command with the provided arguments.
+
+        Parses the raw argument string using the command's parser, handles
+        any parsing errors by displaying usage information, and executes
+        the command with the parsed arguments.
+
+        Args:
+            args: Raw argument string from user input
+
+        Usage: Called by CommandRegistry when command is invoked
+        """
         parser = self.parser
 
         try:
