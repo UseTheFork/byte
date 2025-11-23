@@ -91,11 +91,6 @@ class PseudoXmlParserService(BaseParserService):
         for match in matches:
             file_path, operation, search_content, replace_content = match
 
-            # Strip leading/trailing whitespace from search and replace content
-            # This handles cases where empty sections have extra whitespace
-            search_content = search_content.strip()
-            replace_content = replace_content.strip()
-
             # Determine block type based on operation and file existence
             file_path_obj = Path(file_path.strip())
             if not file_path_obj.is_absolute() and self._config and self._config.project_root:

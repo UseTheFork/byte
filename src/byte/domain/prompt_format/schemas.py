@@ -2,6 +2,8 @@ from enum import Enum
 
 from pydantic.dataclasses import dataclass
 
+from byte.core.utils import list_to_multiline_text
+
 
 class BoundaryType(str, Enum):
     """Type of boundary marker for content sections."""
@@ -83,14 +85,7 @@ class SearchReplaceBlock:
     block_status: BlockStatus = BlockStatus.VALID
     status_message: str = ""
 
-    def to_search_replace_format(
-        self,
-        fence: str = "```",
-        operation: str = "+++++++",
-        search: str = "<<<<<<< SEARCH",
-        divider: str = "=======",
-        replace: str = ">>>>>>> REPLACE",
-    ) -> str:
+    def to_search_replace_format(self) -> str:
         """Convert SearchReplaceBlock back to search/replace block format.
 
         Generates the formatted search/replace block string that can be used
@@ -101,11 +96,18 @@ class SearchReplaceBlock:
 
         Usage: `formatted = block.to_search_replace_format()` -> formatted block string
         """
-        return f"""{fence}
-{operation} {self.file_path}
-{search}
-{self.search_content}
-{divider}
-{self.replace_content}
-{replace}
-{fence}"""
+
+        return list_to_multiline_text(
+            [
+                f"Operation: {self.block_type}",
+                f"File: {self.file_path}",
+                "Search:",
+                "```",
+                self.search_content,
+                "```",
+                "Replace:",
+                "```",
+                self.replace_content,
+                "```",
+            ]
+        )

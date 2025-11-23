@@ -31,7 +31,7 @@ class ParseBlocksNode(Node):
                 return Command(goto="end_node")
 
             if isinstance(e, PreFlightCheckError):
-                console.print_warning_panel("Pre-flight check failed. Requesting corrections...", title="Parse Error")
+                console.print_warning_panel(str(e), title="Parse Error: Pre-flight check failed")
                 return Command(goto="assistant_node", update={"errors": str(e)})
 
             log.exception(e)
@@ -53,9 +53,7 @@ class ParseBlocksNode(Node):
             error_message = f"The following {failed_count} *SEARCH/REPLACE blocks* failed. Check the file content and try again. The other {valid_count} *SEARCH/REPLACE blocks* succeeded.\n\n"
             error_message += "\n\n".join(validation_errors)
 
-            console.print_warning_panel(
-                f"{failed_count} block(s) failed validation. Requesting corrections...", title="Validation Error"
-            )
+            console.print_warning_panel(error_message, title="Validation Error")
 
             return Command(goto="assistant_node", update={"errors": error_message})
 
