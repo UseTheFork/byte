@@ -4,6 +4,7 @@ from byte.core.config.config import ByteConfg
 from byte.domain.analytics.service.agent_analytics_service import AgentAnalyticsService
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.cli.service.console_service import ConsoleService
+from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
 from byte.domain.files.models import FileMode
 from byte.domain.files.service.file_service import FileService
 from byte.domain.knowledge.service.convention_context_service import ConventionContextService
@@ -67,7 +68,13 @@ class LoadPresetCommand(Command):
             console.print_info("History cleared")
 
         file_service = await self.make(FileService)
-        await file_service.clear_context()
+
+        should_clear_files = await self.prompt_for_confirmation(
+            "Would you like to clear the file context before loading this preset?", default=False
+        )
+
+        if should_clear_files:
+            await file_service.clear_context()
 
         for file_path in preset.read_only_files:
             await file_service.add_file(file_path, FileMode.READ_ONLY)
@@ -80,6 +87,10 @@ class LoadPresetCommand(Command):
 
         for convention_filename in preset.conventions:
             convention_service.add_convention(convention_filename)
+
+        if preset.prompt:
+            prompt_service = await self.make(PromptToolkitService)
+            prompt_service.set_placeholder(preset.prompt)
 
         console.print_success(f"Preset '{args}' loaded successfully")
 

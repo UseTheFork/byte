@@ -62,3 +62,17 @@ presets:
       - src/byte/domain/files/command/drop_file_command.py
       - src/byte/domain/knowledge/command/web_command.py
       - src/byte/domain/git/command/commit_command.py
+  - id: mkdocs
+    prompt: "Using the `MKDOCS_STYLEGUIDE` and existing docs as examples, document  "
+    conventions:
+      - MKDOCS_STYLEGUIDE.md
+      - PROJECT_ARCHITECTURE.md
+    editable_files:
+      - src/byte/README.md
+      - docs/index.md
+      - docs/concepts/index.md
+    read_only_files:
+      - docs/concepts/web.md
+      - docs/concepts/lint.md
+      - docs/concepts/file-context.md
+      - .byte/config.yaml

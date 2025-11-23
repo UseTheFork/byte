@@ -71,7 +71,7 @@ class ByteConfg(BaseModel):
     lint: LintConfig = Field(default_factory=LintConfig, description="Code linting and formatting configuration")
     llm: LLMConfig = Field(default_factory=LLMConfig)
     lsp: LSPConfig = Field(default_factory=LSPConfig)
+    presets: list[PresetsConfig] = Field(default_factory=[])
     system: SystemConfig = Field(default_factory=SystemConfig)
     web: WebConfig = Field(default_factory=WebConfig)
-    presets: list[PresetsConfig] = Field(default_factory=[])
     # keep-sorted end
