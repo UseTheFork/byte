@@ -4,56 +4,256 @@ Byte provides a comprehensive set of commands for interacting with your codebase
 
 ---
 
+
 ## System
 
 `!<command>` - Execute a shell command and optionally add output to conversation context
 
+
 ## Agent
 
-`/ask` - Ask the AI agent a question or request assistance
+### `/ask`
 
-`/convention` - Generate convention documents by analyzing codebase patterns and saving them to the conventions directory
+```
+usage: ask ask_query
 
-`/research` - Execute research agent to gather codebase insights, analyze patterns, and save detailed findings to session context for other agents
+Ask the AI agent a question or request assistance
 
-`/show` - Display the current conversation history and context
+positional arguments:
+  ask_query  The user's question or query text
+
+```
+
+### `/convention`
+
+```
+usage: convention
+
+Generate convention documents by analyzing codebase patterns and saving them
+to the conventions directory
+
+```
+
+### `/research`
+
+```
+usage: research research_query
+
+Execute research agent to gather codebase insights, analyze patterns, and save
+detailed findings to session context for other agents
+
+positional arguments:
+  research_query  The research query or question to investigate
+
+```
+
+### `/show`
+
+```
+usage: show
+
+Display the current conversation history and context
+
+```
+
 
 ## Files
 
-`/add` - Add file to context as editable
+### `/add`
 
-`/drop` - Remove file from context
+```
+usage: add file_path
 
-`/ls` - List all files currently in the AI context
+Add file to context as editable
 
-`/read-only` - Add file to context as read-only
+positional arguments:
+  file_path  Path to file
 
-`/switch` - Switch file mode between editable and read-only
+```
+
+### `/drop`
+
+```
+usage: drop file_path
+
+Remove file from context
+
+positional arguments:
+  file_path  Path to file
+
+```
+
+### `/ls`
+
+```
+usage: ls
+
+List all files currently in the AI context
+
+```
+
+### `/read-only`
+
+```
+usage: read-only file_path
+
+Add file to context as read-only
+
+positional arguments:
+  file_path  Path to file
+
+```
+
+### `/switch`
+
+```
+usage: switch file_path
+
+Switch file mode between editable and read-only
+
+positional arguments:
+  file_path  Path to file
+
+```
+
 
 ## General
 
-`/commit` - Create an AI-powered git commit with automatic staging and linting
+### `/commit`
 
-`/copy` - Copy code blocks from the last message to clipboard
+```
+usage: commit
 
-`/exit` - Exit the Byte application gracefully
+Create an AI-powered git commit with automatic staging and linting
 
-`/lint` - Run configured linters on changed files or current context
+```
+
+### `/copy`
+
+```
+usage: copy
+
+Copy code blocks from the last message to clipboard
+
+```
+
+### `/exit`
+
+```
+usage: exit
+
+Exit the Byte application gracefully
+
+```
+
+### `/lint`
+
+```
+usage: lint
+
+Run configured linters on changed files or current context
+
+```
+
+### `/preset`
+
+```
+usage: preset [--should-not-clear-history] [--should-not-clear-files]
+              preset_id
+
+Load a predefined preset configuration with files and conventions
+
+positional arguments:
+  preset_id             ID of the preset to load
+
+options:
+  --should-not-clear-history
+                        Do not clear conversation history before loading
+                        preset
+  --should-not-clear-files
+                        Do not clear file context before loading preset
+
+```
+
 
 ## Memory
 
-`/clear` - Clear conversation history and start a new thread
+### `/clear`
 
-`/reset` - Reset conversation history and clear file context completely
+```
+usage: clear
 
-`/undo` - Undo the last conversation step by removing the most recent human message and all subsequent agent responses from the current thread
+Clear conversation history and start a new thread
+
+```
+
+### `/reset`
+
+```
+usage: reset
+
+Reset conversation history and clear file context completely
+
+```
+
+### `/undo`
+
+```
+usage: undo
+
+Undo the last conversation step by removing the most recent human message and
+all subsequent agent responses from the current thread
+
+```
+
 
 ## Session Context
 
-`/ctx:drop` - Remove items from session context to clean up and reduce noise, improving AI focus on current task
+### `/ctx:drop`
 
-`/ctx:file` - Read a file from disk and add its contents to the session context, making it available to the AI for reference during the conversation
+```
+usage: ctx:drop file_path
 
-`/ctx:ls` - List all session context items
+Remove items from session context to clean up and reduce noise, improving AI
+focus on current task
 
-`/web` - Fetch webpage using headless Chrome, convert HTML to markdown, display for review, and optionally add to LLM context
+positional arguments:
+  file_path  Path to file
+
+```
+
+### `/ctx:file`
+
+```
+usage: ctx:file file_path
+
+Read a file from disk and add its contents to the session context, making it
+available to the AI for reference during the conversation
+
+positional arguments:
+  file_path  Path to file
+
+```
+
+### `/ctx:ls`
+
+```
+usage: ctx:ls
+
+List all session context items
+
+```
+
+### `/web`
+
+```
+usage: web url
+
+Fetch webpage using headless Chrome, convert HTML to markdown, display for
+review, and optionally add to LLM context
+
+positional arguments:
+  url  URL to scrape
+
+```
+
