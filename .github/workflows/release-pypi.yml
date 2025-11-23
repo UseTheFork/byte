@@ -8,7 +8,8 @@ permissions:
   contents: read
 
 jobs:
-  run:
+  build:
+    name: Build distribution 📦
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -27,7 +28,7 @@ jobs:
       - name: Install Python 3.12
         run: uv python install 3.12
 
-      - name: Build
+      - name: Build a binary wheel and a source tarball
         run: uv build
 
       # # Check that basic features work and we didn't miss to include crucial files
@@ -37,5 +38,29 @@ jobs:
       # - name: Smoke test (source distribution)
       #   run: uv run --isolated --no-project --with dist/*.tar.gz tests/smoke_test.py
 
-      - name: Publish
-        run: uv publish --token ${{ secrets.PYPI_API_TOKEN }}
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+  publish-to-pypi:
+    name: Publish Python 🐍 distribution 📦 to PyPI
+    needs:
+    - build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/byte-ai-cli/
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package-distributions
+    - name: Publish distribution 📦 to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        packages-dir: .
