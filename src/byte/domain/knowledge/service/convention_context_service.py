@@ -49,6 +49,53 @@ class ConventionContextService(Service):
             except Exception:
                 pass
 
+    def add_convention(self, filename: str) -> "ConventionContextService":
+        """Add a convention document to the store by loading it from the conventions directory.
+
+        Usage: `service.add_convention("style_guide.md")`
+        """
+        conventions_dir = self._config.system.paths.conventions
+        md_file = conventions_dir / filename
+
+        if not md_file.exists() or not md_file.is_file():
+            return self
+
+        try:
+            content = md_file.read_text(encoding="utf-8")
+            formatted_doc = list_to_multiline_text(
+                [
+                    Boundary.open(
+                        BoundaryType.CONVENTION,
+                        meta={"title": md_file.name.title(), "source": str(md_file)},
+                    ),
+                    "```markdown",
+                    content,
+                    "```",
+                    Boundary.close(BoundaryType.CONVENTION),
+                ]
+            )
+            self.conventions.add(md_file.name, formatted_doc)
+        except Exception:
+            pass
+
+        return self
+
+    def drop_convention(self, key: str) -> "ConventionContextService":
+        """Remove a convention document from the store.
+
+        Usage: `service.drop_convention("old_style_guide")`
+        """
+        self.conventions.remove(key)
+        return self
+
+    def clear_conventions(self) -> "ConventionContextService":
+        """Clear all convention documents from the store.
+
+        Usage: `service.clear_conventions()`
+        """
+        self.conventions.set({})
+        return self
+
     async def add_project_context_hook(self, payload: Payload) -> Payload:
         if self.conventions.is_not_empty():
             conventions = "\n\n".join(self.conventions.all().values())

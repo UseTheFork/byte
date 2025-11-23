@@ -1,5 +1,6 @@
 llm:
   model: anthropic
+
 lint:
   enable: true
   commands:
@@ -11,6 +12,7 @@ lint:
       languages: ["markdown"]
     - command: ["keep-sorted"]
       languages: ["*"]
+
 files:
   ignore:
     - .byte/cache
@@ -24,12 +26,15 @@ files:
     - node_modules
   watch:
     enable: true
+
 web:
   enable: true
   chrome_binary_location: /etc/profiles/per-user/sincore/bin/google-chrome-stable
+
 cli:
   ui_theme: mocha
   syntax_theme: github-dark
+
 lsp:
   enable: false
   timeout: 30
@@ -37,11 +42,23 @@ lsp:
     python:
       command: ["uv", "run", "jedi-language-server"]
       languages: ["python"]
-boot:
-  read_only_files:
-    - src/byte/bootstrap.py
-    - src/byte/container.py
-    - src/byte/core/cli.py
-    - src/byte/core/config/config.py
-    - src/byte/main.py
-    - src/tests/conftest.py
+      
+presets:
+  - id: command
+    conventions:
+      - CODE_STYLEGUIDE.md
+      - COMMENT_STYLEGUIDE.md
+      - PROJECT_ARCHITECTURE.md
+      - PYTHON_STYLEGUIDE.md
+    read_only_files:
+      - src/byte/bootstrap.py
+      - src/byte/container.py
+      - src/byte/core/cli.py
+      - src/byte/core/config/config.py
+      - src/byte/main.py
+      - src/byte/domain/cli/service/command_registry.py
+      - src/byte/core/mixins/user_interactive.py
+      - src/byte/domain/files/command/add_file_command.py
+      - src/byte/domain/files/command/drop_file_command.py
+      - src/byte/domain/knowledge/command/web_command.py
+      - src/byte/domain/git/command/commit_command.py

@@ -9,6 +9,7 @@ from byte.domain.files.config import FilesConfig
 from byte.domain.lint.config import LintConfig
 from byte.domain.llm.config import LLMConfig
 from byte.domain.lsp.config import LSPConfig
+from byte.domain.presets.config import PresetsConfig
 from byte.domain.prompt_format.config import EditFormatConfig
 from byte.domain.system.config import SystemConfig
 from byte.domain.web.config import WebConfig
@@ -72,4 +73,5 @@ class ByteConfg(BaseModel):
     lsp: LSPConfig = Field(default_factory=LSPConfig)
     system: SystemConfig = Field(default_factory=SystemConfig)
     web: WebConfig = Field(default_factory=WebConfig)
+    presets: list[PresetsConfig] = Field(default_factory=[])
     # keep-sorted end

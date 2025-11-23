@@ -15,6 +15,7 @@ from byte.domain.lint.service_provider import LintServiceProvider
 from byte.domain.llm.service_provider import LLMServiceProvider
 from byte.domain.lsp.service_provider import LSPServiceProvider
 from byte.domain.memory.service_provider import MemoryServiceProvider
+from byte.domain.presets.service_provider import PresetsProvider
 from byte.domain.prompt_format.service_provider import PromptFormatProvider
 from byte.domain.system.service_provider import SystemServiceProvider
 from byte.domain.tools.service_provider import ToolsServiceProvider
@@ -60,6 +61,7 @@ async def bootstrap(config: ByteConfg):
         AnalyticsProvider(),
         PromptFormatProvider(),
         WebServiceProvider(),
+        PresetsProvider(),
         SystemServiceProvider(),  # Core system commands
         DevelopmentProvider(),  # Core system commands
     ]
