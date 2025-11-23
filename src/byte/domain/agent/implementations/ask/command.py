@@ -1,3 +1,4 @@
+import argparse
 from argparse import Namespace
 
 from byte.domain.agent.implementations.ask.agent import AskAgent
@@ -28,7 +29,7 @@ class AskCommand(Command):
             prog=self.name,
             description="Ask the AI agent a question or request assistance",
         )
-        parser.add_argument("ask_query", help="The user's question or query text")
+        parser.add_argument("ask_query", nargs=argparse.REMAINDER, help="The user's question or query text")
         return parser
 
     async def execute(self, args: Namespace) -> None:
@@ -37,5 +38,7 @@ class AskCommand(Command):
         Processes the user's question through the agent service, which handles
         the complete interaction flow including AI response generation and display.
         """
+
+        query = " ".join(args.ask_query)
         agent_service = await self.make(AgentService)
-        await agent_service.execute_agent({"messages": [("user", args.ask_query)]}, AskAgent)
+        await agent_service.execute_agent({"messages": [("user", query)]}, AskAgent)
