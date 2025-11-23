@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 
 import git
 from pydantic import BaseModel, Field
@@ -71,7 +72,7 @@ class ByteConfg(BaseModel):
     lint: LintConfig = Field(default_factory=LintConfig, description="Code linting and formatting configuration")
     llm: LLMConfig = Field(default_factory=LLMConfig)
     lsp: LSPConfig = Field(default_factory=LSPConfig)
-    presets: list[PresetsConfig] = Field(default_factory=[])
+    presets: Optional[list[PresetsConfig]] = Field(default_factory=list)
     system: SystemConfig = Field(default_factory=SystemConfig)
     web: WebConfig = Field(default_factory=WebConfig)
     # keep-sorted end

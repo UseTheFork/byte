@@ -168,12 +168,22 @@ def schema_to_markdown(schema: Dict[str, Any]) -> str:
         if field_name == "development" or field_name == "system":
             continue
 
-        # Skip if field doesn't have a $ref (not a nested config object)
-        if "$ref" not in prop:
-            continue
+        # Check for direct $ref OR array with $ref items OR anyOf with array
+        ref_key = None
+        if "$ref" in prop:
+            ref_key = prop["$ref"].split("/")[-1]
+        elif prop.get("type") == "array" and "items" in prop and "$ref" in prop["items"]:
+            ref_key = prop["items"]["$ref"].split("/")[-1]
+        elif "anyOf" in prop:
+            # Handle Optional[list[Config]] case
+            for option in prop["anyOf"]:
+                if option.get("type") == "array" and "items" in option and "$ref" in option["items"]:
+                    ref_key = option["items"]["$ref"].split("/")[-1]
+                    break
 
-        # Extract the reference key (e.g., "CLIConfig")
-        ref_key = prop["$ref"].split("/")[-1]
+        # Skip if no reference found
+        if not ref_key:
+            continue
 
         # Get the nested properties for this section
         nested_props = get_nested_properties(schema, ref_key)
