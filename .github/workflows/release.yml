@@ -94,7 +94,7 @@ jobs:
           path: dist/
 
   publish-to-pypi:
-    name: Publish Python 🐍 distribution 📦 to PyPI
+    name: Publish to PyPI
     needs:
     - build
     runs-on: ubuntu-latest
@@ -109,10 +109,30 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: python-package-distributions
-    - name: Publish distribution 📦 to PyPI
+    - name: Publish distribution to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         packages-dir: .
+
+  verify:
+    name: Verify installation
+    needs: [publish-to-pypi]
+    if: needs.publish-to-pypi.result == 'success'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    
+    - name: Wait for package availability
+      run: sleep 30
+    
+    - name: Install from PyPI
+      run: |
+        pip install byte-ai-cli
+        python -c "from importlib.metadata import version; print(version('byte-ai-cli'))"
 
   deploy-docs:
     name: Deploy Documentation
