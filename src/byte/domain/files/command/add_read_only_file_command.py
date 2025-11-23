@@ -1,3 +1,4 @@
+from argparse import ArgumentParser, Namespace
 from typing import List
 
 from byte.domain.cli.service.command_registry import Command
@@ -23,23 +24,23 @@ class ReadOnlyCommand(Command):
         return "Files"
 
     @property
-    def description(self) -> str:
-        return "Add file to context as read-only"
+    def parser(self) -> ArgumentParser:
+        parser = ArgumentParser(prog=self.name, description="Add file to context as read-only", add_help=False)
+        parser.add_argument("file_path", help="Path to file")
+        return parser
 
-    async def execute(self, args: str) -> None:
+    async def execute(self, args: Namespace) -> None:
         """Add specified file to context with editable permissions."""
         console = await self.make(ConsoleService)
 
-        if not args:
-            console.print("Usage: /read-only <file_path>")
-            return
+        file_path = args.file_path
 
         file_service = await self.make(FileService)
-        result = await file_service.add_file(args, FileMode.READ_ONLY)
+        result = await file_service.add_file(file_path, FileMode.READ_ONLY)
 
         if not result:
             console.print(
-                f"[error]Failed to add {args} (file not found, not readable, or is already in context)[/error]"
+                f"[error]Failed to add {file_path} (file not found, not readable, or is already in context)[/error]"
             )
 
     async def get_completions(self, text: str) -> List[str]:

@@ -1,5 +1,8 @@
+from argparse import Namespace
+
 from byte.domain.agent.implementations.show.agent import ShowAgent
 from byte.domain.agent.service.agent_service import AgentService
+from byte.domain.cli.argparse.base import ByteArgumentParser
 from byte.domain.cli.service.command_registry import Command
 
 
@@ -21,10 +24,14 @@ class ShowCommand(Command):
         return "Agent"
 
     @property
-    def description(self) -> str:
-        return "Display the current conversation history and context"
+    def parser(self) -> ByteArgumentParser:
+        parser = ByteArgumentParser(
+            prog=self.name,
+            description="Display the current conversation history and context",
+        )
+        return parser
 
-    async def execute(self, args: str) -> None:
+    async def execute(self, args: Namespace) -> None:
         """Execute the Show agent to display conversation state.
 
         Invokes the ShowAgent through the agent service to render the current

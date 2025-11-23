@@ -1,8 +1,11 @@
+from argparse import Namespace
+
 from langchain_core.messages import HumanMessage
 from langgraph.graph.message import RemoveMessage
 from langgraph.graph.state import RunnableConfig
 
 from byte.domain.agent.implementations.coder.agent import CoderAgent
+from byte.domain.cli.argparse.base import ByteArgumentParser
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.memory.service.memory_service import MemoryService
@@ -24,14 +27,15 @@ class UndoCommand(Command):
         return "Memory"
 
     @property
-    def description(self) -> str:
-        return "Undo the last conversation step by removing the most recent human message and all subsequent agent responses from the current thread"
+    def parser(self) -> ByteArgumentParser:
+        parser = ByteArgumentParser(
+            prog=self.name,
+            description="Undo the last conversation step by removing the most recent human message and all subsequent agent responses from the current thread",
+        )
+        return parser
 
-    async def execute(self, args: str) -> None:
-        """Execute undo operation on current conversation thread.
-
-        Usage: `/undo` -> reverts to previous checkpoint state
-        """
+    async def execute(self, args: Namespace) -> None:
+        """Execute undo operation on current conversation thread."""
         memory_service = await self.make(MemoryService)
         console = await self.make(ConsoleService)
 

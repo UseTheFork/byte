@@ -1,6 +1,9 @@
+from argparse import Namespace
+
 from rich.panel import Panel
 
 from byte.domain.analytics.service.agent_analytics_service import AgentAnalyticsService
+from byte.domain.cli.argparse.base import ByteArgumentParser
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.memory.service.memory_service import MemoryService
@@ -23,19 +26,18 @@ class ClearCommand(Command):
         return "Memory"
 
     @property
-    def description(self) -> str:
-        return "Clear conversation history and start a new thread"
+    def parser(self) -> ByteArgumentParser:
+        parser = ByteArgumentParser(
+            prog=self.name,
+            description="Clear conversation history and start a new thread",
+        )
+        return parser
 
-    async def execute(self, args: str) -> None:
+    async def execute(self, args: Namespace) -> None:
         """Execute the clear command to create a new conversation thread.
 
         Creates a new thread through the memory service, discarding the current
         conversation history and establishing a fresh context for future messages.
-
-        Args:
-                args: Unused for this command
-
-        Usage: Called automatically when user types `/clear`
         """
 
         memory_service = await self.make(MemoryService)

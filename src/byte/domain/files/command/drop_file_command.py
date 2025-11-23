@@ -1,5 +1,7 @@
+from argparse import Namespace
 from typing import List
 
+from byte.domain.cli.argparse.base import ByteArgumentParser
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.files.service.file_service import FileService
@@ -22,22 +24,26 @@ class DropFileCommand(Command):
         return "Files"
 
     @property
-    def description(self) -> str:
-        return "Remove file from context"
+    def parser(self) -> ByteArgumentParser:
+        parser = ByteArgumentParser(
+            prog=self.name,
+            description="Remove file from context",
+        )
+        parser.add_argument("file_path", help="Path to file")
+        return parser
 
-    async def execute(self, args: str) -> None:
+    async def execute(self, args: Namespace) -> None:
         """Remove specified file from active context."""
         console = await self.make(ConsoleService)
-        if not args:
-            console.print("Usage: /drop <file_path>")
-            return
+
+        file_path = args.file_path
 
         file_service: FileService = await self.make(FileService)
-        if await file_service.remove_file(args):
-            console.print(f"[success]Removed {args} from context[/success]")
+        if await file_service.remove_file(file_path):
+            console.print(f"[success]Removed {file_path} from context[/success]")
             return
         else:
-            console.print(f"[error]File {args} not found in context[/error]")
+            console.print(f"[error]File {file_path} not found in context[/error]")
             return
 
     async def get_completions(self, text: str) -> List[str]:

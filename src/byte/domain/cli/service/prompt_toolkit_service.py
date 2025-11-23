@@ -175,7 +175,10 @@ class PromptToolkitService(Service):
         command = command_registry.get_slash_command(command_name)
 
         if command:
-            await command.execute(args)
+            try:
+                await command.handle(args)
+            except Exception as e:
+                console.print_error(f"Error parsing arguments: {e}")
         else:
             console.print_error(f"Unknown command: /{command_name}")
 

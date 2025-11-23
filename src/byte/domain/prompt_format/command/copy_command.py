@@ -1,5 +1,8 @@
+from argparse import Namespace
+
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.domain.agent.implementations.copy.agent import CopyAgent
+from byte.domain.cli.argparse.base import ByteArgumentParser
 from byte.domain.cli.service.command_registry import Command
 
 
@@ -16,17 +19,15 @@ class CopyCommand(Command, UserInteractive):
         return "copy"
 
     @property
-    def description(self) -> str:
-        return "Copy code blocks from the last message to clipboard"
+    def parser(self) -> ByteArgumentParser:
+        parser = ByteArgumentParser(
+            prog=self.name,
+            description="Copy code blocks from the last message to clipboard",
+        )
+        return parser
 
-    async def execute(self, args: str) -> None:
-        """Execute the copy command by running the CopyAgent.
-
-        Args:
-                args: Command arguments (unused)
-
-        Usage: User types `/copy` in the interactive CLI
-        """
+    async def execute(self, args: Namespace) -> None:
+        """Execute the copy command by running the CopyAgent."""
         copy_agent = await self.make(CopyAgent)
         await copy_agent.execute(
             {},

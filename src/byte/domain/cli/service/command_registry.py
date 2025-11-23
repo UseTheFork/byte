@@ -1,4 +1,6 @@
+import argparse
 from abc import ABC, abstractmethod
+from argparse import Namespace
 from typing import Dict, List, Optional
 
 from byte.core.mixins.bootable import Bootable
@@ -6,6 +8,8 @@ from byte.core.mixins.configurable import Configurable
 from byte.core.mixins.injectable import Injectable
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
+from byte.domain.cli.argparse.base import ByteArgumentParser
+from byte.domain.cli.service.console_service import ConsoleService
 
 
 class Command(ABC, Bootable, Injectable, Configurable, UserInteractive):
@@ -35,16 +39,42 @@ class Command(ABC, Bootable, Injectable, Configurable, UserInteractive):
         return "General"
 
     @property
-    @abstractmethod
     def description(self) -> str:
         """Human-readable description for help system.
 
-        Should briefly explain what the command does and basic usage.
+        By default, extracts description from the argument parser.
+        Can be overridden for custom descriptions.
+        """
+        parser: ByteArgumentParser = self.parser
+        return parser.description or "No description available"
+
+    @property
+    @abstractmethod
+    def parser(self) -> ByteArgumentParser:
+        """Get the argument parser for this command.
+
+        Override to define command-specific arguments. The parser's description
+        will be used for help text and documentation generation.
+
+        Usage: Override in subclass to add arguments
         """
         pass
 
+    async def handle(self, args: str) -> None:
+        """ """
+        parser = self.parser
+
+        try:
+            parsed_args = parser.parse_args(args.split() if args else [])
+        except argparse.ArgumentError:
+            console = await self.make(ConsoleService)
+            console.print_error_panel(parser.format_help(), title="Invalid Command Arguments")
+            return
+
+        return await self.execute(parsed_args)
+
     @abstractmethod
-    async def execute(self, args: str) -> None:
+    async def execute(self, args: Namespace) -> None:
         """Execute the command with provided arguments.
 
         Args contain everything after the command name, unparsed.
