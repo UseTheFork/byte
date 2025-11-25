@@ -35,5 +35,7 @@ class PresetsProvider(ServiceProvider):
         if config.presets:
             for preset in config.presets:
                 if preset.load_on_boot:
-                    await load_preset_command.handle(f"{preset.id} --should-not-clear-history --should-not-clear-files")
+                    await load_preset_command.handle(
+                        f"{preset.id} --should-not-clear-history --should-not-clear-files --silent"
+                    )
                     break

@@ -42,6 +42,11 @@ class LoadPresetCommand(Command):
         parser.add_argument(
             "--should-not-clear-files", action="store_true", help="Do not clear file context before loading preset"
         )
+        parser.add_argument(
+            "--silent",
+            action="store_false",
+            help="Run silently without prompting for confirmations",
+        )
 
         return parser
 
@@ -105,7 +110,8 @@ class LoadPresetCommand(Command):
             prompt_service = await self.make(PromptToolkitService)
             prompt_service.set_placeholder(preset.prompt)
 
-        console.print_success(f"Preset '{args}' loaded successfully")
+        if not args.silent:
+            console.print_success(f"Preset '{preset_id}' loaded successfully")
 
     async def get_completions(self, text: str) -> List[str]:
         """Return tab completion suggestions for preset IDs.
