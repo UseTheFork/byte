@@ -124,7 +124,20 @@ class PromptToolkitService(Service):
         if info_panel:
             console.print(Group(*info_panel))
 
-        user_input = await self.prompt_session.prompt_async(message=message, default=default)
+        try:
+            user_input = await self.prompt_session.prompt_async(message=message, default=default)
+        except KeyboardInterrupt:
+            # Ask for confirmation before quitting
+            console.print()  # Add newline after ^C
+            should_quit = console.confirm("Do you want to quit?", default=True)
+
+            if should_quit:
+                # User confirmed quit - raise to exit the application
+                raise
+            else:
+                # User wants to continue - return without processing input
+                return
+
         console.print()
         # TODO: should we make `user_input` a [("user", user_input)], in this situation.
 
