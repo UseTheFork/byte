@@ -96,6 +96,14 @@ class ConventionContextService(Service):
         self.conventions.set({})
         return self
 
+    def get_conventions(self) -> dict[str, str]:
+        """Get all convention documents from the store.
+
+        Returns a dictionary mapping convention filenames to their formatted content.
+        Usage: `conventions = service.get_conventions()`
+        """
+        return self.conventions.all()
+
     async def add_project_context_hook(self, payload: Payload) -> Payload:
         if self.conventions.is_not_empty():
             conventions = "\n\n".join(self.conventions.all().values())

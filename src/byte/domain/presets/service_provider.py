@@ -6,6 +6,7 @@ from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.presets.command.load_preset_command import LoadPresetCommand
+from byte.domain.presets.command.save_preset_command import SavePresetCommand
 
 
 class PresetsProvider(ServiceProvider):
@@ -18,6 +19,7 @@ class PresetsProvider(ServiceProvider):
     def commands(self) -> List[Type[Command]]:
         return [
             LoadPresetCommand,
+            SavePresetCommand,
         ]
 
     def services(self) -> List[Type[Service]]:
