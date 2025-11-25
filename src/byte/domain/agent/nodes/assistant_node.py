@@ -333,7 +333,7 @@ class AssistantNode(Node):
         Usage: `masked_messages = await self._gather_masked_messages(state)`
         """
         edit_format_service = await self.make(EditFormatService)
-        messages = state.get("messages", [])
+        messages = state.get("history_messages", [])
 
         # We mask a lot less messages in this case.
         if state.get("errors") is not None:
@@ -370,8 +370,6 @@ class AssistantNode(Node):
             },
         )
 
-        # FixtureRecorder.pickle_fixture(payload)
-
         payload = await self.emit(payload)
         agent_state = payload.get("state", agent_state)
 
@@ -401,8 +399,8 @@ class AssistantNode(Node):
                 )
             ):
                 # Re-prompt for actual response
-                messages = agent_state["messages"] + [("user", "Respond with a real output.")]
-                agent_state = {**agent_state, "messages": messages}
+                messages = agent_state["scratch_messages"] + [("user", "Respond with a real output.")]
+                agent_state = {**agent_state, "scratch_messages": messages}
                 console = await self.make(ConsoleService)
                 console.print_warning_panel(
                     "AI did not provide proper output. Requesting a valid response.", title="Warning"
@@ -412,7 +410,7 @@ class AssistantNode(Node):
                 return Command(
                     goto="tools_node",
                     update={
-                        "messages": [result],
+                        "scratch_messages": [result],
                         "errors": None,
                     },
                 )
@@ -422,7 +420,7 @@ class AssistantNode(Node):
         return Command(
             goto=self.goto,
             update={
-                "messages": [result],
+                "scratch_messages": [result],
                 "errors": None,
             },
         )

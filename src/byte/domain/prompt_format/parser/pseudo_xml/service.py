@@ -49,9 +49,7 @@ class PseudoXmlParserService(BaseParserService):
         Usage: `cleaned = service.remove_blocks_from_content(ai_response)`
         """
         # Pattern to match pseudo-XML file blocks
-        pattern = (
-            r'<file\s+path="([^"]+)"\s+operation="[^"]+"\s*>\s*<search>.*?</search>\s*<replace>.*?</replace>\s*</file>'
-        )
+        pattern = r'<file\s+path="([^"]+)"\s+operation="([^"]+)"\s*>\s*<search>(.*?)</search>\s*<replace>(.*?)</replace>\s*</file>'
 
         def replacement(match):
             file_path = match.group(1)
@@ -90,6 +88,10 @@ class PseudoXmlParserService(BaseParserService):
 
         for match in matches:
             file_path, operation, search_content, replace_content = match
+
+            # Strip leading/trailing whitespace but preserve internal structure
+            search_content = search_content.strip()
+            replace_content = replace_content.strip()
 
             # Determine block type based on operation and file existence
             file_path_obj = Path(file_path.strip())

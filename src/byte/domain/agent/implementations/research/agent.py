@@ -18,60 +18,60 @@ from byte.domain.lsp.tools.get_hover_info import get_hover_info
 
 
 class ResearchAgent(Agent):
-	"""Domain service for AI-powered code research and information gathering.
+    """Domain service for AI-powered code research and information gathering.
 
-	Extends Agent to provide research capabilities with tool execution for
-	file searching and reading. Integrates with MCP services for extended
-	tool availability and uses ripgrep for fast codebase searches.
-	Usage: `agent = await container.make(ResearchAgent); result = await agent.execute(state)`
-	"""
+    Extends Agent to provide research capabilities with tool execution for
+    file searching and reading. Integrates with MCP services for extended
+    tool availability and uses ripgrep for fast codebase searches.
+    Usage: `agent = await container.make(ResearchAgent); result = await agent.execute(state)`
+    """
 
-	# Research agent dosent use or update the main memory even thou it gets the current checkpointer state.
-	async def get_checkpointer(self):
-		return None
+    # Research agent dosent use or update the main memory even thou it gets the current checkpointer state.
+    async def get_checkpointer(self):
+        return None
 
-	def get_tools(self):
-		return [find_references, get_definition, get_hover_info]
-		# return [ripgrep_search, read_file]
+    def get_tools(self):
+        return [find_references, get_definition, get_hover_info]
+        # return [ripgrep_search, read_file]
 
-	async def build(self) -> CompiledStateGraph:
-		"""Build and compile the coder agent graph with memory and tools."""
+    async def build(self) -> CompiledStateGraph:
+        """Build and compile the coder agent graph with memory and tools."""
 
-		# Create the assistant and runnable
-		graph = StateGraph(BaseState)
+        # Create the assistant and runnable
+        graph = StateGraph(BaseState)
 
-		# Add nodes
-		graph.add_node("start_node", await self.make(StartNode))
-		graph.add_node("assistant_node", await self.make(AssistantNode, goto="extract_node"))
-		graph.add_node("extract_node", await self.make(ExtractNode, schema="session_context"))
-		graph.add_node("tools_node", await self.make(ToolNode))
+        # Add nodes
+        graph.add_node("start_node", await self.make(StartNode))
+        graph.add_node("assistant_node", await self.make(AssistantNode, goto="extract_node"))
+        graph.add_node("extract_node", await self.make(ExtractNode, schema="session_context"))
+        graph.add_node("tools_node", await self.make(ToolNode))
 
-		graph.add_node("end_node", await self.make(EndNode))
+        graph.add_node("end_node", await self.make(EndNode))
 
-		# Define edges
-		graph.add_edge(START, "start_node")
-		graph.add_edge("start_node", "assistant_node")
+        # Define edges
+        graph.add_edge(START, "start_node")
+        graph.add_edge("start_node", "assistant_node")
 
-		graph.add_edge("extract_node", "end_node")
+        graph.add_edge("extract_node", "end_node")
 
-		graph.add_edge("end_node", END)
+        graph.add_edge("end_node", END)
 
-		graph.add_edge("tools_node", "assistant_node")
+        graph.add_edge("tools_node", "assistant_node")
 
-		# Compile graph with memory and configuration
-		checkpointer = await self.get_checkpointer()
-		return graph.compile(checkpointer=checkpointer)
+        # Compile graph with memory and configuration
+        checkpointer = await self.get_checkpointer()
+        return graph.compile(checkpointer=checkpointer)
 
-	async def get_assistant_runnable(self) -> AssistantContextSchema:
-		llm_service = await self.make(LLMService)
-		main: BaseChatModel = llm_service.get_main_model()
-		weak: BaseChatModel = llm_service.get_weak_model()
+    async def get_assistant_runnable(self) -> AssistantContextSchema:
+        llm_service = await self.make(LLMService)
+        main: BaseChatModel = llm_service.get_main_model()
+        weak: BaseChatModel = llm_service.get_weak_model()
 
-		return AssistantContextSchema(
-			mode="main",
-			prompt=research_prompt,
-			main=main,
-			weak=weak,
-			agent=self.__class__.__name__,
-			tools=self.get_tools(),
-		)
+        return AssistantContextSchema(
+            mode="main",
+            prompt=research_prompt,
+            main=main,
+            weak=weak,
+            agent=self.__class__.__name__,
+            tools=self.get_tools(),
+        )

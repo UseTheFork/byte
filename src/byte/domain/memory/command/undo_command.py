@@ -48,7 +48,7 @@ class UndoCommand(Command):
 
         config = RunnableConfig(configurable={"thread_id": thread_id})
         state_snapshot = await coder_agent_graph.aget_state(config)
-        messages = state_snapshot.values.get("messages", [])
+        messages = state_snapshot.values.get("history_messages", [])
 
         # Find the most recent HumanMessage index
         last_human_index = None
@@ -106,7 +106,7 @@ class UndoCommand(Command):
             )
 
             if confirmed:
-                await coder_agent_graph.aupdate_state(config, {"messages": remove_messages})
+                await coder_agent_graph.aupdate_state(config, {"history_messages": remove_messages})
 
                 console.print_success_panel(
                     "Successfully undone last step",

@@ -113,7 +113,6 @@ class BaseParserService(Service, UserInteractive, ABC):
         await self.pre_flight_check(content)
         blocks = await self.parse_content_to_blocks(content)
         blocks = await self.mid_flight_check(blocks)
-        blocks = await self.apply_blocks(blocks)
 
         return blocks
 
@@ -134,10 +133,6 @@ class BaseParserService(Service, UserInteractive, ABC):
             file_discovery_service: FileDiscoveryService = await self.make(FileDiscoveryService)
             file_service: FileService = await self.make(FileService)
             for block in blocks:
-                # Only apply blocks that are valid
-                if block.block_status != BlockStatus.VALID:
-                    continue
-
                 file_path = Path(block.file_path)
 
                 # If the path is relative, resolve it against the project root

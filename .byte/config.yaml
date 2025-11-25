@@ -77,3 +77,26 @@ presets:
       - docs/concepts/lint.md
       - docs/concepts/file-context.md
       - .byte/config.yaml
+  - id: agent
+    conventions:
+      - CODE_STYLEGUIDE.md
+      - COMMENT_STYLEGUIDE.md
+      - PROJECT_ARCHITECTURE.md
+      - PYTHON_STYLEGUIDE.md
+    read_only_files:
+      - src/byte/bootstrap.py
+      - src/byte/container.py
+      - src/byte/core/cli.py
+      - src/byte/core/config/config.py
+      - src/byte/main.py
+    editable_files:
+      - src/byte/domain/agent/state.py
+      - src/byte/domain/agent/reducers.py
+      - src/byte/domain/agent/schemas.py
+      - src/byte/domain/agent/service_provider.py
+      - src/byte/domain/agent/implementations/base.py
+      - src/byte/domain/agent/implementations/ask/**
+      - src/byte/domain/agent/implementations/coder/**
+      - src/byte/domain/agent/implementations/commit/**
+      - src/byte/domain/agent/nodes/**
+

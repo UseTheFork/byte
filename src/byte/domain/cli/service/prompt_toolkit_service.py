@@ -153,7 +153,7 @@ class PromptToolkitService(Service):
             else:
                 # Only execute agent if user provided non-empty input
                 if user_input.strip():
-                    await agent_service.execute_agent({"messages": [("user", user_input)]}, active_agent)
+                    await agent_service.execute_agent({"history_messages": [("user", user_input)]}, active_agent)
 
     async def _handle_command_input(self, user_input: str):
         """Parse and execute slash commands.

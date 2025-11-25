@@ -103,7 +103,7 @@ class ExtractNode(Node, UserInteractive):
 
         Usage: Called automatically by LangGraph during graph execution
         """
-        last_message = get_last_message(state["messages"])
+        last_message = get_last_message(state["scratch_messages"])
 
         if self.schema == "text":
             output = extract_content_from_message(last_message)

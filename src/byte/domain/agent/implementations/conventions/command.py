@@ -171,7 +171,7 @@ class ConventionCommand(Command, UserInteractive):
 
         convention_agent = await self.make(ConventionAgent)
         convention: dict = await convention_agent.execute(
-            request={"messages": [("user", focus.focus_message)]},
+            request={"history_messages": [("user", focus.focus_message)]},
         )
 
         # Write the convention content to a file

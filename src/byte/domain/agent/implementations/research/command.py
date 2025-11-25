@@ -1,3 +1,4 @@
+import argparse
 from argparse import Namespace
 from typing import cast
 
@@ -36,7 +37,9 @@ class ResearchCommand(Command):
             prog=self.name,
             description="Execute research agent to gather codebase insights, analyze patterns, and save detailed findings to session context for other agents",
         )
-        parser.add_argument("research_query", help="The research query or question to investigate")
+        parser.add_argument(
+            "research_query", nargs=argparse.REMAINDER, help="The research query or question to investigate"
+        )
         return parser
 
     async def execute(self, args: Namespace) -> None:
@@ -51,7 +54,7 @@ class ResearchCommand(Command):
         Usage: `await command.execute("How is authentication handled?")`
         """
 
-        research_query = args.research_query
+        research_query = " ".join(args.research_query)
 
         coder_agent = await self.make(CoderAgent)
         coder_agent_graph = await coder_agent.get_graph()
@@ -61,11 +64,11 @@ class ResearchCommand(Command):
 
         config = RunnableConfig(configurable={"thread_id": thread_id})
         state_snapshot = await coder_agent_graph.aget_state(config)
-        messages = state_snapshot.values.get("messages", [])
+        messages = state_snapshot.values.get("history_messages", [])
 
         agent_service = await self.make(AgentService)
         agent_result = await agent_service.execute_agent(
-            {"messages": [*messages, ("user", research_query)]}, ResearchAgent
+            {"history_messages": [*messages, ("user", research_query)]}, ResearchAgent
         )
 
         extracted_content = cast(SessionContextFormatter, agent_result.get("extracted_content"))

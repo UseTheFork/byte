@@ -41,4 +41,4 @@ class AskCommand(Command):
 
         query = " ".join(args.ask_query)
         agent_service = await self.make(AgentService)
-        await agent_service.execute_agent({"messages": [("user", query)]}, AskAgent)
+        await agent_service.execute_agent({"history_messages": [("user", query)]}, AskAgent)

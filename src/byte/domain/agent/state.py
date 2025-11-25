@@ -13,7 +13,12 @@ class BaseState(TypedDict):
     Usage: `state = BaseState(messages=[], agent="CoderAgent")`
     """
 
-    messages: Annotated[list[AnyMessage], add_messages]
+    # Persistent conversation history from memory store
+    history_messages: Annotated[list[AnyMessage], add_messages]
+
+    # Ephemeral messages for current execution only (validation, errors, etc.)
+    scratch_messages: Annotated[list[AnyMessage], add_messages]
+
     constraints: Annotated[list[ConstraintSchema], add_constraints]
     masked_messages: list[AnyMessage]
 

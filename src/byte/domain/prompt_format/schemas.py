@@ -96,18 +96,35 @@ class SearchReplaceBlock:
 
         Usage: `formatted = block.to_search_replace_format()` -> formatted block string
         """
+        from byte.domain.prompt_format.utils.boundary import Boundary
 
-        return list_to_multiline_text(
+        sections = [
+            Boundary.open(BoundaryType.ERROR, meta={"operation": self.block_type.value}),
+            f"**File:** `{self.file_path}`",
+            "",
+        ]
+        # Add status information if there's an error
+        if self.block_status != BlockStatus.VALID:
+            sections.extend(
+                [
+                    f"**Status:** {self.block_status.value}",
+                    f"**Issue:** {self.status_message}",
+                    "",
+                ]
+            )
+
+        sections.extend(
             [
-                f"Operation: {self.block_type}",
-                f"File: {self.file_path}",
-                "Search:",
-                "```",
+                Boundary.open(BoundaryType.SEARCH),
                 self.search_content,
-                "```",
-                "Replace:",
-                "```",
+                Boundary.close(BoundaryType.SEARCH),
+                "",
+                Boundary.open(BoundaryType.REPLACE),
                 self.replace_content,
-                "```",
+                Boundary.close(BoundaryType.REPLACE),
+                "",
+                Boundary.close(BoundaryType.ERROR),
             ]
         )
+
+        return list_to_multiline_text(sections)

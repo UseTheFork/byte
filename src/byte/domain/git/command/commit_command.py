@@ -76,8 +76,8 @@ class CommitCommand(Command):
             # tokens = count_tokens_approximately([("user", staged_diff)])
 
             commit_agent = await self.make(CommitAgent)
-            commit_message: dict = await commit_agent.execute(
-                request={"messages": [("user", staged_diff)]}, display_mode="thinking"
+            commit_message = await commit_agent.execute(
+                request={"scratch_messages": [("user", staged_diff)]}, display_mode="thinking"
             )
 
             await git_service.commit(str(commit_message.get("extracted_content", "")))

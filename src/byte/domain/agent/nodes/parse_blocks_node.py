@@ -3,7 +3,7 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.core.logging import log
-from byte.core.utils import extract_content_from_message, get_last_message
+from byte.core.utils import extract_content_from_message, get_last_message, list_to_multiline_text
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.agent.state import BaseState
@@ -21,18 +21,30 @@ class ParseBlocksNode(Node):
         """Parse commands from the last assistant message."""
         console = await self.make(ConsoleService)
 
-        last_message = get_last_message(state["messages"])
+        last_message = get_last_message(state["scratch_messages"])
         response_text = extract_content_from_message(last_message)
 
         try:
-            parsed_blocks = await self.edit_format.handle(response_text)
+            parsed_blocks = await self.edit_format.validate(response_text)
         except Exception as e:
             if isinstance(e, NoBlocksFoundError):
                 return Command(goto="end_node")
 
             if isinstance(e, PreFlightCheckError):
                 console.print_warning_panel(str(e), title="Parse Error: Pre-flight check failed")
-                return Command(goto="assistant_node", update={"errors": str(e)})
+
+                error_message = list_to_multiline_text(
+                    [
+                        "Your *Pseudo-XML Edit Blocks* failed pre-flight validation:",
+                        "```",
+                        str(e),
+                        "```",
+                        "No changes were applied. Fix the malformed blocks and retry with corrected syntax.",
+                        "Reply with ALL *Pseudo-XML Edit Blocks* (corrected and uncorrected) plus any other content from your original message.",
+                    ]
+                )
+
+                return Command(goto="assistant_node", update={"errors": error_message})
 
             log.exception(e)
             raise
@@ -50,11 +62,22 @@ class ParseBlocksNode(Node):
 
         if validation_errors:
             failed_count = len(validation_errors)
-            error_message = f"The following {failed_count} *SEARCH/REPLACE blocks* failed. Check the file content and try again. The other {valid_count} *SEARCH/REPLACE blocks* succeeded.\n\n"
-            error_message += "\n\n".join(validation_errors)
+            error_message = "\n\n".join(validation_errors)
+
+            error_message = list_to_multiline_text(
+                [
+                    f"The following {failed_count} *Pseudo-XML Edit Blocks* failed validation:",
+                    error_message,
+                    "No changes were applied.",
+                    "Reply with ALL *Pseudo-XML Edit Blocks* (corrected and uncorrected) plus any other content from your original message.",
+                ]
+            )
 
             console.print_warning_panel(error_message, title="Validation Error")
 
             return Command(goto="assistant_node", update={"errors": error_message})
+
+        # Once all blocks are valid THEN apply them.
+        parsed_blocks = await self.edit_format.apply(parsed_blocks)
 
         return Command(goto="lint_node", update={"parsed_blocks": parsed_blocks})
