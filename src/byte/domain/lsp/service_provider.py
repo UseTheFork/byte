@@ -11,50 +11,50 @@ from byte.domain.lsp.service.lsp_service import LSPService
 
 
 class LSPServiceProvider(ServiceProvider):
-	"""Service provider for Language Server Protocol integration.
+    """Service provider for Language Server Protocol integration.
 
-	Registers LSP services for multi-language code intelligence features
-	like hover information, references, definitions, and completions.
-	Usage: Register with container to enable LSP functionality
-	"""
+    Registers LSP services for multi-language code intelligence features
+    like hover information, references, definitions, and completions.
+    Usage: Register with container to enable LSP functionality
+    """
 
-	def services(self) -> List[Type[Service]]:
-		"""Return list of LSP services to register."""
-		return [LSPService]
+    def services(self) -> List[Type[Service]]:
+        """Return list of LSP services to register."""
+        return [LSPService]
 
-	def commands(self) -> List[Type[Command]]:
-		"""Return list of LSP commands to register."""
-		return []
+    def commands(self) -> List[Type[Command]]:
+        """Return list of LSP commands to register."""
+        return []
 
-	async def boot(self, container: Container):
-		config = await container.make(ByteConfg)
-		if config.lsp.enable:
-			# Boots the LSPs and starts them in the background.
-			await container.make(LSPService)
-			event_bus = await container.make(EventBus)
+    async def boot(self, container: Container):
+        config = await container.make(ByteConfg)
+        if config.lsp.enable:
+            # Boots the LSPs and starts them in the background.
+            await container.make(LSPService)
+            event_bus = await container.make(EventBus)
 
-			event_bus.on(
-				EventType.POST_BOOT.value,
-				self.boot_messages,
-			)
+            event_bus.on(
+                EventType.POST_BOOT.value,
+                self.boot_messages,
+            )
 
-	async def boot_messages(self, payload: Payload) -> Payload:
-		container: Container = payload.get("container", False)
-		if container:
-			task_manager = await container.make(TaskManager)
+    async def boot_messages(self, payload: Payload) -> Payload:
+        container: Container = payload.get("container", False)
+        if container:
+            task_manager = await container.make(TaskManager)
 
-			running_count = sum(1 for name in task_manager._tasks.keys() if name.startswith("lsp_server_"))
+            running_count = sum(1 for name in task_manager._tasks.keys() if name.startswith("lsp_server_"))
 
-			messages = payload.get("messages", [])
-			messages.append(f"[muted]LSP servers running:[/muted] [primary]{running_count}[/primary]")
+            messages = payload.get("messages", [])
+            messages.append(f"[muted]LSP servers running:[/muted] [primary]{running_count}[/primary]")
 
-			payload.set("messages", messages)
+            payload.set("messages", messages)
 
-		return payload
+        return payload
 
-	async def shutdown(self, container: Container) -> None:
-		"""Shutdown all LSP servers gracefully."""
-		config = await container.make(ByteConfg)
-		if config.lsp.enable:
-			lsp_service = await container.make(LSPService)
-			await lsp_service.shutdown_all()
+    async def shutdown(self, container: Container) -> None:
+        """Shutdown all LSP servers gracefully."""
+        config = await container.make(ByteConfg)
+        if config.lsp.enable:
+            lsp_service = await container.make(LSPService)
+            await lsp_service.shutdown_all()

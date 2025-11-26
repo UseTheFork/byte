@@ -7,21 +7,21 @@ from byte.domain.mcp.service.mcp_service import MCPService
 
 
 class MCPServiceProvider(ServiceProvider):
-	"""Service provider for Model Context Protocol (MCP) integration.
+    """Service provider for Model Context Protocol (MCP) integration.
 
-	Usage: `await container.register_provider(MCPServiceProvider())`
-	"""
+    Usage: `await container.register_provider(MCPServiceProvider())`
+    """
 
-	def services(self) -> List[Type[Service]]:
-		"""Register MCP services with the container.
+    def services(self) -> List[Type[Service]]:
+        """Register MCP services with the container.
 
-		Usage: `services = provider.services()`
-		"""
-		return [MCPService]
+        Usage: `services = provider.services()`
+        """
+        return [MCPService]
 
-	def commands(self) -> List[Type[Command]]:
-		"""Register MCP-related CLI commands.
+    def commands(self) -> List[Type[Command]]:
+        """Register MCP-related CLI commands.
 
-		Usage: `commands = provider.commands()`
-		"""
-		return []
+        Usage: `commands = provider.commands()`
+        """
+        return []

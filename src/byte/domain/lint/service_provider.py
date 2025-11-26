@@ -8,16 +8,16 @@ from byte.domain.lint.service.lint_service import LintService
 
 
 class LintServiceProvider(ServiceProvider):
-	"""Service provider for code linting functionality.
+    """Service provider for code linting functionality.
 
-	Registers AI-integrated linting service that can analyze code quality
-	and formatting issues. Integrates with the command registry and provides
-	programmatic access for agent workflows.
-	Usage: Register with container to enable `/lint` command and lint service
-	"""
+    Registers AI-integrated linting service that can analyze code quality
+    and formatting issues. Integrates with the command registry and provides
+    programmatic access for agent workflows.
+    Usage: Register with container to enable `/lint` command and lint service
+    """
 
-	def services(self) -> List[Type[Service]]:
-		return [LintService]
+    def services(self) -> List[Type[Service]]:
+        return [LintService]
 
-	def commands(self) -> List[Type[Command]]:
-		return [LintCommand]
+    def commands(self) -> List[Type[Command]]:
+        return [LintCommand]

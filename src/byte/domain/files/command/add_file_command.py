@@ -7,8 +7,6 @@ from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.files.models import FileMode
 from byte.domain.files.service.file_service import FileService
 
-#
-
 
 class AddFileCommand(Command):
     """Command to add files to AI context as editable.
