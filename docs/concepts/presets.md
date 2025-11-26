@@ -8,6 +8,8 @@ Presets allow you to save and quickly load predefined configurations of files, c
 
 ## Quick Start
 
+### Loading a Preset
+
 Load a preset configuration:
 
 ```
@@ -22,6 +24,26 @@ Byte will:
 4. Add configured editable files to context
 5. Load specified conventions
 6. Set a default prompt (if configured)
+
+### Saving a Preset
+
+Save your current context as a preset:
+
+```
+> /preset:save
+Enter a name for this preset: my-workflow
+Enter a default prompt for this preset (leave blank to skip):
+Preset 'my-workflow' saved successfully
+```
+
+Byte will:
+
+1. Prompt for a preset name
+2. Capture current read-only files
+3. Capture current editable files
+4. Capture loaded conventions
+5. Optionally set a default prompt
+6. Save the configuration to `.byte/config.yaml`
 
 ---
 
@@ -79,6 +101,43 @@ For complete configuration details, see the [Settings Reference](../reference/se
 
 - Automatically load this preset when Byte starts
 - Only one preset should have this enabled
+
+---
+
+## Saving Presets
+
+Instead of manually editing `.byte/config.yaml`, you can save your current context as a preset using the `/preset:save` command.
+
+### How It Works
+
+The save command captures your current workspace state:
+
+```
+> /preset:save
+Enter a name for this preset: documentation
+Enter a default prompt for this preset (leave blank to skip): Write documentation for
+Preset 'documentation' saved successfully
+```
+
+The preset ID is automatically generated from your name (e.g., "My Workflow" becomes "my-workflow").
+
+### What Gets Saved
+
+- **Read-only files** - All files currently in read-only context
+- **Editable files** - All files currently in editable context
+- **Conventions** - All loaded convention files
+- **Default prompt** - Optional prompt text to pre-fill the input
+
+### Workflow
+
+1. Set up your ideal context with `/add` and `/read-only`
+2. Load relevant conventions
+3. Run `/preset:save` to capture the configuration
+4. Give it a descriptive name
+5. Optionally add a default prompt
+6. The preset is immediately available for use
+
+This is particularly useful when you discover a context configuration that works well and want to reuse it later.
 
 ---
 

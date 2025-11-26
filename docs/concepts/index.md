@@ -9,7 +9,7 @@ Byte's design revolves around key principles that work together to provide a pow
 - [Linting](lint.md) - Automated code quality checks and fixes
 - [Commit](commit.md) - AI-powered commit message generation
 - [Web](web.md) - Scrape webpages and convert to markdown for LLM context
-- [Presets](presets.md) - Save and load predefined file and convention configurations
+- [Presets](presets.md) - Save and load predefined configurations of files, conventions, and prompts
 
 Read on to explore these concepts in depth, or jump ahead to:
 
