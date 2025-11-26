@@ -8,6 +8,7 @@ from byte.domain.cli.service.command_registry import Command
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.memory.command.undo_command import UndoCommand
 from byte.domain.system.command.exit_command import ExitCommand
+from byte.domain.system.service.config_writer_service import ConfigWriterService
 from byte.domain.system.service.system_context_service import SystemContextService
 
 
@@ -28,6 +29,7 @@ class SystemServiceProvider(ServiceProvider):
     def services(self) -> List[Type[Service]]:
         return [
             SystemContextService,
+            ConfigWriterService,
         ]
 
     async def boot(self, container: Container) -> None:

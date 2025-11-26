@@ -1,12 +1,14 @@
 from argparse import Namespace
 
 from byte.core.config.config import ByteConfg
+from byte.core.utils.slugify import slugify
 from byte.domain.cli.argparse.base import ByteArgumentParser
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.files.service.file_service import FileService
 from byte.domain.knowledge.service.convention_context_service import ConventionContextService
 from byte.domain.presets.config import PresetsConfig
+from byte.domain.system.service.config_writer_service import ConfigWriterService
 
 
 class SavePresetCommand(Command):
@@ -39,11 +41,22 @@ class SavePresetCommand(Command):
         console = await self.make(ConsoleService)
 
         # Prompt for preset name
-        preset_name = await self.prompt_for_input("Enter a name for this preset:")
+        preset_name = await self.prompt_for_input("Enter a name for this preset")
 
         if not preset_name:
             console.print_error("Preset name cannot be empty")
             return
+
+        # Slugify the preset name to ensure it's URL-safe
+        preset_id = slugify(preset_name)
+
+        # Check if preset with this ID already exists
+        config = await self.make(ByteConfg)
+        if config.presets:
+            existing_preset = next((p for p in config.presets if p.id == preset_id), None)
+            if existing_preset:
+                console.print_error(f"Preset with ID '{preset_id}' already exists")
+                return
 
         # Get current file context
         file_service = await self.make(FileService)
@@ -56,16 +69,19 @@ class SavePresetCommand(Command):
 
         # Create new preset configuration
         new_preset = PresetsConfig(
-            id=preset_name,
+            id=preset_id,
             read_only_files=read_only_files,
             editable_files=editable_files,
             conventions=conventions,
         )
 
         # Add preset to config
-        config = await self.make(ByteConfg)
         if config.presets is None:
             config.presets = []
         config.presets.append(new_preset)
 
-        console.print_success(f"Preset '{preset_name}' saved successfully")
+        # Persist preset to config.yaml file
+        config_writer = await self.make(ConfigWriterService)
+        await config_writer.append_preset(new_preset)
+
+        console.print_success(f"Preset '{preset_id}' saved successfully")

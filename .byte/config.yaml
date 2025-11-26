@@ -1,101 +1,118 @@
 llm:
   model: anthropic
-
 lint:
   enable: true
   commands:
-    - command: ["uv", "run", "ruff", "format", "--force-exclude", "--respect-gitignore"]
-      languages: ["python"]
-    - command: ["uv", "run", "ruff", "check", "--fix", "--force-exclude"]
-      languages: ["python"]
-    - command: ["prettier", "--write"]
-      languages: ["markdown"]
-    - command: ["keep-sorted"]
-      languages: ["*"]
-
+  - command:
+    - uv
+    - run
+    - ruff
+    - format
+    - --force-exclude
+    - --respect-gitignore
+    languages:
+    - python
+  - command:
+    - uv
+    - run
+    - ruff
+    - check
+    - --fix
+    - --force-exclude
+    languages:
+    - python
+  - command:
+    - prettier
+    - --write
+    languages:
+    - markdown
+  - command:
+    - keep-sorted
+    languages:
+    - '*'
 files:
   ignore:
-    - .byte/cache
-    - .ruff_cache
-    - .idea
-    - .venv
-    - .env
-    - .git
-    - .pytest_cache
-    - __pycache__
-    - node_modules
+  - .byte/cache
+  - .ruff_cache
+  - .idea
+  - .venv
+  - .env
+  - .git
+  - .pytest_cache
+  - __pycache__
+  - node_modules
   watch:
     enable: true
-
 web:
   enable: true
   chrome_binary_location: /etc/profiles/per-user/sincore/bin/google-chrome-stable
-
 cli:
   ui_theme: mocha
   syntax_theme: github-dark
-
 lsp:
   enable: false
   timeout: 30
   servers:
     python:
-      command: ["uv", "run", "jedi-language-server"]
-      languages: ["python"]
-      
+      command:
+      - uv
+      - run
+      - jedi-language-server
+      languages:
+      - python
 presets:
-  - id: command
-    load_on_boot: true
-    conventions:
-      - CODE_STYLEGUIDE.md
-      - COMMENT_STYLEGUIDE.md
-      - PROJECT_ARCHITECTURE.md
-      - PYTHON_STYLEGUIDE.md
-    read_only_files:
-      - src/byte/bootstrap.py
-      - src/byte/container.py
-      - src/byte/core/cli.py
-      - src/byte/core/config/config.py
-      - src/byte/main.py
-      - src/byte/domain/cli/service/command_registry.py
-      - src/byte/core/mixins/user_interactive.py
-      - src/byte/domain/files/command/add_file_command.py
-      - src/byte/domain/files/command/drop_file_command.py
-      - src/byte/domain/knowledge/command/web_command.py
-      - src/byte/domain/git/command/commit_command.py
-  - id: mkdocs
-    prompt: "Using the `MKDOCS_STYLEGUIDE` and existing docs as examples, document  "
-    conventions:
-      - MKDOCS_STYLEGUIDE.md
-      - PROJECT_ARCHITECTURE.md
-    editable_files:
-      - src/byte/README.md
-      - docs/index.md
-      - docs/concepts/index.md
-    read_only_files:
-      - docs/concepts/web.md
-      - docs/concepts/lint.md
-      - docs/concepts/file-context.md
-      - .byte/config.yaml
-  - id: agent
-    conventions:
-      - CODE_STYLEGUIDE.md
-      - COMMENT_STYLEGUIDE.md
-      - PROJECT_ARCHITECTURE.md
-      - PYTHON_STYLEGUIDE.md
-    read_only_files:
-      - src/byte/bootstrap.py
-      - src/byte/container.py
-      - src/byte/core/cli.py
-      - src/byte/core/config/config.py
-      - src/byte/main.py
-    editable_files:
-      - src/byte/domain/agent/state.py
-      - src/byte/domain/agent/reducers.py
-      - src/byte/domain/agent/schemas.py
-      - src/byte/domain/agent/service_provider.py
-      - src/byte/domain/agent/implementations/base.py
-      - src/byte/domain/agent/implementations/ask/**
-      - src/byte/domain/agent/implementations/coder/**
-      - src/byte/domain/agent/implementations/commit/**
-      - src/byte/domain/agent/nodes/**
+- id: command
+  load_on_boot: true
+  conventions:
+  - CODE_STYLEGUIDE.md
+  - COMMENT_STYLEGUIDE.md
+  - PROJECT_ARCHITECTURE.md
+  - PYTHON_STYLEGUIDE.md
+  read_only_files:
+  - src/byte/bootstrap.py
+  - src/byte/container.py
+  - src/byte/core/cli.py
+  - src/byte/core/config/config.py
+  - src/byte/main.py
+  - src/byte/domain/cli/service/command_registry.py
+  - src/byte/core/mixins/user_interactive.py
+  - src/byte/domain/files/command/add_file_command.py
+  - src/byte/domain/files/command/drop_file_command.py
+  - src/byte/domain/knowledge/command/web_command.py
+  - src/byte/domain/git/command/commit_command.py
+- id: mkdocs
+  prompt: 'Using the `MKDOCS_STYLEGUIDE` and existing docs as examples, document  '
+  conventions:
+  - MKDOCS_STYLEGUIDE.md
+  - PROJECT_ARCHITECTURE.md
+  editable_files:
+  - src/byte/README.md
+  - docs/index.md
+  - docs/concepts/index.md
+  read_only_files:
+  - docs/concepts/web.md
+  - docs/concepts/lint.md
+  - docs/concepts/file-context.md
+  - .byte/config.yaml
+- id: agent
+  conventions:
+  - CODE_STYLEGUIDE.md
+  - COMMENT_STYLEGUIDE.md
+  - PROJECT_ARCHITECTURE.md
+  - PYTHON_STYLEGUIDE.md
+  read_only_files:
+  - src/byte/bootstrap.py
+  - src/byte/container.py
+  - src/byte/core/cli.py
+  - src/byte/core/config/config.py
+  - src/byte/main.py
+  editable_files:
+  - src/byte/domain/agent/state.py
+  - src/byte/domain/agent/reducers.py
+  - src/byte/domain/agent/schemas.py
+  - src/byte/domain/agent/service_provider.py
+  - src/byte/domain/agent/implementations/base.py
+  - src/byte/domain/agent/implementations/ask/**
+  - src/byte/domain/agent/implementations/coder/**
+  - src/byte/domain/agent/implementations/commit/**
+  - src/byte/domain/agent/nodes/**

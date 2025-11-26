@@ -28,6 +28,7 @@ class PseudoXmlParserService(BaseParserService):
 
     prompts: EditFormatPrompts
     edit_blocks: List[SearchReplaceBlock]
+    match_pattern = r'<file\s+path="([^"]+)"\s+operation="([^"]+)"\s*>\s*<search>(.*?)</search>\s*<replace>(.*?)</replace>\s*</file>'
 
     async def boot(self):
         self.edit_blocks = []
@@ -49,11 +50,10 @@ class PseudoXmlParserService(BaseParserService):
         Usage: `cleaned = service.remove_blocks_from_content(ai_response)`
         """
         # Pattern to match pseudo-XML file blocks
-        pattern = r'<file\s+path="([^"]+)"\s+operation="([^"]+)"\s*>\s*<search>(.*?)</search>\s*<replace>(.*?)</replace>\s*</file>'
+        pattern = self.match_pattern
 
         def replacement(match):
-            file_path = match.group(1)
-            return f"*[Changes applied to `{file_path.strip()}` - block removed]*"
+            return '*[Code change removed for brevity. Refer to `<context type="editable files">`.]*'
 
         # Replace all blocks with summary messages
         cleaned_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
@@ -82,7 +82,7 @@ class PseudoXmlParserService(BaseParserService):
         #   <search>...</search>
         #   <replace>...</replace>
         # </file>
-        pattern = r'<file\s+path="([^"]+)"\s+operation="([^"]+)"\s*>\s*<search>(.*?)</search>\s*<replace>(.*?)</replace>\s*</file>'
+        pattern = self.match_pattern
 
         matches = re.findall(pattern, content, re.DOTALL)
 
