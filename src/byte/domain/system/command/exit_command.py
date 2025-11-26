@@ -24,6 +24,6 @@ class ExitCommand(Command):
         )
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute the exit command by sending shutdown message to coordinator."""
         raise KeyboardInterrupt

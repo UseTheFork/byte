@@ -38,7 +38,7 @@ class WebCommand(Command, UserInteractive):
         parser.add_argument("url", help="URL to scrape")
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute the web scraping command.
 
         Scrapes the provided URL, converts content to markdown, displays it

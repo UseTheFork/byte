@@ -33,7 +33,7 @@ class ListFilesCommand(Command):
         )
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute the list files command by displaying current context files.
 
         Usage: Called automatically when user types `/ls`

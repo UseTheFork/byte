@@ -155,7 +155,7 @@ class ConventionCommand(Command, UserInteractive):
 
         return FOCUS_MESSAGES.get(convention_type)
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         convention_type = await self.prompt_convention_type()
 
         if not convention_type:

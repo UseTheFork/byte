@@ -42,7 +42,7 @@ class ResearchCommand(Command):
         )
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute research agent with the given query.
 
         Runs the research agent to investigate the codebase based on the user's

@@ -33,7 +33,7 @@ class ClearCommand(Command):
         )
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute the clear command to create a new conversation thread.
 
         Creates a new thread through the memory service, discarding the current

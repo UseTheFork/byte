@@ -34,7 +34,7 @@ class ContextAddFileCommand(Command):
         parser.add_argument("file_path", help="Path to file")
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Read a file and add its contents to session context.
 
         Usage: `await command.execute("config.py")`

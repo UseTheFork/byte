@@ -43,7 +43,7 @@ class MCPToolCommand(Command):
 
     # TODO: "Usage: /tool <tool_name> <args>"
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute an MCP tool with provided arguments.
 
         Usage: `/tool read_file path=/path/to/file timeout=30`

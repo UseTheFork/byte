@@ -31,7 +31,7 @@ class LintCommand(Command):
         )
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute linting command with optional arguments."""
 
         try:

@@ -28,7 +28,7 @@ class ContextListCommand(Command, UserInteractive):
         )
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Display all session context keys in a formatted panel.
 
         Usage: `await command.execute("")`

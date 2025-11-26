@@ -32,7 +32,7 @@ class SavePresetCommand(Command):
         )
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Save the current context as a new preset.
 
         Prompts user for a preset name, collects current files and conventions,

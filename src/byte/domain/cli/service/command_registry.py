@@ -81,14 +81,17 @@ class Command(ABC, Bootable, Injectable, Configurable, UserInteractive):
             console.print_error_panel(parser.format_help(), title="Invalid Command Arguments")
             return
 
-        return await self.execute(parsed_args)
+        return await self.execute(parsed_args, args)
 
     @abstractmethod
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute the command with provided arguments.
 
-        Args contain everything after the command name, unparsed.
-        Commands should handle their own argument parsing and validation.
+        Args:
+            args: Parsed arguments from the argument parser
+            raw_args: Raw argument string for commands that need custom parsing
+
+        Commands can choose to use either parsed args or raw_args depending on their needs.
         """
         pass
 

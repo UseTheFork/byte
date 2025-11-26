@@ -32,7 +32,7 @@ class ResetCommand(Command):
         )
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute the reset command to create a new thread and clear file context.
 
         Creates a new thread through the memory service and clears all files from

@@ -32,13 +32,12 @@ class AskCommand(Command):
         parser.add_argument("ask_query", nargs=argparse.REMAINDER, help="The user's question or query text")
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute the Ask agent with the provided user query.
 
         Processes the user's question through the agent service, which handles
         the complete interaction flow including AI response generation and display.
         """
 
-        query = " ".join(args.ask_query)
         agent_service = await self.make(AgentService)
-        await agent_service.execute_agent({"history_messages": [("user", query)]}, AskAgent)
+        await agent_service.execute_agent({"history_messages": [("user", raw_args)]}, AskAgent)

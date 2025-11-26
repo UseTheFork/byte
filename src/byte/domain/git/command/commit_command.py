@@ -33,7 +33,7 @@ class CommitCommand(Command):
         )
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute the commit command with full workflow automation.
 
         Stages all changes, validates that changes exist, runs linting on

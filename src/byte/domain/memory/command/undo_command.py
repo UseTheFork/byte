@@ -34,7 +34,7 @@ class UndoCommand(Command):
         )
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute undo operation on current conversation thread."""
         memory_service = await self.make(MemoryService)
         console = await self.make(ConsoleService)

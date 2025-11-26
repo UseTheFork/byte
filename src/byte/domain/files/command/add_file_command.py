@@ -35,7 +35,7 @@ class AddFileCommand(Command):
         parser.add_argument("file_path", help="Path to file")
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Add specified file to context with editable permissions."""
         console = await self.make(ConsoleService)
 

@@ -33,7 +33,7 @@ class SwitchModeCommand(Command):
         parser.add_argument("file_path", help="Path to file")
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Switch the mode of a file in context."""
         console = await self.make(ConsoleService)
 

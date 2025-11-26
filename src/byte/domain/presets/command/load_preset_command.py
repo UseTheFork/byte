@@ -50,7 +50,7 @@ class LoadPresetCommand(Command):
 
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Load a preset configuration by ID.
 
         Validates the preset exists, optionally clears conversation history,

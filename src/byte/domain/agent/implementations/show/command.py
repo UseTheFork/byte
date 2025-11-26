@@ -31,7 +31,7 @@ class ShowCommand(Command):
         )
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute the Show agent to display conversation state.
 
         Invokes the ShowAgent through the agent service to render the current

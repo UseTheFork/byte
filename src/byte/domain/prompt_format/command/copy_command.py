@@ -26,7 +26,7 @@ class CopyCommand(Command, UserInteractive):
         )
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute the copy command by running the CopyAgent."""
         copy_agent = await self.make(CopyAgent)
         await copy_agent.execute(

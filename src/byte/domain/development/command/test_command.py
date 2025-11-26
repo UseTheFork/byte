@@ -23,7 +23,7 @@ class TestCommand(Command):
         )
         return parser
 
-    async def execute(self, args: Namespace) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """ """
         console = await self.make(ConsoleService)
         lsp_service = await self.make(LSPService)
