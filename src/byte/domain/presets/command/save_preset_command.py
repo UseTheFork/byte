@@ -67,12 +67,19 @@ class SavePresetCommand(Command):
         convention_service = await self.make(ConventionContextService)
         conventions = list(convention_service.get_conventions().keys())
 
+        # Prompt for optional default prompt text
+        preset_prompt = await self.prompt_for_input("Enter a default prompt for this preset (leave blank to skip)")
+
+        # Only include prompt if user provided one
+        prompt_value = preset_prompt if preset_prompt and preset_prompt.strip() else None
+
         # Create new preset configuration
         new_preset = PresetsConfig(
             id=preset_id,
             read_only_files=read_only_files,
             editable_files=editable_files,
             conventions=conventions,
+            prompt=prompt_value,
         )
 
         # Add preset to config
