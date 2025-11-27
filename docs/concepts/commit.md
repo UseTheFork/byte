@@ -2,7 +2,7 @@
 
 Byte's commit system uses AI to generate meaningful commit messages by analyzing your staged changes. It automates the entire commit workflow - staging files, running linters, generating commit messages, and handling git operations.
 
-![Commit process showing staging, linting, and message generation](../images/commit_success.png)
+![Commit process showing staging, linting, and message generation](../images/recording/command_commit.gif)
 
 ---
 
