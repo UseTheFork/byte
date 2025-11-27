@@ -9,7 +9,6 @@
 
 <p align="center"><img width="800" alt="Byte Demo" src="https://raw.githubusercontent.com/usethefork/byte/main/docs/images/assets/recording/example_coder.gif" /></p>
 
-
 ---
 
 ## What is Byte?
