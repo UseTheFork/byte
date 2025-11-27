@@ -59,12 +59,12 @@ class CoderAgent(Agent):
 
         edit_format_service = await self.make(EditFormatService)
 
-        # Create the assistant runnable with out any tools. So regardless it wont make a tool call even thou we have a tool node.
         return AssistantContextSchema(
             mode="main",
             prompt=coder_prompt,
             main=main,
             weak=weak,
+            enforcement=edit_format_service.prompts.enforcement,
             recovery_steps=edit_format_service.prompts.recovery_steps,
             agent=self.__class__.__name__,
         )

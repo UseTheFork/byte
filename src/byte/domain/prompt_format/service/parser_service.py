@@ -11,10 +11,12 @@ from byte.core.service.base_service import Service
 from byte.domain.files.models import FileMode
 from byte.domain.files.service.discovery_service import FileDiscoveryService
 from byte.domain.files.service.file_service import FileService
+from byte.domain.prompt_format.constants import EDIT_BLOCK_NAME
 from byte.domain.prompt_format.exceptions import NoBlocksFoundError, PreFlightCheckError
 from byte.domain.prompt_format.schemas import (
     BlockStatus,
     BlockType,
+    BoundaryType,
     EditFormatPrompts,
     SearchReplaceBlock,
 )
@@ -24,6 +26,7 @@ from byte.domain.prompt_format.service.parser_service_prompt import (
     edit_format_system,
     practice_messages,
 )
+from byte.domain.prompt_format.utils import Boundary
 
 
 class ParserService(Service, UserInteractive, ABC):
@@ -59,7 +62,7 @@ class ParserService(Service, UserInteractive, ABC):
         pattern = self.match_pattern
 
         def replacement(match):
-            return '*[Code change removed for brevity. Refer to `<context type="editable files">`.]*'
+            return f"*[Code change removed for brevity. Refer to `{Boundary.open(BoundaryType.CONTEXT, meta={'type': 'editable files'})}`.]*"
 
         # Replace all blocks with summary messages
         cleaned_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
@@ -133,7 +136,7 @@ class ParserService(Service, UserInteractive, ABC):
         return blocks
 
     async def pre_flight_check(self, content: str) -> None:
-        """Validate that pseudo-XML block markers are properly balanced.
+        """Validate that block markers are properly balanced.
 
         Counts occurrences of required XML tags and raises an exception
         if they don't match, indicating malformed blocks.
@@ -147,33 +150,33 @@ class ParserService(Service, UserInteractive, ABC):
 
         if file_open_count == 0:
             raise NoBlocksFoundError(
-                "No pseudo-XML file blocks found in content. AI responses must include properly formatted edit blocks."
+                "No {EDIT_BLOCK_NAME} blocks found in content. AI responses must include properly formatted edit blocks."
             )
 
         if file_open_count != file_close_count:
             raise PreFlightCheckError(
-                f"Malformed pseudo-XML blocks: "
+                f"Malformed {EDIT_BLOCK_NAME} blocks: "
                 f"<file> tags={file_open_count}, </file> tags={file_close_count}. "
                 f"Opening and closing tags must match."
             )
 
         if search_count != search_close_count:
             raise PreFlightCheckError(
-                f"Malformed pseudo-XML blocks: "
+                f"Malformed {EDIT_BLOCK_NAME} blocks: "
                 f"<search> tags={search_count}, </search> tags={search_close_count}. "
                 f"Opening and closing tags must match."
             )
 
         if replace_count != replace_close_count:
             raise PreFlightCheckError(
-                f"Malformed pseudo-XML blocks: "
+                f"Malformed {EDIT_BLOCK_NAME} blocks: "
                 f"<replace> tags={replace_count}, </replace> tags={replace_close_count}. "
                 f"Opening and closing tags must match."
             )
 
         if search_count != replace_count:
             raise PreFlightCheckError(
-                f"Malformed pseudo-XML blocks: "
+                f"Malformed {EDIT_BLOCK_NAME} blocks: "
                 f"<search> tags={search_count}, <replace> tags={replace_count}. "
                 f"Each file block must have matching search and replace tags."
             )

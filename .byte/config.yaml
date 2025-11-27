@@ -62,7 +62,7 @@ lsp:
       - python
 presets:
 - id: command
-  load_on_boot: true
+  load_on_boot: false
   conventions:
   - CODE_STYLEGUIDE.md
   - COMMENT_STYLEGUIDE.md
@@ -116,3 +116,21 @@ presets:
   - src/byte/domain/agent/implementations/coder/**
   - src/byte/domain/agent/implementations/commit/**
   - src/byte/domain/agent/nodes/**
+- id: parser
+  conventions:
+  - CODE_STYLEGUIDE.md
+  - COMMENT_STYLEGUIDE.md
+  - PROJECT_ARCHITECTURE.md
+  - PYTHON_STYLEGUIDE.md
+  read_only_files:
+  - src/byte/bootstrap.py
+  - src/byte/container.py
+  - src/byte/core/cli.py
+  - src/byte/core/config/config.py
+  - src/byte/main.py
+  - src/byte/core/mixins/**
+  - src/byte/core/utils/**
+  - src/byte/core/service/base_service.py
+  - src/byte/core/service_provider.py
+  editable_files:
+  - src/byte/domain/prompt_format/**

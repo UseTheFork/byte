@@ -51,14 +51,14 @@ class AssistantNode(Node):
 
         return runnable
 
-    async def _gather_reinforcement(self, mode: str) -> list[HumanMessage]:
+    async def _gather_reinforcement(self, context: AssistantContextSchema) -> list[HumanMessage]:
         """Gather reinforcement messages from various domains.
 
         Emits GATHER_REINFORCEMENT event and collects reinforcement
         messages that will be assembled into the prompt context.
 
         Args:
-                mode: The AI mode being used ("main" or "weak")
+                context: AssistantContextSchema
 
         Returns:
                 List containing a single HumanMessage with combined reinforcement content
@@ -69,7 +69,7 @@ class AssistantNode(Node):
             event_type=EventType.GATHER_REINFORCEMENT,
             data={
                 "reinforcement": [],
-                "mode": mode,
+                "mode": context.mode,
             },
         )
         reinforcement_payload = await self.emit(reinforcement_payload)
@@ -80,9 +80,11 @@ class AssistantNode(Node):
             combined_content = "\n".join(f"- {msg}" for msg in reinforcement_messages)
             final_message = list_to_multiline_text(
                 [
-                    Boundary.open(BoundaryType.REINFORCEMENT),
+                    Boundary.open(BoundaryType.CRITICAL_REQUIREMENTS),
                     f"{combined_content}",
-                    Boundary.close(BoundaryType.REINFORCEMENT),
+                    "",
+                    context.enforcement,
+                    Boundary.close(BoundaryType.CRITICAL_REQUIREMENTS),
                 ]
             )
             return [HumanMessage(final_message)]
@@ -335,10 +337,6 @@ class AssistantNode(Node):
         edit_format_service = await self.make(EditFormatService)
         messages = state.get("history_messages", [])
 
-        # We mask a lot less messages in this case.
-        if state.get("errors") is not None:
-            return await edit_format_service.edit_block_service.replace_blocks_in_historic_messages_hook(messages, 5)
-
         return await edit_format_service.edit_block_service.replace_blocks_in_historic_messages_hook(messages)
 
     async def _generate_agent_state(self, state: BaseState, config, runtime: Runtime[AssistantContextSchema]) -> tuple:
@@ -352,7 +350,7 @@ class AssistantNode(Node):
         agent_state["project_hierarchy"] = await self._gather_project_hierarchy()
         agent_state["file_context"] = await self._gather_file_context()
         agent_state["file_context_with_line_numbers"] = await self._gather_file_context(True)
-        agent_state["reinforcement"] = await self._gather_reinforcement(runtime.context.mode)
+        agent_state["reinforcement"] = await self._gather_reinforcement(runtime.context)
         agent_state["constraints_context"] = await self._gather_constraints(state)
 
         agent_state["masked_messages"] = await self._gather_masked_messages(state)
