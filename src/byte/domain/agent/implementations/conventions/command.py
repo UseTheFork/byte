@@ -171,7 +171,7 @@ class ConventionCommand(Command, UserInteractive):
 
         convention_agent = await self.make(ConventionAgent)
         convention: dict = await convention_agent.execute(
-            request={"history_messages": [("user", focus.focus_message)]},
+            focus.focus_message,
         )
 
         # Write the convention content to a file
@@ -184,6 +184,6 @@ class ConventionCommand(Command, UserInteractive):
         await convention_context_service.boot()
         console = await self.make(ConsoleService)
         console.print_success_panel(
-            "Convention document generated and saved to\n\nThe convention has been loaded into the session context and is now available for AI reference.",
+            f"Convention document generated and saved to {focus.file_name}\n\nThe convention has been loaded into the session context and is now available for AI reference.",
             title="Convention Generated",
         )

@@ -7,6 +7,7 @@ from langgraph.types import Command
 
 from byte.core.event_bus import EventType, Payload
 from byte.core.logging import log
+from byte.core.utils import dd
 from byte.core.utils.list_to_multiline_text import list_to_multiline_text
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.schemas import AssistantContextSchema
@@ -406,6 +407,7 @@ class AssistantNode(Node):
                     and not result.content[0].get("text")
                 )
             ):
+                dd(result)
                 # Re-prompt for actual response
                 messages = agent_state["scratch_messages"] + [("user", "Respond with a real output.")]
                 agent_state = {**agent_state, "scratch_messages": messages}

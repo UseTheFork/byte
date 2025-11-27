@@ -78,7 +78,7 @@ class CommitCommand(Command):
             commit_agent = await self.make(CommitAgent)
             commit_message = await commit_agent.execute(request=staged_diff, display_mode="thinking")
 
-            await git_service.commit(str(commit_message.get("extracted_content", "")))
+            await git_service.commit(str(commit_message["extracted_content"]))
         except ByteConfigException as e:
             console = await self.make(ConsoleService)
             console.print_error_panel(

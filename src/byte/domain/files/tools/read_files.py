@@ -1,21 +1,13 @@
 from pathlib import Path
 
 from langchain_core.tools import tool
-from pydantic import BaseModel, Field
 
 from byte.context import make
 from byte.domain.files.service.file_service import FileService
 
 
-class ReadFilesInput(BaseModel):
-    """Input for read_files command."""
-
-    file_paths: list[str] = Field(description="List of file paths to read (relative to the project root)")
-
-
 @tool(
-    args_schema=ReadFilesInput,
-    description="""Read the contents of a file from the project. This tool reads files that are available in the project's file discovery service, respecting gitignore patterns. It does require the file to be in the AI context.""",
+    parse_docstring=True,
 )
 async def read_files(file_paths: list[str]) -> str:
     """Read the contents of a file from the project.
@@ -25,10 +17,10 @@ async def read_files(file_paths: list[str]) -> str:
     be in the AI context.
 
     Args:
-            file_paths: List of file paths to read (relative to the project root)
+        file_paths: MUST BE A LIST, of file paths to read (relative to the project root)
 
     Returns:
-            The contents of the file, or an error message if the file cannot be read
+        The contents of the file, or an error message if the file cannot be read
     """
     file_service = await make(FileService)
 

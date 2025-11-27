@@ -67,12 +67,7 @@ class ConventionAgent(Agent):
         # Define edges
         graph.add_edge(START, "start_node")
         graph.add_edge("start_node", "assistant_node")
-        graph.add_edge("assistant_node", "validation_node")
-        graph.add_edge("validation_node", "extract_node")
-        graph.add_edge("extract_node", "end_node")
         graph.add_edge("end_node", END)
-
-        graph.add_edge("tools_node", "assistant_node")
 
         # Compile graph with memory and configuration
         return graph.compile()

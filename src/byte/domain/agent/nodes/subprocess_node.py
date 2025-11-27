@@ -52,7 +52,9 @@ class SubprocessNode(Node, UserInteractive):
                 Boundary.close(BoundaryType.CONTEXT),
             )
 
-            return Command(goto="end_node", update={"messages": [("user", list_to_multiline_text(result_message))]})
+            return Command(
+                goto="end_node", update={"scratch_messages": [("user", list_to_multiline_text(result_message))]}
+            )
 
         return Command(goto="end_node")
 
