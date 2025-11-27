@@ -2,8 +2,6 @@
 
 Presets allow you to save and quickly load predefined configurations of files, conventions, and prompts. They're ideal for switching between different workflows, project contexts, or documentation tasks without manually adding files each time.
 
-![Preset loading process](../images/presets.png)
-
 ---
 
 ## Quick Start

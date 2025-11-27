@@ -2,7 +2,7 @@
 
 The file context acts as the AI's "workspace" - only files added to the context are visible to the AI. This design gives you precise control over what the AI can access and change, preventing unwanted modifications and reducing noise in the AI's decision-making.
 
-![File context showing read-only and editable files](../images/file-context.png)
+![File context showing read-only and editable files](../images/recording/command_file.gif)
 
 ---
 

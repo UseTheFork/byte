@@ -62,7 +62,7 @@ lsp:
       - python
 presets:
 - id: command
-  load_on_boot: true
+  load_on_boot: false
   conventions:
   - CODE_STYLEGUIDE.md
   - COMMENT_STYLEGUIDE.md

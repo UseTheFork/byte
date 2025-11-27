@@ -91,6 +91,11 @@
                   pkgs.pre-commit # Pre-ommit hooks
                   pkgs.git-cliff # Changelog generator
 
+                  pkgs.vhs
+
+                  pkgs.asciinema
+                  pkgs.asciinema-agg
+
                   pkgs.uv
                   pkgs.nodejs
                   pkgs.prettier

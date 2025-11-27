@@ -2,7 +2,7 @@
 
 Byte's web command allows you to scrape web pages and convert them to markdown format for use in your AI conversations. It uses headless Chrome to fetch pages, handles JavaScript-rendered content, and converts HTML to clean markdown that can be added to the LLM context.
 
-![Web process showing progress](../images/web.png)
+![Web process showing progress](../images/recording/command_web.gif)
 
 ---
 
