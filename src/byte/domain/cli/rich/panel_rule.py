@@ -43,7 +43,7 @@ class PanelTop(JupyterMixin):
         border_style = style + console.get_style(self.border_style)
 
         # Panel characters
-        top_left = "╭"
+        top_left = "╭─"
         top_right = "╮"
         top = "─"
 
@@ -57,7 +57,7 @@ class PanelTop(JupyterMixin):
         else:
             title_text = console.render_str(self.title, style="none")
 
-        title_text.plain = title_text.plain.replace("\n", " ")
+        title_text.plain = " " + title_text.plain.replace("\n", " ")
         title_text.expand_tabs()
 
         required_space = 4 if self.align == "center" else 2

@@ -27,7 +27,7 @@ class BoundaryType(str, Enum):
     PROJECT_HIERARCHY = "project_hierarchy"
     CONSTRAINTS = "constraints"
 
-    CRITICAL_REQUIREMENTS = "critical_requirements"
+    CRITICAL_REQUIREMENTS = "response_requirements"
     RECOVERY_STEPS = "recovery_steps"
 
     CONTEXT = "context"

@@ -6,6 +6,7 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.core.event_bus import EventType, Payload
+from byte.core.logging import log
 from byte.core.utils.list_to_multiline_text import list_to_multiline_text
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.schemas import AssistantContextSchema
@@ -80,17 +81,17 @@ class AssistantNode(Node):
             combined_content = "\n".join(f"- {msg}" for msg in reinforcement_messages)
 
             message_parts = [
-                Boundary.open(BoundaryType.CRITICAL_REQUIREMENTS),
+                # Boundary.open(BoundaryType.CRITICAL_REQUIREMENTS),
                 f"{combined_content}",
             ]
 
-            if context.enforcement:
-                message_parts.extend(["", context.enforcement])
+            # if context.enforcement:
+            #     message_parts.extend(["", context.enforcement])
 
-            message_parts.append(Boundary.close(BoundaryType.CRITICAL_REQUIREMENTS))
+            # message_parts.append(Boundary.close(BoundaryType.CRITICAL_REQUIREMENTS))
 
-            final_message = list_to_multiline_text(message_parts)
-            return [HumanMessage(final_message)]
+            # final_message = list_to_multiline_text(message_parts)
+            # return [HumanMessage(final_message)]
 
         return []
 
@@ -388,6 +389,8 @@ class AssistantNode(Node):
 
             result = cast(AIMessage, result)
             await self._track_token_usage(result, runtime.context.mode)
+
+            log.debug(result)
 
             # Ensure we get a real response
             if not result.tool_calls and (

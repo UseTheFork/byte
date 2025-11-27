@@ -1,1 +1,1 @@
-EDIT_BLOCK_NAME = "Structured Edit"
+EDIT_BLOCK_NAME = "Pseudo-XML Edit"

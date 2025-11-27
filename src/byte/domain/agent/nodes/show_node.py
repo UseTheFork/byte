@@ -26,6 +26,23 @@ class ShowNode(AssistantNode):
 
         console = await self.make(ConsoleService)
 
-        console.print(prompt_value.to_string())
+        messages = prompt_value.to_messages()
+        for message in messages:
+            message_type = type(message).__name__
+
+            # Determine border style based on message type
+            border_style = "primary"
+            if message_type == "SystemMessage":
+                border_style = "danger"
+            elif message_type == "HumanMessage":
+                border_style = "info"
+            elif message_type == "AIMessage":
+                border_style = "secondary"
+
+            console.panel_top(f"Message: {message_type}", border_style=border_style)
+            console.print("")
+            console.print(message.content)
+            console.print("")
+            console.panel_bottom(border_style=border_style)
 
         return Command(goto="end_node", update=state)
