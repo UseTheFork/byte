@@ -61,6 +61,24 @@ lsp:
       languages:
       - python
 presets:
+- id: base
+  load_on_boot: true
+  conventions:
+  - CODE_STYLEGUIDE.md
+  - COMMENT_STYLEGUIDE.md
+  - PROJECT_ARCHITECTURE.md
+  - PYTHON_STYLEGUIDE.md
+  read_only_files:
+  - src/byte/bootstrap.py
+  - src/byte/container.py
+  - src/byte/core/cli.py
+  - src/byte/core/config/config.py
+  - src/byte/main.py
+  - src/byte/core/mixins/**
+  - src/byte/core/utils/**
+  - src/byte/core/service/base_service.py
+  - src/byte/core/service_provider.py
+
 - id: command
   load_on_boot: false
   conventions:

@@ -102,6 +102,7 @@ class ParserService(Service, UserInteractive, ABC):
             # search_content = search_content.strip()
             # replace_content = replace_content.strip()
 
+            # TODO: Improve logging here.
             log.debug(file_path)
             log.debug(search_content)
 
@@ -218,10 +219,22 @@ class ParserService(Service, UserInteractive, ABC):
                 # File exists - validate search content can be found
                 try:
                     content = file_path.read_text(encoding="utf-8")
+
                     if block.search_content and block.search_content not in content:
-                        block.block_status = BlockStatus.SEARCH_NOT_FOUND_ERROR
-                        block.status_message = f"Search content not found in {block.file_path}"
-                        continue
+                        # Try stripping whitespace as a fallback
+                        stripped_search = block.search_content.strip()
+
+                        if stripped_search and stripped_search in content:
+                            # Match found after stripping - update the block's search content
+                            block.search_content = stripped_search
+                            block.replace_content = block.replace_content.strip()
+                            # Continue to next validation (block remains VALID)
+                        else:
+                            # Still no match even after stripping
+                            block.block_status = BlockStatus.SEARCH_NOT_FOUND_ERROR
+                            block.status_message = f"Search content not found in {block.file_path}"
+                            continue
+
                 except (FileNotFoundError, PermissionError, UnicodeDecodeError):
                     block.block_status = BlockStatus.SEARCH_NOT_FOUND_ERROR
                     block.status_message = f"Cannot read file: {block.file_path}"
@@ -296,7 +309,7 @@ class ParserService(Service, UserInteractive, ABC):
                     if file_path.exists():
                         if await self.prompt_for_confirmation(
                             f"Delete '{file_path}'?",
-                            False,
+                            True,
                         ):
                             file_path.unlink()
 

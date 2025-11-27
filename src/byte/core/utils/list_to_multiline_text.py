@@ -5,4 +5,7 @@ def list_to_multiline_text(lines: list[str], seperator: str = "\n") -> str:
     Example:
         ["foo", "bar", "baz"] -> "foo\nbar\nbaz"
     """
+    if not lines:
+        return ""
+
     return seperator.join(lines)

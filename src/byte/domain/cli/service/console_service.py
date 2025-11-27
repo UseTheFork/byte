@@ -4,9 +4,9 @@ from rich.rule import Rule
 from rich.syntax import Syntax
 from rich.theme import Theme
 
-from byte.core.config.config import ByteConfg
 from byte.core.service.base_service import Service
 from byte.domain.cli.rich.menu import Menu
+from byte.domain.cli.rich.panel_rule import PanelBottom, PanelTop
 from byte.domain.cli.schemas import ByteTheme, ThemeRegistry
 
 
@@ -14,7 +14,6 @@ class ConsoleService(Service):
     """Console service for terminal output with themed styling."""
 
     _console: Console
-    _config: ByteConfg
 
     async def boot(self, **kwargs) -> None:
         """Initialize the console with configured theme.
@@ -24,7 +23,6 @@ class ConsoleService(Service):
 
         Usage: Called automatically during service initialization
         """
-        self._config = await self.make(ByteConfg)
 
         # Load the selected Catppuccin theme variant.
         theme_registry = ThemeRegistry()
@@ -287,14 +285,80 @@ class ConsoleService(Service):
         kwargs.setdefault("align", "left")
         self.console.print(Rule(*args, **kwargs))
 
+    def panel_top(self, *args, **kwargs):
+        """Print the top border of a panel with optional title.
+
+        Creates and prints a panel top border with left-aligned title
+        and inactive border styling by default.
+
+        Usage:
+                `service.panel_top("Section Title")`
+                `service.panel_top("Header", border_style="primary")`
+
+        Args:
+                *args: Positional arguments passed to PanelTop constructor
+                **kwargs: Keyword arguments passed to PanelTop, with defaults applied
+        """
+        kwargs.setdefault("border_style", "inactive_border")
+        kwargs.setdefault("align", "left")
+        self.console.print(PanelTop(*args, **kwargs))
+
+    def panel_bottom(self, *args, **kwargs):
+        """Print the bottom border of a panel with optional subtitle.
+
+        Creates and prints a panel bottom border with left-aligned subtitle
+        and inactive border styling by default.
+
+        Usage:
+                `service.panel_bottom("End of Section")`
+                `service.panel_bottom("Footer", border_style="primary")`
+
+        Args:
+                *args: Positional arguments passed to PanelBottom constructor
+                **kwargs: Keyword arguments passed to PanelBottom, with defaults applied
+        """
+        kwargs.setdefault("border_style", "inactive_border")
+        kwargs.setdefault("align", "left")
+        self.console.print(PanelBottom(*args, **kwargs))
+
     def select(self, *args, **kwargs):
-        """ """
+        """Show a single-selection menu and return the chosen option.
+
+        Creates a Menu component with the configured console and allows the user
+        to select one option from the provided choices using keyboard navigation.
+
+        Args:
+                *args: Positional arguments passed to Menu constructor (typically choices)
+                **kwargs: Keyword arguments passed to Menu, with console defaulted
+
+        Returns:
+                The selected option value
+
+        Usage:
+                `choice = service.select("Option 1", "Option 2", "Option 3")`
+                `choice = service.select(*options, title="Choose one")`
+        """
         kwargs.setdefault("console", self._console)
         menu = Menu(*args, **kwargs)
         return menu.select()
 
     def multiselect(self, *args, **kwargs):
-        """ """
+        """Show a multi-selection menu and return the chosen options.
+
+        Creates a Menu component with the configured console and allows the user
+        to select multiple options from the provided choices using keyboard navigation.
+
+        Args:
+                *args: Positional arguments passed to Menu constructor (typically choices)
+                **kwargs: Keyword arguments passed to Menu, with console defaulted
+
+        Returns:
+                List of selected option values
+
+        Usage:
+                `choices = service.multiselect("Option 1", "Option 2", "Option 3")`
+                `choices = service.multiselect(*options, title="Choose multiple")`
+        """
         kwargs.setdefault("console", self._console)
         menu = Menu(*args, **kwargs)
         return menu.multiselect()

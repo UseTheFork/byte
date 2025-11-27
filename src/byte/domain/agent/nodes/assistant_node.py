@@ -78,15 +78,18 @@ class AssistantNode(Node):
 
         if reinforcement_messages:
             combined_content = "\n".join(f"- {msg}" for msg in reinforcement_messages)
-            final_message = list_to_multiline_text(
-                [
-                    Boundary.open(BoundaryType.CRITICAL_REQUIREMENTS),
-                    f"{combined_content}",
-                    "",
-                    context.enforcement,
-                    Boundary.close(BoundaryType.CRITICAL_REQUIREMENTS),
-                ]
-            )
+
+            message_parts = [
+                Boundary.open(BoundaryType.CRITICAL_REQUIREMENTS),
+                f"{combined_content}",
+            ]
+
+            if context.enforcement:
+                message_parts.extend(["", context.enforcement])
+
+            message_parts.append(Boundary.close(BoundaryType.CRITICAL_REQUIREMENTS))
+
+            final_message = list_to_multiline_text(message_parts)
             return [HumanMessage(final_message)]
 
         return []
