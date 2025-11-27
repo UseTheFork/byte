@@ -24,16 +24,20 @@ class EndNode(Node):
             await self.emit(payload)
 
         # This is where we promote `scratch_messages` to `history_messages`
-        last_message = get_last_message(state["scratch_messages"])
-        clear_scratch = RemoveMessage(id=REMOVE_ALL_MESSAGES)
+        update_dict = {
+            **state,
+            # We always want to erase the current user request
+            "user_request": "",
+        }
+
+        # Only update messages if there are scratch messages to process
+        if state["scratch_messages"]:
+            last_message = get_last_message(state["scratch_messages"])
+            clear_scratch = RemoveMessage(id=REMOVE_ALL_MESSAGES)
+            update_dict["history_messages"] = last_message
+            update_dict["scratch_messages"] = clear_scratch
 
         return Command(
             goto=END,
-            update={
-                **state,
-                # We always want to erase the current user request
-                "user_request": "",
-                "history_messages": last_message,
-                "scratch_messages": clear_scratch,
-            },
+            update=update_dict,
         )

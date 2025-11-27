@@ -24,7 +24,6 @@ class CopyAgent(Agent):
 
         # Define edges
         graph.add_edge(START, "copy_node")
-        graph.add_edge("copy_node", "end_node")
         graph.add_edge("end_node", END)
 
         checkpointer = await self.get_checkpointer()

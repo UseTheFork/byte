@@ -23,6 +23,11 @@ class CopyNode(Node, UserInteractive):
         """Extract code blocks and prompt user to select one for clipboard copy."""
         console = await self.make(ConsoleService)
         messages = state["history_messages"]
+
+        if not messages:
+            console.print_warning("No messages found in history.")
+            return Command(goto="end_node", update=state)
+
         last_message = messages[-1]
 
         response_text = extract_content_from_message(last_message)
