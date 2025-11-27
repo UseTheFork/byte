@@ -40,4 +40,4 @@ class AskCommand(Command):
         """
 
         agent_service = await self.make(AgentService)
-        await agent_service.execute_agent({"history_messages": [("user", raw_args)]}, AskAgent)
+        await agent_service.execute_agent(raw_args, AskAgent)

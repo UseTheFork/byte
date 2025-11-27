@@ -1,8 +1,14 @@
 # Byte
 
-<p align="center"><img alt="Byte Logo" src="https://raw.githubusercontent.com/usethefork/byte/main/docs/images/assets/logo.svg" /></p>
+<p align="center">
+    <img alt="Byte Logo" src="https://raw.githubusercontent.com/usethefork/byte/main/docs/images/assets/logo.svg" /><br />
+    <a href="https://github.com/UseTheFork/byte/releases"><img src="https://img.shields.io/github/release/UseTheFork/byte" alt="Latest Release"></a>
+</p>
 
-A human-in-the-loop AI coding agent that keeps you in control. Byte helps you build through natural conversation while maintaining full visibility and approval over every change.
+<p align="center">A human-in-the-loop AI coding agent that keeps you in control. Byte helps you build through natural conversation while maintaining full visibility and approval over every change.</a>
+
+<p align="center"><img width="800" alt="Byte Demo" src="https://raw.githubusercontent.com/usethefork/byte/main/docs/images/assets/recording/example_coder.gif" /></p>
+
 
 ---
 

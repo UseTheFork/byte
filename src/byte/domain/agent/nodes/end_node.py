@@ -24,8 +24,16 @@ class EndNode(Node):
             await self.emit(payload)
 
         # This is where we promote `scratch_messages` to `history_messages`
-
         last_message = get_last_message(state["scratch_messages"])
         clear_scratch = RemoveMessage(id=REMOVE_ALL_MESSAGES)
 
-        return Command(goto=END, update={**state, "history_messages": last_message, "scratch_messages": clear_scratch})
+        return Command(
+            goto=END,
+            update={
+                **state,
+                # We always want to erase the current user request
+                "user_request": "",
+                "history_messages": last_message,
+                "scratch_messages": clear_scratch,
+            },
+        )

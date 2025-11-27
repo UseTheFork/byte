@@ -49,8 +49,8 @@ class Byte:
     async def run(self):
         """Run the main application loop.
 
-        Initializes the application, starts the main event loop, and ensures
-        proper cleanup of the task manager on shutdown.
+        Initializes the application, starts the main loop, and ensures proper cleanup
+        of the task manager on exit.
         """
         await self.initialize()
         try:
