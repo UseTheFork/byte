@@ -55,6 +55,7 @@ conventions_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
         ("placeholder", "{project_hierarchy}"),
         ("placeholder", "{file_context_with_line_numbers}"),
         ("placeholder", "{history_messages}"),
+        ("user", "{processed_user_request}"),
         ("placeholder", "{errors}"),
     ]
 )

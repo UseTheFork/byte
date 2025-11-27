@@ -52,7 +52,7 @@ class AssistantNode(Node):
 
         return runnable
 
-    async def _gather_reinforcement(self, context: AssistantContextSchema) -> list[HumanMessage]:
+    async def _gather_reinforcement(self, user_request: str, context: AssistantContextSchema) -> str:
         """Gather reinforcement messages from various domains.
 
         Emits GATHER_REINFORCEMENT event and collects reinforcement
@@ -74,26 +74,25 @@ class AssistantNode(Node):
             },
         )
         reinforcement_payload = await self.emit(reinforcement_payload)
-
         reinforcement_messages = reinforcement_payload.get("reinforcement", [])
 
+        message_parts = []
+
         if reinforcement_messages:
-            combined_content = "\n".join(f"- {msg}" for msg in reinforcement_messages)
+            message_parts.extend(f"{msg}" for msg in reinforcement_messages)
 
-            message_parts = [
-                # Boundary.open(BoundaryType.CRITICAL_REQUIREMENTS),
-                f"{combined_content}",
-            ]
+        if context.enforcement:
+            message_parts.extend(["", context.enforcement])
 
-            # if context.enforcement:
-            #     message_parts.extend(["", context.enforcement])
+        if message_parts:
+            message_parts.insert(0, "")
+            message_parts.insert(0, "Don't forget to follow these rules")
+            message_parts.insert(0, "# Reminders")
 
-            # message_parts.append(Boundary.close(BoundaryType.CRITICAL_REQUIREMENTS))
+        # Insert the user message at the top
+        message_parts.insert(0, user_request)
 
-            # final_message = list_to_multiline_text(message_parts)
-            # return [HumanMessage(final_message)]
-
-        return []
+        return list_to_multiline_text(message_parts)
 
     async def _gather_project_hierarchy(self) -> list[HumanMessage]:
         """Gather project hierarchy for LLM understanding of project structure.
@@ -354,10 +353,15 @@ class AssistantNode(Node):
         agent_state["project_hierarchy"] = await self._gather_project_hierarchy()
         agent_state["file_context"] = await self._gather_file_context()
         agent_state["file_context_with_line_numbers"] = await self._gather_file_context(True)
-        agent_state["reinforcement"] = await self._gather_reinforcement(runtime.context)
         agent_state["constraints_context"] = await self._gather_constraints(state)
 
         agent_state["masked_messages"] = await self._gather_masked_messages(state)
+
+        # Reinforcement is appended to the user message.
+        agent_state["processed_user_request"] = await self._gather_reinforcement(
+            state.get("user_request", ""),
+            runtime.context,
+        )
 
         if state.get("errors", None) is not None:
             agent_state["errors"] = await self._gather_errors(agent_state)

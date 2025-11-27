@@ -30,6 +30,7 @@ commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
                 ]
             ),
         ),
+        ("user", "{processed_user_request}"),
         ("placeholder", "{scratch_messages}"),
     ]
 )

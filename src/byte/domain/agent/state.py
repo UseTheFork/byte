@@ -19,6 +19,9 @@ class BaseState(TypedDict):
     # Ephemeral messages for current execution only (validation, errors, etc.)
     scratch_messages: Annotated[list[AnyMessage], add_messages]
 
+    # Current user request being processed by the agent
+    user_request: str
+
     constraints: Annotated[list[ConstraintSchema], add_constraints]
     masked_messages: list[AnyMessage]
 

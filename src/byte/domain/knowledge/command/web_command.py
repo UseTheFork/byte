@@ -88,15 +88,7 @@ class WebCommand(Command, UserInteractive):
 
             cleaner_agent = await self.make(CleanerAgent)
             result = await cleaner_agent.execute(
-                {
-                    "messages": [
-                        (
-                            "user",
-                            f"# Extract only the relevant information from this web content:\n\n{markdown_content}",
-                        )
-                    ],
-                    "project_inforamtion_and_context": [],
-                },
+                f"# Extract only the relevant information from this web content:\n\n{markdown_content}",
                 display_mode="thinking",
             )
 

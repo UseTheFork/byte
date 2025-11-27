@@ -30,6 +30,6 @@ class CopyCommand(Command, UserInteractive):
         """Execute the copy command by running the CopyAgent."""
         copy_agent = await self.make(CopyAgent)
         await copy_agent.execute(
-            {},
+            "",
             display_mode="silent",
         )

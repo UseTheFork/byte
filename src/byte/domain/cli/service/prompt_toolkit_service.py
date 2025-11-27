@@ -207,7 +207,7 @@ class PromptToolkitService(Service):
         user_input = user_input[1:]
 
         subprocess_agent = await self.make(SubprocessAgent)
-        await subprocess_agent.execute({"command": user_input}, display_mode="silent")
+        await subprocess_agent.execute(user_input, display_mode="silent")
         # TODO: Should we execute somthing after this?
 
     async def interrupt(self):
