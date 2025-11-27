@@ -152,7 +152,7 @@ class AssistantNode(Node):
                     Boundary.open(BoundaryType.CONTEXT, meta={"type": "read only files"}),
                     Boundary.notice("Any edits to these files will be rejected"),
                     f"{read_only_content}",
-                    Boundary.open(BoundaryType.CONTEXT),
+                    Boundary.close(BoundaryType.CONTEXT),
                 ]
             )
 
@@ -162,7 +162,7 @@ class AssistantNode(Node):
                 [
                     Boundary.open(BoundaryType.CONTEXT, meta={"type": "editable files"}),
                     f"{editable_content}",
-                    Boundary.open(BoundaryType.CONTEXT),
+                    Boundary.close(BoundaryType.CONTEXT),
                 ]
             )
 

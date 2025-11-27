@@ -41,6 +41,7 @@ class ParseBlocksNode(Node):
                         "```",
                         "No changes were applied. Fix the malformed blocks and retry with corrected syntax.",
                         "Reply with ALL *Pseudo-XML Edit Blocks* (corrected and uncorrected) plus any other content from your original message.",
+                        runtime.context.recovery_steps,
                     ]
                 )
 
@@ -70,6 +71,7 @@ class ParseBlocksNode(Node):
                     error_message,
                     "No changes were applied.",
                     "Reply with ALL *Pseudo-XML Edit Blocks* (corrected and uncorrected) plus any other content from your original message.",
+                    runtime.context.recovery_steps,
                 ]
             )
 

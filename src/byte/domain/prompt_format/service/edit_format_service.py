@@ -1,13 +1,12 @@
 from typing import List
 
-from byte.core.config.config import ByteConfg
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
-from byte.domain.prompt_format.parser.pseudo_xml.service import PseudoXmlParserService
 from byte.domain.prompt_format.schemas import (
     EditFormatPrompts,
     SearchReplaceBlock,
 )
+from byte.domain.prompt_format.service.parser_service import ParserService
 from byte.domain.prompt_format.service.shell_command_prompt import (
     shell_command_system,
     shell_practice_messages,
@@ -26,20 +25,27 @@ class EditFormatService(Service, UserInteractive):
 
     async def boot(self):
         """Initialize service with appropriate prompts based on configuration."""
-        config = await self.make(ByteConfg)
-        self.edit_block_service = await self.make(PseudoXmlParserService)
+        self.edit_block_service = await self.make(ParserService)
 
-        if config.edit_format.enable_shell_commands:
+        if self._config.edit_format.enable_shell_commands:
             # Combine system prompts to provide AI with both edit and shell capabilities
             combined_system = f"{self.edit_block_service.prompts.system}\n\n{shell_command_system}"
 
             # Combine practice messages to show examples of both edit blocks and shell commands
             combined_examples = self.edit_block_service.prompts.examples + shell_practice_messages
 
-            self.prompts = EditFormatPrompts(system=combined_system, examples=combined_examples)
+            self.prompts = EditFormatPrompts(
+                system=combined_system,
+                enforcement=self.edit_block_service.prompts.enforcement,
+                recovery_steps=self.edit_block_service.prompts.recovery_steps,
+                examples=combined_examples,
+            )
         else:
             self.prompts = EditFormatPrompts(
-                system=self.edit_block_service.prompts.system, examples=self.edit_block_service.prompts.examples
+                system=self.edit_block_service.prompts.system,
+                enforcement=self.edit_block_service.prompts.enforcement,
+                recovery_steps=self.edit_block_service.prompts.recovery_steps,
+                examples=self.edit_block_service.prompts.examples,
             )
 
     async def validate(self, content: str) -> List[SearchReplaceBlock]:

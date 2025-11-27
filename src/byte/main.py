@@ -47,7 +47,11 @@ class Byte:
                 await file_service.add_file(file_path, FileMode.EDITABLE)
 
     async def run(self):
-        """ """
+        """Run the main application loop.
+
+        Initializes the application, starts the main event loop, and ensures
+        proper cleanup of the task manager on shutdown.
+        """
         await self.initialize()
         try:
             await self._main_loop()

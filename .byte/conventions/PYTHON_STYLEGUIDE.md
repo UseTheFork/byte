@@ -2,14 +2,13 @@
 
 ## General
 
-- Python 3.12+, tabs for indentation, Ruff for linting/formatting
+- Python 3.12+, **spaces** for indentation, Ruff for linting/formatting
 - Type hints mandatory for all function signatures
 - Absolute imports from `byte.` package root
 
 ## Type Hints & Imports
 
 - Use `Optional[T]`, `Union[A, B]`, `List`, `Dict`, `Type` from typing
-- Import under `TYPE_CHECKING` for circular dependencies: `if TYPE_CHECKING: from byte.container import Container`
 
 ## Naming
 

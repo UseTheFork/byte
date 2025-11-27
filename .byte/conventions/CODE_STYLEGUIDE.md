@@ -5,7 +5,7 @@
 ### General
 
 - Python 3.12+
-- Tabs for indentation
+- **Spaces** for indentation
 - Type hints mandatory for all function signatures
 - Absolute imports from `byte.` package root
 

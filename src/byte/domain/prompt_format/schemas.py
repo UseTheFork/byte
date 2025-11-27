@@ -27,6 +27,9 @@ class BoundaryType(str, Enum):
     PROJECT_HIERARCHY = "project_hierarchy"
     CONSTRAINTS = "constraints"
 
+    CRITICAL_REQUIREMENTS = "critical_requirements"
+    RECOVERY_STEPS = "recovery_steps"
+
     CONTEXT = "context"
 
     SYSTEM_CONTEXT = "system_context"
@@ -55,6 +58,8 @@ class EditFormatPrompts:
     """"""
 
     system: str
+    enforcement: str
+    recovery_steps: str
     examples: list[tuple[str, str]]
 
     # shell_system: str

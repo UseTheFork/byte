@@ -44,7 +44,7 @@ class LoadPresetCommand(Command):
         )
         parser.add_argument(
             "--silent",
-            action="store_false",
+            action="store_true",
             help="Run silently without prompting for confirmations",
         )
 

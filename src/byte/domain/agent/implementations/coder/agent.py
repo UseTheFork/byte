@@ -57,11 +57,14 @@ class CoderAgent(Agent):
         main: BaseChatModel = llm_service.get_main_model()
         weak: BaseChatModel = llm_service.get_weak_model()
 
+        edit_format_service = await self.make(EditFormatService)
+
         # Create the assistant runnable with out any tools. So regardless it wont make a tool call even thou we have a tool node.
         return AssistantContextSchema(
             mode="main",
             prompt=coder_prompt,
             main=main,
             weak=weak,
+            recovery_steps=edit_format_service.prompts.recovery_steps,
             agent=self.__class__.__name__,
         )
