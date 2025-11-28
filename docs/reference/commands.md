@@ -15,7 +15,7 @@ Byte provides a comprehensive set of commands for interacting with your codebase
 ### `/ask`
 
 ```
-usage: ask ask_query
+usage: ask ...
 
 Ask the AI agent a question or request assistance
 
@@ -37,7 +37,7 @@ to the conventions directory
 ### `/research`
 
 ```
-usage: research research_query
+usage: research ...
 
 Execute research agent to gather codebase insights, analyze patterns, and save
 detailed findings to session context for other agents
@@ -159,6 +159,7 @@ Run configured linters on changed files or current context
 
 ```
 usage: preset [--should-not-clear-history] [--should-not-clear-files]
+              [--silent]
               preset_id
 
 Load a predefined preset configuration with files and conventions
@@ -172,6 +173,16 @@ options:
                         preset
   --should-not-clear-files
                         Do not clear file context before loading preset
+  --silent              Run silently without prompting for confirmations
+
+```
+
+### `/preset:save`
+
+```
+usage: preset:save
+
+Save the current context as a preset configuration
 
 ```
 
