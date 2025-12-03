@@ -290,7 +290,7 @@ class AICommentWatcherService(Service):
         if prompt_toolkit_service.is_interrupted():
             reinforcement_list = payload.get("reinforcement", [])
             reinforcement_list.extend(
-                'After successfully implementing all changes, remove the "AI:" comment markers from the code.'
+                '- After successfully implementing all changes, remove the "AI:" comment markers from the code.'
             )
             payload.set("reinforcement", reinforcement_list)
 

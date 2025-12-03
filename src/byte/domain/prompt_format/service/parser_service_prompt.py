@@ -155,6 +155,9 @@ edit_format_recovery_steps = list_to_multiline_text(
         "   - Check for trailing spaces",
         "4. **Verify character-by-character** that your search block matches",
         "5. **Never guess** - always View the file to get exact text",
+        "",
+        f"ALWAYS respond with the original message and ALL of the {EDIT_BLOCK_NAME} Blocks.",
+        " Note: The message you respond with will be the ones stored in conversation history.",
         Boundary.close(BoundaryType.RECOVERY_STEPS),
     ]
 )
@@ -411,8 +414,11 @@ practice_messages = [
             ]
         ),
     ),
+    # (
+    #     "user",
+    #     "Training complete. Everything below this message is the actual project.",
+    # ),
 ]
-
 
 # pseudo_xml_prompts = EditFormatPrompts(
 #     system=edit_format_system,

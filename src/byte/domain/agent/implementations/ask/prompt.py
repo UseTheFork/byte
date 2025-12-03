@@ -39,3 +39,10 @@ ask_prompt = ChatPromptTemplate.from_messages(
         ("placeholder", "{scratch_messages}"),
     ]
 )
+
+ask_enforcement = list_to_multiline_text(
+    [
+        "- Never use XML-style tags in your responses (e.g., <file>, <search>, <replace>). These are for internal parsing only."
+        "- DO NOT provide full code implementations unless explicitly requested. Describe the changes needed first.",
+    ]
+)

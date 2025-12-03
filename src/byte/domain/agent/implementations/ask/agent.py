@@ -1,7 +1,7 @@
 from langchain_core.language_models.chat_models import BaseChatModel
 from langgraph.graph import END, START, StateGraph
 
-from byte.domain.agent.implementations.ask.prompt import ask_prompt
+from byte.domain.agent.implementations.ask.prompt import ask_enforcement, ask_prompt
 from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.end_node import EndNode
@@ -64,6 +64,7 @@ class AskAgent(Agent):
         return AssistantContextSchema(
             mode="main",
             prompt=ask_prompt,
+            enforcement=ask_enforcement,
             main=main,
             weak=weak,
             agent=self.__class__.__name__,

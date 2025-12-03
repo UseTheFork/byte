@@ -87,7 +87,7 @@ class AssistantNode(Node):
 
         if message_parts:
             message_parts.insert(0, "")
-            message_parts.insert(0, "Don't forget to follow these rules")
+            message_parts.insert(0, "> Don't forget to follow these rules")
             message_parts.insert(0, "# Reminders")
 
         # Insert the user message at the top
