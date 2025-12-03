@@ -93,9 +93,6 @@
 
                   pkgs.vhs
 
-                  pkgs.asciinema
-                  pkgs.asciinema-agg
-
                   pkgs.uv
                   pkgs.nodejs
                   pkgs.prettier

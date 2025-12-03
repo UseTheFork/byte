@@ -1,4 +1,4 @@
-from langchain.messages import RemoveMessage
+from langchain.messages import HumanMessage, RemoveMessage
 from langgraph.graph.message import REMOVE_ALL_MESSAGES
 from langgraph.graph.state import END, RunnableConfig
 from langgraph.runtime import Runtime
@@ -34,7 +34,11 @@ class EndNode(Node):
         if state["scratch_messages"]:
             last_message = get_last_message(state["scratch_messages"])
             clear_scratch = RemoveMessage(id=REMOVE_ALL_MESSAGES)
-            update_dict["history_messages"] = last_message
+
+            # Create a HumanMessage from the user_request
+            user_message = HumanMessage(content=state["user_request"])
+
+            update_dict["history_messages"] = [user_message, last_message]
             update_dict["scratch_messages"] = clear_scratch
 
         return Command(
