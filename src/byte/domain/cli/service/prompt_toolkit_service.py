@@ -189,6 +189,7 @@ class PromptToolkitService(Service):
 
         if command:
             try:
+                # AI: we are getting this error here `Error parsing arguments: sequence item 0: expected str instance, dict found` why? AI?
                 await command.handle(args)
             except Exception as e:
                 console.print_error(f"Error parsing arguments: {e}")

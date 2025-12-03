@@ -43,4 +43,4 @@ class ShowCommand(Command):
         Usage: Called automatically when user types `/show`
         """
         agent_service = await self.make(AgentService)
-        await agent_service.execute_agent({"messages": [("user", "")]}, ShowAgent)
+        await agent_service.execute_agent("", ShowAgent)
