@@ -34,8 +34,9 @@ class SystemContextService(Service):
         if config.lint.enable and config.lint.commands:
             system_context.append("- The user's pre-commit runs these lint commands, don't suggest running them:")
             for lint_cmd in config.lint.commands:
+                lint_cmd_string = " ".join(lint_cmd.command)
                 exts = ", ".join(lint_cmd.languages)
-                system_context.append(f"  - `{lint_cmd.command}` (for {exts} files)")
+                system_context.append(f"  - `{lint_cmd_string}` (for {exts} files)")
 
         system_context_list = payload.get("system_context", [])
         system_context_list.extend(system_context)
