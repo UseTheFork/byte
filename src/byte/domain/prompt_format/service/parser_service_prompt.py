@@ -414,10 +414,6 @@ practice_messages = [
             ]
         ),
     ),
-    # (
-    #     "user",
-    #     "Training complete. Everything below this message is the actual project.",
-    # ),
 ]
 
 # pseudo_xml_prompts = EditFormatPrompts(

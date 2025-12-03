@@ -139,7 +139,7 @@ class AssistantNode(Node):
         else:
             read_only_files, editable_files = await file_service.generate_context_prompt()
 
-        file_context_content = []
+        file_context_content = ["> NOTICE: Everything below this message is the actual project.", ""]
 
         if read_only_files or editable_files:
             file_context_content.extend(
