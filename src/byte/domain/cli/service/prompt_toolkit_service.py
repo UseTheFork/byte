@@ -8,6 +8,7 @@ from rich.console import Group
 
 from byte.core.config.config import ByteConfg
 from byte.core.event_bus import EventType, Payload
+from byte.core.logging import log
 from byte.core.service.base_service import Service
 from byte.domain.agent.implementations.subprocess.agent import SubprocessAgent
 from byte.domain.agent.service.agent_service import AgentService
@@ -189,10 +190,10 @@ class PromptToolkitService(Service):
 
         if command:
             try:
-                # AI: we are getting this error here `Error parsing arguments: sequence item 0: expected str instance, dict found` why? AI?
                 await command.handle(args)
             except Exception as e:
-                console.print_error(f"Error parsing arguments: {e}")
+                log.exception("Oops")
+                console.print_error_panel(f"{e}", title="Oops")
         else:
             console.print_error(f"Unknown command: /{command_name}")
 

@@ -24,6 +24,8 @@ class ParseBlocksNode(Node):
         last_message = get_last_message(state["scratch_messages"])
         response_text = extract_content_from_message(last_message)
 
+        log.info(config["metadata"])
+
         try:
             parsed_blocks = await self.edit_format.validate(response_text)
         except Exception as e:
