@@ -4,11 +4,9 @@ Byte provides a comprehensive set of commands for interacting with your codebase
 
 ---
 
-
 ## System
 
 `!<command>` - Execute a shell command and optionally add output to conversation context
-
 
 ## Agent
 
@@ -55,7 +53,6 @@ usage: show
 Display the current conversation history and context
 
 ```
-
 
 ## Files
 
@@ -125,7 +122,6 @@ positional arguments:
 
 ```
 
-
 ## General
 
 ### `/commit`
@@ -192,7 +188,6 @@ Save the current context as a preset configuration
 
 ```
 
-
 ## Memory
 
 ### `/clear`
@@ -222,7 +217,6 @@ Undo the last conversation step by removing the most recent human message and al
 responses from the current thread
 
 ```
-
 
 ## Session Context
 
@@ -272,4 +266,3 @@ positional arguments:
   url  URL to scrape
 
 ```
-
