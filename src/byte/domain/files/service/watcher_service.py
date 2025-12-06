@@ -62,6 +62,7 @@ class FileWatcherService(Service):
         try:
             async for changes in awatch(str(self._config.project_root), watch_filter=self._watch_filter):
                 for change_type, file_path_str in changes:
+                    log.debug(f"File changed: {change_type} -> {file_path_str}")
                     file_path = Path(file_path_str)
                     await self._handle_file_change(file_path, change_type)
         except Exception as e:
