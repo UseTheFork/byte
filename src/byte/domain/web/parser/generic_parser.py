@@ -16,18 +16,19 @@ class GenericParser(BaseWebParser):
         pass
 
     def can_parse(self, soup: BeautifulSoup, url: str) -> bool:
-        """Always returns True as this is a fallback parser.
+        """Check if parser can extract content from the page.
 
         Args:
                 soup: BeautifulSoup object containing the HTML content
                 url: The URL of the page being parsed
 
         Returns:
-                Always True to serve as a fallback
+                True if parse() returns non-empty content, False otherwise
 
-        Usage: `if parser.can_parse(soup, url)` -> True
+        Usage: `if parser.can_parse(soup, url)` -> boolean
         """
-        return True
+        content = self.parse(soup)
+        return bool(content.strip())
 
     def parse(self, soup: BeautifulSoup) -> str:
         """Extract text from common HTML content containers.

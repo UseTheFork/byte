@@ -14,6 +14,7 @@ from byte.domain.web.parser.generic_parser import GenericParser
 from byte.domain.web.parser.gitbook_parser import GitBookParser
 from byte.domain.web.parser.github_parser import GitHubParser
 from byte.domain.web.parser.mkdocs_parser import MkDocsParser
+from byte.domain.web.parser.raw_content_parser import RawContentParser
 from byte.domain.web.parser.readthedocs_parser import ReadTheDocsParser
 
 
@@ -33,6 +34,7 @@ class ChromiumService(Service):
             GitHubParser(),
             MkDocsParser(),
             GenericParser(),
+            RawContentParser(),
         ]
 
     async def do_scrape(self, url: str) -> str:
