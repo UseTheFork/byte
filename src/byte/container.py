@@ -29,7 +29,7 @@ class Container:
         if concrete is None:
 
             def concrete():
-                return service_class(self)  # pyright: ignore[reportCallIssue]
+                return service_class(self)
 
         self._transients[service_class] = concrete
 
@@ -43,7 +43,7 @@ class Container:
         if concrete is None:
             # Auto-create factory for class
             def concrete():
-                return service_class(self)  # pyright: ignore[reportCallIssue]
+                return service_class(self)
 
         self._singletons[service_class] = concrete
 
