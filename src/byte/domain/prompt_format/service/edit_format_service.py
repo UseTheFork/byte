@@ -23,7 +23,7 @@ class EditFormatService(Service, UserInteractive):
     Usage: `blocks = await service.handle(ai_response)`
     """
 
-    async def boot(self):
+    async def boot(self, **kwargs):
         """Initialize service with appropriate prompts based on configuration."""
         self.edit_block_service = await self.make(ParserService)
 
@@ -48,7 +48,7 @@ class EditFormatService(Service, UserInteractive):
                 examples=self.edit_block_service.prompts.examples,
             )
 
-    async def validate(self, content: str) -> List[SearchReplaceBlock]:
+    async def validate(self, content: str) -> List[SearchReplaceBlock]:  # ty:ignore[invalid-method-override]
         """Process content by validating, parsing, and applying edit blocks and shell commands.
 
         First processes all file edit blocks through the complete workflow (validation,

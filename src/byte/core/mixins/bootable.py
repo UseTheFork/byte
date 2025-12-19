@@ -15,20 +15,6 @@ class Bootable:
         self.container = container
         super().__init__()
 
-    async def ensure_booted(self, **kwargs) -> None:
-        """Ensure this service is booted before use."""
-        if not self._is_booted:
-            await self._async_init(**kwargs)
-
-    async def _async_init(self, **kwargs) -> None:
-        """Handle async initialization after container is set."""
-        if self._is_booted:
-            return
-
-        await self._boot_mixins(**kwargs)
-        await self.boot(**kwargs)
-        self._is_booted = True
-
     async def _boot_mixins(self, **kwargs) -> None:
         """Automatically boot all mixins that have boot_{mixin_name} methods."""
         for cls in self.__class__.__mro__:
@@ -45,7 +31,21 @@ class Bootable:
                     else:
                         boot_method(**kwargs)
 
-    async def boot(self, **kwargs) -> None:
+    async def _async_init(self, **kwargs) -> None:
+        """Handle async initialization after container is set."""
+        if self._is_booted:
+            return
+
+        await self._boot_mixins(**kwargs)
+        await self.boot(**kwargs)
+        self._is_booted = True
+
+    async def ensure_booted(self, **kwargs) -> None:
+        """Ensure this service is booted before use."""
+        if not self._is_booted:
+            await self._async_init(**kwargs)
+
+    async def boot(self, *args, **kwargs) -> None:
         """Boot method called after initialization.
 
         Override this method to perform setup that requires the container

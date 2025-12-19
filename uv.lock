@@ -259,6 +259,7 @@ dev = [
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
     { name = "ruff" },
+    { name = "ssort" },
     { name = "tomli" },
     { name = "ty" },
 ]
@@ -303,6 +304,7 @@ dev = [
     { name = "pytest-asyncio", specifier = ">=1.2.0" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
     { name = "ruff", specifier = ">=0.12.12" },
+    { name = "ssort", specifier = ">=0.16.0" },
     { name = "tomli", specifier = ">=2.2.1" },
     { name = "ty", specifier = ">=0.0.4" },
 ]
@@ -2163,6 +2165,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/6d/e6/21ccce3262dd4889aa3332e5a119a3491a95e8f60939870a3a035aabac0d/soupsieve-2.8.tar.gz", hash = "sha256:e2dd4a40a628cb5f28f6d4b0db8800b8f581b65bb380b97de22ba5ca8d72572f", size = 103472, upload-time = "2025-08-27T15:39:51.78Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/14/a0/bb38d3b76b8cae341dad93a2dd83ab7462e6dbcdd84d43f54ee60a8dc167/soupsieve-2.8-py3-none-any.whl", hash = "sha256:0cc76456a30e20f5d7f2e14a98a4ae2ee4e5abdc7c5ea0aafe795f344bc7984c", size = 36679, upload-time = "2025-08-27T15:39:50.179Z" },
+]
+
+[[package]]
+name = "ssort"
+version = "0.16.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pathspec" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/7a/c0/696b3c20b58f4a536845bbfded3be1d7a2b99e622ac51755e402c43729f0/ssort-0.16.0.tar.gz", hash = "sha256:1e7222cf7ffbbb0523d88fe1931a36b0bbd7f478d2964feb25be3621c52a981f", size = 23252, upload-time = "2025-12-07T02:20:00.092Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5c/45/a23b1c13f2416e060af4d90e8407a350d5da7ad1ccf33e6eb9cbaaf7b363/ssort-0.16.0-py3-none-any.whl", hash = "sha256:013d57d4a0e4bde896afbcaa1e9e98a6829bf1b63ddcccecfcb7e64336921bba", size = 27683, upload-time = "2025-12-07T02:19:59.139Z" },
 ]
 
 [[package]]
