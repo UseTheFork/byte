@@ -91,8 +91,6 @@ edit_format_system = list_to_multiline_text(
         Boundary.close(BoundaryType.FILE),
         "```",
         "",
-        # Boundary.open(BoundaryType.CRITICAL_REQUIREMENTS),
-        # "",
         "## **CRITICAL RULES:**",
         "File Paths:",
         "- Use the FULL file path exactly as shown by the user",
@@ -117,7 +115,6 @@ edit_format_system = list_to_multiline_text(
         f'- If user says "ok", "go ahead", or "do that" → provide {EDIT_BLOCK_NAME} blocks',
         "- Wait for user confirmation before assuming edits are applied",
         f"- ONLY EVER RETURN CODE IN A {EDIT_BLOCK_NAME} Blocks!",
-        # Boundary.close(BoundaryType.CRITICAL_REQUIREMENTS),
     ]
 )
 
