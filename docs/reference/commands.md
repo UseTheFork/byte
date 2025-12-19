@@ -4,9 +4,11 @@ Byte provides a comprehensive set of commands for interacting with your codebase
 
 ---
 
+
 ## System
 
 `!<command>` - Execute a shell command and optionally add output to conversation context
+
 
 ## Agent
 
@@ -27,8 +29,8 @@ positional arguments:
 ```
 usage: convention
 
-Generate convention documents by analyzing codebase patterns and saving them to the conventions
-directory
+Generate convention documents by analyzing codebase patterns and saving them
+to the conventions directory
 
 ```
 
@@ -37,8 +39,8 @@ directory
 ```
 usage: research ...
 
-Execute research agent to gather codebase insights, analyze patterns, and save detailed findings to
-session context for other agents
+Execute research agent to gather codebase insights, analyze patterns, and save
+detailed findings to session context for other agents
 
 positional arguments:
   research_query  The research query or question to investigate
@@ -53,6 +55,7 @@ usage: show
 Display the current conversation history and context
 
 ```
+
 
 ## Files
 
@@ -122,6 +125,7 @@ positional arguments:
 
 ```
 
+
 ## General
 
 ### `/commit`
@@ -163,7 +167,9 @@ Run configured linters on changed files or current context
 ### `/preset`
 
 ```
-usage: preset [--should-not-clear-history] [--should-not-clear-files] [--silent] preset_id
+usage: preset [--should-not-clear-history] [--should-not-clear-files]
+              [--silent]
+              preset_id
 
 Load a predefined preset configuration with files and conventions
 
@@ -172,7 +178,8 @@ positional arguments:
 
 options:
   --should-not-clear-history
-                        Do not clear conversation history before loading preset
+                        Do not clear conversation history before loading
+                        preset
   --should-not-clear-files
                         Do not clear file context before loading preset
   --silent              Run silently without prompting for confirmations
@@ -187,6 +194,7 @@ usage: preset:save
 Save the current context as a preset configuration
 
 ```
+
 
 ## Memory
 
@@ -213,10 +221,11 @@ Reset conversation history and clear file context completely
 ```
 usage: undo
 
-Undo the last conversation step by removing the most recent human message and all subsequent agent
-responses from the current thread
+Undo the last conversation step by removing the most recent human message and
+all subsequent agent responses from the current thread
 
 ```
+
 
 ## Session Context
 
@@ -225,7 +234,8 @@ responses from the current thread
 ```
 usage: ctx:drop file_path
 
-Remove items from session context to clean up and reduce noise, improving AI focus on current task
+Remove items from session context to clean up and reduce noise, improving AI
+focus on current task
 
 positional arguments:
   file_path  Path to file
@@ -237,8 +247,8 @@ positional arguments:
 ```
 usage: ctx:file file_path
 
-Read a file from disk and add its contents to the session context, making it available to the AI
-for reference during the conversation
+Read a file from disk and add its contents to the session context, making it
+available to the AI for reference during the conversation
 
 positional arguments:
   file_path  Path to file
@@ -259,10 +269,11 @@ List all session context items
 ```
 usage: web url
 
-Fetch webpage using headless Chrome, convert HTML to markdown, display for review, and optionally
-add to LLM context
+Fetch webpage using headless Chrome, convert HTML to markdown, display for
+review, and optionally add to LLM context
 
 positional arguments:
   url  URL to scrape
 
 ```
+
