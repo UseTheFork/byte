@@ -8,6 +8,18 @@ from pydantic.dataclasses import dataclass
 
 
 @dataclass
+class MetadataSchema:
+    """Metadata tracking for agent execution state.
+
+    Tracks execution metrics like current loop iteration for monitoring and debugging.
+
+    Usage: `metadata = MetadataSchema(iteration=1)`
+    """
+
+    iteration: int = Field(default=0)
+
+
+@dataclass
 class ConstraintSchema:
     """User-defined constraint to guide agent behavior during execution.
 

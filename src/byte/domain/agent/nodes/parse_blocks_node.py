@@ -21,10 +21,19 @@ class ParseBlocksNode(Node):
         """Parse commands from the last assistant message."""
         console = await self.make(ConsoleService)
 
+        metadata = state["metadata"]
+        metadata.iteration += 1
+
+        if metadata.iteration >= 5:
+            should_continue = console.confirm(
+                "Failed to parse blocks after 5 attempts. Continue trying?",
+                default=False,
+            )
+            if not should_continue:
+                return Command(goto="end_node")
+
         last_message = get_last_message(state["scratch_messages"])
         response_text = extract_content_from_message(last_message)
-
-        log.info(config["metadata"])
 
         try:
             parsed_blocks = await self.edit_format.validate(response_text)
@@ -47,7 +56,7 @@ class ParseBlocksNode(Node):
                     ]
                 )
 
-                return Command(goto="assistant_node", update={"errors": error_message})
+                return Command(goto="assistant_node", update={"errors": error_message, "metadata": metadata})
 
             log.exception(e)
             raise
@@ -79,9 +88,9 @@ class ParseBlocksNode(Node):
 
             console.print_warning_panel(error_message, title="Validation Error")
 
-            return Command(goto="assistant_node", update={"errors": error_message})
+            return Command(goto="assistant_node", update={"errors": error_message, "metadata": metadata})
 
         # Once all blocks are valid THEN apply them.
         parsed_blocks = await self.edit_format.apply(parsed_blocks)
 
-        return Command(goto="lint_node", update={"parsed_blocks": parsed_blocks})
+        return Command(goto="lint_node", update={"parsed_blocks": parsed_blocks, "metadata": metadata})

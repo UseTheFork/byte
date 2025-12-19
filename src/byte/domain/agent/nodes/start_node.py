@@ -4,7 +4,7 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 
 from byte.domain.agent.nodes.base_node import Node
-from byte.domain.agent.schemas import AssistantContextSchema
+from byte.domain.agent.schemas import AssistantContextSchema, MetadataSchema
 from byte.domain.agent.state import BaseState
 from byte.domain.prompt_format.service.edit_format_service import EditFormatService
 
@@ -25,6 +25,7 @@ class StartNode(Node):
             "examples": [],
             "donts": [],
             "errors": None,
+            "metadata": MetadataSchema(iteration=0),
         }
 
         if self.edit_format is not None:

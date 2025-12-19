@@ -1,4 +1,4 @@
-from byte.domain.agent.schemas import ConstraintSchema
+from byte.domain.agent.schemas import ConstraintSchema, MetadataSchema
 
 
 def replace_list(left: list | None, right: list) -> list:
@@ -29,3 +29,11 @@ def add_constraints(left: list[ConstraintSchema] | None, right: list[ConstraintS
     if left is None:
         return right
     return left + right
+
+
+def update_metadata(left: MetadataSchema | None, right: MetadataSchema) -> MetadataSchema:
+    """Reducer that replaces the old metadata with the new metadata.
+
+    Usage: `metadata: Annotated[MetadataSchema, update_metadata]`
+    """
+    return right

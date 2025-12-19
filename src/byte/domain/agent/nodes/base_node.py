@@ -13,9 +13,6 @@ from byte.domain.analytics.service.agent_analytics_service import AgentAnalytics
 
 
 class Node(ABC, Bootable, Configurable, Eventable):
-    async def __call__(self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]):
-        pass
-
     async def _track_token_usage(self, result: AIMessage, mode: str) -> None:
         """Track token usage from AI response and update analytics.
 
@@ -40,3 +37,6 @@ class Node(ABC, Bootable, Configurable, Eventable):
                 await agent_analytics_service.update_main_usage(usage)
             else:
                 await agent_analytics_service.update_weak_usage(usage)
+
+    async def __call__(self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]):
+        pass
