@@ -80,15 +80,62 @@ class ShellCommandBlock:
 
 
 @dataclass
+class RawSearchReplaceBlock:
+    """Represents raw/unparsed content from a block for validation purposes.
+
+    Used to capture malformed blocks that couldn't be properly parsed,
+    allowing the system to return them to the LLM for correction.
+    """
+
+    block_id: str
+    raw_content: str
+    block_status: BlockStatus = BlockStatus.VALID
+    status_message: str = ""
+
+
+@dataclass
 class SearchReplaceBlock:
     """Represents a single edit operation with file path, search content, and replacement content."""
 
+    block_id: str
     file_path: str
     search_content: str
     replace_content: str
     block_type: BlockType = BlockType.EDIT
     block_status: BlockStatus = BlockStatus.VALID
     status_message: str = ""
+
+    def to_error_format(self) -> str:
+        """Convert SearchReplaceBlock to error format for LLM feedback.
+
+        Generates a formatted error block that includes the file path, operation type,
+        block ID, validation status, and the original search/replace content. Used to
+        provide context to the LLM when a block fails validation.
+
+        Returns:
+            str: Formatted error block string with status information
+
+        Usage: `error_msg = block.to_error_format()` -> formatted error block
+        """
+        from byte.domain.prompt_format.utils.boundary import Boundary
+
+        sections = [
+            Boundary.open(BoundaryType.ERROR, meta={"operation": self.block_type.value, "block_id": self.block_id}),
+            f"**File:** `{self.file_path}`",
+            f"**Block ID:** {self.block_id}",
+            f"**Status:** {self.block_status.value}",
+            f"**Issue:** {self.status_message}",
+            "",
+            Boundary.open(BoundaryType.SEARCH),
+            self.search_content,
+            Boundary.close(BoundaryType.SEARCH),
+            Boundary.open(BoundaryType.REPLACE),
+            self.replace_content,
+            Boundary.close(BoundaryType.REPLACE),
+            Boundary.close(BoundaryType.ERROR),
+        ]
+
+        return list_to_multiline_text(sections)
 
     def to_search_replace_format(self) -> str:
         """Convert SearchReplaceBlock back to search/replace block format.
@@ -104,32 +151,17 @@ class SearchReplaceBlock:
         from byte.domain.prompt_format.utils.boundary import Boundary
 
         sections = [
-            Boundary.open(BoundaryType.ERROR, meta={"operation": self.block_type.value}),
-            f"**File:** `{self.file_path}`",
-            "",
+            Boundary.open(
+                BoundaryType.FILE,
+                meta={"path": self.file_path, "operation": self.block_type.value, "block_id": self.block_id},
+            ),
+            Boundary.open(BoundaryType.SEARCH),
+            self.search_content,
+            Boundary.close(BoundaryType.SEARCH),
+            Boundary.open(BoundaryType.REPLACE),
+            self.replace_content,
+            Boundary.close(BoundaryType.REPLACE),
+            Boundary.close(BoundaryType.FILE),
         ]
-        # Add status information if there's an error
-        if self.block_status != BlockStatus.VALID:
-            sections.extend(
-                [
-                    f"**Status:** {self.block_status.value}",
-                    f"**Issue:** {self.status_message}",
-                    "",
-                ]
-            )
-
-        sections.extend(
-            [
-                Boundary.open(BoundaryType.SEARCH),
-                self.search_content,
-                Boundary.close(BoundaryType.SEARCH),
-                "",
-                Boundary.open(BoundaryType.REPLACE),
-                self.replace_content,
-                Boundary.close(BoundaryType.REPLACE),
-                "",
-                Boundary.close(BoundaryType.ERROR),
-            ]
-        )
 
         return list_to_multiline_text(sections)

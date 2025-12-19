@@ -42,7 +42,7 @@ class Service(ABC, Bootable, Configurable, Injectable, Eventable):
         await self.validate()
         return await self.handle(**kwargs)
 
-    async def handle(self, **kwargs) -> Any:
+    async def handle(self, *args, **kwargs) -> Any:
         """Handle service-specific operations with flexible parameters.
 
         This method should be implemented by concrete service classes to define

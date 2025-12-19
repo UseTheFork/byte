@@ -1,10 +1,7 @@
-from typing import List
-
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
 from byte.domain.prompt_format.schemas import (
     EditFormatPrompts,
-    SearchReplaceBlock,
 )
 from byte.domain.prompt_format.service.parser_service import ParserService
 from byte.domain.prompt_format.service.shell_command_prompt import (
@@ -47,50 +44,3 @@ class EditFormatService(Service, UserInteractive):
                 recovery_steps=self.edit_block_service.prompts.recovery_steps,
                 examples=self.edit_block_service.prompts.examples,
             )
-
-    async def validate(self, content: str) -> List[SearchReplaceBlock]:  # ty:ignore[invalid-method-override]
-        """Process content by validating, parsing, and applying edit blocks and shell commands.
-
-        First processes all file edit blocks through the complete workflow (validation,
-        parsing).
-
-        Args:
-                content: Raw content string containing edit instructions and optional shell commands
-
-        Returns:
-                List of SearchReplaceBlock objects representing individual edit operations
-
-        Raises:
-                PreFlightCheckError: If content contains malformed edit blocks
-
-        Usage: `blocks = await service.validate(ai_response)`
-        """
-
-        # Process file edit blocks
-        blocks = await self.edit_block_service.handle(content)
-
-        return blocks
-
-    async def apply(self, blocks: List[SearchReplaceBlock]) -> List[SearchReplaceBlock]:
-        """Process content by validating, parsing, and applying edit blocks and shell commands.
-
-        First processes all file edit blocks through the complete workflow (validation,
-        parsing). Then, if shell commands are enabled and all edits succeeded,
-        executes any shell command blocks found in the content."""
-
-        # Process file edit blocks
-        blocks = await self.edit_block_service.apply_blocks(blocks)
-
-        # Only execute shell commands if enabled and all edit blocks succeeded
-        # if self._config.edit_format.enable_shell_commands:
-        #     all_edits_valid = all(b.block_status == BlockStatus.VALID for b in blocks)
-
-        #     if all_edits_valid:
-        #         shell_command_service = await self.make(ShellCommandService)
-        #         await shell_command_service.handle(content)
-        #     else:
-        #         # Log that shell commands were skipped due to failed edits
-
-        #         log.info("Skipping shell command execution due to failed edit blocks")
-
-        return blocks

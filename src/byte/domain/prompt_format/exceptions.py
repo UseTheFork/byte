@@ -14,6 +14,12 @@ class PreFlightCheckError(EditFormatError):
     pass
 
 
+class PreFlightUnparsableError(EditFormatError):
+    """ """
+
+    pass
+
+
 class NoBlocksFoundError(EditFormatError):
     """Exception raised when no SEARCH/REPLACE blocks are found in content.
 

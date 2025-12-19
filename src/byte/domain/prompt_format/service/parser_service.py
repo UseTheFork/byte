@@ -12,12 +12,13 @@ from byte.domain.files.models import FileMode
 from byte.domain.files.service.discovery_service import FileDiscoveryService
 from byte.domain.files.service.file_service import FileService
 from byte.domain.prompt_format.constants import EDIT_BLOCK_NAME
-from byte.domain.prompt_format.exceptions import NoBlocksFoundError, PreFlightCheckError
+from byte.domain.prompt_format.exceptions import NoBlocksFoundError, PreFlightCheckError, PreFlightUnparsableError
 from byte.domain.prompt_format.schemas import (
     BlockStatus,
     BlockType,
     BoundaryType,
     EditFormatPrompts,
+    RawSearchReplaceBlock,
     SearchReplaceBlock,
 )
 from byte.domain.prompt_format.service.parser_service_prompt import (
@@ -32,7 +33,7 @@ from byte.domain.prompt_format.utils import Boundary
 class ParserService(Service, UserInteractive, ABC):
     prompts: EditFormatPrompts
     edit_blocks: List[SearchReplaceBlock]
-    match_pattern = r'<file\s+path="([^"]+)"\s+operation="([^"]+)"\s*>\s*<search>(.*?)</search>\s*<replace>(.*?)</replace>\s*</file>'
+    match_pattern = r"<file\s+([^>]+)>\s*<search>(.*?)</search>\s*<replace>(.*?)</replace>\s*</file>"
 
     async def boot(self):
         self.edit_blocks = []
@@ -69,6 +70,21 @@ class ParserService(Service, UserInteractive, ABC):
 
         return cleaned_content
 
+    def _parse_attributes(self, attr_string: str) -> dict[str, str]:
+        """Parse XML-style attributes from a string.
+
+        Args:
+            attr_string: String containing attributes like 'key="value" key2="value2"'
+
+        Returns:
+            Dictionary mapping attribute names to values
+        """
+        attrs = {}
+        attr_pattern = r'(\w+)="([^"]*)"'
+        for match in re.finditer(attr_pattern, attr_string):
+            attrs[match.group(1)] = match.group(2)
+        return attrs
+
     async def parse_content_to_blocks(self, content: str) -> List[SearchReplaceBlock]:
         """Extract SEARCH/REPLACE blocks from AI response content.
 
@@ -96,13 +112,23 @@ class ParserService(Service, UserInteractive, ABC):
         matches = re.findall(pattern, content, re.DOTALL)
 
         for match in matches:
-            file_path, operation, search_content, replace_content = match
+            attr_string, search_content, replace_content = match
+
+            # Parse attributes from the tag
+            attrs = self._parse_attributes(attr_string)
+
+            # Extract required attributes
+            block_id = attrs.get("block_id", "").strip()
+            file_path = attrs.get("path", "").strip()
+            operation = attrs.get("operation", "").strip()
 
             # Strip leading/trailing whitespace but preserve internal structure
             # search_content = search_content.strip()
             # replace_content = replace_content.strip()
 
             # TODO: Improve logging here.
+            log.debug(block_id)
+            log.debug(operation)
             log.debug(file_path)
             log.debug(search_content)
 
@@ -128,6 +154,7 @@ class ParserService(Service, UserInteractive, ABC):
 
             blocks.append(
                 SearchReplaceBlock(
+                    block_id=block_id.strip(),
                     file_path=file_path.strip(),
                     search_content=search_content,
                     replace_content=replace_content,
@@ -136,23 +163,63 @@ class ParserService(Service, UserInteractive, ABC):
             )
         return blocks
 
-    async def pre_flight_check(self, content: str) -> None:
+    async def check_block_ids(self, content: str) -> None:
+        """Validate that all file blocks have a block_id attribute.
+
+        Checks that every <file> tag includes a block_id attribute and raises
+        an exception if any blocks are missing this required identifier.
+        """
+
+        file_blocks_with_id = re.findall(r'<file\s+[^>]*block_id="[^"]+', content)
+        file_blocks_total = re.findall(r"<file\s+", content)
+
+        blocks_with_id_count = len(file_blocks_with_id)
+        total_blocks_count = len(file_blocks_total)
+
+        if blocks_with_id_count < total_blocks_count:
+            raise PreFlightUnparsableError(
+                f"Malformed {EDIT_BLOCK_NAME} blocks: "
+                f"{total_blocks_count - blocks_with_id_count} block(s) missing block_id attribute. "
+                f"All file blocks must include a block_id."
+            )
+
+    async def check_blocks_exist(self, content: str) -> None:
+        """Check if any edit blocks exist in the content.
+
+        Raises NoBlocksFoundError if no file blocks are found.
+        """
+        file_open_count = len(re.findall(r"<file\s+[^>]*>", content))
+
+        if file_open_count == 0:
+            raise NoBlocksFoundError(f"No {EDIT_BLOCK_NAME} blocks found in content.")
+
+    async def check_file_tags_balanced(self, content: str) -> None:
+        """foo"""
+        file_open_count = len(re.findall(r"<file\s+[^>]*>", content))
+        file_close_count = content.count("</file>")
+
+        if file_open_count != file_close_count:
+            raise PreFlightUnparsableError(
+                f"Malformed {EDIT_BLOCK_NAME} blocks: "
+                f"<file> tags={file_open_count}, </file> tags={file_close_count}. "
+                f"Opening and closing tags must match."
+            )
+
+    async def parse_content_to_raw_blocks(self, content: str) -> list[RawSearchReplaceBlock]:
         """Validate that block markers are properly balanced.
 
         Counts occurrences of required XML tags and raises an exception
         if they don't match, indicating malformed blocks.
         """
-        file_open_count = len(re.findall(r'<file\s+path="[^"]+"\s+operation="[^"]+"', content))
+
+        # AI: how do you suggest we modify this method. it should perform the initial parsing
+
+        file_open_count = len(re.findall(r"<file\s+[^>]*>", content))
         file_close_count = content.count("</file>")
         search_count = content.count("<search>")
         search_close_count = content.count("</search>")
         replace_count = content.count("<replace>")
         replace_close_count = content.count("</replace>")
-
-        if file_open_count == 0:
-            raise NoBlocksFoundError(
-                "No {EDIT_BLOCK_NAME} blocks found in content. AI responses must include properly formatted edit blocks."
-            )
 
         if file_open_count != file_close_count:
             raise PreFlightCheckError(
@@ -272,9 +339,11 @@ class ParserService(Service, UserInteractive, ABC):
         Raises:
                 PreFlightCheckError: If content contains malformed edit blocks
         """
-        await self.pre_flight_check(content)
+
         blocks = await self.parse_content_to_blocks(content)
         blocks = await self.mid_flight_check(blocks)
+
+        log.info(blocks)
 
         return blocks
 

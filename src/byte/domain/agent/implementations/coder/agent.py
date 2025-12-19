@@ -23,11 +23,6 @@ class CoderAgent(Agent):
     the actor system for clean separation of concerns.
     """
 
-    edit_format: EditFormatService
-
-    async def boot(self):
-        self.edit_format = await self.make(EditFormatService)
-
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""
 
@@ -35,9 +30,9 @@ class CoderAgent(Agent):
         graph = StateGraph(BaseState)
 
         # Add nodes
-        graph.add_node("start_node", await self.make(StartNode, edit_format=self.edit_format))
+        graph.add_node("start_node", await self.make(StartNode))
         graph.add_node("assistant_node", await self.make(AssistantNode, goto="parse_blocks_node"))
-        graph.add_node("parse_blocks_node", await self.make(ParseBlocksNode, edit_format=self.edit_format))
+        graph.add_node("parse_blocks_node", await self.make(ParseBlocksNode))
         graph.add_node("lint_node", await self.make(LintNode))
         graph.add_node("end_node", await self.make(EndNode))
 
