@@ -47,6 +47,18 @@ class Container:
 
         self._singletons[service_class] = concrete
 
+    async def _create_instance(self, factory: Callable, **kwargs) -> Any:
+        """Helper to create and boot instances."""
+        if asyncio.iscoroutinefunction(factory):
+            instance = await factory()
+        else:
+            instance = factory()
+
+        if isinstance(instance, Bootable):
+            await instance.ensure_booted(**kwargs)
+
+        return instance
+
     async def make(self, service_class: Type[T], **kwargs) -> T:
         """Resolve a service from the container.
 
@@ -70,18 +82,6 @@ class Container:
             return await self._create_instance(factory, **kwargs)  # Don't cache
 
         raise ValueError(f"No binding found for {service_class.__name__}")
-
-    async def _create_instance(self, factory: Callable, **kwargs) -> Any:
-        """Helper to create and boot instances."""
-        if asyncio.iscoroutinefunction(factory):
-            instance = await factory()
-        else:
-            instance = factory()
-
-        if isinstance(instance, Bootable):
-            await instance.ensure_booted(**kwargs)
-
-        return instance
 
     def reset(self) -> None:
         """Reset the container state, clearing all bindings and instances.

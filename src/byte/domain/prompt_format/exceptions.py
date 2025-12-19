@@ -15,7 +15,11 @@ class PreFlightCheckError(EditFormatError):
 
 
 class PreFlightUnparsableError(EditFormatError):
-    """ """
+    """Exception raised when edit blocks cannot be parsed from the content.
+
+    This indicates the content contains malformed edit block syntax that
+    prevents the parser from extracting valid edit operations.
+    """
 
     pass
 
