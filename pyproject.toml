@@ -1,6 +1,6 @@
 [project]
 name = "byte-ai-cli"
-version = "0.5.2"
+version = "0.5.3"
 description = "A human-in-the-loop AI coding agent that keeps you in control."
 readme = "README.md"
 requires-python = ">=3.12"
