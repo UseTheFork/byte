@@ -24,6 +24,21 @@ class Service(ABC, Bootable, Configurable, Injectable, Eventable):
         """
         return True
 
+    async def handle(self, *args, **kwargs) -> Any:
+        """Handle service-specific operations with flexible parameters.
+
+        This method should be implemented by concrete service classes to define
+        their core business logic. The kwargs parameter allows for flexible
+        parameter passing that can vary between different service implementations.
+
+        Args:
+                **kwargs: Flexible keyword arguments specific to the service implementation. Each concrete service should document its expected parameters.
+
+        Returns:
+                Service-specific return value as defined by the concrete implementation.
+        """
+        pass
+
     async def __call__(self, **kwargs) -> Any:
         """Execute the service by validating then handling.
 
@@ -41,18 +56,3 @@ class Service(ABC, Bootable, Configurable, Injectable, Eventable):
         """
         await self.validate()
         return await self.handle(**kwargs)
-
-    async def handle(self, *args, **kwargs) -> Any:
-        """Handle service-specific operations with flexible parameters.
-
-        This method should be implemented by concrete service classes to define
-        their core business logic. The kwargs parameter allows for flexible
-        parameter passing that can vary between different service implementations.
-
-        Args:
-                **kwargs: Flexible keyword arguments specific to the service implementation. Each concrete service should document its expected parameters.
-
-        Returns:
-                Service-specific return value as defined by the concrete implementation.
-        """
-        pass
