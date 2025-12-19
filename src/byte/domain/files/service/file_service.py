@@ -24,7 +24,7 @@ class FileService(Service):
     Usage: `await file_service.add_file("main.py", FileMode.EDITABLE)`
     """
 
-    async def boot(self) -> None:
+    async def boot(self, **kwargs) -> None:
         """Initialize file service and ensure discovery service is ready."""
         self._context_files: Dict[str, FileContext] = {}
 

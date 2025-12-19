@@ -106,7 +106,7 @@ class LoadPresetCommand(Command):
         for convention_filename in preset.conventions:
             convention_service.add_convention(convention_filename)
 
-        if preset.prompt:
+        if preset.prompt is not None:
             prompt_service = await self.make(PromptToolkitService)
             prompt_service.set_placeholder(preset.prompt)
 

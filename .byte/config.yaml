@@ -6,6 +6,12 @@ lint:
   - command:
     - uv
     - run
+    - ssort
+    languages:
+    - python
+  - command:
+    - uv
+    - run
     - ruff
     - format
     - --force-exclude

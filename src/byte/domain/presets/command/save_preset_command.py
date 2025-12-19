@@ -5,6 +5,7 @@ from byte.core.utils.slugify import slugify
 from byte.domain.cli.argparse.base import ByteArgumentParser
 from byte.domain.cli.service.command_registry import Command
 from byte.domain.cli.service.console_service import ConsoleService
+from byte.domain.files.models import FileMode
 from byte.domain.files.service.file_service import FileService
 from byte.domain.knowledge.service.convention_context_service import ConventionContextService
 from byte.domain.presets.config import PresetsConfig
@@ -60,8 +61,8 @@ class SavePresetCommand(Command):
 
         # Get current file context
         file_service = await self.make(FileService)
-        read_only_files = [f.relative_path for f in file_service.list_files()]
-        editable_files = [f.relative_path for f in file_service.list_files()]
+        read_only_files = [f.relative_path for f in file_service.list_files(FileMode.READ_ONLY)]
+        editable_files = [f.relative_path for f in file_service.list_files(FileMode.EDITABLE)]
 
         # Get current conventions
         convention_service = await self.make(ConventionContextService)

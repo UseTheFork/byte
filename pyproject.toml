@@ -53,14 +53,13 @@ module-name = "byte"
 
 [dependency-groups]
 dev = [
-    "basedpyright>=1.32.1",
     "grandalf>=0.8",
-    "jedi-language-server>=0.46.0",
     "pytest>=8.4.2",
     "pytest-asyncio>=1.2.0",
     "pytest-cov>=7.0.0",
     "ruff>=0.12.12",
     "tomli>=2.2.1",
+    "ty>=0.0.4",
 ]
 
 mkdocs = ["mkdocs>=1.6.1", "mkdocs-material>=9.6.21", "mkdocstrings>=0.30.1"]
@@ -118,27 +117,6 @@ line-ending = "lf"
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
-
-[tool.basedpyright]
-# keep-sorted start
-exclude = ["**/node_modules", "**/__pycache__"]
-include = ["src"]
-pythonPlatform = "All"
-pythonVersion = "3.12"
-reportArgumentType = false
-reportAttributeAccessIssue = false
-reportIgnoreCommentWithoutRule = true
-reportRedeclaration = false
-reportUnnecessaryTypeIgnoreComment = "warning"
-typeCheckingMode = "basic"
-# keep-sorted end
-
-executionEnvironments = [
-    { root = "src/tests", reportPrivateUsage = false, extraPaths = [
-        "src/tests/e2e",
-    ] },
-    { root = "src" },
-]
 
 [build-system]
 requires = ["uv_build>=0.8.10,<0.9.0"]
