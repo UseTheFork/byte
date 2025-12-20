@@ -1,6 +1,7 @@
 from argparse import Namespace
 from typing import List
 
+from byte import log
 from byte.core.config.config import ByteConfg
 from byte.domain.analytics.service.agent_analytics_service import AgentAnalyticsService
 from byte.domain.cli.argparse.base import ByteArgumentParser
@@ -93,6 +94,8 @@ class LoadPresetCommand(Command):
 
             if should_clear_files:
                 await file_service.clear_context()
+
+        log.debug(preset)
 
         for file_path in preset.read_only_files:
             await file_service.add_file(file_path, FileMode.READ_ONLY)

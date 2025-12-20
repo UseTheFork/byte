@@ -1,9 +1,11 @@
 from langgraph.graph.state import RunnableConfig
+from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.utils import list_to_multiline_text
 from byte.domain.agent.nodes.base_node import Node
+from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.agent.state import BaseState
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.cli.service.subprocess_service import SubprocessService
@@ -19,7 +21,7 @@ class SubprocessNode(Node, UserInteractive):
     Usage: Used in SubprocessAgent workflow via `!command` syntax
     """
 
-    async def __call__(self, state: BaseState, config: RunnableConfig):
+    async def __call__(self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]):
         """Execute subprocess command and optionally add results to messages.
 
         Args:
@@ -32,7 +34,7 @@ class SubprocessNode(Node, UserInteractive):
         Usage: Called automatically by SubprocessAgent during graph execution
         """
 
-        subprocess_command = state["command"]
+        subprocess_command = state["user_request"]
         subprocess_service = await self.make(SubprocessService)
         subprocess_result = await subprocess_service.run(subprocess_command)
 

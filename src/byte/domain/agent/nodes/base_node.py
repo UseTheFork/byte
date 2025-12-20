@@ -1,7 +1,7 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 
 from langchain_core.messages import AIMessage
-from langgraph.graph.state import RunnableConfig
+from langchain_core.runnables import RunnableConfig
 from langgraph.runtime import Runtime
 
 from byte.core.mixins.bootable import Bootable
@@ -38,5 +38,7 @@ class Node(ABC, Bootable, Configurable, Eventable):
             else:
                 await agent_analytics_service.update_weak_usage(usage)
 
+    @abstractmethod
     async def __call__(self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]):
+        """Execute the node logic. Must be implemented by subclasses."""
         pass
