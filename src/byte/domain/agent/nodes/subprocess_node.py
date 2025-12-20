@@ -21,6 +21,28 @@ class SubprocessNode(Node, UserInteractive):
     Usage: Used in SubprocessAgent workflow via `!command` syntax
     """
 
+    async def _display_subprocess_results(self, subprocess_result):
+        """Display subprocess execution results and prompt user to add to messages.
+
+        Shows the command output in a panel and asks if the user wants to include
+        the results in the conversation context for AI awareness.
+
+        Usage: `await self._display_subprocess_results(result)` -> displays and prompts
+        """
+        console = await self.make(ConsoleService)
+
+        # Display the results with more detail
+        result_display = f"Exit Code: {subprocess_result.exit_code}\n\nOutput:\n{subprocess_result.stdout}"
+        if subprocess_result.stderr:
+            result_display += f"\n\nErrors:\n{subprocess_result.stderr}"
+
+        console.print_panel(result_display, title=f"Command: {subprocess_result.command}")
+
+        # Ask user if they want to add results to messages
+        should_add = await self.prompt_for_confirmation("Add subprocess output to conversation context?", default=True)
+
+        return should_add
+
     async def __call__(self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]):
         """Execute subprocess command and optionally add results to messages.
 
@@ -59,25 +81,3 @@ class SubprocessNode(Node, UserInteractive):
             )
 
         return Command(goto="end_node")
-
-    async def _display_subprocess_results(self, subprocess_result):
-        """Display subprocess execution results and prompt user to add to messages.
-
-        Shows the command output in a panel and asks if the user wants to include
-        the results in the conversation context for AI awareness.
-
-        Usage: `await self._display_subprocess_results(result)` -> displays and prompts
-        """
-        console = await self.make(ConsoleService)
-
-        # Display the results with more detail
-        result_display = f"Exit Code: {subprocess_result.exit_code}\n\nOutput:\n{subprocess_result.stdout}"
-        if subprocess_result.stderr:
-            result_display += f"\n\nErrors:\n{subprocess_result.stderr}"
-
-        console.print_panel(result_display, title=f"Command: {subprocess_result.command}")
-
-        # Ask user if they want to add results to messages
-        should_add = await self.prompt_for_confirmation("Add subprocess output to conversation context?", default=True)
-
-        return should_add
