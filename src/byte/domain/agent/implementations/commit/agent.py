@@ -1,6 +1,5 @@
 from langchain_core.language_models.chat_models import BaseChatModel
-from langgraph.constants import END
-from langgraph.graph import START, StateGraph
+from langgraph.graph import StateGraph
 
 from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.implementations.commit.prompt import commit_prompt
@@ -33,12 +32,12 @@ class CommitAgent(Agent):
         graph.add_node("assistant_node", await self.make(AssistantNode, goto="extract_node"))
         graph.add_node("end_node", await self.make(EndNode))
 
-        # Define edges
-        graph.add_edge(START, "start_node")
-        graph.add_edge("start_node", "assistant_node")
-        graph.add_edge("assistant_node", "extract_node")
-        graph.add_edge("extract_node", "end_node")
-        graph.add_edge("end_node", END)
+        # # Define edges
+        # graph.add_edge(START, "start_node")
+        # graph.add_edge("start_node", "assistant_node")
+        # graph.add_edge("assistant_node", "extract_node")
+        # graph.add_edge("extract_node", "end_node")
+        # graph.add_edge("end_node", END)
 
         # Compile graph with memory and configuration
         return graph.compile()
