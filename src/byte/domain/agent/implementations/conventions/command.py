@@ -88,6 +88,15 @@ FOCUS_MESSAGES = {
         ),
         file_name="BACKEND_CODE_PATTERNS.md",
     ),
+    "Testing Code Patterns": ConventionFocus(
+        focus_message=(
+            "Generate a testing code patterns convention focusing on: "
+            "test structure and organization, testing frameworks and tools, "
+            "unit test patterns, integration test patterns, mocking and fixtures, "
+            "test naming conventions, and testing best practices."
+        ),
+        file_name="TESTING_CODE_PATTERNS.md",
+    ),
 }
 
 
