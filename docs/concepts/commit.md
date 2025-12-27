@@ -8,7 +8,7 @@ Byte's commit system uses AI to generate meaningful commit messages by analyzing
 
 ## Quick Start
 
-Create an commit:
+Create a commit:
 
 ```
 > /commit
@@ -18,11 +18,51 @@ Byte will:
 
 1. Stage all changed files (with confirmation)
 2. Run configured linters on changed files
-3. Analyze the git diff with AI
-4. Generate a descriptive commit message
-5. Create the commit with the generated message
+3. Prompt you to choose between Commit Plan or Single Commit
+4. Analyze the git diff with AI
+5. Generate commit message(s) based on your choice
+6. Create the commit(s)
 
-If the commit fails (for example, when pre-commit hooks modify files), Byte will:
+---
+
+## Commit Types
+
+Byte offers two approaches to organizing your commits:
+
+### Commit Plan
+
+Analyzes your staged changes and intelligently groups related files into multiple logical commits. The Agent:
+
+- Reviews all staged files and their diffs
+- Groups related changes together (e.g., feature additions, bug fixes, refactoring)
+- Generates a separate commit message for each group
+- Creates multiple commits automatically
+
+**When to use:**
+
+- Large changesets with multiple logical changes
+- Mixed feature work and bug fixes
+- Changes spanning multiple domains or modules
+
+### Single Commit
+
+Creates one commit for all staged changes with a single descriptive message. The AI:
+
+- Reviews all staged files and their diffs
+- Generates one comprehensive commit message
+- Creates a single commit
+
+**When to use:**
+
+- Focused changes to a single feature or fix
+- Small, cohesive changesets
+- When you want manual control over commit boundaries
+
+---
+
+## Error Handling
+
+If a commit fails (for example, when pre-commit hooks modify files), Byte will:
 
 - Display the error message
 - Prompt you to stage the changes and try again
@@ -51,7 +91,7 @@ See [Linting concept](lint.md) for detailed configuration.
 
 ## Commit Message Format
 
-The AI generates messages following conventional commit conventions:
+The AI generates messages following conventional commit conventions for both commit types:
 
 ### Structure
 

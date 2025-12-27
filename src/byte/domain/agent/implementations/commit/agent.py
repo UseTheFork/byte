@@ -3,7 +3,7 @@ from langgraph.constants import END
 from langgraph.graph import START, StateGraph
 
 from byte.domain.agent.implementations.base import Agent
-from byte.domain.agent.implementations.commit.prompt import commit_prompt, detailed_commit_prompt
+from byte.domain.agent.implementations.commit.prompt import commit_plan_prompt, commit_prompt
 from byte.domain.agent.implementations.commit.structured_output import CommitMessage, CommitPlan
 from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.end_node import EndNode
@@ -96,7 +96,7 @@ class CommitPlanAgent(Agent):
 
         return AssistantContextSchema(
             mode="weak",
-            prompt=detailed_commit_prompt,
+            prompt=commit_plan_prompt,
             main=main,
             weak=weak,
             agent=self.__class__.__name__,

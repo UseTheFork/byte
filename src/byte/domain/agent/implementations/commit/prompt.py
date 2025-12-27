@@ -4,7 +4,7 @@ from byte.core.utils.list_to_multiline_text import list_to_multiline_text
 from byte.domain.prompt_format.schemas import BoundaryType
 from byte.domain.prompt_format.utils import Boundary
 
-detailed_commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
+commit_plan_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
     [
         (
             "system",
