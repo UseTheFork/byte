@@ -65,6 +65,8 @@ byte = "byte.core.cli:cli"
 [tool.uv.build-backend]
 module-name = "byte"
 
+[tool.ty.environment]
+python-version = "3.12"
 
 [tool.ruff]
 target-version = "py312"
