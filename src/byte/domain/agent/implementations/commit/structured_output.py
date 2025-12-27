@@ -8,3 +8,7 @@ class CommitGroup(BaseModel):
 
 class CommitPlan(BaseModel):
     commits: list[CommitGroup] = Field(..., description="List of commit groups, each with a message and files.")
+
+
+class CommitMessage(BaseModel):
+    commit_message: str = Field(..., description="A single commit message for all changes.")
