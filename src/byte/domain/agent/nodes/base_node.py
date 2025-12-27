@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
-from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableConfig
 from langgraph.runtime import Runtime
 
@@ -13,24 +13,26 @@ from byte.domain.analytics.service.agent_analytics_service import AgentAnalytics
 
 
 class Node(ABC, Bootable, Configurable, Eventable):
-    async def _track_token_usage(self, result: AIMessage, mode: str) -> None:
-        """Track token usage from AI response and update analytics.
+    async def _track_token_usage(self, usage_metadata: dict, mode: str) -> None:
+        """Track token usage from callback metadata and update analytics.
 
-        Extracts usage metadata from the AI message and records it in the
-        analytics service based on the current AI mode (main or weak).
+        Extracts usage metadata from the get_usage_metadata_callback result
+        and records it in the analytics service based on the current AI mode.
 
         Args:
-                result: The AI message containing usage metadata
-                mode: The AI mode being used ("main" or "weak")
+            usage_metadata: Dictionary with model names as keys and usage stats as values
+            mode: The AI mode being used ("main" or "weak")
 
-        Usage: `await self._track_token_usage(result, runtime.context.mode)`
+        Usage: `await self._track_token_usage(cb, runtime.context.mode)`
         """
-        if result.usage_metadata:
-            usage_metadata = result.usage_metadata
+        if usage_metadata:
+            # Get the first model's usage data (typically only one model)
+            model_usage = next(iter(usage_metadata.values()))
+
             usage = TokenUsageSchema(
-                input_tokens=usage_metadata.get("input_tokens", 0),
-                output_tokens=usage_metadata.get("output_tokens", 0),
-                total_tokens=usage_metadata.get("total_tokens", 0),
+                input_tokens=model_usage.get("input_tokens", 0),
+                output_tokens=model_usage.get("output_tokens", 0),
+                total_tokens=model_usage.get("total_tokens", 0),
             )
             agent_analytics_service = await self.make(AgentAnalyticsService)
             if mode == "main":
@@ -39,6 +41,12 @@ class Node(ABC, Bootable, Configurable, Eventable):
                 await agent_analytics_service.update_weak_usage(usage)
 
     @abstractmethod
-    async def __call__(self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]):
+    async def __call__(
+        self,
+        state: BaseState,
+        *,
+        runtime: Runtime[AssistantContextSchema],
+        config: RunnableConfig,
+    ) -> Any:
         """Execute the node logic. Must be implemented by subclasses."""
         pass

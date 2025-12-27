@@ -1,11 +1,12 @@
 from langchain_core.language_models.chat_models import BaseChatModel
-from langgraph.graph import StateGraph
+from langgraph.constants import END
+from langgraph.graph import START, StateGraph
 
 from byte.domain.agent.implementations.base import Agent
-from byte.domain.agent.implementations.commit.prompt import commit_prompt
+from byte.domain.agent.implementations.commit.prompt import detailed_commit_prompt
+from byte.domain.agent.implementations.commit.structured_output import CommitPlan
 from byte.domain.agent.nodes.assistant_node import AssistantNode
 from byte.domain.agent.nodes.end_node import EndNode
-from byte.domain.agent.nodes.extract_node import ExtractNode
 from byte.domain.agent.nodes.start_node import StartNode
 from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.agent.state import BaseState
@@ -27,17 +28,18 @@ class CommitAgent(Agent):
         graph = StateGraph(BaseState)
 
         # Add nodes
-        graph.add_node("start_node", await self.make(StartNode))
-        graph.add_node("extract_node", await self.make(ExtractNode))
-        graph.add_node("assistant_node", await self.make(AssistantNode, goto="extract_node"))
-        graph.add_node("end_node", await self.make(EndNode))
+        graph.add_node("start_node", await self.make(StartNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node(
+            "assistant_node",
+            await self.make(AssistantNode, goto="extract_node", structured_output=CommitPlan),  # ty:ignore[invalid-argument-type]
+        )
+        graph.add_node("end_node", await self.make(EndNode))  # ty:ignore[invalid-argument-type]
 
-        # # Define edges
-        # graph.add_edge(START, "start_node")
-        # graph.add_edge("start_node", "assistant_node")
-        # graph.add_edge("assistant_node", "extract_node")
-        # graph.add_edge("extract_node", "end_node")
-        # graph.add_edge("end_node", END)
+        # Define edges
+        graph.add_edge(START, "start_node")
+        graph.add_edge("start_node", "assistant_node")
+        graph.add_edge("assistant_node", "end_node")
+        graph.add_edge("end_node", END)
 
         # Compile graph with memory and configuration
         return graph.compile()
@@ -49,7 +51,7 @@ class CommitAgent(Agent):
 
         return AssistantContextSchema(
             mode="weak",
-            prompt=commit_prompt,
+            prompt=detailed_commit_prompt,
             main=main,
             weak=weak,
             agent=self.__class__.__name__,

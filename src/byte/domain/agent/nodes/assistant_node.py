@@ -1,12 +1,13 @@
-from typing import cast
-
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.callbacks import get_usage_metadata_callback
+from langchain_core.messages import BaseMessage, HumanMessage
 from langchain_core.runnables import Runnable
+from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
+from pydantic import BaseModel
 
+from byte.core import log
 from byte.core.event_bus import EventType, Payload
-from byte.core.logging import log
 from byte.core.utils import dd
 from byte.core.utils.list_to_multiline_text import list_to_multiline_text
 from byte.domain.agent.nodes.base_node import Node
@@ -23,8 +24,10 @@ class AssistantNode(Node):
     async def boot(
         self,
         goto: str = "end_node",
+        structured_output: BaseModel | None = None,
         **kwargs,
     ):
+        self.structured_output = structured_output
         self.goto = goto
 
     def _create_runnable(self, context: AssistantContextSchema) -> Runnable:
@@ -43,6 +46,10 @@ class AssistantNode(Node):
         """
         # Select model based on mode
         model = context.main if context.mode == "main" else context.weak
+
+        # Bind Structred output if provided.
+        if self.structured_output is not None:
+            model = model.with_structured_output(self.structured_output)
 
         # Bind tools if provided
         if context.tools is not None and len(context.tools) > 0:
@@ -384,18 +391,33 @@ class AssistantNode(Node):
 
         return (agent_state, config)
 
-    async def __call__(self, state: BaseState, config, runtime: Runtime[AssistantContextSchema]):
+    async def __call__(
+        self,
+        state: BaseState,
+        *,
+        runtime: Runtime[AssistantContextSchema],
+        config: RunnableConfig,
+    ):
         while True:
             agent_state, config = await self._generate_agent_state(state, config, runtime)
 
             runnable = self._create_runnable(runtime.context)
 
-            result = await runnable.ainvoke(agent_state, config=config)
+            with get_usage_metadata_callback() as usage_metadata_callback:
+                result = await runnable.ainvoke(agent_state, config=config)
+                await self._track_token_usage(usage_metadata_callback.usage_metadata, runtime.context.mode)
+                log.debug(result)
+                log.debug(usage_metadata_callback)
 
-            result = cast(AIMessage, result)
-            await self._track_token_usage(result, runtime.context.mode)
-
-            log.debug(result)
+            # If we are requesting Structured output we can end with extracted being our structred output.
+            if self.structured_output is not None:
+                return Command(
+                    goto="end_node",
+                    update={
+                        "extracted_content": result,
+                        "errors": None,
+                    },
+                )
 
             # Ensure we get a real response
             if not result.tool_calls and (
