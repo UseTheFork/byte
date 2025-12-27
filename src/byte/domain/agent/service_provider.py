@@ -8,7 +8,7 @@ from byte.domain.agent.implementations.ask.command import AskCommand
 from byte.domain.agent.implementations.base import Agent
 from byte.domain.agent.implementations.cleaner.agent import CleanerAgent
 from byte.domain.agent.implementations.coder.agent import CoderAgent
-from byte.domain.agent.implementations.commit.agent import CommitAgent
+from byte.domain.agent.implementations.commit.agent import CommitAgent, CommitPlanAgent
 from byte.domain.agent.implementations.conventions.agent import ConventionAgent
 from byte.domain.agent.implementations.conventions.command import ConventionCommand
 from byte.domain.agent.implementations.copy.agent import CopyAgent
@@ -52,6 +52,7 @@ class AgentServiceProvider(ServiceProvider):
             CleanerAgent,
             CoderAgent,
             CommitAgent,
+            CommitPlanAgent,
             ConventionAgent,
             CopyAgent,
             ResearchAgent,
