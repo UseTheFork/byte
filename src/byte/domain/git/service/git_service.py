@@ -53,10 +53,10 @@ class GitService(Service, UserInteractive):
 
         # Get modified and staged files
         for item in self._repo.index.diff(None):  # Working tree vs index
-            changed_files.append(Path(item.a_path))
+            changed_files.append(Path(str(item.a_path)))
 
         for item in self._repo.index.diff("HEAD"):  # Index vs HEAD
-            changed_files.append(Path(item.a_path))
+            changed_files.append(Path(str(item.a_path)))
 
         # Get untracked files if requested
         if include_untracked:
@@ -77,6 +77,9 @@ class GitService(Service, UserInteractive):
         console = await self.make(ConsoleService)
 
         continue_commit = True
+
+        # Record currently staged files before attempting commit
+        staged_files = [item.a_path for item in self._repo.index.diff("HEAD")]
 
         while continue_commit:
             try:
@@ -101,8 +104,9 @@ class GitService(Service, UserInteractive):
                 retry = await self.prompt_for_confirmation("Stage changes and try again?", default=True)
 
                 if retry:
-                    # Stage changes and retry commit
-                    await self.stage_changes()
+                    # Re-stage only the files that were originally staged for this commit
+                    for file_path in staged_files:
+                        await self.add(str(file_path))
                     # Loop continues for another attempt
                 else:
                     # User declined retry, exit loop
@@ -141,3 +145,27 @@ class GitService(Service, UserInteractive):
                 # Add all unstaged changes
                 self._repo.git.add("--all")
                 console.print_success(f"Added {len(unstaged_changes)} unstaged changes to commit")
+
+    async def reset(self, file_path: str | None = None) -> None:
+        """Unstage files from the git index.
+
+        Args:
+                file_path: Optional path to specific file to unstage. If None, unstages all files.
+
+        Usage: `await git_service.reset("config.py")` -> unstages specific file
+        Usage: `await git_service.reset()` -> unstages all files
+        """
+        if file_path:
+            self._repo.index.reset(paths=[file_path])
+        else:
+            self._repo.index.reset()
+
+    async def add(self, file_path: str) -> None:
+        """Stage a specific file to the git index.
+
+        Args:
+                file_path: Path to the file to stage
+
+        Usage: `await git_service.add("config.py")` -> stages specific file
+        """
+        self._repo.index.add([file_path])

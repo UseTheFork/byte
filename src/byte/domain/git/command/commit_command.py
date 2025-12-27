@@ -1,6 +1,8 @@
 from argparse import Namespace
 
+from byte.core import log
 from byte.core.exceptions import ByteConfigException
+from byte.core.utils.list_to_multiline_text import list_to_multiline_text
 from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.agent.implementations.commit.agent import CommitAgent
 from byte.domain.agent.service.agent_service import AgentService
@@ -10,6 +12,8 @@ from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.git.service.git_service import GitService
 from byte.domain.lint.exceptions import LintConfigException
 from byte.domain.lint.service.lint_service import LintService
+from byte.domain.prompt_format.schemas import BoundaryType
+from byte.domain.prompt_format.utils import Boundary
 
 
 class CommitCommand(Command):
@@ -32,6 +36,32 @@ class CommitCommand(Command):
             description="Create an AI-powered git commit with automatic staging and linting",
         )
         return parser
+
+    async def _process_commit_plan(self, commit_plan) -> None:
+        """Process the commit plan by unstaging all files and committing each group separately.
+
+        Unstages all currently staged files, then iterates through each commit group
+        in the plan, staging only the files for that group and creating a commit with
+        the group's message.
+
+        Args:
+            commit_plan: The CommitPlan containing commit groups with messages and files
+
+        Usage: `await self._process_commit_plan(commit_plan)`
+        """
+        git_service = await self.make(GitService)
+
+        # Unstage all files
+        await git_service.reset()
+
+        # Iterate over each commit group
+        log.debug(commit_plan)
+        for commit_group in commit_plan.commits:
+            # Stage files for this commit group
+            await git_service.add(commit_group.files)
+
+            # Commit with the group's message
+            await git_service.commit(commit_group.commit_message)
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute the commit command with full workflow automation.
@@ -65,20 +95,37 @@ class CommitCommand(Command):
                 if do_fix:
                     joined_lint_errors = lint_service.format_lint_errors(failed_commands)
                     agent_service = await self.make(AgentService)
-                    await agent_service.execute_agent({"errors": joined_lint_errors}, CoderAgent)
+                    await agent_service.execute_agent(joined_lint_errors, CoderAgent)
             except LintConfigException:
                 pass
 
             # Extract staged changes for AI analysis
             staged_diff = repo.git.diff("--cached")
 
+            # Get list of staged file paths
+            staged_files = [item.a_path for item in repo.index.diff("HEAD")]
+
             # TODO: need to implment `count_tokens_approximately`
             # tokens = count_tokens_approximately([("user", staged_diff)])
 
-            commit_agent = await self.make(CommitAgent)
-            commit_message = await commit_agent.execute(request=staged_diff, display_mode="thinking")
+            # Combine diff and file list for AI analysis
+            staged_files_list = "\n".join(f"- {file}" for file in staged_files)
+            prompt = list_to_multiline_text(
+                [
+                    Boundary.open(BoundaryType.CONTEXT, meta={"type": "Staged Files"}),
+                    staged_files_list,
+                    Boundary.close(BoundaryType.CONTEXT),
+                    "",
+                    Boundary.open(BoundaryType.CONTEXT, meta={"type": "Diff"}),
+                    staged_diff,
+                    Boundary.close(BoundaryType.CONTEXT),
+                ]
+            )
 
-            await git_service.commit(str(commit_message["extracted_content"]))
+            commit_agent = await self.make(CommitAgent)
+            commit_result = await commit_agent.execute(request=prompt, display_mode="thinking")
+
+            await self._process_commit_plan(commit_result["extracted_content"])
         except ByteConfigException as e:
             console = await self.make(ConsoleService)
             console.print_error_panel(
