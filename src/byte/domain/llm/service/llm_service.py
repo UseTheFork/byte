@@ -53,8 +53,8 @@ class LLMService(Service):
 
         # Instantiate using the stored class reference
         return self._service_config.model_class(
-            max_tokens=model_schema.constraints.max_output_tokens,  # pyright: ignore[reportCallIssue]
-            api_key=self._service_config.api_key,  # pyright: ignore[reportCallIssue]
+            max_tokens=model_schema.constraints.max_output_tokens,
+            api_key=self._service_config.api_key,
             **params_dict,
             **provider_params,
         )

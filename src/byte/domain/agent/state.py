@@ -30,7 +30,7 @@ class BaseState(TypedDict):
     errors: Annotated[str | None, replace_str]
     examples: list[AnyMessage]
 
-    extracted_content: str
+    extracted_content: str | dict
 
     # These are specific to Coder
     edit_format_system: str
