@@ -4,7 +4,7 @@ from byte.core import log
 from byte.core.exceptions import ByteConfigException
 from byte.core.utils.list_to_multiline_text import list_to_multiline_text
 from byte.domain.agent.implementations.coder.agent import CoderAgent
-from byte.domain.agent.implementations.commit.agent import CommitAgent
+from byte.domain.agent.implementations.commit.agent import CommitAgent, CommitPlanAgent
 from byte.domain.agent.service.agent_service import AgentService
 from byte.domain.cli.argparse.base import ByteArgumentParser
 from byte.domain.cli.service.command_registry import Command
@@ -58,7 +58,13 @@ class CommitCommand(Command):
         log.debug(commit_plan)
         for commit_group in commit_plan.commits:
             # Stage files for this commit group
-            await git_service.add(commit_group.files)
+            for file_path in commit_group.files:
+                file_full_path = self._config.project_root / file_path
+                if file_full_path.exists():
+                    await git_service.add(file_path)
+                else:
+                    # File was deleted, stage the deletion
+                    await git_service.remove(file_path)
 
             # Commit with the group's message
             await git_service.commit(commit_group.commit_message)
@@ -122,10 +128,21 @@ class CommitCommand(Command):
                 ]
             )
 
-            commit_agent = await self.make(CommitAgent)
-            commit_result = await commit_agent.execute(request=prompt, display_mode="thinking")
+            commit_type = await self.prompt_for_select(
+                "What type of commit would you like to generate?",
+                choices=["Commit Plan", "Single Commit", "Cancel"],
+                default="Commit Plan",
+            )
 
-            await self._process_commit_plan(commit_result["extracted_content"])
+            if commit_type == "Commit Plan":
+                commit_agent = await self.make(CommitPlanAgent)
+                commit_result = await commit_agent.execute(request=prompt, display_mode="thinking")
+                await self._process_commit_plan(commit_result["extracted_content"])
+            elif commit_type == "Single Commit":
+                commit_agent = await self.make(CommitAgent)
+                commit_result = await commit_agent.execute(request=prompt, display_mode="thinking")
+                commit_message = commit_result["extracted_content"].commit_message
+                await git_service.commit(commit_message)
         except ByteConfigException as e:
             console = await self.make(ConsoleService)
             console.print_error_panel(
