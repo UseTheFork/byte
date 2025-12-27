@@ -1,6 +1,7 @@
 import json
 
 from langchain_core.messages import ToolMessage
+from langchain_core.runnables import RunnableConfig
 from langgraph.graph.message import RemoveMessage
 from langgraph.runtime import Runtime
 from langgraph.types import Command
@@ -16,7 +17,7 @@ from byte.domain.cli.service.console_service import ConsoleService
 
 
 class ToolNode(Node, UserInteractive):
-    async def __call__(self, state: BaseState, runtime: Runtime[AssistantContextSchema]):
+    async def __call__(self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]):
         message = get_last_message(state["scratch_messages"])
 
         outputs = []

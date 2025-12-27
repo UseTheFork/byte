@@ -1,3 +1,4 @@
+from langchain_core.runnables import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
@@ -15,7 +16,12 @@ class ShowNode(AssistantNode):
     Usage: Used in CopyAgent workflow via `/copy` command
     """
 
-    async def __call__(self, state: BaseState, config, runtime: Runtime[AssistantContextSchema]):
+    async def __call__(
+        self,
+        state: BaseState,
+        runtime: Runtime[AssistantContextSchema],
+        config: RunnableConfig,
+    ):
         """Extract code blocks and prompt user to select one for clipboard copy."""
         agent_state, config = await self._generate_agent_state(state, config, runtime)
 

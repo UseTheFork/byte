@@ -1,3 +1,5 @@
+from typing import Any
+
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 
@@ -8,7 +10,13 @@ from byte.domain.prompt_format.service.edit_format_service import EditFormatServ
 
 
 class StartNode(Node):
-    async def __call__(self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]):
+    async def __call__(
+        self,
+        state: BaseState,
+        *,
+        runtime: Runtime[AssistantContextSchema],
+        config: RunnableConfig,
+    ) -> Any:
         edit_format = await self.make(EditFormatService)
 
         result = {
