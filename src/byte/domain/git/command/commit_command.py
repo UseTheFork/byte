@@ -106,27 +106,31 @@ class CommitCommand(Command):
                 pass
 
             # Extract staged changes for AI analysis
-            staged_diff = repo.git.diff("--cached")
+            staged_diff = await git_service.get_diff("HEAD")
 
-            # Get list of staged file paths
-            staged_files = [item.a_path for item in repo.index.diff("HEAD")]
+            # Build formatted diff sections for each file
+            diff_section = []
+            file_section = [Boundary.open(BoundaryType.CONTEXT, meta={"type": "Files"})]
+            for diff_item in staged_diff:
+                file_path = diff_item["file"]
+                change_type = diff_item["change_type"]
 
-            # TODO: need to implment `count_tokens_approximately`
-            # tokens = count_tokens_approximately([("user", staged_diff)])
+                # Start file section with change type
+                diff_section.append(
+                    Boundary.open(
+                        BoundaryType.CONTEXT, meta={"type": "Diff", "change_type": change_type, "file": file_path}
+                    )
+                )
+                file_section.append(f"{file_path}")
 
-            # Combine diff and file list for AI analysis
-            staged_files_list = "\n".join(f"- {file}" for file in staged_files)
-            prompt = list_to_multiline_text(
-                [
-                    Boundary.open(BoundaryType.CONTEXT, meta={"type": "Staged Files"}),
-                    staged_files_list,
-                    Boundary.close(BoundaryType.CONTEXT),
-                    "",
-                    Boundary.open(BoundaryType.CONTEXT, meta={"type": "Diff"}),
-                    staged_diff,
-                    Boundary.close(BoundaryType.CONTEXT),
-                ]
-            )
+                # Include diff content only for non-deleted files
+                if change_type != "D" and diff_item["diff"]:
+                    diff_section.append(diff_item["diff"])
+
+                diff_section.append(Boundary.close(BoundaryType.CONTEXT))
+
+            file_section.append(Boundary.close(BoundaryType.CONTEXT))
+            prompt = list_to_multiline_text(diff_section) + list_to_multiline_text(file_section)
 
             commit_type = await self.prompt_for_select(
                 "What type of commit would you like to generate?",

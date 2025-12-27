@@ -184,3 +184,54 @@ class GitService(Service, UserInteractive):
         Usage: `await git_service.remove("config.py")` -> stages file deletion
         """
         self._repo.index.remove([file_path])
+
+    async def get_diff(self, other: str | None = None) -> List[dict]:
+        """Get structured diff data for changes in the repository.
+
+        Args:
+                other: Optional comparison target. Common values:
+                        - None: Compare working tree to index (unstaged changes)
+                        - "HEAD": Compare index to HEAD (staged changes)
+                        - "--cached": Same as "HEAD" (staged changes)
+
+        Returns:
+                List of dictionaries containing diff information for each changed file
+
+        Usage: `await git_service.get_diff("HEAD")` -> get staged changes
+        Usage: `await git_service.get_diff()` -> get unstaged changes
+        """
+
+        staged_diff = self._repo.index.diff(other, create_patch=True)
+
+        diff_data = []
+        for diff_item in staged_diff:
+            diff_content = None
+
+            # Determine change type
+            if diff_item.new_file:
+                change_type = "ADD"
+            elif diff_item.deleted_file:
+                change_type = "DELETE"
+            elif diff_item.renamed_file:
+                change_type = "RENAME"
+            else:
+                change_type = "MODIFY"
+
+            if diff_item.diff:
+                if isinstance(diff_item.diff, bytes):
+                    diff_content = diff_item.diff.decode("utf-8")
+                else:
+                    diff_content = str(diff_item.diff)
+
+            diff_data.append(
+                {
+                    "file": diff_item.a_path,
+                    "change_type": change_type,
+                    "diff": diff_content,
+                    "renamed": diff_item.renamed,
+                    "new_file": diff_item.new_file,
+                    "deleted_file": diff_item.deleted_file,
+                }
+            )
+
+        return diff_data
