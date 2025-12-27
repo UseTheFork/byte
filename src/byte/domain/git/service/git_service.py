@@ -106,7 +106,12 @@ class GitService(Service, UserInteractive):
                 if retry:
                     # Re-stage only the files that were originally staged for this commit
                     for file_path in staged_files:
-                        await self.add(str(file_path))
+                        file_full_path = self._config.project_root / file_path
+                        if file_full_path.exists():
+                            await self.add(str(file_path))
+                        else:
+                            # File was deleted, stage the deletion
+                            await self.remove(str(file_path))
                     # Loop continues for another attempt
                 else:
                     # User declined retry, exit loop
@@ -169,3 +174,13 @@ class GitService(Service, UserInteractive):
         Usage: `await git_service.add("config.py")` -> stages specific file
         """
         self._repo.index.add([file_path])
+
+    async def remove(self, file_path: str) -> None:
+        """Stage a file deletion to the git index.
+
+        Args:
+                file_path: Path to the deleted file to stage
+
+        Usage: `await git_service.remove("config.py")` -> stages file deletion
+        """
+        self._repo.index.remove([file_path])
