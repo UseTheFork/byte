@@ -1,7 +1,6 @@
 from importlib import import_module
 
-# TODO: link this to git repo
-# Credits to langchain_core/_import_utils.py
+# Credits to https://github.com/langchain-ai/langchain/blob/master/libs/core/langchain_core/_import_utils.py
 
 
 def import_attr(
