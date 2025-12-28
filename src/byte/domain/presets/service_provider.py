@@ -1,7 +1,7 @@
 from typing import List, Type
 
 from byte.container import Container
-from byte.core.config.config import ByteConfg
+from byte.core.config.config import ByteConfig
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli.service.command_registry import Command
@@ -33,7 +33,7 @@ class PresetsProvider(ServiceProvider):
 
         load_preset_command = await container.make(LoadPresetCommand)
 
-        config = await container.make(ByteConfg)
+        config = await container.make(ByteConfig)
         if config.presets:
             for preset in config.presets:
                 if preset.load_on_boot:

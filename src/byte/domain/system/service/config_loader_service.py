@@ -4,7 +4,7 @@ from importlib.metadata import PackageNotFoundError, version
 
 import yaml
 
-from byte.core.config.config import BYTE_CONFIG_FILE, ByteConfg, CLIArgs
+from byte.core.config.config import BYTE_CONFIG_FILE, ByteConfig, CLIArgs
 from byte.domain.system.config import PathsConfig
 
 
@@ -31,7 +31,7 @@ class ConfigLoaderService:
 
         return config if config is not None else {}
 
-    def _apply_system_config(self, config: ByteConfg) -> ByteConfg:
+    def _apply_system_config(self, config: ByteConfig) -> ByteConfig:
         """Apply system-level configuration settings.
 
         Usage: `config = self._apply_system_config(config)`
@@ -60,7 +60,7 @@ class ConfigLoaderService:
 
         return config
 
-    def _apply_environment_overrides(self, config: ByteConfg) -> ByteConfg:
+    def _apply_environment_overrides(self, config: ByteConfig) -> ByteConfig:
         """Apply environment variable overrides to configuration.
 
         Checks for BYTE_DEV_MODE environment variable and enables development mode if set.
@@ -72,7 +72,7 @@ class ConfigLoaderService:
 
         return config
 
-    def _load_llm_api_keys(self, config: ByteConfg) -> ByteConfg:
+    def _load_llm_api_keys(self, config: ByteConfig) -> ByteConfig:
         """Load and configure LLM API keys from environment variables.
 
         Detects available API keys and enables corresponding LLM providers.
@@ -106,7 +106,7 @@ class ConfigLoaderService:
 
         return config
 
-    def _load_boot_config(self, config: ByteConfg) -> ByteConfg:
+    def _load_boot_config(self, config: ByteConfig) -> ByteConfig:
         """Load boot configuration from CLI arguments.
 
         Merges boot config from YAML with CLI arguments, removing duplicates.
@@ -123,7 +123,7 @@ class ConfigLoaderService:
 
         return config
 
-    def __call__(self) -> ByteConfg:
+    def __call__(self) -> ByteConfig:
         """Load configuration from BYTE_CONFIG_FILE.
 
         Returns a dictionary of configuration values parsed from YAML.
@@ -132,7 +132,7 @@ class ConfigLoaderService:
 
         yaml_config = self._load_yaml_config()
 
-        config = ByteConfg(**yaml_config)
+        config = ByteConfig(**yaml_config)
         config = self._apply_system_config(config)
         config = self._apply_environment_overrides(config)
         config = self._load_llm_api_keys(config)

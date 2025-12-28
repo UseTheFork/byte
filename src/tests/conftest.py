@@ -8,7 +8,7 @@ from byte.domain.prompt_format.service.edit_block_service import EditBlockServic
 
 from byte.bootstrap import bootstrap
 from byte.container import Container
-from byte.core.config.config import ByteConfg
+from byte.core.config.config import ByteConfig
 from byte.domain.files.service.file_service import FileService
 from byte.domain.prompt_format.service.shell_command_service import ShellCommandService
 
@@ -39,7 +39,7 @@ def tmp_project_root(tmp_path: Path) -> Path:
 
 
 @pytest_asyncio.fixture
-async def test_config(tmp_project_root: Path) -> ByteConfg:
+async def test_config(tmp_project_root: Path) -> ByteConfig:
     """Create a test configuration with temporary paths.
 
     Usage: `async def test_something(test_config): ...`
@@ -53,7 +53,7 @@ async def test_config(tmp_project_root: Path) -> ByteConfg:
     config_file.write_text("model: sonnet\n")
 
     # Create config instance with test paths
-    config = ByteConfg()
+    config = ByteConfig()
     config.project_root = tmp_project_root
     config.byte_dir = byte_dir
 
@@ -61,7 +61,7 @@ async def test_config(tmp_project_root: Path) -> ByteConfg:
 
 
 @pytest_asyncio.fixture
-async def test_container(test_config: ByteConfg) -> AsyncGenerator[Container, None]:
+async def test_container(test_config: ByteConfig) -> AsyncGenerator[Container, None]:
     """Bootstrap a test container with minimal service configuration.
 
     Provides a fully configured container for testing services in isolation

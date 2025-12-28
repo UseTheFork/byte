@@ -1,7 +1,7 @@
 from typing import List, Type
 
 from byte.container import Container
-from byte.core.config.config import ByteConfg
+from byte.core.config.config import ByteConfig
 from byte.core.event_bus import EventBus, EventType, Payload
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
@@ -63,7 +63,7 @@ class FileServiceProvider(ServiceProvider):
         )
 
         # Boot AI comment watcher if enabled
-        config = await container.make(ByteConfg)
+        config = await container.make(ByteConfig)
         if config.files.watch.enable:
             ai_comment_watcher = await container.make(AICommentWatcherService)
 

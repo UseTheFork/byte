@@ -1,7 +1,7 @@
 from typing import List, Type
 
 from byte.container import Container
-from byte.core.config.config import ByteConfg
+from byte.core.config.config import ByteConfig
 from byte.core.event_bus import EventBus, EventType, Payload
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
@@ -27,7 +27,7 @@ class LSPServiceProvider(ServiceProvider):
         return []
 
     async def boot(self, container: Container):
-        config = await container.make(ByteConfg)
+        config = await container.make(ByteConfig)
         if config.lsp.enable:
             # Boots the LSPs and starts them in the background.
             await container.make(LSPService)
@@ -54,7 +54,7 @@ class LSPServiceProvider(ServiceProvider):
 
     async def shutdown(self, container: Container) -> None:
         """Shutdown all LSP servers gracefully."""
-        config = await container.make(ByteConfg)
+        config = await container.make(ByteConfig)
         if config.lsp.enable:
             lsp_service = await container.make(LSPService)
             await lsp_service.shutdown_all()

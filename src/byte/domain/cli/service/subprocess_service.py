@@ -1,7 +1,7 @@
 import asyncio
 from typing import Optional
 
-from byte.core.config.config import ByteConfg
+from byte.core.config.config import ByteConfig
 from byte.core.service.base_service import Service
 from byte.domain.cli.schemas import SubprocessResult
 
@@ -36,7 +36,7 @@ class SubprocessService(Service):
         """
         try:
             # Get project root from config
-            config = await self.make(ByteConfg)
+            config = await self.make(ByteConfig)
             working_dir = str(config.project_root)
 
             # Create subprocess

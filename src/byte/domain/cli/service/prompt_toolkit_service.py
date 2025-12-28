@@ -6,7 +6,7 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.shortcuts import PromptSession
 from rich.console import Group
 
-from byte.core.config.config import ByteConfg
+from byte.core.config.config import ByteConfig
 from byte.core.event_bus import EventType, Payload
 from byte.core.logging import log
 from byte.core.service.base_service import Service
@@ -77,7 +77,7 @@ class PromptToolkitService(Service):
 
         self.completer = CommandCompleter()
 
-        config = await self.make(ByteConfg)
+        config = await self.make(ByteConfig)
 
         self.prompt_session = PromptSession(
             history=FileHistory(config.byte_cache_dir / ".input_history"),

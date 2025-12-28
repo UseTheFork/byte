@@ -6,7 +6,7 @@ import yaml
 from rich.console import Console
 from rich.theme import Theme
 
-from byte.core.config.config import BYTE_CACHE_DIR, BYTE_CONFIG_FILE, PROJECT_ROOT, ByteConfg
+from byte.core.config.config import BYTE_CACHE_DIR, BYTE_CONFIG_FILE, PROJECT_ROOT, ByteConfig
 from byte.domain.cli.rich.menu import Menu
 from byte.domain.cli.schemas import ByteTheme, ThemeRegistry
 
@@ -82,7 +82,7 @@ class FirstBootService:
         llm_model = self._init_llm()
 
         # Build config with selected LLM model
-        config = ByteConfg()
+        config = ByteConfig()
         config.llm.model = llm_model
 
         # Initialize files configuration
@@ -201,7 +201,7 @@ class FirstBootService:
 
         return selected  # pyright: ignore[reportReturnType]
 
-    def _init_web(self, config: ByteConfg) -> ByteConfg:
+    def _init_web(self, config: ByteConfig) -> ByteConfig:
         """Initialize web configuration by detecting Chrome or Chromium binary.
 
         Attempts to locate google-chrome-stable first, then falls back to chromium.
@@ -224,7 +224,7 @@ class FirstBootService:
 
         return config
 
-    def _init_files(self, config: ByteConfg) -> ByteConfg:
+    def _init_files(self, config: ByteConfig) -> ByteConfig:
         """Initialize files configuration by asking if user wants to enable file watching.
 
         Prompts user with a confirmation dialog. If confirmed, sets watch.enable to true.

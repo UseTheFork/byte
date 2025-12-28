@@ -1,6 +1,6 @@
 from argparse import Namespace
 
-from byte.core.config.config import ByteConfg
+from byte.core.config.config import ByteConfig
 from byte.core.utils.slugify import slugify
 from byte.domain.cli.argparse.base import ByteArgumentParser
 from byte.domain.cli.service.command_registry import Command
@@ -52,7 +52,7 @@ class SavePresetCommand(Command):
         preset_id = slugify(preset_name)
 
         # Check if preset with this ID already exists
-        config = await self.make(ByteConfg)
+        config = await self.make(ByteConfig)
         if config.presets:
             existing_preset = next((p for p in config.presets if p.id == preset_id), None)
             if existing_preset:

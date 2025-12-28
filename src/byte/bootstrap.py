@@ -1,5 +1,5 @@
 from byte.container import app
-from byte.core.config.config import ByteConfg
+from byte.core.config.config import ByteConfig
 from byte.core.event_bus import EventBus
 from byte.core.task_manager import TaskManager
 from byte.domain.agent.service_provider import AgentServiceProvider
@@ -22,7 +22,7 @@ from byte.domain.tools.service_provider import ToolsServiceProvider
 from byte.domain.web.service_provider import WebServiceProvider
 
 
-async def bootstrap(config: ByteConfg):
+async def bootstrap(config: ByteConfig):
     """Initialize and configure the application's dependency injection container.
 
     Follows a two-phase initialization pattern: register all services first,
@@ -39,7 +39,7 @@ async def bootstrap(config: ByteConfg):
     app.singleton(CommandRegistry)
 
     # Boot config as early as possible
-    app.singleton(ByteConfg, lambda: config)
+    app.singleton(ByteConfig, lambda: config)
 
     # Setup console early
     app.singleton(ConsoleService)

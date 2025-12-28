@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from byte.core.config.config import ByteConfg
+from byte.core.config.config import ByteConfig
 
 
 def format_type(type_info: Any) -> str:
@@ -139,13 +139,13 @@ def create_section_table(
 
 
 def schema_to_markdown(schema: Dict[str, Any]) -> str:
-    """Convert ByteConfg schema to markdown documentation.
+    """Convert ByteConfig schema to markdown documentation.
 
     Creates separate tables for each configuration section (cli, llm, files, etc).
     Recursively processes nested configs like LLMProviderConfig.
     Excludes internal fields marked with exclude=True.
 
-    Usage: `schema_to_markdown(ByteConfg.model_json_schema())` -> full markdown string
+    Usage: `schema_to_markdown(ByteConfig.model_json_schema())` -> full markdown string
     """
     sections = []
 
@@ -220,7 +220,7 @@ def main():
 
     Usage: `python src/scripts/settings_to_md.py`
     """
-    schema = ByteConfg.model_json_schema()
+    schema = ByteConfig.model_json_schema()
     markdown = schema_to_markdown(schema)
 
     # Write to docs/settings.md

@@ -6,7 +6,7 @@ from byte.bootstrap import bootstrap, shutdown
 from byte.container import Container
 from byte.context import container_context
 from byte.core.cli import cli
-from byte.core.config.config import ByteConfg
+from byte.core.config.config import ByteConfig
 from byte.core.logging import log
 from byte.core.task_manager import TaskManager
 from byte.domain.cli.service.console_service import ConsoleService
@@ -33,7 +33,7 @@ class Byte:
         self.task_manager = await self.container.make(TaskManager)
 
         # Do boot config operations based on CLI invocation
-        config = await self.container.make(ByteConfg)
+        config = await self.container.make(ByteConfig)
         file_service = await self.container.make(FileService)
 
         # Add read-only files from boot config
@@ -78,7 +78,7 @@ class Byte:
                 # console.console.print_exception(show_locals=True)
 
 
-async def main(config: ByteConfg):
+async def main(config: ByteConfig):
     """Application entry point"""
     container = await bootstrap(config)
     container_context.set(container)
@@ -94,7 +94,7 @@ async def main(config: ByteConfg):
     console.print("[warning]Goodbye![/warning]")
 
 
-def run(config: ByteConfg):
+def run(config: ByteConfig):
     asyncio.run(main(config))
 
 

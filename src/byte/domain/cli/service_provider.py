@@ -1,5 +1,5 @@
 from byte.container import Container
-from byte.core.config.config import ByteConfg
+from byte.core.config.config import ByteConfig
 from byte.core.event_bus import EventBus, EventType, Payload
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli.service.console_service import ConsoleService
@@ -34,7 +34,7 @@ class CLIServiceProvider(ServiceProvider):
     async def boot_messages(self, payload: Payload) -> Payload:
         container: Container = payload.get("container", False)
         if container:
-            config = await container.make(ByteConfg)
+            config = await container.make(ByteConfig)
             console = await container.make(ConsoleService)
             messages = payload.get("messages", [])
 

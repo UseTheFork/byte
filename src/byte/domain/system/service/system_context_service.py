@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from byte.core.config.config import ByteConfg
+from byte.core.config.config import ByteConfig
 from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
 
@@ -28,7 +28,7 @@ class SystemContextService(Service):
         system_context.append(f"- Current date: {datetime.now().strftime('%Y-%m-%d')}")
 
         # Check in the config if we have lint commands that should not be suggested.
-        config = await self.make(ByteConfg)
+        config = await self.make(ByteConfig)
 
         # Add lint commands context if configured
         if config.lint.enable and config.lint.commands:

@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from byte.bootstrap import bootstrap, shutdown
-from byte.core.config.config import ByteConfg
+from byte.core.config.config import ByteConfig
 from byte.domain.cli.service.command_registry import Command, CommandRegistry
 
 
@@ -89,7 +89,7 @@ async def generate_commands_md() -> None:
     Usage: `await generate_commands_md()`
     """
     # Bootstrap minimal app to get registry
-    config = ByteConfg()
+    config = ByteConfig()
     container = await bootstrap(config)
 
     try:

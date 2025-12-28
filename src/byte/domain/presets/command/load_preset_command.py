@@ -2,7 +2,7 @@ from argparse import Namespace
 from typing import List
 
 from byte import log
-from byte.core.config.config import ByteConfg
+from byte.core.config.config import ByteConfig
 from byte.domain.analytics.service.agent_analytics_service import AgentAnalyticsService
 from byte.domain.cli.argparse.base import ByteArgumentParser
 from byte.domain.cli.service.command_registry import Command
@@ -63,7 +63,7 @@ class LoadPresetCommand(Command):
         preset_id = args.preset_id
 
         # Validate preset ID and retrieve preset configuration
-        config = await self.make(ByteConfg)
+        config = await self.make(ByteConfig)
         if config.presets:
             preset = next((p for p in config.presets if p.id == preset_id), None)
 
@@ -121,7 +121,7 @@ class LoadPresetCommand(Command):
 
         Usage: return ["foo", "bar"] for available preset IDs
         """
-        config = await self.make(ByteConfg)
+        config = await self.make(ByteConfig)
         if config.presets:
             preset_ids = [preset.id for preset in config.presets]
 

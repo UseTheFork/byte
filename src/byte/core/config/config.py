@@ -57,7 +57,7 @@ class BootConfig(BaseModel):
     editable_files: list[str] = Field(default_factory=list, description="Files to add to editable context")
 
 
-class ByteConfg(BaseModel):
+class ByteConfig(BaseModel):
     project_root: Path = Field(default=PROJECT_ROOT, exclude=True)
     byte_dir: Path = Field(default=BYTE_DIR, exclude=True)
     byte_cache_dir: Path = Field(default=BYTE_CACHE_DIR, exclude=True)

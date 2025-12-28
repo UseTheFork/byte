@@ -5,7 +5,7 @@ from typing import Optional
 from langchain_core.tools import tool
 
 from byte.context import make
-from byte.core.config.config import ByteConfg
+from byte.core.config.config import ByteConfig
 
 
 def _check_ripgrep_installed() -> bool:
@@ -38,7 +38,7 @@ async def ripgrep_search(
     if not _check_ripgrep_installed():
         return "Error: ripgrep (rg) is not installed. Please install it to use this feature."
 
-    config = await make(ByteConfg)
+    config = await make(ByteConfig)
     project_root = str(config.project_root)
 
     # Build ripgrep command
