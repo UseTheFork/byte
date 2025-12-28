@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.domain.cli.argparse.base import ByteArgumentParser
     from byte.domain.cli.rich.markdown import CodeBlock, Heading, Markdown
     from byte.domain.cli.rich.menu import Menu, MenuInputHandler, MenuRenderer, MenuState, MenuStyle
     from byte.domain.cli.rich.panel_rule import PanelBottom, PanelTop
@@ -17,6 +18,7 @@ if TYPE_CHECKING:
     from byte.domain.cli.service.subprocess_service import SubprocessService
 
 __all__ = (
+    "ByteArgumentParser",
     "CodeBlock",
     "Command",
     "CommandRegistry",
@@ -39,6 +41,7 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
+    "ByteArgumentParser": "argparse.base",
     "CodeBlock": "rich.markdown",
     "Command": "service.command_registry",
     "CommandRegistry": "service.command_registry",

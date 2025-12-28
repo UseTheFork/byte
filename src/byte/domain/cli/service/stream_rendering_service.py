@@ -5,7 +5,7 @@ from langchain_core.messages.tool import ToolMessage
 from rich.live import Live
 
 from byte.core.service.base_service import Service
-from byte.core.utils import extract_content_from_message
+from byte.core.utils.extract_content_from_message import extract_content_from_message
 from byte.domain.cli.rich.rune_spinner import RuneSpinner
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.cli.utils.formatters import MarkdownStream
@@ -39,32 +39,30 @@ class StreamRenderingService(Service):
             mdargs={"code_theme": self._config.cli.syntax_theme},
         )
 
-    async def handle_message(self, chunk, agent_name: str):
-        """Handle streaming message chunks from AI agents with type-specific processing.
+    async def _start_tool_message(self):
+        """Display tool execution start indicator with visual separation.
 
-        Routes different message types (AI, Tool, etc.) to appropriate handlers for
-        proper display formatting and user experience. Manages stream lifecycle
-        and content accumulation for smooth rendering.
-        Usage: `await service.handle_message((message, metadata), "CoderAgent")` -> processes chunk
+        Shows a visual rule separator to indicate transition from AI response
+        to tool execution phase, providing clear visual feedback to users.
+        Usage: Called automatically when AI response indicates tool usage
         """
+        # Tool messages might need different visual treatment
 
-        message_chunk, metadata = chunk
+        self.console.print()
+        self.console.rule("Using Tool")
 
-        # Set the Agent "class" as the Agent Name
-        self.agent_name = agent_name
+        # We reset the stream_id here to make it look like a new stream
+        self.current_stream_id = ""
 
-        # Handle different message types with isinstance checks
-        if isinstance(message_chunk, AIMessageChunk):
-            # Handle AI assistant responses - normal streaming content
-            await self._handle_ai_message(message_chunk, metadata)
+    async def _update_active_stream(self, final: bool = False):
+        """Update the active markdown stream renderer with accumulated content.
 
-        elif isinstance(message_chunk, ToolMessage):
-            # Handle tool execution results - might want different formatting
-            await self._end_tool_message(message_chunk, metadata)
-
-        else:
-            # Handle other message types with default behavior
-            await self._handle_default_message(message_chunk, metadata)
+        Passes accumulated content to the markdown stream for progressive
+        rendering, with optional final flag to indicate stream completion.
+        Usage: Called internally during content accumulation and finalization
+        """
+        if self.active_stream and self.display_mode == "verbose":
+            await self.active_stream.update(self.accumulated_content, final=final)
 
     async def _handle_ai_message(self, message_chunk, metadata):
         """Handle AI assistant message chunks with content accumulation and stream management.
@@ -95,21 +93,6 @@ class StreamRenderingService(Service):
                 if message_chunk.response_metadata.get("stop_reason") == "tool_use":
                     await self._start_tool_message()
 
-    async def _start_tool_message(self):
-        """Display tool execution start indicator with visual separation.
-
-        Shows a visual rule separator to indicate transition from AI response
-        to tool execution phase, providing clear visual feedback to users.
-        Usage: Called automatically when AI response indicates tool usage
-        """
-        # Tool messages might need different visual treatment
-
-        self.console.print()
-        self.console.rule("Using Tool")
-
-        # We reset the stream_id here to make it look like a new stream
-        self.current_stream_id = ""
-
     async def _end_tool_message(self, message_chunk, metadata):
         """Handle completion of tool execution with spinner restart.
 
@@ -136,6 +119,33 @@ class StreamRenderingService(Service):
                 self.accumulated_content += content
                 if self.display_mode == "verbose":
                     await self._update_active_stream()
+
+    async def handle_message(self, chunk, agent_name: str):
+        """Handle streaming message chunks from AI agents with type-specific processing.
+
+        Routes different message types (AI, Tool, etc.) to appropriate handlers for
+        proper display formatting and user experience. Manages stream lifecycle
+        and content accumulation for smooth rendering.
+        Usage: `await service.handle_message((message, metadata), "CoderAgent")` -> processes chunk
+        """
+
+        message_chunk, metadata = chunk
+
+        # Set the Agent "class" as the Agent Name
+        self.agent_name = agent_name
+
+        # Handle different message types with isinstance checks
+        if isinstance(message_chunk, AIMessageChunk):
+            # Handle AI assistant responses - normal streaming content
+            await self._handle_ai_message(message_chunk, metadata)
+
+        elif isinstance(message_chunk, ToolMessage):
+            # Handle tool execution results - might want different formatting
+            await self._end_tool_message(message_chunk, metadata)
+
+        else:
+            # Handle other message types with default behavior
+            await self._handle_default_message(message_chunk, metadata)
 
     async def handle_update(self, chunk):
         """Handle state update chunks from LangGraph execution with node transition management.
@@ -174,6 +184,15 @@ class StreamRenderingService(Service):
         self.active_stream = None
         self.current_stream_id = None
         await self.stop_spinner()
+
+    def _format_agent_name(self, agent_name: str) -> str:
+        """Convert agent class name to readable headline case.
+
+        Usage: "CoderAgent" -> "Coder Agent"
+        """
+        # Insert space before capital letters (except the first one)
+        spaced = re.sub(r"(?<!^)(?=[A-Z])", " ", agent_name)
+        return spaced
 
     async def start_stream_render(self, stream_id):
         """Initialize a new streaming render session with agent identification.
@@ -234,25 +253,6 @@ class StreamRenderingService(Service):
             spinner = RuneSpinner(text="Thinking...", size=15)
             self.spinner = Live(spinner, console=self.console.console, transient=True, refresh_per_second=20)
             self.spinner.start()
-
-    async def _update_active_stream(self, final: bool = False):
-        """Update the active markdown stream renderer with accumulated content.
-
-        Passes accumulated content to the markdown stream for progressive
-        rendering, with optional final flag to indicate stream completion.
-        Usage: Called internally during content accumulation and finalization
-        """
-        if self.active_stream and self.display_mode == "verbose":
-            await self.active_stream.update(self.accumulated_content, final=final)
-
-    def _format_agent_name(self, agent_name: str) -> str:
-        """Convert agent class name to readable headline case.
-
-        Usage: "CoderAgent" -> "Coder Agent"
-        """
-        # Insert space before capital letters (except the first one)
-        spaced = re.sub(r"(?<!^)(?=[A-Z])", " ", agent_name)
-        return spaced
 
     def set_display_mode(self, mode: str) -> None:
         """Set the display mode for stream rendering.
