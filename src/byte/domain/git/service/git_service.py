@@ -4,8 +4,8 @@ from typing import List
 import git
 from git.exc import InvalidGitRepositoryError
 
-from byte.core.mixins.user_interactive import UserInteractive
-from byte.core.service.base_service import Service
+from byte import Service
+from byte.core.mixins import UserInteractive
 from byte.domain.cli.service.console_service import ConsoleService
 
 
@@ -213,7 +213,7 @@ class GitService(Service, UserInteractive):
             elif diff_item.deleted_file:
                 change_type = "DELETE"
             elif diff_item.renamed_file:
-                change_type = "RENAME"
+                change_type = "RENAME FILE"
             else:
                 change_type = "MODIFY"
 
