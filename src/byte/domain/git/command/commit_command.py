@@ -2,14 +2,12 @@ from argparse import Namespace
 
 from byte.core import log
 from byte.core.exceptions import ByteConfigException
-from byte.core.utils.list_to_multiline_text import list_to_multiline_text
+from byte.core.utils import list_to_multiline_text
 from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.agent.implementations.commit.agent import CommitAgent, CommitPlanAgent
 from byte.domain.agent.service.agent_service import AgentService
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.git.service.git_service import GitService
+from byte.domain.cli import ByteArgumentParser, Command, ConsoleService
+from byte.domain.git import GitService
 from byte.domain.lint.exceptions import LintConfigException
 from byte.domain.lint.service.lint_service import LintService
 from byte.domain.prompt_format.schemas import BoundaryType
@@ -124,7 +122,7 @@ class CommitCommand(Command):
                 file_section.append(f"{file_path}")
 
                 # Include diff content only for non-deleted files
-                if change_type != "D" and diff_item["diff"]:
+                if change_type != "DELETE" and diff_item["diff"]:
                     diff_section.append(diff_item["diff"])
 
                 diff_section.append(Boundary.close(BoundaryType.CONTEXT))

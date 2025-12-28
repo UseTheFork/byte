@@ -1,4 +1,4 @@
-from byte.core.utils.list_to_multiline_text import list_to_multiline_text
+from byte.core.utils import list_to_multiline_text
 
 # From: https://github.com/Aider-AI/aider/blob/f8aa80396d9696111c93f6f34adbf10347c59a1a/aider/coders/shell.py
 shell_command_system = list_to_multiline_text(

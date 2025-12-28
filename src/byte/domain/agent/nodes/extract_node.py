@@ -8,8 +8,7 @@ from langgraph.types import Command
 from pydantic import BaseModel, Field
 
 from byte.core.mixins.user_interactive import UserInteractive
-from byte.core.utils import extract_content_from_message, get_last_message
-from byte.core.utils.list_to_multiline_text import list_to_multiline_text
+from byte.core.utils import extract_content_from_message, get_last_message, list_to_multiline_text
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.agent.state import BaseState

@@ -8,8 +8,7 @@ from pydantic import BaseModel
 
 from byte.core import log
 from byte.core.event_bus import EventType, Payload
-from byte.core.utils import dd
-from byte.core.utils.list_to_multiline_text import list_to_multiline_text
+from byte.core.utils import dd, list_to_multiline_text
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.agent.state import BaseState

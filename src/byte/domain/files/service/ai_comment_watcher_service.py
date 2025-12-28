@@ -5,7 +5,7 @@ from typing import List, Optional
 from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
 from byte.core.task_manager import TaskManager
-from byte.core.utils.list_to_multiline_text import list_to_multiline_text
+from byte.core.utils import list_to_multiline_text
 from byte.domain.agent.implementations.ask.agent import AskAgent
 from byte.domain.agent.implementations.coder.agent import CoderAgent
 from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
@@ -21,6 +21,11 @@ class AICommentWatcherService(Service):
     Usage: Automatically started during boot if watch.enable is True
     """
 
+    def _subscribe_to_file_events(self) -> None:
+        """Subscribe to file change events to scan for AI comments."""
+        # This will be called by event bus when files change
+        pass
+
     async def boot(self) -> None:
         """Initialize AI comment watcher."""
         if not self._config.files.watch.enable:
@@ -31,87 +36,6 @@ class AICommentWatcherService(Service):
 
         # Subscribe to file change events from FileWatcherService
         self._subscribe_to_file_events()
-
-    def _subscribe_to_file_events(self) -> None:
-        """Subscribe to file change events to scan for AI comments."""
-        # This will be called by event bus when files change
-        pass
-
-    async def handle_file_change(self, payload: Payload) -> Payload:
-        """Handle file change events by scanning for AI comments."""
-        file_path = payload.get("file_path")
-        change_type = payload.get("change_type")
-
-        if not file_path or change_type == "deleted":
-            return payload
-
-        file_path = Path(file_path)
-        result = await self._handle_file_modified(file_path)
-
-        if result:
-            prompt_toolkit_service = await self.make(PromptToolkitService)
-            await prompt_toolkit_service.interrupt()
-
-        return payload
-
-    async def _handle_file_modified(self, file_path: Path) -> bool:
-        """Handle file modification by scanning for AI comments."""
-        try:
-            content = file_path.read_text(encoding="utf-8")
-            ai_result = await self._scan_for_ai_comments(file_path, content)
-
-            if ai_result:
-                # Use the determined file mode from the scan result
-                file_mode = ai_result["file_mode"]
-                auto_add_result = await self._auto_add_file_to_context(file_path, file_mode)
-
-                # Return true if file was added OR if any AI comments were found
-                return auto_add_result or bool(ai_result.get("action_type"))
-
-            return False
-        except (FileNotFoundError, PermissionError, UnicodeDecodeError):
-            return False
-
-    async def _scan_for_ai_comments(self, file_path: Path, content: str) -> Optional[dict]:
-        """Scan file content for AI comment patterns.
-
-        Returns dict with line_nums, comments, and action_type, or None if no AI comments found.
-        """
-        comments = []
-        action_type = None
-        file_mode = FileMode.EDITABLE
-
-        # First pass: Extract all comment lines
-        comment_blocks = self._extract_comment_lines(content)
-
-        # Second pass: Check extracted comments for AI markers
-        for comment_block in comment_blocks:
-            ai_match = self._check_for_ai_marker(comment_block)
-
-            if ai_match:
-                comments.append(comment_block)
-
-                # Determine file mode based on AI marker
-                if ai_match["marker"] == "@":
-                    file_mode = FileMode.READ_ONLY
-                elif ai_match["marker"] == ":":
-                    file_mode = FileMode.EDITABLE
-
-                # Track action type (prioritize ! over ?)
-                if ai_match["action"] == "!":
-                    action_type = "!"
-                elif ai_match["action"] == "?" and action_type != "!":
-                    action_type = "?"
-
-        if not comments:
-            return None
-
-        return {
-            "comments": comments,
-            "action_type": action_type,
-            "file_mode": file_mode,
-            "file_path": file_path,
-        }
 
     def _extract_comment_lines(self, content: str) -> List[str]:
         """Extract comment blocks from content.
@@ -177,10 +101,86 @@ class AICommentWatcherService(Service):
 
         return {"marker": marker, "action": action}
 
+    async def _scan_for_ai_comments(self, file_path: Path, content: str) -> Optional[dict]:
+        """Scan file content for AI comment patterns.
+
+        Returns dict with line_nums, comments, and action_type, or None if no AI comments found.
+        """
+        comments = []
+        action_type = None
+        file_mode = FileMode.EDITABLE
+
+        # First pass: Extract all comment lines
+        comment_blocks = self._extract_comment_lines(content)
+
+        # Second pass: Check extracted comments for AI markers
+        for comment_block in comment_blocks:
+            ai_match = self._check_for_ai_marker(comment_block)
+
+            if ai_match:
+                comments.append(comment_block)
+
+                # Determine file mode based on AI marker
+                if ai_match["marker"] == "@":
+                    file_mode = FileMode.READ_ONLY
+                elif ai_match["marker"] == ":":
+                    file_mode = FileMode.EDITABLE
+
+                # Track action type (prioritize ! over ?)
+                if ai_match["action"] == "!":
+                    action_type = "!"
+                elif ai_match["action"] == "?" and action_type != "!":
+                    action_type = "?"
+
+        if not comments:
+            return None
+
+        return {
+            "comments": comments,
+            "action_type": action_type,
+            "file_mode": file_mode,
+            "file_path": file_path,
+        }
+
     async def _auto_add_file_to_context(self, file_path: Path, mode: FileMode = FileMode.EDITABLE) -> bool:
         """Automatically add file to context when AI comment is detected."""
         file_service = await self.make(FileService)
         return await file_service.add_file(file_path, mode)
+
+    async def _handle_file_modified(self, file_path: Path) -> bool:
+        """Handle file modification by scanning for AI comments."""
+        try:
+            content = file_path.read_text(encoding="utf-8")
+            ai_result = await self._scan_for_ai_comments(file_path, content)
+
+            if ai_result:
+                # Use the determined file mode from the scan result
+                file_mode = ai_result["file_mode"]
+                auto_add_result = await self._auto_add_file_to_context(file_path, file_mode)
+
+                # Return true if file was added OR if any AI comments were found
+                return auto_add_result or bool(ai_result.get("action_type"))
+
+            return False
+        except (FileNotFoundError, PermissionError, UnicodeDecodeError):
+            return False
+
+    async def handle_file_change(self, payload: Payload) -> Payload:
+        """Handle file change events by scanning for AI comments."""
+        file_path = payload.get("file_path")
+        change_type = payload.get("change_type")
+
+        if not file_path or change_type == "deleted":
+            return payload
+
+        file_path = Path(file_path)
+        result = await self._handle_file_modified(file_path)
+
+        if result:
+            prompt_toolkit_service = await self.make(PromptToolkitService)
+            await prompt_toolkit_service.interrupt()
+
+        return payload
 
     async def scan_context_files_for_ai_comments(self) -> Optional[dict]:
         """Scan all files currently in context for AI comment patterns.

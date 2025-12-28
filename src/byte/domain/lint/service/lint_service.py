@@ -10,8 +10,7 @@ from rich.table import Column
 from byte.core.logging import log
 from byte.core.mixins.user_interactive import UserInteractive
 from byte.core.service.base_service import Service
-from byte.core.utils import get_language_from_filename
-from byte.core.utils.list_to_multiline_text import list_to_multiline_text
+from byte.core.utils import get_language_from_filename, list_to_multiline_text
 from byte.domain.cli.rich.markdown import Markdown
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.git.service.git_service import GitService
