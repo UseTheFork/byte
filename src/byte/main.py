@@ -46,18 +46,6 @@ class Byte:
             for file_path in config.boot.editable_files:
                 await file_service.add_file(file_path, FileMode.EDITABLE)
 
-    async def run(self):
-        """Run the main application loop.
-
-        Initializes the application, starts the main loop, and ensures proper cleanup
-        of the task manager on exit.
-        """
-        await self.initialize()
-        try:
-            await self._main_loop()
-        finally:
-            await self.task_manager.shutdown()
-
     async def _main_loop(self):
         """Main application loop - easy to follow"""
         input_service = await self.container.make(PromptToolkitService)
@@ -75,7 +63,19 @@ class Byte:
                     str(e),
                     title="Exception",
                 )
-                # console.console.print_exception(show_locals=True)
+
+    async def run(self):
+        """Run the main application loop.
+
+        Initializes the application, starts the main loop, and ensures proper cleanup
+        of the task manager on exit.
+        """
+        await self.initialize()
+        try:
+            await self._main_loop()
+        finally:
+            await self.task_manager.shutdown()
+            # console.console.print_exception(show_locals=True)
 
 
 async def main(config: ByteConfig):
