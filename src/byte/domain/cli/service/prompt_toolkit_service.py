@@ -85,6 +85,48 @@ class PromptToolkitService(Service):
             completer=self.completer,
         )
 
+    async def _handle_command_input(self, user_input: str):
+        """Parse and execute slash commands.
+
+        Args:
+                user_input: Raw user input starting with /
+
+        Usage: Called internally when user input starts with /
+        """
+        # Parse command name and args
+        parts = user_input[1:].split(" ", 1)  # Remove "/" and split
+        command_name = parts[0]
+        args = parts[1] if len(parts) > 1 else ""
+
+        console = await self.make(ConsoleService)
+
+        # Get command registry and execute
+        command_registry = await self.make(CommandRegistry)
+        command = command_registry.get_slash_command(command_name)
+
+        if command:
+            try:
+                await command.handle(args)
+            except Exception as e:
+                log.exception("Oops")
+                console.print_error_panel(f"{e}", title="Oops")
+        else:
+            console.print_error(f"Unknown command: /{command_name}")
+
+    async def _handle_subcommand_input(self, user_input: str):
+        """Parse and execute subcommands starting with !.
+
+        Args:
+                user_input: Raw user input starting with !
+
+        Usage: Called internally when user input starts with !
+        """
+
+        user_input = user_input[1:]
+
+        subprocess_agent = await self.make(SubprocessAgent)
+        await subprocess_agent.execute(user_input, display_mode="silent")
+
     async def execute(self):
         """Display prompt, capture user input, and route to appropriate handler.
 
@@ -168,48 +210,6 @@ class PromptToolkitService(Service):
                 # Only execute agent if user provided non-empty input
                 if user_input.strip():
                     await agent_service.execute_agent(user_input, active_agent)
-
-    async def _handle_command_input(self, user_input: str):
-        """Parse and execute slash commands.
-
-        Args:
-                user_input: Raw user input starting with /
-
-        Usage: Called internally when user input starts with /
-        """
-        # Parse command name and args
-        parts = user_input[1:].split(" ", 1)  # Remove "/" and split
-        command_name = parts[0]
-        args = parts[1] if len(parts) > 1 else ""
-
-        console = await self.make(ConsoleService)
-
-        # Get command registry and execute
-        command_registry = await self.make(CommandRegistry)
-        command = command_registry.get_slash_command(command_name)
-
-        if command:
-            try:
-                await command.handle(args)
-            except Exception as e:
-                log.exception("Oops")
-                console.print_error_panel(f"{e}", title="Oops")
-        else:
-            console.print_error(f"Unknown command: /{command_name}")
-
-    async def _handle_subcommand_input(self, user_input: str):
-        """Parse and execute subcommands starting with !.
-
-        Args:
-                user_input: Raw user input starting with !
-
-        Usage: Called internally when user input starts with !
-        """
-
-        user_input = user_input[1:]
-
-        subprocess_agent = await self.make(SubprocessAgent)
-        await subprocess_agent.execute(user_input, display_mode="silent")
         # TODO: Should we execute somthing after this?
 
     async def interrupt(self):
