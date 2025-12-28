@@ -52,7 +52,7 @@ class CLIArgs(BaseModel):
 
 
 # TODO: should this be moved to a boot domain or to the syste, domain?
-class BootConfg(BaseModel):
+class BootConfig(BaseModel):
     read_only_files: list[str] = Field(default_factory=list, description="Files to add to read-only context")
     editable_files: list[str] = Field(default_factory=list, description="Files to add to editable context")
 
@@ -64,7 +64,7 @@ class ByteConfg(BaseModel):
     dotenv_loaded: bool = Field(default=False, exclude=True, description="Whether a .env file was successfully loaded")
 
     # keep-sorted start
-    boot: BootConfg = Field(default_factory=BootConfg)
+    boot: BootConfig = Field(default_factory=BootConfig)
     cli: CLIConfig = Field(default_factory=CLIConfig)
     development: DevelopmentConfig = Field(default_factory=DevelopmentConfig)
     edit_format: EditFormatConfig = Field(default_factory=EditFormatConfig)
