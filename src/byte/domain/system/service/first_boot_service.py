@@ -29,80 +29,6 @@ class FirstBootService:
         """
         return not BYTE_CONFIG_FILE.exists()
 
-    def run_if_needed(self) -> bool:
-        """Run initialization flow if this is the first boot.
-
-        Returns True if initialization was performed, False if skipped.
-        Usage: `initialized = await initializer.run_if_needed()`
-        """
-        if not self.is_first_boot():
-            return False
-
-        self._run_initialization()
-        return True
-
-    def _run_initialization(self) -> None:
-        """Perform first-boot initialization steps.
-
-        Creates the default configuration file from the template.
-        """
-
-        # Load the selected Catppuccin theme variant.
-        theme_registry = ThemeRegistry()
-        selected_theme: ByteTheme = theme_registry.get_theme("mocha")
-
-        init_theme = Theme(
-            {
-                "text": selected_theme.base05,  # Default Foreground
-                "success": selected_theme.base0B,  # Green - Strings, Inserted
-                "error": selected_theme.base08,  # Red - Variables, Tags
-                "warning": selected_theme.base0A,  # Yellow - Classes, Bold
-                "info": selected_theme.base0C,  # Teal - Support, Regex
-                "danger": selected_theme.base08,  # Red - Variables, Tags
-                "primary": selected_theme.base0D,  # Blue - Functions, Headings
-                "secondary": selected_theme.base0E,  # Mauve - Keywords, Italic
-                "muted": selected_theme.base03,  # Comments, Invisibles
-                "subtle": selected_theme.base04,  # Dark Foreground
-                "active_border": selected_theme.base07,  # Light Background
-                "inactive_border": selected_theme.base03,  # Comments, Invisibles
-            }
-        )
-
-        self._console = Console(theme=init_theme)
-
-        # Display welcome message for first boot
-        self.print_info("\n[bold cyan]Welcome to Byte![/bold cyan]")
-        self.print_info("Setting up your development environment...\n")
-
-        # Set up all Byte directories
-        self._setup_byte_directories()
-        self._setup_gitignore()
-
-        # Initialize LLM configuration
-        llm_model = self._init_llm()
-
-        # Build config with selected LLM model
-        config = ByteConfig()
-        config.llm.model = llm_model
-
-        # Initialize files configuration
-        config = self._init_files(config)
-
-        # Initialize web configuration
-        config = self._init_web(config)
-
-        # Write the configuration template to the YAML file
-        with open(BYTE_CONFIG_FILE, "w") as f:
-            yaml.dump(
-                config.model_dump(mode="json"),
-                f,
-                default_flow_style=False,
-                sort_keys=False,
-                allow_unicode=True,
-            )
-
-        self.print_success(f"Created configuration file at {BYTE_CONFIG_FILE}\n")
-
     def _setup_byte_directories(self) -> None:
         """Set up all necessary Byte directories.
 
@@ -242,6 +168,80 @@ class FirstBootService:
             self.print_info("File watching disabled\n")
 
         return config
+
+    def _run_initialization(self) -> None:
+        """Perform first-boot initialization steps.
+
+        Creates the default configuration file from the template.
+        """
+
+        # Load the selected Catppuccin theme variant.
+        theme_registry = ThemeRegistry()
+        selected_theme: ByteTheme = theme_registry.get_theme("mocha")
+
+        init_theme = Theme(
+            {
+                "text": selected_theme.base05,  # Default Foreground
+                "success": selected_theme.base0B,  # Green - Strings, Inserted
+                "error": selected_theme.base08,  # Red - Variables, Tags
+                "warning": selected_theme.base0A,  # Yellow - Classes, Bold
+                "info": selected_theme.base0C,  # Teal - Support, Regex
+                "danger": selected_theme.base08,  # Red - Variables, Tags
+                "primary": selected_theme.base0D,  # Blue - Functions, Headings
+                "secondary": selected_theme.base0E,  # Mauve - Keywords, Italic
+                "muted": selected_theme.base03,  # Comments, Invisibles
+                "subtle": selected_theme.base04,  # Dark Foreground
+                "active_border": selected_theme.base07,  # Light Background
+                "inactive_border": selected_theme.base03,  # Comments, Invisibles
+            }
+        )
+
+        self._console = Console(theme=init_theme)
+
+        # Display welcome message for first boot
+        self.print_info("\n[bold cyan]Welcome to Byte![/bold cyan]")
+        self.print_info("Setting up your development environment...\n")
+
+        # Set up all Byte directories
+        self._setup_byte_directories()
+        self._setup_gitignore()
+
+        # Initialize LLM configuration
+        llm_model = self._init_llm()
+
+        # Build config with selected LLM model
+        config = ByteConfig()
+        config.llm.model = llm_model
+
+        # Initialize files configuration
+        config = self._init_files(config)
+
+        # Initialize web configuration
+        config = self._init_web(config)
+
+        # Write the configuration template to the YAML file
+        with open(BYTE_CONFIG_FILE, "w") as f:
+            yaml.dump(
+                config.model_dump(mode="json"),
+                f,
+                default_flow_style=False,
+                sort_keys=False,
+                allow_unicode=True,
+            )
+
+        self.print_success(f"Created configuration file at {BYTE_CONFIG_FILE}\n")
+
+    def run_if_needed(self) -> bool:
+        """Run initialization flow if this is the first boot.
+
+        Returns True if initialization was performed, False if skipped.
+        Usage: `initialized = await initializer.run_if_needed()`
+        """
+        if not self.is_first_boot():
+            return False
+
+        self._run_initialization()
+        return True
 
     def find_binary(self, binary_name: str) -> Optional[Path]:
         """Find the full path to a binary using which.
