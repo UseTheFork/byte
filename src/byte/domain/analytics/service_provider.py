@@ -4,7 +4,7 @@ from byte.container import Container
 from byte.core.event_bus import EventBus, EventType
 from byte.core.service.base_service import Service
 from byte.core.service_provider import ServiceProvider
-from byte.domain.analytics.service.agent_analytics_service import AgentAnalyticsService
+from byte.domain.analytics import AgentAnalyticsService
 
 
 class AnalyticsProvider(ServiceProvider):

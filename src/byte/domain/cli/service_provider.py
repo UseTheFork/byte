@@ -1,14 +1,12 @@
 from byte.container import Container
-from byte.core.config.config import ByteConfig
-from byte.core.event_bus import EventBus, EventType, Payload
-from byte.core.service_provider import ServiceProvider
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.cli.service.interactions_service import InteractionService
-from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
-from byte.domain.cli.service.stream_rendering_service import (
+from byte.core import ByteConfig, EventBus, EventType, Payload, ServiceProvider
+from byte.domain.cli import (
+    ConsoleService,
+    InteractionService,
+    PromptToolkitService,
     StreamRenderingService,
+    SubprocessService,
 )
-from byte.domain.cli.service.subprocess_service import SubprocessService
 
 
 class CLIServiceProvider(ServiceProvider):
