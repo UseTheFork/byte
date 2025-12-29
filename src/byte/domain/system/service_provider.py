@@ -1,15 +1,10 @@
 from typing import List, Type
 
-from byte.container import Container
-from byte.core.event_bus import EventBus, EventType, Payload
-from byte.core.service.base_service import Service
-from byte.core.service_provider import ServiceProvider
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.memory.command.undo_command import UndoCommand
-from byte.domain.system.command.exit_command import ExitCommand
-from byte.domain.system.service.config_writer_service import ConfigWriterService
-from byte.domain.system.service.system_context_service import SystemContextService
+from byte import Container
+from byte.core import EventBus, EventType, Payload, Service, ServiceProvider
+from byte.domain.cli import Command, ConsoleService
+from byte.domain.memory import UndoCommand
+from byte.domain.system import ConfigWriterService, ExitCommand, SystemContextService
 
 
 class SystemServiceProvider(ServiceProvider):

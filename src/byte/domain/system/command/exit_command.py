@@ -1,7 +1,6 @@
 from argparse import Namespace
 
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.service.command_registry import Command
+from byte.domain.cli import ByteArgumentParser, Command
 
 
 class ExitCommand(Command):
