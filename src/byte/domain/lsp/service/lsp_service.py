@@ -20,6 +20,31 @@ class LSPService(Service):
     Usage: `hover = await lsp_service.get_hover(file_path, line, char)` -> hover info
     """
 
+    async def _start_lsp_client(self, server_name: str) -> None:
+        """Start a single LSP client in background."""
+        try:
+            server_config = self._config.lsp.servers[server_name]
+            client = LSPClient(
+                name=server_name,
+                command=server_config.command,
+                root_path=self._config.project_root,
+            )
+
+            log.info(f"Starting LSP server: {server_name}")
+            if await client.start():
+                self.clients[server_name] = client
+                log.info(f"LSP server started successfully: {server_name}")
+            else:
+                log.error(f"Failed to start LSP server: {server_name}")
+        except Exception as e:
+            log.error(f"Error starting LSP server {server_name}: {e}")
+            log.exception(e)
+
+    async def _start_lsp_servers(self) -> None:
+        """Start all configured LSP servers in background."""
+        for server_name, server_config in self._config.lsp.servers.items():
+            self.task_manager.start_task(f"lsp_server_{server_name}", self._start_lsp_client(server_name))
+
     async def boot(self) -> None:
         """Initialize LSP service with configured servers."""
         self.clients: Dict[str, LSPClient] = {}
@@ -35,6 +60,63 @@ class LSPService(Service):
         # Start LSP servers in background if enabled
         if self._config.lsp.enable:
             await self._start_lsp_servers()
+
+    async def _get_client_for_file(self, file_path: Path) -> Optional[LSPClient]:
+        """Get an LSP client for the given file.
+
+        Usage: Internal method to route file to appropriate LSP server
+        """
+        if not self._config.lsp.enable:
+            return None
+
+        # Get the language for this file using Pygments
+        file_language = get_language_from_filename(str(file_path))
+
+        if not file_language:
+            log.debug(f"Could not determine language for file: {file_path}")
+            return None
+
+        # Determine server from file language (case-insensitive)
+        server_name = self.language_map.get(file_language.lower())
+
+        if not server_name or server_name not in self._config.lsp.servers:
+            log.debug(f"No LSP server configured for language '{file_language}' (file: {file_path})")
+            return None
+
+        # Return existing client if available
+        client = self.clients.get(server_name)
+        if client:
+            return client
+
+        # If client not ready yet, log a warning
+        log.warning(f"LSP client '{server_name}' not ready yet for file: {file_path}")
+        return None
+
+    async def _ensure_document_open(self, client: LSPClient, file_path: Path) -> bool:
+        """Ensure a document is opened in the LSP server.
+
+        Usage: Internal method to notify server about document before requests
+        """
+        try:
+            # Read file content
+            content = file_path.read_text(encoding="utf-8")
+
+            # Determine language ID from filename
+            file_language = get_language_from_filename(str(file_path))
+            if not file_language:
+                # Fallback to extension if language detection fails
+                language_id = file_path.suffix.lstrip(".")
+            else:
+                # Use lowercase language name as language ID
+                language_id = file_language.lower()
+
+            # Notify server about the document
+            await client.did_open(file_path, content, language_id)
+            log.debug(f"Opened document in LSP: {file_path}")
+            return True
+        except Exception as e:
+            log.error(f"Failed to open document in LSP: {file_path} - {e}")
+            return False
 
     async def handle(self, **kwargs) -> Any:
         """Handle LSP service operations.
@@ -176,85 +258,3 @@ class LSPService(Service):
             await client.stop()
 
         self.clients.clear()
-
-    async def _start_lsp_servers(self) -> None:
-        """Start all configured LSP servers in background."""
-        for server_name, server_config in self._config.lsp.servers.items():
-            self.task_manager.start_task(f"lsp_server_{server_name}", self._start_lsp_client(server_name))
-
-    async def _start_lsp_client(self, server_name: str) -> None:
-        """Start a single LSP client in background."""
-        try:
-            server_config = self._config.lsp.servers[server_name]
-            client = LSPClient(
-                name=server_name,
-                command=server_config.command,
-                root_path=self._config.project_root,
-            )
-
-            log.info(f"Starting LSP server: {server_name}")
-            if await client.start():
-                self.clients[server_name] = client
-                log.info(f"LSP server started successfully: {server_name}")
-            else:
-                log.error(f"Failed to start LSP server: {server_name}")
-        except Exception as e:
-            log.error(f"Error starting LSP server {server_name}: {e}")
-            log.exception(e)
-
-    async def _get_client_for_file(self, file_path: Path) -> Optional[LSPClient]:
-        """Get an LSP client for the given file.
-
-        Usage: Internal method to route file to appropriate LSP server
-        """
-        if not self._config.lsp.enable:
-            return None
-
-        # Get the language for this file using Pygments
-        file_language = get_language_from_filename(str(file_path))
-
-        if not file_language:
-            log.debug(f"Could not determine language for file: {file_path}")
-            return None
-
-        # Determine server from file language (case-insensitive)
-        server_name = self.language_map.get(file_language.lower())
-
-        if not server_name or server_name not in self._config.lsp.servers:
-            log.debug(f"No LSP server configured for language '{file_language}' (file: {file_path})")
-            return None
-
-        # Return existing client if available
-        client = self.clients.get(server_name)
-        if client:
-            return client
-
-        # If client not ready yet, log a warning
-        log.warning(f"LSP client '{server_name}' not ready yet for file: {file_path}")
-        return None
-
-    async def _ensure_document_open(self, client: LSPClient, file_path: Path) -> bool:
-        """Ensure a document is opened in the LSP server.
-
-        Usage: Internal method to notify server about document before requests
-        """
-        try:
-            # Read file content
-            content = file_path.read_text(encoding="utf-8")
-
-            # Determine language ID from filename
-            file_language = get_language_from_filename(str(file_path))
-            if not file_language:
-                # Fallback to extension if language detection fails
-                language_id = file_path.suffix.lstrip(".")
-            else:
-                # Use lowercase language name as language ID
-                language_id = file_language.lower()
-
-            # Notify server about the document
-            await client.did_open(file_path, content, language_id)
-            log.debug(f"Opened document in LSP: {file_path}")
-            return True
-        except Exception as e:
-            log.error(f"Failed to open document in LSP: {file_path} - {e}")
-            return False
