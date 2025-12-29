@@ -1,17 +1,12 @@
 from argparse import Namespace
 
-from byte.core import log
-from byte.core.exceptions import ByteConfigException
+from byte.core import ByteConfigException, log
 from byte.core.utils import list_to_multiline_text
-from byte.domain.agent.implementations.coder.agent import CoderAgent
-from byte.domain.agent.implementations.commit.agent import CommitAgent, CommitPlanAgent
-from byte.domain.agent.service.agent_service import AgentService
+from byte.domain.agent import AgentService, CoderAgent, CommitAgent, CommitPlanAgent
 from byte.domain.cli import ByteArgumentParser, Command, ConsoleService
 from byte.domain.git import GitService
-from byte.domain.lint.exceptions import LintConfigException
-from byte.domain.lint.service.lint_service import LintService
-from byte.domain.prompt_format.schemas import BoundaryType
-from byte.domain.prompt_format.utils import Boundary
+from byte.domain.lint import LintConfigException, LintService
+from byte.domain.prompt_format import Boundary, BoundaryType
 
 
 class CommitCommand(Command):

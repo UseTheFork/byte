@@ -7,6 +7,7 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.core.config.config import ByteConfig
     from byte.core.event_bus import EventBus, EventType, Payload
+    from byte.core.exceptions import ByteConfigException
     from byte.core.logging import log
     from byte.core.service.base_service import Service
     from byte.core.service_provider import ServiceProvider
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
 
 __all__ = (
     "ByteConfig",
+    "ByteConfigException",
     "EventBus",
     "EventType",
     "Payload",
@@ -29,6 +31,7 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "ByteConfig": "config.config",
+    "ByteConfigException": "exceptions",
     "EventBus": "event_bus",
     "EventType": "event_bus",
     "Payload": "event_bus",

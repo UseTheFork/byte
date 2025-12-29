@@ -6,7 +6,7 @@ from git.exc import InvalidGitRepositoryError
 
 from byte import Service
 from byte.core.mixins import UserInteractive
-from byte.domain.cli.service.console_service import ConsoleService
+from byte.domain.cli import ConsoleService
 
 
 class GitService(Service, UserInteractive):
