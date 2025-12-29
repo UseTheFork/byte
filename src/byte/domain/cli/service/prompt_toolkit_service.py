@@ -6,14 +6,9 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.shortcuts import PromptSession
 from rich.console import Group
 
-from byte.core.config.config import ByteConfig
-from byte.core.event_bus import EventType, Payload
-from byte.core.logging import log
-from byte.core.service.base_service import Service
-from byte.domain.agent.implementations.subprocess.agent import SubprocessAgent
-from byte.domain.agent.service.agent_service import AgentService
-from byte.domain.cli.service.command_registry import CommandRegistry
-from byte.domain.cli.service.console_service import ConsoleService
+from byte.core import ByteConfig, EventType, Payload, Service, log
+from byte.domain.agent import AgentService, SubprocessAgent
+from byte.domain.cli import CommandRegistry, ConsoleService
 
 
 class CommandCompleter(Completer):

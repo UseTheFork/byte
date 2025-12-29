@@ -5,9 +5,7 @@ from rich.syntax import Syntax
 from rich.theme import Theme
 
 from byte.core.service.base_service import Service
-from byte.domain.cli.rich.menu import Menu
-from byte.domain.cli.rich.panel_rule import PanelBottom, PanelTop
-from byte.domain.cli.schemas import ByteTheme, ThemeRegistry
+from byte.domain.cli import ByteTheme, Menu, PanelBottom, PanelTop, ThemeRegistry
 
 
 class ConsoleService(Service):

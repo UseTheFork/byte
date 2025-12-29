@@ -3,7 +3,7 @@ from typing import Optional
 
 from byte.core.config.config import ByteConfig
 from byte.core.service.base_service import Service
-from byte.domain.cli.schemas import SubprocessResult
+from byte.domain.cli import SubprocessResult
 
 
 class SubprocessService(Service):

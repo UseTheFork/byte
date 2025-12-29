@@ -4,11 +4,9 @@ from langchain_core.messages.ai import AIMessageChunk
 from langchain_core.messages.tool import ToolMessage
 from rich.live import Live
 
-from byte.core.service.base_service import Service
+from byte.core import Service
 from byte.core.utils import extract_content_from_message
-from byte.domain.cli.rich.rune_spinner import RuneSpinner
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.cli.utils.formatters import MarkdownStream
+from byte.domain.cli import ConsoleService, MarkdownStream, RuneSpinner
 
 
 class StreamRenderingService(Service):

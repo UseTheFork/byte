@@ -2,8 +2,8 @@ from typing import List, Optional
 
 from rich.prompt import Prompt
 
-from byte.core.service.base_service import Service
-from byte.domain.cli.service.console_service import ConsoleService
+from byte.core import Service
+from byte.domain.cli import ConsoleService
 
 
 class InteractionService(Service):

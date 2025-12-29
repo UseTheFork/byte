@@ -5,7 +5,7 @@ from rich.console import Console
 from rich.live import Live
 from rich.text import Text
 
-from byte.domain.cli.rich.markdown import Markdown
+from byte.domain.cli import Markdown
 
 
 class MarkdownStream:
@@ -37,6 +37,14 @@ class MarkdownStream:
         self.live = None
         self._live_started = False
 
+    def __del__(self):
+        """Destructor to ensure Live display is properly cleaned up."""
+        if self.live:
+            try:
+                self.live.stop()
+            except Exception:
+                pass  # Ignore any errors during cleanup
+
     def _render_markdown_to_lines(self, text):
         """Render markdown text to a list of lines.
 
@@ -55,25 +63,6 @@ class MarkdownStream:
 
         # Split rendered output into lines
         return output.splitlines(keepends=True)
-
-    def __del__(self):
-        """Destructor to ensure Live display is properly cleaned up."""
-        if self.live:
-            try:
-                self.live.stop()
-            except Exception:
-                pass  # Ignore any errors during cleanup
-
-    async def update(self, text: str, final: bool = False):
-        """Async version of update that yields control"""
-        # Process all lines at once like the original update method
-        lines = self._render_markdown_to_lines(text)
-
-        # Process all lines without chunking
-        await self._process_line_chunk(lines, final)
-
-        # Yield control once
-        await asyncio.sleep(0)
 
     async def _process_line_chunk(self, lines_chunk, is_final):
         """Process chunk of lines without blocking"""
@@ -122,3 +111,14 @@ class MarkdownStream:
             self.live.update("")
             self.live.stop()
             self.live = None
+
+    async def update(self, text: str, final: bool = False):
+        """Async version of update that yields control"""
+        # Process all lines at once like the original update method
+        lines = self._render_markdown_to_lines(text)
+
+        # Process all lines without chunking
+        await self._process_line_chunk(lines, final)
+
+        # Yield control once
+        await asyncio.sleep(0)
