@@ -2,16 +2,12 @@ from argparse import Namespace
 from typing import List
 
 from byte import log
-from byte.core.config.config import ByteConfig
-from byte.domain.analytics.service.agent_analytics_service import AgentAnalyticsService
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
-from byte.domain.files.models import FileMode
-from byte.domain.files.service.file_service import FileService
-from byte.domain.knowledge.service.convention_context_service import ConventionContextService
-from byte.domain.memory.service.memory_service import MemoryService
+from byte.core import ByteConfig
+from byte.domain.analytics import AgentAnalyticsService
+from byte.domain.cli import ByteArgumentParser, Command, ConsoleService, PromptToolkitService
+from byte.domain.files import FileMode, FileService
+from byte.domain.knowledge import ConventionContextService
+from byte.domain.memory import MemoryService
 
 
 class LoadPresetCommand(Command):

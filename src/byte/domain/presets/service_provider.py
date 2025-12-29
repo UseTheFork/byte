@@ -1,12 +1,9 @@
 from typing import List, Type
 
-from byte.container import Container
-from byte.core.config.config import ByteConfig
-from byte.core.service.base_service import Service
-from byte.core.service_provider import ServiceProvider
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.presets.command.load_preset_command import LoadPresetCommand
-from byte.domain.presets.command.save_preset_command import SavePresetCommand
+from byte import Container
+from byte.core import ByteConfig, Service, ServiceProvider
+from byte.domain.cli import Command
+from byte.domain.presets import LoadPresetCommand, SavePresetCommand
 
 
 class PresetsProvider(ServiceProvider):

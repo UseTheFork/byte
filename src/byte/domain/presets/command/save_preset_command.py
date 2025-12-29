@@ -1,15 +1,12 @@
 from argparse import Namespace
 
-from byte.core.config.config import ByteConfig
+from byte.core import ByteConfig
 from byte.core.utils.slugify import slugify
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.files.models import FileMode
-from byte.domain.files.service.file_service import FileService
-from byte.domain.knowledge.service.convention_context_service import ConventionContextService
-from byte.domain.presets.config import PresetsConfig
-from byte.domain.system.service.config_writer_service import ConfigWriterService
+from byte.domain.cli import ByteArgumentParser, Command, ConsoleService
+from byte.domain.files import FileMode, FileService
+from byte.domain.knowledge import ConventionContextService
+from byte.domain.presets import PresetsConfig
+from byte.domain.system import ConfigWriterService
 
 
 class SavePresetCommand(Command):
