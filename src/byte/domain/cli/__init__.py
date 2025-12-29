@@ -10,15 +10,18 @@ if TYPE_CHECKING:
     from byte.domain.cli.rich.menu import Menu, MenuInputHandler, MenuRenderer, MenuState, MenuStyle
     from byte.domain.cli.rich.panel_rule import PanelBottom, PanelTop
     from byte.domain.cli.rich.rune_spinner import RuneSpinner
+    from byte.domain.cli.schemas import ByteTheme, SubprocessResult, ThemeRegistry
     from byte.domain.cli.service.command_registry import Command, CommandRegistry
     from byte.domain.cli.service.console_service import ConsoleService
     from byte.domain.cli.service.interactions_service import InteractionService
     from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
     from byte.domain.cli.service.stream_rendering_service import StreamRenderingService
     from byte.domain.cli.service.subprocess_service import SubprocessService
+    from byte.domain.cli.utils.formatters import MarkdownStream
 
 __all__ = (
     "ByteArgumentParser",
+    "ByteTheme",
     "CodeBlock",
     "Command",
     "CommandRegistry",
@@ -26,6 +29,7 @@ __all__ = (
     "Heading",
     "InteractionService",
     "Markdown",
+    "MarkdownStream",
     "Menu",
     "MenuInputHandler",
     "MenuRenderer",
@@ -36,12 +40,15 @@ __all__ = (
     "PromptToolkitService",
     "RuneSpinner",
     "StreamRenderingService",
+    "SubprocessResult",
     "SubprocessService",
+    "ThemeRegistry",
 )
 
 _dynamic_imports = {
     # keep-sorted start
-    "ByteArgumentParser": "argparse.base",
+    "ByteArgumentParser": "schemas",
+    "ByteTheme": "cli.schemas",
     "CodeBlock": "rich.markdown",
     "Command": "service.command_registry",
     "CommandRegistry": "service.command_registry",
@@ -49,6 +56,7 @@ _dynamic_imports = {
     "Heading": "rich.markdown",
     "InteractionService": "service.interactions_service",
     "Markdown": "rich.markdown",
+    "MarkdownStream": "utils.formatters",
     "Menu": "rich.menu",
     "MenuInputHandler": "rich.menu",
     "MenuRenderer": "rich.menu",
@@ -59,7 +67,9 @@ _dynamic_imports = {
     "PromptToolkitService": "service.prompt_toolkit_service",
     "RuneSpinner": "rich.rune_spinner",
     "StreamRenderingService": "service.stream_rendering_service",
+    "SubprocessResult": "argparse.base",
     "SubprocessService": "service.subprocess_service",
+    "ThemeRegistry": "cli.schemas",
     # keep-sorted end
 }
 

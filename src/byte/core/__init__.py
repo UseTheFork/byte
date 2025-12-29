@@ -5,12 +5,18 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.core.config.config import ByteConfig
+    from byte.core.event_bus import EventBus, EventType, Payload
     from byte.core.logging import log
     from byte.core.service.base_service import Service
     from byte.core.service_provider import ServiceProvider
     from byte.core.utils.dump import dd, dump
 
 __all__ = (
+    "ByteConfig",
+    "EventBus",
+    "EventType",
+    "Payload",
     "Service",
     "ServiceProvider",
     "dd",
@@ -20,6 +26,10 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
+    "ByteConfig": "config.config",
+    "EventBus": "event_bus",
+    "EventType": "event_bus",
+    "Payload": "event_bus",
     "Service": "service.base_service",
     "ServiceProvider": "service_provider",
     "dd": "utils.dump",
