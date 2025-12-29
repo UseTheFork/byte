@@ -1,9 +1,8 @@
 from argparse import Namespace
 
-from byte.core.mixins.user_interactive import UserInteractive
-from byte.domain.agent.implementations.copy.agent import CopyAgent
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.service.command_registry import Command
+from byte.core.mixins import UserInteractive
+from byte.domain.agent import CopyAgent
+from byte.domain.cli import ByteArgumentParser, Command
 
 
 class CopyCommand(Command, UserInteractive):

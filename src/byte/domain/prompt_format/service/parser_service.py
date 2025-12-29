@@ -7,16 +7,17 @@ from langchain_core.messages import AIMessage, BaseMessage
 
 from byte.core import Service, log
 from byte.core.mixins import UserInteractive
-from byte.domain.files.models import FileMode
-from byte.domain.files.service.discovery_service import FileDiscoveryService
-from byte.domain.files.service.file_service import FileService
-from byte.domain.prompt_format.constants import EDIT_BLOCK_NAME
-from byte.domain.prompt_format.exceptions import NoBlocksFoundError, PreFlightCheckError, PreFlightUnparsableError
-from byte.domain.prompt_format.schemas import (
+from byte.domain.files import FileDiscoveryService, FileMode, FileService
+from byte.domain.prompt_format import (
+    EDIT_BLOCK_NAME,
     BlockStatus,
     BlockType,
+    Boundary,
     BoundaryType,
     EditFormatPrompts,
+    NoBlocksFoundError,
+    PreFlightCheckError,
+    PreFlightUnparsableError,
     RawSearchReplaceBlock,
     SearchReplaceBlock,
 )
@@ -26,7 +27,6 @@ from byte.domain.prompt_format.service.parser_service_prompt import (
     edit_format_system,
     practice_messages,
 )
-from byte.domain.prompt_format.utils import Boundary
 
 
 class ParserService(Service, UserInteractive, ABC):

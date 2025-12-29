@@ -1,7 +1,5 @@
 from byte.core.utils import list_to_multiline_text
-from byte.domain.prompt_format.constants import EDIT_BLOCK_NAME
-from byte.domain.prompt_format.schemas import BoundaryType
-from byte.domain.prompt_format.utils import Boundary
+from byte.domain.prompt_format import EDIT_BLOCK_NAME, Boundary, BoundaryType
 
 edit_format_system = list_to_multiline_text(
     [

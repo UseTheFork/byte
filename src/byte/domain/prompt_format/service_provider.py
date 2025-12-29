@@ -1,12 +1,8 @@
 from typing import List, Type
 
-from byte.core.service.base_service import Service
-from byte.core.service_provider import ServiceProvider
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.prompt_format.command.copy_command import CopyCommand
-from byte.domain.prompt_format.service.edit_format_service import EditFormatService
-from byte.domain.prompt_format.service.parser_service import ParserService
-from byte.domain.prompt_format.service.shell_command_service import ShellCommandService
+from byte.core import Service, ServiceProvider
+from byte.domain.cli import Command
+from byte.domain.prompt_format import CopyCommand, EditFormatService, ParserService, ShellCommandService
 
 
 class PromptFormatProvider(ServiceProvider):

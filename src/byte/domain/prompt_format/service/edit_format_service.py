@@ -1,10 +1,8 @@
-from byte.core.mixins.user_interactive import UserInteractive
-from byte.core.service.base_service import Service
-from byte.domain.prompt_format.schemas import (
+from byte.core import Service
+from byte.core.mixins import UserInteractive
+from byte.domain.prompt_format import (
     EditFormatPrompts,
-)
-from byte.domain.prompt_format.service.parser_service import ParserService
-from byte.domain.prompt_format.service.shell_command_prompt import (
+    ParserService,
     shell_command_system,
     shell_practice_messages,
 )

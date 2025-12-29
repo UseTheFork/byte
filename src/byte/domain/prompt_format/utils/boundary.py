@@ -1,6 +1,6 @@
 from typing import Literal
 
-from byte.domain.prompt_format.schemas import BoundaryType
+from byte.domain.prompt_format import BoundaryType
 
 
 class Boundary:

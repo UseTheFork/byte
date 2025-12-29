@@ -3,10 +3,10 @@ import subprocess
 from pathlib import Path
 from typing import List
 
-from byte.core.mixins.user_interactive import UserInteractive
-from byte.core.service.base_service import Service
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.prompt_format.schemas import (
+from byte.core import Service
+from byte.core.mixins import UserInteractive
+from byte.domain.cli import ConsoleService
+from byte.domain.prompt_format import (
     BlockStatus,
     EditFormatPrompts,
     ShellCommandBlock,
