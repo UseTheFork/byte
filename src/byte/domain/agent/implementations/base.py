@@ -23,7 +23,6 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
     """
 
     _graph: Optional[CompiledStateGraph] = None
-    current_message: Optional[Any] = None
 
     @abstractmethod
     async def build(self) -> CompiledStateGraph:
@@ -44,17 +43,21 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
         """
         stream_rendering_service = await self.make(StreamRenderingService)
 
-        # log.info("----")
-        # log.info(mode)
-        # log.info(chunk)
-
         # Filter and process based on mode
         if mode == "messages":
             # Handle LLM token streaming
             await stream_rendering_service.handle_message(chunk, self.__class__.__name__)
 
-        elif mode == "tasks":
-            await stream_rendering_service.handle_task(chunk, self.__class__.__name__)
+        elif mode == "updates":
+            # Handle state updates after each step
+            # await stream_rendering_service.handle_update(chunk)
+            pass
+        elif mode == "values":
+            # Handle full state after each step - could be used for progress tracking
+            pass
+        elif mode == "custom":
+            # Handle custom data from get_stream_writer()
+            pass
 
         return chunk
 
@@ -82,7 +85,7 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
         async for mode, chunk in graph.astream(
             input=initial_state,
             config=config,
-            stream_mode=["messages", "tasks", "values"],
+            stream_mode=["values", "updates", "messages", "custom"],
             context=await self.get_assistant_runnable(),
         ):
             processed_event = await self._handle_stream_event(mode, chunk)
@@ -122,12 +125,14 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
 
         stream_rendering_service = await self.make(StreamRenderingService)
         stream_rendering_service.set_display_mode(display_mode)
+
+        await stream_rendering_service.start_spinner()
+
         # Create a task so we can cancel it properly
         stream_task = asyncio.create_task(self._run_stream(graph, initial_state, config, stream_rendering_service))
 
         try:
             processed_event = await stream_task
-            log.debug(processed_event)
         except (KeyboardInterrupt, asyncio.CancelledError):
             # Cancel the stream task properly
             stream_task.cancel()
