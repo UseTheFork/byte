@@ -4,8 +4,8 @@ from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from byte.core.logging import log
-from byte.domain.lsp.schemas import (
+from byte.core import log
+from byte.domain.lsp import (
     CompletionItem,
     Diagnostic,
     HoverResult,

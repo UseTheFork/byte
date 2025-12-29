@@ -1,17 +1,15 @@
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from byte.core.logging import log
-from byte.core.service.base_service import Service
-from byte.core.task_manager import TaskManager
+from byte.core import Service, TaskManager, log
 from byte.core.utils import get_language_from_filename
-from byte.domain.lsp.schemas import (
+from byte.domain.lsp import (
     CompletionItem,
     Diagnostic,
     HoverResult,
     Location,
+    LSPClient,
 )
-from byte.domain.lsp.service.lsp_client import LSPClient
 
 
 class LSPService(Service):

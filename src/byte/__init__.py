@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.context import make
     from byte.core.logging import log
     from byte.core.service.base_service import Service
     from byte.core.service_provider import ServiceProvider
@@ -16,6 +17,7 @@ __all__ = (
     "dd",
     "dump",
     "log",
+    "make",
 )
 
 _dynamic_imports = {
@@ -25,6 +27,7 @@ _dynamic_imports = {
     "dd": "core",
     "dump": "core",
     "log": "core",
+    "make": "context",
     # keep-sorted end
 }
 

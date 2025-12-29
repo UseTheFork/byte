@@ -3,7 +3,7 @@ from pathlib import Path
 from langchain_core.tools import tool
 
 from byte.context import make
-from byte.domain.lsp.service.lsp_service import LSPService
+from byte.domain.lsp import LSPService
 
 
 @tool(parse_docstring=True)

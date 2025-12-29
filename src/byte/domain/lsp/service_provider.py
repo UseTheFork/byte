@@ -1,13 +1,9 @@
 from typing import List, Type
 
 from byte.container import Container
-from byte.core.config.config import ByteConfig
-from byte.core.event_bus import EventBus, EventType, Payload
-from byte.core.service.base_service import Service
-from byte.core.service_provider import ServiceProvider
-from byte.core.task_manager import TaskManager
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.lsp.service.lsp_service import LSPService
+from byte.core import ByteConfig, EventBus, EventType, Payload, Service, ServiceProvider, TaskManager
+from byte.domain.cli import Command
+from byte.domain.lsp import LSPService
 
 
 class LSPServiceProvider(ServiceProvider):
