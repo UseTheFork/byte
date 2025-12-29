@@ -3,6 +3,8 @@ from byte.core.mixins import UserInteractive
 from byte.domain.prompt_format import (
     EditFormatPrompts,
     ParserService,
+)
+from byte.domain.prompt_format.service.shell_command_prompt import (
     shell_command_system,
     shell_practice_messages,
 )
