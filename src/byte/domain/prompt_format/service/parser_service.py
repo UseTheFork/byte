@@ -5,9 +5,8 @@ from typing import List
 
 from langchain_core.messages import AIMessage, BaseMessage
 
-from byte.core.logging import log
-from byte.core.mixins.user_interactive import UserInteractive
-from byte.core.service.base_service import Service
+from byte.core import Service, log
+from byte.core.mixins import UserInteractive
 from byte.domain.files.models import FileMode
 from byte.domain.files.service.discovery_service import FileDiscoveryService
 from byte.domain.files.service.file_service import FileService
@@ -212,8 +211,6 @@ class ParserService(Service, UserInteractive, ABC):
         if they don't match, indicating malformed blocks.
         """
 
-        # AI: how do you suggest we modify this method. it should perform the initial parsing
-
         file_open_count = len(re.findall(r"<file\s+[^>]*>", content))
         file_close_count = content.count("</file>")
         search_count = content.count("<search>")
@@ -284,28 +281,31 @@ class ParserService(Service, UserInteractive, ABC):
             # Check if file exists
             if file_path.exists():
                 # File exists - validate search content can be found
-                try:
-                    content = file_path.read_text(encoding="utf-8")
 
-                    if block.search_content and block.search_content not in content:
-                        # Try stripping whitespace as a fallback
-                        stripped_search = block.search_content.strip()
+                # Only validate search content for EDIT operations
+                if block.block_type == BlockType.EDIT:
+                    try:
+                        content = file_path.read_text(encoding="utf-8")
 
-                        if stripped_search and stripped_search in content:
-                            # Match found after stripping - update the block's search content
-                            block.search_content = stripped_search
-                            block.replace_content = block.replace_content.strip()
-                            # Continue to next validation (block remains VALID)
-                        else:
-                            # Still no match even after stripping
-                            block.block_status = BlockStatus.SEARCH_NOT_FOUND_ERROR
-                            block.status_message = f"Search content not found in {block.file_path}"
-                            continue
+                        if block.search_content and block.search_content not in content:
+                            # Try stripping whitespace as a fallback
+                            stripped_search = block.search_content.strip()
 
-                except (FileNotFoundError, PermissionError, UnicodeDecodeError):
-                    block.block_status = BlockStatus.SEARCH_NOT_FOUND_ERROR
-                    block.status_message = f"Cannot read file: {block.file_path}"
-                    continue
+                            if stripped_search and stripped_search in content:
+                                # Match found after stripping - update the block's search content
+                                block.search_content = stripped_search
+                                block.replace_content = block.replace_content.strip()
+                                # Continue to next validation (block remains VALID)
+                            else:
+                                # Still no match even after stripping
+                                block.block_status = BlockStatus.SEARCH_NOT_FOUND_ERROR
+                                block.status_message = f"Search content not found in {block.file_path}"
+                                continue
+
+                    except (FileNotFoundError, PermissionError, UnicodeDecodeError):
+                        block.block_status = BlockStatus.SEARCH_NOT_FOUND_ERROR
+                        block.status_message = f"Cannot read file: {block.file_path}"
+                        continue
             else:
                 # File doesn't exist - ensure it's within git root
                 # Get project root from config
