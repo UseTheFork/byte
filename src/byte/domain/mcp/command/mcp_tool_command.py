@@ -1,15 +1,12 @@
 from argparse import Namespace
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import Any, Dict, List
 
 from langchain_core.tools import StructuredTool
 
+from byte import Container
 from byte.core.utils import dd, dump
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.mcp.service.mcp_service import MCPService
-
-if TYPE_CHECKING:
-    from byte.container import Container
+from byte.domain.cli import ByteArgumentParser, Command
+from byte.domain.mcp import MCPService
 
 
 # TODO: This needs to be finished.
@@ -21,7 +18,7 @@ class MCPToolCommand(Command):
     Usage: `/tool read_file path=/path/to/file`
     """
 
-    def __init__(self, container: "Container"):
+    def __init__(self, container: Container):
         super().__init__(container)
         self._available_tools: Dict[str, Any] = {}
 

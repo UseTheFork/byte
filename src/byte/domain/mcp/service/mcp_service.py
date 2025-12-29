@@ -3,7 +3,7 @@ from typing import Dict
 from langchain_core.tools import StructuredTool
 from langchain_mcp_adapters.client import MultiServerMCPClient
 
-from byte.core.service.base_service import Service
+from byte.core import Service
 
 
 class MCPService(Service):
