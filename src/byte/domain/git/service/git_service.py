@@ -207,14 +207,17 @@ class GitService(Service, UserInteractive):
         for diff_item in staged_diff:
             diff_content = None
 
-            # Determine change type
-            if diff_item.new_file:
+            # Determine change type by checking blob existence
+            if diff_item.a_blob is not None and diff_item.b_blob is None:
+                # No old blob, has new blob = file was added
                 change_type = "ADD"
-            elif diff_item.deleted_file:
+            elif diff_item.a_blob is None and diff_item.b_blob is not None:
+                # Has old blob, no new blob = file was deleted
                 change_type = "DELETE"
-            elif diff_item.renamed_file:
+            elif diff_item.renamed:
                 change_type = "RENAME FILE"
             else:
+                # Both blobs exist = file was modified
                 change_type = "MODIFY"
 
             if diff_item.diff:
@@ -223,14 +226,18 @@ class GitService(Service, UserInteractive):
                 else:
                     diff_content = str(diff_item.diff)
 
+            # Clear diff content for deletions since the file no longer exists
+            if change_type == "DELETE":
+                diff_content = None
+
             diff_data.append(
                 {
                     "file": diff_item.a_path,
                     "change_type": change_type,
                     "diff": diff_content,
                     "renamed": diff_item.renamed,
-                    "new_file": diff_item.new_file,
-                    "deleted_file": diff_item.deleted_file,
+                    "new_file": change_type == "ADD",
+                    "deleted_file": change_type == "DELETE",
                 }
             )
 
