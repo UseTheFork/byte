@@ -15,35 +15,6 @@ class MCPService(Service):
         "coder": "coder",
     }
 
-    async def boot(self, **kwargs):
-        self._all_tools = {}  # Store filtered tools by agent type
-        self._agent_tools = {}  # Store filtered tools by agent type
-
-        # Build connections dict from config
-        connections = {}
-
-        for server in self._config.mcp:
-            server_config = {"transport": server.connection.transport}
-
-            if server.connection.transport == "stdio":
-                server_config["command"] = server.connection.command
-                if server.connection.args:
-                    server_config["args"] = server.connection.args
-            elif server.connection.transport == "streamable_http":
-                server_config["url"] = server.connection.url
-                if server.connection.headers:
-                    server_config["headers"] = server.connection.headers
-
-            connections[server.name] = server_config
-
-        if connections:
-            client = MultiServerMCPClient(connections)
-            tools = await client.get_tools()
-
-            self._all_tools = tools
-            # Filter tools for each agent type based on server configuration
-            await self._filter_tools_by_agent(tools)
-
     async def _filter_tools_by_agent(self, tools):
         """Filter tools for each agent type based on MCP server configuration."""
         # Initialize agent tools dict
@@ -76,6 +47,35 @@ class MCPService(Service):
                     filtered_tools = tools
 
                 self._agent_tools[agent_name].extend(filtered_tools)
+
+    async def boot(self, **kwargs):
+        self._all_tools = {}  # Store filtered tools by agent type
+        self._agent_tools = {}  # Store filtered tools by agent type
+
+        # Build connections dict from config
+        connections = {}
+
+        for server in self._config.mcp:
+            server_config = {"transport": server.connection.transport}
+
+            if server.connection.transport == "stdio":
+                server_config["command"] = server.connection.command
+                if server.connection.args:
+                    server_config["args"] = server.connection.args
+            elif server.connection.transport == "streamable_http":
+                server_config["url"] = server.connection.url
+                if server.connection.headers:
+                    server_config["headers"] = server.connection.headers
+
+            connections[server.name] = server_config
+
+        if connections:
+            client = MultiServerMCPClient(connections)
+            tools = await client.get_tools()
+
+            self._all_tools = tools
+            # Filter tools for each agent type based on server configuration
+            await self._filter_tools_by_agent(tools)
 
     def get_tools_for_agent(self, agent_name: str):
         """Get filtered tools for a specific agent type."""

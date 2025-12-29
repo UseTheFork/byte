@@ -1,11 +1,8 @@
 from typing import List, Type
 
-from byte.core.service.base_service import Service
-from byte.core.service_provider import ServiceProvider
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.memory.command.clear_command import ClearCommand
-from byte.domain.memory.command.reset_command import ResetCommand
-from byte.domain.memory.service.memory_service import MemoryService
+from byte.core import Service, ServiceProvider
+from byte.domain.cli import Command
+from byte.domain.memory import ClearCommand, MemoryService, ResetCommand
 
 
 class MemoryServiceProvider(ServiceProvider):

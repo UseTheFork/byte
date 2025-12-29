@@ -22,6 +22,31 @@ class MCPToolCommand(Command):
         super().__init__(container)
         self._available_tools: Dict[str, Any] = {}
 
+    async def _refresh_available_tools(self):
+        """Refresh the list of available tools from MCP service based on config."""
+        # Get MCP service from container
+        mcp_service = await self.make(MCPService)
+        if not mcp_service:
+            self._available_tools = {}
+            return
+
+        # Get all tools
+        all_tools = mcp_service.get_all_tools_by_name()
+
+        # Filter based on tool_command configuration
+        filtered_tools: Dict[str, Any] = {}
+        config_service = self._config
+        if config_service and config_service.mcp:
+            for server in config_service.mcp:
+                if server.tool_command and server.tool_command.include:
+                    # Only include explicitly listed tools from this server
+                    for tool_name in server.tool_command.include:
+                        if tool_name in all_tools:
+                            filtered_tools[tool_name] = all_tools[tool_name]
+
+        # If no tool_command filters defined anywhere, no tools are available
+        self._available_tools = filtered_tools
+
     async def boot(self):
         """Load and filter available tools based on configuration."""
         await self._refresh_available_tools()
@@ -89,28 +114,3 @@ class MCPToolCommand(Command):
         """
         prefix = text.strip()
         return [tool_name for tool_name in self._available_tools.keys() if tool_name.startswith(prefix)]
-
-    async def _refresh_available_tools(self):
-        """Refresh the list of available tools from MCP service based on config."""
-        # Get MCP service from container
-        mcp_service = await self.make(MCPService)
-        if not mcp_service:
-            self._available_tools = {}
-            return
-
-        # Get all tools
-        all_tools = mcp_service.get_all_tools_by_name()
-
-        # Filter based on tool_command configuration
-        filtered_tools: Dict[str, Any] = {}
-        config_service = self._config
-        if config_service and config_service.mcp:
-            for server in config_service.mcp:
-                if server.tool_command and server.tool_command.include:
-                    # Only include explicitly listed tools from this server
-                    for tool_name in server.tool_command.include:
-                        if tool_name in all_tools:
-                            filtered_tools[tool_name] = all_tools[tool_name]
-
-        # If no tool_command filters defined anywhere, no tools are available
-        self._available_tools = filtered_tools

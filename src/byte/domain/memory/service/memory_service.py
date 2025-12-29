@@ -3,7 +3,7 @@ from typing import Optional
 
 from langgraph.checkpoint.memory import InMemorySaver
 
-from byte.core.service.base_service import Service
+from byte.core import Service
 
 
 class MemoryService(Service):

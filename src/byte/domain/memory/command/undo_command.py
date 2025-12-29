@@ -4,11 +4,9 @@ from langchain_core.messages import HumanMessage
 from langgraph.graph.message import RemoveMessage
 from langgraph.graph.state import RunnableConfig
 
-from byte.domain.agent.implementations.coder.agent import CoderAgent
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.memory.service.memory_service import MemoryService
+from byte.domain.agent import CoderAgent
+from byte.domain.cli import ByteArgumentParser, Command, ConsoleService
+from byte.domain.memory import MemoryService
 
 
 class UndoCommand(Command):

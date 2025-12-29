@@ -2,11 +2,9 @@ from argparse import Namespace
 
 from rich.panel import Panel
 
-from byte.domain.analytics.service.agent_analytics_service import AgentAnalyticsService
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.memory.service.memory_service import MemoryService
+from byte.domain.analytics import AgentAnalyticsService
+from byte.domain.cli import ByteArgumentParser, Command, ConsoleService
+from byte.domain.memory import MemoryService
 
 
 class ClearCommand(Command):
