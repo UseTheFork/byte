@@ -1,3 +1,4 @@
+from difflib import unified_diff
 from pathlib import Path
 from typing import List
 
@@ -201,43 +202,48 @@ class GitService(Service, UserInteractive):
         Usage: `await git_service.get_diff()` -> get unstaged changes
         """
 
-        staged_diff = self._repo.index.diff(other, create_patch=True)
+        staged_diff = self._repo.index.diff(other)
 
         diff_data = []
         for diff_item in staged_diff:
-            diff_content = None
+            diff_content = ""
 
-            # Determine change type by checking blob existence
-            if diff_item.a_blob is not None and diff_item.b_blob is None:
-                # No old blob, has new blob = file was added
-                change_type = "ADD"
-            elif diff_item.a_blob is None and diff_item.b_blob is not None:
-                # Has old blob, no new blob = file was deleted
-                change_type = "DELETE"
-            elif diff_item.renamed:
-                change_type = "RENAME FILE"
-            else:
-                # Both blobs exist = file was modified
-                change_type = "MODIFY"
+            change_type = diff_item.change_type
 
-            if diff_item.diff:
-                if isinstance(diff_item.diff, bytes):
-                    diff_content = diff_item.diff.decode("utf-8")
-                else:
-                    diff_content = str(diff_item.diff)
+            match diff_item.change_type:
+                case "A":
+                    msg = f"deleted: {diff_item.a_path}"
+                case "D":
+                    msg = f"new: {diff_item.a_path}"
+                case "M":
+                    msg = f"modified: {diff_item.a_path}"
+                case "R":
+                    msg = f"renamed: {diff_item.a_path} -> {diff_item.b_path}"
+                case _:
+                    msg = f"type {diff_item.change_type}: {diff_item.a_path}"
+
+            if diff_item.b_blob and diff_item.a_blob:
+                for line in unified_diff(
+                    diff_item.b_blob.data_stream.read().decode("utf-8").splitlines(),
+                    diff_item.a_blob.data_stream.read().decode("utf-8").splitlines(),
+                    lineterm="",
+                ):
+                    diff_content += line + "\n"
 
             # Clear diff content for deletions since the file no longer exists
-            if change_type == "DELETE":
+            if change_type == "A":
                 diff_content = None
 
             diff_data.append(
                 {
                     "file": diff_item.a_path,
-                    "change_type": change_type,
+                    "change_type": diff_item.change_type,
                     "diff": diff_content,
-                    "renamed": diff_item.renamed,
-                    "new_file": change_type == "ADD",
-                    "deleted_file": change_type == "DELETE",
+                    "msg": msg,
+                    "is_renamed": change_type == "R",
+                    "is_modified": change_type == "M",
+                    "is_new": change_type == "D",
+                    "is_deleted": change_type == "A",
                 }
             )
 

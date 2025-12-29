@@ -105,16 +105,18 @@ class CommitCommand(Command):
             diff_section = []
             file_section = [Boundary.open(BoundaryType.CONTEXT, meta={"type": "Files"})]
             for diff_item in staged_diff:
+                msg = diff_item["msg"]
                 file_path = diff_item["file"]
                 change_type = diff_item["change_type"]
 
                 # Start file section with change type
                 diff_section.append(
                     Boundary.open(
-                        BoundaryType.CONTEXT, meta={"type": "Diff", "change_type": change_type, "file": file_path}
+                        BoundaryType.CONTEXT,
+                        meta={"type": "Diff", "change_type": change_type, "file": file_path},
                     )
                 )
-                file_section.append(f"{file_path}")
+                file_section.append(f"{msg}")
 
                 # Include diff content only for non-deleted files
                 if change_type != "DELETE" and diff_item["diff"]:
