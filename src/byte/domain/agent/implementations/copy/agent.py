@@ -24,7 +24,7 @@ class CopyAgent(Agent):
         graph.add_edge("end_node", END)
 
         checkpointer = await self.get_checkpointer()
-        return graph.compile(checkpointer=checkpointer, debug=False)
+        return graph.compile(checkpointer=checkpointer)
 
     async def get_assistant_runnable(self) -> None:
         pass
