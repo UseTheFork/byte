@@ -2,9 +2,8 @@ import os
 from pathlib import Path
 from typing import List, Optional, Set
 
-from byte.core.logging import log
-from byte.core.service.base_service import Service
-from byte.domain.files.service.ignore_service import FileIgnoreService
+from byte.core import Service, log
+from byte.domain.files import FileIgnoreService
 
 
 class FileDiscoveryService(Service):
@@ -15,10 +14,15 @@ class FileDiscoveryService(Service):
     Usage: `files = discovery.get_files()` -> all non-ignored project files
     """
 
-    async def boot(self) -> None:
-        """Initialize file discovery by scanning project with ignore patterns."""
-        self._all_files: Set[Path] = set()
-        await self._scan_project_files()
+    async def _is_ignored(self, path: Path) -> bool:
+        """Check if a path should be ignored using FileIgnoreService.
+
+        Delegates to the centralized ignore service for consistent
+        filtering across all file operations.
+        """
+        ignore_service = await self.make(FileIgnoreService)
+        is_ignored = await ignore_service.is_ignored(path)
+        return is_ignored
 
     async def _scan_project_files(self) -> None:
         """Recursively scan project directory and cache all non-ignored files.
@@ -42,15 +46,10 @@ class FileDiscoveryService(Service):
                     log.debug(f"Discovered file: {file_path}")
                     self._all_files.add(file_path)
 
-    async def _is_ignored(self, path: Path) -> bool:
-        """Check if a path should be ignored using FileIgnoreService.
-
-        Delegates to the centralized ignore service for consistent
-        filtering across all file operations.
-        """
-        ignore_service = await self.make(FileIgnoreService)
-        is_ignored = await ignore_service.is_ignored(path)
-        return is_ignored
+    async def boot(self) -> None:
+        """Initialize file discovery by scanning project with ignore patterns."""
+        self._all_files: Set[Path] = set()
+        await self._scan_project_files()
 
     async def get_files(self, extension: Optional[str] = None) -> List[Path]:
         """Get all discovered files, optionally filtered by extension.

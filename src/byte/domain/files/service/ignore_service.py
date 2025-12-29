@@ -3,8 +3,7 @@ from typing import Optional
 
 import pathspec
 
-from byte.core.logging import log
-from byte.core.service.base_service import Service
+from byte.core import Service, log
 
 
 class FileIgnoreService(Service):
@@ -15,11 +14,6 @@ class FileIgnoreService(Service):
     custom configuration patterns for comprehensive file filtering.
     Usage: `is_ignored = await ignore_service.is_ignored(file_path)`
     """
-
-    async def boot(self) -> None:
-        """Initialize service by loading and compiling ignore patterns."""
-        self._gitignore_spec: Optional[pathspec.PathSpec] = None
-        await self._load_ignore_patterns()
 
     async def _load_ignore_patterns(self) -> None:
         """Load and compile ignore patterns from .gitignore files and config.
@@ -52,6 +46,11 @@ class FileIgnoreService(Service):
             log.debug("No ignore patterns loaded")
 
         self._gitignore_spec = pathspec.PathSpec.from_lines("gitwildmatch", patterns)
+
+    async def boot(self) -> None:
+        """Initialize service by loading and compiling ignore patterns."""
+        self._gitignore_spec: Optional[pathspec.PathSpec] = None
+        await self._load_ignore_patterns()
 
     async def is_ignored(self, path: Path) -> bool:
         """Check if a path should be ignored based on loaded patterns.

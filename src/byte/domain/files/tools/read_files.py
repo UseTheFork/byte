@@ -3,7 +3,7 @@ from pathlib import Path
 from langchain_core.tools import tool
 
 from byte.context import make
-from byte.domain.files.service.file_service import FileService
+from byte.domain.files import FileService
 
 
 @tool(

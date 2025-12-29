@@ -2,13 +2,8 @@ from pathlib import Path
 
 from watchfiles import Change, awatch
 
-from byte.core.event_bus import EventType, Payload
-from byte.core.logging import log
-from byte.core.service.base_service import Service
-from byte.core.task_manager import TaskManager
-from byte.domain.files.service.discovery_service import FileDiscoveryService
-from byte.domain.files.service.file_service import FileService
-from byte.domain.files.service.ignore_service import FileIgnoreService
+from byte.core import EventType, Payload, Service, TaskManager, log
+from byte.domain.files import FileDiscoveryService, FileIgnoreService, FileService
 
 
 class FileWatcherService(Service):
@@ -18,15 +13,6 @@ class FileWatcherService(Service):
     Always active to keep file discovery up-to-date.
     Usage: Automatically started during boot to monitor file changes
     """
-
-    async def boot(self) -> None:
-        """Initialize file watcher with TaskManager integration."""
-        self.task_manager = await self.make(TaskManager)
-        self.ignore_service = await self.make(FileIgnoreService)
-        self.file_discovery = await self.make(FileDiscoveryService)
-        self.file_service = await self.make(FileService)
-
-        await self._start_watching()
 
     def _watch_filter(self, change: Change, path: str) -> bool:
         """Filter function for watchfiles to ignore files based on ignore patterns.
@@ -53,22 +39,6 @@ class FileWatcherService(Service):
         except (ValueError, RuntimeError):
             return False
 
-    async def _start_watching(self) -> None:
-        """Start file system monitoring using TaskManager."""
-        self.task_manager.start_task("file_watcher", self._watch_files())
-
-    async def _watch_files(self) -> None:
-        """Main file watching loop."""
-        try:
-            async for changes in awatch(str(self._config.project_root), watch_filter=self._watch_filter):
-                for change_type, file_path_str in changes:
-                    log.debug(f"File changed: {change_type} -> {file_path_str}")
-                    file_path = Path(file_path_str)
-                    await self._handle_file_change(file_path, change_type)
-        except Exception as e:
-            log.exception(e)
-            print(f"File watcher error: {e}")
-
     async def _handle_file_change(self, file_path: Path, change_type: Change) -> None:
         """Handle file system changes and update discovery cache."""
         if file_path.is_dir():
@@ -92,3 +62,28 @@ class FileWatcherService(Service):
                 },
             )
         )
+
+    async def _watch_files(self) -> None:
+        """Main file watching loop."""
+        try:
+            async for changes in awatch(str(self._config.project_root), watch_filter=self._watch_filter):
+                for change_type, file_path_str in changes:
+                    log.debug(f"File changed: {change_type} -> {file_path_str}")
+                    file_path = Path(file_path_str)
+                    await self._handle_file_change(file_path, change_type)
+        except Exception as e:
+            log.exception(e)
+            print(f"File watcher error: {e}")
+
+    async def _start_watching(self) -> None:
+        """Start file system monitoring using TaskManager."""
+        self.task_manager.start_task("file_watcher", self._watch_files())
+
+    async def boot(self) -> None:
+        """Initialize file watcher with TaskManager integration."""
+        self.task_manager = await self.make(TaskManager)
+        self.ignore_service = await self.make(FileIgnoreService)
+        self.file_discovery = await self.make(FileDiscoveryService)
+        self.file_service = await self.make(FileService)
+
+        await self._start_watching()

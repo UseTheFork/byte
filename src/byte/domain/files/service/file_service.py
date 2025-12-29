@@ -5,14 +5,11 @@ from typing import Dict, List, Optional, Union
 
 from rich.columns import Columns
 
-from byte.core.event_bus import EventType, Payload
-from byte.core.service.base_service import Service
+from byte.core import EventType, Payload, Service
 from byte.core.utils import list_to_multiline_text
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.files.models import FileContext, FileMode
-from byte.domain.files.service.discovery_service import FileDiscoveryService
-from byte.domain.prompt_format.schemas import BoundaryType
-from byte.domain.prompt_format.utils import Boundary
+from byte.domain.cli import ConsoleService
+from byte.domain.files import FileContext, FileDiscoveryService, FileMode
+from byte.domain.prompt_format import Boundary, BoundaryType
 
 
 class FileService(Service):
@@ -27,6 +24,20 @@ class FileService(Service):
     async def boot(self, **kwargs) -> None:
         """Initialize file service and ensure discovery service is ready."""
         self._context_files: Dict[str, FileContext] = {}
+
+    async def _notify_file_added(self, file_path: str, mode: FileMode):
+        """Notify system that a file was added to context"""
+
+        payload = Payload(
+            event_type=EventType.FILE_ADDED,
+            data={
+                "file_path": file_path,
+                "mode": mode.value,
+                "action": "context_added",
+            },
+        )
+
+        await self.emit(payload)
 
     async def add_file(self, path: Union[str, PathLike], mode: FileMode) -> bool:
         """Add a file to the active context for AI awareness.
@@ -81,20 +92,6 @@ class FileService(Service):
 
             # Emit event for UI updates and other interested components
             return True
-
-    async def _notify_file_added(self, file_path: str, mode: FileMode):
-        """Notify system that a file was added to context"""
-
-        payload = Payload(
-            event_type=EventType.FILE_ADDED,
-            data={
-                "file_path": file_path,
-                "mode": mode.value,
-                "action": "context_added",
-            },
-        )
-
-        await self.emit(payload)
 
     async def remove_file(self, path: Union[str, PathLike]) -> bool:
         """Remove a file from active context to reduce noise.
@@ -192,6 +189,20 @@ class FileService(Service):
         """
         path_obj = Path(path).resolve()
         return self._context_files.get(str(path_obj))
+
+    async def _emit_file_context_event(self, file: str, type, content: str) -> str:
+        """ """
+        payload = Payload(
+            event_type=EventType.GENERATE_FILE_CONTEXT,
+            data={
+                "file": file,
+                "type": type,
+                "content": content,
+            },
+        )
+
+        payload = await self.emit(payload)
+        return payload.get("content", content)
 
     async def generate_context_prompt(self) -> tuple[list[str], list[str]]:
         """Generate structured file lists for read-only and editable files.
@@ -347,20 +358,6 @@ class FileService(Service):
                     lines.append(f"{file_indent}... {remaining} more files")
 
         return "\n".join(lines)
-
-    async def _emit_file_context_event(self, file: str, type, content: str) -> str:
-        """ """
-        payload = Payload(
-            event_type=EventType.GENERATE_FILE_CONTEXT,
-            data={
-                "file": file,
-                "type": type,
-                "content": content,
-            },
-        )
-
-        payload = await self.emit(payload)
-        return payload.get("content", content)
 
     async def clear_context(self):
         """Clear all files from context for fresh start.

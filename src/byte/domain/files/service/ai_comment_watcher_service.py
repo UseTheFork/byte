@@ -2,15 +2,11 @@ import re
 from pathlib import Path
 from typing import List, Optional
 
-from byte.core.event_bus import Payload
-from byte.core.service.base_service import Service
-from byte.core.task_manager import TaskManager
+from byte.core import Payload, Service, TaskManager
 from byte.core.utils import list_to_multiline_text
-from byte.domain.agent.implementations.ask.agent import AskAgent
-from byte.domain.agent.implementations.coder.agent import CoderAgent
-from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
-from byte.domain.files.models import FileMode
-from byte.domain.files.service.file_service import FileService
+from byte.domain.agent import AskAgent, CoderAgent
+from byte.domain.cli import PromptToolkitService
+from byte.domain.files import FileMode, FileService
 
 
 class AICommentWatcherService(Service):
