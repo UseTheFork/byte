@@ -1,4 +1,4 @@
-from byte.core.exceptions import ByteConfigException
+from byte.core import ByteConfigException
 
 
 class WebNotEnabledException(ByteConfigException):

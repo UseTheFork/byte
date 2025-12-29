@@ -1,8 +1,7 @@
 from typing import List, Type
 
-from byte.core.service.base_service import Service
-from byte.core.service_provider import ServiceProvider
-from byte.domain.web.service.chromium_service import ChromiumService
+from byte.core import Service, ServiceProvider
+from byte.domain.web import ChromiumService
 
 
 class WebServiceProvider(ServiceProvider):
