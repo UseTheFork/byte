@@ -1,10 +1,8 @@
 from typing import List, Type
 
-from byte.core.service.base_service import Service
-from byte.core.service_provider import ServiceProvider
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.lint.command.lint_command import LintCommand
-from byte.domain.lint.service.lint_service import LintService
+from byte.core import Service, ServiceProvider
+from byte.domain.cli import Command
+from byte.domain.lint import LintCommand, LintService
 
 
 class LintServiceProvider(ServiceProvider):

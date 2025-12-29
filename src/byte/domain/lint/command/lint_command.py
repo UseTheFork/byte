@@ -1,14 +1,10 @@
 from argparse import Namespace
 
-from byte.core.exceptions import ByteConfigException
-from byte.core.logging import log
-from byte.domain.agent.implementations.coder.agent import CoderAgent
-from byte.domain.agent.service.agent_service import AgentService
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.git.service.git_service import GitService
-from byte.domain.lint.service.lint_service import LintService
+from byte.core import ByteConfigException, log
+from byte.domain.agent import AgentService, CoderAgent
+from byte.domain.cli import ByteArgumentParser, Command, ConsoleService
+from byte.domain.git import GitService
+from byte.domain.lint import LintService
 
 
 class LintCommand(Command):

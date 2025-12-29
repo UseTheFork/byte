@@ -7,17 +7,13 @@ from rich.live import Live
 from rich.progress import BarColumn, Progress, TaskProgressColumn
 from rich.table import Column
 
-from byte.core.logging import log
-from byte.core.mixins.user_interactive import UserInteractive
-from byte.core.service.base_service import Service
+from byte.core import Service, log
+from byte.core.mixins import UserInteractive
 from byte.core.utils import get_language_from_filename, list_to_multiline_text
-from byte.domain.cli.rich.markdown import Markdown
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.git.service.git_service import GitService
-from byte.domain.lint.exceptions import LintConfigException
-from byte.domain.lint.types import LintCommand, LintFile
-from byte.domain.prompt_format.schemas import BoundaryType
-from byte.domain.prompt_format.utils.boundary import Boundary
+from byte.domain.cli import ConsoleService, Markdown
+from byte.domain.git import GitService
+from byte.domain.lint import LintCommand, LintConfigException, LintFile
+from byte.domain.prompt_format import Boundary, BoundaryType
 
 
 class LintService(Service, UserInteractive):
