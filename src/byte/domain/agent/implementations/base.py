@@ -44,21 +44,17 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
         """
         stream_rendering_service = await self.make(StreamRenderingService)
 
-        log.info("----")
-        log.info(mode)
-        log.info(chunk)
+        # log.info("----")
+        # log.info(mode)
+        # log.info(chunk)
 
         # Filter and process based on mode
         if mode == "messages":
             # Handle LLM token streaming
             await stream_rendering_service.handle_message(chunk, self.__class__.__name__)
 
-            # This lets us store the last chunk which is the completed AI message
-            # self.current_message = chunk
-
         elif mode == "tasks":
             await stream_rendering_service.handle_task(chunk, self.__class__.__name__)
-            # self.current_message = chunk
 
         return chunk
 
