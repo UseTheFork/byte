@@ -2,17 +2,19 @@ from langchain.chat_models import BaseChatModel
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
-from byte.domain.agent.implementations.base import Agent
+from byte.domain.agent import (
+    Agent,
+    AssistantContextSchema,
+    AssistantNode,
+    BaseState,
+    EndNode,
+    LintNode,
+    ParseBlocksNode,
+    StartNode,
+)
 from byte.domain.agent.implementations.coder.prompt import coder_prompt
-from byte.domain.agent.nodes.assistant_node import AssistantNode
-from byte.domain.agent.nodes.end_node import EndNode
-from byte.domain.agent.nodes.lint_node import LintNode
-from byte.domain.agent.nodes.parse_blocks_node import ParseBlocksNode
-from byte.domain.agent.nodes.start_node import StartNode
-from byte.domain.agent.schemas import AssistantContextSchema
-from byte.domain.agent.state import BaseState
-from byte.domain.llm.service.llm_service import LLMService
-from byte.domain.prompt_format.service.edit_format_service import EditFormatService
+from byte.domain.llm import LLMService
+from byte.domain.prompt_format import EditFormatService
 
 
 class CoderAgent(Agent):

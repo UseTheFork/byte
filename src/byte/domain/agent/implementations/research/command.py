@@ -4,15 +4,10 @@ from typing import cast
 
 from langgraph.graph.state import RunnableConfig
 
-from byte.domain.agent.implementations.coder.agent import CoderAgent
-from byte.domain.agent.implementations.research.agent import ResearchAgent
-from byte.domain.agent.nodes.extract_node import SessionContextFormatter
-from byte.domain.agent.service.agent_service import AgentService
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.knowledge.models import SessionContextModel
-from byte.domain.knowledge.service.session_context_service import SessionContextService
-from byte.domain.memory.service.memory_service import MemoryService
+from byte.domain.agent import AgentService, CoderAgent, ResearchAgent, SessionContextFormatter
+from byte.domain.cli import ByteArgumentParser, Command
+from byte.domain.knowledge import SessionContextModel, SessionContextService
+from byte.domain.memory import MemoryService
 
 
 class ResearchCommand(Command):

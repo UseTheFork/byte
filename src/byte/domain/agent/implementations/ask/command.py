@@ -1,10 +1,8 @@
 import argparse
 from argparse import Namespace
 
-from byte.domain.agent.implementations.ask.agent import AskAgent
-from byte.domain.agent.service.agent_service import AgentService
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.service.command_registry import Command
+from byte.domain.agent import AgentService, AskAgent
+from byte.domain.cli import ByteArgumentParser, Command
 
 
 class AskCommand(Command):

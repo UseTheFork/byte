@@ -2,13 +2,11 @@ from argparse import Namespace
 
 from pydantic import BaseModel
 
-from byte.core.mixins.user_interactive import UserInteractive
+from byte.core.mixins import UserInteractive
 from byte.core.utils import slugify
-from byte.domain.agent.implementations.conventions.agent import ConventionAgent
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.knowledge.service.convention_context_service import ConventionContextService
+from byte.domain.agent import ConventionAgent
+from byte.domain.cli import ByteArgumentParser, Command, ConsoleService
+from byte.domain.knowledge import ConventionContextService
 
 
 class ConventionFocus(BaseModel):

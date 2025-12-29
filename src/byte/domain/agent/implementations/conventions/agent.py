@@ -2,18 +2,20 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langgraph.constants import END
 from langgraph.graph import START, StateGraph
 
-from byte.domain.agent.implementations.base import Agent
+from byte.domain.agent import (
+    Agent,
+    AssistantContextSchema,
+    AssistantNode,
+    BaseState,
+    EndNode,
+    ExtractNode,
+    StartNode,
+    ToolNode,
+    ValidationNode,
+)
 from byte.domain.agent.implementations.conventions.prompt import conventions_prompt
-from byte.domain.agent.nodes.assistant_node import AssistantNode
-from byte.domain.agent.nodes.end_node import EndNode
-from byte.domain.agent.nodes.extract_node import ExtractNode
-from byte.domain.agent.nodes.start_node import StartNode
-from byte.domain.agent.nodes.tool_node import ToolNode
-from byte.domain.agent.nodes.validation_node import ValidationNode
-from byte.domain.agent.schemas import AssistantContextSchema
-from byte.domain.agent.state import BaseState
 from byte.domain.files.tools.read_files import read_files
-from byte.domain.llm.service.llm_service import LLMService
+from byte.domain.llm import LLMService
 
 
 class ConventionAgent(Agent):

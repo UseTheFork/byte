@@ -2,15 +2,10 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langgraph.constants import END
 from langgraph.graph import START, StateGraph
 
-from byte.domain.agent.implementations.base import Agent
+from byte.domain.agent import Agent, AssistantContextSchema, AssistantNode, BaseState, EndNode, StartNode
 from byte.domain.agent.implementations.commit.prompt import commit_plan_prompt, commit_prompt
 from byte.domain.agent.implementations.commit.structured_output import CommitMessage, CommitPlan
-from byte.domain.agent.nodes.assistant_node import AssistantNode
-from byte.domain.agent.nodes.end_node import EndNode
-from byte.domain.agent.nodes.start_node import StartNode
-from byte.domain.agent.schemas import AssistantContextSchema
-from byte.domain.agent.state import BaseState
-from byte.domain.llm.service.llm_service import LLMService
+from byte.domain.llm import LLMService
 
 
 class CommitAgent(Agent):

@@ -1,10 +1,7 @@
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
-from byte.domain.agent.implementations.base import Agent
-from byte.domain.agent.nodes.copy_node import CopyNode
-from byte.domain.agent.nodes.end_node import EndNode
-from byte.domain.agent.state import BaseState
+from byte.domain.agent import Agent, BaseState, CopyNode, EndNode
 
 
 class CopyAgent(Agent):

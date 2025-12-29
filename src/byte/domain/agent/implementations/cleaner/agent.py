@@ -5,17 +5,11 @@ from langgraph.graph import START, StateGraph
 from langgraph.types import Command
 from rich.markdown import Markdown
 
-from byte.core.mixins.user_interactive import UserInteractive
-from byte.domain.agent.implementations.base import Agent
+from byte.core.mixins import UserInteractive
+from byte.domain.agent import Agent, AssistantContextSchema, AssistantNode, BaseState, EndNode, ExtractNode, StartNode
 from byte.domain.agent.implementations.cleaner.prompt import cleaner_prompt
-from byte.domain.agent.nodes.assistant_node import AssistantNode
-from byte.domain.agent.nodes.end_node import EndNode
-from byte.domain.agent.nodes.extract_node import ExtractNode
-from byte.domain.agent.nodes.start_node import StartNode
-from byte.domain.agent.schemas import AssistantContextSchema
-from byte.domain.agent.state import BaseState
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.llm.service.llm_service import LLMService
+from byte.domain.cli import ConsoleService
+from byte.domain.llm import LLMService
 
 
 class CleanerAgent(Agent, UserInteractive):
@@ -25,36 +19,6 @@ class CleanerAgent(Agent, UserInteractive):
     like session context, removing noise and focusing on key details.
     Usage: `agent = await container.make(CleanerAgent); clean = await agent.execute(state)`
     """
-
-    async def build(self):
-        """Build and compile the cleaner agent graph.
-
-        Creates a StateGraph optimized for content cleaning with specialized
-        prompts focused on information extraction and relevance filtering.
-        Usage: `graph = await agent.build()` -> ready for content cleaning
-        """
-
-        # Create the state graph
-        graph = StateGraph(BaseState)
-
-        # Add nodes
-        graph.add_node("start_node", await self.make(StartNode))
-        graph.add_node("assistant_node", await self.make(AssistantNode, goto="extract_node"))
-        graph.add_node("extract_node", await self.make(ExtractNode))
-        graph.add_node("end_node", await self.make(EndNode))
-
-        graph.add_node("confirm_content_node", self._confirm_content)
-
-        # Define edges
-        graph.add_edge(START, "start_node")
-        graph.add_edge("start_node", "assistant_node")
-        graph.add_edge("assistant_node", "extract_node")
-        graph.add_edge("extract_node", "confirm_content_node")
-        graph.add_edge("confirm_content_node", "end_node")
-        graph.add_edge("end_node", END)
-
-        # Compile graph without memory for stateless operation
-        return graph.compile()
 
     async def _confirm_content(self, state: BaseState):
         """Ask user to confirm the cleaned content or provide modifications.
@@ -91,6 +55,36 @@ class CleanerAgent(Agent, UserInteractive):
             )
 
             return Command(goto="assistant_node", update={"history_messages": [error_message]})
+
+    async def build(self):
+        """Build and compile the cleaner agent graph.
+
+        Creates a StateGraph optimized for content cleaning with specialized
+        prompts focused on information extraction and relevance filtering.
+        Usage: `graph = await agent.build()` -> ready for content cleaning
+        """
+
+        # Create the state graph
+        graph = StateGraph(BaseState)
+
+        # Add nodes
+        graph.add_node("start_node", await self.make(StartNode))
+        graph.add_node("assistant_node", await self.make(AssistantNode, goto="extract_node"))
+        graph.add_node("extract_node", await self.make(ExtractNode))
+        graph.add_node("end_node", await self.make(EndNode))
+
+        graph.add_node("confirm_content_node", self._confirm_content)
+
+        # Define edges
+        graph.add_edge(START, "start_node")
+        graph.add_edge("start_node", "assistant_node")
+        graph.add_edge("assistant_node", "extract_node")
+        graph.add_edge("extract_node", "confirm_content_node")
+        graph.add_edge("confirm_content_node", "end_node")
+        graph.add_edge("end_node", END)
+
+        # Compile graph without memory for stateless operation
+        return graph.compile()
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
         llm_service = await self.make(LLMService)

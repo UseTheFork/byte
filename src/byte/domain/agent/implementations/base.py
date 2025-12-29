@@ -4,18 +4,13 @@ from typing import Any, Literal, Optional
 
 from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 
-from byte.core.event_bus import EventType, Payload
-from byte.core.logging import log
-from byte.core.mixins.bootable import Bootable
-from byte.core.mixins.configurable import Configurable
-from byte.core.mixins.eventable import Eventable
-from byte.core.mixins.injectable import Injectable
-from byte.domain.agent.schemas import AssistantContextSchema
-from byte.domain.agent.state import BaseState
-from byte.domain.cli.service.stream_rendering_service import (
+from byte.core import EventType, Payload, log
+from byte.core.mixins import Bootable, Configurable, Eventable, Injectable
+from byte.domain.agent import AssistantContextSchema, BaseState
+from byte.domain.cli import (
     StreamRenderingService,
 )
-from byte.domain.memory.service.memory_service import MemoryService
+from byte.domain.memory import MemoryService
 
 
 class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
@@ -65,6 +60,36 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
             pass
 
         return chunk
+
+    async def _run_stream(
+        self,
+        graph: CompiledStateGraph,
+        initial_state: BaseState,
+        config: RunnableConfig,
+        stream_rendering_service: StreamRenderingService,
+    ):
+        """Helper method to run the stream in a cancellable task.
+
+        Args:
+                graph: The compiled state graph to execute
+                initial_state: The initial state for the graph
+                config: The runnable configuration with thread ID
+                stream_rendering_service: Service for rendering stream output
+
+        Returns:
+                The final processed event from the stream
+
+        Usage: Called internally by execute() to run the stream in a cancellable task
+        """
+        processed_event = None
+        async for mode, chunk in graph.astream(
+            input=initial_state,
+            config=config,
+            stream_mode=["values", "updates", "messages", "custom"],
+            context=await self.get_assistant_runnable(),
+        ):
+            processed_event = await self._handle_stream_event(mode, chunk)
+        return processed_event
 
     async def execute(
         self,
@@ -128,36 +153,6 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
 
         await self.emit(payload)
 
-        return processed_event
-
-    async def _run_stream(
-        self,
-        graph: CompiledStateGraph,
-        initial_state: BaseState,
-        config: RunnableConfig,
-        stream_rendering_service: StreamRenderingService,
-    ):
-        """Helper method to run the stream in a cancellable task.
-
-        Args:
-                graph: The compiled state graph to execute
-                initial_state: The initial state for the graph
-                config: The runnable configuration with thread ID
-                stream_rendering_service: Service for rendering stream output
-
-        Returns:
-                The final processed event from the stream
-
-        Usage: Called internally by execute() to run the stream in a cancellable task
-        """
-        processed_event = None
-        async for mode, chunk in graph.astream(
-            input=initial_state,
-            config=config,
-            stream_mode=["values", "updates", "messages", "custom"],
-            context=await self.get_assistant_runnable(),
-        ):
-            processed_event = await self._handle_stream_event(mode, chunk)
         return processed_event
 
     async def get_checkpointer(self):

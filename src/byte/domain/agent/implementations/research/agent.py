@@ -2,16 +2,18 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
-from byte.domain.agent.implementations.base import Agent
+from byte.domain.agent import (
+    Agent,
+    AssistantContextSchema,
+    AssistantNode,
+    BaseState,
+    EndNode,
+    ExtractNode,
+    StartNode,
+    ToolNode,
+)
 from byte.domain.agent.implementations.research.prompt import research_prompt
-from byte.domain.agent.nodes.assistant_node import AssistantNode
-from byte.domain.agent.nodes.end_node import EndNode
-from byte.domain.agent.nodes.extract_node import ExtractNode
-from byte.domain.agent.nodes.start_node import StartNode
-from byte.domain.agent.nodes.tool_node import ToolNode
-from byte.domain.agent.schemas import AssistantContextSchema
-from byte.domain.agent.state import BaseState
-from byte.domain.llm.service.llm_service import LLMService
+from byte.domain.llm import LLMService
 from byte.domain.lsp.tools.find_references import find_references
 from byte.domain.lsp.tools.get_definition import get_definition
 from byte.domain.lsp.tools.get_hover_info import get_hover_info
