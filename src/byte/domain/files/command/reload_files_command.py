@@ -1,8 +1,6 @@
 from argparse import Namespace
 
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.cli.service.console_service import ConsoleService
+from byte.domain.cli import ByteArgumentParser, Command, ConsoleService
 from byte.domain.files.service.discovery_service import FileDiscoveryService
 
 

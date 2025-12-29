@@ -2,12 +2,11 @@ from rich.console import Group
 from rich.progress_bar import ProgressBar
 from rich.table import Table
 
-from byte.core.event_bus import Payload
-from byte.core.service.base_service import Service
-from byte.domain.agent.schemas import TokenUsageSchema
-from byte.domain.analytics.schemas import UsageAnalytics
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.llm.service.llm_service import LLMService
+from byte.core import Payload, Service
+from byte.domain.agent import TokenUsageSchema
+from byte.domain.analytics import UsageAnalytics
+from byte.domain.cli import ConsoleService
+from byte.domain.llm import LLMService
 
 
 class AgentAnalyticsService(Service):

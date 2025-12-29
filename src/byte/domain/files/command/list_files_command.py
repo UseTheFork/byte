@@ -2,11 +2,8 @@ from argparse import Namespace
 
 from rich.columns import Columns
 
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.files.models import FileMode
-from byte.domain.files.service.file_service import FileService
+from byte.domain.cli import ByteArgumentParser, Command, ConsoleService
+from byte.domain.files import FileMode, FileService
 
 
 class ListFilesCommand(Command):
