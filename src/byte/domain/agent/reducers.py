@@ -1,4 +1,4 @@
-from byte.domain.agent.schemas import ConstraintSchema, MetadataSchema
+from byte.domain.agent import ConstraintSchema, MetadataSchema
 
 
 def replace_list(left: list | None, right: list) -> list:

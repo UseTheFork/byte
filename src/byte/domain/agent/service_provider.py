@@ -1,6 +1,6 @@
 from typing import List, Type
 
-from byte.container import Container
+from byte import Container
 from byte.core import Service, ServiceProvider
 from byte.domain.agent import (
     Agent,

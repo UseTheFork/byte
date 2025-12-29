@@ -1,8 +1,7 @@
 from typing import Optional, Type
 
-from byte.core.service.base_service import Service
-from byte.domain.agent.implementations.base import Agent
-from byte.domain.agent.implementations.coder.agent import CoderAgent
+from byte.core import Service
+from byte.domain.agent import Agent, CoderAgent
 
 
 class AgentService(Service):
@@ -41,6 +40,10 @@ class AgentService(Service):
         agent_instance = self._agent_instances[target_agent]
         return await agent_instance.execute(input)
 
+    def _is_valid_agent(self, agent_type: Type[Agent]) -> bool:
+        """Check if the agent type is valid."""
+        return agent_type in self._available_agents
+
     def set_active_agent(self, agent_type: Type[Agent]) -> bool:
         """Switch the active agent."""
         if self._is_valid_agent(agent_type):
@@ -54,10 +57,6 @@ class AgentService(Service):
         Usage: current_agent = agent_service.get_active_agent()
         """
         return self._current_agent
-
-    def _is_valid_agent(self, agent_type: Type[Agent]) -> bool:
-        """Check if the agent type is valid."""
-        return agent_type in self._available_agents
 
     def get_active_agent_type(self) -> Type[Agent]:
         """Get the currently active agent type."""
