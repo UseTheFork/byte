@@ -3,7 +3,7 @@ from argparse import Namespace
 from byte.core import ByteConfigException
 from byte.core.mixins import UserInteractive
 from byte.core.utils import slugify
-from byte.domain.agent.implementations.cleaner.agent import CleanerAgent
+from byte.domain.agent import CleanerAgent
 from byte.domain.cli import ByteArgumentParser, Command, ConsoleService, Markdown
 from byte.domain.knowledge import SessionContextModel, SessionContextService
 from byte.domain.web import ChromiumService

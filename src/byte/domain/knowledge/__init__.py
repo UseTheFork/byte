@@ -28,13 +28,13 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "CLIContextDisplayService": "service.cli_context_display_service",
-    "ConventionContextService": "service.convention_context_service",
-    "SessionContextService": "service.session_context_service",
     "ContextAddFileCommand": "command.context_add_file_command",
     "ContextDropCommand": "command.context_drop_command",
     "ContextListCommand": "command.context_list_command",
-    "WebCommand": "command.web_command",
+    "ConventionContextService": "service.convention_context_service",
     "SessionContextModel": "models",
+    "SessionContextService": "service.session_context_service",
+    "WebCommand": "command.web_command",
     # keep-sorted end
 }
 

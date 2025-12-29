@@ -9,10 +9,10 @@ from byte.domain.knowledge import (
     ContextDropCommand,
     ContextListCommand,
     ConventionContextService,
+    SessionContextModel,
     SessionContextService,
     WebCommand,
 )
-from byte.domain.knowledge.models import SessionContextModel
 
 
 class KnowledgeServiceProvider(ServiceProvider):
