@@ -1,7 +1,8 @@
 import inspect
 import sys
 
-from rich.pretty import pprint
+from rich import inspect as rich_inspect
+from rich.console import Console
 
 
 def dump(*args, **kwargs):
@@ -12,11 +13,12 @@ def dump(*args, **kwargs):
     dump(locals())
     dump(globals())
     """
+    console = Console()
 
     # Get caller information and build call stack
-    frame = inspect.currentframe().f_back  # pyright: ignore[reportOptionalMemberAccess]
-    filename = frame.f_code.co_filename  # pyright: ignore[reportOptionalMemberAccess]
-    lineno = frame.f_lineno  # pyright: ignore[reportOptionalMemberAccess]
+    frame = inspect.currentframe().f_back  # pyright: ignore[reportOptionalMemberAccess]  # ty:ignore[possibly-missing-attribute]
+    filename = frame.f_code.co_filename  # pyright: ignore[reportOptionalMemberAccess]  # ty:ignore[possibly-missing-attribute]
+    lineno = frame.f_lineno  # pyright: ignore[reportOptionalMemberAccess]  # ty:ignore[possibly-missing-attribute]
 
     # Trace the call stack
     call_chain = []
@@ -27,22 +29,22 @@ def dump(*args, **kwargs):
         current_frame = current_frame.f_back
 
     # Print location information
-    pprint(f"Debug output from {filename}:{lineno}")
-    pprint("Call chain:")
+    console.print(f"Debug output from {filename}:{lineno}")
+    console.print("Call chain:")
     for i, call in enumerate(call_chain):
-        pprint(f"  {i}: {call}")
+        console.print(f"  {i}: {call}")
 
     if not args and not kwargs:
         # If no arguments, dump the caller's locals
-        pprint(frame.f_locals)  # pyright: ignore[reportOptionalMemberAccess]
+        rich_inspect(frame.f_locals, all=True)  # pyright: ignore[reportOptionalMemberAccess]  # ty:ignore[possibly-missing-attribute]
     else:
         # Print each argument
         for arg in args:
-            pprint(arg)
+            rich_inspect(arg, all=True)
 
         # Print keyword arguments
         if kwargs:
-            pprint(kwargs)
+            rich_inspect(kwargs, all=True)
 
 
 def dd(*args, **kwargs):
