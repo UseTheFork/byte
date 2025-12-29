@@ -7,9 +7,11 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.core.utils.dump import dd, dump
     from byte.core.utils.extract_content_from_message import extract_content_from_message
+    from byte.core.utils.extract_json_from_message import extract_json_from_message
     from byte.core.utils.get_language_from_filename import get_language_from_filename
     from byte.core.utils.get_last_message import get_last_message
     from byte.core.utils.list_to_multiline_text import list_to_multiline_text
+    from byte.core.utils.parse_partial_json import parse_partial_json
     from byte.core.utils.slugify import slugify
     from byte.core.utils.value import value
 
@@ -17,22 +19,28 @@ __all__ = (
     "dd",
     "dump",
     "extract_content_from_message",
+    "extract_json_from_message",
     "get_language_from_filename",
     "get_last_message",
     "list_to_multiline_text",
+    "parse_partial_json",
     "slugify",
     "value",
 )
 
 _dynamic_imports = {
+    # keep-sorted start
     "dd": "dump",
     "dump": "dump",
     "extract_content_from_message": "extract_content_from_message",
+    "extract_json_from_message": "extract_json_from_message",
     "get_language_from_filename": "get_language_from_filename",
     "get_last_message": "get_last_message",
     "list_to_multiline_text": "list_to_multiline_text",
+    "parse_partial_json": "parse_partial_json",
     "slugify": "slugify",
     "value": "value",
+    # keep-sorted end
 }
 
 
