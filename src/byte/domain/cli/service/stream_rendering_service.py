@@ -4,8 +4,9 @@ from langchain_core.messages.ai import AIMessageChunk
 from langchain_core.messages.tool import ToolMessage
 from rich.live import Live
 
+from byte import log
 from byte.core import Service
-from byte.core.utils import extract_content_from_message
+from byte.core.utils import extract_content_from_message, extract_json_from_message, parse_partial_json
 from byte.domain.cli import ConsoleService, MarkdownStream, RuneSpinner
 
 
@@ -29,9 +30,11 @@ class StreamRenderingService(Service):
 
         self.current_stream_id = None
         self.accumulated_content = ""
+        self.accumulated_tool_call_json = ""
         self.agent_name = ""
         self.display_mode = "verbose"
         self.spinner = None
+        self.spinner_message = "Thinking..."
         self.active_stream = MarkdownStream(
             console=self.console.console,
             mdargs={"code_theme": self._config.cli.syntax_theme},
@@ -70,26 +73,23 @@ class StreamRenderingService(Service):
         Usage: Called internally when processing AIMessageChunk instances
         """
 
-        # Check if we need to start a new stream
-        if metadata.get("thread_id") and metadata["thread_id"] != self.current_stream_id:
-            await self.start_stream_render(metadata["thread_id"])
+        # If we are handeling a message we are streaming so lets make sure that the spinner is off at this point.
+        if self.display_mode == "verbose":
+            await self.stop_spinner()
 
         # Append message content to accumulated content
         if message_chunk.content:
             self.accumulated_content += extract_content_from_message(message_chunk)
+            self.accumulated_tool_call_json += extract_json_from_message(message_chunk)
+            log.info(self.accumulated_tool_call_json)
+
+            if self.accumulated_tool_call_json != "":
+                # TODO: Make this more verbose?
+                self.set_spinner_message("Using Tool")
+                log.info(parse_partial_json(self.accumulated_tool_call_json))
+
             if self.display_mode == "verbose":
                 await self._update_active_stream()
-
-        if hasattr(message_chunk, "response_metadata"):
-            # Check for stream ending conditions
-            if (
-                message_chunk.response_metadata.get("stop_reason") == "end_turn"
-                or message_chunk.response_metadata.get("stop_reason") == "tool_use"
-            ):
-                await self.end_stream_render()
-
-                if message_chunk.response_metadata.get("stop_reason") == "tool_use":
-                    await self._start_tool_message()
 
     async def _end_tool_message(self, message_chunk, metadata):
         """Handle completion of tool execution with spinner restart.
@@ -101,7 +101,7 @@ class StreamRenderingService(Service):
         # PLaceholder for maybe displaying the result of the tool message?
         self.console.print()
         # Restart the spinner since usually the AI will think after this.
-        await self.start_spinner()
+        # await self.start_spinner()
 
     async def _handle_default_message(self, message_chunk, metadata):
         """Handle non-AI, non-Tool message types with basic content processing.
@@ -128,6 +128,12 @@ class StreamRenderingService(Service):
         """
 
         message_chunk, metadata = chunk
+        checkpoint_ns = metadata.get("checkpoint_ns", None)
+
+        # This is the equivalent of a node change but speicifically when we are streaming.
+        if checkpoint_ns != self.current_stream_id:
+            self.current_stream_id = checkpoint_ns
+            await self.start_stream_render()
 
         # Set the Agent "class" as the Agent Name
         self.agent_name = agent_name
@@ -138,6 +144,7 @@ class StreamRenderingService(Service):
             await self._handle_ai_message(message_chunk, metadata)
 
         elif isinstance(message_chunk, ToolMessage):
+            # TODO: should check if we need this.
             # Handle tool execution results - might want different formatting
             await self._end_tool_message(message_chunk, metadata)
 
@@ -145,7 +152,7 @@ class StreamRenderingService(Service):
             # Handle other message types with default behavior
             await self._handle_default_message(message_chunk, metadata)
 
-    async def handle_update(self, chunk):
+    async def handle_task(self, chunk: dict, agent_name: str):
         """Handle state update chunks from LangGraph execution with node transition management.
 
         Processes graph node transitions, managing stream lifecycle when moving
@@ -154,31 +161,27 @@ class StreamRenderingService(Service):
         Usage: Called automatically when processing graph state updates
         """
 
-        if isinstance(chunk, dict):
-            for key in chunk.keys():
-                # If we see a 'tools' key, we're transitioning to tool execution
-                if key == "tools":
-                    # End the current stream since tools don't stream content
-                    await self.end_stream_render()
-                    # Store the previous stream ID so we can resume later
-                    self._previous_stream_id = self.current_stream_id
+        # Set the Agent "class" as the Agent Name
+        self.agent_name = agent_name
 
-                # If we're transitioning back to assistant after tools
-                elif key == "assistant" and hasattr(self, "_previous_stream_id"):
-                    # Resume streaming with the previous stream ID
-                    await self.start_stream_render(self._previous_stream_id)
-                    # Clear the stored previous ID
-                    delattr(self, "_previous_stream_id")
+        # task_id = chunk.get("id", None)
+        task_node = chunk.get("name", None)
+        # task_node = chunk.get("assistant_node")
 
-                # For any other new node transition
-                elif key != self.current_stream_id:
-                    await self.end_stream_render()
+        # Since we know we ALWAYS start on start_node we leverage it to start our spinner.
+        if task_node == "start_node":
+            await self.start_spinner("Thinking...")
+
+        # Since we know we ALWAYS end on end_node we leverage it to cleanup.
+        if task_node == "end_node":
+            await self.end_stream()
 
     async def end_stream_render(self):
         """End the current stream rendering and reset accumulated content."""
         if self.display_mode == "verbose":
             await self._update_active_stream(final=True)
         self.accumulated_content = ""
+        self.accumulated_tool_call_json = ""
         self.active_stream = None
         self.current_stream_id = None
         await self.stop_spinner()
@@ -192,7 +195,7 @@ class StreamRenderingService(Service):
         spaced = re.sub(r"(?<!^)(?=[A-Z])", " ", agent_name)
         return spaced
 
-    async def start_stream_render(self, stream_id):
+    async def start_stream_render(self):
         """Initialize a new streaming render session with agent identification.
 
         Sets up a new markdown stream renderer, displays agent header with
@@ -203,10 +206,8 @@ class StreamRenderingService(Service):
         if self.active_stream and self.display_mode == "verbose":
             await self._update_active_stream(final=True)
 
-        await self.stop_spinner()
-
-        self.current_stream_id = stream_id
         self.accumulated_content = ""  # Reset accumulated content for new stream
+        self.accumulated_tool_call_json = ""  # Reset accumulated json content for new stream
         if self.display_mode == "verbose":
             self.active_stream = MarkdownStream(
                 console=self.console.console,
@@ -239,7 +240,7 @@ class StreamRenderingService(Service):
         if self.spinner:
             self.spinner.stop()
 
-    async def start_spinner(self):
+    async def start_spinner(self, message: str = "Thinking..."):
         """Start a thinking spinner to indicate AI processing activity.
 
         Creates and starts a Rich Live spinner with "Thinking..." text to
@@ -247,10 +248,13 @@ class StreamRenderingService(Service):
         Usage: Called automatically when AI needs to process or think
         """
         if self.display_mode in ["verbose", "thinking"]:
-            # Start with animated spinner
-            spinner = RuneSpinner(text="Thinking...", size=15)
-            self.spinner = Live(spinner, console=self.console.console, transient=True, refresh_per_second=20)
-            self.spinner.start()
+            self.set_spinner_message(message)
+
+            if self.spinner is None:
+                # Start with animated spinner
+                spinner = RuneSpinner(text=self.spinner_message, size=15)
+                self.spinner = Live(spinner, console=self.console.console, transient=True, refresh_per_second=20)
+                self.spinner.start()
 
     def set_display_mode(self, mode: str) -> None:
         """Set the display mode for stream rendering.
@@ -267,3 +271,18 @@ class StreamRenderingService(Service):
         if mode not in valid_modes:
             raise ValueError(f"Invalid display mode '{mode}'. Must be one of: {valid_modes}")
         self.display_mode = mode
+
+    def set_spinner_message(self, message: str) -> None:
+        """Update the message displayed by the thinking spinner.
+
+        Args:
+            message: Text to display alongside the spinner animation
+
+        Usage: `stream_service.set_spinner_message("Using Tool")` -> updates spinner text
+        """
+        self.spinner_message = message
+
+        # Update the active spinner's text if one is running
+        if self.spinner and self.spinner.renderable:
+            new_spinner = RuneSpinner(text=message, size=15)
+            self.spinner.update(new_spinner)
