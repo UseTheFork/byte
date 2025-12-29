@@ -2,15 +2,11 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte.core.mixins.user_interactive import UserInteractive
+from byte.core.mixins import UserInteractive
 from byte.core.utils import list_to_multiline_text
-from byte.domain.agent.nodes.base_node import Node
-from byte.domain.agent.schemas import AssistantContextSchema
-from byte.domain.agent.state import BaseState
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.cli.service.subprocess_service import SubprocessService
-from byte.domain.prompt_format.schemas import BoundaryType
-from byte.domain.prompt_format.utils import Boundary
+from byte.domain.agent import AssistantContextSchema, BaseState, Node
+from byte.domain.cli import ConsoleService, SubprocessService
+from byte.domain.prompt_format import Boundary, BoundaryType
 
 
 class SubprocessNode(Node, UserInteractive):

@@ -3,9 +3,8 @@ from pathlib import Path
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
-from byte.domain.agent.nodes.base_node import Node
-from byte.domain.agent.state import BaseState
-from byte.domain.lint.service.lint_service import LintService
+from byte.domain.agent import BaseState, Node
+from byte.domain.lint import LintService
 
 
 class LintNode(Node):

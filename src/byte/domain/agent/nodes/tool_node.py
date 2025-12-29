@@ -8,12 +8,10 @@ from langgraph.types import Command
 from rich.pretty import Pretty
 from rich.text import Text
 
-from byte.core.mixins.user_interactive import UserInteractive
+from byte.core.mixins import UserInteractive
 from byte.core.utils import get_last_message
-from byte.domain.agent.nodes.base_node import Node
-from byte.domain.agent.schemas import AssistantContextSchema, ConstraintSchema
-from byte.domain.agent.state import BaseState
-from byte.domain.cli.service.console_service import ConsoleService
+from byte.domain.agent import AssistantContextSchema, BaseState, ConstraintSchema, Node
+from byte.domain.cli import ConsoleService
 
 
 class ToolNode(Node, UserInteractive):

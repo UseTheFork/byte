@@ -2,10 +2,8 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte.domain.agent.nodes.assistant_node import AssistantNode
-from byte.domain.agent.schemas import AssistantContextSchema
-from byte.domain.agent.state import BaseState
-from byte.domain.cli.service.console_service import ConsoleService
+from byte.domain.agent import AssistantContextSchema, AssistantNode, BaseState
+from byte.domain.cli import ConsoleService
 
 
 class ShowNode(AssistantNode):

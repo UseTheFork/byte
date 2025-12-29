@@ -7,13 +7,10 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 from pydantic import BaseModel, Field
 
-from byte.core.mixins.user_interactive import UserInteractive
+from byte.core.mixins import UserInteractive
 from byte.core.utils import extract_content_from_message, get_last_message, list_to_multiline_text
-from byte.domain.agent.nodes.base_node import Node
-from byte.domain.agent.schemas import AssistantContextSchema
-from byte.domain.agent.state import BaseState
-from byte.domain.prompt_format.schemas import BoundaryType
-from byte.domain.prompt_format.utils import Boundary
+from byte.domain.agent import AssistantContextSchema, BaseState, Node
+from byte.domain.prompt_format import Boundary, BoundaryType
 
 # TODO: This dosent feel like the right place for this.
 

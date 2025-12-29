@@ -6,17 +6,12 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 from pydantic import BaseModel
 
-from byte.core import log
-from byte.core.event_bus import EventType, Payload
+from byte.core import EventType, Payload, log
 from byte.core.utils import dd, list_to_multiline_text
-from byte.domain.agent.nodes.base_node import Node
-from byte.domain.agent.schemas import AssistantContextSchema
-from byte.domain.agent.state import BaseState
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.files.service.file_service import FileService
-from byte.domain.prompt_format.schemas import BoundaryType
-from byte.domain.prompt_format.service.edit_format_service import EditFormatService
-from byte.domain.prompt_format.utils import Boundary
+from byte.domain.agent import AssistantContextSchema, BaseState, Node
+from byte.domain.cli import ConsoleService
+from byte.domain.files import FileService
+from byte.domain.prompt_format import Boundary, BoundaryType, EditFormatService
 
 
 class AssistantNode(Node):

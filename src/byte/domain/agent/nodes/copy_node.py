@@ -4,11 +4,10 @@ import pyperclip
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
-from byte.core.mixins.user_interactive import UserInteractive
+from byte.core.mixins import UserInteractive
 from byte.core.utils import extract_content_from_message
-from byte.domain.agent.nodes.base_node import Node
-from byte.domain.agent.state import BaseState
-from byte.domain.cli.service.console_service import ConsoleService
+from byte.domain.agent import BaseState, Node
+from byte.domain.cli import ConsoleService
 
 
 class CopyNode(Node, UserInteractive):
@@ -18,36 +17,6 @@ class CopyNode(Node, UserInteractive):
     and allows user to select which block to copy to clipboard.
     Usage: Used in CopyAgent workflow via `/copy` command
     """
-
-    async def __call__(self, state: BaseState, config: RunnableConfig):
-        """Extract code blocks and prompt user to select one for clipboard copy."""
-        console = await self.make(ConsoleService)
-        messages = state["history_messages"]
-
-        if not messages:
-            console.print_warning("No messages found in history.")
-            return Command(goto="end_node", update=state)
-
-        last_message = messages[-1]
-
-        response_text = extract_content_from_message(last_message)
-
-        # Extract all code blocks with their language identifiers
-        code_blocks = self._extract_code_blocks(response_text)
-
-        if not code_blocks:
-            console.print_warning("No code blocks found in the last message.")
-            return Command(goto="end_node", update=state)
-
-        # Display truncated previews and let user select
-        selected_block = await self._prompt_user_selection(code_blocks)
-
-        if selected_block is not None:
-            # Copy to clipboard
-            pyperclip.copy(selected_block["content"])
-            console.print_success(f"Copied {selected_block['language']} code block to clipboard!")
-
-        return Command(goto="end_node", update=state)
 
     def _extract_code_blocks(self, content: str) -> list[dict[str, str]]:
         """Extract all code blocks from content with their language identifiers.
@@ -170,3 +139,33 @@ class CopyNode(Node, UserInteractive):
         # Find the index of the selected choice and return the corresponding block
         selected_idx = choices.index(selected_choice)
         return code_blocks[selected_idx]
+
+    async def __call__(self, state: BaseState, config: RunnableConfig):
+        """Extract code blocks and prompt user to select one for clipboard copy."""
+        console = await self.make(ConsoleService)
+        messages = state["history_messages"]
+
+        if not messages:
+            console.print_warning("No messages found in history.")
+            return Command(goto="end_node", update=state)
+
+        last_message = messages[-1]
+
+        response_text = extract_content_from_message(last_message)
+
+        # Extract all code blocks with their language identifiers
+        code_blocks = self._extract_code_blocks(response_text)
+
+        if not code_blocks:
+            console.print_warning("No code blocks found in the last message.")
+            return Command(goto="end_node", update=state)
+
+        # Display truncated previews and let user select
+        selected_block = await self._prompt_user_selection(code_blocks)
+
+        if selected_block is not None:
+            # Copy to clipboard
+            pyperclip.copy(selected_block["content"])
+            console.print_success(f"Copied {selected_block['language']} code block to clipboard!")
+
+        return Command(goto="end_node", update=state)
