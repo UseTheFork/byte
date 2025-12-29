@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from byte.core.logging import log
     from byte.core.service.base_service import Service
     from byte.core.service_provider import ServiceProvider
+    from byte.core.task_manager import TaskManager
     from byte.core.utils.dump import dd, dump
 
 __all__ = (
@@ -19,6 +20,7 @@ __all__ = (
     "Payload",
     "Service",
     "ServiceProvider",
+    "TaskManager",
     "dd",
     "dump",
     "log",
@@ -32,6 +34,7 @@ _dynamic_imports = {
     "Payload": "event_bus",
     "Service": "service.base_service",
     "ServiceProvider": "service_provider",
+    "TaskManager": "task_manager",
     "dd": "utils.dump",
     "dump": "utils.dump",
     "log": "logging",
