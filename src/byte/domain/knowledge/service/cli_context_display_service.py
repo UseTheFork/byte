@@ -1,12 +1,11 @@
 from rich.table import Table
 
-from byte.core.event_bus import Payload
-from byte.core.service.base_service import Service
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.knowledge.service.convention_context_service import (
+from byte.core import Payload, Service
+from byte.domain.cli import ConsoleService
+from byte.domain.knowledge import (
     ConventionContextService,
+    SessionContextService,
 )
-from byte.domain.knowledge.service.session_context_service import SessionContextService
 
 
 class CLIContextDisplayService(Service):

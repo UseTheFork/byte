@@ -1,22 +1,18 @@
 from typing import List, Type
 
 from byte.container import Container
-from byte.core.event_bus import EventBus, EventType
-from byte.core.service.base_service import Service
-from byte.core.service_provider import ServiceProvider
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.knowledge.command.context_add_file_command import ContextAddFileCommand
-from byte.domain.knowledge.command.context_drop_command import ContextDropCommand
-from byte.domain.knowledge.command.context_list_command import ContextListCommand
-from byte.domain.knowledge.command.web_command import WebCommand
-from byte.domain.knowledge.models import SessionContextModel
-from byte.domain.knowledge.service.cli_context_display_service import (
+from byte.core import EventBus, EventType, Service, ServiceProvider
+from byte.domain.cli import Command
+from byte.domain.knowledge import (
     CLIContextDisplayService,
-)
-from byte.domain.knowledge.service.convention_context_service import (
+    ContextAddFileCommand,
+    ContextDropCommand,
+    ContextListCommand,
     ConventionContextService,
+    SessionContextService,
+    WebCommand,
 )
-from byte.domain.knowledge.service.session_context_service import SessionContextService
+from byte.domain.knowledge.models import SessionContextModel
 
 
 class KnowledgeServiceProvider(ServiceProvider):

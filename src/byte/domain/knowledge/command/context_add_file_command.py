@@ -1,12 +1,9 @@
 from argparse import Namespace
 from pathlib import Path
 
-from byte.core.config.config import ByteConfig
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.knowledge.models import SessionContextModel
-from byte.domain.knowledge.service.session_context_service import SessionContextService
+from byte.core import ByteConfig
+from byte.domain.cli import ByteArgumentParser, Command, ConsoleService
+from byte.domain.knowledge import SessionContextModel, SessionContextService
 
 
 class ContextAddFileCommand(Command):

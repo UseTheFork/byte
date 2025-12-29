@@ -9,20 +9,32 @@ if TYPE_CHECKING:
     from byte.domain.knowledge.command.context_drop_command import ContextDropCommand
     from byte.domain.knowledge.command.context_list_command import ContextListCommand
     from byte.domain.knowledge.command.web_command import WebCommand
+    from byte.domain.knowledge.models import SessionContextModel
+    from byte.domain.knowledge.service.cli_context_display_service import CLIContextDisplayService
+    from byte.domain.knowledge.service.convention_context_service import ConventionContextService
+    from byte.domain.knowledge.service.session_context_service import SessionContextService
 
 __all__ = (
+    "CLIContextDisplayService",
     "ContextAddFileCommand",
     "ContextDropCommand",
     "ContextListCommand",
+    "ConventionContextService",
+    "SessionContextModel",
+    "SessionContextService",
     "WebCommand",
 )
 
 _dynamic_imports = {
     # keep-sorted start
-    "ContextAddFileCommand": "context_add_file_command",
-    "ContextDropCommand": "context_drop_command",
-    "ContextListCommand": "context_list_command",
-    "WebCommand": "web_command",
+    "CLIContextDisplayService": "service.cli_context_display_service",
+    "ConventionContextService": "service.convention_context_service",
+    "SessionContextService": "service.session_context_service",
+    "ContextAddFileCommand": "command.context_add_file_command",
+    "ContextDropCommand": "command.context_drop_command",
+    "ContextListCommand": "command.context_list_command",
+    "WebCommand": "command.web_command",
+    "SessionContextModel": "models",
     # keep-sorted end
 }
 

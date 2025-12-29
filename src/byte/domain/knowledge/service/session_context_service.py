@@ -1,12 +1,9 @@
 from typing import Optional
 
-from byte.core.array_store import ArrayStore
-from byte.core.event_bus import Payload
-from byte.core.service.base_service import Service
+from byte.core import ArrayStore, Payload, Service
 from byte.core.utils import list_to_multiline_text
-from byte.domain.knowledge.models import SessionContextModel
-from byte.domain.prompt_format.schemas import BoundaryType
-from byte.domain.prompt_format.utils import Boundary
+from byte.domain.knowledge import SessionContextModel
+from byte.domain.prompt_format import Boundary, BoundaryType
 
 
 class SessionContextService(Service):

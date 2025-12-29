@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.core.array_store import ArrayStore
     from byte.core.config.config import ByteConfig
     from byte.core.event_bus import EventBus, EventType, Payload
     from byte.core.exceptions import ByteConfigException
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
     from byte.core.utils.dump import dd, dump
 
 __all__ = (
+    "ArrayStore",
     "ByteConfig",
     "ByteConfigException",
     "EventBus",
@@ -30,6 +32,7 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
+    "ArrayStore": "array_store",
     "ByteConfig": "config.config",
     "ByteConfigException": "exceptions",
     "EventBus": "event_bus",

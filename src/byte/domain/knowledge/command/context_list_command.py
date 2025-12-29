@@ -2,11 +2,9 @@ from argparse import Namespace
 
 from rich.columns import Columns
 
-from byte.core.mixins.user_interactive import UserInteractive
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.knowledge.service.session_context_service import SessionContextService
+from byte.core.mixins import UserInteractive
+from byte.domain.cli import ByteArgumentParser, Command, ConsoleService
+from byte.domain.knowledge import SessionContextService
 
 
 class ContextListCommand(Command, UserInteractive):

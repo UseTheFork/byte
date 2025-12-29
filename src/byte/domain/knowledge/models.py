@@ -1,8 +1,6 @@
 from typing import Literal
 
-from byte.core.mixins.bootable import Bootable
-from byte.core.mixins.configurable import Configurable
-from byte.core.mixins.injectable import Injectable
+from byte.core.mixins import Bootable, Configurable, Injectable
 from byte.core.utils import slugify
 
 

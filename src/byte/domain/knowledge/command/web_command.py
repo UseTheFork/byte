@@ -1,16 +1,12 @@
 from argparse import Namespace
 
-from byte.core.exceptions import ByteConfigException
-from byte.core.mixins.user_interactive import UserInteractive
+from byte.core import ByteConfigException
+from byte.core.mixins import UserInteractive
 from byte.core.utils import slugify
 from byte.domain.agent.implementations.cleaner.agent import CleanerAgent
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.rich.markdown import Markdown
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.knowledge.models import SessionContextModel
-from byte.domain.knowledge.service.session_context_service import SessionContextService
-from byte.domain.web.service.chromium_service import ChromiumService
+from byte.domain.cli import ByteArgumentParser, Command, ConsoleService, Markdown
+from byte.domain.knowledge import SessionContextModel, SessionContextService
+from byte.domain.web import ChromiumService
 
 
 class WebCommand(Command, UserInteractive):

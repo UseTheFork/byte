@@ -1,10 +1,8 @@
 from argparse import Namespace
 from typing import List
 
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.service.command_registry import Command
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.knowledge.service.session_context_service import SessionContextService
+from byte.domain.cli import ByteArgumentParser, Command, ConsoleService
+from byte.domain.knowledge import SessionContextService
 
 
 class ContextDropCommand(Command):
