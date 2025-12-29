@@ -5,7 +5,7 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.core.event_bus import EventType, Payload
-from byte.core.utils.get_last_message import get_last_message
+from byte.core.utils import get_last_message
 from byte.domain.agent.nodes.base_node import Node
 from byte.domain.agent.schemas import AssistantContextSchema
 from byte.domain.agent.state import BaseState

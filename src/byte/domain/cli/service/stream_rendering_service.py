@@ -5,7 +5,7 @@ from langchain_core.messages.tool import ToolMessage
 from rich.live import Live
 
 from byte.core.service.base_service import Service
-from byte.core.utils.extract_content_from_message import extract_content_from_message
+from byte.core.utils import extract_content_from_message
 from byte.domain.cli.rich.rune_spinner import RuneSpinner
 from byte.domain.cli.service.console_service import ConsoleService
 from byte.domain.cli.utils.formatters import MarkdownStream
