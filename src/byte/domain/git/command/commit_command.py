@@ -134,6 +134,7 @@ class CommitCommand(Command):
             if commit_type == "Commit Plan":
                 commit_agent = await self.make(CommitPlanAgent)
                 commit_result = await commit_agent.execute(request=prompt, display_mode="thinking")
+                log.debug(commit_result)
                 await self._process_commit_plan(commit_result["extracted_content"])
             elif commit_type == "Single Commit":
                 commit_agent = await self.make(CommitAgent)
