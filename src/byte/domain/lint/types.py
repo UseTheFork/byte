@@ -16,7 +16,7 @@ class LintFile:
 
 
 @dataclass
-class LintCommand:
+class LintCommandType:
     """Dataclass representing a lint command with results for multiple files."""
 
     command: List[str]

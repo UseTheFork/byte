@@ -12,7 +12,7 @@ from byte.core.mixins import UserInteractive
 from byte.core.utils import get_language_from_filename, list_to_multiline_text
 from byte.domain.cli import ConsoleService, Markdown
 from byte.domain.git import GitService
-from byte.domain.lint import LintCommand, LintConfigException, LintFile
+from byte.domain.lint import LintCommandType, LintConfigException, LintFile
 from byte.domain.prompt_format import Boundary, BoundaryType
 
 
@@ -57,11 +57,11 @@ class LintService(Service, UserInteractive):
 
         return await self.lint_changed_files()
 
-    async def lint_changed_files(self) -> List[LintCommand]:
+    async def lint_changed_files(self) -> List[LintCommandType]:
         """Run configured linters on git changed files.
 
         Returns:
-                List of LintCommand objects with results
+                List of LintCommandType objects with results
 
         Usage: `results = await lint_service.lint_changed_files()` -> lint changed files
         """
@@ -106,11 +106,11 @@ class LintService(Service, UserInteractive):
                 stderr=f"Error executing command: {e!s}",
             )
 
-    async def display_results_summary(self, lint_commands: List[LintCommand]) -> tuple[bool, list]:
+    async def display_results_summary(self, lint_commands: List[LintCommandType]) -> tuple[bool, list]:
         """Display a summary panel of linting results.
 
         Args:
-                lint_commands: List of LintCommand objects with results
+                lint_commands: List of LintCommandType objects with results
         """
 
         if not lint_commands:
@@ -188,7 +188,7 @@ class LintService(Service, UserInteractive):
 
         return (False, [])
 
-    async def lint_files(self, changed_files: List[Path]) -> List[LintCommand]:
+    async def lint_files(self, changed_files: List[Path]) -> List[LintCommandType]:
         """Run configured linters on specified files.
 
         Args:
@@ -255,7 +255,7 @@ class LintService(Service, UserInteractive):
                         )
                         total_lint_commands += 1
                     lint_commands.append(
-                        LintCommand(
+                        LintCommandType(
                             command=command.command,
                             results=lint_files,
                         )

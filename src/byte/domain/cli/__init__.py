@@ -47,8 +47,8 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
-    "ByteArgumentParser": "schemas",
-    "ByteTheme": "cli.schemas",
+    "ByteArgumentParser": "argparse.base",
+    "ByteTheme": "schemas",
     "CodeBlock": "rich.markdown",
     "Command": "service.command_registry",
     "CommandRegistry": "service.command_registry",
@@ -67,9 +67,9 @@ _dynamic_imports = {
     "PromptToolkitService": "service.prompt_toolkit_service",
     "RuneSpinner": "rich.rune_spinner",
     "StreamRenderingService": "service.stream_rendering_service",
-    "SubprocessResult": "argparse.base",
+    "SubprocessResult": "schemas",
     "SubprocessService": "service.subprocess_service",
-    "ThemeRegistry": "cli.schemas",
+    "ThemeRegistry": "schemas",
     # keep-sorted end
 }
 

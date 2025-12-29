@@ -1,8 +1,7 @@
 import asyncio
 from typing import Optional
 
-from byte.core.config.config import ByteConfig
-from byte.core.service.base_service import Service
+from byte.core import ByteConfig, Service
 from byte.domain.cli import SubprocessResult
 
 
