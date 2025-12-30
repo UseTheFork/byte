@@ -1,7 +1,16 @@
 from langchain_core.prompts.chat import ChatPromptTemplate
 
 from byte.core.utils import list_to_multiline_text
+from byte.domain.agent.implementations.commit.constants import COMMIT_TYPES
 from byte.domain.prompt_format import Boundary, BoundaryType
+
+# Credits to https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13
+
+
+def _format_commit_types() -> str:
+    """Format COMMIT_TYPES dictionary into a readable string for prompts."""
+    return "\n".join(f"  - {type_}: {description}" for type_, description in COMMIT_TYPES.items())
+
 
 commit_plan_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
     [
@@ -17,7 +26,7 @@ commit_plan_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
                     "- A concise, one-line commit message for that group of changes",
                     "- A list of file paths that belong to that commit",
                     "The commit message should be structured as follows: [type]: [description]",
-                    "Use these for [type]: fix, feat, build, chore, ci, docs, style, refactor, perf, test",
+                    f"Available commit types:\n{_format_commit_types()}",
                     "Ensure each commit message:",
                     "- Starts with the appropriate prefix.",
                     '- Is in the imperative mood (e.g., "add feature" not "added feature" or "adding feature").',
@@ -49,12 +58,11 @@ commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
                     "Review the diffs carefully.",
                     "Generate a one-line commit message for those changes.",
                     "The commit message should be structured as follows: [type]: [description]",
-                    "Use these for [type]: fix, feat, build, chore, ci, docs, style, refactor, perf, test",
+                    f"Available commit types:\n{_format_commit_types()}",
                     "Ensure the commit message:",
                     "- Starts with the appropriate prefix.",
                     '- Is in the imperative mood (e.g., "add feature" not "added feature" or "adding feature").',
                     "- Does not exceed 72 characters.",
-                    "Reply only with the one-line commit message, without any additional text, explanations, or line breaks.",
                     Boundary.close(BoundaryType.TASK),
                 ]
             ),
