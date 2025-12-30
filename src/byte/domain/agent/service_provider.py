@@ -11,6 +11,7 @@ from byte.domain.agent import (
     CleanerAgent,
     CoderAgent,
     CommitAgent,
+    CommitCommand,
     CommitPlanAgent,
     ConventionAgent,
     ConventionCommand,
@@ -67,6 +68,7 @@ class AgentServiceProvider(ServiceProvider):
         return [
             # keep-sorted start
             AskCommand,
+            CommitCommand,
             ConventionCommand,
             ResearchCommand,
             ShowCommand,
