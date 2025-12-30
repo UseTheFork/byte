@@ -1,8 +1,7 @@
 from typing import List, Type
 
 from byte.core import Service, ServiceProvider
-from byte.domain.cli import Command
-from byte.domain.git import CommitCommand, GitService
+from byte.domain.git import GitService
 
 
 class GitServiceProvider(ServiceProvider):
@@ -15,6 +14,3 @@ class GitServiceProvider(ServiceProvider):
 
     def services(self) -> List[Type[Service]]:
         return [GitService]
-
-    def commands(self) -> List[Type[Command]]:
-        return [CommitCommand]
