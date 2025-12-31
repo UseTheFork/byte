@@ -1,6 +1,34 @@
 # CHANGELOG
 
 
+## v0.7.1 (2025-12-31)
+
+### Bug Fixes
+
+- Remove redundant ref parameter in checkout action
+  ([`bb76ccd`](https://github.com/UseTheFork/byte/commit/bb76ccdaaf300d66230f8b8429d2cbb916a22702))
+
+- Reorder semantic-release version command flags
+  ([`c39b016`](https://github.com/UseTheFork/byte/commit/c39b0167841083c27fc75eb2bcc7e307a9009b4d))
+
+- Update release workflow to fetch full git history and use GitHub token
+  ([`14cc909`](https://github.com/UseTheFork/byte/commit/14cc90940e8e6f7b7221638e246121ee8a24b601))
+
+### Chores
+
+- Configure semantic-release for automated versioning and release management
+  ([`40b1e6f`](https://github.com/UseTheFork/byte/commit/40b1e6f25351d2af747131e667f8df3059259730))
+
+- Increase semantic-release version command verbosity
+  ([`59a66ca`](https://github.com/UseTheFork/byte/commit/59a66ca97dfd007043550e8e7f06f9424b769c42))
+
+- Remove hardcoded repo directory path
+  ([`a168b44`](https://github.com/UseTheFork/byte/commit/a168b441f6e1b5dda3b9709eb167f995ecda5b0e))
+
+- Update release workflow and build configuration
+  ([`44044db`](https://github.com/UseTheFork/byte/commit/44044db056bc405340c24a0a6c9168a5debf786b))
+
+
 ## v0.7.0 (2025-12-31)
 
 ### Chores
