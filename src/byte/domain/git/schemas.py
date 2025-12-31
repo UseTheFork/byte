@@ -1,16 +1,14 @@
 from pydantic import BaseModel, Field
 
-from byte.domain.agent.implementations.commit.constants import COMMIT_TYPE_LIST
-
 
 class CommitMessage(BaseModel):
     type: str = Field(
         ...,
-        description=f"The commit type. Must be one of: {COMMIT_TYPE_LIST}",
+        description="The commit type. Refer to the <rules type='Allowed Commit Types'> section for valid types and their descriptions.",
     )
     scope: str | None = Field(
         None,
-        description="Optional scope providing additional contextual information (e.g., 'parser', 'api', 'ui').",
+        description="Optional scope providing additional contextual information. Refer to the <rules type='Allowed Commit Scopes'> section for valid scope values.",
     )
     commit_message: str = Field(
         ...,
@@ -20,6 +18,11 @@ class CommitMessage(BaseModel):
     breaking_change: bool = Field(
         False,
         description="Flag indicating whether this commit introduces a breaking change.",
+    )
+    breaking_change_message: str | None = Field(
+        None,
+        description="REQUIRED if breaking_change is True AND the commit_message isn't sufficiently informative. "
+        "Describes the breaking change.",
     )
     body: str | None = Field(
         None,
