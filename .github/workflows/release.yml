@@ -39,7 +39,7 @@ jobs:
         id: version
         env:
           GH_TOKEN: "none"
-        run: uv run semantic-release -v version --no-changelog --no-commit --no-tag -vv
+        run: uv run semantic-release -vv version --no-changelog --no-commit --no-tag
 
       - name: Upload | Distribution Artifacts
         if: ${{ steps.version.outputs.released == 'true' }}
