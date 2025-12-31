@@ -1,0 +1,1760 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="CLI-powered, human-in-the-loop flow coding agent.">
+      
+      
+        <meta name="author" content="UseTheFork">
+      
+      
+        <link rel="canonical" href="https://usethefork.github.io/byte/concepts/file-context/">
+      
+      
+        <link rel="prev" href="../memory/">
+      
+      
+        <link rel="next" href="../file-watching/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../images/assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>File Context - Byte</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#file-context" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Byte" class="md-header__button md-logo" aria-label="Byte" data-md-component="logo">
+      
+  <img src="../../images/assets/logo-square.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Byte
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              File Context
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/UseTheFork/byte" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    byte
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Byte" class="md-nav__button md-logo" aria-label="Byte" data-md-component="logo">
+      
+  <img src="../../images/assets/logo-square.svg" alt="logo">
+
+    </a>
+    Byte
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/UseTheFork/byte" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    byte
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../getting-started/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/first-steps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    First steps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/workflow-example/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflow Example
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory & Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File Context
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#file-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Modes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="File Modes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#read-only-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Read-Only Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#editable-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Editable Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Adding Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-files-with-wildcards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple Files with Wildcards
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#viewing-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Viewing Context
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Viewing Context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#list-all-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List All Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#before-each-prompt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before Each Prompt
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#removing-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removing Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Removing Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-files_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-files-with-wildcards_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple Files with Wildcards
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Discovery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="File Discovery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ignore-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ignore Patterns
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#start-small" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Start Small
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-read-only-strategically" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Read-Only Strategically
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context-in-ai-prompts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context in AI Prompts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Concepts
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../file-watching/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File Watching
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../conventions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lint/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../commit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../web/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lsp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LSP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../reference/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    References
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/settings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#file-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Modes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="File Modes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#read-only-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Read-Only Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#editable-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Editable Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Adding Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-files-with-wildcards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple Files with Wildcards
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#viewing-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Viewing Context
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Viewing Context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#list-all-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List All Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#before-each-prompt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before Each Prompt
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#removing-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removing Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Removing Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-files_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-files-with-wildcards_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple Files with Wildcards
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Discovery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="File Discovery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ignore-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ignore Patterns
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#start-small" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Start Small
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-read-only-strategically" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Read-Only Strategically
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context-in-ai-prompts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context in AI Prompts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Concepts
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Concepts
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="file-context"><a class="toclink" href="#file-context">File Context</a></h1>
+<p>The file context acts as the AI's "workspace" - only files added to the context are visible to the AI. This design gives you precise control over what the AI can access and change, preventing unwanted modifications and reducing noise in the AI's decision-making.</p>
+<p><img alt="File context showing read-only and editable files" src="../../images/recording/command_file.gif" /></p>
+<hr />
+<h2 id="file-modes"><a class="toclink" href="#file-modes">File Modes</a></h2>
+<p>Byte supports two access modes for files in context:</p>
+<h3 id="read-only-mode"><a class="toclink" href="#read-only-mode">Read-Only Mode</a></h3>
+<p>Files added as read-only are visible to the AI for reference but cannot be modified. The main use case is to add files you want the AI to be aware of but not change.</p>
+<p><strong>Command:</strong> <code>/read-only &lt;file_path&gt;</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>&gt; /read-only config.yaml
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>Added config.yaml (read-only)
+</code></pre></div>
+<h3 id="editable-mode"><a class="toclink" href="#editable-mode">Editable Mode</a></h3>
+<p>Files added as editable can be modified by the AI through SEARCH/REPLACE blocks.</p>
+<p><strong>Command:</strong> <code>/add &lt;file_path&gt;</code></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>&gt; /add src/main.py
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Added src/main.py (editable)
+</code></pre></div>
+<hr />
+<h2 id="adding-files"><a class="toclink" href="#adding-files">Adding Files</a></h2>
+<h3 id="single-files"><a class="toclink" href="#single-files">Single Files</a></h3>
+<p>Add individual files by specifying their path relative to the project root:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>&gt; /add src/services/auth.py
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>&gt; /read-only README.md
+</code></pre></div>
+<h3 id="multiple-files-with-wildcards"><a class="toclink" href="#multiple-files-with-wildcards">Multiple Files with Wildcards</a></h3>
+<p>Use glob patterns to add multiple files at once:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>&gt; /add src/models/*.py
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Added src/models/user.py (editable)
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>Added src/models/post.py (editable)
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>Added src/models/comment.py (editable)
+</code></pre></div>
+<p><strong>Supported patterns:</strong></p>
+<ul>
+<li><code>*</code> - matches any characters in a filename</li>
+<li><code>**</code> - matches directories recursively</li>
+<li><code>?</code> - matches a single character</li>
+<li><code>[seq]</code> - matches any character in seq</li>
+</ul>
+<p><strong>Examples:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>&gt; /add tests/**/*.py           # All Python test files
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>&gt; /add src/domain/*/config.py  # All config.py in domain subdirectories
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>&gt; /read-only docs/*.md          # All Markdown files in docs
+</code></pre></div>
+<hr />
+<h2 id="viewing-context"><a class="toclink" href="#viewing-context">Viewing Context</a></h2>
+<h3 id="list-all-files"><a class="toclink" href="#list-all-files">List All Files</a></h3>
+<p>See all files currently in context:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>&gt; /ls
+</code></pre></div>
+<p>This displays two panels:</p>
+<ul>
+<li><strong>Read-Only Files</strong> - Files available for reference</li>
+<li><strong>Editable Files</strong> - Files the AI can modify</li>
+</ul>
+<h3 id="before-each-prompt"><a class="toclink" href="#before-each-prompt">Before Each Prompt</a></h3>
+<p>Byte automatically displays the current context before accepting your input, so you always know what files the AI can access.</p>
+<hr />
+<h2 id="removing-files"><a class="toclink" href="#removing-files">Removing Files</a></h2>
+<h3 id="single-files_1"><a class="toclink" href="#single-files_1">Single Files</a></h3>
+<p>Remove a file from context when it's no longer needed:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>&gt; /drop old_file.py
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>Removed old_file.py from context
+</code></pre></div>
+<h3 id="multiple-files-with-wildcards_1"><a class="toclink" href="#multiple-files-with-wildcards_1">Multiple Files with Wildcards</a></h3>
+<p>Remove multiple files using patterns:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>&gt; /drop tests/**/*.py
+</code></pre></div>
+<p>This removes all Python test files from the context.</p>
+<hr />
+<h2 id="file-discovery"><a class="toclink" href="#file-discovery">File Discovery</a></h2>
+<p>Byte automatically discovers all files in your project on startup, respecting <code>.gitignore</code> patterns. This enables:</p>
+<ul>
+<li><strong>Tab completion</strong> - Press Tab while typing file paths to see suggestions</li>
+<li><strong>Fast lookups</strong> - File operations use a cached index for performance</li>
+<li><strong>Automatic filtering</strong> - Git-ignored files are excluded from suggestions</li>
+</ul>
+<p>The discovery service:</p>
+<ol>
+<li>Scans your project directory recursively</li>
+<li>Loads <code>.gitignore</code> patterns and configuration ignore rules</li>
+<li>Builds an in-memory index of available files</li>
+<li>Updates the index when files change (if file watching is enabled)</li>
+</ol>
+<h3 id="ignore-patterns"><a class="toclink" href="#ignore-patterns">Ignore Patterns</a></h3>
+<p>Files are automatically excluded based on:</p>
+<ol>
+<li><strong><code>.gitignore</code> rules</strong> - Standard git ignore patterns from your project's <code>.gitignore</code> file</li>
+<li><strong>Configuration patterns</strong> - Custom ignore rules defined in <code>.byte/config.yaml</code></li>
+</ol>
+<p>You can add additional ignore patterns in your <code>.byte/config.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nt">files</span><span class="p">:</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">ignore</span><span class="p">:</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.byte/cache</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.ruff_cache</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*.log&quot;</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">build/</span>
+</code></pre></div>
+<p>These patterns use gitignore-style syntax and are combined with your <code>.gitignore</code> rules. Patterns support:</p>
+<ul>
+<li><code>*</code> - Wildcard for any characters</li>
+<li><code>**</code> - Matches directories recursively</li>
+<li><code>?</code> - Single character match</li>
+<li>Negation with <code>!</code> prefix</li>
+<li>Directory-specific patterns with trailing <code>/</code></li>
+</ul>
+<p>See the <a href="../../reference/settings/">Settings Reference</a> for complete configuration options.</p>
+<hr />
+<h2 id="best-practices"><a class="toclink" href="#best-practices">Best Practices</a></h2>
+<h3 id="start-small"><a class="toclink" href="#start-small">Start Small</a></h3>
+<p>Begin with only the files directly related to your task:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>&gt; /add src/main.py
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>&gt; /read-only config.yaml
+</code></pre></div>
+<p>Add more files as needed rather than loading everything upfront.</p>
+<h3 id="use-read-only-strategically"><a class="toclink" href="#use-read-only-strategically">Use Read-Only Strategically</a></h3>
+<p>Add reference files as read-only to provide context without risking unwanted changes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>&gt; /read-only docs/architecture.md
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>&gt; /read-only .env.example
+</code></pre></div>
+<hr />
+<h2 id="context-in-ai-prompts"><a class="toclink" href="#context-in-ai-prompts">Context in AI Prompts</a></h2>
+<p>When the AI receives your message, Byte includes a structured context block with all files:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a># Here are the files in the current context:
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>## READ-ONLY FILES (for reference only):
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>---
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>source: config.yaml
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>mode: read-only
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>---
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>[file contents]
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>## EDITABLE FILES (can be modified):
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>---
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>source: src/main.py
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>mode: editable
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>---
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>[file contents]
+</code></pre></div>
+<p>This format helps the AI understand:</p>
+<ul>
+<li>What files are available</li>
+<li>What permissions it has for each file</li>
+<li>The current state of each file</li>
+</ul>
+<hr />
+<h2 id="related-concepts"><a class="toclink" href="#related-concepts">Related Concepts</a></h2>
+<ul>
+<li><a href="../file-watching/">File Watching</a> - Automatic context updates when files change</li>
+<li><a href="../conventions/">Conventions</a> - Project-specific guidelines automatically included in context</li>
+<li><a href="../../reference/settings/">Settings Reference</a> - Configuration options for file handling</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../memory/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Memory &amp; Context">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Memory & Context
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../file-watching/" class="md-footer__link md-footer__link--next" aria-label="Next: File Watching">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                File Watching
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.path", "navigation.instant", "navigation.instant.prefetch", "navigation.instant.progress", "navigation.sections", "navigation.indexes", "navigation.tracking", "content.code.annotate", "toc.follow", "navigation.footer", "navigation.top", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
