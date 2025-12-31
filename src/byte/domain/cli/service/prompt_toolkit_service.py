@@ -3,6 +3,7 @@ from typing import AsyncGenerator
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.document import Document
 from prompt_toolkit.history import FileHistory
+from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.shortcuts import PromptSession
 from rich.console import Group
 
@@ -55,6 +56,15 @@ class CommandCompleter(Completer):
                     yield Completion(completion, start_position=-len(cmd_prefix))
 
 
+key_bindings = KeyBindings()
+
+
+@key_bindings.add("escape", "enter", eager=True)
+def _(event):
+    "Handle Alt+Enter key press"
+    event.current_buffer.insert_text("\n")
+
+
 class PromptToolkitService(Service):
     """Service for handling interactive user input via prompt_toolkit.
 
@@ -77,6 +87,7 @@ class PromptToolkitService(Service):
         self.prompt_session = PromptSession(
             history=FileHistory(config.byte_cache_dir / ".input_history"),
             multiline=False,
+            key_bindings=key_bindings,
             completer=self.completer,
         )
 
