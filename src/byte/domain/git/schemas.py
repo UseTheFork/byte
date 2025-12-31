@@ -8,12 +8,12 @@ class CommitMessage(BaseModel):
     )
     scope: str | None = Field(
         None,
-        description="Optional scope providing additional contextual information. Refer to the <rules type='Allowed Commit Scopes'> section for valid scope values.",
+        description="OPTIONAL scope providing additional contextual information. Refer to the <rules type='Allowed Commit Scopes'> section for valid scope values.",
     )
     commit_message: str = Field(
         ...,
         description="The description part of the commit message only (without the type prefix). "
-        "Must be in imperative mood (e.g., 'add feature' not 'added feature') and not exceed 72 characters.",
+        "Refer to the <rules type='Commit Description Guidelines'> section for formatting requirements.",
     )
     breaking_change: bool = Field(
         False,
@@ -27,6 +27,7 @@ class CommitMessage(BaseModel):
     body: str | None = Field(
         None,
         description="OPTIONAL body with motivation for the change and contrast with previous behavior. "
+        "Only needed if the commit_message isn't sufficiently informative. "
         "Use imperative, present tense: 'change' not 'changed' nor 'changes'. "
         "Should explain why the change was made, not what was changed (code shows that). "
         "If breaking_change is True, describe the breaking changes here.",
