@@ -243,4 +243,28 @@ class CommitService(Service, UserInteractive):
 
         commit_guidelines.append(Boundary.close(BoundaryType.RULES))
 
+        commit_guidelines.append(
+            Boundary.open(
+                BoundaryType.RULES,
+                meta={
+                    "type": "Field Inclusion Rules",
+                },
+            )
+        )
+
+        field_rules = []
+        if not config.git.enable_scopes:
+            field_rules.append("- DO NOT include `scope` in the commit message")
+        if not config.git.enable_body:
+            field_rules.append("- DO NOT include `body` in the commit message")
+        if not config.git.enable_breaking_changes:
+            field_rules.append("- DO NOT include `breaking_change` or `breaking_change_message` in the commit message")
+
+        if field_rules:
+            commit_guidelines.append("\n".join(field_rules))
+        else:
+            commit_guidelines.append("- All optional fields are enabled and may be included when appropriate")
+
+        commit_guidelines.append(Boundary.close(BoundaryType.RULES))
+
         return list_to_multiline_text(commit_guidelines)
