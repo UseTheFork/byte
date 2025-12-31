@@ -11,6 +11,7 @@ from byte.core.utils import dd, list_to_multiline_text
 from byte.domain.agent import AssistantContextSchema, BaseState, Node
 from byte.domain.cli import ConsoleService
 from byte.domain.files import FileService
+from byte.domain.git import CommitService
 from byte.domain.prompt_format import Boundary, BoundaryType, EditFormatService
 
 
@@ -121,6 +122,12 @@ class AssistantNode(Node):
             return [HumanMessage(hierarchy_content)]
 
         return []
+
+    async def _gather_commit_guidelines(self) -> list[HumanMessage]:
+        """ """
+        commit_service = await self.make(CommitService)
+        git_guidelines = await commit_service.generate_commit_guidelines()
+        return [HumanMessage(git_guidelines)]
 
     async def _gather_file_context(self, with_line_numbers=False) -> list[HumanMessage]:
         """Gather file context including read-only and editable files.
@@ -353,6 +360,7 @@ class AssistantNode(Node):
 
         agent_state["project_inforamtion_and_context"] = await self._gather_project_context()
         agent_state["project_hierarchy"] = await self._gather_project_hierarchy()
+        agent_state["commit_guidelines"] = await self._gather_commit_guidelines()
         agent_state["file_context"] = await self._gather_file_context()
         agent_state["file_context_with_line_numbers"] = await self._gather_file_context(True)
         agent_state["constraints_context"] = await self._gather_constraints(state)

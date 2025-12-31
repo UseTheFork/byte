@@ -1,14 +1,14 @@
 from contextvars import ContextVar
 from typing import Optional, Type, TypeVar
 
-from byte.container import Container
+from byte import Container
 
 T = TypeVar("T")
 
 container_context: ContextVar[Optional["Container"]] = ContextVar("container", default=None)
 
 
-def get_container() -> "Container":
+def get_container() -> Container:
     """Get the current container from context."""
     container = container_context.get()
     if container is None:
