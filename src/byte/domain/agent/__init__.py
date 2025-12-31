@@ -11,7 +11,6 @@ if TYPE_CHECKING:
     from byte.domain.agent.implementations.cleaner.agent import CleanerAgent
     from byte.domain.agent.implementations.coder.agent import CoderAgent
     from byte.domain.agent.implementations.commit.agent import CommitAgent, CommitPlanAgent
-    from byte.domain.agent.implementations.commit.command import CommitCommand
     from byte.domain.agent.implementations.conventions.agent import ConventionAgent
     from byte.domain.agent.implementations.conventions.command import ConventionCommand
     from byte.domain.agent.implementations.copy.agent import CopyAgent
@@ -48,7 +47,6 @@ __all__ = (
     "CleanerAgent",
     "CoderAgent",
     "CommitAgent",
-    "CommitCommand",
     "CommitPlanAgent",
     "ConstraintSchema",
     "ConventionAgent",
@@ -91,7 +89,6 @@ _dynamic_imports = {
     "CleanerAgent": "implementations.cleaner.agent",
     "CoderAgent": "implementations.coder.agent",
     "CommitAgent": "implementations.commit.agent",
-    "CommitCommand": "implementations.commit.command",
     "CommitPlanAgent": "implementations.commit.agent",
     "ConstraintSchema": "schemas",
     "ConventionAgent": "implementations.conventions.agent",

@@ -4,7 +4,7 @@ from langgraph.graph import START, StateGraph
 
 from byte.domain.agent import Agent, AssistantContextSchema, AssistantNode, BaseState, EndNode, StartNode
 from byte.domain.agent.implementations.commit.prompt import commit_plan_prompt, commit_prompt
-from byte.domain.agent.implementations.commit.structured_output import CommitMessage, CommitPlan
+from byte.domain.git import CommitMessage, CommitPlan
 from byte.domain.llm import LLMService
 
 

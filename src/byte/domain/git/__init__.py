@@ -5,12 +5,20 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.domain.git.command.commit_command import CommitCommand
+    from byte.domain.git.schemas import CommitGroup, CommitMessage, CommitPlan
+    from byte.domain.git.service.commit_service import CommitService
     from byte.domain.git.service.git_service import GitService
 
-__all__ = ("GitService",)
+__all__ = ("CommitCommand", "CommitGroup", "CommitMessage", "CommitPlan", "CommitService", "GitService")
 
 _dynamic_imports = {
     # keep-sorted start
+    "CommitCommand": "command.commit_command",
+    "CommitGroup": "schemas",
+    "CommitMessage": "schemas",
+    "CommitPlan": "schemas",
+    "CommitService": "service.commit_service",
     "GitService": "service.git_service",
     # keep-sorted end
 }
