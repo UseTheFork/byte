@@ -5,7 +5,7 @@ from langchain_core.messages.tool import ToolMessage
 from rich.live import Live
 
 from byte.core import Service
-from byte.core.utils import extract_content_from_message
+from byte.core.utils import extract_content_from_message, extract_json_from_message
 from byte.domain.cli import ConsoleService, MarkdownStream, RuneSpinner
 
 
@@ -79,6 +79,9 @@ class StreamRenderingService(Service):
             self.accumulated_content += extract_content_from_message(message_chunk)
             if self.display_mode == "verbose":
                 await self._update_active_stream()
+
+            if extract_json_from_message(message_chunk) is not None:
+                await self.end_stream_render()
 
         if hasattr(message_chunk, "response_metadata"):
             # Check for stream ending conditions
