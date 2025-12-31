@@ -130,7 +130,7 @@ build-backend = "uv_build"
 assets = []
 build_command_env = []
 build_command = """
-  uv lock --upgrade-package "$PACKAGE_NAME"
+  uv lock --upgrade-package byte-ai-cli
   uv build
 """
 version_toml = ["pyproject.toml:project.version"]
