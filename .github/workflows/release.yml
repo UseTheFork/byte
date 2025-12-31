@@ -201,6 +201,26 @@ jobs:
           print-hash: true
           verbose: true
 
+  verify:
+    name: Verify installation
+    needs: [deploy]
+    if: needs.deploy.result == 'success'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
+    
+    - name: Wait for package availability
+      run: sleep 30
+    
+    - name: Install from PyPI
+      run: |
+        pip install byte-ai-cli
+        python -c "from importlib.metadata import version; print(version('byte-ai-cli'))"
+
   deploy-docs:
     name: Deploy Documentation
     needs:
