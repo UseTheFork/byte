@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from byte.domain.cli.config import CLIConfig
 from byte.domain.development.config import DevelopmentConfig
 from byte.domain.files.config import FilesConfig
+from byte.domain.git.config import GitConfig
 from byte.domain.lint.config import LintConfig
 from byte.domain.llm.config import LLMConfig
 from byte.domain.lsp.config import LSPConfig
@@ -69,6 +70,7 @@ class ByteConfig(BaseModel):
     development: DevelopmentConfig = Field(default_factory=DevelopmentConfig)
     edit_format: EditFormatConfig = Field(default_factory=EditFormatConfig)
     files: FilesConfig = Field(default_factory=FilesConfig)
+    git: GitConfig = Field(default_factory=GitConfig)
     lint: LintConfig = Field(default_factory=LintConfig, description="Code linting and formatting configuration")
     llm: LLMConfig = Field(default_factory=LLMConfig)
     lsp: LSPConfig = Field(default_factory=LSPConfig)
