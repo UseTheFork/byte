@@ -37,3 +37,11 @@ class GitConfig(BaseModel):
         ],
         description="Available scopes for conventional commits",
     )
+    description_guidelines: List[str] = Field(
+        default_factory=list,
+        description="Additional guidelines for commit descriptions",
+    )
+    max_description_length: int = Field(
+        default=72,
+        description="Maximum character length for commit descriptions",
+    )

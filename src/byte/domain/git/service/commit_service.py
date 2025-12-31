@@ -205,6 +205,33 @@ class CommitService(Service, UserInteractive):
             Boundary.open(
                 BoundaryType.RULES,
                 meta={
+                    "type": "Commit Description Guidelines",
+                },
+            )
+        )
+
+        description_guidelines = [
+            "- Use imperative mood (e.g., 'add feature' not 'added feature' or 'adding feature')",
+            "- Start with lowercase letter",
+            "- Do not end with a period",
+            f"- Keep under {config.git.max_description_length} characters",
+            "- Be concise and descriptive",
+            "- Focus on what the change does, not how it does it",
+        ]
+
+        # Add any custom guidelines from config
+        if config.git.description_guidelines:
+            for guideline in config.git.description_guidelines:
+                description_guidelines.append(f"- {guideline}")
+
+        commit_guidelines.append("\n".join(description_guidelines))
+
+        commit_guidelines.append(Boundary.close(BoundaryType.RULES))
+
+        commit_guidelines.append(
+            Boundary.open(
+                BoundaryType.RULES,
+                meta={
                     "type": "Allowed Commit Scopes",
                 },
             )
