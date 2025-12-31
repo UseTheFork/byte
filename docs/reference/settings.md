@@ -37,6 +37,17 @@ Byte's configuration system uses a YAML file located at `.byte/config.yaml` to c
 |-------|------|---------|-------------|
 | `enable` | `boolean` | `false` | Enable file watching for AI comment markers (AI:, AI@, AI?, AI!). When enabled, Byte automatically detects changes and processes AI instructions. |
 
+## Git
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `enable_scopes` | `boolean` | `false` | Enable scope selection for conventional commits |
+| `enable_breaking_changes` | `boolean` | `true` | Enable breaking change detection and confirmation |
+| `enable_body` | `boolean` | `true` | Enable commit message body generation |
+| `scopes` | `array[string]` | - | Available scopes for conventional commits |
+| `description_guidelines` | `array[string]` | - | Additional guidelines for commit descriptions |
+| `max_description_length` | `integer` | `72` | Maximum character length for commit descriptions |
+
 ## Lint
 
 Code linting and formatting configuration
