@@ -89,7 +89,6 @@
 
                   pkgs.just # Command Runner
                   pkgs.pre-commit # Pre-ommit hooks
-                  pkgs.git-cliff # Changelog generator
 
                   pkgs.vhs
 
