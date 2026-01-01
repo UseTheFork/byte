@@ -1,4 +1,4 @@
-""""""
+"""Byte - AI-powered coding assistant."""
 
 from typing import TYPE_CHECKING
 
@@ -11,6 +11,8 @@ if TYPE_CHECKING:
     from byte.core.service.base_service import Service
     from byte.core.service_provider import ServiceProvider
     from byte.core.utils.dump import dd, dump
+
+__version__ = "0.7.1"
 
 __all__ = (
     "Container",
