@@ -17,11 +17,13 @@ if TYPE_CHECKING:
     from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
     from byte.domain.cli.service.stream_rendering_service import StreamRenderingService
     from byte.domain.cli.service.subprocess_service import SubprocessService
+    from byte.domain.cli.service_provider import CLIServiceProvider
     from byte.domain.cli.utils.formatters import MarkdownStream
 
 __all__ = (
     "ByteArgumentParser",
     "ByteTheme",
+    "CLIServiceProvider",
     "CodeBlock",
     "Command",
     "CommandRegistry",
@@ -49,6 +51,7 @@ _dynamic_imports = {
     # keep-sorted start
     "ByteArgumentParser": "argparse.base",
     "ByteTheme": "schemas",
+    "CLIServiceProvider": "service_provider",
     "CodeBlock": "rich.markdown",
     "Command": "service.command_registry",
     "CommandRegistry": "service.command_registry",

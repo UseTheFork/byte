@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from byte.bootstrap import bootstrap, shutdown
-from byte.core.config.config import ByteConfig
+from byte.core import ByteConfig
 from byte.domain.cli.service.command_registry import Command, CommandRegistry
 
 

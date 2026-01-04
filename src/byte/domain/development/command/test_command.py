@@ -1,6 +1,6 @@
 from argparse import Namespace
 
-from byte.core.config.config import PROJECT_ROOT
+from byte.core import PROJECT_ROOT
 from byte.core.utils import dump
 from byte.domain.cli.argparse.base import ByteArgumentParser
 from byte.domain.cli.service.command_registry import Command

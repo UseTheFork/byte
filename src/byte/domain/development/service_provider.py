@@ -1,5 +1,5 @@
 from byte.container import Container
-from byte.core.config.config import ByteConfig
+from byte.core import ByteConfig
 from byte.core.service_provider import ServiceProvider
 from byte.domain.cli.service.command_registry import CommandRegistry
 from byte.domain.development.command.test_command import TestCommand

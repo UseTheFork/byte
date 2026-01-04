@@ -9,8 +9,17 @@ if TYPE_CHECKING:
     from byte.domain.git.schemas import CommitGroup, CommitMessage, CommitPlan
     from byte.domain.git.service.commit_service import CommitService
     from byte.domain.git.service.git_service import GitService
+    from byte.domain.git.service_provider import GitServiceProvider
 
-__all__ = ("CommitCommand", "CommitGroup", "CommitMessage", "CommitPlan", "CommitService", "GitService")
+__all__ = (
+    "CommitCommand",
+    "CommitGroup",
+    "CommitMessage",
+    "CommitPlan",
+    "CommitService",
+    "GitService",
+    "GitServiceProvider",
+)
 
 _dynamic_imports = {
     # keep-sorted start
@@ -20,6 +29,7 @@ _dynamic_imports = {
     "CommitPlan": "schemas",
     "CommitService": "service.commit_service",
     "GitService": "service.git_service",
+    "GitServiceProvider": "service_provider",
     # keep-sorted end
 }
 

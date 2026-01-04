@@ -6,7 +6,7 @@ from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
     from byte.core.array_store import ArrayStore
-    from byte.core.config.config import ByteConfig
+    from byte.core.config import BYTE_CACHE_DIR, BYTE_CONFIG_FILE, PROJECT_ROOT, ByteConfig, CLIArgs
     from byte.core.event_bus import EventBus, EventType, Payload
     from byte.core.exceptions import ByteConfigException
     from byte.core.logging import log
@@ -16,9 +16,13 @@ if TYPE_CHECKING:
     from byte.core.utils.dump import dd, dump
 
 __all__ = (
+    "BYTE_CACHE_DIR",
+    "BYTE_CONFIG_FILE",
+    "PROJECT_ROOT",
     "ArrayStore",
     "ByteConfig",
     "ByteConfigException",
+    "CLIArgs",
     "EventBus",
     "EventType",
     "Payload",
@@ -33,10 +37,14 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "ArrayStore": "array_store",
-    "ByteConfig": "config.config",
+    "BYTE_CACHE_DIR": "config",
+    "BYTE_CONFIG_FILE": "config",
+    "ByteConfig": "config",
     "ByteConfigException": "exceptions",
+    "CLIArgs": "config",
     "EventBus": "event_bus",
     "EventType": "event_bus",
+    "PROJECT_ROOT": "config",
     "Payload": "event_bus",
     "Service": "service.base_service",
     "ServiceProvider": "service_provider",

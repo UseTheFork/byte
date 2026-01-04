@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from byte.domain.analytics.service.agent_analytics_service import AgentAnalyticsService
     from byte.domain.analytics.service_provider import AnalyticsProvider
 
+
 __all__ = (
     "AgentAnalyticsService",
     "AnalyticsProvider",

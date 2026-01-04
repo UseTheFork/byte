@@ -5,14 +5,12 @@ from rich.console import Console
 from byte.bootstrap import bootstrap, shutdown
 from byte.container import Container
 from byte.context import container_context
+from byte.core import ByteConfig
 from byte.core.cli import cli
-from byte.core.config.config import ByteConfig
 from byte.core.logging import log
 from byte.core.task_manager import TaskManager
-from byte.domain.cli.service.console_service import ConsoleService
-from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
-from byte.domain.files.models import FileMode
-from byte.domain.files.service.file_service import FileService
+from byte.domain.cli import ConsoleService, PromptToolkitService
+from byte.domain.files import FileMode, FileService
 
 
 class Byte:

@@ -9,7 +9,7 @@ def _get_log_file_path() -> Path:
     Imports config locally to avoid circular dependency issues.
     Usage: `log_path = _get_log_file_path()`
     """
-    from byte.core.config.config import BYTE_CACHE_DIR
+    from byte.core import BYTE_CACHE_DIR
 
     return BYTE_CACHE_DIR / "byte.log"
 

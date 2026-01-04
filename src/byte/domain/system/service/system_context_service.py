@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from byte.core.config.config import ByteConfig
+from byte.core import ByteConfig
 from byte.core.event_bus import Payload
 from byte.core.service.base_service import Service
 

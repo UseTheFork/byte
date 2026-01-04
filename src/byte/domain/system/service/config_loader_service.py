@@ -4,7 +4,7 @@ from importlib.metadata import PackageNotFoundError, version
 
 import yaml
 
-from byte.core.config.config import BYTE_CONFIG_FILE, ByteConfig, CLIArgs
+from byte.core import BYTE_CONFIG_FILE, ByteConfig, CLIArgs
 from byte.domain.system.config import PathsConfig
 
 

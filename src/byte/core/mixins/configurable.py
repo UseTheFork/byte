@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Optional
 
-from byte.core.config.config import ByteConfig
+from byte.core import ByteConfig
 
 if TYPE_CHECKING:
     from byte.container import Container

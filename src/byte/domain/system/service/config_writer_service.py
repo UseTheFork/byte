@@ -2,7 +2,7 @@ from pathlib import Path
 
 import yaml
 
-from byte.core.config.config import BYTE_CONFIG_FILE
+from byte.core import BYTE_CONFIG_FILE
 from byte.core.service.base_service import Service
 from byte.domain.presets.config import PresetsConfig
 

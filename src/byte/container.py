@@ -1,7 +1,7 @@
 import asyncio
 from typing import Any, Callable, Dict, Optional, Type, TypeVar
 
-from byte.core.mixins.bootable import Bootable
+from byte.core.mixins import Bootable
 
 T = TypeVar("T")
 

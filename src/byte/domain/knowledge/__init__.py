@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from byte.domain.knowledge.service.cli_context_display_service import CLIContextDisplayService
     from byte.domain.knowledge.service.convention_context_service import ConventionContextService
     from byte.domain.knowledge.service.session_context_service import SessionContextService
+    from byte.domain.knowledge.service_provider import KnowledgeServiceProvider
 
 __all__ = (
     "CLIContextDisplayService",
@@ -20,6 +21,7 @@ __all__ = (
     "ContextDropCommand",
     "ContextListCommand",
     "ConventionContextService",
+    "KnowledgeServiceProvider",
     "SessionContextModel",
     "SessionContextService",
     "WebCommand",
@@ -32,6 +34,7 @@ _dynamic_imports = {
     "ContextDropCommand": "command.context_drop_command",
     "ContextListCommand": "command.context_list_command",
     "ConventionContextService": "service.convention_context_service",
+    "KnowledgeServiceProvider": "service_provider",
     "SessionContextModel": "models",
     "SessionContextService": "service.session_context_service",
     "WebCommand": "command.web_command",

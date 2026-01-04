@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from byte.core.config.config import ByteConfig
+from byte.core import ByteConfig
 
 
 def format_type(type_info: Any) -> str:

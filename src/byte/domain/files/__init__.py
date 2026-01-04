@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from byte.domain.files.service.file_service import FileService
     from byte.domain.files.service.ignore_service import FileIgnoreService
     from byte.domain.files.service.watcher_service import FileWatcherService
+    from byte.domain.files.service_provider import FileServiceProvider
 
 __all__ = (
     "AICommentWatcherService",
@@ -27,6 +28,7 @@ __all__ = (
     "FileIgnoreService",
     "FileMode",
     "FileService",
+    "FileServiceProvider",
     "FileWatcherService",
     "ListFilesCommand",
     "ReadOnlyCommand",
@@ -44,6 +46,7 @@ _dynamic_imports = {
     "FileIgnoreService": "service.ignore_service",
     "FileMode": "models",
     "FileService": "service.file_service",
+    "FileServiceProvider": "service_provider",
     "FileWatcherService": "service.watcher_service",
     "ListFilesCommand": "command.list_files_command",
     "ReadOnlyCommand": "command.add_read_only_file_command",

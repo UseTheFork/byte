@@ -34,11 +34,13 @@ if TYPE_CHECKING:
     from byte.domain.agent.reducers import add_constraints, replace_list, replace_str, update_metadata
     from byte.domain.agent.schemas import AssistantContextSchema, ConstraintSchema, MetadataSchema, TokenUsageSchema
     from byte.domain.agent.service.agent_service import AgentService
+    from byte.domain.agent.service_provider import AgentServiceProvider
     from byte.domain.agent.state import BaseState
 
 __all__ = (
     "Agent",
     "AgentService",
+    "AgentServiceProvider",
     "AskAgent",
     "AskCommand",
     "AssistantContextSchema",
@@ -81,6 +83,7 @@ _dynamic_imports = {
     # keep-sorted start
     "Agent": "implementations.base",
     "AgentService": "service.agent_service",
+    "AgentServiceProvider": "service_provider",
     "AskAgent": "implementations.ask.agent",
     "AskCommand": "implementations.ask.command",
     "AssistantContextSchema": "schemas",

@@ -6,7 +6,7 @@ import yaml
 from rich.console import Console
 from rich.theme import Theme
 
-from byte.core.config.config import BYTE_CACHE_DIR, BYTE_CONFIG_FILE, PROJECT_ROOT, ByteConfig
+from byte.core import BYTE_CACHE_DIR, BYTE_CONFIG_FILE, PROJECT_ROOT, ByteConfig
 from byte.domain.cli.rich.menu import Menu
 from byte.domain.cli.schemas import ByteTheme, ThemeRegistry
 

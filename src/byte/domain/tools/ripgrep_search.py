@@ -5,7 +5,7 @@ from typing import Optional
 from langchain_core.tools import tool
 
 from byte.context import make
-from byte.core.config.config import ByteConfig
+from byte.core import ByteConfig
 
 
 def _check_ripgrep_installed() -> bool:
