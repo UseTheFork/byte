@@ -5,20 +5,20 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
-    from byte.domain.cli.argparse.base import ByteArgumentParser
-    from byte.domain.cli.rich.markdown import CodeBlock, Heading, Markdown
-    from byte.domain.cli.rich.menu import Menu, MenuInputHandler, MenuRenderer, MenuState, MenuStyle
-    from byte.domain.cli.rich.panel_rule import PanelBottom, PanelTop
-    from byte.domain.cli.rich.rune_spinner import RuneSpinner
-    from byte.domain.cli.schemas import ByteTheme, SubprocessResult, ThemeRegistry
-    from byte.domain.cli.service.command_registry import Command, CommandRegistry
-    from byte.domain.cli.service.console_service import ConsoleService
-    from byte.domain.cli.service.interactions_service import InteractionService
-    from byte.domain.cli.service.prompt_toolkit_service import PromptToolkitService
-    from byte.domain.cli.service.stream_rendering_service import StreamRenderingService
-    from byte.domain.cli.service.subprocess_service import SubprocessService
-    from byte.domain.cli.service_provider import CLIServiceProvider
-    from byte.domain.cli.utils.formatters import MarkdownStream
+    from byte.cli.argparse.base import ByteArgumentParser
+    from byte.cli.rich.markdown import CodeBlock, Heading, Markdown
+    from byte.cli.rich.menu import Menu, MenuInputHandler, MenuRenderer, MenuState, MenuStyle
+    from byte.cli.rich.panel_rule import PanelBottom, PanelTop
+    from byte.cli.rich.rune_spinner import RuneSpinner
+    from byte.cli.schemas import ByteTheme, SubprocessResult, ThemeRegistry
+    from byte.cli.service.command_registry import Command, CommandRegistry
+    from byte.cli.service.console_service import ConsoleService
+    from byte.cli.service.interactions_service import InteractionService
+    from byte.cli.service.prompt_toolkit_service import PromptToolkitService
+    from byte.cli.service.stream_rendering_service import StreamRenderingService
+    from byte.cli.service.subprocess_service import SubprocessService
+    from byte.cli.service_provider import CLIServiceProvider
+    from byte.cli.utils.formatters import MarkdownStream
 
 __all__ = (
     "ByteArgumentParser",
