@@ -8,18 +8,7 @@ from pydantic import ValidationError
 from byte.foundation import Application
 
 
-@click.command()
-@click.option(
-    "--read-only",
-    multiple=True,
-    help="Add files to read-only context (can be specified multiple times)",
-)
-@click.option(
-    "--add",
-    multiple=True,
-    help="Add files to editable context (can be specified multiple times)",
-)
-def cli(read_only: tuple[str, ...], add: tuple[str, ...]):
+def cli():
     """Byte CLI Assistant"""
 
     try:
