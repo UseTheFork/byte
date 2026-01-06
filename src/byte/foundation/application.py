@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Callable, Optional, TypeVar
 
-from byte.foundation import Container, EventBus, Kernel, TaskManager
+from byte.foundation import Console, Container, EventBus, Kernel, TaskManager
 
 T = TypeVar("T")
 
@@ -20,8 +20,8 @@ class Application(Container):
 
         self.singleton(EventBus)
         self.singleton(TaskManager)
+        self.singleton(Console)
         # self.singleton(CommandRegistry)
-        # self.singleton(ConsoleService)
 
     def __init__(self, base_path: Optional[Path] = None):
         super().__init__()
@@ -209,6 +209,25 @@ class Application(Container):
         """
         base = self.config_path("conventions")
         return self.join_paths(base, path)
+
+    def environment_path(self) -> Path:
+        """
+        Get the path to the environment file directory.
+
+        Returns:
+            The full path to the environment file directory.
+        """
+        environment_path = getattr(self, "_environment_path", None)
+        return Path(environment_path) if environment_path else self.base_path()
+
+    def environment_file_path(self) -> Path:
+        """
+        Get the fully qualified path to the environment file.
+
+        Returns:
+            The full path to the environment file.
+        """
+        return self.join_paths(self.environment_path(), ".env")
 
     def session_context_path(self, path: str = "") -> Path:
         """

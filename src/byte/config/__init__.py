@@ -6,12 +6,14 @@ from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
     from byte.config.byte_config import ByteConfig
+    from byte.config.repository import Repository
 
-__all__ = ("ByteConfig",)
+__all__ = ("ByteConfig", "Repository")
 
 _dynamic_imports = {
     # keep-sorted start
     "ByteConfig": "byte_config",
+    "Repository": "repository",
     # keep-sorted end
 }
 

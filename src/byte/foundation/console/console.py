@@ -1,5 +1,4 @@
-from byte.core.service.base_service import Service
-from rich.console import Console
+from rich.console import Console as RichConsole
 from rich.panel import Panel
 from rich.rule import Rule
 from rich.syntax import Syntax
@@ -8,12 +7,12 @@ from rich.theme import Theme
 from byte.cli import ByteTheme, Menu, PanelBottom, PanelTop, ThemeRegistry
 
 
-class ConsoleService(Service):
+class Console:
     """Console service for terminal output with themed styling."""
 
-    _console: Console
+    _console: RichConsole
 
-    async def boot(self, **kwargs) -> None:
+    def __init__(self, app=None, **kwargs):
         """Initialize the console with configured theme.
 
         Loads the Catppuccin theme variant specified in config and applies
@@ -24,7 +23,8 @@ class ConsoleService(Service):
 
         # Load the selected Catppuccin theme variant.
         theme_registry = ThemeRegistry()
-        selected_theme: ByteTheme = theme_registry.get_theme(self._config.cli.ui_theme)
+        selected_theme: ByteTheme = theme_registry.get_theme("mocha")
+        # selected_theme: ByteTheme = theme_registry.get_theme(self._config.cli.ui_theme)
 
         # Apply Base16 colors to semantic style names.
         byte_theme = Theme(
@@ -43,10 +43,10 @@ class ConsoleService(Service):
                 "inactive_border": selected_theme.base03,  # Comments, Invisibles
             }
         )
-        self._console = Console(theme=byte_theme)
+        self._console = RichConsole(theme=byte_theme)
 
     @property
-    def console(self) -> Console:
+    def console(self) -> RichConsole:
         """Access the underlying Rich Console instance for advanced operations.
 
         Most operations should use the service's wrapper methods (print, panel, etc.),
