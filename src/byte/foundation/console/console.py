@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from rich.console import Console as RichConsole
 from rich.panel import Panel
 from rich.rule import Rule
@@ -6,13 +10,16 @@ from rich.theme import Theme
 
 from byte.cli import ByteTheme, Menu, PanelBottom, PanelTop, ThemeRegistry
 
+if TYPE_CHECKING:
+    from byte.foundation import Application
+
 
 class Console:
     """Console service for terminal output with themed styling."""
 
     _console: RichConsole
 
-    def __init__(self, app=None, **kwargs):
+    def __init__(self, app: Application, **kwargs):
         """Initialize the console with configured theme.
 
         Loads the Catppuccin theme variant specified in config and applies
@@ -20,11 +27,15 @@ class Console:
 
         Usage: Called automatically during service initialization
         """
+        self._app = app
+        self.ui_theme = "mocha"
+        self.syntax_theme = "monokai"
+        self.setup_console()
 
+    def setup_console(self):
         # Load the selected Catppuccin theme variant.
         theme_registry = ThemeRegistry()
-        selected_theme: ByteTheme = theme_registry.get_theme("mocha")
-        # selected_theme: ByteTheme = theme_registry.get_theme(self._config.cli.ui_theme)
+        selected_theme: ByteTheme = theme_registry.get_theme(self.ui_theme)
 
         # Apply Base16 colors to semantic style names.
         byte_theme = Theme(
@@ -172,7 +183,7 @@ class Console:
         Returns:
                 Syntax: Configured Rich Syntax component ready for rendering
         """
-        kwargs.setdefault("theme", self._config.cli.syntax_theme)
+        kwargs.setdefault("theme", self.syntax_theme)
         return Syntax(*args, **kwargs)
 
     def print_error_panel(self, *args, **kwargs):

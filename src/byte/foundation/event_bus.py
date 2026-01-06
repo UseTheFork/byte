@@ -75,8 +75,8 @@ class Payload:
 class EventBus:
     """Simple event system with typed Pydantic payloads."""
 
-    def __init__(self, container=None, **kwargs):
-        self.container = container
+    def __init__(self, app=None, **kwargs):
+        self.container = app
         self._listeners: Dict[str, List[Callable]] = {}
 
     def on(self, event_name: str, callback: Callable):

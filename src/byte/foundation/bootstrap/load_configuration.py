@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 import yaml
 
 from byte.config import ByteConfig
+from byte.foundation import Console
 from byte.foundation.bootstrap.bootstrapper import Bootstrapper
 
 if TYPE_CHECKING:
@@ -79,6 +80,13 @@ class LoadConfiguration(Bootstrapper):
         editable_files = list(set(config.boot.editable_files + editable_files))
         config.boot.editable_files = editable_files
 
+    def _setup_console(self, app: Application, config: ByteConfig):
+        """ """
+        console: Console = app.make(Console)
+        console.ui_theme = config.cli.ui_theme
+        console.syntax_theme = config.cli.syntax_theme
+        console.setup_console()
+
     def bootstrap(self, app: Application) -> None:
         """
         Bootstrap environment variable loading.
@@ -91,3 +99,4 @@ class LoadConfiguration(Bootstrapper):
         config = app.instance("config", ByteConfig(**yaml_config))
         self._load_llm_api_keys(app, config)
         self._load_boot_config(app, config)
+        self._setup_console(app, config)
