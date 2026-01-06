@@ -36,15 +36,15 @@ def dump(*args, **kwargs):
 
     if not args and not kwargs:
         # If no arguments, dump the caller's locals
-        rich_inspect(frame.f_locals, all=True)  # pyright: ignore[reportOptionalMemberAccess]  # ty:ignore[possibly-missing-attribute]
+        rich_inspect(frame.f_locals, all=False)  # pyright: ignore[reportOptionalMemberAccess]  # ty:ignore[possibly-missing-attribute]
     else:
         # Print each argument
         for arg in args:
-            rich_inspect(arg, all=True)
+            rich_inspect(arg, all=False)
 
         # Print keyword arguments
         if kwargs:
-            rich_inspect(kwargs, all=True)
+            rich_inspect(kwargs, all=False)
 
 
 def dd(*args, **kwargs):

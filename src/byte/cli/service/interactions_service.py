@@ -1,9 +1,9 @@
 from typing import List, Optional
 
+from byte.domain.cli import ConsoleService
 from rich.prompt import Prompt
 
 from byte.core import Service
-from byte.domain.cli import ConsoleService
 
 
 class InteractionService(Service):

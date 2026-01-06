@@ -34,9 +34,6 @@ class PanelTop(JupyterMixin):
         self.border_style = border_style
         self.align = align
 
-    def __repr__(self) -> str:
-        return f"PanelTop({self.title!r})"
-
     def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
         width = options.max_width
         style = console.get_style(self.style)
@@ -103,6 +100,9 @@ class PanelTop(JupyterMixin):
     def __rich_measure__(self, console: Console, options: ConsoleOptions) -> Measurement:
         return Measurement(1, 1)
 
+    def __repr__(self) -> str:
+        return f"PanelTop({self.title!r})"
+
 
 class PanelBottom(JupyterMixin):
     """A console renderable to draw the bottom border of a panel with optional subtitle.
@@ -128,9 +128,6 @@ class PanelBottom(JupyterMixin):
         self.style = style
         self.border_style = border_style
         self.align = align
-
-    def __repr__(self) -> str:
-        return f"PanelBottom({self.subtitle!r})"
 
     def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
         width = options.max_width
@@ -197,3 +194,6 @@ class PanelBottom(JupyterMixin):
 
     def __rich_measure__(self, console: Console, options: ConsoleOptions) -> Measurement:
         return Measurement(1, 1)
+
+    def __repr__(self) -> str:
+        return f"PanelBottom({self.subtitle!r})"

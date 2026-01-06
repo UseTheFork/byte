@@ -49,6 +49,20 @@ class MenuState:
         self.window_size = window_size
         self.window_start = 0
 
+    def _adjust_window(self) -> None:
+        """Adjust the viewing window to keep current selection visible."""
+        # If we have fewer options than window size, show all
+        if len(self.options) <= self.window_size:
+            self.window_start = 0
+            return
+
+        # Keep selection in middle of window when possible
+        ideal_start = self.index - self.window_size // 2
+
+        # Clamp to valid range
+        max_start = len(self.options) - self.window_size
+        self.window_start = max(0, min(ideal_start, max_start))
+
     def move_up(self) -> None:
         """Move selection up, wrapping to bottom if at top."""
         self.index = (self.index - 1) % len(self.options)
@@ -66,20 +80,6 @@ class MenuState:
     def move_right(self) -> None:
         """Move selection right in horizontal menu."""
         self.index = (self.index + 1) % len(self.options)
-
-    def _adjust_window(self) -> None:
-        """Adjust the viewing window to keep current selection visible."""
-        # If we have fewer options than window size, show all
-        if len(self.options) <= self.window_size:
-            self.window_start = 0
-            return
-
-        # Keep selection in middle of window when possible
-        ideal_start = self.index - self.window_size // 2
-
-        # Clamp to valid range
-        max_start = len(self.options) - self.window_size
-        self.window_start = max(0, min(ideal_start, max_start))
 
     def toggle_selection(self) -> None:
         """Toggle selection of current option in multiselect mode."""
@@ -473,6 +473,46 @@ class Menu:
                     self._cancel(live)
                     return None
 
+    def _handle_horizontal_navigation(self, action: str, live: Live) -> None:
+        """Handle left/right navigation for horizontal menu.
+
+        Usage: `self._handle_horizontal_navigation("left", live)` -> move left
+        """
+        if action == "left":
+            self.state.move_left()
+        elif action == "right":
+            self.state.move_right()
+
+        live.update(self.renderer.render_horizontal(), refresh=True)
+
+    def _finalize_confirm(self, live: Live, selected: bool) -> None:
+        """Finalize confirm dialog after selection.
+
+        Shows only the selected option (Yes or No) with finalized styling.
+
+        Usage: `self._finalize_confirm(live, True)` -> finalize Yes selection
+        """
+        # Store original state
+        original_options = self.state.options
+        original_style = self.style
+
+        # Update to finalized state
+        self.style = self.style.as_finalized()
+        self.renderer.style = self.style
+
+        # Show only selected option
+        selected_text = "Yes" if selected else "No"
+        self.state.options = (selected_text,)
+        self.state.index = 0
+
+        # Update display with horizontal layout
+        live.update(self.renderer.render_horizontal(), refresh=True)
+
+        # Restore original state
+        self.state.options = original_options
+        self.style = original_style
+        self.renderer.style = self.style
+
     def confirm(self, default: bool = True, esc: bool = True) -> bool | None:
         """Confirmation dialog with Yes/No selection using left/right navigation.
 
@@ -521,43 +561,3 @@ class Menu:
                 except (KeyboardInterrupt, EOFError):
                     self._cancel(live)
                     return None
-
-    def _handle_horizontal_navigation(self, action: str, live: Live) -> None:
-        """Handle left/right navigation for horizontal menu.
-
-        Usage: `self._handle_horizontal_navigation("left", live)` -> move left
-        """
-        if action == "left":
-            self.state.move_left()
-        elif action == "right":
-            self.state.move_right()
-
-        live.update(self.renderer.render_horizontal(), refresh=True)
-
-    def _finalize_confirm(self, live: Live, selected: bool) -> None:
-        """Finalize confirm dialog after selection.
-
-        Shows only the selected option (Yes or No) with finalized styling.
-
-        Usage: `self._finalize_confirm(live, True)` -> finalize Yes selection
-        """
-        # Store original state
-        original_options = self.state.options
-        original_style = self.style
-
-        # Update to finalized state
-        self.style = self.style.as_finalized()
-        self.renderer.style = self.style
-
-        # Show only selected option
-        selected_text = "Yes" if selected else "No"
-        self.state.options = (selected_text,)
-        self.state.index = 0
-
-        # Update display with horizontal layout
-        live.update(self.renderer.render_horizontal(), refresh=True)
-
-        # Restore original state
-        self.state.options = original_options
-        self.style = original_style
-        self.renderer.style = self.style

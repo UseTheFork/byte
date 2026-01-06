@@ -1,5 +1,6 @@
 from typing import AsyncGenerator
 
+from byte.domain.cli import CommandRegistry, ConsoleService
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.document import Document
 from prompt_toolkit.history import FileHistory
@@ -9,7 +10,6 @@ from rich.console import Group
 
 from byte.core import ByteConfig, EventType, Payload, Service, log
 from byte.domain.agent import AgentService, SubprocessAgent
-from byte.domain.cli import CommandRegistry, ConsoleService
 
 
 class CommandCompleter(Completer):

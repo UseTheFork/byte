@@ -3,9 +3,10 @@ from abc import ABC, abstractmethod
 from argparse import Namespace
 from typing import Dict, List, Optional
 
+from byte.domain.cli import ByteArgumentParser, ConsoleService
+
 from byte.core import Service
 from byte.core.mixins import Bootable, Configurable, Injectable, UserInteractive
-from byte.domain.cli import ByteArgumentParser, ConsoleService
 
 
 class Command(ABC, Bootable, Injectable, Configurable, UserInteractive):

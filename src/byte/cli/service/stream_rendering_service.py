@@ -1,12 +1,12 @@
 import re
 
+from byte.domain.cli import ConsoleService, MarkdownStream, RuneSpinner
 from langchain_core.messages.ai import AIMessageChunk
 from langchain_core.messages.tool import ToolMessage
 from rich.live import Live
 
 from byte.core import Service
 from byte.core.utils import extract_content_from_message, extract_json_from_message
-from byte.domain.cli import ConsoleService, MarkdownStream, RuneSpinner
 
 
 class StreamRenderingService(Service):

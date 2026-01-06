@@ -1,9 +1,11 @@
-from abc import ABC
-from typing import List, Type
+from __future__ import annotations
 
-from byte.container import Container
-from byte.core.service.base_service import Service
-from byte.domain.cli.service.command_registry import Command, CommandRegistry
+from abc import ABC
+from typing import TYPE_CHECKING, List, Type
+
+if TYPE_CHECKING:
+    from byte.foundation import Application
+    from byte.support import Service
 
 
 class ServiceProvider(ABC):
@@ -15,8 +17,8 @@ class ServiceProvider(ABC):
     """
 
     def __init__(self):
-        # Optional container reference for providers that need it during initialization
-        self.container = None
+        # Optional application reference for providers that need it during initialization
+        self.app = None
 
     def services(self) -> List[Type[Service]]:
         """Return list of service classes this provider makes available.
@@ -27,7 +29,7 @@ class ServiceProvider(ABC):
         """
         return []
 
-    async def register_services(self, container: Container):
+    async def register_services(self, app: Application):
         """Register all services returned by services() as singletons in the container.
 
         Automatically registers each service class returned by the services() method
@@ -39,42 +41,42 @@ class ServiceProvider(ABC):
             return
 
         for service_class in services:
-            container.singleton(service_class)
+            app.singleton(service_class)
 
-    def commands(self) -> List[Type[Command]]:
-        """"""
-        return []
+    # def commands(self) -> List[Type[Command]]:
+    #     """"""
+    #     return []
 
-    async def register_commands(self, container: Container):
-        """"""
-        commands = self.commands()
-        if not commands:
-            return
+    # async def register_commands(self, container: Container):
+    #     """"""
+    #     commands = self.commands()
+    #     if not commands:
+    #         return
 
-        for command_class in commands:
-            container.bind(command_class)
+    #     for command_class in commands:
+    #         container.bind(command_class)
 
-    async def boot_commands(self, container: Container):
-        """boot all commands from commands()"""
-        commands = self.commands()
-        if not commands:
-            return
+    # async def boot_commands(self, container: Container):
+    #     """boot all commands from commands()"""
+    #     commands = self.commands()
+    #     if not commands:
+    #         return
 
-        command_registry = await container.make(CommandRegistry)
+    #     command_registry = await container.make(CommandRegistry)
 
-        for command_class in commands:
-            command = await container.make(command_class)
-            await command_registry.register_slash_command(command)
+    #     for command_class in commands:
+    #         command = await container.make(command_class)
+    #         await command_registry.register_slash_command(command)
 
-    def set_container(self, container: Container):
+    def set_application(self, app: Application):
         """Set the container instance for providers that need container access.
 
         Allows providers to store a reference for complex initialization scenarios
         where the container is needed beyond the register/boot phases.
         """
-        self.container = container
+        self.app = app
 
-    async def register(self, container: Container):
+    async def register(self, app: Application):
         """Register services in the container without initializing them.
 
         This is phase 1 of the two-phase initialization. Only bind service
@@ -83,7 +85,7 @@ class ServiceProvider(ABC):
         """
         pass
 
-    async def boot(self, container: Container):
+    async def boot(self, app: Application):
         """Boot services after all providers have been registered.
 
         This is phase 2 where services can safely reference each other since
@@ -94,7 +96,7 @@ class ServiceProvider(ABC):
         """
         pass
 
-    async def shutdown(self, container: Container):
+    async def shutdown(self, app: Application):
         """Shutdown services and clean up resources.
 
         Called during application shutdown to allow each provider to clean up
