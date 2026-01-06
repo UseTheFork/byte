@@ -3,10 +3,10 @@ from abc import ABC, abstractmethod
 from argparse import Namespace
 from typing import Dict, List, Optional
 
-from byte.domain.cli import ByteArgumentParser, ConsoleService
-
-from byte.core import Service
-from byte.core.mixins import Bootable, Configurable, Injectable, UserInteractive
+from byte.cli import ByteArgumentParser
+from byte.foundation import Console
+from byte.support import Service
+from byte.support.mixins import Bootable, Configurable, Injectable, UserInteractive
 
 
 class Command(ABC, Bootable, Injectable, Configurable, UserInteractive):
@@ -74,7 +74,7 @@ class Command(ABC, Bootable, Injectable, Configurable, UserInteractive):
         try:
             parsed_args = parser.parse_args(args.split() if args else [])
         except argparse.ArgumentError:
-            console = await self.make(ConsoleService)
+            console = await self.make(Console)
             console.print_error_panel(parser.format_help(), title="Invalid Command Arguments")
             return
 

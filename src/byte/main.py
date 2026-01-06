@@ -5,6 +5,7 @@ from pathlib import Path
 import click
 from pydantic import ValidationError
 
+from byte.cli import CLIServiceProvider
 from byte.foundation import Application
 
 
@@ -12,7 +13,10 @@ def cli():
     """Byte CLI Assistant"""
 
     try:
-        application = Application.configure(Path.cwd()).create()
+        providers = [
+            CLIServiceProvider,
+        ]
+        application = Application.configure(Path.cwd(), providers).create()
 
         pass
     except ValidationError:

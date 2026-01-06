@@ -1,6 +1,5 @@
 from typing import AsyncGenerator
 
-from byte.domain.cli import CommandRegistry, ConsoleService
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.document import Document
 from prompt_toolkit.history import FileHistory
@@ -8,8 +7,10 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.shortcuts import PromptSession
 from rich.console import Group
 
-from byte.core import ByteConfig, EventType, Payload, Service, log
+from byte.cli import CommandRegistry
 from byte.domain.agent import AgentService, SubprocessAgent
+from byte.foundation import Console, EventType, Payload
+from byte.support import Service
 
 
 class CommandCompleter(Completer):
@@ -82,7 +83,7 @@ class PromptToolkitService(Service):
 
         self.completer = CommandCompleter()
 
-        config = await self.make(ByteConfig)
+        config = await self.make("config")
 
         self.prompt_session = PromptSession(
             history=FileHistory(config.byte_cache_dir / ".input_history"),
@@ -104,17 +105,18 @@ class PromptToolkitService(Service):
         command_name = parts[0]
         args = parts[1] if len(parts) > 1 else ""
 
-        console = await self.make(ConsoleService)
+        console = self.make(Console)
 
         # Get command registry and execute
-        command_registry = await self.make(CommandRegistry)
+        command_registry = self.make(CommandRegistry)
         command = command_registry.get_slash_command(command_name)
 
         if command:
             try:
                 await command.handle(args)
             except Exception as e:
-                log.exception("Oops")
+                # TODO: Fix this
+                # log.exception("Oops")
                 console.print_error_panel(f"{e}", title="Oops")
         else:
             console.print_error(f"Unknown command: /{command_name}")
@@ -142,7 +144,7 @@ class PromptToolkitService(Service):
 
         Usage: Called by main loop to handle each user interaction
         """
-        console = await self.make(ConsoleService)
+        console = self.make(Console)
 
         # Use placeholder if set, then clear it
         default = self.placeholder or ""

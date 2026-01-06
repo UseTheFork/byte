@@ -24,9 +24,7 @@ class ApplicationBuilder:
 
         return self
 
-    def with_providers(
-        self, providers: list[type] | None = None, with_bootstrap_providers: bool = True
-    ) -> ApplicationBuilder:
+    def with_providers(self, providers: list[type] | None = None) -> ApplicationBuilder:
         """
         Register service providers with the application.
 

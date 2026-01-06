@@ -1,10 +1,11 @@
 import asyncio
 import io
 
-from byte.domain.cli import Markdown
 from rich.console import Console
 from rich.live import Live
 from rich.text import Text
+
+from byte.cli import Markdown
 
 
 class MarkdownStream:

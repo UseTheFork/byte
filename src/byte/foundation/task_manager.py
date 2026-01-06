@@ -1,10 +1,10 @@
 import asyncio
 
-from byte.core.mixins.bootable import Bootable
+from byte.support.mixins.bootable import Bootable
 
 
 class TaskManager(Bootable):
-    async def boot(self):
+    def __init__(self, *args, **kwargs):
         self._tasks = {}
 
     def start_task(self, name: str, coro):

@@ -1,12 +1,11 @@
-from byte.container import Container
-from byte.core import ByteConfig, EventBus, EventType, Payload, ServiceProvider
-from byte.domain.cli import (
-    ConsoleService,
+from byte.cli import (
     InteractionService,
     PromptToolkitService,
     StreamRenderingService,
     SubprocessService,
 )
+from byte.foundation import Application, Console, EventBus, EventType, Payload
+from byte.support import ServiceProvider
 
 
 class CLIServiceProvider(ServiceProvider):
@@ -20,9 +19,9 @@ class CLIServiceProvider(ServiceProvider):
             SubprocessService,
         ]
 
-    async def boot(self, container: Container):
+    async def boot(self, app: Application):
         """Boot UI services."""
-        event_bus = await container.make(EventBus)
+        event_bus = await app.make(EventBus)
 
         event_bus.on(
             EventType.POST_BOOT.value,
@@ -30,10 +29,10 @@ class CLIServiceProvider(ServiceProvider):
         )
 
     async def boot_messages(self, payload: Payload) -> Payload:
-        container: Container = payload.get("container", False)
-        if container:
-            config = await container.make(ByteConfig)
-            console = await container.make(ConsoleService)
+        app: Application = payload.get("container", False)
+        if app:
+            config = await app.make("config")
+            console = await app.make(Console)
             messages = payload.get("messages", [])
 
             # Create diagonal gradient from primary to secondary color

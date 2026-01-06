@@ -9,10 +9,19 @@ if TYPE_CHECKING:
     from byte.foundation.console.console import Console
     from byte.foundation.console.kernel import Kernel
     from byte.foundation.container import Container
-    from byte.foundation.event_bus import EventBus
+    from byte.foundation.event_bus import EventBus, EventType, Payload
     from byte.foundation.task_manager import TaskManager
 
-__all__ = ("Application", "Console", "Container", "EventBus", "Kernel", "TaskManager")
+__all__ = (
+    "Application",
+    "Console",
+    "Container",
+    "EventBus",
+    "EventType",
+    "Kernel",
+    "Payload",
+    "TaskManager",
+)
 
 _dynamic_imports = {
     # keep-sorted start
@@ -20,7 +29,9 @@ _dynamic_imports = {
     "Console": "console.console",
     "Container": "container",
     "EventBus": "event_bus",
+    "EventType": "event_bus",
     "Kernel": "console.kernel",
+    "Payload": "event_bus",
     "TaskManager": "task_manager",
     # keep-sorted end
 }

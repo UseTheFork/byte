@@ -37,7 +37,7 @@ class Application(Container):
         self._register_base_service_providers()
 
     @staticmethod
-    def configure(base_path: Optional[Path] = None):
+    def configure(base_path: Optional[Path] = None, providers: list[type] | None = []):
         """
         Create and configure a new Application instance.
 
@@ -49,7 +49,7 @@ class Application(Container):
         """
         from byte.foundation.application_builder import ApplicationBuilder
 
-        return ApplicationBuilder(Application(base_path=base_path)).with_kernels().with_providers([])
+        return ApplicationBuilder(Application(base_path=base_path)).with_kernels().with_providers(providers)
 
     def set_base_path(self, base_path: Path):
         """Set the base paths."""
