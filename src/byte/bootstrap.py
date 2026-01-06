@@ -1,4 +1,4 @@
-from byte.container import app
+from byte.application import app
 from byte.core import ByteConfig
 from byte.core.event_bus import EventBus
 from byte.core.task_manager import TaskManager
@@ -29,6 +29,8 @@ async def bootstrap(config: ByteConfig):
 
     Returns the fully configured container ready for use.
     """
+
+    app.boot(config.project_root)
 
     app.singleton(EventBus)
     app.singleton(TaskManager)

@@ -60,7 +60,7 @@ mkdocs = ["mkdocs>=1.6.1", "mkdocs-material>=9.6.21", "mkdocstrings>=0.30.1"]
 Homepage = "https://github.com/UseTheFork/byte"
 
 [project.scripts]
-byte = "byte.core.cli:cli"
+byte = "byte.main:cli"
 
 [tool.uv.build-backend]
 module-name = "byte"

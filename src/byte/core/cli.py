@@ -66,4 +66,5 @@ def cli(read_only: tuple[str, ...], add: tuple[str, ...]):
 
 
 if __name__ == "__main__":
-    cli()
+    pass
+    # cli()

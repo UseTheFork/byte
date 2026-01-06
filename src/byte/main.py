@@ -1,100 +1,121 @@
 import asyncio
+import sys
+from pathlib import Path
 
-from rich.console import Console
+import click
+from pydantic import ValidationError
 
-from byte.bootstrap import bootstrap, shutdown
-from byte.container import Container
-from byte.context import container_context
-from byte.core import ByteConfig
-from byte.core.cli import cli
-from byte.core.logging import log
-from byte.core.task_manager import TaskManager
-from byte.domain.cli import ConsoleService, PromptToolkitService
-from byte.domain.files import FileMode, FileService
+from byte.foundation import Application
 
 
-class Byte:
-    """Main application class that orchestrates the CLI interface and command processing.
+@click.command()
+@click.option(
+    "--read-only",
+    multiple=True,
+    help="Add files to read-only context (can be specified multiple times)",
+)
+@click.option(
+    "--add",
+    multiple=True,
+    help="Add files to editable context (can be specified multiple times)",
+)
+def cli(read_only: tuple[str, ...], add: tuple[str, ...]):
+    """Byte CLI Assistant"""
 
-    Separates concerns by delegating prompt handling to PromptHandler and command
-    processing to CommandProcessor, while maintaining the main event loop.
-    """
+    try:
+        application = Application.configure(Path.cwd()).create()
 
-    def __init__(self, container: Container):
-        self.container = container
-        self.actor_tasks = []
+        pass
+    except ValidationError:
+        raise click.Abort
 
-    async def initialize(self):
-        """Discover and start all registered actors"""
-
-        # Store the TaskManager for shutdown later.
-        self.task_manager = await self.container.make(TaskManager)
-
-        # Do boot config operations based on CLI invocation
-        config = await self.container.make(ByteConfig)
-        file_service = await self.container.make(FileService)
-
-        # Add read-only files from boot config
-        if config.boot.read_only_files:
-            for file_path in config.boot.read_only_files:
-                await file_service.add_file(file_path, FileMode.READ_ONLY)
-
-        # Add editable files from boot config
-        if config.boot.editable_files:
-            for file_path in config.boot.editable_files:
-                await file_service.add_file(file_path, FileMode.EDITABLE)
-
-    async def _main_loop(self):
-        """Main application loop - easy to follow"""
-        input_service = await self.container.make(PromptToolkitService)
-
-        while True:
-            try:
-                # Get user input (this can be async/non-blocking)
-                await input_service.execute()
-            except KeyboardInterrupt:
-                break
-            except Exception as e:
-                log.exception(e)
-                console = await self.container.make(ConsoleService)
-                console.print_error_panel(
-                    str(e),
-                    title="Exception",
-                )
-
-    async def run(self):
-        """Run the main application loop.
-
-        Initializes the application, starts the main loop, and ensures proper cleanup
-        of the task manager on exit.
-        """
-        await self.initialize()
-        try:
-            await self._main_loop()
-        finally:
-            await self.task_manager.shutdown()
-            # console.console.print_exception(show_locals=True)
-
-
-async def main(config: ByteConfig):
-    """Application entry point"""
-    container = await bootstrap(config)
-    container_context.set(container)
-
-    # Create and run the actor-based app
-    app = Byte(container)
-    await app.run()
-
-    # Cleanup
-    await shutdown(container)
-
-    console = Console()
-    console.print("[warning]Goodbye![/warning]")
-
-
-def run(config: ByteConfig):
-    asyncio.run(main(config))
+    asyncio.run(application.handle_command(sys.argv))
 
 
 if __name__ == "__main__":
     cli()
+
+
+# from byte.core.cli import cli
+
+# class Byte:
+#     """Main application class that orchestrates the CLI interface and command processing.
+
+#     Separates concerns by delegating prompt handling to PromptHandler and command
+#     processing to CommandProcessor, while maintaining the main event loop.
+#     """
+
+#     def __init__(self, container: Container):
+#         self.container = container
+#         self.actor_tasks = []
+
+#     async def initialize(self):
+#         """Discover and start all registered actors"""
+
+#         # Store the TaskManager for shutdown later.
+#         self.task_manager = await self.container.make(TaskManager)
+
+#         # Do boot config operations based on CLI invocation
+#         config = await self.container.make(ByteConfig)
+#         file_service = await self.container.make(FileService)
+
+#         # Add read-only files from boot config
+#         if config.boot.read_only_files:
+#             for file_path in config.boot.read_only_files:
+#                 await file_service.add_file(file_path, FileMode.READ_ONLY)
+
+#         # Add editable files from boot config
+#         if config.boot.editable_files:
+#             for file_path in config.boot.editable_files:
+#                 await file_service.add_file(file_path, FileMode.EDITABLE)
+
+#     async def _main_loop(self):
+#         """Main application loop - easy to follow"""
+#         input_service = await self.container.make(PromptToolkitService)
+
+#         while True:
+#             try:
+#                 # Get user input (this can be async/non-blocking)
+#                 await input_service.execute()
+#             except KeyboardInterrupt:
+#                 break
+#             except Exception as e:
+#                 log.exception(e)
+#                 console = await self.container.make(ConsoleService)
+#                 console.print_error_panel(
+#                     str(e),
+#                     title="Exception",
+#                 )
+
+#     async def run(self):
+#         """Run the main application loop.
+
+#         Initializes the application, starts the main loop, and ensures proper cleanup
+#         of the task manager on exit.
+#         """
+#         await self.initialize()
+#         try:
+#             await self._main_loop()
+#         finally:
+#             await self.task_manager.shutdown()
+#             # console.console.print_exception(show_locals=True)
+
+
+# async def main(config: ByteConfig):
+#     """Application entry point"""
+#     container = await bootstrap(config)
+#     container_context.set(container)
+
+#     # Create and run the actor-based app
+#     app = Byte(container)
+#     await app.run()
+
+#     # Cleanup
+#     await shutdown(container)
+
+#     console = Console()
+#     console.print("[warning]Goodbye![/warning]")
+
+
+# def run(config: ByteConfig):
+#     asyncio.run(main(config))
