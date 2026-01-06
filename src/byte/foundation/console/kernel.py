@@ -2,7 +2,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from byte.foundation.bootstrap import BootProviders, HandleExceptions, LoadConfiguration, RegisterProviders
+from byte.foundation.bootstrap import (
+    BootProviders,
+    HandleExceptions,
+    LoadConfiguration,
+    LoadConsoleArgs,
+    LoadEnvironmentVariables,
+    PrepareEnvironment,
+    RegisterProviders,
+)
 
 if TYPE_CHECKING:
     from byte.foundation import Application
@@ -16,6 +24,9 @@ class Kernel:
 
     def bootstrappers(self):
         return [
+            LoadEnvironmentVariables,
+            LoadConsoleArgs,
+            PrepareEnvironment,
             LoadConfiguration,
             HandleExceptions,
             RegisterProviders,
@@ -41,8 +52,6 @@ class Kernel:
 
             # if self.should_discover_commands():
             #     self.discover_commands()
-
-            self.commands_loaded = True
 
     async def handle(self, input: list[str]) -> int:
         """
