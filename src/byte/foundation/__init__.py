@@ -10,10 +10,12 @@ if TYPE_CHECKING:
     from byte.foundation.console.kernel import Kernel
     from byte.foundation.container import Container
     from byte.foundation.event_bus import EventBus, EventType, Payload
+    from byte.foundation.exceptions import ByteException
     from byte.foundation.task_manager import TaskManager
 
 __all__ = (
     "Application",
+    "ByteException",
     "Console",
     "Container",
     "EventBus",
@@ -26,6 +28,7 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "Application": "application",
+    "ByteException": "exceptions",
     "Console": "console.console",
     "Container": "container",
     "EventBus": "event_bus",

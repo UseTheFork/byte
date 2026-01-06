@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from byte.cli.rich.rune_spinner import RuneSpinner
     from byte.cli.schemas import ByteTheme, SubprocessResult, ThemeRegistry
     from byte.cli.service.command_registry import Command, CommandRegistry
-    from byte.cli.service.console_service import ConsoleService
     from byte.cli.service.interactions_service import InteractionService
     from byte.cli.service.prompt_toolkit_service import PromptToolkitService
     from byte.cli.service.stream_rendering_service import StreamRenderingService
@@ -27,7 +26,6 @@ __all__ = (
     "CodeBlock",
     "Command",
     "CommandRegistry",
-    "ConsoleService",
     "Heading",
     "InteractionService",
     "Markdown",
@@ -55,7 +53,6 @@ _dynamic_imports = {
     "CodeBlock": "rich.markdown",
     "Command": "service.command_registry",
     "CommandRegistry": "service.command_registry",
-    "ConsoleService": "service.console_service",
     "Heading": "rich.markdown",
     "InteractionService": "service.interactions_service",
     "Markdown": "rich.markdown",
