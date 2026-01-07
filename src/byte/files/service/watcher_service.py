@@ -21,7 +21,7 @@ class FileWatcherService(Service):
         We cache the ignore service's pathspec for efficient synchronous filtering.
         Usage: Used internally by awatch to determine which file changes to process.
         """
-        if not self._config.project_root:
+        if not self.app["path"]:
             return True
 
         try:
@@ -31,7 +31,7 @@ class FileWatcherService(Service):
                 return True
 
             file_path = Path(path)
-            relative_path = file_path.relative_to(self._config.project_root)
+            relative_path = file_path.relative_to(self.app["path"])
 
             is_ignored = spec.match_file(str(relative_path)) or spec.match_file(str(relative_path) + "/")
 
@@ -66,7 +66,7 @@ class FileWatcherService(Service):
     async def _watch_files(self) -> None:
         """Main file watching loop."""
         try:
-            async for changes in awatch(str(self._config.project_root), watch_filter=self._watch_filter):
+            async for changes in awatch(str(self.app["path"]), watch_filter=self._watch_filter):
                 for change_type, file_path_str in changes:
                     # log.debug(f"File changed: {change_type} -> {file_path_str}")
                     file_path = Path(file_path_str)
@@ -75,15 +75,15 @@ class FileWatcherService(Service):
             # log.exception(e)
             print(f"File watcher error: {e}")
 
-    async def _start_watching(self) -> None:
+    def _start_watching(self) -> None:
         """Start file system monitoring using TaskManager."""
         self.task_manager.start_task("file_watcher", self._watch_files())
 
-    async def boot(self) -> None:
+    def boot(self) -> None:
         """Initialize file watcher with TaskManager integration."""
         self.task_manager = self.make(TaskManager)
         self.ignore_service = self.make(FileIgnoreService)
         self.file_discovery = self.make(FileDiscoveryService)
         self.file_service = self.make(FileService)
 
-        await self._start_watching()
+        self._start_watching()

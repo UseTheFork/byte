@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import List
 
-from byte.domain.lsp import Location, LSPService
 from langchain_core.tools import tool
 
 from byte import make
+from byte.lsp import Location, LSPService
 
 
 @tool(parse_docstring=True)
@@ -24,7 +24,7 @@ async def find_references(file_path: str, line: int, character: int, include_dec
     Returns:
             Reference information grouped by file with context, or an error message if unavailable
     """
-    lsp_service = await make(LSPService)
+    lsp_service = make(LSPService)
 
     # Convert string path to Path object
     path_obj = Path(file_path).resolve()

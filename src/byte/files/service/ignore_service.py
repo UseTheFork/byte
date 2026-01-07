@@ -15,7 +15,7 @@ class FileIgnoreService(Service):
     Usage: `is_ignored = await ignore_service.is_ignored(file_path)`
     """
 
-    async def _load_ignore_patterns(self) -> None:
+    def _load_ignore_patterns(self) -> None:
         """Load and compile ignore patterns from .gitignore files and config.
 
         Searches for .gitignore in project root and combines with custom
@@ -24,8 +24,8 @@ class FileIgnoreService(Service):
         patterns = []
 
         # Load project-specific .gitignore only if we have a valid project root
-        if self._config.project_root is not None:
-            gitignore_path = self._config.project_root / ".gitignore"
+        if self.app["path"] is not None:
+            gitignore_path = self.app["path"] / ".gitignore"
             if gitignore_path.exists():
                 try:
                     with open(gitignore_path, encoding="utf-8") as f:
@@ -47,12 +47,12 @@ class FileIgnoreService(Service):
 
         self._gitignore_spec = pathspec.PathSpec.from_lines("gitwildmatch", patterns)
 
-    async def boot(self) -> None:
+    def boot(self) -> None:
         """Initialize service by loading and compiling ignore patterns."""
         self._gitignore_spec: Optional[pathspec.PathSpec] = None
-        await self._load_ignore_patterns()
+        self._load_ignore_patterns()
 
-    async def is_ignored(self, path: Path) -> bool:
+    def is_ignored(self, path: Path) -> bool:
         """Check if a path should be ignored based on loaded patterns.
 
         Uses relative path from project root for pattern matching,
@@ -60,11 +60,11 @@ class FileIgnoreService(Service):
         directory patterns to handle all gitignore pattern types.
         Usage: `if await ignore_service.is_ignored(file_path): continue`
         """
-        if not self._gitignore_spec or not self._config.project_root:
+        if not self._gitignore_spec or not self.app["path"]:
             return False
 
         try:
-            relative_path = path.relative_to(self._config.project_root)
+            relative_path = path.relative_to(self.app["path"])
             relative_str = str(relative_path)
 
             # Check if the path itself matches
@@ -92,7 +92,7 @@ class FileIgnoreService(Service):
         ensuring file filtering stays up-to-date with project rules.
         Usage: `await ignore_service.refresh()` -> reloads patterns
         """
-        await self._load_ignore_patterns()
+        self._load_ignore_patterns()
 
     def get_pathspec(self) -> Optional[pathspec.PathSpec]:
         """Get the compiled pathspec for advanced filtering use cases.

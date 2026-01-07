@@ -18,15 +18,15 @@ class LLMServiceProvider(ServiceProvider):
     def services(self) -> List[Type[Service]]:
         return [LLMService]
 
-    async def boot(self, app: Application) -> None:
+    async def boot(self) -> None:
         """Boot LLM services and display configuration information.
 
         Shows user which models are active for transparency and debugging,
         helping users understand which AI capabilities are available.
         Usage: Called automatically during application startup
         """
-        event_bus = app.make(EventBus)
-        llm_service = app.make(LLMService)
+        event_bus = self.app.make(EventBus)
+        llm_service = self.app.make(LLMService)
 
         # Register listener that calls list_in_context_files before each prompt
         event_bus.on(

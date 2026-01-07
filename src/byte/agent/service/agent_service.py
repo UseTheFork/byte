@@ -9,7 +9,7 @@ class AgentService(Service):
 
     _current_agent: Type[Agent] = CoderAgent
 
-    async def boot(self):
+    def boot(self):
         """Boot method to initialize the agent service."""
         self._current_agent = CoderAgent  # Set default agent
         self._agent_instances = {}

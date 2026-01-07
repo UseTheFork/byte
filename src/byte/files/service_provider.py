@@ -39,20 +39,20 @@ class FileServiceProvider(ServiceProvider):
             ReloadFilesCommand,
         ]
 
-    async def boot(self, app: Application):
+    async def boot(self):
         """Boot file services and register commands with registry."""
         # Ensure ignore service is booted first for pattern loading
-        app.make(FileIgnoreService)
+        self.app.make(FileIgnoreService)
 
         # Then boot file discovery which depends on ignore service
-        app.make(FileDiscoveryService)
+        self.app.make(FileDiscoveryService)
 
         # Boots the filewatcher service in to the task manager
-        app.make(FileWatcherService)
+        self.app.make(FileWatcherService)
 
         # Set up event listener for PRE_PROMPT_TOOLKIT
-        event_bus = app.make(EventBus)
-        file_service = app.make(FileService)
+        event_bus = self.app.make(EventBus)
+        file_service = self.app.make(FileService)
 
         # Register listener that calls list_in_context_files before each prompt
         event_bus.on(
@@ -61,9 +61,9 @@ class FileServiceProvider(ServiceProvider):
         )
 
         # Boot AI comment watcher if enabled
-        config = app.make("config")
+        config = self.app.make("config")
         if config.files.watch.enable:
-            ai_comment_watcher = app.make(AICommentWatcherService)
+            ai_comment_watcher = self.app.make(AICommentWatcherService)
 
             # Register AI comment watcher event hooks
             event_bus.on(

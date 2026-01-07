@@ -20,9 +20,9 @@ class EditFormatService(Service, UserInteractive):
     Usage: `blocks = await service.handle(ai_response)`
     """
 
-    async def boot(self, **kwargs):
+    def boot(self, **kwargs):
         """Initialize service with appropriate prompts based on configuration."""
-        self.edit_block_service = self.make(ParserService)
+        self.edit_block_service = self.app.make(ParserService)
 
         if self._config.edit_format.enable_shell_commands:
             # Combine system prompts to provide AI with both edit and shell capabilities

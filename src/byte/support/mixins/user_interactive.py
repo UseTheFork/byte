@@ -33,7 +33,7 @@ class UserInteractive:
         if not self.app:
             raise RuntimeError("No container available - ensure service is properly initialized")
 
-        interaction_service = await self.app.make(InteractionService)
+        interaction_service = self.app.make(InteractionService)
         return await interaction_service.input_text(message)
 
     async def prompt_for_confirmation(self, message: str, default: bool = True):
@@ -47,7 +47,7 @@ class UserInteractive:
         if not self.app:
             raise RuntimeError("No container available - ensure service is properly initialized")
 
-        interaction_service = await self.app.make(InteractionService)
+        interaction_service = self.app.make(InteractionService)
         return await interaction_service.confirm(message, default)
 
     async def prompt_for_select(self, message: str, choices: list[str], default: str | None = None) -> str | None:
@@ -61,7 +61,7 @@ class UserInteractive:
         if not self.app:
             raise RuntimeError("No container available - ensure service is properly initialized")
 
-        interaction_service = await self.app.make(InteractionService)
+        interaction_service = self.app.make(InteractionService)
         return await interaction_service.select(message, choices, default)
 
     async def prompt_for_select_numbered(
@@ -76,7 +76,7 @@ class UserInteractive:
         if not self.app:
             raise RuntimeError("No container available - ensure service is properly initialized")
 
-        interaction_service = await self.app.make(InteractionService)
+        interaction_service = self.app.make(InteractionService)
         return await interaction_service.select_numbered(message, choices, default)
 
     async def prompt_for_confirm_or_input(
@@ -92,5 +92,5 @@ class UserInteractive:
         if not self.app:
             raise RuntimeError("No container available - ensure service is properly initialized")
 
-        interaction_service = await self.app.make(InteractionService)
+        interaction_service = self.app.make(InteractionService)
         return await interaction_service.confirm_or_input(confirm_message, input_message, default_confirm)

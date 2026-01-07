@@ -34,7 +34,7 @@ class ParserService(Service, UserInteractive, ABC):
     edit_blocks: List[SearchReplaceBlock]
     match_pattern = r"<file\s+([^>]+)>\s*<search>(.*?)</search>\s*<replace>(.*?)</replace>\s*</file>"
 
-    async def boot(self):
+    def boot(self):
         self.edit_blocks = []
         self.prompts = EditFormatPrompts(
             system=edit_format_system,

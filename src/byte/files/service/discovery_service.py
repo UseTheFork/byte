@@ -14,42 +14,42 @@ class FileDiscoveryService(Service):
     Usage: `files = discovery.get_files()` -> all non-ignored project files
     """
 
-    async def _is_ignored(self, path: Path) -> bool:
+    def _is_ignored(self, path: Path) -> bool:
         """Check if a path should be ignored using FileIgnoreService.
 
         Delegates to the centralized ignore service for consistent
         filtering across all file operations.
         """
-        ignore_service = await self.make(FileIgnoreService)
-        is_ignored = await ignore_service.is_ignored(path)
+        ignore_service = self.make(FileIgnoreService)
+        is_ignored = ignore_service.is_ignored(path)
         return is_ignored
 
-    async def _scan_project_files(self) -> None:
+    def _scan_project_files(self) -> None:
         """Recursively scan project directory and cache all non-ignored files.
 
         Builds an in-memory index of project files for fast lookups and
         completions, filtering out ignored files and directories.
         """
-        if not self._config.project_root or not self._config.project_root.exists():
+        if not self.app["path"] or not self.app["path"].exists():
             return
 
-        for root, dirs, files in os.walk(self._config.project_root):
+        for root, dirs, files in os.walk(self.app["path"]):
             root_path = Path(root)
 
             # Filter directories to avoid scanning ignored ones
-            dirs[:] = [d for d in dirs if not await self._is_ignored(root_path / d)]
+            dirs[:] = [d for d in dirs if not self._is_ignored(root_path / d)]
 
             # Add non-ignored files to our cache
             for file in files:
                 file_path = root_path / file
-                if not await self._is_ignored(file_path) and file_path.is_file():
+                if not self._is_ignored(file_path) and file_path.is_file():
                     # log.debug(f"Discovered file: {file_path}")
                     self._all_files.add(file_path)
 
-    async def boot(self) -> None:
+    def boot(self) -> None:
         """Initialize file discovery by scanning project with ignore patterns."""
         self._all_files: Set[Path] = set()
-        await self._scan_project_files()
+        self._scan_project_files()
 
     async def get_files(self, extension: Optional[str] = None) -> List[Path]:
         """Get all discovered files, optionally filtered by extension.
@@ -63,7 +63,7 @@ class FileDiscoveryService(Service):
         if extension:
             files = [f for f in files if f.suffix == extension]
 
-        return sorted(files, key=lambda p: str(p.relative_to(self._config.project_root)))
+        return sorted(files, key=lambda p: str(p.relative_to(self.app["path"])))
 
     async def get_relative_paths(self, extension: Optional[str] = None) -> List[str]:
         """Get relative path strings for UI display and completions.
@@ -73,10 +73,10 @@ class FileDiscoveryService(Service):
         Usage: `paths = discovery.get_relative_paths('.py')` -> ['src/main.py', ...]
         """
         files = await self.get_files(extension)
-        if not self._config.project_root:
+        if not self.app["path"]:
             return [str(f) for f in files]
 
-        return [str(f.relative_to(self._config.project_root)) for f in files]
+        return [str(f.relative_to(self.app["path"])) for f in files]
 
     async def find_files(self, pattern: str) -> List[Path]:
         """Find files matching a partial path pattern for completions.
@@ -86,7 +86,7 @@ class FileDiscoveryService(Service):
         exact prefix matches, then fuzzy matches by relevance score.
         Usage: `matches = discovery.find_files('boot')` -> includes 'byte/bootstrap.py'
         """
-        if not self._config.project_root:
+        if not self.app["path"]:
             return []
 
         pattern_lower = pattern.lower()
@@ -95,7 +95,7 @@ class FileDiscoveryService(Service):
 
         for file_path in self._all_files:
             try:
-                relative_path = str(file_path.relative_to(self._config.project_root))
+                relative_path = str(file_path.relative_to(self.app["path"]))
                 relative_path_lower = relative_path.lower()
 
                 # Exact prefix match gets highest priority
@@ -122,14 +122,14 @@ class FileDiscoveryService(Service):
         # Combine exact matches first, then fuzzy matches
         all_matches = exact_matches + fuzzy_files
 
-        return sorted(all_matches, key=lambda p: str(p.relative_to(self._config.project_root)))
+        return sorted(all_matches, key=lambda p: str(p.relative_to(self.app["path"])))
 
     async def add_file(self, path: Path) -> bool:
         """Add a newly discovered file to the cache.
 
         Usage: `discovery.add_file(Path("new_file.py"))` -> adds to cache
         """
-        if await self._is_ignored(path):
+        if self._is_ignored(path):
             return False
 
         if path.is_file() and path not in self._all_files:
@@ -157,7 +157,7 @@ class FileDiscoveryService(Service):
         self._all_files.clear()
 
         # Refresh ignore patterns from FileIgnoreService
-        ignore_service = await self.make(FileIgnoreService)
+        ignore_service = self.make(FileIgnoreService)
         await ignore_service.refresh()
 
-        await self._scan_project_files()
+        self._scan_project_files()

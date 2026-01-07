@@ -1,16 +1,15 @@
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from byte.core.utils import get_language_from_filename
-from byte.domain.lsp import (
+from byte import Service, TaskManager, log
+from byte.lsp import (
     CompletionItem,
     Diagnostic,
     HoverResult,
     Location,
     LSPClient,
 )
-
-from byte.core import Service, TaskManager, log
+from byte.support.utils import get_language_from_filename
 
 
 class LSPService(Service):
@@ -28,29 +27,29 @@ class LSPService(Service):
             client = LSPClient(
                 name=server_name,
                 command=server_config.command,
-                root_path=self._config.project_root,
+                root_path=self.app["path"],
             )
 
-            log.info(f"Starting LSP server: {server_name}")
+            log().info(f"Starting LSP server: {server_name}")
             if await client.start():
                 self.clients[server_name] = client
-                log.info(f"LSP server started successfully: {server_name}")
+                log().info(f"LSP server started successfully: {server_name}")
             else:
-                log.error(f"Failed to start LSP server: {server_name}")
+                log().error(f"Failed to start LSP server: {server_name}")
         except Exception as e:
-            log.error(f"Error starting LSP server {server_name}: {e}")
-            log.exception(e)
+            log().error(f"Error starting LSP server {server_name}: {e}")
+            log().exception(e)
 
     async def _start_lsp_servers(self) -> None:
         """Start all configured LSP servers in background."""
         for server_name, server_config in self._config.lsp.servers.items():
             self.task_manager.start_task(f"lsp_server_{server_name}", self._start_lsp_client(server_name))
 
-    async def boot(self) -> None:
+    def boot(self) -> None:
         """Initialize LSP service with configured servers."""
         self.clients: Dict[str, LSPClient] = {}
         self.language_map: Dict[str, str] = {}
-        self.task_manager = await self.make(TaskManager)
+        self.task_manager = self.make(TaskManager)
 
         # Build language to server name mapping
         for server_name, server_config in self._config.lsp.servers.items():
@@ -60,7 +59,7 @@ class LSPService(Service):
 
         # Start LSP servers in background if enabled
         if self._config.lsp.enable:
-            await self._start_lsp_servers()
+            self._start_lsp_servers()
 
     async def _get_client_for_file(self, file_path: Path) -> Optional[LSPClient]:
         """Get an LSP client for the given file.
@@ -74,14 +73,14 @@ class LSPService(Service):
         file_language = get_language_from_filename(str(file_path))
 
         if not file_language:
-            log.debug(f"Could not determine language for file: {file_path}")
+            log().debug(f"Could not determine language for file: {file_path}")
             return None
 
         # Determine server from file language (case-insensitive)
         server_name = self.language_map.get(file_language.lower())
 
         if not server_name or server_name not in self._config.lsp.servers:
-            log.debug(f"No LSP server configured for language '{file_language}' (file: {file_path})")
+            log().debug(f"No LSP server configured for language '{file_language}' (file: {file_path})")
             return None
 
         # Return existing client if available
@@ -90,7 +89,7 @@ class LSPService(Service):
             return client
 
         # If client not ready yet, log a warning
-        log.warning(f"LSP client '{server_name}' not ready yet for file: {file_path}")
+        log().warning(f"LSP client '{server_name}' not ready yet for file: {file_path}")
         return None
 
     async def _ensure_document_open(self, client: LSPClient, file_path: Path) -> bool:
@@ -113,10 +112,10 @@ class LSPService(Service):
 
             # Notify server about the document
             await client.did_open(file_path, content, language_id)
-            log.debug(f"Opened document in LSP: {file_path}")
+            log().debug(f"Opened document in LSP: {file_path}")
             return True
         except Exception as e:
-            log.error(f"Failed to open document in LSP: {file_path} - {e}")
+            log().error(f"Failed to open document in LSP: {file_path} - {e}")
             return False
 
     async def handle(self, **kwargs) -> Any:

@@ -4,12 +4,21 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
+from byte.agent import AgentServiceProvider
+from byte.analytics import AnalyticsProvider
 from byte.cli import CLIServiceProvider
 from byte.context import application_context
+from byte.files import FileServiceProvider
 from byte.foundation import Application
+from byte.git import GitServiceProvider
 from byte.knowledge import KnowledgeServiceProvider
+from byte.lint import LintServiceProvider
+from byte.llm import LLMServiceProvider
 from byte.memory import MemoryServiceProvider
+from byte.presets import PresetsProvider
+from byte.prompt_format import PromptFormatProvider
 from byte.system import SystemServiceProvider
+from byte.web import WebServiceProvider
 
 
 def cli():
@@ -20,6 +29,17 @@ def cli():
             CLIServiceProvider,
             MemoryServiceProvider,
             KnowledgeServiceProvider,
+            FileServiceProvider,
+            # ToolsServiceProvider,
+            LLMServiceProvider,
+            GitServiceProvider,
+            LintServiceProvider,
+            AgentServiceProvider,
+            # LSPServiceProvider,
+            AnalyticsProvider,
+            PromptFormatProvider,
+            WebServiceProvider,
+            PresetsProvider,
             SystemServiceProvider,
         ]
         application = Application.configure(Path.cwd(), providers).create()

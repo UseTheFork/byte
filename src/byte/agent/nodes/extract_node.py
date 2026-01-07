@@ -65,7 +65,7 @@ class ExtractNode(Node, UserInteractive):
     Usage: `node = await container.make(ExtractNode, schema="session_context")`
     """
 
-    async def boot(
+    def boot(
         self,
         goto: str = "end_node",
         schema: Literal["text", "session_context"] = "text",

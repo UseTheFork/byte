@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import List
 
-from byte.domain.lsp import Location, LSPService
 from langchain_core.tools import tool
 
 from byte.context import make
+from byte.lsp import Location, LSPService
 
 
 @tool(parse_docstring=True)
@@ -22,7 +22,7 @@ async def get_definition(file_path: str, line: int, character: int) -> str:
     Returns:
             Definition information with file paths and ranges, or an error message if unavailable
     """
-    lsp_service = await make(LSPService)
+    lsp_service = make(LSPService)
 
     # Convert string path to Path object
     path_obj = Path(file_path).resolve()

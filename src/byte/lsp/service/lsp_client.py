@@ -4,15 +4,14 @@ from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from byte.domain.lsp import (
+from byte import log
+from byte.lsp import (
     CompletionItem,
     Diagnostic,
     HoverResult,
     Location,
     LspServerState,
 )
-
-from byte.core import log
 
 
 class LSPClient:
@@ -45,10 +44,10 @@ class LSPClient:
         """Send a JSON-RPC request and wait for response."""
         # Allow initialize request during STARTING state
         if self.state == LspServerState.STARTING and method != "initialize":
-            log.warning(f"[LSP {self.name}] Cannot send request {method}: server state is {self.state}")
+            log().warning(f"[LSP {self.name}] Cannot send request {method}: server state is {self.state}")
             return None
         elif self.state not in (LspServerState.RUNNING, LspServerState.STARTING):
-            log.warning(f"[LSP {self.name}] Cannot send request {method}: server state is {self.state}")
+            log().warning(f"[LSP {self.name}] Cannot send request {method}: server state is {self.state}")
             return None
 
         self.request_id += 1
@@ -66,35 +65,35 @@ class LSPClient:
         future = loop.create_future()
         self.pending_requests[request_id] = future
 
-        log.debug(f"[LSP {self.name}] Sending request #{request_id}: {method}")
-        log.debug(f"[LSP {self.name}] Request message: {message}")
-        log.debug(f"[LSP {self.name}] Pending requests: {list(self.pending_requests.keys())}")
+        log().debug(f"[LSP {self.name}] Sending request #{request_id}: {method}")
+        log().debug(f"[LSP {self.name}] Request message: {message}")
+        log().debug(f"[LSP {self.name}] Pending requests: {list(self.pending_requests.keys())}")
 
         # Send request
         try:
             await self._write_message(message)
-            log.debug(f"[LSP {self.name}] Request #{request_id} sent successfully")
+            log().debug(f"[LSP {self.name}] Request #{request_id} sent successfully")
         except Exception as e:
-            log.error(f"[LSP {self.name}] Failed to send request #{request_id}: {e}")
-            log.exception(e)
+            log().error(f"[LSP {self.name}] Failed to send request #{request_id}: {e}")
+            log().exception(e)
             self.pending_requests.pop(request_id, None)
             return None
 
         # Wait for response
         try:
-            log.debug(f"[LSP {self.name}] Waiting for response to request #{request_id}...")
+            log().debug(f"[LSP {self.name}] Waiting for response to request #{request_id}...")
             result = await asyncio.wait_for(future, timeout=30.0)
-            log.debug(f"[LSP {self.name}] Received response to request #{request_id}")
+            log().debug(f"[LSP {self.name}] Received response to request #{request_id}")
             return result
         except TimeoutError:
             self.pending_requests.pop(request_id, None)
-            log.warning(f"[LSP {self.name}] Request #{request_id} timeout after 30s: {method}")
-            log.warning(f"[LSP {self.name}] Still pending: {list(self.pending_requests.keys())}")
+            log().warning(f"[LSP {self.name}] Request #{request_id} timeout after 30s: {method}")
+            log().warning(f"[LSP {self.name}] Still pending: {list(self.pending_requests.keys())}")
             return None
         except Exception as e:
             self.pending_requests.pop(request_id, None)
-            log.error(f"[LSP {self.name}] Request #{request_id} failed: {e}")
-            log.exception(e)
+            log().error(f"[LSP {self.name}] Request #{request_id} failed: {e}")
+            log().exception(e)
             return None
 
     async def _send_notification(self, method: str, params: Dict[str, Any]) -> None:
@@ -170,9 +169,9 @@ class LSPClient:
                 # Parse diagnostics
                 diagnostics = [Diagnostic(**diag) for diag in diagnostics_data]
                 self._diagnostics[uri] = diagnostics
-                log.debug(f"[LSP {self.name}] Received {len(diagnostics)} diagnostics for {uri}")
+                log().debug(f"[LSP {self.name}] Received {len(diagnostics)} diagnostics for {uri}")
             except Exception as e:
-                log.error(f"[LSP {self.name}] Failed to parse diagnostics: {e}")
+                log().error(f"[LSP {self.name}] Failed to parse diagnostics: {e}")
 
     async def _read_message(self) -> Optional[Dict[str, Any]]:
         """Read a single JSON-RPC message from the server."""
@@ -181,11 +180,11 @@ class LSPClient:
             headers = {}
             while True:
                 if self.reader is None:
-                    log.warning(f"[LSP {self.name}] Reader is None")
+                    log().warning(f"[LSP {self.name}] Reader is None")
                     return None
                 line = await self.reader.readline()
                 if not line:
-                    log.warning(f"[LSP {self.name}] EOF while reading headers")
+                    log().warning(f"[LSP {self.name}] EOF while reading headers")
                     return None
                 if line == b"\r\n":
                     break
@@ -197,11 +196,11 @@ class LSPClient:
 
             # Read content
             if "Content-Length" not in headers:
-                log.warning(f"[LSP {self.name}] No Content-Length in headers: {headers}")
+                log().warning(f"[LSP {self.name}] No Content-Length in headers: {headers}")
                 return None
 
             content_length = int(headers["Content-Length"])
-            log.debug(f"[LSP {self.name}] Reading {content_length} bytes of content")
+            log().debug(f"[LSP {self.name}] Reading {content_length} bytes of content")
 
             # Read content in chunks to ensure we get all of it
             content = b""
@@ -209,7 +208,7 @@ class LSPClient:
             while remaining > 0:
                 chunk = await self.reader.read(min(remaining, 4096))
                 if not chunk:
-                    log.warning(
+                    log().warning(
                         f"[LSP {self.name}] EOF while reading content, got {len(content)}/{content_length} bytes"
                     )
                     return None
@@ -217,26 +216,26 @@ class LSPClient:
                 remaining -= len(chunk)
 
             message = json.loads(content.decode("utf-8"))
-            log.debug(f"[LSP {self.name}] Parsed message type: {message.get('method', message.get('id', 'unknown'))}")
+            log().debug(f"[LSP {self.name}] Parsed message type: {message.get('method', message.get('id', 'unknown'))}")
             return message
 
         except Exception as e:
-            log.error(f"[LSP {self.name}] Error reading LSP message: {e}")
-            log.exception(e)
+            log().error(f"[LSP {self.name}] Error reading LSP message: {e}")
+            log().exception(e)
             return None
 
     async def _read_loop(self) -> None:
         """Continuously read messages from the server."""
-        log.debug(f"[LSP {self.name}] Read loop started")
+        log().debug(f"[LSP {self.name}] Read loop started")
         try:
             while True:
-                log.debug(f"[LSP {self.name}] Waiting for message...")
+                log().debug(f"[LSP {self.name}] Waiting for message...")
                 message = await self._read_message()
                 if message is None:
-                    log.warning(f"[LSP {self.name}] Read message returned None, stopping read loop")
+                    log().warning(f"[LSP {self.name}] Read message returned None, stopping read loop")
                     break
 
-                log.debug(f"[LSP {self.name}] Received message: {message}")
+                log().debug(f"[LSP {self.name}] Received message: {message}")
 
                 # Handle response
                 if "id" in message and message["id"] in self.pending_requests:
@@ -244,34 +243,34 @@ class LSPClient:
                     future = self.pending_requests.pop(request_id)
 
                     if "result" in message:
-                        log.debug(f"[LSP {self.name}] Setting result for request #{request_id}")
+                        log().debug(f"[LSP {self.name}] Setting result for request #{request_id}")
 
                         # Check if this is the initialize response (request_id == 1)
                         if request_id == 1 and "capabilities" in message["result"]:
-                            log.info(f"[LSP {self.name}] Received initialize response, setting state to RUNNING")
+                            log().info(f"[LSP {self.name}] Received initialize response, setting state to RUNNING")
                             self.state = LspServerState.RUNNING
 
                         future.set_result(message["result"])
                     elif "error" in message:
-                        log.error(f"[LSP {self.name}] Error response for request #{request_id}: {message['error']}")
+                        log().error(f"[LSP {self.name}] Error response for request #{request_id}: {message['error']}")
                         future.set_exception(Exception(message["error"]))
                 elif "id" in message:
-                    log.warning(f"[LSP {self.name}] Received response for unknown request #{message['id']}")
+                    log().warning(f"[LSP {self.name}] Received response for unknown request #{message['id']}")
                 elif "method" in message:
                     # This is a notification from server
                     method = message["method"]
-                    log.debug(f"[LSP {self.name}] Received notification: {method}")
+                    log().debug(f"[LSP {self.name}] Received notification: {method}")
 
                     # Handle publishDiagnostics notification
                     if method == "textDocument/publishDiagnostics":
                         await self._handle_publish_diagnostics(message.get("params", {}))
 
         except asyncio.CancelledError:
-            log.debug(f"[LSP {self.name}] Read loop cancelled")
+            log().debug(f"[LSP {self.name}] Read loop cancelled")
             pass
         except Exception as e:
-            log.error(f"[LSP {self.name}] Read loop error: {e}")
-            log.exception(e)
+            log().error(f"[LSP {self.name}] Read loop error: {e}")
+            log().exception(e)
             self.state = LspServerState.FAILED
 
     async def _read_stderr(self) -> None:
@@ -283,9 +282,9 @@ class LSPClient:
                 line = await self.process.stderr.readline()
                 if not line:
                     break
-                log.debug(f"[LSP {self.name}] stderr: {line.decode('utf-8').strip()}")
+                log().debug(f"[LSP {self.name}] stderr: {line.decode('utf-8').strip()}")
         except Exception as e:
-            log.error(f"[LSP {self.name}] Error reading stderr: {e}")
+            log().error(f"[LSP {self.name}] Error reading stderr: {e}")
 
     async def start(self) -> bool:
         """Start the LSP server process.
@@ -293,10 +292,10 @@ class LSPClient:
         Usage: `await client.start()` -> starts server and initializes
         """
         if self.state == LspServerState.RUNNING:
-            log.debug(f"[LSP {self.name}] Already running")
+            log().debug(f"[LSP {self.name}] Already running")
             return True
 
-        log.info(f"[LSP {self.name}] Starting server with command: {' '.join(self.command)}")
+        log().info(f"[LSP {self.name}] Starting server with command: {' '.join(self.command)}")
         self.state = LspServerState.STARTING
 
         try:
@@ -307,7 +306,7 @@ class LSPClient:
                 stderr=asyncio.subprocess.PIPE,
             )
 
-            log.debug(f"[LSP {self.name}] Process started with PID {self.process.pid}")
+            log().debug(f"[LSP {self.name}] Process started with PID {self.process.pid}")
 
             self.reader = self.process.stdout
             self.writer = self.process.stdin
@@ -318,19 +317,19 @@ class LSPClient:
             # Start stderr monitoring
             self._stderr_task = asyncio.create_task(self._read_stderr())
 
-            log.debug(f"[LSP {self.name}] Read task started")
+            log().debug(f"[LSP {self.name}] Read task started")
 
             # Initialize the server
-            log.debug(f"[LSP {self.name}] Sending initialize request")
+            log().debug(f"[LSP {self.name}] Sending initialize request")
             await self._initialize()
-            log.info(f"[LSP {self.name}] Server initialized successfully")
+            log().info(f"[LSP {self.name}] Server initialized successfully")
 
             # State will be set to RUNNING when we receive the initialize response
             return True
 
         except Exception as e:
-            log.error(f"[LSP {self.name}] Failed to start: {e}")
-            log.exception(e)
+            log().error(f"[LSP {self.name}] Failed to start: {e}")
+            log().exception(e)
             self.state = LspServerState.FAILED
             return False
 
@@ -386,7 +385,7 @@ class LSPClient:
                 except ProcessLookupError:
                     pass  # Already dead
             except Exception as e:
-                log.debug(f"[LSP {self.name}] Process cleanup error: {e}")
+                log().debug(f"[LSP {self.name}] Process cleanup error: {e}")
 
         self.state = LspServerState.STOPPED
 
@@ -554,7 +553,7 @@ class LSPClient:
         """
         # Skip if already opened
         if file_path in self._opened_documents:
-            log.debug(f"[LSP {self.name}] Document already open: {file_path}")
+            log().debug(f"[LSP {self.name}] Document already open: {file_path}")
             return
 
         await self._send_notification(

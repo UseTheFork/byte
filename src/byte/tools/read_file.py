@@ -3,8 +3,8 @@ from pathlib import Path
 from langchain_core.tools import tool
 
 from byte.context import make
-from byte.domain.files.service.discovery_service import FileDiscoveryService
-from byte.domain.files.service.file_service import FileService
+from byte.files.service.discovery_service import FileDiscoveryService
+from byte.files.service.file_service import FileService
 
 
 @tool(parse_docstring=True)
@@ -21,7 +21,7 @@ async def read_file(file_path: str) -> str:
     Returns:
             The contents of the file, or an error message if the file cannot be read
     """
-    file_service = await make(FileService)
+    file_service = make(FileService)
 
     # Check if file is in context first
     file_context = file_service.get_file_context(file_path)
@@ -31,7 +31,7 @@ async def read_file(file_path: str) -> str:
             return content
         return f"Error: File '{file_path}' is in context but could not be read"
 
-    discovery_service = await make(FileDiscoveryService)
+    discovery_service = make(FileDiscoveryService)
     discovered_files = await discovery_service.get_files()
     discovered_file_paths = {str(f.resolve()) for f in discovered_files}
 

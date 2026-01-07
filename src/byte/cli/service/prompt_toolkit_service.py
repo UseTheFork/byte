@@ -43,7 +43,7 @@ class CommandCompleter(Completer):
         if not self.command_registry:
             from byte.context import make
 
-            self.command_registry = await make(CommandRegistry)
+            self.command_registry = make(CommandRegistry)
 
         text = document.text_before_cursor
 

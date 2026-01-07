@@ -37,7 +37,7 @@ async def ripgrep_search(
     if not _check_ripgrep_installed():
         return "Error: ripgrep (rg) is not installed. Please install it to use this feature."
 
-    config = await make("config")
+    config = make("config")
     project_root = str(config.project_root)
 
     # Build ripgrep command

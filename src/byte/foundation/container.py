@@ -144,9 +144,6 @@ class Container:
         instance = abstract(app=self, **kwargs)
 
         if isinstance(instance, Bootable):
-            print(123)
-            print(123)
-            print(123)
             instance.ensure_booted(**kwargs)
 
         return instance

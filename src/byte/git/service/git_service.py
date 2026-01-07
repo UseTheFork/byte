@@ -18,13 +18,13 @@ class GitService(Service, UserInteractive):
     Usage: `changed_files = await git_service.get_changed_files()` -> list of modified files
     """
 
-    async def boot(self):
+    def boot(self):
         # Initialize git repository using the project root from config
         try:
-            self._repo = git.Repo(self._config.project_root)
+            self._repo = git.Repo(self.app["path"])
         except InvalidGitRepositoryError:
             raise InvalidGitRepositoryError(
-                f"Not a git repository: {self._config.project_root}. Please run 'git init' or navigate to a git repository."
+                f"Not a git repository: {self.app['path']}. Please run 'git init' or navigate to a git repository."
             )
 
     async def get_repo(self):
@@ -32,7 +32,7 @@ class GitService(Service, UserInteractive):
 
         Usage: `repo = await git_service.get_repo()` -> git.Repo instance
         """
-        await self.ensure_booted()
+        self.ensure_booted()
         return self._repo
 
     async def get_changed_files(self, include_untracked: bool = True) -> List[Path]:
@@ -106,7 +106,7 @@ class GitService(Service, UserInteractive):
                 if retry:
                     # Re-stage only the files that were originally staged for this commit
                     for file_path in staged_files:
-                        file_full_path = self._config.project_root / file_path
+                        file_full_path = self.app["path"] / file_path
                         if file_full_path.exists():
                             await self.add(str(file_path))
                         else:

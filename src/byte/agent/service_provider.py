@@ -89,7 +89,7 @@ class AgentServiceProvider(ServiceProvider):
             # keep-sorted end
         ]
 
-    async def register(self) -> None:
+    def register(self) -> None:
         # Create all agents
         for agent_class in self.agents():
             self.app.singleton(agent_class)

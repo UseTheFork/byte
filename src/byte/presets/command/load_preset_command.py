@@ -58,7 +58,7 @@ class LoadPresetCommand(Command):
         preset_id = args.preset_id
 
         # Validate preset ID and retrieve preset configuration
-        config = self.make("config")
+        config = self.app["config"]
         if config.presets:
             preset = next((p for p in config.presets if p.id == preset_id), None)
 
@@ -116,7 +116,7 @@ class LoadPresetCommand(Command):
 
         Usage: return ["foo", "bar"] for available preset IDs
         """
-        config = self.make("config")
+        config = self.app["config"]
         if config.presets:
             preset_ids = [preset.id for preset in config.presets]
 

@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
-    from byte.domain.lsp.config import LSPConfig, LSPServerConfig
-    from byte.domain.lsp.schemas import (
+    from byte.lsp.config import LSPConfig, LSPServerConfig
+    from byte.lsp.schemas import (
         CompletionItem,
         Diagnostic,
         DiagnosticSeverity,
@@ -17,12 +17,12 @@ if TYPE_CHECKING:
         Range,
         TextDocumentIdentifier,
     )
-    from byte.domain.lsp.service.lsp_client import LSPClient
-    from byte.domain.lsp.service.lsp_service import LSPService
-    from byte.domain.lsp.service_provider import LSPServiceProvider
-    from byte.domain.lsp.tools.find_references import find_references
-    from byte.domain.lsp.tools.get_definition import get_definition
-    from byte.domain.lsp.tools.get_hover_info import get_hover_info
+    from byte.lsp.service.lsp_client import LSPClient
+    from byte.lsp.service.lsp_service import LSPService
+    from byte.lsp.service_provider import LSPServiceProvider
+    from byte.lsp.tools.find_references import find_references
+    from byte.lsp.tools.get_definition import get_definition
+    from byte.lsp.tools.get_hover_info import get_hover_info
 
 __all__ = (
     "CompletionItem",

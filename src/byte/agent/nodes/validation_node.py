@@ -78,7 +78,7 @@ class ValidationNode(Node, UserInteractive):
         if validation_errors:
             error_message = "# Fix the following issues:\n" + "\n".join(f"- {error}" for error in validation_errors)
 
-            console = self.make(Console)
+            console = self.app.make(Console)
             console.print_warning_panel(
                 f"{len(validation_errors)} validation error(s) found. Requesting corrections.",
                 title="Validation Failed",

@@ -20,7 +20,7 @@ class FileService(Service):
     Usage: `await file_service.add_file("main.py", FileMode.EDITABLE)`
     """
 
-    async def boot(self, **kwargs) -> None:
+    def boot(self, **kwargs) -> None:
         """Initialize file service and ensure discovery service is ready."""
         self._context_files: Dict[str, FileContext] = {}
 
@@ -287,7 +287,7 @@ class FileService(Service):
 
         Usage: `hierarchy = await service.generate_project_hierarchy()` -> tree structure
         """
-        if not self._config.project_root:
+        if not self.app["path"]:
             return "No project root configured"
 
         file_discovery = self.make(FileDiscoveryService)
@@ -299,7 +299,7 @@ class FileService(Service):
 
         for file_path in all_files:
             try:
-                relative = file_path.relative_to(self._config.project_root)
+                relative = file_path.relative_to(self.app["path"])
                 parts = relative.parts
 
                 # Check if it's a root file - include all root files
@@ -388,9 +388,9 @@ class FileService(Service):
         file_discovery = self.make(FileDiscoveryService)
         matches = await file_discovery.find_files(pattern)
 
-        if not self._config.project_root:
+        if not self.app["path"]:
             return [str(f) for f in matches]
-        return [str(f.relative_to(self._config.project_root)) for f in matches]
+        return [str(f.relative_to(self.app["path"])) for f in matches]
 
     async def is_file_in_context(self, path: Union[str, PathLike]) -> bool:
         """Check if a file is currently in the AI context.

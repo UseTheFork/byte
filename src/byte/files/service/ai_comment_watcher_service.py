@@ -22,7 +22,7 @@ class AICommentWatcherService(Service):
         # This will be called by event bus when files change
         pass
 
-    async def boot(self) -> None:
+    def boot(self) -> None:
         """Initialize AI comment watcher."""
         if not self._config.files.watch.enable:
             return
@@ -140,7 +140,7 @@ class AICommentWatcherService(Service):
 
     async def _auto_add_file_to_context(self, file_path: Path, mode: FileMode = FileMode.EDITABLE) -> bool:
         """Automatically add file to context when AI comment is detected."""
-        file_service = await self.make(FileService)
+        file_service = self.make(FileService)
         return await file_service.add_file(file_path, mode)
 
     async def _handle_file_modified(self, file_path: Path) -> bool:

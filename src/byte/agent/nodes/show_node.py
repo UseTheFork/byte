@@ -28,7 +28,7 @@ class ShowNode(AssistantNode):
         template = runnable.get_prompts(config)
         prompt_value = await template[0].ainvoke(agent_state)
 
-        console = self.make(Console)
+        console = self.app.make(Console)
 
         messages = prompt_value.to_messages()
         for message in messages:

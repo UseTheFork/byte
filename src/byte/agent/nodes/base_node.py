@@ -31,7 +31,7 @@ class Node(ABC, Bootable, Configurable, Eventable):
                 output_tokens=model_usage.get("output_tokens", 0),
                 total_tokens=model_usage.get("total_tokens", 0),
             )
-            agent_analytics_service = await self.make(AgentAnalyticsService)
+            agent_analytics_service = self.app.make(AgentAnalyticsService)
             if mode == "main":
                 await agent_analytics_service.update_main_usage(usage)
             else:

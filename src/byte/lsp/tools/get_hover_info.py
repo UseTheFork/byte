@@ -1,9 +1,9 @@
 from pathlib import Path
 
-from byte.domain.lsp import LSPService
 from langchain_core.tools import tool
 
 from byte.context import make
+from byte.lsp import LSPService
 
 
 @tool(parse_docstring=True)
@@ -22,7 +22,7 @@ async def get_hover_info(file_path: str, line: int, character: int) -> str:
     Returns:
             Hover information as a string, or an error message if unavailable
     """
-    lsp_service = await make(LSPService)
+    lsp_service = make(LSPService)
 
     # Convert string path to Path object
     path_obj = Path(file_path).resolve()

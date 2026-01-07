@@ -1,9 +1,13 @@
-from typing import List, Type
+from __future__ import annotations
 
-from byte.container import Container
-from byte.core import ByteConfig, EventBus, EventType, Payload, Service, ServiceProvider, TaskManager
-from byte.domain.cli import Command
-from byte.domain.lsp import LSPService
+from typing import TYPE_CHECKING, List, Type
+
+from byte import EventBus, EventType, Payload, Service, ServiceProvider, TaskManager
+from byte.cli import Command
+from byte.lsp import LSPService
+
+if TYPE_CHECKING:
+    from byte.foundation import Application
 
 
 class LSPServiceProvider(ServiceProvider):
@@ -22,12 +26,12 @@ class LSPServiceProvider(ServiceProvider):
         """Return list of LSP commands to register."""
         return []
 
-    async def boot(self, container: Container):
-        config = await container.make(ByteConfig)
+    async def boot(self):
+        config = self.app["config"]
         if config.lsp.enable:
             # Boots the LSPs and starts them in the background.
-            await container.make(LSPService)
-            event_bus = await container.make(EventBus)
+            self.app.make(LSPService)
+            event_bus = self.app.make(EventBus)
 
             event_bus.on(
                 EventType.POST_BOOT.value,
@@ -35,7 +39,7 @@ class LSPServiceProvider(ServiceProvider):
             )
 
     async def boot_messages(self, payload: Payload) -> Payload:
-        container: Container = payload.get("container", False)
+        container: Application = payload.get("container", False)
         if container:
             task_manager = await container.make(TaskManager)
 
@@ -48,9 +52,9 @@ class LSPServiceProvider(ServiceProvider):
 
         return payload
 
-    async def shutdown(self, container: Container) -> None:
+    async def shutdown(self, container: Application) -> None:
         """Shutdown all LSP servers gracefully."""
-        config = await container.make(ByteConfig)
+        config = self.app["config"]
         if config.lsp.enable:
             lsp_service = await container.make(LSPService)
             await lsp_service.shutdown_all()

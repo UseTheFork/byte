@@ -15,7 +15,7 @@ class AgentAnalyticsService(Service):
     to users about their usage patterns and limits through rich progress displays.
     """
 
-    async def boot(self):
+    def boot(self):
         """Initialize analytics service and register event listeners.
 
         Sets up token tracking and registers the pre-prompt hook to display

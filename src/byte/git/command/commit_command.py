@@ -30,7 +30,7 @@ class CommitCommand(Command):
         )
         return parser
 
-    async def boot(self, *args, **kwargs) -> None:
+    def boot(self, *args, **kwargs) -> None:
         self.commit_service = self.make(CommitService)
         self.git_service = self.make(GitService)
 
@@ -58,7 +58,7 @@ class CommitCommand(Command):
                 return
 
             try:
-                lint_service = await self.make(LintService)
+                lint_service = self.make(LintService)
                 lint_commands = await lint_service()
 
                 do_fix, failed_commands = await lint_service.display_results_summary(lint_commands)
@@ -78,12 +78,12 @@ class CommitCommand(Command):
             )
 
             if commit_type == "Commit Plan":
-                commit_agent = await self.make(CommitPlanAgent)
+                commit_agent = self.make(CommitPlanAgent)
                 commit_result = await commit_agent.execute(request=prompt, display_mode="thinking")
                 # log.debug(commit_result)
                 await self.commit_service.process_commit_plan(commit_result["extracted_content"])
             elif commit_type == "Single Commit":
-                commit_agent = await self.make(CommitAgent)
+                commit_agent = self.make(CommitAgent)
                 commit_result = await commit_agent.execute(request=prompt, display_mode="thinking")
                 formatted_message = await self.commit_service.format_conventional_commit(
                     commit_result["extracted_content"]

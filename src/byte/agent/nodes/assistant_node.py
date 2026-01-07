@@ -15,7 +15,7 @@ from byte.support.utils import dd, list_to_multiline_text
 
 
 class AssistantNode(Node):
-    async def boot(
+    def boot(
         self,
         goto: str = "end_node",
         structured_output: BaseModel | None = None,
@@ -107,7 +107,7 @@ class AssistantNode(Node):
 
         Usage: `hierarchy_messages = await self._gather_project_hierarchy()`
         """
-        file_service = await self.make(FileService)
+        file_service = self.app.make(FileService)
         hierarchy = await file_service.generate_project_hierarchy()
 
         if hierarchy:
@@ -124,7 +124,7 @@ class AssistantNode(Node):
 
     async def _gather_commit_guidelines(self) -> list[HumanMessage]:
         """ """
-        commit_service = await self.make(CommitService)
+        commit_service = self.app.make(CommitService)
         git_guidelines = await commit_service.generate_commit_guidelines()
         return [HumanMessage(git_guidelines)]
 
@@ -139,7 +139,7 @@ class AssistantNode(Node):
 
         Usage: `file_messages = await self._gather_file_context()`
         """
-        file_service = await self.make(FileService)
+        file_service = self.app.make(FileService)
 
         if with_line_numbers:
             read_only_files, editable_files = await file_service.generate_context_prompt_with_line_numbers()
@@ -325,7 +325,7 @@ class AssistantNode(Node):
 
         Usage: `system_prompt, examples = await self._gather_edit_format()`
         """
-        edit_format_service = await self.make(EditFormatService)
+        edit_format_service = self.app.make(EditFormatService)
 
         return (edit_format_service.prompts.system, edit_format_service.prompts.examples)
 
@@ -345,7 +345,7 @@ class AssistantNode(Node):
 
         Usage: `masked_messages = await self._gather_masked_messages(state)`
         """
-        edit_format_service = await self.make(EditFormatService)
+        edit_format_service = self.app.make(EditFormatService)
         messages = state.get("history_messages", [])
 
         return await edit_format_service.edit_block_service.replace_blocks_in_historic_messages_hook(messages)
@@ -434,7 +434,7 @@ class AssistantNode(Node):
                 # Re-prompt for actual response
                 messages = agent_state["scratch_messages"] + [("user", "Respond with a real output.")]
                 agent_state = {**agent_state, "scratch_messages": messages}
-                console = await self.make(Console)
+                console = self.app.make(Console)
                 console.print_warning_panel(
                     "AI did not provide proper output. Requesting a valid response.", title="Warning"
                 )

@@ -15,7 +15,7 @@ class StartNode(Node):
         runtime: Runtime[AssistantContextSchema],
         config: RunnableConfig,
     ) -> Any:
-        edit_format = await self.make(EditFormatService)
+        edit_format = self.app.make(EditFormatService)
 
         result = {
             "agent": runtime.context.agent,

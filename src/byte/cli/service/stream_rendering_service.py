@@ -19,7 +19,7 @@ class StreamRenderingService(Service):
     Usage: `await stream_service.handle_message(chunk, "CoderAgent")` -> renders streaming content
     """
 
-    async def boot(self) -> None:
+    def boot(self) -> None:
         """Initialize the stream rendering service with console and state management.
 
         Sets up the Rich console, initializes streaming state variables, and prepares

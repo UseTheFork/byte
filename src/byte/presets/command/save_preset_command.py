@@ -49,7 +49,7 @@ class SavePresetCommand(Command):
         preset_id = slugify(preset_name)
 
         # Check if preset with this ID already exists
-        config = self.make("config")
+        config = self.app["config"]
         if config.presets:
             existing_preset = next((p for p in config.presets if p.id == preset_id), None)
             if existing_preset:

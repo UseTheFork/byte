@@ -25,7 +25,7 @@ class ChromiumService(Service):
     Usage: `markdown = await chromium_service.do_scrape("https://example.com")` -> scraped content as markdown
     """
 
-    async def boot(self) -> None:
+    def boot(self) -> None:
         """Initialize the service with available parsers."""
         self.parsers: List[BaseWebParser] = [
             ReadTheDocsParser(),

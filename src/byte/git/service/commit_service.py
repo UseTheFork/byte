@@ -26,7 +26,7 @@ class CommitService(Service, UserInteractive):
     commit standards and managing the commit workflow.
     """
 
-    async def boot(self, *args, **kwargs) -> None:
+    def boot(self, *args, **kwargs) -> None:
         self.git_service = self.make(GitService)
 
     async def build_commit_prompt(self) -> str:
@@ -90,7 +90,7 @@ class CommitService(Service, UserInteractive):
         for commit_group in commit_plan.commits:
             # Stage files for this commit group
             for file_path in commit_group.files:
-                file_full_path = self._config.project_root / file_path
+                file_full_path = self.app["path"] / file_path
                 if file_full_path.exists():
                     await self.git_service.add(file_path)
                 else:
@@ -119,7 +119,7 @@ class CommitService(Service, UserInteractive):
 
         Usage: `formatted = await self.format_conventional_commit(commit_message)`
         """
-        config = self.make("config")
+        config = self.app["config"]
         git_config = config.git
 
         # Build the header line
@@ -180,7 +180,7 @@ class CommitService(Service, UserInteractive):
         return "\n".join(message_parts)
 
     async def generate_commit_guidelines(self) -> str:
-        config = self.make("config")
+        config = self.app["config"]
         commit_guidelines = []
 
         commit_guidelines.append(

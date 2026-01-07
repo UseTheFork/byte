@@ -26,7 +26,7 @@ class SubprocessNode(Node, UserInteractive):
 
         Usage: `await self._display_subprocess_results(result)` -> displays and prompts
         """
-        console = self.make(Console)
+        console = self.app.make(Console)
 
         # Display the results with more detail
         result_display = f"Exit Code: {subprocess_result.exit_code}\n\nOutput:\n{subprocess_result.stdout}"

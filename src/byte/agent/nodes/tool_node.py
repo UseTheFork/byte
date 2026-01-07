@@ -30,7 +30,7 @@ class ToolNode(Node, UserInteractive):
         tools_by_name = {tool.name: tool for tool in tools}
 
         for tool_call in message.tool_calls:
-            console = self.make(Console)
+            console = self.app.make(Console)
 
             pretty = Pretty(tool_call)
             console.print_panel(pretty)

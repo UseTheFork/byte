@@ -20,11 +20,11 @@ class Injectable:
 
     app: Application
 
-    def make(self, service_class: Type[T]) -> T:
+    def make(self, service_class: Type[T], **kwargs) -> T:
         """Resolve a service from the container.
 
         Usage: `service = await self.make(ServiceClass)`
         """
         if not self.app:
             raise RuntimeError("No container available - ensure service is properly initialized")
-        return self.app.make(service_class)
+        return self.app.make(service_class, **kwargs)

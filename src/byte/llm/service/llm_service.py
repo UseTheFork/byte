@@ -17,7 +17,7 @@ class LLMService(Service):
 
     _service_config: LLMSchema
 
-    async def _configure_service(self) -> None:
+    def _configure_service(self) -> None:
         """Configure LLM service with model settings based on global configuration."""
 
         if self._config.llm.model == "anthropic":

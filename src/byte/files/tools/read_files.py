@@ -22,7 +22,7 @@ async def read_files(file_paths: list[str]) -> str:
     Returns:
         The contents of the file, or an error message if the file cannot be read
     """
-    file_service = await make(FileService)
+    file_service = make(FileService)
 
     final_content = []
 
