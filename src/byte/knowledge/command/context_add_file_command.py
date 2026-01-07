@@ -69,6 +69,6 @@ class ContextAddFileCommand(Command):
         # Add YAML header with file path
         yaml_header = f"---\nfile_path: {context_key}\n---\n\n"
         content = yaml_header + content
-        model = await self.make(SessionContextModel, type="file", key=context_key, content=content)
+        model = self.make(SessionContextModel, type="file", key=context_key, content=content)
         session_context_service.add_context(model)
         console.print(f"[success]Added {context_key} to session context[/success]")

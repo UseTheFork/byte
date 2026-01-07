@@ -1,10 +1,10 @@
 from typing import Optional
 
-from byte.core.utils import list_to_multiline_text
-from byte.domain.knowledge import SessionContextModel
-from byte.domain.prompt_format import Boundary, BoundaryType
-
-from byte.core import ArrayStore, Payload, Service
+from byte import Payload, Service
+from byte.knowledge import SessionContextModel
+from byte.prompt_format import Boundary, BoundaryType
+from byte.support import ArrayStore
+from byte.support.utils import list_to_multiline_text
 
 
 class SessionContextService(Service):
@@ -16,7 +16,7 @@ class SessionContextService(Service):
     Usage: `await service.add_context("conventions", "Style guide content")`
     """
 
-    async def boot(self):
+    def boot(self):
         """Initialize the session context service with an empty store.
 
         Usage: `service = SessionContextService(container)`

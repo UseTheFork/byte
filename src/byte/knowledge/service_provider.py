@@ -1,6 +1,6 @@
 from typing import List, Type
 
-from byte import Application, Command, EventBus, EventType, Service, ServiceProvider
+from byte import Command, EventBus, EventType, Service, ServiceProvider
 from byte.knowledge import (
     CLIContextDisplayService,
     ContextAddFileCommand,
@@ -37,18 +37,18 @@ class KnowledgeServiceProvider(ServiceProvider):
             ContextAddFileCommand,
         ]
 
-    async def register(self, app: Application):
-        app.bind(SessionContextModel)
+    def register(self):
+        self.app.bind(SessionContextModel)
 
-    async def boot(self, app: Application):
+    async def boot(self):
         """Boot file services and register commands with registry."""
 
         # Set up event listener for PRE_PROMPT_TOOLKIT
-        event_bus = app.make(EventBus)
-        conventions_service = app.make(ConventionContextService)
-        session_context_service = app.make(SessionContextService)
+        event_bus = self.app.make(EventBus)
+        conventions_service = self.app.make(ConventionContextService)
+        session_context_service = self.app.make(SessionContextService)
 
-        cli_context_display_service = app.make(CLIContextDisplayService)
+        cli_context_display_service = self.app.make(CLIContextDisplayService)
 
         # Register listener that calls list_in_context_files before each prompt
         event_bus.on(

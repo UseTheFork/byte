@@ -1,8 +1,9 @@
 from argparse import Namespace
 from typing import List
 
-from byte.domain.cli import ByteArgumentParser, Command, ConsoleService
-from byte.domain.knowledge import SessionContextService
+from byte import Console
+from byte.cli import ByteArgumentParser, Command
+from byte.knowledge import SessionContextService
 
 
 class ContextDropCommand(Command):
@@ -32,11 +33,11 @@ class ContextDropCommand(Command):
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Remove specified item from session context."""
-        console = await self.make(ConsoleService)
+        console = self.make(Console)
 
         args_file_path = args.file_path
 
-        session_context_service = await self.make(SessionContextService)
+        session_context_service = self.make(SessionContextService)
         context_items = session_context_service.get_all_context()
 
         if args_file_path in context_items:
@@ -53,7 +54,7 @@ class ContextDropCommand(Command):
         Suggests existing context keys that match the input pattern.
         """
         try:
-            session_context_service = await self.make(SessionContextService)
+            session_context_service = self.make(SessionContextService)
             context_items = session_context_service.get_all_context()
 
             # Filter keys that start with the input text

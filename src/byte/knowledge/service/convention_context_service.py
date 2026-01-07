@@ -1,7 +1,7 @@
-from byte.core.utils import list_to_multiline_text
-from byte.domain.prompt_format import Boundary, BoundaryType
-
-from byte.core import ArrayStore, Payload, Service
+from byte import Payload, Service
+from byte.prompt_format import Boundary, BoundaryType
+from byte.support import ArrayStore
+from byte.support.utils import list_to_multiline_text
 
 
 class ConventionContextService(Service):
@@ -13,7 +13,7 @@ class ConventionContextService(Service):
     Usage: `service = ConventionContextService(container)`
     """
 
-    async def boot(self) -> None:
+    def boot(self) -> None:
         """Load convention files from the conventions directory into ArrayStore.
 
         Checks for a 'conventions' directory in BYTE_DIR and loads all .md files
@@ -21,7 +21,7 @@ class ConventionContextService(Service):
         Usage: `await service.boot()`
         """
         self.conventions = ArrayStore()
-        conventions_dir = self._config.system.paths.conventions
+        conventions_dir = self.app["path.conventions"]
 
         if not conventions_dir.exists() or not conventions_dir.is_dir():
             return

@@ -11,7 +11,7 @@ class SessionContextModel(Bootable, Configurable, Injectable):
     Similar to FileContext pattern for consistent file handling.
     """
 
-    async def boot(self, type: Literal["web", "file", "agent"], key: str, **kwargs) -> None:
+    def boot(self, type: Literal["web", "file", "agent"], key: str, **kwargs) -> None:
         self.type = type
         self.key = key
 

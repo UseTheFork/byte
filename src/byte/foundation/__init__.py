@@ -36,9 +36,9 @@ _dynamic_imports = {
     "EventBus": "event_bus",
     "EventType": "event_bus",
     "Kernel": "console.kernel",
+    "Log": "log",
     "Payload": "event_bus",
     "TaskManager": "task_manager",
-    "Log": "log",
     # keep-sorted end
 }
 

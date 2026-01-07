@@ -98,6 +98,7 @@ class Container:
         """Helper to create and boot instances."""
         instance = factory()
 
+        # TODO: Centralize this.
         if isinstance(instance, Bootable):
             instance.ensure_booted(**kwargs)
 
@@ -143,6 +144,9 @@ class Container:
         instance = abstract(app=self, **kwargs)
 
         if isinstance(instance, Bootable):
+            print(123)
+            print(123)
+            print(123)
             instance.ensure_booted(**kwargs)
 
         return instance

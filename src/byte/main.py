@@ -7,6 +7,7 @@ from pydantic import ValidationError
 from byte.cli import CLIServiceProvider
 from byte.context import application_context
 from byte.foundation import Application
+from byte.knowledge import KnowledgeServiceProvider
 from byte.memory import MemoryServiceProvider
 from byte.system import SystemServiceProvider
 
@@ -18,6 +19,7 @@ def cli():
         providers = [
             CLIServiceProvider,
             MemoryServiceProvider,
+            KnowledgeServiceProvider,
             SystemServiceProvider,
         ]
         application = Application.configure(Path.cwd(), providers).create()

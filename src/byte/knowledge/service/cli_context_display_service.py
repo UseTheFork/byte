@@ -1,24 +1,23 @@
-from byte.domain.cli import ConsoleService
-from byte.domain.knowledge import (
+from rich.table import Table
+
+from byte import Console, Payload, Service
+from byte.knowledge import (
     ConventionContextService,
     SessionContextService,
 )
-from rich.table import Table
-
-from byte.core import Payload, Service
 
 
 class CLIContextDisplayService(Service):
     async def display_context_panel_hook(self, payload: Payload) -> Payload:
         """Display session context and convention panels showing all active items."""
 
-        console = await self.make(ConsoleService)
+        console = self.make(Console)
         info_panel = payload.get("info_panel", [])
 
-        session_context_service = await self.make(SessionContextService)
+        session_context_service = self.make(SessionContextService)
         context_items = session_context_service.get_all_context()
 
-        convention_context_service = await self.make(ConventionContextService)
+        convention_context_service = self.make(ConventionContextService)
         convention_items = convention_context_service.conventions.all()
 
         context_markdown = None
