@@ -1,9 +1,16 @@
+from __future__ import annotations
+
 import asyncio
 import time
 from enum import Enum
-from typing import Any, Callable, Dict, List, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, TypeVar
 
+from byte import Log
 from byte.support import ArrayStore
+
+if TYPE_CHECKING:
+    from byte.foundation import Application
+
 
 T = TypeVar("T")
 
@@ -61,12 +68,12 @@ class Payload:
         """Get data value with optional default."""
         return self.data.get(key, default)
 
-    def set(self, key: str, value: Any) -> "Payload":
+    def set(self, key: str, value: Any) -> Payload:
         """Update the data store with a key-value pair and return self."""
         self.data.add(key, value)
         return self
 
-    def update(self, updates: Dict[str, Any]) -> "Payload":
+    def update(self, updates: Dict[str, Any]) -> Payload:
         """Merge multiple updates into the data store and return self."""
         self.data.merge(updates)
         return self
@@ -75,8 +82,8 @@ class Payload:
 class EventBus:
     """Simple event system with typed Pydantic payloads."""
 
-    def __init__(self, app=None, **kwargs):
-        self.container = app
+    def __init__(self, app: Application):
+        self.app = app
         self._listeners: Dict[str, List[Callable]] = {}
 
     def on(self, event_name: str, callback: Callable):
@@ -106,7 +113,8 @@ class EventBus:
 
             except Exception as e:
                 # TODO: This should get logging from the app and use that.
-                # log.exception(e)
+                log = self.app.make(Log)
+                log.exception(e)
                 print(f"Error in event listener for '{event_name}': {e}")
 
         return current_payload

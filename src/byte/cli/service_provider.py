@@ -23,7 +23,7 @@ class CLIServiceProvider(ServiceProvider):
 
     async def boot(self):
         """Boot UI services."""
-        event_bus = await self.app.make(EventBus)
+        event_bus = self.app.make(EventBus)
 
         event_bus.on(
             EventType.POST_BOOT.value,
@@ -33,8 +33,8 @@ class CLIServiceProvider(ServiceProvider):
     async def boot_messages(self, payload: Payload) -> Payload:
         app: Application = payload.get("container", False)
         if app:
-            config = await app.make("config")
-            console = await app.make(Console)
+            config = app.make("config")
+            console = app.make(Console)
             messages = payload.get("messages", [])
 
             # Create diagonal gradient from primary to secondary color
@@ -78,7 +78,7 @@ class CLIServiceProvider(ServiceProvider):
             if config.dotenv_loaded:
                 messages.append(f"[muted]Env File Found:[/muted] [primary]{config.dotenv_loaded}[/primary]")
 
-            messages.append(f"[muted]Project Root:[/muted] [primary]{config.project_root}[/primary]")
+            messages.append(f"[muted]Project Root:[/muted] [primary]{app['path']}[/primary]")
 
             payload.set("messages", messages)
 

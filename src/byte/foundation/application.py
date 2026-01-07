@@ -3,7 +3,7 @@ from typing import Callable, Optional, TypeVar
 
 from byte import ServiceProvider
 from byte.cli import PromptToolkitService
-from byte.foundation import Console, Container, EventBus, Kernel, TaskManager
+from byte.foundation import Console, Container, EventBus, Kernel, Log, TaskManager
 from byte.foundation.bootstrap import RegisterProviders
 
 T = TypeVar("T")
@@ -21,10 +21,10 @@ class Application(Container):
     def _register_base_service_providers(self):
         """Register all of the base service providers."""
 
+        self.singleton(Log)
         self.singleton(EventBus)
         self.singleton(TaskManager)
         self.singleton(Console)
-        # self.singleton(CommandRegistry)
 
     def __init__(self, base_path: Optional[Path] = None):
         super().__init__()
@@ -64,9 +64,10 @@ class Application(Container):
 
     def bootstrap_with(self, bootstrappers: list) -> None:
         self._has_been_bootstrapped = True
+        log = self.make(Log)
 
         for bootstrapper in bootstrappers:
-            self.bind(bootstrapper)
+            log.debug("Bootstrapping: {}", bootstrapper.__name__)
             instance = self.make(bootstrapper)
             instance.bootstrap(self)
 
@@ -122,7 +123,8 @@ class Application(Container):
 
         providers = RegisterProviders._merge
         for provider in providers:
-            await self.boot_provider(provider)
+            provider_instance = self.make(provider)
+            await self.boot_provider(provider_instance)
 
         # Fire booted callbacks
         for callback in self._booted_callbacks:

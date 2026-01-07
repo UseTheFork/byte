@@ -2,12 +2,12 @@ import asyncio
 import sys
 from pathlib import Path
 
-import click
 from pydantic import ValidationError
 
 from byte.cli import CLIServiceProvider
 from byte.context import application_context
 from byte.foundation import Application
+from byte.memory import MemoryServiceProvider
 from byte.system import SystemServiceProvider
 
 
@@ -17,13 +17,14 @@ def cli():
     try:
         providers = [
             CLIServiceProvider,
+            MemoryServiceProvider,
             SystemServiceProvider,
         ]
         application = Application.configure(Path.cwd(), providers).create()
         application_context.set(application)
 
     except ValidationError:
-        raise click.Abort
+        raise
 
     asyncio.run(application.handle_command(sys.argv))
 

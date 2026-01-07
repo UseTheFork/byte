@@ -3,6 +3,7 @@ from __future__ import annotations
 import inspect
 from typing import TYPE_CHECKING
 
+from byte import Log
 from byte.foundation.bootstrap.bootstrapper import Bootstrapper
 from byte.support import ServiceProvider
 
@@ -40,6 +41,7 @@ class RegisterProviders(Bootstrapper):
         """
         # Get providers from application configuration
         providers = RegisterProviders._merge
+        log = app.make(Log)
 
         # Register each provider
         for provider_class in providers:
@@ -50,6 +52,7 @@ class RegisterProviders(Bootstrapper):
                     f"must extend ServiceProvider"
                 )
 
+            log.debug("Register Service Provider: {}", provider_class.__name__)
             app.singleton(provider_class)
 
             # Instantiate the provider
@@ -59,7 +62,7 @@ class RegisterProviders(Bootstrapper):
             if hasattr(provider, "register") and callable(provider.register):
                 provider.register()
 
-            # Call the register services method if it exists
+            # # Call the register services method if it exists
             if hasattr(provider, "register_services") and callable(provider.register_services):
                 provider.register_services()
 
