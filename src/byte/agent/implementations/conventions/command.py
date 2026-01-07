@@ -1,12 +1,12 @@
 from argparse import Namespace
 
-from byte.core.mixins import UserInteractive
-from byte.core.utils import slugify
-from byte.domain.agent import ConventionAgent
-from byte.domain.cli import ByteArgumentParser, Command, ConsoleService
-from byte.domain.knowledge import ConventionContextService
-
+from byte import Console
+from byte.agent import ConventionAgent
 from byte.agent.implementations.conventions.constants import FOCUS_MESSAGES, ConventionFocus
+from byte.cli import ByteArgumentParser, Command
+from byte.knowledge import ConventionContextService
+from byte.support.mixins import UserInteractive
+from byte.support.utils import slugify
 
 
 class ConventionCommand(Command, UserInteractive):
@@ -87,7 +87,7 @@ class ConventionCommand(Command, UserInteractive):
         if not focus:
             return
 
-        convention_agent = await self.make(ConventionAgent)
+        convention_agent = self.make(ConventionAgent)
         convention: dict = await convention_agent.execute(
             focus.focus_message,
         )
@@ -98,9 +98,9 @@ class ConventionCommand(Command, UserInteractive):
         convention_file_path.write_text(convention["extracted_content"])
 
         # refresh the Conventions in the session by `rebooting` the Service
-        convention_context_service = await self.make(ConventionContextService)
+        convention_context_service = self.make(ConventionContextService)
         await convention_context_service.boot()
-        console = await self.make(ConsoleService)
+        console = self.make(Console)
         console.print_success_panel(
             f"Convention document generated and saved to {focus.file_name}\n\nThe convention has been loaded into the session context and is now available for AI reference.",
             title="Convention Generated",

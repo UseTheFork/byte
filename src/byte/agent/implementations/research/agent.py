@@ -1,4 +1,8 @@
-from byte.domain.agent import (
+from langchain_core.language_models.chat_models import BaseChatModel
+from langgraph.graph import END, START, StateGraph
+from langgraph.graph.state import CompiledStateGraph
+
+from byte.agent import (
     Agent,
     AssistantContextSchema,
     AssistantNode,
@@ -8,15 +12,11 @@ from byte.domain.agent import (
     StartNode,
     ToolNode,
 )
-from byte.domain.llm import LLMService
-from byte.domain.lsp.tools.find_references import find_references
-from byte.domain.lsp.tools.get_definition import get_definition
-from byte.domain.lsp.tools.get_hover_info import get_hover_info
-from langchain_core.language_models.chat_models import BaseChatModel
-from langgraph.graph import END, START, StateGraph
-from langgraph.graph.state import CompiledStateGraph
-
 from byte.agent.implementations.research.prompt import research_prompt
+from byte.llm import LLMService
+from byte.lsp.tools.find_references import find_references
+from byte.lsp.tools.get_definition import get_definition
+from byte.lsp.tools.get_hover_info import get_hover_info
 
 
 class ResearchAgent(Agent):
@@ -43,12 +43,12 @@ class ResearchAgent(Agent):
         graph = StateGraph(BaseState)
 
         # Add nodes
-        graph.add_node("start_node", await self.make(StartNode))
-        graph.add_node("assistant_node", await self.make(AssistantNode, goto="extract_node"))
-        graph.add_node("extract_node", await self.make(ExtractNode, schema="session_context"))
-        graph.add_node("tools_node", await self.make(ToolNode))
+        graph.add_node("start_node", self.make(StartNode))
+        graph.add_node("assistant_node", self.make(AssistantNode, goto="extract_node"))
+        graph.add_node("extract_node", self.make(ExtractNode, schema="session_context"))
+        graph.add_node("tools_node", self.make(ToolNode))
 
-        graph.add_node("end_node", await self.make(EndNode))
+        graph.add_node("end_node", self.make(EndNode))
 
         # Define edges
         graph.add_edge(START, "start_node")
@@ -65,7 +65,7 @@ class ResearchAgent(Agent):
         return graph.compile(checkpointer=checkpointer)
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
-        llm_service = await self.make(LLMService)
+        llm_service = self.make(LLMService)
         main: BaseChatModel = llm_service.get_main_model()
         weak: BaseChatModel = llm_service.get_weak_model()
 

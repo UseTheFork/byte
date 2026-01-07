@@ -1,10 +1,9 @@
 from argparse import Namespace
 
-from byte.domain.cli.argparse.base import ByteArgumentParser
-from byte.domain.cli.service.command_registry import Command
-
 from byte.agent.implementations.show.agent import ShowAgent
 from byte.agent.service.agent_service import AgentService
+from byte.cli.argparse.base import ByteArgumentParser
+from byte.cli.service.command_registry import Command
 
 
 class ShowCommand(Command):
@@ -43,5 +42,5 @@ class ShowCommand(Command):
 
         Usage: Called automatically when user types `/show`
         """
-        agent_service = await self.make(AgentService)
+        agent_service = self.make(AgentService)
         await agent_service.execute_agent("", ShowAgent)

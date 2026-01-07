@@ -6,7 +6,9 @@ import click
 from pydantic import ValidationError
 
 from byte.cli import CLIServiceProvider
+from byte.context import application_context
 from byte.foundation import Application
+from byte.system import SystemServiceProvider
 
 
 def cli():
@@ -15,10 +17,11 @@ def cli():
     try:
         providers = [
             CLIServiceProvider,
+            SystemServiceProvider,
         ]
         application = Application.configure(Path.cwd(), providers).create()
+        application_context.set(application)
 
-        pass
     except ValidationError:
         raise click.Abort
 

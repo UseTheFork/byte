@@ -3,7 +3,10 @@ from __future__ import annotations
 from abc import ABC
 from typing import TYPE_CHECKING, List, Type
 
+from byte.cli import CommandRegistry
+
 if TYPE_CHECKING:
+    from byte import Command
     from byte.foundation import Application
     from byte.support import Service
 
@@ -16,9 +19,9 @@ class ServiceProvider(ABC):
     domain or cross-cutting concern, promoting modular architecture.
     """
 
-    def __init__(self):
+    def __init__(self, app: Application):
         # Optional application reference for providers that need it during initialization
-        self.app = None
+        self.app = app
 
     def services(self) -> List[Type[Service]]:
         """Return list of service classes this provider makes available.
@@ -29,7 +32,7 @@ class ServiceProvider(ABC):
         """
         return []
 
-    async def register_services(self, app: Application):
+    def register_services(self):
         """Register all services returned by services() as singletons in the container.
 
         Automatically registers each service class returned by the services() method
@@ -41,32 +44,24 @@ class ServiceProvider(ABC):
             return
 
         for service_class in services:
-            app.singleton(service_class)
+            self.app.singleton(service_class)
 
-    # def commands(self) -> List[Type[Command]]:
-    #     """"""
-    #     return []
+    def commands(self) -> List[Type[Command]]:
+        """"""
+        return []
 
-    # async def register_commands(self, container: Container):
-    #     """"""
-    #     commands = self.commands()
-    #     if not commands:
-    #         return
+    def register_commands(self):
+        """"""
+        commands = self.commands()
+        if not commands:
+            return
 
-    #     for command_class in commands:
-    #         container.bind(command_class)
+        command_registry: CommandRegistry = self.app.make(CommandRegistry)
 
-    # async def boot_commands(self, container: Container):
-    #     """boot all commands from commands()"""
-    #     commands = self.commands()
-    #     if not commands:
-    #         return
-
-    #     command_registry = await container.make(CommandRegistry)
-
-    #     for command_class in commands:
-    #         command = await container.make(command_class)
-    #         await command_registry.register_slash_command(command)
+        for command_class in commands:
+            self.app.bind(command_class)
+            command = self.app.make(command_class)
+            command_registry.register_slash_command(command)
 
     def set_application(self, app: Application):
         """Set the container instance for providers that need container access.
@@ -76,7 +71,7 @@ class ServiceProvider(ABC):
         """
         self.app = app
 
-    async def register(self, app: Application):
+    def register(self):
         """Register services in the container without initializing them.
 
         This is phase 1 of the two-phase initialization. Only bind service
@@ -85,7 +80,7 @@ class ServiceProvider(ABC):
         """
         pass
 
-    async def boot(self, app: Application):
+    async def boot(self):
         """Boot services after all providers have been registered.
 
         This is phase 2 where services can safely reference each other since

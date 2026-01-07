@@ -10,11 +10,11 @@ if TYPE_CHECKING:
 class Configurable:
     app: Application
 
-    async def _configure_service(self) -> None:
+    def _configure_service(self) -> None:
         """Override this method to set service-specific configuration."""
         pass
 
-    async def boot_configurable(self, **kwargs) -> None:
-        self._config: ByteConfig = await self.app.make("config")
+    def boot_configurable(self, **kwargs) -> None:
+        self._config: ByteConfig = self.app.make("config")
         self._service_config = {}
-        await self._configure_service()
+        self._configure_service()

@@ -1,7 +1,7 @@
 import inspect
 from typing import Any, Callable, Optional, Type, TypeVar
 
-from byte.core.mixins import Bootable
+from byte.support.mixins import Bootable
 
 T = TypeVar("T")
 
@@ -128,7 +128,24 @@ class Container:
             factory = self._transients[abstract_str]
             return self._create_instance(factory, **kwargs)  # Don't cache
 
+        # Fallback to build if abstract is a type
+        if isinstance(abstract, type):
+            return self.build(abstract, **kwargs)
+
         raise ValueError(f"No binding found for {abstract_str}")
+
+    def build(self, abstract: Type[T], **kwargs) -> T:
+        """Build an instance of the given type with container injection.
+
+        Usage: `instance = container.build(MyClass, extra_arg=value)`
+        """
+        # Pass self as app= along with any other kwargs
+        instance = abstract(app=self, **kwargs)
+
+        if isinstance(instance, Bootable):
+            instance.ensure_booted(**kwargs)
+
+        return instance
 
     def flush(self) -> None:
         """Reset the container state, clearing all bindings and instances.

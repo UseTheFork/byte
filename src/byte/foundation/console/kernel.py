@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from byte.foundation.bootstrap import (
-    BootProviders,
     HandleExceptions,
     LoadConfiguration,
     LoadConsoleArgs,
@@ -30,7 +29,7 @@ class Kernel:
             LoadConfiguration,
             HandleExceptions,
             RegisterProviders,
-            BootProviders,
+            # BootProviders,
         ]
 
     def bootstrap(self) -> None:
@@ -62,8 +61,10 @@ class Kernel:
         """
         self.bootstrap()
 
-        return 1
-        # return await self.run(input)
+        # Now we can Async boot all the providers
+        await self.app.boot()
+
+        return await self.app.run()
 
     def terminate(self):
         self.app.terminate()

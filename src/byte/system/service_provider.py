@@ -1,6 +1,6 @@
 from typing import List, Type
 
-from byte import Application, Command, Console, EventBus, EventType, Payload, Service, ServiceProvider
+from byte import Command, Console, EventBus, EventType, Payload, Service, ServiceProvider
 from byte.memory import UndoCommand
 from byte.system import ExitCommand, SystemContextService
 
@@ -25,14 +25,14 @@ class SystemServiceProvider(ServiceProvider):
             # ConfigWriterService,
         ]
 
-    async def boot(self, app: Application) -> None:
+    async def boot(self) -> None:
         """Boot system services and register commands with registry.
 
         Usage: `provider.boot(container)` -> commands become available as /exit, /help
         """
 
-        event_bus = app.make(EventBus)
-        system_context_service = app.make(SystemContextService)
+        event_bus = self.app.make(EventBus)
+        system_context_service = self.app.make(SystemContextService)
 
         event_bus.on(
             EventType.GATHER_PROJECT_CONTEXT.value,
@@ -45,12 +45,12 @@ class SystemServiceProvider(ServiceProvider):
                 event_type=EventType.POST_BOOT,
                 data={
                     "messages": [],
-                    "container": app,
+                    "container": self.app,
                 },
             )
         )
 
-        console = app.make(Console)
+        console = self.app.make(Console)
         messages = payload.get("messages", [])
 
         # Join all message strings into a single string with newlines

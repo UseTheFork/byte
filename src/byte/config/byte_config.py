@@ -5,16 +5,15 @@ import git
 from pydantic import BaseModel, Field
 
 from byte.cli.config import CLIConfig
-from byte.domain.development.config import DevelopmentConfig
-from byte.domain.files.config import FilesConfig
-from byte.domain.git.config import GitConfig
-from byte.domain.lint.config import LintConfig
-from byte.domain.llm.config import LLMConfig
-from byte.domain.lsp.config import LSPConfig
-from byte.domain.presets.config import PresetsConfig
-from byte.domain.prompt_format.config import EditFormatConfig
-from byte.domain.system.config import SystemConfig
-from byte.domain.web.config import WebConfig
+from byte.files.config import FilesConfig
+from byte.git.config import GitConfig
+from byte.lint.config import LintConfig
+from byte.llm.config import LLMConfig
+from byte.lsp.config import LSPConfig
+from byte.presets.config import PresetsConfig
+from byte.prompt_format.config import EditFormatConfig
+from byte.system.config import SystemConfig
+from byte.web.config import WebConfig
 
 
 def _find_project_root() -> Path:
@@ -64,7 +63,6 @@ class ByteConfig(BaseModel):
     # keep-sorted start
     boot: BootConfig = Field(default_factory=BootConfig)
     cli: CLIConfig = Field(default_factory=CLIConfig)
-    development: DevelopmentConfig = Field(default_factory=DevelopmentConfig)
     edit_format: EditFormatConfig = Field(default_factory=EditFormatConfig)
     files: FilesConfig = Field(default_factory=FilesConfig)
     git: GitConfig = Field(default_factory=GitConfig)

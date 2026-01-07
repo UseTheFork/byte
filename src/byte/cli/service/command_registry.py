@@ -1,12 +1,17 @@
+from __future__ import annotations
+
 import argparse
 from abc import ABC, abstractmethod
 from argparse import Namespace
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
+from byte import Console
 from byte.cli import ByteArgumentParser
-from byte.foundation import Console
 from byte.support import Service
 from byte.support.mixins import Bootable, Configurable, Injectable, UserInteractive
+
+if TYPE_CHECKING:
+    from byte.foundation import Application
 
 
 class Command(ABC, Bootable, Injectable, Configurable, UserInteractive):
@@ -74,7 +79,7 @@ class Command(ABC, Bootable, Injectable, Configurable, UserInteractive):
         try:
             parsed_args = parser.parse_args(args.split() if args else [])
         except argparse.ArgumentError:
-            console = await self.make(Console)
+            console = self.make(Console)
             console.print_error_panel(parser.format_help(), title="Invalid Command Arguments")
             return
 
@@ -109,12 +114,13 @@ class CommandRegistry(Service):
     for improved user experience.
     """
 
-    async def boot(self):
+    def __init__(self, app: Application):
+        super().__init__(app)
         # Separate namespaces for different command types
         self._slash_commands: Dict[str, Command] = {}
         self._at_commands: Dict[str, Command] = {}
 
-    async def register_slash_command(self, command: Command):
+    def register_slash_command(self, command: Command):
         """Register a slash command for /command syntax.
 
         Usage: `await registry.register_slash_command(AddFileCommand())`

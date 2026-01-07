@@ -1,7 +1,3 @@
-from byte.core.mixins import UserInteractive
-from byte.domain.agent import Agent, AssistantContextSchema, AssistantNode, BaseState, EndNode, ExtractNode, StartNode
-from byte.domain.cli import ConsoleService
-from byte.domain.llm import LLMService
 from langchain.chat_models import BaseChatModel
 from langchain.messages import HumanMessage
 from langgraph.constants import END
@@ -9,7 +5,11 @@ from langgraph.graph import START, StateGraph
 from langgraph.types import Command
 from rich.markdown import Markdown
 
+from byte import Console
+from byte.agent import Agent, AssistantContextSchema, AssistantNode, BaseState, EndNode, ExtractNode, StartNode
 from byte.agent.implementations.cleaner.prompt import cleaner_prompt
+from byte.llm import LLMService
+from byte.support.mixins import UserInteractive
 
 
 class CleanerAgent(Agent, UserInteractive):
@@ -28,7 +28,7 @@ class CleanerAgent(Agent, UserInteractive):
         Usage: `result = await agent._confirm_content(state)` -> updated state
         """
 
-        console = await self.make(ConsoleService)
+        console = self.make(Console)
 
         cleaned_content = state.get("extracted_content", "")
 
@@ -68,10 +68,10 @@ class CleanerAgent(Agent, UserInteractive):
         graph = StateGraph(BaseState)
 
         # Add nodes
-        graph.add_node("start_node", await self.make(StartNode))
-        graph.add_node("assistant_node", await self.make(AssistantNode, goto="extract_node"))
-        graph.add_node("extract_node", await self.make(ExtractNode))
-        graph.add_node("end_node", await self.make(EndNode))
+        graph.add_node("start_node", self.make(StartNode))
+        graph.add_node("assistant_node", self.make(AssistantNode, goto="extract_node"))
+        graph.add_node("extract_node", self.make(ExtractNode))
+        graph.add_node("end_node", self.make(EndNode))
 
         graph.add_node("confirm_content_node", self._confirm_content)
 
@@ -87,7 +87,7 @@ class CleanerAgent(Agent, UserInteractive):
         return graph.compile()
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
-        llm_service = await self.make(LLMService)
+        llm_service = self.make(LLMService)
         main: BaseChatModel = llm_service.get_main_model()
         weak: BaseChatModel = llm_service.get_weak_model()
 

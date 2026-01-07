@@ -1,4 +1,8 @@
-from byte.domain.agent import (
+from langchain_core.language_models.chat_models import BaseChatModel
+from langgraph.constants import END
+from langgraph.graph import START, StateGraph
+
+from byte.agent import (
     Agent,
     AssistantContextSchema,
     AssistantNode,
@@ -9,13 +13,9 @@ from byte.domain.agent import (
     ToolNode,
     ValidationNode,
 )
-from byte.domain.files.tools.read_files import read_files
-from byte.domain.llm import LLMService
-from langchain_core.language_models.chat_models import BaseChatModel
-from langgraph.constants import END
-from langgraph.graph import START, StateGraph
-
 from byte.agent.implementations.conventions.prompt import conventions_prompt
+from byte.files.tools.read_files import read_files
+from byte.llm import LLMService
 
 
 class ConventionAgent(Agent):
@@ -51,20 +51,20 @@ class ConventionAgent(Agent):
         graph = StateGraph(BaseState)
 
         # Add nodes
-        graph.add_node("start_node", await self.make(StartNode))
-        graph.add_node("assistant_node", await self.make(AssistantNode, goto="validation_node"))
+        graph.add_node("start_node", self.make(StartNode))
+        graph.add_node("assistant_node", self.make(AssistantNode, goto="validation_node"))
         graph.add_node(
             "validation_node",
-            await self.make(
+            self.make(
                 ValidationNode,
                 goto="extract_node",
                 max_lines=75,
             ),
         )
 
-        graph.add_node("extract_node", await self.make(ExtractNode))
-        graph.add_node("tools_node", await self.make(ToolNode))
-        graph.add_node("end_node", await self.make(EndNode))
+        graph.add_node("extract_node", self.make(ExtractNode))
+        graph.add_node("tools_node", self.make(ToolNode))
+        graph.add_node("end_node", self.make(EndNode))
 
         # Define edges
         graph.add_edge(START, "start_node")
@@ -75,7 +75,7 @@ class ConventionAgent(Agent):
         return graph.compile()
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
-        llm_service = await self.make(LLMService)
+        llm_service = self.make(LLMService)
         main: BaseChatModel = llm_service.get_main_model()
         weak: BaseChatModel = llm_service.get_weak_model()
 

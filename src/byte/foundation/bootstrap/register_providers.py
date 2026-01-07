@@ -39,7 +39,7 @@ class RegisterProviders(Bootstrapper):
             app: The application instance.
         """
         # Get providers from application configuration
-        providers = self._merge
+        providers = RegisterProviders._merge
 
         # Register each provider
         for provider_class in providers:
@@ -50,9 +50,19 @@ class RegisterProviders(Bootstrapper):
                     f"must extend ServiceProvider"
                 )
 
+            app.singleton(provider_class)
+
             # Instantiate the provider
             provider = app.make(provider_class, app=app)
 
             # Call the register method if it exists
             if hasattr(provider, "register") and callable(provider.register):
                 provider.register()
+
+            # Call the register services method if it exists
+            if hasattr(provider, "register_services") and callable(provider.register_services):
+                provider.register_services()
+
+            # Call the register services method if it exists
+            if hasattr(provider, "register_commands") and callable(provider.register_commands):
+                provider.register_commands()

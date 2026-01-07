@@ -1,10 +1,7 @@
-from pathlib import Path
-
 import yaml
-from byte.core.service.base_service import Service
-from byte.domain.presets.config import PresetsConfig
 
-from byte.core import BYTE_CONFIG_FILE
+from byte import Service, dd
+from byte.presets.config import PresetsConfig
 
 
 class ConfigWriterService(Service):
@@ -15,10 +12,6 @@ class ConfigWriterService(Service):
     Usage: `await service.append_preset(preset_config)`
     """
 
-    async def boot(self) -> None:
-        """Initialize the config writer service."""
-        self.config_path: Path = BYTE_CONFIG_FILE
-
     async def append_preset(self, preset: PresetsConfig) -> None:
         """Append a new preset to the config.yaml file.
 
@@ -26,8 +19,12 @@ class ConfigWriterService(Service):
         and writes the updated config back to the file.
         Usage: `await service.append_preset(new_preset)`
         """
+
+        config_path = self.app["path.config"]
+        dd(config_path)
+
         # Read existing config
-        with open(self.config_path) as f:
+        with open(config_path) as f:
             config_data = yaml.safe_load(f) or {}
 
         # Ensure presets key exists
@@ -41,5 +38,5 @@ class ConfigWriterService(Service):
         config_data["presets"].append(preset_dict)
 
         # Write updated config back to file
-        with open(self.config_path, "w") as f:
+        with open(config_path, "w") as f:
             yaml.safe_dump(config_data, f, default_flow_style=False, sort_keys=False)

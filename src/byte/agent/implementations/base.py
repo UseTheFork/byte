@@ -2,15 +2,15 @@ import asyncio
 from abc import ABC, abstractmethod
 from typing import Any, Literal, Optional
 
-from byte.core.mixins import Bootable, Configurable, Eventable, Injectable
-from byte.domain.agent import AssistantContextSchema, BaseState
-from byte.domain.cli import (
-    StreamRenderingService,
-)
-from byte.domain.memory import MemoryService
 from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 
-from byte.core import EventType, Payload, log
+from byte import EventType, Payload
+from byte.agent import AssistantContextSchema, BaseState
+from byte.cli import (
+    StreamRenderingService,
+)
+from byte.memory import MemoryService
+from byte.support.mixins import Bootable, Configurable, Eventable, Injectable
 
 
 class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
@@ -41,7 +41,7 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
                 mode: The stream mode ("values", "updates", "messages", or "custom")
                 chunk: The data chunk from that stream mode
         """
-        stream_rendering_service = await self.make(StreamRenderingService)
+        stream_rendering_service = self.make(StreamRenderingService)
 
         # Filter and process based on mode
         if mode == "messages":
@@ -111,7 +111,7 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
         """
         # Get or create thread ID
         if thread_id is None:
-            memory_service = await self.make(MemoryService)
+            memory_service = self.make(MemoryService)
             thread_id = await memory_service.get_or_create_thread()
 
         # Create configuration with thread ID
@@ -123,7 +123,7 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
         # Get the graph and stream events
         graph = await self.get_graph()
 
-        stream_rendering_service = await self.make(StreamRenderingService)
+        stream_rendering_service = self.make(StreamRenderingService)
         stream_rendering_service.set_display_mode(display_mode)
 
         await stream_rendering_service.start_spinner()
@@ -140,7 +140,7 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
                 await stream_task
             except asyncio.CancelledError:
                 pass
-            log.info("Agent execution cancelled by user")
+            # log.info("Agent execution cancelled by user")
             return None
         finally:
             await stream_rendering_service.end_stream()
@@ -157,7 +157,7 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
 
     async def get_checkpointer(self):
         # Get memory for persistence
-        memory_service = await self.make(MemoryService)
+        memory_service = self.make(MemoryService)
         checkpointer = await memory_service.get_saver()
         return checkpointer
 

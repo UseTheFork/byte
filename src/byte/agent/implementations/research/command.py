@@ -2,11 +2,12 @@ import argparse
 from argparse import Namespace
 from typing import cast
 
-from byte.domain.agent import AgentService, CoderAgent, ResearchAgent, SessionContextFormatter
-from byte.domain.cli import ByteArgumentParser, Command
-from byte.domain.knowledge import SessionContextModel, SessionContextService
-from byte.domain.memory import MemoryService
 from langgraph.graph.state import RunnableConfig
+
+from byte.agent import AgentService, CoderAgent, ResearchAgent, SessionContextFormatter
+from byte.cli import ByteArgumentParser, Command
+from byte.knowledge import SessionContextModel, SessionContextService
+from byte.memory import MemoryService
 
 
 class ResearchCommand(Command):

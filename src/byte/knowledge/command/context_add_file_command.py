@@ -1,10 +1,9 @@
 from argparse import Namespace
 from pathlib import Path
 
-from byte.domain.cli import ByteArgumentParser, Command, ConsoleService
-from byte.domain.knowledge import SessionContextModel, SessionContextService
-
-from byte.core import ByteConfig
+from byte import Console
+from byte.cli import ByteArgumentParser, Command
+from byte.knowledge import SessionContextModel, SessionContextService
 
 
 class ContextAddFileCommand(Command):
@@ -37,12 +36,12 @@ class ContextAddFileCommand(Command):
 
         Usage: `await command.execute("config.py")`
         """
-        console = await self.make(ConsoleService)
+        console = self.make(Console)
 
         args_file_path = args.file_path
 
-        config = await self.make(ByteConfig)
-        session_context_service = await self.make(SessionContextService)
+        config = await self.app["config"]
+        session_context_service = self.make(SessionContextService)
 
         # Convert to Path object, resolve relative paths from project root
         file_path = Path(args_file_path)

@@ -29,9 +29,9 @@ class ShowAgent(CoderAgent):
         """
 
         graph = StateGraph(BaseState)
-        graph.add_node("start_node", await self.make(StartNode))
-        graph.add_node("show_node", await self.make(ShowNode))
-        graph.add_node("end_node", await self.make(EndNode))
+        graph.add_node("start_node", self.make(StartNode))
+        graph.add_node("show_node", self.make(ShowNode))
+        graph.add_node("end_node", self.make(EndNode))
 
         # Define edges
         graph.add_edge(START, "start_node")

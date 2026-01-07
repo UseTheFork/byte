@@ -7,7 +7,6 @@ from langgraph.types import Command
 
 from byte import Console
 from byte.agent import AssistantContextSchema, BaseState, Node
-from byte.core import log
 from byte.prompt_format import (
     EDIT_BLOCK_NAME,
     BlockStatus,
@@ -267,7 +266,7 @@ class ParseBlocksNode(Node):
 
                 return Command(goto="assistant_node", update={"errors": error_message, "metadata": self.metadata})
 
-            log.exception(e)
+            # log.exception(e)
             raise
 
     async def _parse_single_raw_block(self, raw_block: RawSearchReplaceBlock) -> SearchReplaceBlock:

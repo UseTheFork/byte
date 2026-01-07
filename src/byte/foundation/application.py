@@ -1,7 +1,10 @@
 from pathlib import Path
 from typing import Callable, Optional, TypeVar
 
+from byte import ServiceProvider
+from byte.cli import PromptToolkitService
 from byte.foundation import Console, Container, EventBus, Kernel, TaskManager
+from byte.foundation.bootstrap import RegisterProviders
 
 T = TypeVar("T")
 
@@ -103,7 +106,7 @@ class Application(Container):
         """
         return self._booted
 
-    def boot(self) -> None:
+    async def boot(self) -> None:
         """
         Boot the application's service providers.
 
@@ -117,11 +120,25 @@ class Application(Container):
         for callback in self._booting_callbacks:
             callback(self)
 
+        providers = RegisterProviders._merge
+        for provider in providers:
+            await self.boot_provider(provider)
+
         # Fire booted callbacks
         for callback in self._booted_callbacks:
             callback(self)
 
         self._booted = True
+
+    async def boot_provider(self, provider: ServiceProvider) -> None:
+        """
+        Boot the application's service providers.
+
+        Returns:
+            None
+        """
+        if hasattr(provider, "boot") and callable(getattr(provider, "boot")):
+            await provider.boot()
 
     def bind_paths_in_container(self):
         """Set the base paths."""
@@ -270,11 +287,30 @@ class Application(Container):
 
     async def handle_command(self, input: list[str]) -> int:
         # dispatcher = self.make(Dispatcher)
-        kernel = self.make(Kernel, app=self)
+        kernel: Kernel = self.make(Kernel, app=self)
         status = await kernel.handle(input)
         kernel.terminate()
 
         return status
+
+    async def run(self) -> int:
+        """"""
+        input_service = self.make(PromptToolkitService)
+        while True:
+            try:
+                # Get user input (this can be async/non-blocking)
+                await input_service.execute()
+            except KeyboardInterrupt:
+                break
+            except Exception as e:
+                # log.exception(e)
+                console = self.make(Console)
+                console.print_error_panel(
+                    str(e),
+                    title="Exception",
+                )
+                return 2
+        return 1
 
     def terminate(self) -> None:
         """Terminate the application."""

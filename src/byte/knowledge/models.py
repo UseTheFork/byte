@@ -1,7 +1,7 @@
 from typing import Literal
 
-from byte.core.mixins import Bootable, Configurable, Injectable
-from byte.core.utils import slugify
+from byte.support.mixins import Bootable, Configurable, Injectable
+from byte.support.utils import slugify
 
 
 class SessionContextModel(Bootable, Configurable, Injectable):

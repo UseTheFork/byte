@@ -1,4 +1,7 @@
-from typing import AsyncGenerator
+from __future__ import annotations
+
+from pathlib import Path
+from typing import TYPE_CHECKING, AsyncGenerator
 
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.document import Document
@@ -7,10 +10,13 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.shortcuts import PromptSession
 from rich.console import Group
 
+from byte.agent import AgentService, SubprocessAgent
 from byte.cli import CommandRegistry
-from byte.domain.agent import AgentService, SubprocessAgent
 from byte.foundation import Console, EventType, Payload
 from byte.support import Service
+
+if TYPE_CHECKING:
+    from byte.foundation import Application
 
 
 class CommandCompleter(Completer):
@@ -75,18 +81,20 @@ class PromptToolkitService(Service):
     Usage: `await prompt_service.execute()` -> displays prompt and processes input
     """
 
-    async def boot(self):
+    def __init__(self, app: Application):
         """Initialize the prompt session with history and completion support."""
         # Placeholder for `prompt_async` if we where interupted we restore using the placeholder
+        super().__init__(app)
+
         self.placeholder = None
         self.interrupted = False
 
         self.completer = CommandCompleter()
 
-        config = await self.make("config")
+        byte_cache_dir: Path = self.app["path.cache"]
 
         self.prompt_session = PromptSession(
-            history=FileHistory(config.byte_cache_dir / ".input_history"),
+            history=FileHistory(byte_cache_dir / ".input_history"),
             multiline=False,
             key_bindings=key_bindings,
             completer=self.completer,
@@ -132,7 +140,7 @@ class PromptToolkitService(Service):
 
         user_input = user_input[1:]
 
-        subprocess_agent = await self.make(SubprocessAgent)
+        subprocess_agent = self.make(SubprocessAgent)
         await subprocess_agent.execute(user_input, display_mode="silent")
 
     async def execute(self):
@@ -192,7 +200,7 @@ class PromptToolkitService(Service):
         console.print()
         # TODO: should we make `user_input` a [("user", user_input)], in this situation.
 
-        agent_service = await self.make(AgentService)
+        agent_service = self.make(AgentService)
         active_agent = agent_service.get_active_agent()
 
         payload = Payload(

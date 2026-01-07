@@ -26,7 +26,7 @@ class SystemContextService(Service):
         system_context.append(f"- Current date: {datetime.now().strftime('%Y-%m-%d')}")
 
         # Check in the config if we have lint commands that should not be suggested.
-        config = self.make("config")
+        config = self.app["config"]
 
         # Add lint commands context if configured
         if config.lint.enable and config.lint.commands:

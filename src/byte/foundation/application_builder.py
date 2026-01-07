@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from byte.foundation import Kernel
+from byte.foundation.bootstrap import RegisterProviders
 
 if TYPE_CHECKING:
     from byte.foundation import Application
@@ -38,6 +39,8 @@ class ApplicationBuilder:
 
         if providers is None:
             providers = []
+
+        RegisterProviders.merge(providers)
 
         return self
 

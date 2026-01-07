@@ -1,4 +1,4 @@
-from byte.core.service_provider import ServiceProvider
+from byte import ServiceProvider
 
 
 class ToolsServiceProvider(ServiceProvider):

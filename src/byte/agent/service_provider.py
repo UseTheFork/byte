@@ -1,6 +1,6 @@
 from typing import List, Type
 
-from byte import Application, Service, ServiceProvider
+from byte import Service, ServiceProvider
 from byte.agent import (
     Agent,
     AgentService,
@@ -89,11 +89,11 @@ class AgentServiceProvider(ServiceProvider):
             # keep-sorted end
         ]
 
-    async def register(self, app: Application) -> None:
+    async def register(self) -> None:
         # Create all agents
         for agent_class in self.agents():
-            app.singleton(agent_class)
+            self.app.singleton(agent_class)
 
         # Create all Nodes
         for node_class in self.nodes():
-            app.bind(node_class)
+            self.app.bind(node_class)

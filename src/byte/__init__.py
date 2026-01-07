@@ -37,7 +37,7 @@ _dynamic_imports = {
     "EventType": "foundation",
     "Payload": "foundation",
     "Service": "support",
-    "ServiceProvider": "core",
+    "ServiceProvider": "support",
     "TaskManager": "foundation",
     "dd": "support.utils",
     "dump": "support.utils",

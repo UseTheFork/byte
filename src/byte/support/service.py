@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 from abc import ABC
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from byte.support.mixins.bootable import Bootable
 from byte.support.mixins.configurable import Configurable
 from byte.support.mixins.eventable import Eventable
 from byte.support.mixins.injectable import Injectable
+
+if TYPE_CHECKING:
+    pass
+
 
 T = TypeVar("T")
 

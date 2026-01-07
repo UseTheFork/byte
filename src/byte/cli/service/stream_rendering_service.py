@@ -4,7 +4,8 @@ from langchain_core.messages.ai import AIMessageChunk
 from langchain_core.messages.tool import ToolMessage
 from rich.live import Live
 
-from byte.cli import ConsoleService, MarkdownStream, RuneSpinner
+from byte import Console
+from byte.cli import MarkdownStream, RuneSpinner
 from byte.support import Service
 from byte.support.utils import extract_content_from_message, extract_json_from_message
 
@@ -25,7 +26,7 @@ class StreamRenderingService(Service):
         the markdown stream renderer for handling AI agent responses.
         Usage: Called automatically during service container boot process
         """
-        self.console = await self.make(ConsoleService)
+        self.console = self.make(Console)
 
         self.current_stream_id = None
         self.accumulated_content = ""

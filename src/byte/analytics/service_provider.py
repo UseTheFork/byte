@@ -1,6 +1,6 @@
 from typing import List, Type
 
-from byte import Application, EventBus, EventType, Service, ServiceProvider
+from byte import EventBus, EventType, Service, ServiceProvider
 from byte.analytics import AgentAnalyticsService
 
 
@@ -16,7 +16,7 @@ class AnalyticsProvider(ServiceProvider):
     def services(self) -> List[Type[Service]]:
         return [AgentAnalyticsService]
 
-    async def boot(self, app: Application):
+    async def boot(self):
         """Boot analytics services and register event listeners.
 
         Sets up hooks to display usage panels before prompts and update
@@ -25,8 +25,8 @@ class AnalyticsProvider(ServiceProvider):
         """
 
         # Set up event listener for PRE_PROMPT_TOOLKIT
-        event_bus = app.make(EventBus)
-        agent_analytics_service = app.make(AgentAnalyticsService)
+        event_bus = self.app.make(EventBus)
+        agent_analytics_service = self.app.make(AgentAnalyticsService)
 
         # Register listener to show analytics panel before each prompt
         event_bus.on(

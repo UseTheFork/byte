@@ -1,11 +1,11 @@
-from byte.domain.agent import Agent, AssistantContextSchema, AssistantNode, BaseState, EndNode, StartNode
-from byte.domain.git import CommitMessage, CommitPlan
-from byte.domain.llm import LLMService
 from langchain_core.language_models.chat_models import BaseChatModel
 from langgraph.constants import END
 from langgraph.graph import START, StateGraph
 
+from byte.agent import Agent, AssistantContextSchema, AssistantNode, BaseState, EndNode, StartNode
 from byte.agent.implementations.commit.prompt import commit_plan_prompt, commit_prompt
+from byte.git import CommitMessage, CommitPlan
+from byte.llm import LLMService
 
 
 class CommitAgent(Agent):
@@ -23,12 +23,12 @@ class CommitAgent(Agent):
         graph = StateGraph(BaseState)
 
         # Add nodes
-        graph.add_node("start_node", await self.make(StartNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("start_node", self.make(StartNode))  # ty:ignore[invalid-argument-type]
         graph.add_node(
             "assistant_node",
-            await self.make(AssistantNode, goto="extract_node", structured_output=CommitMessage),  # ty:ignore[invalid-argument-type]
+            self.make(AssistantNode, goto="extract_node", structured_output=CommitMessage),  # ty:ignore[invalid-argument-type]
         )
-        graph.add_node("end_node", await self.make(EndNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("end_node", self.make(EndNode))  # ty:ignore[invalid-argument-type]
 
         # Define edges
         graph.add_edge(START, "start_node")
@@ -40,7 +40,7 @@ class CommitAgent(Agent):
         return graph.compile()
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
-        llm_service = await self.make(LLMService)
+        llm_service = self.make(LLMService)
         main: BaseChatModel = llm_service.get_main_model()
         weak: BaseChatModel = llm_service.get_weak_model()
 
@@ -68,12 +68,12 @@ class CommitPlanAgent(Agent):
         graph = StateGraph(BaseState)
 
         # Add nodes
-        graph.add_node("start_node", await self.make(StartNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("start_node", self.make(StartNode))  # ty:ignore[invalid-argument-type]
         graph.add_node(
             "assistant_node",
-            await self.make(AssistantNode, goto="extract_node", structured_output=CommitPlan),  # ty:ignore[invalid-argument-type]
+            self.make(AssistantNode, goto="extract_node", structured_output=CommitPlan),  # ty:ignore[invalid-argument-type]
         )
-        graph.add_node("end_node", await self.make(EndNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("end_node", self.make(EndNode))  # ty:ignore[invalid-argument-type]
 
         # Define edges
         graph.add_edge(START, "start_node")
@@ -85,7 +85,7 @@ class CommitPlanAgent(Agent):
         return graph.compile()
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
-        llm_service = await self.make(LLMService)
+        llm_service = self.make(LLMService)
         main: BaseChatModel = llm_service.get_main_model()
         weak: BaseChatModel = llm_service.get_weak_model()
 

@@ -32,5 +32,5 @@ class Eventable:
         if not self.app:
             raise RuntimeError("No app available - ensure service is properly initialized")
 
-        event_bus = await self.app.make(EventBus)
+        event_bus = self.app.make(EventBus)
         return await event_bus.emit(payload)

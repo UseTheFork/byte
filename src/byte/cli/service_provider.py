@@ -1,4 +1,5 @@
 from byte.cli import (
+    CommandRegistry,
     InteractionService,
     PromptToolkitService,
     StreamRenderingService,
@@ -17,11 +18,12 @@ class CLIServiceProvider(ServiceProvider):
             InteractionService,
             PromptToolkitService,
             SubprocessService,
+            CommandRegistry,
         ]
 
-    async def boot(self, app: Application):
+    async def boot(self):
         """Boot UI services."""
-        event_bus = await app.make(EventBus)
+        event_bus = await self.app.make(EventBus)
 
         event_bus.on(
             EventType.POST_BOOT.value,

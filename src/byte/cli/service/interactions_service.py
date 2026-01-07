@@ -21,7 +21,7 @@ class InteractionService(Service):
         """
 
         try:
-            console = await self.make(Console)
+            console = self.make(Console)
 
             return console.confirm(
                 message=f"{message}",
@@ -41,7 +41,7 @@ class InteractionService(Service):
             raise ValueError("Choices list cannot be empty")
 
         try:
-            console = await self.make(Console)
+            console = self.make(Console)
 
             # Determine starting index if default provided
             start_index = 0
@@ -78,7 +78,7 @@ class InteractionService(Service):
             raise ValueError("Choices list cannot be empty")
 
         try:
-            console = await self.make(Console)
+            console = self.make(Console)
 
             # Determine starting index if default provided (convert 1-based to 0-based)
             start_index = 0
@@ -111,7 +111,7 @@ class InteractionService(Service):
         Usage: `text = await interaction_service.input_text("Enter name:", "default_name")`
         """
         try:
-            console = await self.make(Console)
+            console = self.make(Console)
 
             result = Prompt.ask(
                 message,
@@ -144,7 +144,7 @@ class InteractionService(Service):
                 return (True, None)
 
             # If not confirmed, prompt for text input
-            console = await self.make(Console)
+            console = self.make(Console)
             text_input = Prompt.ask(
                 input_message,
                 console=console.console,

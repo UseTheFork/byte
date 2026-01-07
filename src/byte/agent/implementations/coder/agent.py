@@ -1,4 +1,8 @@
-from byte.domain.agent import (
+from langchain.chat_models import BaseChatModel
+from langgraph.graph import END, START, StateGraph
+from langgraph.graph.state import CompiledStateGraph
+
+from byte.agent import (
     Agent,
     AssistantContextSchema,
     AssistantNode,
@@ -8,13 +12,9 @@ from byte.domain.agent import (
     ParseBlocksNode,
     StartNode,
 )
-from byte.domain.llm import LLMService
-from byte.domain.prompt_format import EditFormatService
-from langchain.chat_models import BaseChatModel
-from langgraph.graph import END, START, StateGraph
-from langgraph.graph.state import CompiledStateGraph
-
 from byte.agent.implementations.coder.prompt import coder_prompt
+from byte.llm import LLMService
+from byte.prompt_format import EditFormatService
 
 
 class CoderAgent(Agent):
@@ -32,11 +32,11 @@ class CoderAgent(Agent):
         graph = StateGraph(BaseState)
 
         # Add nodes
-        graph.add_node("start_node", await self.make(StartNode))
-        graph.add_node("assistant_node", await self.make(AssistantNode, goto="parse_blocks_node"))
-        graph.add_node("parse_blocks_node", await self.make(ParseBlocksNode))
-        graph.add_node("lint_node", await self.make(LintNode))
-        graph.add_node("end_node", await self.make(EndNode))
+        graph.add_node("start_node", self.make(StartNode))
+        graph.add_node("assistant_node", self.make(AssistantNode, goto="parse_blocks_node"))
+        graph.add_node("parse_blocks_node", self.make(ParseBlocksNode))
+        graph.add_node("lint_node", self.make(LintNode))
+        graph.add_node("end_node", self.make(EndNode))
 
         # Define edges
         graph.add_edge(START, "start_node")
@@ -50,11 +50,11 @@ class CoderAgent(Agent):
         return graph.compile(checkpointer=checkpointer)
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
-        llm_service = await self.make(LLMService)
+        llm_service = self.make(LLMService)
         main: BaseChatModel = llm_service.get_main_model()
         weak: BaseChatModel = llm_service.get_weak_model()
 
-        edit_format_service = await self.make(EditFormatService)
+        edit_format_service = self.make(EditFormatService)
 
         return AssistantContextSchema(
             mode="main",

@@ -1,6 +1,7 @@
-from byte.domain.agent import Agent, BaseState, CopyNode, EndNode
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
+
+from byte.agent import Agent, BaseState, CopyNode, EndNode
 
 
 class CopyAgent(Agent):
@@ -15,8 +16,8 @@ class CopyAgent(Agent):
         """Build and compile the coder agent graph with memory and tools."""
 
         graph = StateGraph(BaseState)
-        graph.add_node("copy_node", await self.make(CopyNode))
-        graph.add_node("end_node", await self.make(EndNode))
+        graph.add_node("copy_node", self.make(CopyNode))
+        graph.add_node("end_node", self.make(EndNode))
 
         # Define edges
         graph.add_edge(START, "copy_node")

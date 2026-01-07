@@ -1,6 +1,6 @@
 from typing import Any, Callable, Optional, TypeVar
 
-from byte.core.utils import value
+from byte.support.utils import value
 
 T = TypeVar("T")
 
