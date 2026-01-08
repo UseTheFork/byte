@@ -3,7 +3,6 @@ from __future__ import annotations
 import sys
 from typing import TYPE_CHECKING
 
-from rich.console import Console
 from rich.traceback import Traceback
 
 from byte.foundation.bootstrap.bootstrapper import Bootstrapper
@@ -15,7 +14,7 @@ if TYPE_CHECKING:
 class HandleExceptions(Bootstrapper):
     """Bootstrap exception handling for the application."""
 
-    app: Application | None = None
+    app: Application
 
     def _render_for_console(self, exception: Exception) -> None:
         """
@@ -24,7 +23,7 @@ class HandleExceptions(Bootstrapper):
         Args:
             exception: The exception to render.
         """
-        console = Console(stderr=True)
+        console = HandleExceptions.app["console"]
 
         traceback = Traceback.from_exception(
             type(exception),
@@ -33,6 +32,17 @@ class HandleExceptions(Bootstrapper):
             show_locals=True,
         )
         console.print(traceback)
+
+    def _render_for_logging(self, exception: Exception) -> None:
+        """
+        Render an exception for logging.
+
+        Args:
+            exception: The exception to log.
+        """
+        log = HandleExceptions.app["log"]
+
+        log.exception(exception)
 
     def _make_exception_handler(self):
         """
@@ -47,6 +57,7 @@ class HandleExceptions(Bootstrapper):
 
             # Render for console
             self._render_for_console(exc_value)
+            self._render_for_logging(exc_value)
 
         return exception_handler
 
