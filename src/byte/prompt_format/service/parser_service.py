@@ -402,7 +402,7 @@ class ParserService(Service, UserInteractive, ABC):
                     # Replace entire file contents
                     if await self.prompt_for_confirmation(
                         f"Replace all contents of '{file_path}'?",
-                        False,
+                        True,
                     ):
                         file_path.write_text(block.replace_content, encoding="utf-8")
 
