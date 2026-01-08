@@ -80,9 +80,7 @@ class ShellCommandService(Service, UserInteractive):
             # Create a block for each command
             for command in commands:
                 # Set working directory to project root if available
-                working_dir = ""
-                if self._config and self._config.project_root:
-                    working_dir = str(self._config.project_root)
+                working_dir = str(self.app.path())
 
                 blocks.append(
                     ShellCommandBlock(

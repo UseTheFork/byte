@@ -30,10 +30,10 @@ class AskAgent(Agent):
         graph = StateGraph(BaseState)
 
         # Add nodes
-        graph.add_node("start_node", self.make(StartNode))
-        graph.add_node("assistant_node", self.make(AssistantNode))
-        graph.add_node("tools_node", self.make(ToolNode))
-        graph.add_node("end_node", self.make(EndNode))
+        graph.add_node("start_node", self.app.make(StartNode))
+        graph.add_node("assistant_node", self.app.make(AssistantNode))
+        graph.add_node("tools_node", self.app.make(ToolNode))
+        graph.add_node("end_node", self.app.make(EndNode))
 
         # Define edges
         graph.add_edge(START, "start_node")
@@ -48,7 +48,7 @@ class AskAgent(Agent):
         return graph.compile(checkpointer=checkpointer)
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
-        llm_service = self.make(LLMService)
+        llm_service = self.app.make(LLMService)
         main: BaseChatModel = llm_service.get_main_model()
         weak: BaseChatModel = llm_service.get_weak_model()
 

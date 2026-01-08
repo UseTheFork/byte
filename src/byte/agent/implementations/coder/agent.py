@@ -32,11 +32,11 @@ class CoderAgent(Agent):
         graph = StateGraph(BaseState)
 
         # Add nodes
-        graph.add_node("start_node", self.make(StartNode))
-        graph.add_node("assistant_node", self.make(AssistantNode, goto="parse_blocks_node"))
-        graph.add_node("parse_blocks_node", self.make(ParseBlocksNode))
-        graph.add_node("lint_node", self.make(LintNode))
-        graph.add_node("end_node", self.make(EndNode))
+        graph.add_node("start_node", self.app.make(StartNode))
+        graph.add_node("assistant_node", self.app.make(AssistantNode, goto="parse_blocks_node"))
+        graph.add_node("parse_blocks_node", self.app.make(ParseBlocksNode))
+        graph.add_node("lint_node", self.app.make(LintNode))
+        graph.add_node("end_node", self.app.make(EndNode))
 
         # Define edges
         graph.add_edge(START, "start_node")

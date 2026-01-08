@@ -1,6 +1,6 @@
 from typing import List, Type
 
-from byte import Application, EventBus, EventType, Payload, Service, ServiceProvider
+from byte import EventBus, EventType, Payload, Service, ServiceProvider
 from byte.cli import Command
 from byte.files import (
     AddFileCommand,
@@ -61,7 +61,7 @@ class FileServiceProvider(ServiceProvider):
         )
 
         # Boot AI comment watcher if enabled
-        config = self.app.make("config")
+        config = self.app["config"]
         if config.files.watch.enable:
             ai_comment_watcher = self.app.make(AICommentWatcherService)
 
@@ -88,13 +88,11 @@ class FileServiceProvider(ServiceProvider):
         )
 
     async def boot_messages(self, payload: Payload) -> Payload:
-        app: Application = payload.get("container", False)
-        if app:
-            file_discovery = app.make(FileDiscoveryService)
-            messages = payload.get("messages", [])
-            found_files = await file_discovery.get_files()
-            messages.append(f"[muted]Files Discovered:[/muted] [primary]{len(found_files)}[/primary]")
+        file_discovery = self.app.make(FileDiscoveryService)
+        messages = payload.get("messages", [])
+        found_files = await file_discovery.get_files()
+        messages.append(f"[muted]Files Discovered:[/muted] [primary]{len(found_files)}[/primary]")
 
-            payload.set("messages", messages)
+        payload.set("messages", messages)
 
         return payload

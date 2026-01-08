@@ -5,7 +5,7 @@ from typing import List
 
 from langchain_core.messages import AIMessage, BaseMessage
 
-from byte import Service
+from byte import Service, log
 from byte.files import FileDiscoveryService, FileMode, FileService
 from byte.prompt_format import (
     EDIT_BLOCK_NAME,
@@ -126,15 +126,15 @@ class ParserService(Service, UserInteractive, ABC):
             # replace_content = replace_content.strip()
 
             # TODO: Improve logging here.
-            # log.debug(block_id)
-            # log.debug(operation)
-            # log.debug(file_path)
-            # log.debug(search_content)
+            log().debug(block_id)
+            log().debug(operation)
+            log().debug(file_path)
+            log().debug(search_content)
 
             # Determine block type based on operation and file existence
             file_path_obj = Path(file_path.strip())
-            if not file_path_obj.is_absolute() and self._config and self._config.project_root:
-                file_path_obj = (self._config.project_root / file_path_obj).resolve()
+            if not file_path_obj.is_absolute() and self._config and self.app["config"]:
+                file_path_obj = self.app.path(str(file_path_obj)).resolve()
             else:
                 file_path_obj = file_path_obj.resolve()
 
@@ -266,8 +266,8 @@ class ParserService(Service, UserInteractive, ABC):
             file_path = Path(block.file_path)
 
             # If the path is relative, resolve it against the project root
-            if not file_path.is_absolute() and self._config and self._config.project_root:
-                file_path = (self._config.project_root / file_path).resolve()
+            if not file_path.is_absolute():
+                file_path = self.app.path("file_path").resolve()
             else:
                 file_path = file_path.resolve()
 
@@ -309,14 +309,13 @@ class ParserService(Service, UserInteractive, ABC):
             else:
                 # File doesn't exist - ensure it's within git root
                 # Get project root from config
-                if self._config and self._config.project_root:
-                    try:
-                        # Use the resolved file_path for the check
-                        file_path.relative_to(self._config.project_root.resolve())
-                    except ValueError:
-                        block.block_status = BlockStatus.FILE_OUTSIDE_PROJECT_ERROR
-                        block.status_message = f"New file must be within project root: {block.file_path}"
-                        continue
+                try:
+                    # Use the resolved file_path for the check
+                    file_path.relative_to(self.app.path().resolve())
+                except ValueError:
+                    block.block_status = BlockStatus.FILE_OUTSIDE_PROJECT_ERROR
+                    block.status_message = f"New file must be within project root: {block.file_path}"
+                    continue
 
             # If we reach here, the block is valid
             block.block_status = BlockStatus.VALID
@@ -367,8 +366,8 @@ class ParserService(Service, UserInteractive, ABC):
                 file_path = Path(block.file_path)
 
                 # If the path is relative, resolve it against the project root
-                if not file_path.is_absolute() and self._config and self._config.project_root:
-                    file_path = (self._config.project_root / file_path).resolve()
+                if not file_path.is_absolute():
+                    file_path = self.app.path(str(file_path)).resolve()
                 else:
                     file_path = file_path.resolve()
 

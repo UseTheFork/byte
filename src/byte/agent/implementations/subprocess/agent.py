@@ -22,9 +22,9 @@ class SubprocessAgent(Agent):
         # Add nodes
         graph.add_node(
             "subprocess_node",
-            self.make(SubprocessNode),
+            self.app.make(SubprocessNode),
         )
-        graph.add_node("end_node", self.make(EndNode))
+        graph.add_node("end_node", self.app.make(EndNode))
 
         # Define edges
         graph.add_edge(START, "subprocess_node")

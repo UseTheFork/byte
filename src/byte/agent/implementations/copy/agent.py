@@ -16,8 +16,8 @@ class CopyAgent(Agent):
         """Build and compile the coder agent graph with memory and tools."""
 
         graph = StateGraph(BaseState)
-        graph.add_node("copy_node", self.make(CopyNode))
-        graph.add_node("end_node", self.make(EndNode))
+        graph.add_node("copy_node", self.app.make(CopyNode))
+        graph.add_node("end_node", self.app.make(EndNode))
 
         # Define edges
         graph.add_edge(START, "copy_node")

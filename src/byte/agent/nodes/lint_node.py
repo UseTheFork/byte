@@ -9,7 +9,7 @@ from byte.lint import LintService
 
 class LintNode(Node):
     async def __call__(self, state: BaseState, config: RunnableConfig):
-        lint_service = await self.make(LintService)
+        lint_service = self.app.make(LintService)
 
         if not self._config.lint.enable:
             return Command(goto="end_node")

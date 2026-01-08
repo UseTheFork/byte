@@ -1,9 +1,17 @@
+from __future__ import annotations
+
 import inspect
-from typing import Any, Callable, Optional, Type, TypeVar
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Type, TypeVar, Union, overload
 
 from byte.support.mixins import Bootable
 
 T = TypeVar("T")
+
+
+if TYPE_CHECKING:
+    from byte import Application, Console, Log
+    from byte.config import ByteConfig
 
 
 class Container:
@@ -104,7 +112,13 @@ class Container:
 
         return instance
 
-    def make(self, abstract, **kwargs) -> T:
+    @overload
+    def make(self, abstract: Type[T], **kwargs) -> T: ...
+
+    @overload
+    def make(self, abstract: str, **kwargs) -> Any: ...
+
+    def make(self, abstract: Union[Type[T], str], **kwargs) -> Union[T, Any]:
         """Resolve a service from the container.
 
         Usage:
@@ -188,6 +202,36 @@ class Container:
         """
         abstract_str = self._normalize_abstract(abstract)
         return abstract_str in self._instances
+
+    @overload
+    def __getitem__(self, abstract: Literal["console"], **kwargs) -> Console: ...
+
+    @overload
+    def __getitem__(self, abstract: Literal["config"], **kwargs) -> ByteConfig: ...
+
+    @overload
+    def __getitem__(self, abstract: Literal["log"], **kwargs) -> Log: ...
+
+    @overload
+    def __getitem__(self, abstract: Literal["app"], **kwargs) -> Application: ...
+
+    @overload
+    def __getitem__(self, abstract: Literal["path"], **kwargs) -> Path: ...
+
+    @overload
+    def __getitem__(self, abstract: Literal["path.app"], **kwargs) -> Path: ...
+
+    @overload
+    def __getitem__(self, abstract: Literal["path.config"], **kwargs) -> Path: ...
+
+    @overload
+    def __getitem__(self, abstract: Literal["path.cache"], **kwargs) -> Path: ...
+
+    @overload
+    def __getitem__(self, abstract: Literal["path.conventions"], **kwargs) -> Path: ...
+
+    @overload
+    def __getitem__(self, abstract: Literal["path.session_context"], **kwargs) -> Path: ...
 
     def __getitem__(self, key: str) -> Any:
         """Resolve an item from the container by key."""

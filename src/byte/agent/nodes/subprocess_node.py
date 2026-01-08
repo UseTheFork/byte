@@ -54,7 +54,7 @@ class SubprocessNode(Node, UserInteractive):
         """
 
         subprocess_command = state["user_request"]
-        subprocess_service = self.make(SubprocessService)
+        subprocess_service = self.app.make(SubprocessService)
         subprocess_result = await subprocess_service.run(subprocess_command)
 
         should_add = await self._display_subprocess_results(subprocess_result)

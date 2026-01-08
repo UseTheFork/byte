@@ -28,7 +28,7 @@ class CleanerAgent(Agent, UserInteractive):
         Usage: `result = await agent._confirm_content(state)` -> updated state
         """
 
-        console = self.make(Console)
+        console = self.app.make(Console)
 
         cleaned_content = state.get("extracted_content", "")
 
@@ -68,10 +68,10 @@ class CleanerAgent(Agent, UserInteractive):
         graph = StateGraph(BaseState)
 
         # Add nodes
-        graph.add_node("start_node", self.make(StartNode))
-        graph.add_node("assistant_node", self.make(AssistantNode, goto="extract_node"))
-        graph.add_node("extract_node", self.make(ExtractNode))
-        graph.add_node("end_node", self.make(EndNode))
+        graph.add_node("start_node", self.app.make(StartNode))
+        graph.add_node("assistant_node", self.app.make(AssistantNode, goto="extract_node"))
+        graph.add_node("extract_node", self.app.make(ExtractNode))
+        graph.add_node("end_node", self.app.make(EndNode))
 
         graph.add_node("confirm_content_node", self._confirm_content)
 
@@ -87,7 +87,7 @@ class CleanerAgent(Agent, UserInteractive):
         return graph.compile()
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
-        llm_service = self.make(LLMService)
+        llm_service = self.app.make(LLMService)
         main: BaseChatModel = llm_service.get_main_model()
         weak: BaseChatModel = llm_service.get_weak_model()
 

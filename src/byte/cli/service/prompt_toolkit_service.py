@@ -200,7 +200,7 @@ class PromptToolkitService(Service):
         console.print()
         # TODO: should we make `user_input` a [("user", user_input)], in this situation.
 
-        agent_service = self.make(AgentService)
+        agent_service = self.app.make(AgentService)
         active_agent = agent_service.get_active_agent()
 
         payload = Payload(

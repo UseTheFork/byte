@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Callable, Optional, TypeVar
 
 from byte import ServiceProvider
-from byte.cli import PromptToolkitService
 from byte.foundation import Console, Container, EventBus, Kernel, Log, TaskManager
 from byte.foundation.bootstrap import RegisterProviders
 
@@ -10,7 +9,12 @@ T = TypeVar("T")
 
 
 class Application(Container):
-    """ """
+    """The main application container that manages service providers and application lifecycle.
+
+    Usage: `app = Application.configure(base_path=Path.cwd())` -> creates configured application instance
+    Usage: `await app.boot()` -> boots all registered service providers
+    Usage: `await app.run()` -> starts interactive prompt session
+    """
 
     def _register_base_bindings(self):
         """Register the basic bindings into the container."""
@@ -26,6 +30,16 @@ class Application(Container):
         self.singleton(TaskManager)
         self.singleton(Console)
 
+    def _register_base_service_provider_bindings(self):
+        """Register base service provider instances in the container.
+
+        Usage: Called internally during application initialization to bind log and console services.
+        """
+        self.instance("log", self.log())
+        self.instance("console", self.console())
+
+        return self
+
     def __init__(self, base_path: Optional[Path] = None):
         super().__init__()
         self._has_been_bootstrapped = False
@@ -38,6 +52,7 @@ class Application(Container):
 
         self._register_base_bindings()
         self._register_base_service_providers()
+        self._register_base_service_provider_bindings()
 
     @staticmethod
     def configure(base_path: Optional[Path] = None, providers: list[type] | None = []):
@@ -152,6 +167,20 @@ class Application(Container):
         self.instance("path.session_context", self.session_context_path())
 
         return self
+
+    def log(self) -> Log:
+        """Get the Log service instance from the container.
+
+        Usage: `app.log()` -> returns Log instance for logging operations
+        """
+        return self.make(Log)
+
+    def console(self) -> Console:
+        """Get the Console service instance from the container.
+
+        Usage: `app.console()` -> returns Console instance for terminal output
+        """
+        return self.make(Console)
 
     def path(self, path: str = "") -> Path:
         """
@@ -296,7 +325,12 @@ class Application(Container):
         return status
 
     async def run(self) -> int:
-        """"""
+        """Run the interactive prompt-based application loop.
+
+        Usage: `await app.run()` -> starts interactive session until KeyboardInterrupt
+        """
+        from byte.cli import PromptToolkitService
+
         input_service = self.make(PromptToolkitService)
         while True:
             try:

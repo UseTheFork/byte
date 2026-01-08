@@ -51,20 +51,20 @@ class ConventionAgent(Agent):
         graph = StateGraph(BaseState)
 
         # Add nodes
-        graph.add_node("start_node", self.make(StartNode))
-        graph.add_node("assistant_node", self.make(AssistantNode, goto="validation_node"))
+        graph.add_node("start_node", self.app.make(StartNode))
+        graph.add_node("assistant_node", self.app.make(AssistantNode, goto="validation_node"))
         graph.add_node(
             "validation_node",
-            self.make(
+            self.app.make(
                 ValidationNode,
                 goto="extract_node",
                 max_lines=75,
             ),
         )
 
-        graph.add_node("extract_node", self.make(ExtractNode))
-        graph.add_node("tools_node", self.make(ToolNode))
-        graph.add_node("end_node", self.make(EndNode))
+        graph.add_node("extract_node", self.app.make(ExtractNode))
+        graph.add_node("tools_node", self.app.make(ToolNode))
+        graph.add_node("end_node", self.app.make(EndNode))
 
         # Define edges
         graph.add_edge(START, "start_node")
@@ -75,7 +75,7 @@ class ConventionAgent(Agent):
         return graph.compile()
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
-        llm_service = self.make(LLMService)
+        llm_service = self.app.make(LLMService)
         main: BaseChatModel = llm_service.get_main_model()
         weak: BaseChatModel = llm_service.get_weak_model()
 

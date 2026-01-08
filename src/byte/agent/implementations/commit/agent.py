@@ -23,12 +23,12 @@ class CommitAgent(Agent):
         graph = StateGraph(BaseState)
 
         # Add nodes
-        graph.add_node("start_node", self.make(StartNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("start_node", self.app.make(StartNode))  # ty:ignore[invalid-argument-type]
         graph.add_node(
             "assistant_node",
-            self.make(AssistantNode, goto="extract_node", structured_output=CommitMessage),  # ty:ignore[invalid-argument-type]
+            self.app.make(AssistantNode, goto="extract_node", structured_output=CommitMessage),  # ty:ignore[invalid-argument-type]
         )
-        graph.add_node("end_node", self.make(EndNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
 
         # Define edges
         graph.add_edge(START, "start_node")
@@ -40,7 +40,7 @@ class CommitAgent(Agent):
         return graph.compile()
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
-        llm_service = self.make(LLMService)
+        llm_service = self.app.make(LLMService)
         main: BaseChatModel = llm_service.get_main_model()
         weak: BaseChatModel = llm_service.get_weak_model()
 
@@ -68,12 +68,12 @@ class CommitPlanAgent(Agent):
         graph = StateGraph(BaseState)
 
         # Add nodes
-        graph.add_node("start_node", self.make(StartNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("start_node", self.app.make(StartNode))  # ty:ignore[invalid-argument-type]
         graph.add_node(
             "assistant_node",
-            self.make(AssistantNode, goto="extract_node", structured_output=CommitPlan),  # ty:ignore[invalid-argument-type]
+            self.app.make(AssistantNode, goto="extract_node", structured_output=CommitPlan),  # ty:ignore[invalid-argument-type]
         )
-        graph.add_node("end_node", self.make(EndNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
 
         # Define edges
         graph.add_edge(START, "start_node")
@@ -85,7 +85,7 @@ class CommitPlanAgent(Agent):
         return graph.compile()
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
-        llm_service = self.make(LLMService)
+        llm_service = self.app.make(LLMService)
         main: BaseChatModel = llm_service.get_main_model()
         weak: BaseChatModel = llm_service.get_weak_model()
 

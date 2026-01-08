@@ -5,7 +5,6 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte import Console
 from byte.agent import AssistantContextSchema, BaseState, Node
 from byte.prompt_format import (
     EDIT_BLOCK_NAME,
@@ -408,8 +407,8 @@ class ParseBlocksNode(Node):
 
     async def __call__(self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]):
         """Parse commands from the last assistant message."""
-        self.console = self.make(Console)
-        self.edit_format = self.make(EditFormatService)
+        self.console = self.app["console"]
+        self.edit_format = self.app.make(EditFormatService)
         self.runtime = runtime
 
         self.metadata = state["metadata"]

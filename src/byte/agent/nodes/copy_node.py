@@ -53,7 +53,7 @@ class CopyNode(Node, UserInteractive):
         Usage: `block = await self._prompt_user_selection(blocks)`
         """
 
-        console = self.make(Console)
+        console = self.app.make(Console)
 
         # Configuration for preview display
         max_preview_lines = 5
@@ -142,7 +142,7 @@ class CopyNode(Node, UserInteractive):
 
     async def __call__(self, state: BaseState, config: RunnableConfig):
         """Extract code blocks and prompt user to select one for clipboard copy."""
-        console = self.make(Console)
+        console = self.app.make(Console)
         messages = state["history_messages"]
 
         if not messages:

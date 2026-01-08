@@ -20,7 +20,6 @@ class ServiceProvider(ABC):
     """
 
     def __init__(self, app: Application):
-        # Optional application reference for providers that need it during initialization
         self.app = app
 
     def services(self) -> List[Type[Service]]:

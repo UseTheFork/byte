@@ -199,7 +199,8 @@ class LintService(Service, UserInteractive):
 
 
         """
-        console = self.make(Console)
+        console = self.app["console"]
+        log = self.app["log"]
 
         git_service: GitService = self.make(GitService)
 
@@ -267,7 +268,7 @@ class LintService(Service, UserInteractive):
                     for i, lint_file in enumerate(command.results):
                         command_str = " ".join(command.command)
                         status.update(f"Running {command_str} on {lint_file.file}")
-                        # log.info(f"Executing lint command: {command_str} on {lint_file.file}")
+                        log.info("Executing lint command: {} on {}", command_str, lint_file.file)
 
                         updated_lint_file = await self._execute_lint_command(lint_file, git_root)
                         command.results[i] = updated_lint_file
