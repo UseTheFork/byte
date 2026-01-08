@@ -222,6 +222,9 @@ class Container:
     def __getitem__(self, abstract: Literal["path.app"], **kwargs) -> Path: ...
 
     @overload
+    def __getitem__(self, abstract: Literal["path.root"], **kwargs) -> Path: ...
+
+    @overload
     def __getitem__(self, abstract: Literal["path.config"], **kwargs) -> Path: ...
 
     @overload

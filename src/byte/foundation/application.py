@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import Callable, Optional, TypeVar
 
+from git import InvalidGitRepositoryError, Repo
+
 from byte import ServiceProvider
 from byte.foundation import Console, Container, EventBus, Kernel, Log, TaskManager
 from byte.foundation.bootstrap import RegisterProviders
@@ -69,10 +71,22 @@ class Application(Container):
 
         return ApplicationBuilder(Application(base_path=base_path)).with_kernels().with_providers(providers)
 
+    def _set_git_root_path(self) -> None:
+        """Set the Git repository root path by traversing up from the start path.
+
+        Usage: Called internally from `set_base_path` to find and store the Git repository root.
+        """
+        try:
+            repo = Repo(self._base_path, search_parent_directories=True)
+            self._git_root_path = Path(repo.working_dir)
+        except InvalidGitRepositoryError:
+            raise RuntimeError(f"No Git repository found starting from {self._base_path}")
+
     def set_base_path(self, base_path: Path):
         """Set the base paths."""
         self._base_path = base_path
 
+        self._set_git_root_path()
         self.bind_paths_in_container()
 
         return self
@@ -161,6 +175,7 @@ class Application(Container):
         """Set the base paths."""
         self.instance("path", self.path())
         self.instance("path.app", self.app_path())
+        self.instance("path.root", self.root_path())
         self.instance("path.config", self.config_path())
         self.instance("path.cache", self.cache_path())
         self.instance("path.conventions", self.conventions_path())
@@ -219,6 +234,18 @@ class Application(Container):
         """
         return self.join_paths(self._base_path, path)
 
+    def root_path(self, path: str = "") -> Path:
+        """
+        Get the root path of the Git repository.
+
+        Args:
+            path: Optional path to append to the root path.
+
+        Returns:
+            The full root path or root path with appended subdirectory.
+        """
+        return self.join_paths(self._git_root_path, path)
+
     def config_path(self, path: str = "") -> Path:
         """
         Get the path to the application configuration directory.
@@ -229,7 +256,7 @@ class Application(Container):
         Returns:
             The full path to the config directory or subdirectory.
         """
-        base = self.base_path(".byte")
+        base = self.root_path(".byte")
         return self.join_paths(base, path)
 
     def cache_path(self, path: str = "") -> Path:
@@ -266,7 +293,7 @@ class Application(Container):
             The full path to the environment file directory.
         """
         environment_path = getattr(self, "_environment_path", None)
-        return Path(environment_path) if environment_path else self.base_path()
+        return Path(environment_path) if environment_path else self.root_path()
 
     def environment_file_path(self) -> Path:
         """

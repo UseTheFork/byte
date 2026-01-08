@@ -21,10 +21,10 @@ class GitService(Service, UserInteractive):
     def boot(self):
         # Initialize git repository using the project root from config
         try:
-            self._repo = git.Repo(self.app["path"])
+            self._repo = git.Repo(self.app["path.root"])
         except InvalidGitRepositoryError:
             raise InvalidGitRepositoryError(
-                f"Not a git repository: {self.app['path']}. Please run 'git init' or navigate to a git repository."
+                f"Not a git repository: {self.app['path.root']}. Please run 'git init' or navigate to a git repository."
             )
 
     async def get_repo(self):
@@ -106,7 +106,7 @@ class GitService(Service, UserInteractive):
                 if retry:
                     # Re-stage only the files that were originally staged for this commit
                     for file_path in staged_files:
-                        file_full_path = self.app["path"] / file_path
+                        file_full_path = self.app.root_path(str(file_path))
                         if file_full_path.exists():
                             await self.add(str(file_path))
                         else:
