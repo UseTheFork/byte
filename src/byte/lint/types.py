@@ -8,6 +8,7 @@ from pydantic.dataclasses import dataclass
 class LintFile:
     """Dataclass representing the result of executing a lint command on a specific file."""
 
+    command: List[str]
     file: Path
     full_command: str
     exit_code: int | None = None

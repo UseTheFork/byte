@@ -32,11 +32,11 @@ class LintCommand(Command):
         """Execute linting command with optional arguments."""
 
         try:
-            git_service = self.make(GitService)
+            git_service = self.app.make(GitService)
             await git_service.stage_changes()
 
-            lint_service = self.make(LintService)
-            lint_commands = await lint_service()
+            lint_service = self.app.make(LintService)
+            lint_commands = await lint_service.handle()
 
             do_fix, failed_commands = await lint_service.display_results_summary(lint_commands)
             if do_fix:
