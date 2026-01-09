@@ -1,7 +1,5 @@
-from pathlib import Path
 from typing import Optional
 
-import git
 from pydantic import BaseModel, Field
 
 from byte.cli.config import CLIConfig
@@ -14,36 +12,6 @@ from byte.presets.config import PresetsConfig
 from byte.prompt_format.config import EditFormatConfig
 from byte.system.config import SystemConfig
 from byte.web.config import WebConfig
-
-
-def _find_project_root() -> Path:
-    """Find git repository root directory.
-
-    Raises InvalidGitRepositoryError if not in a git repository.
-    """
-    try:
-        repo = git.Repo(search_parent_directories=True)
-        return Path(repo.working_dir)
-    except git.InvalidGitRepositoryError:
-        raise git.InvalidGitRepositoryError(
-            "Byte requires a git repository. Please run 'git init' or navigate to a git repository."
-        )
-
-
-# PROJECT_ROOT = _find_project_root()
-# BYTE_DIR: Path = PROJECT_ROOT / ".byte"
-# BYTE_DIR.mkdir(exist_ok=True)
-
-# BYTE_CACHE_DIR: Path = BYTE_DIR / "cache"
-# BYTE_CACHE_DIR.mkdir(exist_ok=True)
-
-# BYTE_SESSION_DIR: Path = BYTE_DIR / "session_context"
-# BYTE_SESSION_DIR.mkdir(exist_ok=True)
-
-# BYTE_CONFIG_FILE = BYTE_DIR / "config.yaml"
-
-# # Load our dotenv
-# DOTENV_PATH = PROJECT_ROOT / ".env"
 
 
 class CLIArgs(BaseModel):
@@ -59,6 +27,7 @@ class BootConfig(BaseModel):
 
 class AppConfig(BaseModel):
     env: str = Field(default="production", exclude=True, description="XXXX")
+    debug: bool = Field(default=False, exclude=True, description="XXXX")
 
 
 class ByteConfig(BaseModel):

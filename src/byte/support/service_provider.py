@@ -45,10 +45,12 @@ class ServiceProvider(ABC):
         for service_class in services:
             self.app.singleton(service_class)
 
+    # TODO: Doc Strings
     def commands(self) -> List[Type[Command]]:
         """"""
         return []
 
+    # TODO: Doc Strings
     def register_commands(self):
         """"""
         commands = self.commands()

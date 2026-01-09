@@ -1,6 +1,6 @@
 from typing import List, Type
 
-from byte import Command, Console, EventBus, EventType, Payload, Service, ServiceProvider
+from byte import Command, EventBus, EventType, Payload, Service, ServiceProvider
 from byte.memory import UndoCommand
 from byte.system import ExitCommand, SystemContextService
 
@@ -45,12 +45,11 @@ class SystemServiceProvider(ServiceProvider):
                 event_type=EventType.POST_BOOT,
                 data={
                     "messages": [],
-                    "container": self.app,
                 },
             )
         )
 
-        console = self.app.make(Console)
+        console = self.app["console"]
         messages = payload.get("messages", [])
 
         # Join all message strings into a single string with newlines

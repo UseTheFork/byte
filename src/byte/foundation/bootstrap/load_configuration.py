@@ -9,7 +9,6 @@ from byte.config import ByteConfig
 from byte.foundation.bootstrap.bootstrapper import Bootstrapper
 
 if TYPE_CHECKING:
-    from byte.config import Repository
     from byte.foundation import Application
 
 
@@ -64,9 +63,9 @@ class LoadConfiguration(Bootstrapper):
         Usage: `config = self._load_boot_config(config)`
         """
 
-        args: Repository = app.make("args")
-        read_only_files = args.get("args.options", {}).get("read_only", [])
-        editable_files = args.get("args.options", {}).get("editable", [])
+        args = app["args"]
+        read_only_files = args.get("options", {}).get("read_only", [])
+        editable_files = args.get("options", {}).get("editable", [])
 
         # Merge read_only_files from YAML and CLI, removing duplicates
         read_only_files = list(set(config.boot.read_only_files + read_only_files))
@@ -77,11 +76,27 @@ class LoadConfiguration(Bootstrapper):
         config.boot.editable_files = editable_files
 
     def _setup_console(self, app: Application, config: ByteConfig):
-        """ """
+        """Configure console UI and syntax themes from configuration.
+
+        Usage: `self._setup_console(app, config)`
+        """
         console = app["console"]
         console.ui_theme = config.cli.ui_theme
         console.syntax_theme = config.cli.syntax_theme
         console.setup_console()
+
+    def _setup_environment(self, app: Application, config: ByteConfig):
+        """Configure application environment settings including debug mode.
+
+        Usage: `self._setup_environment(app, config)`
+        """
+        args = app["args"]
+
+        flags = args.get("flags", [])
+        byte_debug = os.getenv("BYTE_DEBUG", "").lower() in ("true", "1", "yes")
+
+        if "debug" in flags or byte_debug:
+            config.app.debug = True
 
     def bootstrap(self, app: Application) -> None:
         """
@@ -93,9 +108,10 @@ class LoadConfiguration(Bootstrapper):
 
         yaml_config = self._load_configuration_file(app)
         config = app.instance("config", ByteConfig(**yaml_config))
+        self._setup_console(app, config)
+        self._setup_environment(app, config)
         self._load_llm_api_keys(app, config)
         self._load_boot_config(app, config)
-        self._setup_console(app, config)
 
         app.detect_environment(lambda: config.app.env)
         # app.resolve_environment_using(lambda environments: app.environment(*environments))

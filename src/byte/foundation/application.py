@@ -285,14 +285,14 @@ class Application(Container):
         base = self.config_path("conventions")
         return self.join_paths(base, path)
 
-    def is_local(self) -> bool:
+    def is_development(self) -> bool:
         """
         Determine if the application is in the local environment.
 
         Returns:
             True if in local environment, False otherwise.
         """
-        return self["env"] == "local"
+        return self["env"] == "development" or self["env"] == "dev"
 
     def is_production(self) -> bool:
         """
@@ -409,6 +409,7 @@ class Application(Container):
             except KeyboardInterrupt:
                 break
             except Exception as e:
+                # TODO: I think this can be moved to the general Exception handler.
                 # log.exception(e)
                 console = self.make(Console)
                 console.print_error_panel(
