@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Union
 
 from rich.columns import Columns
 
-from byte import Console, EventType, Payload, Service
+from byte import EventType, Payload, Service
 from byte.files import FileContext, FileDiscoveryService, FileMode
 from byte.prompt_format import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
@@ -47,7 +47,7 @@ class FileService(Service):
         Usage: `await service.add_file("config.py", FileMode.READ_ONLY)`
         Usage: `await service.add_file("src/*.py", FileMode.EDITABLE)` -> adds all Python files
         """
-        file_discovery = self.make(FileDiscoveryService)
+        file_discovery = self.app.make(FileDiscoveryService)
         discovered_files = await file_discovery.get_files()
         discovered_file_paths = {str(f.resolve()) for f in discovered_files}
 
@@ -101,7 +101,7 @@ class FileService(Service):
         Usage: `await service.remove_file("old_file.py")`
         Usage: `await service.remove_file("src/*.py")` -> removes all Python files
         """
-        file_discovery = self.make(FileDiscoveryService)
+        file_discovery = self.app.make(FileDiscoveryService)
         discovered_files = await file_discovery.get_files()
         discovered_file_paths = {str(f.resolve()) for f in discovered_files}
 
@@ -290,8 +290,10 @@ class FileService(Service):
         if not self.app["path"]:
             return "No project root configured"
 
-        file_discovery = self.make(FileDiscoveryService)
+        file_discovery = self.app.make(FileDiscoveryService)
         all_files = await file_discovery.get_files()
+
+        self.app["log"].debug(all_files)
 
         # Build directory structure
         dir_structure: Dict[Path, List[Path]] = {}
@@ -356,6 +358,8 @@ class FileService(Service):
                 if remaining > 0:
                     lines.append(f"{file_indent}... {remaining} more files")
 
+        self.app["log"].debug("\n".join(lines))
+
         return "\n".join(lines)
 
     async def clear_context(self):
@@ -375,7 +379,7 @@ class FileService(Service):
         optionally filtered by extension for language-specific operations.
         Usage: `py_files = service.get_project_files('.py')` -> Python files
         """
-        file_discovery = self.make(FileDiscoveryService)
+        file_discovery = self.app.make(FileDiscoveryService)
         return await file_discovery.get_relative_paths(extension)
 
     async def find_project_files(self, pattern: str) -> List[str]:
@@ -385,7 +389,7 @@ class FileService(Service):
         file index, respecting gitignore patterns automatically.
         Usage: `matches = service.find_project_files('src/main')` -> matching files
         """
-        file_discovery = self.make(FileDiscoveryService)
+        file_discovery = self.app.make(FileDiscoveryService)
         matches = await file_discovery.find_files(pattern)
 
         if not self.app["path"]:
@@ -409,13 +413,13 @@ class FileService(Service):
         helping users understand the current context state.
         """
 
-        console = self.make(Console)
+        console = self.app["console"]
 
         info_panel = payload.get("info_panel", [])
 
         read_only_panel = None
 
-        file_service = self.make(FileService)
+        file_service = self.app.make(FileService)
         readonly_files = file_service.list_files(FileMode.READ_ONLY)
         if readonly_files:
             file_names = [f"[text]{f.relative_path}[/text]" for f in readonly_files]

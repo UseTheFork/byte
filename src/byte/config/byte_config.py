@@ -57,10 +57,15 @@ class BootConfig(BaseModel):
     editable_files: list[str] = Field(default_factory=list, description="Files to add to editable context")
 
 
+class AppConfig(BaseModel):
+    env: str = Field(default="production", exclude=True, description="XXXX")
+
+
 class ByteConfig(BaseModel):
     dotenv_loaded: bool = Field(default=False, exclude=True, description="Whether a .env file was successfully loaded")
 
     # keep-sorted start
+    app: AppConfig = Field(default_factory=AppConfig)
     boot: BootConfig = Field(default_factory=BootConfig)
     cli: CLIConfig = Field(default_factory=CLIConfig)
     edit_format: EditFormatConfig = Field(default_factory=EditFormatConfig)

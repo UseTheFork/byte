@@ -11,7 +11,7 @@ T = TypeVar("T")
 
 if TYPE_CHECKING:
     from byte import Application, Console, Log
-    from byte.config import ByteConfig
+    from byte.config import ByteConfig, Repository
 
 
 class Container:
@@ -202,6 +202,12 @@ class Container:
         """
         abstract_str = self._normalize_abstract(abstract)
         return abstract_str in self._instances
+
+    @overload
+    def __getitem__(self, abstract: Literal["args"], **kwargs) -> Repository: ...
+
+    @overload
+    def __getitem__(self, abstract: Literal["env"], **kwargs) -> str: ...
 
     @overload
     def __getitem__(self, abstract: Literal["console"], **kwargs) -> Console: ...

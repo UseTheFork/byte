@@ -285,6 +285,49 @@ class Application(Container):
         base = self.config_path("conventions")
         return self.join_paths(base, path)
 
+    def is_local(self) -> bool:
+        """
+        Determine if the application is in the local environment.
+
+        Returns:
+            True if in local environment, False otherwise.
+        """
+        return self["env"] == "local"
+
+    def is_production(self) -> bool:
+        """
+        Determine if the application is in the production environment.
+
+        Returns:
+            True if in production environment, False otherwise.
+        """
+        return self["env"] == "production"
+
+    def running_unit_tests(self) -> bool:
+        """
+        Determine if the application is running unit tests.
+
+        Returns:
+            True if running unit tests, False otherwise.
+        """
+        return self["env"] == "testing"
+
+    def detect_environment(self, callback: Callable) -> str:
+        """
+        Detect the application's current environment.
+
+        Args:
+            callback: Closure that returns the environment name.
+
+        Returns:
+            Environment name.
+        """
+        from byte.foundation.environment_detector import EnvironmentDetector
+
+        env = EnvironmentDetector().detect(callback, self)
+        self.instance("env", env)
+        return env
+
     def environment_path(self) -> Path:
         """
         Get the path to the environment file directory.

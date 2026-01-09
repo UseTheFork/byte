@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from byte.foundation import Application
 
 
+# TODO: Doc String
 class LoadConsoleArgs(Bootstrapper):
     """"""
 
@@ -27,17 +28,17 @@ class LoadConsoleArgs(Bootstrapper):
         """Parse command-line arguments into the repository.
 
         Stores:
-        - args.raw: Full argv list
-        - args.script: Script name (argv[0])
-        - args.command: First positional argument (if any)
-        - args.flags: List of flags (--flag, -f)
-        - args.options: Dict of options (--key=value, --key value)
-        - args.positional: List of positional arguments
+        - raw: Full argv list
+        - script: Script name (argv[0])
+        - command: First positional argument (if any)
+        - flags: List of flags (--flag, -f)
+        - options: Dict of options (--key=value, --key value)
+        - positional: List of positional arguments
         """
         argv = sys.argv[1:]  # Skip script name
 
-        config.add("args.raw", sys.argv)
-        config.add("args.script", sys.argv[0])
+        config.add("raw", sys.argv)
+        config.add("script", sys.argv[0])
 
         flags = []
         options = {}
@@ -80,7 +81,7 @@ class LoadConsoleArgs(Bootstrapper):
 
             i += 1
 
-        config.add("args.command", positional[0] if positional else None)
-        config.add("args.flags", flags)
-        config.add("args.options", options)
-        config.add("args.positional", positional)
+        config.add("command", positional[0] if positional else None)
+        config.add("flags", flags)
+        config.add("options", options)
+        config.add("positional", positional)

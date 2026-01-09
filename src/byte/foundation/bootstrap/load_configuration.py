@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 import yaml
 
 from byte.config import ByteConfig
-from byte.foundation import Console
 from byte.foundation.bootstrap.bootstrapper import Bootstrapper
 
 if TYPE_CHECKING:
@@ -16,9 +15,6 @@ if TYPE_CHECKING:
 
 class LoadConfiguration(Bootstrapper):
     """Bootstrap class for loading configuration."""
-
-    # app.detect_environment(lambda: config.get("app.env", "production"))
-    # app.resolve_environment_using(lambda environments: app.environment(*environments))
 
     def _load_configuration_file(self, app: Application) -> dict:
         """
@@ -82,7 +78,7 @@ class LoadConfiguration(Bootstrapper):
 
     def _setup_console(self, app: Application, config: ByteConfig):
         """ """
-        console: Console = app.make(Console)
+        console = app["console"]
         console.ui_theme = config.cli.ui_theme
         console.syntax_theme = config.cli.syntax_theme
         console.setup_console()
@@ -100,3 +96,6 @@ class LoadConfiguration(Bootstrapper):
         self._load_llm_api_keys(app, config)
         self._load_boot_config(app, config)
         self._setup_console(app, config)
+
+        app.detect_environment(lambda: config.app.env)
+        # app.resolve_environment_using(lambda environments: app.environment(*environments))
