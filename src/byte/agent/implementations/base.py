@@ -135,12 +135,13 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
             processed_event = await stream_task
         except (KeyboardInterrupt, asyncio.CancelledError):
             # Cancel the stream task properly
-            stream_task.cancel()
+            if not stream_task.done:
+                stream_task.cancel()
             try:
-                await stream_task
+                await stream_task  # Re-await to catch the cancelation error.
             except asyncio.CancelledError:
                 pass
-            # log.info("Agent execution cancelled by user")
+            self.app["log"].info("Agent execution cancelled by user")
             return None
         finally:
             await stream_rendering_service.end_stream()

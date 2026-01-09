@@ -17,7 +17,7 @@ class ValidationNode(Node, UserInteractive):
     Usage: `node = await container.make(ValidationNode, max_lines=50)`
     """
 
-    async def boot(
+    def boot(
         self,
         goto: str = "end_node",
         max_lines: int | None = None,

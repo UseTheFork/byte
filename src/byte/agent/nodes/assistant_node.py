@@ -276,11 +276,11 @@ class AssistantNode(Node):
         )
         project_context = await self.emit(project_context)
 
-        project_inforamtion_and_context = []
+        project_information_and_context = []
         conventions = project_context.get("conventions", [])
         if conventions:
             conventions = "\n\n".join(conventions)
-            project_inforamtion_and_context.extend(
+            project_information_and_context.extend(
                 [
                     Boundary.open(BoundaryType.CONTEXT, meta={"type": "coding and project conventions"}),
                     f"{conventions}",
@@ -291,7 +291,7 @@ class AssistantNode(Node):
         session_docs = project_context.get("session_docs", [])
         if session_docs:
             session_docs = "\n\n".join(session_docs)
-            project_inforamtion_and_context.extend(
+            project_information_and_context.extend(
                 [
                     Boundary.open(BoundaryType.CONTEXT, meta={"type": "session"}),
                     f"{session_docs}",
@@ -302,7 +302,7 @@ class AssistantNode(Node):
         system_context = project_context.get("system_context", [])
         if system_context:
             system_info_content = "\n".join(system_context)
-            project_inforamtion_and_context.extend(
+            project_information_and_context.extend(
                 [
                     Boundary.open(BoundaryType.CONTEXT, meta={"type": "system"}),
                     f"{system_info_content}",
@@ -310,7 +310,7 @@ class AssistantNode(Node):
                 ]
             )
 
-        return [HumanMessage(list_to_multiline_text(project_inforamtion_and_context))]
+        return [HumanMessage(list_to_multiline_text(project_information_and_context))]
 
     async def _gather_edit_format(self) -> tuple[str, list[tuple[str, str]]]:
         """Gather edit format system prompt and examples for the assistant.
@@ -357,7 +357,7 @@ class AssistantNode(Node):
         agent_state["edit_format_system"] = edit_format_system
         agent_state["examples"] = edit_format_examples
 
-        agent_state["project_inforamtion_and_context"] = await self._gather_project_context()
+        agent_state["project_information_and_context"] = await self._gather_project_context()
         agent_state["project_hierarchy"] = await self._gather_project_hierarchy()
         agent_state["commit_guidelines"] = await self._gather_commit_guidelines()
         agent_state["file_context"] = await self._gather_file_context()
