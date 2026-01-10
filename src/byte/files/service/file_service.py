@@ -189,6 +189,7 @@ class FileService(Service):
         path_obj = Path(path).resolve()
         return self._context_files.get(str(path_obj))
 
+    # TODO: Doc String
     async def _emit_file_context_event(self, file: str, type, content: str) -> str:
         """ """
         payload = Payload(
@@ -271,7 +272,77 @@ class FileService(Service):
 
         return (read_only_files, editable_files)
 
-    async def generate_project_hierarchy(self, max_depth: int = 8, max_files_per_dir: int = 5) -> str:
+    def generate_project_hierarchy_tree(
+        self,
+        path: Path,
+        prefix: str = "",
+        show_files: bool = True,
+        discovered_files: Optional[set] = None,
+        max_files_per_dir: int = 5,
+    ) -> str:
+        """Recursively builds the directory tree structure as a string, respecting gitignore."""
+        lines = []
+
+        if not path.is_dir():
+            return f"Error: '{path}' is not a directory."
+
+        # Get discovered files on first call
+        if discovered_files is None:
+            file_discovery = self.app.make(FileDiscoveryService)
+            discovered_files = set(file_discovery._all_files)
+
+        # sort items to ensure consistent order
+        contents = sorted(list(path.iterdir()))
+
+        # Filter and separate directories from files
+        filtered_dirs = []
+        filtered_files = []
+        for item in contents:
+            if item.is_dir():
+                # Include directory if it contains any discovered files
+                if any(f.is_relative_to(item) for f in discovered_files):
+                    filtered_dirs.append(item)
+            elif item in discovered_files:
+                # Include file if it's in discovered files
+                filtered_files.append(item)
+
+        # Limit files if needed (but show all files at root level)
+        is_root = path == self.app["path"]
+        if is_root:
+            files_to_show = filtered_files
+            remaining_files = 0
+        else:
+            files_to_show = filtered_files[:max_files_per_dir]
+            remaining_files = len(filtered_files) - len(files_to_show)
+
+        # Combine dirs and limited files for display
+        filtered_contents = filtered_dirs + files_to_show
+
+        # use different connectors for the last item in a directory
+        # Account for the "more files" message if present
+        has_more_message = remaining_files > 0
+        pointers = ["├── "] * (len(filtered_contents) - 1 + (1 if has_more_message else 0)) + ["└── "]
+
+        for pointer, item in zip(pointers, filtered_contents):
+            if item.is_dir():
+                lines.append(f"{prefix}{pointer}{item.name}/")
+                # Recurse into subdirectory with an updated prefix
+                extension = "│   " if pointer == "├── " else "    "
+                lines.append(
+                    self.generate_project_hierarchy_tree(
+                        item, prefix + extension, show_files, discovered_files, max_files_per_dir
+                    )
+                )
+            elif show_files:
+                lines.append(f"{prefix}{pointer}{item.name}")
+
+        # Add "more files" message if needed
+        if has_more_message:
+            lines.append(f"{prefix}└── ... {remaining_files} more files")
+
+        return "\n".join(lines)
+
+    async def generate_project_hierarchy(self) -> str:
         """Generate a concise project hierarchy for LLM understanding.
 
         Creates a tree-like structure showing directories and a sample of files,
@@ -290,77 +361,10 @@ class FileService(Service):
         if not self.app["path"]:
             return "No project root configured"
 
-        file_discovery = self.app.make(FileDiscoveryService)
-        all_files = await file_discovery.get_files()
+        result = self.generate_project_hierarchy_tree(self.app["path"])
+        self.app["log"].debug(result)
 
-        self.app["log"].debug(all_files)
-
-        # Build directory structure
-        dir_structure: Dict[Path, List[Path]] = {}
-        root_files: List[Path] = []
-
-        for file_path in all_files:
-            try:
-                relative = file_path.relative_to(self.app["path"])
-                parts = relative.parts
-
-                # Check if it's a root file - include all root files
-                if len(parts) == 1:
-                    root_files.append(relative)
-                else:
-                    # Track all files regardless of depth
-                    parent = Path(*parts[:-1])
-                    if parent not in dir_structure:
-                        dir_structure[parent] = []
-                    dir_structure[parent].append(relative)
-            except ValueError:
-                continue
-
-        # Build the hierarchy string
-        lines = ["Project Structure:", ""]
-
-        # Add root files first
-        if root_files:
-            for file in sorted(root_files):
-                lines.append(f"├── {file}")
-            lines.append("")
-
-        # Add directories with limited file samples
-        dirs_by_depth: Dict[int, List[Path]] = {}
-        for dir_path in dir_structure.keys():
-            depth = len(dir_path.parts)
-            if depth not in dirs_by_depth:
-                dirs_by_depth[depth] = []
-            dirs_by_depth[depth].append(dir_path)
-
-        # Sort and display directories by depth
-        for depth in sorted(dirs_by_depth.keys()):
-            if depth > max_depth:
-                continue
-
-            for dir_path in sorted(dirs_by_depth[depth]):
-                indent = "│   " * (depth - 1) + "├── "
-                files = sorted(dir_structure[dir_path])
-                total_files = len(files)
-
-                # Show directory with total file count
-                lines.append(f"{indent}{dir_path.parts[-1]}/ ({total_files} files)")
-
-                # Show sample of files
-                files_to_show = files[:max_files_per_dir]
-                file_indent = "│   " * depth + "├── "
-
-                for file in files_to_show:
-                    lines.append(f"{file_indent}{file.name}")
-
-                # Add "X more files" message if there are more
-                remaining = total_files - len(files_to_show)
-                if remaining > 0:
-                    lines.append(f"{file_indent}... {remaining} more files")
-
-        self.app["log"].debug("\n".join(lines))
-
-        return "\n".join(lines)
+        return f"Project Structure:\n{result}"
 
     async def clear_context(self):
         """Clear all files from context for fresh start.

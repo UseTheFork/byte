@@ -2,8 +2,9 @@ from pathlib import Path
 
 from langchain_core.tools import tool
 
-from byte.context import make
-from byte.files import FileService
+from byte.files import FileContext, FileMode
+from byte.prompt_format import Boundary, BoundaryType
+from byte.support.utils import list_to_multiline_text
 
 
 @tool(
@@ -22,34 +23,30 @@ async def read_files(file_paths: list[str]) -> str:
     Returns:
         The contents of the file, or an error message if the file cannot be read
     """
-    file_service = make(FileService)
 
     final_content = []
 
     for file_path in file_paths:
         # Check if file is in context first
-        file_context = file_service.get_file_context(file_path)
+        file_context = FileContext(path=Path(file_path), mode=FileMode.READ_ONLY)
+
         if file_context:
             content = file_context.get_content()
-            if content is not None:
-                language = file_context.language
-                final_content.append(
-                    f"<file: source={file_context.relative_path}, language={language}>\n{content}\n</file>"
+
+            language = file_context.language
+            final_content.append(
+                list_to_multiline_text(
+                    [
+                        Boundary.open(
+                            BoundaryType.FILE,
+                            meta={"source": file_context.relative_path, "language": language},
+                        ),
+                        f"```{language}",
+                        f"{content}",
+                        "```",
+                        Boundary.close(BoundaryType.FILE),
+                    ]
                 )
-                continue
-            final_content.append(f"Error: File '{file_path}' is in context but could not be read")
-            continue
-
-        # Resolve the path
-        path_obj = Path(file_path).resolve()
-
-        # Read the file directly
-        try:
-            content = path_obj.read_text(encoding="utf-8")
-            # Determine language from file extension
-            language = path_obj.suffix.lstrip(".") if path_obj.suffix else "text"
-            final_content.append(f"<file: source={file_path}, language={language}>\n{content}\n</file>")
-        except (FileNotFoundError, PermissionError, UnicodeDecodeError) as e:
-            final_content.append(f"Error reading file '{file_path}': {e!s}")
+            )
 
     return "\n\n".join(final_content)
