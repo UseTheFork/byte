@@ -404,19 +404,18 @@ class Application(Container):
         input_service = self.make(PromptToolkitService)
         while True:
             try:
-                # Get user input (this can be async/non-blocking)
                 await input_service.execute()
             except KeyboardInterrupt:
                 break
-            except Exception as e:
-                # TODO: I think this can be moved to the general Exception handler.
-                # log.exception(e)
-                console = self.make(Console)
-                console.print_error_panel(
-                    str(e),
-                    title="Exception",
-                )
-                return 2
+            # except Exception as e:
+            # TODO: I think this can be moved to the general Exception handler.
+            # log.exception(e)
+            # console = self.make(Console)
+            # console.print_error_panel(
+            #     str(e),
+            #     title="Exception",
+            # )
+            # return 2
         return 1
 
     def terminate(self) -> None:

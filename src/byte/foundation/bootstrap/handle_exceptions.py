@@ -33,6 +33,9 @@ class HandleExceptions(Bootstrapper):
         )
         console.print(traceback)
 
+        # TODO: Check if in dev mode and vary exception printing based on that.
+        # console.print_error_panel(f"{e}", title="Oops")
+
     def _render_for_logging(self, exception: Exception) -> None:
         """
         Render an exception for logging.
