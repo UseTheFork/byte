@@ -93,13 +93,14 @@ class ConventionCommand(Command, UserInteractive):
         )
 
         # Write the convention content to a file
-        convention_file_path = self._config.system.paths.conventions / focus.file_name
+        convention_file_path = self.app.conventions_path(focus.file_name)
         convention_file_path.parent.mkdir(parents=True, exist_ok=True)
         convention_file_path.write_text(convention["extracted_content"])
 
         # refresh the Conventions in the session by `rebooting` the Service
         convention_context_service = self.make(ConventionContextService)
-        await convention_context_service.boot()
+        convention_context_service.boot()
+
         console = self.make(Console)
         console.print_success_panel(
             f"Convention document generated and saved to {focus.file_name}\n\nThe convention has been loaded into the session context and is now available for AI reference.",
