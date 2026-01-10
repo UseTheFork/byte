@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from byte import Payload, Service
 from byte.prompt_format import Boundary, BoundaryType
 from byte.support import ArrayStore
@@ -47,7 +49,7 @@ class ConventionContextService(Service):
             except Exception:
                 pass
 
-    def add_convention(self, filename: str) -> "ConventionContextService":
+    def add_convention(self, filename: str) -> ConventionContextService:
         """Add a convention document to the store by loading it from the conventions directory.
 
         Usage: `service.add_convention("style_guide.md")`
@@ -78,7 +80,7 @@ class ConventionContextService(Service):
 
         return self
 
-    def drop_convention(self, key: str) -> "ConventionContextService":
+    def drop_convention(self, key: str) -> ConventionContextService:
         """Remove a convention document from the store.
 
         Usage: `service.drop_convention("old_style_guide")`
@@ -86,7 +88,7 @@ class ConventionContextService(Service):
         self.conventions.remove(key)
         return self
 
-    def clear_conventions(self) -> "ConventionContextService":
+    def clear_conventions(self) -> ConventionContextService:
         """Clear all convention documents from the store.
 
         Usage: `service.clear_conventions()`
