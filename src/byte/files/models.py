@@ -42,5 +42,5 @@ class FileContext(BaseModel):
         """Read file content safely, returning None if unreadable."""
         try:
             return self.path.read_text(encoding="utf-8")
-        except (FileNotFoundError, PermissionError, UnicodeDecodeError):
-            return None
+        except (FileNotFoundError, PermissionError, UnicodeDecodeError) as e:
+            return f"**ERROR** reading file:\n\n{e!s}"

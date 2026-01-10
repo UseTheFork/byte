@@ -120,12 +120,7 @@ class PromptToolkitService(Service):
         command = command_registry.get_slash_command(command_name)
 
         if command:
-            try:
-                await command.handle(args)
-            except Exception as e:
-                # TODO: Fix this
-                # log.exception("Oops")
-                console.print_error_panel(f"{e}", title="Oops")
+            await command.handle(args)
         else:
             console.print_error(f"Unknown command: /{command_name}")
 

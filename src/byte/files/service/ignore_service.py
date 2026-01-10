@@ -38,12 +38,12 @@ class FileIgnoreService(Service):
             patterns.extend(self._config.files.ignore)
 
         # Log all patterns being used for debugging
-        # if patterns:
-        #     # log.debug(f"Loaded {len(patterns)} ignore patterns:")
-        #     for pattern in patterns:
-        #         # log.debug(f"  - {pattern}")
-        # else:
-        #     # log.debug("No ignore patterns loaded")
+        if patterns:
+            self.app["log"].debug(f"Loaded {len(patterns)} ignore patterns:")
+            for pattern in patterns:
+                self.app["log"].debug(f"  - {pattern}")
+        else:
+            self.app["log"].debug("No ignore patterns loaded")
 
         self._gitignore_spec = pathspec.PathSpec.from_lines("gitwildmatch", patterns)
 
