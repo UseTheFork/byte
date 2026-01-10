@@ -43,6 +43,9 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
         """
         stream_rendering_service = self.make(StreamRenderingService)
 
+        self.app["log"].debug(mode)
+        self.app["log"].debug(chunk)
+
         # Filter and process based on mode
         if mode == "messages":
             # Handle LLM token streaming
@@ -85,7 +88,7 @@ class Agent(ABC, Bootable, Configurable, Injectable, Eventable):
         async for mode, chunk in graph.astream(
             input=initial_state,
             config=config,
-            stream_mode=["values", "updates", "messages", "custom"],
+            stream_mode=["values", "updates", "messages", "custom", "tasks"],
             context=await self.get_assistant_runnable(),
         ):
             processed_event = await self._handle_stream_event(mode, chunk)

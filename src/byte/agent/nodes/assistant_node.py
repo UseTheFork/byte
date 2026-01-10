@@ -407,10 +407,10 @@ class AssistantNode(Node):
             with get_usage_metadata_callback() as usage_metadata_callback:
                 result = await runnable.ainvoke(agent_state, config=config)
                 await self._track_token_usage(usage_metadata_callback.usage_metadata, runtime.context.mode)
-                # log.debug(result)
-                # log.debug(usage_metadata_callback)
+                self.app["log"].debug(result)
+                self.app["log"].debug(usage_metadata_callback)
 
-            # If we are requesting Structured output we can end with extracted being our structred output.
+            # If we are requesting Structured output we can end with extracted being our structured output.
             if self.structured_output is not None:
                 return Command(
                     goto="end_node",

@@ -4,7 +4,6 @@ from langchain_core.messages.ai import AIMessageChunk
 from langchain_core.messages.tool import ToolMessage
 from rich.live import Live
 
-from byte import Console
 from byte.cli import MarkdownStream, RuneSpinner
 from byte.support import Service
 from byte.support.utils import extract_content_from_message, extract_json_from_message
@@ -26,7 +25,7 @@ class StreamRenderingService(Service):
         the markdown stream renderer for handling AI agent responses.
         Usage: Called automatically during service container boot process
         """
-        self.console = self.make(Console)
+        self.console = self.app["console"]
 
         self.current_stream_id = None
         self.accumulated_content = ""
@@ -185,6 +184,7 @@ class StreamRenderingService(Service):
         self.accumulated_content = ""
         self.active_stream = None
         self.current_stream_id = None
+        self.console.clear_live()
         await self.stop_spinner()
 
     def _format_agent_name(self, agent_name: str) -> str:
@@ -252,6 +252,7 @@ class StreamRenderingService(Service):
         """
         if self.display_mode in ["verbose", "thinking"]:
             # Start with animated spinner
+            self.console.set_live()
             spinner = RuneSpinner(text="Thinking...", size=15)
             self.spinner = Live(spinner, console=self.console.console, transient=True, refresh_per_second=20)
             self.spinner.start()
