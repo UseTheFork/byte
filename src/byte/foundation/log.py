@@ -3,13 +3,31 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from loguru import logger
+from rich.logging import RichHandler
 
 if TYPE_CHECKING:
     from byte.foundation import Application
 
 
 class Log:
-    """ """
+    """Logging service wrapper for Loguru with Rich integration.
+
+    Configures logging with file output and Rich console handler,
+    automatically clearing log files on boot and filtering console
+    output based on live mode state.
+
+    Usage: `log.info("message")` -> logs to file and console
+    Usage: `log.debug("debug info")` -> logs debug information
+    """
+
+    # TODO: need to figure this out.
+    def _should_log_to_console(self, record) -> bool:
+        """Filter function to only log to Rich when console is not in live mode."""
+        try:
+            return not self.app["console"].is_live()
+        except (KeyError, AttributeError):
+            # Console not available yet, allow logging
+            return True
 
     def __init__(self, app: Application):
         self.app = app
@@ -21,68 +39,27 @@ class Log:
         config = {
             "handlers": [
                 {"sink": log_file, "level": "DEBUG", "serialize": False, "backtrace": True},
-                # {"sink": RichHandler(markup=True), "format": "{message}"},
+                {
+                    "sink": RichHandler(markup=True),
+                    "level": "INFO",
+                    "format": "{message}",
+                    "filter": self._should_log_to_console,
+                },
             ],
         }
 
         # TODO: Check env before setting up above sinks.
-
         logger.configure(**config)
 
         self.log = logger
 
-    def trace(self, *args, **kwargs) -> None:
-        """Log a trace message.
+    def __getattr__(self, name: str):
+        """Proxy unknown method calls to the underlying Loguru logger.
 
-        Usage: `log.trace("Trace information")`
+        Allows direct access to Loguru logger methods not explicitly wrapped
+        by this service, enabling full Loguru API access.
+
+        Usage: `log.debug("message")` -> calls `log.log.debug("message")`
+        Usage: `log.info("message")` -> calls `log.log.info("message")`
         """
-        self.log.trace(*args, **kwargs)
-
-    def debug(self, *args, **kwargs) -> None:
-        """Log a debug message.
-
-        Usage: `log.debug("Debug information")`
-        """
-        self.log.debug(*args, **kwargs)
-
-    def info(self, *args, **kwargs) -> None:
-        """Log an info message.
-
-        Usage: `log.info("Info message")`
-        """
-        self.log.info(*args, **kwargs)
-
-    def success(self, *args, **kwargs) -> None:
-        """Log a success message.
-
-        Usage: `log.success("Operation successful")`
-        """
-        self.log.success(*args, **kwargs)
-
-    def warning(self, *args, **kwargs) -> None:
-        """Log a warning message.
-
-        Usage: `log.warning("Warning message")`
-        """
-        self.log.warning(*args, **kwargs)
-
-    def error(self, *args, **kwargs) -> None:
-        """Log an error message.
-
-        Usage: `log.error("Error occurred")`
-        """
-        self.log.error(*args, **kwargs)
-
-    def critical(self, *args, **kwargs) -> None:
-        """Log a critical message.
-
-        Usage: `log.critical("Critical issue")`
-        """
-        self.log.critical(*args, **kwargs)
-
-    def exception(self, *args, **kwargs) -> None:
-        """Log an exception with traceback.
-
-        Usage: `log.exception("Exception occurred")`
-        """
-        self.log.exception(*args, **kwargs)
+        return getattr(self.log, name)

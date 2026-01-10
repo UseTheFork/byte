@@ -27,10 +27,34 @@ class Console:
 
         Usage: Called automatically during service initialization
         """
+        self._is_live = False
         self._app = app
         self.ui_theme = "mocha"
         self.syntax_theme = "monokai"
         self.setup_console()
+
+    def set_live(self) -> Console:
+        """Set the console to live mode.
+
+        Usage: `service.set_live()`
+        """
+        self._is_live = True
+        return self
+
+    def clear_live(self) -> Console:
+        """Clear the console live mode.
+
+        Usage: `service.clear_live()`
+        """
+        self._is_live = False
+        return self
+
+    def is_live(self) -> bool:
+        """Check if the console is in live mode.
+
+        Usage: `if service.is_live(): ...`
+        """
+        return self._is_live
 
     def setup_console(self):
         # Load the selected Catppuccin theme variant.
@@ -65,7 +89,7 @@ class Console:
         the service API.
 
         Usage: `service.console.clear()`
-        Usage: `service.console.set_window_title("ByteSmith")`
+        Usage: `service.console.set_window_title("Byte")`
         """
         return self._console
 
@@ -393,3 +417,15 @@ class Console:
         kwargs.setdefault("title", message)
         menu = Menu("Yes", "No", **kwargs)
         return menu.confirm(default=default)
+
+    def __getattr__(self, name: str):
+        """Proxy unknown method calls to the underlying Rich Console.
+
+        Allows direct access to Rich Console methods not explicitly wrapped
+        by this service, enabling full Rich API access while maintaining
+        the service's convenience methods.
+
+        Usage: `service.clear()` -> calls `service._console.clear()`
+        Usage: `service.set_window_title("Byte")` -> calls `service._console.set_window_title("Byte")`
+        """
+        return getattr(self._console, name)
