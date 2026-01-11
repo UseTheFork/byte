@@ -84,6 +84,25 @@ presets:
   - src/byte/support/service_provider.py
   - src/byte/support/service.py
 
+- id: files
+  load_on_boot: false
+  conventions:
+  - CODE_PATTERNS.md
+  - COMMENT_STYLEGUIDE.md
+  - PROJECT_ARCHITECTURE.md
+  - PYTHON_STYLEGUIDE.md
+  read_only_files:
+  - src/byte/foundation/container.py
+  - src/byte/foundation/application.py
+  - src/byte/foundation/console/kernel.py
+  - src/byte/foundation/console/console.py
+  - src/byte/config/config.py
+  - src/byte/support/utils/**
+  - src/byte/support/service_provider.py
+  - src/byte/support/service.py
+  editable_files:
+  - src/byte/files/**
+
 - id: command
   conventions:
   - CODE_PATTERNS.md

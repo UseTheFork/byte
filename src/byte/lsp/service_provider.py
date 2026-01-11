@@ -39,22 +39,20 @@ class LSPServiceProvider(ServiceProvider):
             )
 
     async def boot_messages(self, payload: Payload) -> Payload:
-        container: Application = payload.get("container", False)
-        if container:
-            task_manager = await container.make(TaskManager)
+        task_manager = self.app.make(TaskManager)
 
-            running_count = sum(1 for name in task_manager._tasks.keys() if name.startswith("lsp_server_"))
+        running_count = sum(1 for name in task_manager._tasks.keys() if name.startswith("lsp_server_"))
 
-            messages = payload.get("messages", [])
-            messages.append(f"[muted]LSP servers running:[/muted] [primary]{running_count}[/primary]")
+        messages = payload.get("messages", [])
+        messages.append(f"[muted]LSP servers running:[/muted] [primary]{running_count}[/primary]")
 
-            payload.set("messages", messages)
+        payload.set("messages", messages)
 
         return payload
 
-    async def shutdown(self, container: Application) -> None:
+    async def shutdown(self, app: Application) -> None:
         """Shutdown all LSP servers gracefully."""
         config = self.app["config"]
         if config.lsp.enable:
-            lsp_service = await container.make(LSPService)
+            lsp_service = app.make(LSPService)
             await lsp_service.shutdown_all()

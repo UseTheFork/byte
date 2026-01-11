@@ -24,6 +24,8 @@ class LoadConfiguration(Bootstrapper):
             name: The configuration key name.
             path: The path to the configuration file.
         """
+        config = {}  # Initialize before the if block
+
         # Load the configuration file
         config_file_path = app.config_path("config.yaml")
         if config_file_path.exists():

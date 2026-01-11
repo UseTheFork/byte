@@ -388,7 +388,7 @@ class Application(Container):
 
     async def handle_command(self, input: list[str]) -> int:
         # dispatcher = self.make(Dispatcher)
-        kernel: Kernel = self.make(Kernel, app=self)
+        kernel = self.make(Kernel, app=self)
         status = await kernel.handle(input)
         kernel.terminate()
 

@@ -106,6 +106,7 @@ _dynamic_imports = {
     "EndNode": "nodes.end_node",
     "ExtractNode": "nodes.extract_node",
     "LintNode": "nodes.lint_node",
+    "MaxLinesValidator": "validators.max_lines",
     "MetadataSchema": "schemas",
     "Node": "nodes.base_node",
     "ParseBlocksNode": "nodes.parse_blocks_node",
@@ -120,14 +121,13 @@ _dynamic_imports = {
     "SubprocessNode": "nodes.subprocess_node",
     "TokenUsageSchema": "schemas",
     "ToolNode": "nodes.tool_node",
+    "ValidationError": "validators.base",
     "ValidationNode": "nodes.validation_node",
+    "Validator": "validators.base",
     "add_constraints": "reducers",
     "replace_list": "reducers",
     "replace_str": "reducers",
     "update_metadata": "reducers",
-    "Validator": "validators.base",
-    "ValidationError": "validators.base",
-    "MaxLinesValidator": "validators.max_lines",
     # keep-sorted end
 }
 

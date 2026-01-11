@@ -1,14 +1,35 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import git
 import pytest
 import pytest_asyncio
 
-from byte import Container
-from byte.core import ByteConfig
-from tests.container_factory import TestContainerFactory
+from byte.config import ByteConfig
+
+if TYPE_CHECKING:
+    pass
 
 
 class BaseTest:
     """Base test class for all Byte tests."""
+
+    @pytest_asyncio.fixture
+    async def application(self, git_repo, providers):
+        """Create application with FileServiceProvider for testing."""
+        from byte import Application
+        from byte.foundation import Kernel
+
+        application = Application.configure(git_repo, providers).create()
+
+        kernel = application.make(Kernel, app=application)
+        kernel.bootstrap()
+
+        # Now we can Async boot all the providers
+        await kernel.app.boot()
+
+        return application
 
     @pytest.fixture
     def git_repo(self, tmp_path):
@@ -31,6 +52,10 @@ class BaseTest:
         byte_dir = repo_path / ".byte"
         byte_dir.mkdir()
 
+        # Create the other directories
+        byte_cache_dir = repo_path / ".byte" / "cache"
+        byte_cache_dir.mkdir()
+
         # Initial commit
         repo.index.add(["README.md", ".gitignore"])
         repo.index.commit("Initial commit")
@@ -38,16 +63,17 @@ class BaseTest:
         yield repo_path
         repo.close()
 
+    @pytest.fixture(scope="session", autouse=True)
+    def set_test_environment(self):
+        """Configure testing environment for all tests."""
+        import os
+
+        os.environ["BYTE_ENV"] = "testing"
+
     @pytest.fixture
     def test_config(self, git_repo):
         """Create a ByteConfig instance with a temporary git repository.
 
         Usage: Tests can use this fixture to get a configured ByteConfig.
         """
-        return ByteConfig(project_root=git_repo)
-
-    @pytest_asyncio.fixture
-    async def container(self, test_config: ByteConfig) -> Container:
-        """Create container with SessionContextService and dependencies."""
-        container = await TestContainerFactory.create_minimal(test_config)
-        return container
+        return ByteConfig()

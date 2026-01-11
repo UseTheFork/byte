@@ -30,9 +30,9 @@ _dynamic_imports = {
     "CommitMessage": "schemas",
     "CommitPlan": "schemas",
     "CommitService": "service.commit_service",
+    "CommitValidator": "validators.commit_validator",
     "GitService": "service.git_service",
     "GitServiceProvider": "service_provider",
-    "CommitValidator": "validators.commit_validator",
     # keep-sorted end
 }
 
