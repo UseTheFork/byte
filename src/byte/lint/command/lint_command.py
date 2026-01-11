@@ -1,6 +1,5 @@
 from argparse import Namespace
 
-from byte import Console
 from byte.agent import AgentService, CoderAgent
 from byte.cli import ByteArgumentParser, Command
 from byte.config import ByteConfigException
@@ -41,12 +40,12 @@ class LintCommand(Command):
             do_fix, failed_commands = await lint_service.display_results_summary(lint_commands)
             if do_fix:
                 joined_lint_errors = lint_service.format_lint_errors(failed_commands)
-                agent_service = self.make(AgentService)
+                agent_service = self.app.make(AgentService)
                 await agent_service.execute_agent({"errors": joined_lint_errors}, CoderAgent)
 
         except ByteConfigException as e:
             # log.exception(e)
-            console = self.make(Console)
+            console = self.app["console"]
             console.print_error_panel(
                 str(e),
                 title="Configuration Error",

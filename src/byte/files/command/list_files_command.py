@@ -2,7 +2,6 @@ from argparse import Namespace
 
 from rich.columns import Columns
 
-from byte import Console
 from byte.cli import ByteArgumentParser, Command
 from byte.files import FileMode, FileService
 
@@ -36,8 +35,8 @@ class ListFilesCommand(Command):
 
         Usage: Called automatically when user types `/ls`
         """
-        console = self.make(Console)
-        file_service = self.make(FileService)
+        console = self.app["console"]
+        file_service = self.app.make(FileService)
 
         # Get files by mode
         read_only_files = file_service.list_files(FileMode.READ_ONLY)

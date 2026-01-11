@@ -20,7 +20,7 @@ class FileDiscoveryService(Service):
         Delegates to the centralized ignore service for consistent
         filtering across all file operations.
         """
-        ignore_service = self.make(FileIgnoreService)
+        ignore_service = self.app.make(FileIgnoreService)
         is_ignored = ignore_service.is_ignored(path)
         return is_ignored
 
@@ -157,7 +157,7 @@ class FileDiscoveryService(Service):
         self._all_files.clear()
 
         # Refresh ignore patterns from FileIgnoreService
-        ignore_service = self.make(FileIgnoreService)
+        ignore_service = self.app.make(FileIgnoreService)
         await ignore_service.refresh()
 
         self._scan_project_files()

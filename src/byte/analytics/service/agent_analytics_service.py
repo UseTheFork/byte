@@ -2,7 +2,7 @@ from rich.console import Group
 from rich.progress_bar import ProgressBar
 from rich.table import Table
 
-from byte import Console, Payload, Service
+from byte import Payload, Service
 from byte.agent import TokenUsageSchema
 from byte.analytics import UsageAnalytics
 from byte.llm import LLMService
@@ -44,8 +44,8 @@ class AgentAnalyticsService(Service):
         Shows current token consumption for both main and weak models
         with visual progress indicators to help users track their usage.
         """
-        console = self.make(Console)
-        llm_service = self.make(LLMService)
+        console = self.app["console"]
+        llm_service = self.app.make(LLMService)
 
         info_panel = payload.get("info_panel", [])
 

@@ -12,7 +12,7 @@ from rich.console import Group
 
 from byte.agent import AgentService, SubprocessAgent
 from byte.cli import CommandRegistry
-from byte.foundation import Console, EventType, Payload
+from byte.foundation import EventType, Payload
 from byte.support import Service
 
 if TYPE_CHECKING:
@@ -84,7 +84,7 @@ class PromptToolkitService(Service):
     def __init__(self, app: Application):
         """Initialize the prompt session with history and completion support."""
         # Placeholder for `prompt_async` if we where interupted we restore using the placeholder
-        super().__init__(app)
+        super().__init__(app=app)
 
         self.placeholder = None
         self.interrupted = False
@@ -113,10 +113,10 @@ class PromptToolkitService(Service):
         command_name = parts[0]
         args = parts[1] if len(parts) > 1 else ""
 
-        console = self.make(Console)
+        console = self.app["console"]
 
         # Get command registry and execute
-        command_registry = self.make(CommandRegistry)
+        command_registry = self.app.make(CommandRegistry)
         command = command_registry.get_slash_command(command_name)
 
         if command:
@@ -135,7 +135,7 @@ class PromptToolkitService(Service):
 
         user_input = user_input[1:]
 
-        subprocess_agent = self.make(SubprocessAgent)
+        subprocess_agent = self.app.make(SubprocessAgent)
         await subprocess_agent.execute(user_input, display_mode="silent")
 
     async def execute(self):
@@ -147,7 +147,7 @@ class PromptToolkitService(Service):
 
         Usage: Called by main loop to handle each user interaction
         """
-        console = self.make(Console)
+        console = self.app["console"]
 
         # Use placeholder if set, then clear it
         default = self.placeholder or ""

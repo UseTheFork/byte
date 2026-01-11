@@ -35,8 +35,7 @@ class SubprocessService(Service):
         """
         try:
             # Get project root from config
-            config = await self.make("config")
-            working_dir = str(config.project_root)
+            working_dir = str(self.app["path"])
 
             # Create subprocess
             process = await asyncio.create_subprocess_shell(

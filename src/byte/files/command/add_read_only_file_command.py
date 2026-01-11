@@ -1,7 +1,6 @@
 from argparse import ArgumentParser, Namespace
 from typing import List
 
-from byte import Console
 from byte.cli import Command
 from byte.files import FileMode, FileService
 
@@ -30,11 +29,11 @@ class ReadOnlyCommand(Command):
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Add specified file to context with editable permissions."""
-        console = self.make(Console)
+        console = self.app["console"]
 
         file_path = args.file_path
 
-        file_service = self.make(FileService)
+        file_service = self.app.make(FileService)
         result = await file_service.add_file(file_path, FileMode.READ_ONLY)
 
         if not result:
@@ -49,7 +48,7 @@ class ReadOnlyCommand(Command):
         suggesting project files that match the input pattern.
         """
         try:
-            file_service = self.make(FileService)
+            file_service = self.app.make(FileService)
 
             matches = await file_service.find_project_files(text)
             return [f for f in matches if not await file_service.is_file_in_context(f)]

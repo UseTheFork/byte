@@ -8,7 +8,6 @@ from langgraph.types import Command
 from rich.pretty import Pretty
 from rich.text import Text
 
-from byte import Console
 from byte.agent import AssistantContextSchema, BaseState, ConstraintSchema, Node
 from byte.support.mixins import UserInteractive
 from byte.support.utils import get_last_message
@@ -30,7 +29,7 @@ class ToolNode(Node, UserInteractive):
         tools_by_name = {tool.name: tool for tool in tools}
 
         for tool_call in message.tool_calls:
-            console = self.app.make(Console)
+            console = self.app["console"]
 
             pretty = Pretty(tool_call)
             console.print_panel(pretty)

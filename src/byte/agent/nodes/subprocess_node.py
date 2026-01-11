@@ -2,7 +2,6 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte import Console
 from byte.agent import AssistantContextSchema, BaseState, Node
 from byte.cli import SubprocessService
 from byte.prompt_format import Boundary, BoundaryType
@@ -26,7 +25,7 @@ class SubprocessNode(Node, UserInteractive):
 
         Usage: `await self._display_subprocess_results(result)` -> displays and prompts
         """
-        console = self.app.make(Console)
+        console = self.app["console"]
 
         # Display the results with more detail
         result_display = f"Exit Code: {subprocess_result.exit_code}\n\nOutput:\n{subprocess_result.stdout}"

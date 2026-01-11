@@ -23,7 +23,7 @@ class LSPService(Service):
     async def _start_lsp_client(self, server_name: str) -> None:
         """Start a single LSP client in background."""
         try:
-            server_config = self._config.lsp.servers[server_name]
+            server_config = self.app["config"].lsp.servers[server_name]
             client = LSPClient(
                 name=server_name,
                 command=server_config.command,
@@ -42,23 +42,23 @@ class LSPService(Service):
 
     async def _start_lsp_servers(self) -> None:
         """Start all configured LSP servers in background."""
-        for server_name, server_config in self._config.lsp.servers.items():
+        for server_name, server_config in self.app["config"].lsp.servers.items():
             self.task_manager.start_task(f"lsp_server_{server_name}", self._start_lsp_client(server_name))
 
     def boot(self) -> None:
         """Initialize LSP service with configured servers."""
         self.clients: Dict[str, LSPClient] = {}
         self.language_map: Dict[str, str] = {}
-        self.task_manager = self.make(TaskManager)
+        self.task_manager = self.app.make(TaskManager)
 
         # Build language to server name mapping
-        for server_name, server_config in self._config.lsp.servers.items():
+        for server_name, server_config in self.app["config"].lsp.servers.items():
             for language in server_config.languages:
                 # Store languages in lowercase for case-insensitive matching
                 self.language_map[language.lower()] = server_name
 
         # Start LSP servers in background if enabled
-        if self._config.lsp.enable:
+        if self.app["config"].lsp.enable:
             self._start_lsp_servers()
 
     async def _get_client_for_file(self, file_path: Path) -> Optional[LSPClient]:
@@ -66,7 +66,7 @@ class LSPService(Service):
 
         Usage: Internal method to route file to appropriate LSP server
         """
-        if not self._config.lsp.enable:
+        if not self.app["config"].lsp.enable:
             return None
 
         # Get the language for this file using Pygments
@@ -79,7 +79,7 @@ class LSPService(Service):
         # Determine server from file language (case-insensitive)
         server_name = self.language_map.get(file_language.lower())
 
-        if not server_name or server_name not in self._config.lsp.servers:
+        if not server_name or server_name not in self.app["config"].lsp.servers:
             log().debug(f"No LSP server configured for language '{file_language}' (file: {file_path})")
             return None
 

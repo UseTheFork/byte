@@ -80,7 +80,7 @@ class Container:
         if concrete is None:
 
             def concrete():
-                return service_class(self)
+                return service_class(app=self)
 
         service_class_str = self._normalize_abstract(service_class)
 
@@ -98,7 +98,7 @@ class Container:
         if concrete is None:
             # Auto-create factory for class
             def concrete():
-                return service_class(self)
+                return service_class(app=self)
 
         self._singletons[service_class_str] = concrete
 

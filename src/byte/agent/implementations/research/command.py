@@ -51,25 +51,25 @@ class ResearchCommand(Command):
 
         research_query = " ".join(args.research_query)
 
-        coder_agent = await self.make(CoderAgent)
+        coder_agent = await self.app.make(CoderAgent)
         coder_agent_graph = await coder_agent.get_graph()
 
-        memory_service = await self.make(MemoryService)
+        memory_service = await self.app.make(MemoryService)
         thread_id = await memory_service.get_or_create_thread()
 
         config = RunnableConfig(configurable={"thread_id": thread_id})
         state_snapshot = await coder_agent_graph.aget_state(config)
         messages = state_snapshot.values.get("history_messages", [])
 
-        agent_service = await self.make(AgentService)
+        agent_service = await self.app.make(AgentService)
         agent_result = await agent_service.execute_agent(
             {"history_messages": [*messages, ("user", research_query)]}, ResearchAgent
         )
 
         extracted_content = cast(SessionContextFormatter, agent_result.get("extracted_content"))
 
-        session_context_service = await self.make(SessionContextService)
-        model = await self.make(
+        session_context_service = await self.app.make(SessionContextService)
+        model = await self.app.make(
             SessionContextModel, type="agent", key=extracted_content.name, content=extracted_content.content
         )
         session_context_service.add_context(model)

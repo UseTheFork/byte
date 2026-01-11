@@ -1,7 +1,6 @@
 from argparse import Namespace
 from typing import List
 
-from byte import Console
 from byte.cli import ByteArgumentParser, Command
 from byte.files import FileService
 
@@ -33,11 +32,11 @@ class DropFileCommand(Command):
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Remove specified file from active context."""
-        console = self.make(Console)
+        console = self.app["console"]
 
         file_path = args.file_path
 
-        file_service: FileService = self.make(FileService)
+        file_service: FileService = self.app.make(FileService)
         if await file_service.remove_file(file_path):
             console.print(f"[success]Removed {file_path} from context[/success]")
             return
@@ -53,7 +52,7 @@ class DropFileCommand(Command):
         Usage: Tab completion shows only files currently in AI context
         """
         try:
-            file_service = self.make(FileService)
+            file_service = self.app.make(FileService)
 
             # Get all files currently in context
             context_files = file_service.list_files()

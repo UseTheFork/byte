@@ -5,7 +5,7 @@ from pydoll.browser.chromium import Chrome
 from pydoll.browser.options import ChromiumOptions
 from rich.live import Live
 
-from byte import Console, Service
+from byte import Service
 from byte.cli.rich.rune_spinner import RuneSpinner
 from byte.web.exceptions import WebNotEnabledException
 from byte.web.parser.base import BaseWebParser
@@ -51,14 +51,14 @@ class ChromiumService(Service):
         Usage: `content = await chromium_service.do_scrape("https://example.com")` -> markdown string
         """
         # Check if web commands are enabled in configuration
-        if not self._config.web.enable:
+        if not self.app["config"].web.enable:
             raise WebNotEnabledException
 
-        console = self.make(Console)
+        console = self.app["console"]
 
         options = ChromiumOptions()
         options.add_argument("--headless=new")
-        options.binary_location = str(self._config.web.chrome_binary_location)
+        options.binary_location = str(self.app["config"].web.chrome_binary_location)
         options.start_timeout = 20
 
         spinner = RuneSpinner(text=f"Scraping {url}...", size=15)

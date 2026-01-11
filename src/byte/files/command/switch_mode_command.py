@@ -1,7 +1,6 @@
 from argparse import Namespace
 from typing import List
 
-from byte import Console
 from byte.cli import ByteArgumentParser, Command
 from byte.files import FileMode, FileService
 
@@ -33,11 +32,11 @@ class SwitchModeCommand(Command):
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Switch the mode of a file in context."""
-        console = self.make(Console)
+        console = self.app["console"]
 
         file_path = args.file_path
 
-        file_service = self.make(FileService)
+        file_service = self.app.make(FileService)
 
         # Check if file is in context
         file_context = file_service.get_file_context(file_path)
@@ -64,7 +63,7 @@ class SwitchModeCommand(Command):
         allowing users to easily select which files to switch.
         """
         try:
-            file_service = self.make(FileService)
+            file_service = self.app.make(FileService)
 
             # Get all files currently in context
             context_files = file_service.list_files()

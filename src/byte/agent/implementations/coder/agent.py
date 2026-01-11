@@ -50,11 +50,11 @@ class CoderAgent(Agent):
         return graph.compile(checkpointer=checkpointer)
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
-        llm_service = self.make(LLMService)
+        llm_service = self.app.make(LLMService)
         main: BaseChatModel = llm_service.get_main_model()
         weak: BaseChatModel = llm_service.get_weak_model()
 
-        edit_format_service = self.make(EditFormatService)
+        edit_format_service = self.app.make(EditFormatService)
 
         return AssistantContextSchema(
             mode="main",

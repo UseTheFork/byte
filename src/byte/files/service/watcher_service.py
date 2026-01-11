@@ -81,9 +81,9 @@ class FileWatcherService(Service):
 
     def boot(self) -> None:
         """Initialize file watcher with TaskManager integration."""
-        self.task_manager = self.make(TaskManager)
-        self.ignore_service = self.make(FileIgnoreService)
-        self.file_discovery = self.make(FileDiscoveryService)
-        self.file_service = self.make(FileService)
+        self.task_manager = self.app.make(TaskManager)
+        self.ignore_service = self.app.make(FileIgnoreService)
+        self.file_discovery = self.app.make(FileDiscoveryService)
+        self.file_service = self.app.make(FileService)
 
         self._start_watching()

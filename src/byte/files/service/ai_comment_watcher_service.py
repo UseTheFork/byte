@@ -24,11 +24,11 @@ class AICommentWatcherService(Service):
 
     def boot(self) -> None:
         """Initialize AI comment watcher."""
-        if not self._config.files.watch.enable:
+        if not self.app["config"].files.watch.enable:
             return
 
-        self.task_manager = self.make(TaskManager)
-        self.file_service = self.make(FileService)
+        self.task_manager = self.app.make(TaskManager)
+        self.file_service = self.app.make(FileService)
 
         # Subscribe to file change events from FileWatcherService
         self._subscribe_to_file_events()
@@ -140,7 +140,7 @@ class AICommentWatcherService(Service):
 
     async def _auto_add_file_to_context(self, file_path: Path, mode: FileMode = FileMode.EDITABLE) -> bool:
         """Automatically add file to context when AI comment is detected."""
-        file_service = self.make(FileService)
+        file_service = self.app.make(FileService)
         return await file_service.add_file(file_path, mode)
 
     async def _handle_file_modified(self, file_path: Path) -> bool:
@@ -173,7 +173,7 @@ class AICommentWatcherService(Service):
         result = await self._handle_file_modified(file_path)
 
         if result:
-            prompt_toolkit_service = self.make(PromptToolkitService)
+            prompt_toolkit_service = self.app.make(PromptToolkitService)
             await prompt_toolkit_service.interrupt()
 
         return payload
@@ -183,7 +183,7 @@ class AICommentWatcherService(Service):
 
         Returns a dict with prompt and agent info for the first AI comment found, or None if no triggers found.
         """
-        file_service = self.make(FileService)
+        file_service = self.app.make(FileService)
         context_files = file_service.list_files()  # Get all files in context
         gathered_comments = []
         action_type = None
@@ -282,7 +282,7 @@ class AICommentWatcherService(Service):
         return payload
 
     async def add_reinforcement_hook(self, payload: Payload) -> Payload:
-        prompt_toolkit_service = self.make(PromptToolkitService)
+        prompt_toolkit_service = self.app.make(PromptToolkitService)
         if prompt_toolkit_service.is_interrupted():
             reinforcement_list = payload.get("reinforcement", [])
             reinforcement_list.extend(

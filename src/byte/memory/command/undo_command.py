@@ -4,7 +4,6 @@ from langchain_core.messages import HumanMessage
 from langgraph.graph.message import RemoveMessage
 from langgraph.graph.state import RunnableConfig
 
-from byte import Console
 from byte.agent import CoderAgent
 from byte.cli import ByteArgumentParser, Command
 from byte.memory import MemoryService
@@ -35,14 +34,14 @@ class UndoCommand(Command):
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute undo operation on current conversation thread."""
-        memory_service = self.make(MemoryService)
-        console = self.make(Console)
+        memory_service = self.app.make(MemoryService)
+        console = self.app["console"]
 
         # It dosent matter if we use CoderAgent or AskAgent here since they use the same BaseState.
-        coder_agent = self.make(CoderAgent)
+        coder_agent = self.app.make(CoderAgent)
         coder_agent_graph = await coder_agent.get_graph()
 
-        memory_service = self.make(MemoryService)
+        memory_service = self.app.make(MemoryService)
         thread_id = await memory_service.get_or_create_thread()
 
         config = RunnableConfig(configurable={"thread_id": thread_id})

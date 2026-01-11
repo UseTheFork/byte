@@ -25,7 +25,7 @@ class MCPToolCommand(Command):
     async def _refresh_available_tools(self):
         """Refresh the list of available tools from MCP service based on config."""
         # Get MCP service from container
-        mcp_service = await self.make(MCPService)
+        mcp_service = await self.app.make(MCPService)
         if not mcp_service:
             self._available_tools = {}
             return

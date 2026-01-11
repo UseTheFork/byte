@@ -1,6 +1,5 @@
 from argparse import Namespace
 
-from byte import Console
 from byte.cli import ByteArgumentParser, Command
 from byte.files.service.discovery_service import FileDiscoveryService
 
@@ -32,9 +31,9 @@ class ReloadFilesCommand(Command):
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Refresh the file discovery cache by rescanning the project."""
-        console = self.make(Console)
+        console = self.app["console"]
 
-        file_discovery = self.make(FileDiscoveryService)
+        file_discovery = self.app.make(FileDiscoveryService)
         await file_discovery.refresh()
 
         console.print("[success]File discovery cache reloaded successfully[/success]")

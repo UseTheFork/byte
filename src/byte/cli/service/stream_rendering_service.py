@@ -34,7 +34,7 @@ class StreamRenderingService(Service):
         self.spinner = None
         self.active_stream = MarkdownStream(
             console=self.console.console,
-            mdargs={"code_theme": self._config.cli.syntax_theme},
+            mdargs={"code_theme": self.app["config"].cli.syntax_theme},
         )
 
     async def _start_tool_message(self):
@@ -215,7 +215,7 @@ class StreamRenderingService(Service):
             self.active_stream = MarkdownStream(
                 console=self.console.console,
                 mdargs={
-                    "code_theme": self._config.cli.syntax_theme,
+                    "code_theme": self.app["config"].cli.syntax_theme,
                     "inline_code_lexer": "text",
                 },
             )  # Reset the stream renderer

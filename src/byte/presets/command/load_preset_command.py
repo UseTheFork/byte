@@ -1,7 +1,6 @@
 from argparse import Namespace
 from typing import List
 
-from byte import Console
 from byte.analytics import AgentAnalyticsService
 from byte.cli import ByteArgumentParser, Command, PromptToolkitService
 from byte.files import FileMode, FileService
@@ -53,7 +52,7 @@ class LoadPresetCommand(Command):
         clears current file context, adds preset files (read-only and editable),
         and loads preset conventions.
         """
-        console = self.make(Console)
+        console = self.app["console"]
 
         preset_id = args.preset_id
 
@@ -73,14 +72,14 @@ class LoadPresetCommand(Command):
             )
 
             if should_clear:
-                memory_service = self.make(MemoryService)
+                memory_service = self.app.make(MemoryService)
                 await memory_service.new_thread()
 
-                agent_analytics_service = self.make(AgentAnalyticsService)
+                agent_analytics_service = self.app.make(AgentAnalyticsService)
                 agent_analytics_service.reset_context()
                 console.print_info("History cleared")
 
-        file_service = self.make(FileService)
+        file_service = self.app.make(FileService)
 
         if not args.should_not_clear_files:
             should_clear_files = await self.prompt_for_confirmation(

@@ -3,7 +3,7 @@ import subprocess
 from pathlib import Path
 from typing import List
 
-from byte import Console, Service
+from byte import Service
 from byte.prompt_format import (
     BlockStatus,
     EditFormatPrompts,
@@ -163,7 +163,7 @@ class ShellCommandService(Service, UserInteractive):
                 )
 
                 # Display the result of the command in a panel
-                console = self.make(Console)
+                console = self.app["console"]
 
                 if result.returncode == 0:
                     # Success - show output in green panel

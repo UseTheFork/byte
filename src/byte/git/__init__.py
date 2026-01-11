@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from byte.git.service.commit_service import CommitService
     from byte.git.service.git_service import GitService
     from byte.git.service_provider import GitServiceProvider
+    from byte.git.validators.commit_validator import CommitValidator
 
 __all__ = (
     "CommitCommand",
@@ -17,6 +18,7 @@ __all__ = (
     "CommitMessage",
     "CommitPlan",
     "CommitService",
+    "CommitValidator",
     "GitService",
     "GitServiceProvider",
 )
@@ -30,6 +32,7 @@ _dynamic_imports = {
     "CommitService": "service.commit_service",
     "GitService": "service.git_service",
     "GitServiceProvider": "service_provider",
+    "CommitValidator": "validators.commit_validator",
     # keep-sorted end
 }
 

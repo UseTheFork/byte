@@ -1,7 +1,6 @@
 from argparse import Namespace
 from pathlib import Path
 
-from byte import Console
 from byte.cli import ByteArgumentParser, Command
 from byte.knowledge import SessionContextModel, SessionContextService
 
@@ -36,17 +35,17 @@ class ContextAddFileCommand(Command):
 
         Usage: `await command.execute("config.py")`
         """
-        console = self.make(Console)
+        console = self.app["console"]
 
         args_file_path = args.file_path
 
-        config = await self.app["config"]
-        session_context_service = self.make(SessionContextService)
+        session_context_service = self.app.make(SessionContextService)
 
         # Convert to Path object, resolve relative paths from project root
         file_path = Path(args_file_path)
         if not file_path.is_absolute():
-            file_path = config.project_root / file_path
+            # self.app["path"]
+            file_path = self.app.root_path(str(file_path))
 
         # Check if file exists
         if not file_path.exists():
@@ -64,11 +63,11 @@ class ContextAddFileCommand(Command):
             console.print(f"[error]Error reading file: {e!s}[/error]")
             return
 
-        context_key = str(file_path.relative_to(config.project_root))
+        context_key = str(file_path.relative_to(self.app["path"]))
 
         # Add YAML header with file path
         yaml_header = f"---\nfile_path: {context_key}\n---\n\n"
         content = yaml_header + content
-        model = self.make(SessionContextModel, type="file", key=context_key, content=content)
+        model = self.app.make(SessionContextModel, type="file", key=context_key, content=content)
         session_context_service.add_context(model)
         console.print(f"[success]Added {context_key} to session context[/success]")

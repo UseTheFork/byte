@@ -37,5 +37,5 @@ class AskCommand(Command):
         the complete interaction flow including AI response generation and display.
         """
 
-        agent_service = self.make(AgentService)
+        agent_service = self.app.make(AgentService)
         await agent_service.execute_agent(raw_args, AskAgent)

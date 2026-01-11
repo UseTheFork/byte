@@ -1,6 +1,5 @@
 from argparse import Namespace
 
-from byte import Console
 from byte.analytics import AgentAnalyticsService
 from byte.cli import ByteArgumentParser, Command
 from byte.files import FileService
@@ -37,16 +36,16 @@ class ResetCommand(Command):
         Creates a new thread through the memory service and clears all files from
         the file service context, providing a complete reset of the conversation state.
         """
-        memory_service = self.make(MemoryService)
+        memory_service = self.app.make(MemoryService)
         await memory_service.new_thread()
 
-        file_service = self.make(FileService)
+        file_service = self.app.make(FileService)
         await file_service.clear_context()
 
-        agent_analytics_service = self.make(AgentAnalyticsService)
+        agent_analytics_service = self.app.make(AgentAnalyticsService)
         agent_analytics_service.reset_context()
 
-        console = self.make(Console)
+        console = self.app["console"]
 
         # Display success confirmation to user
         console.print(console.panel("[success]Conversation and file context completely reset[/success]"))

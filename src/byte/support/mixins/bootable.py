@@ -11,9 +11,13 @@ T = TypeVar("T")
 class Bootable:
     _is_booted = False
 
-    def __init__(self, app: Application):
+    def __init__(self, *args, app: Application, **kwargs):
+        if app is None:
+            raise ValueError("app parameter is required")
         self.app = app
-        super().__init__()
+        self.args = args
+        self.kwargs = kwargs
+        super().__init__(*args, **kwargs)
 
     def _boot_mixins(self, **kwargs) -> None:
         """Automatically boot all mixins that have boot_{mixin_name} methods."""
@@ -39,11 +43,11 @@ class Bootable:
 
     def boot(self, *args, **kwargs) -> None:
         """Boot method called after initialization.
-
-        Override this method to perform setup that requires the container
-        to be fully initialized, such as registering event listeners or
-        accessing other services. Called automatically after initialization.
-        Usage: `async def boot(self): self.event_dispatcher = await
-        self.container.make("event_dispatcher")`
+        __init__
+                Override this method to perform setup that requires the container
+                to be fully initialized, such as registering event listeners or
+                accessing other services. Called automatically after initialization.
+                Usage: `async def boot(self): self.event_dispatcher = await
+                self.container.make("event_dispatcher")`
         """
         pass

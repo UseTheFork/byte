@@ -17,25 +17,25 @@ class LLMService(Service):
 
     _service_config: LLMSchema
 
-    def _configure_service(self) -> None:
+    def boot(self) -> None:
         """Configure LLM service with model settings based on global configuration."""
 
-        if self._config.llm.model == "anthropic":
+        if self.app["config"].llm.model == "anthropic":
             self._service_config = AnthropicSchema(
-                api_key=self._config.llm.anthropic.api_key,
-                provider_params=self._config.llm.anthropic.model_params.copy(),
+                api_key=self.app["config"].llm.anthropic.api_key,
+                provider_params=self.app["config"].llm.anthropic.model_params.copy(),
             )
 
-        if self._config.llm.model == "openai":
+        if self.app["config"].llm.model == "openai":
             self._service_config = OpenAiSchema(
-                api_key=self._config.llm.openai.api_key,
-                provider_params=self._config.llm.openai.model_params.copy(),
+                api_key=self.app["config"].llm.openai.api_key,
+                provider_params=self.app["config"].llm.openai.model_params.copy(),
             )
 
-        if self._config.llm.model == "gemini":
+        if self.app["config"].llm.model == "gemini":
             self._service_config = GoogleSchema(
-                api_key=self._config.llm.gemini.api_key,
-                provider_params=self._config.llm.gemini.model_params.copy(),
+                api_key=self.app["config"].llm.gemini.api_key,
+                provider_params=self.app["config"].llm.gemini.model_params.copy(),
             )
 
     def get_model(self, model_type: str = "main", **kwargs) -> Any:

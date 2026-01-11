@@ -2,8 +2,7 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte import Console
-from byte.agent import AssistantContextSchema, BaseState, Node
+from byte.agent import AssistantContextSchema, BaseState, Node, ValidationError, Validator
 from byte.support.mixins import UserInteractive
 from byte.support.utils import extract_content_from_message, get_last_message
 
@@ -19,8 +18,8 @@ class ValidationNode(Node, UserInteractive):
 
     def boot(
         self,
+        validators: list[Validator],
         goto: str = "end_node",
-        max_lines: int | None = None,
         **kwargs,
     ):
         """Initialize the validation node with constraints and routing configuration.
@@ -31,24 +30,8 @@ class ValidationNode(Node, UserInteractive):
 
         Usage: `await node.boot(goto="end_node", max_lines=100)`
         """
-        self.max_lines = max_lines
+        self.validators = validators
         self.goto = goto
-
-    def _validate_max_lines(self, content: str, validation_errors: list[str]) -> list[str]:
-        """Validate that content doesn't exceed max_lines limit.
-
-        Usage: `errors = self._validate_max_lines(content, [])`
-        """
-        if self.max_lines is None:
-            return validation_errors
-
-        lines = [line for line in content.split("\n") if line.strip()]
-        line_count = len(lines)
-
-        if line_count > self.max_lines:
-            validation_errors.append(f"Content exceeds maximum line limit: {line_count} lines (max: {self.max_lines})")
-
-        return validation_errors
 
     async def __call__(self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]):
         """Execute validation checks on the last assistant message.
@@ -70,15 +53,20 @@ class ValidationNode(Node, UserInteractive):
         last_message = get_last_message(state["scratch_messages"])
         message_content = extract_content_from_message(last_message)
 
-        validation_errors: list[str] = []
+        validation_errors: list[ValidationError] = []
 
-        if self.max_lines is not None:
-            validation_errors = self._validate_max_lines(message_content, validation_errors)
+        # Run all validators
+        for validator in self.validators:
+            errors = await validator.validate(message_content)
+            # AI: How should we now append errors here ai?
+            validation_errors.extend(errors)
 
         if validation_errors:
-            error_message = "# Fix the following issues:\n" + "\n".join(f"- {error}" for error in validation_errors)
+            error_message = "# Fix the following issues:\n" + "\n".join(
+                error.to_string() for error in validation_errors
+            )
 
-            console = self.app.make(Console)
+            console = self.app["console"]
             console.print_warning_panel(
                 f"{len(validation_errors)} validation error(s) found. Requesting corrections.",
                 title="Validation Failed",

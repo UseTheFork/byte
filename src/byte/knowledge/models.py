@@ -1,10 +1,10 @@
 from typing import Literal
 
-from byte.support.mixins import Bootable, Configurable, Injectable
+from byte.support.mixins import Bootable
 from byte.support.utils import slugify
 
 
-class SessionContextModel(Bootable, Configurable, Injectable):
+class SessionContextModel(Bootable):
     """Model representing a session context item with file-based persistence.
 
     Content is stored in .byte/session_context/ and loaded on-demand.
@@ -15,7 +15,7 @@ class SessionContextModel(Bootable, Configurable, Injectable):
         self.type = type
         self.key = key
 
-        self.file_path = self._config.system.paths.session_context / f"{slugify(self.key)}.md"
+        self.file_path = self.app.session_context_path(f"{slugify(self.key)}.md")
         self.set_content(kwargs.get("content"))
 
     @property

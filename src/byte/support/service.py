@@ -1,21 +1,15 @@
 from __future__ import annotations
 
 from abc import ABC
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import Any, TypeVar
 
 from byte.support.mixins.bootable import Bootable
-from byte.support.mixins.configurable import Configurable
 from byte.support.mixins.eventable import Eventable
-from byte.support.mixins.injectable import Injectable
-
-if TYPE_CHECKING:
-    pass
-
 
 T = TypeVar("T")
 
 
-class Service(ABC, Bootable, Configurable, Injectable, Eventable):
+class Service(ABC, Bootable, Eventable):
     async def validate(self) -> bool:
         """Validate service state before executing handle method.
 

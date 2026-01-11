@@ -24,7 +24,7 @@ class EditFormatService(Service, UserInteractive):
         """Initialize service with appropriate prompts based on configuration."""
         self.edit_block_service = self.app.make(ParserService)
 
-        if self._config.edit_format.enable_shell_commands:
+        if self.app["config"].edit_format.enable_shell_commands:
             # Combine system prompts to provide AI with both edit and shell capabilities
             combined_system = f"{self.edit_block_service.prompts.system}\n\n{shell_command_system}"
 

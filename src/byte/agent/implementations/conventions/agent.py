@@ -9,6 +9,7 @@ from byte.agent import (
     BaseState,
     EndNode,
     ExtractNode,
+    MaxLinesValidator,
     StartNode,
     ToolNode,
     ValidationNode,
@@ -34,6 +35,11 @@ class ConventionAgent(Agent):
     def get_tools(self):
         return [read_files]
 
+    def get_validators(self):
+        return [
+            self.app.make(MaxLinesValidator, max_lines=75),
+        ]
+
     async def build(self):
         """Build and compile the convention agent graph with validation and extraction.
 
@@ -58,7 +64,7 @@ class ConventionAgent(Agent):
             self.app.make(
                 ValidationNode,
                 goto="extract_node",
-                max_lines=75,
+                validators=self.get_validators(),
             ),
         )
 

@@ -34,7 +34,7 @@ class AgentService(Service):
 
         if target_agent not in self._agent_instances:
             # Lazy load target agent
-            agent_instance = self.make(target_agent)
+            agent_instance = self.app.make(target_agent)
             self._agent_instances[target_agent] = agent_instance
 
         agent_instance = self._agent_instances[target_agent]

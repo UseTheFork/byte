@@ -1,7 +1,6 @@
 from argparse import Namespace
 from typing import List
 
-from byte import Console
 from byte.cli import ByteArgumentParser, Command
 from byte.files import FileMode, FileService
 
@@ -33,11 +32,11 @@ class AddFileCommand(Command):
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Add specified file to context with editable permissions."""
-        console = self.make(Console)
+        console = self.app["console"]
 
         file_path = args.file_path
 
-        file_service = self.make(FileService)
+        file_service = self.app.make(FileService)
         result = await file_service.add_file(file_path, FileMode.EDITABLE)
 
         if not result:
@@ -52,7 +51,7 @@ class AddFileCommand(Command):
         the input pattern, respecting gitignore patterns automatically.
         """
         try:
-            file_service = self.make(FileService)
+            file_service = self.app.make(FileService)
 
             # Get project files matching the pattern
             matches = await file_service.find_project_files(text)

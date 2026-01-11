@@ -133,7 +133,7 @@ class ParserService(Service, UserInteractive, ABC):
 
             # Determine block type based on operation and file existence
             file_path_obj = Path(file_path.strip())
-            if not file_path_obj.is_absolute() and self._config and self.app["config"]:
+            if not file_path_obj.is_absolute() and self.app["config"] and self.app["config"]:
                 file_path_obj = self.app.path(str(file_path_obj)).resolve()
             else:
                 file_path_obj = file_path_obj.resolve()
@@ -260,7 +260,7 @@ class ParserService(Service, UserInteractive, ABC):
                 List of SearchReplaceBlock objects with updated status information
         """
 
-        file_service: FileService = self.make(FileService)
+        file_service: FileService = self.app.make(FileService)
 
         for block in blocks:
             file_path = Path(block.file_path)
@@ -360,8 +360,8 @@ class ParserService(Service, UserInteractive, ABC):
                 List[SearchReplaceBlock]: The original list of blocks with their status information
         """
         try:
-            file_discovery_service: FileDiscoveryService = self.make(FileDiscoveryService)
-            file_service: FileService = self.make(FileService)
+            file_discovery_service: FileDiscoveryService = self.app.make(FileDiscoveryService)
+            file_service: FileService = self.app.make(FileService)
             for block in blocks:
                 file_path = Path(block.file_path)
 
@@ -437,7 +437,7 @@ class ParserService(Service, UserInteractive, ABC):
         mask_count = (
             mask_message_count
             if mask_message_count is not None
-            else (self._config.edit_format.mask_message_count if self._config else 1)
+            else (self.app["config"].edit_format.mask_message_count if self.app["config"] else 1)
         )
 
         # Count total AIMessages to determine which ones are in the last N

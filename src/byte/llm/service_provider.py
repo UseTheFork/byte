@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List, Type
 
-from byte import Application, EventBus, EventType, Payload, Service, ServiceProvider
+from byte import EventBus, EventType, Payload, Service, ServiceProvider
 from byte.llm import LLMService
 
 
@@ -40,17 +40,15 @@ class LLMServiceProvider(ServiceProvider):
         )
 
     async def boot_messages(self, payload: Payload) -> Payload:
-        app: Application = payload.get("container", False)
-        if app:
-            llm_service = app.make(LLMService)
-            # Display active model configuration for user awareness
-            main_model = llm_service._service_config.main.params.model
-            weak_model = llm_service._service_config.weak.params.model
+        llm_service = self.app.make(LLMService)
+        # Display active model configuration for user awareness
+        main_model = llm_service._service_config.main.params.model
+        weak_model = llm_service._service_config.weak.params.model
 
-            messages = payload.get("messages", [])
-            messages.append(f"[muted]Main model:[/muted] [primary]{main_model}[/primary]")
-            messages.append(f"[muted]Weak model:[/muted] [primary]{weak_model}[/primary]")
+        messages = payload.get("messages", [])
+        messages.append(f"[muted]Main model:[/muted] [primary]{main_model}[/primary]")
+        messages.append(f"[muted]Weak model:[/muted] [primary]{weak_model}[/primary]")
 
-            payload.set("messages", messages)
+        payload.set("messages", messages)
 
         return payload

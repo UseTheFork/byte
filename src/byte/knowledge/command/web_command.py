@@ -1,6 +1,5 @@
 from argparse import Namespace
 
-from byte import Console
 from byte.agent import CleanerAgent
 from byte.cli import ByteArgumentParser, Command, Markdown
 from byte.config import ByteConfigException
@@ -46,13 +45,13 @@ class WebCommand(Command, UserInteractive):
 
         Usage: Called when user types `/web <url>`
         """
-        console = self.make(Console)
-        session_context_service = self.make(SessionContextService)
+        console = self.app["console"]
+        session_context_service = self.app.make(SessionContextService)
 
         url = args.url
 
         try:
-            chromium_service = self.make(ChromiumService)
+            chromium_service = self.app.make(ChromiumService)
             markdown_content = await chromium_service.do_scrape(url)
         except ByteConfigException as e:
             console.print_error_panel(
@@ -77,13 +76,13 @@ class WebCommand(Command, UserInteractive):
             console.print_success("Content added to context")
 
             key = slugify(url)
-            model = self.make(SessionContextModel, type="web", key=key, content=markdown_content)
+            model = self.app.make(SessionContextModel, type="web", key=key, content=markdown_content)
             session_context_service.add_context(model)
 
         elif choice == "Clean with LLM":
             console.print_info("Cleaning content with LLM...")
 
-            cleaner_agent = self.make(CleanerAgent)
+            cleaner_agent = self.app.make(CleanerAgent)
             result = await cleaner_agent.execute(
                 f"# Extract only the relevant information from this web content:\n\n{markdown_content}",
                 display_mode="thinking",
@@ -94,7 +93,7 @@ class WebCommand(Command, UserInteractive):
             if cleaned_content:
                 console.print_success("Content cleaned and added to context")
                 key = slugify(args)
-                model = self.make(SessionContextModel, type="web", key=key, content=cleaned_content)
+                model = self.app.make(SessionContextModel, type="web", key=key, content=cleaned_content)
                 session_context_service.add_context(model)
             else:
                 console.print_warning("No cleaned content returned")

@@ -5,7 +5,7 @@ from typing import List
 import git
 from git.exc import InvalidGitRepositoryError
 
-from byte import Console, Service
+from byte import Service
 from byte.support.mixins import UserInteractive
 
 
@@ -74,7 +74,7 @@ class GitService(Service, UserInteractive):
 
         Usage: `await git_service.commit("feat: add new feature")` -> creates commit with message
         """
-        console = self.make(Console)
+        console = self.app["console"]
 
         continue_commit = True
 
@@ -126,7 +126,7 @@ class GitService(Service, UserInteractive):
 
         Usage: Called internally during commit process to handle unstaged files
         """
-        console = self.make(Console)
+        console = self.app["console"]
         unstaged_changes = self._repo.index.diff(None)  # None compares working tree to index
         if unstaged_changes:
             file_list = []

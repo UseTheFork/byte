@@ -35,7 +35,7 @@ class FileIgnoreService(Service):
                     pass
 
             # Load ignore patterns from configuration
-            patterns.extend(self._config.files.ignore)
+            patterns.extend(self.app["config"].files.ignore)
 
         # Log all patterns being used for debugging
         if patterns:

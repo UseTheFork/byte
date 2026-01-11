@@ -2,9 +2,9 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langgraph.constants import END
 from langgraph.graph import START, StateGraph
 
-from byte.agent import Agent, AssistantContextSchema, AssistantNode, BaseState, EndNode, StartNode
+from byte.agent import Agent, AssistantContextSchema, AssistantNode, BaseState, EndNode, StartNode, ValidationNode
 from byte.agent.implementations.commit.prompt import commit_plan_prompt, commit_prompt
-from byte.git import CommitMessage, CommitPlan
+from byte.git import CommitMessage, CommitPlan, CommitValidator
 from byte.llm import LLMService
 
 
@@ -56,6 +56,11 @@ class CommitAgent(Agent):
 class CommitPlanAgent(Agent):
     """Domain service for generating AI-powered git commit messages and creating commits."""
 
+    def get_validators(self):
+        return [
+            self.app.make(CommitValidator),
+        ]
+
     async def build(self):
         """Build and compile the coder agent graph with memory and tools.
 
@@ -71,7 +76,11 @@ class CommitPlanAgent(Agent):
         graph.add_node("start_node", self.app.make(StartNode))  # ty:ignore[invalid-argument-type]
         graph.add_node(
             "assistant_node",
-            self.app.make(AssistantNode, goto="extract_node", structured_output=CommitPlan),  # ty:ignore[invalid-argument-type]
+            self.app.make(AssistantNode, goto="validation_node", structured_output=CommitPlan),  # ty:ignore[invalid-argument-type]
+        )
+        graph.add_node(
+            "validation_node",
+            self.app.make(ValidationNode, goto="extract_node", validators=self.get_validators()),  # ty:ignore[invalid-argument-type]
         )
         graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
 

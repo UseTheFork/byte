@@ -6,10 +6,10 @@ from langgraph.runtime import Runtime
 
 from byte.agent import AssistantContextSchema, BaseState, TokenUsageSchema
 from byte.analytics import AgentAnalyticsService
-from byte.support.mixins import Bootable, Configurable, Eventable
+from byte.support.mixins import Bootable, Eventable
 
 
-class Node(ABC, Bootable, Configurable, Eventable):
+class Node(ABC, Bootable, Eventable):
     async def _track_token_usage(self, usage_metadata: dict, mode: str) -> None:
         """Track token usage from callback metadata and update analytics.
 

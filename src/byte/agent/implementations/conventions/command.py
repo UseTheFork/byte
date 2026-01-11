@@ -1,6 +1,5 @@
 from argparse import Namespace
 
-from byte import Console
 from byte.agent import ConventionAgent
 from byte.agent.implementations.conventions.constants import FOCUS_MESSAGES, ConventionFocus
 from byte.cli import ByteArgumentParser, Command
@@ -87,7 +86,7 @@ class ConventionCommand(Command, UserInteractive):
         if not focus:
             return
 
-        convention_agent = self.make(ConventionAgent)
+        convention_agent = self.app.make(ConventionAgent)
         convention: dict = await convention_agent.execute(
             focus.focus_message,
         )
@@ -98,10 +97,10 @@ class ConventionCommand(Command, UserInteractive):
         convention_file_path.write_text(convention["extracted_content"])
 
         # refresh the Conventions in the session by `rebooting` the Service
-        convention_context_service = self.make(ConventionContextService)
+        convention_context_service = self.app.make(ConventionContextService)
         convention_context_service.boot()
 
-        console = self.make(Console)
+        console = self.app["console"]
         console.print_success_panel(
             f"Convention document generated and saved to {focus.file_name}\n\nThe convention has been loaded into the session context and is now available for AI reference.",
             title="Convention Generated",

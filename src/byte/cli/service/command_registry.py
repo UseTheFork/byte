@@ -5,16 +5,15 @@ from abc import ABC, abstractmethod
 from argparse import Namespace
 from typing import TYPE_CHECKING, Dict, List, Optional
 
-from byte import Console
 from byte.cli import ByteArgumentParser
 from byte.support import Service
-from byte.support.mixins import Bootable, Configurable, Injectable, UserInteractive
+from byte.support.mixins import Bootable, UserInteractive
 
 if TYPE_CHECKING:
-    from byte.foundation import Application
+    pass
 
 
-class Command(ABC, Bootable, Injectable, Configurable, UserInteractive):
+class Command(ABC, Bootable, UserInteractive):
     """Base class for all commands implementing the Command pattern.
 
     Provides a consistent interface for executable commands with support for
@@ -79,7 +78,7 @@ class Command(ABC, Bootable, Injectable, Configurable, UserInteractive):
         try:
             parsed_args = parser.parse_args(args.split() if args else [])
         except argparse.ArgumentError:
-            console = self.make(Console)
+            console = self.app["console"]
             console.print_error_panel(parser.format_help(), title="Invalid Command Arguments")
             return
 
@@ -114,8 +113,7 @@ class CommandRegistry(Service):
     for improved user experience.
     """
 
-    def __init__(self, app: Application):
-        super().__init__(app)
+    def boot(self):
         # Separate namespaces for different command types
         self._slash_commands: Dict[str, Command] = {}
         self._at_commands: Dict[str, Command] = {}

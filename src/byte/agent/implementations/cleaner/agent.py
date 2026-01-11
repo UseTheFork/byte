@@ -5,7 +5,6 @@ from langgraph.graph import START, StateGraph
 from langgraph.types import Command
 from rich.markdown import Markdown
 
-from byte import Console
 from byte.agent import Agent, AssistantContextSchema, AssistantNode, BaseState, EndNode, ExtractNode, StartNode
 from byte.agent.implementations.cleaner.prompt import cleaner_prompt
 from byte.llm import LLMService
@@ -28,7 +27,7 @@ class CleanerAgent(Agent, UserInteractive):
         Usage: `result = await agent._confirm_content(state)` -> updated state
         """
 
-        console = self.app.make(Console)
+        console = self.app["console"]
 
         cleaned_content = state.get("extracted_content", "")
 

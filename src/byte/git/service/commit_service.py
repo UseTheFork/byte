@@ -1,4 +1,4 @@
-from byte import Console, Service
+from byte import Service
 from byte.git import CommitGroup, CommitMessage, CommitPlan, GitService
 from byte.prompt_format import Boundary, BoundaryType
 from byte.support.mixins import UserInteractive
@@ -27,7 +27,7 @@ class CommitService(Service, UserInteractive):
     """
 
     def boot(self, *args, **kwargs) -> None:
-        self.git_service = self.make(GitService)
+        self.git_service = self.app.make(GitService)
 
     async def build_commit_prompt(self) -> str:
         """Build a formatted prompt from staged changes for AI commit message generation.
@@ -119,8 +119,7 @@ class CommitService(Service, UserInteractive):
 
         Usage: `formatted = await self.format_conventional_commit(commit_message)`
         """
-        config = self.app["config"]
-        git_config = config.git
+        git_config = self.app["config"].git
 
         # Build the header line
         header_parts = [commit_message.type]
@@ -141,7 +140,7 @@ class CommitService(Service, UserInteractive):
 
         # Only handle breaking changes if enabled in config
         if git_config.enable_breaking_changes and commit_message.breaking_change:
-            console = self.make(Console)
+            console = self.app["console"]
 
             # Display commit message parts for context
             context_parts = [

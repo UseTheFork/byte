@@ -2,7 +2,6 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte import Console
 from byte.agent import AssistantContextSchema, AssistantNode, BaseState
 
 
@@ -28,7 +27,7 @@ class ShowNode(AssistantNode):
         template = runnable.get_prompts(config)
         prompt_value = await template[0].ainvoke(agent_state)
 
-        console = self.app.make(Console)
+        console = self.app["console"]
 
         messages = prompt_value.to_messages()
         for message in messages:

@@ -7,7 +7,7 @@ from rich.live import Live
 from rich.progress import BarColumn, Progress, TaskID, TextColumn
 from rich.table import Column
 
-from byte import Console, Service
+from byte import Service
 from byte.cli import Markdown
 from byte.git import GitService
 from byte.lint import LintConfigException, LintFile
@@ -39,12 +39,12 @@ class LintService(Service, UserInteractive):
 
         Usage: `await service.validate()` -> ensure lint config is valid
         """
-        if not self._config.lint.enable:
+        if not self.app["config"].lint.enable:
             raise LintConfigException(
                 "Linting is disabled. Set 'lint.enable' to true in your .byte/config.yaml to use lint commands."
             )
 
-        if len(self._config.lint.commands) == 0:
+        if len(self.app["config"].lint.commands) == 0:
             raise LintConfigException(
                 "No lint commands configured. Add commands to 'lint.commands' in your .byte/config.yaml. "
                 "See docs/reference/settings.md for configuration examples."
@@ -183,7 +183,7 @@ class LintService(Service, UserInteractive):
 
         summary_text = Markdown(markdown_content)
 
-        console = self.make(Console)
+        console = self.app["console"]
         # Display panel
         console.print_panel(
             summary_text,
@@ -234,7 +234,7 @@ class LintService(Service, UserInteractive):
         self._lint_stack = {}
 
         # Handle commands as a list of command strings
-        if self._config.lint.enable and self._config.lint.commands:
+        if self.app["config"].lint.enable and self.app["config"].lint.commands:
             # outer status bar and progress bar
             status = console.console.status("Not started")
             bar_column = BarColumn(bar_width=None, table_column=Column(ratio=2))
@@ -254,7 +254,7 @@ class LintService(Service, UserInteractive):
             ):
                 # Create array of command/file combinations
                 status.update("Gathering Commands")
-                for command in self._config.lint.commands:
+                for command in self.app["config"].lint.commands:
                     for file_path in changed_files:
                         if str(file_path) not in self._lint_stack:
                             self._lint_stack[str(file_path)] = []

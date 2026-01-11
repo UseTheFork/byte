@@ -2,7 +2,6 @@ from argparse import Namespace
 
 from rich.columns import Columns
 
-from byte import Console
 from byte.cli import ByteArgumentParser, Command
 from byte.knowledge import SessionContextService
 from byte.support.mixins import UserInteractive
@@ -32,9 +31,9 @@ class ContextListCommand(Command, UserInteractive):
 
         Usage: `await command.execute("")`
         """
-        console = self.make(Console)
+        console = self.app["console"]
 
-        session_context_service = self.make(SessionContextService)
+        session_context_service = self.app.make(SessionContextService)
         session_context = session_context_service.get_all_context()
 
         context_keys = [f"[text]{key}[/text]" for key in session_context.keys()]

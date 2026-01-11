@@ -410,7 +410,7 @@ class Application(Container):
             # except Exception as e:
             # TODO: I think this can be moved to the general Exception handler.
             # log.exception(e)
-            # console = self.make(Console)
+            # console = self.app["console"]
             # console.print_error_panel(
             #     str(e),
             #     title="Exception",

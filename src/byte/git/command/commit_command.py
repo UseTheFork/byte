@@ -1,6 +1,5 @@
 from argparse import Namespace
 
-from byte import Console
 from byte.agent import AgentService, CoderAgent, CommitAgent, CommitPlanAgent
 from byte.cli import ByteArgumentParser, Command
 from byte.config import ByteConfigException
@@ -31,8 +30,8 @@ class CommitCommand(Command):
         return parser
 
     def boot(self, *args, **kwargs) -> None:
-        self.commit_service = self.make(CommitService)
-        self.git_service = self.make(GitService)
+        self.commit_service = self.app.make(CommitService)
+        self.git_service = self.app.make(GitService)
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute the commit command with full workflow automation.
@@ -47,7 +46,7 @@ class CommitCommand(Command):
         Usage: Called automatically when user types `/commit`
         """
         try:
-            console = self.make(Console)
+            console = self.app["console"]
             await self.git_service.stage_changes()
 
             repo = await self.git_service.get_repo()
@@ -58,13 +57,13 @@ class CommitCommand(Command):
                 return
 
             try:
-                lint_service = self.make(LintService)
+                lint_service = self.app.make(LintService)
                 lint_commands = await lint_service()
 
                 do_fix, failed_commands = await lint_service.display_results_summary(lint_commands)
                 if do_fix:
                     joined_lint_errors = lint_service.format_lint_errors(failed_commands)
-                    agent_service = self.make(AgentService)
+                    agent_service = self.app.make(AgentService)
                     await agent_service.execute_agent(joined_lint_errors, CoderAgent)
             except LintConfigException:
                 pass
@@ -78,19 +77,19 @@ class CommitCommand(Command):
             )
 
             if commit_type == "Commit Plan":
-                commit_agent = self.make(CommitPlanAgent)
+                commit_agent = self.app.make(CommitPlanAgent)
                 commit_result = await commit_agent.execute(request=prompt, display_mode="thinking")
                 # log.debug(commit_result)
                 await self.commit_service.process_commit_plan(commit_result["extracted_content"])
             elif commit_type == "Single Commit":
-                commit_agent = self.make(CommitAgent)
+                commit_agent = self.app.make(CommitAgent)
                 commit_result = await commit_agent.execute(request=prompt, display_mode="thinking")
                 formatted_message = await self.commit_service.format_conventional_commit(
                     commit_result["extracted_content"]
                 )
                 await self.git_service.commit(formatted_message)
         except ByteConfigException as e:
-            console = self.make(Console)
+            console = self.app["console"]
             console.print_error_panel(
                 str(e),
                 title="Configuration Error",

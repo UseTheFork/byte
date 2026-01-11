@@ -6,7 +6,7 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 from pydantic import BaseModel
 
-from byte import Console, EventType, Payload
+from byte import EventType, Payload
 from byte.agent import AssistantContextSchema, BaseState, Node
 from byte.files import FileService
 from byte.git import CommitService
@@ -434,7 +434,7 @@ class AssistantNode(Node):
                 # Re-prompt for actual response
                 messages = agent_state["scratch_messages"] + [("user", "Respond with a real output.")]
                 agent_state = {**agent_state, "scratch_messages": messages}
-                console = self.app.make(Console)
+                console = self.app["console"]
                 console.print_warning_panel(
                     "AI did not provide proper output. Requesting a valid response.", title="Warning"
                 )

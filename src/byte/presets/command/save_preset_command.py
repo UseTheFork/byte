@@ -1,6 +1,5 @@
 from argparse import Namespace
 
-from byte import Console
 from byte.cli import ByteArgumentParser, Command
 from byte.files import FileMode, FileService
 from byte.knowledge import ConventionContextService
@@ -36,7 +35,7 @@ class SavePresetCommand(Command):
         Prompts user for a preset name, collects current files and conventions,
         creates a new preset configuration, and adds it to the config.
         """
-        console = self.make(Console)
+        console = self.app["console"]
 
         # Prompt for preset name
         preset_name = await self.prompt_for_input("Enter a name for this preset")
@@ -57,12 +56,12 @@ class SavePresetCommand(Command):
                 return
 
         # Get current file context
-        file_service = self.make(FileService)
+        file_service = self.app.make(FileService)
         read_only_files = [f.relative_path for f in file_service.list_files(FileMode.READ_ONLY)]
         editable_files = [f.relative_path for f in file_service.list_files(FileMode.EDITABLE)]
 
         # Get current conventions
-        convention_service = self.make(ConventionContextService)
+        convention_service = self.app.make(ConventionContextService)
         conventions = list(convention_service.get_conventions().keys())
 
         # Prompt for optional default prompt text
@@ -86,7 +85,7 @@ class SavePresetCommand(Command):
         config.presets.append(new_preset)
 
         # Persist preset to config.yaml file
-        config_writer = self.make(ConfigWriterService)
+        config_writer = self.app.make(ConfigWriterService)
         await config_writer.append_preset(new_preset)
 
         console.print_success(f"Preset '{preset_id}' saved successfully")
