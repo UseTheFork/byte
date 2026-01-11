@@ -54,8 +54,8 @@ class ConventionContextService(Service):
 
         Usage: `service.add_convention("style_guide.md")`
         """
-        conventions_dir = self._config.system.paths.conventions
-        md_file = conventions_dir / filename
+
+        md_file = self.app.conventions_path(filename)
 
         if not md_file.exists() or not md_file.is_file():
             return self

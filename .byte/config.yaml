@@ -70,24 +70,23 @@ presets:
 - id: base
   load_on_boot: false
   conventions:
-  - CODE_STYLEGUIDE.md
+  - CODE_PATTERNS.md
   - COMMENT_STYLEGUIDE.md
   - PROJECT_ARCHITECTURE.md
   - PYTHON_STYLEGUIDE.md
   read_only_files:
-  - src/byte/bootstrap.py
-  - src/byte/container.py
-  - src/byte/core/cli.py
-  - src/byte/core/config/config.py
-  - src/byte/main.py
-  - src/byte/core/mixins/**
-  - src/byte/core/utils/**
-  - src/byte/core/service/base_service.py
-  - src/byte/core/service_provider.py
+  - src/byte/foundation/container.py
+  - src/byte/foundation/application.py
+  - src/byte/foundation/console/kernel.py
+  - src/byte/foundation/console/console.py
+  - src/byte/config/config.py
+  - src/byte/support/utils/**
+  - src/byte/support/service_provider.py
+  - src/byte/support/service.py
 
 - id: command
   conventions:
-  - CODE_STYLEGUIDE.md
+  - CODE_PATTERNS.md
   - COMMENT_STYLEGUIDE.md
   - PROJECT_ARCHITECTURE.md
   - PYTHON_STYLEGUIDE.md

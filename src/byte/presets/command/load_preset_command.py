@@ -98,14 +98,14 @@ class LoadPresetCommand(Command):
         for file_path in preset.editable_files:
             await file_service.add_file(file_path, FileMode.EDITABLE)
 
-        convention_service = self.make(ConventionContextService)
+        convention_service = self.app.make(ConventionContextService)
         convention_service.clear_conventions()
 
         for convention_filename in preset.conventions:
             convention_service.add_convention(convention_filename)
 
         if preset.prompt is not None:
-            prompt_service = self.make(PromptToolkitService)
+            prompt_service = self.app.make(PromptToolkitService)
             prompt_service.set_placeholder(preset.prompt)
 
         if not args.silent:
