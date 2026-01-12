@@ -1,5 +1,5 @@
 from langchain_core.language_models.chat_models import BaseChatModel
-from langgraph.graph import END, START, StateGraph
+from langgraph.graph import START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
 from byte.agent import (
@@ -40,25 +40,18 @@ class ResearchAgent(Agent):
         """Build and compile the coder agent graph with memory and tools."""
 
         # Create the assistant and runnable
-        graph = StateGraph(BaseState)
+        graph = StateGraph(BaseState)  # ty:ignore[invalid-argument-type]
 
         # Add nodes
-        graph.add_node("start_node", self.app.make(StartNode))
-        graph.add_node("assistant_node", self.app.make(AssistantNode, goto="extract_node"))
-        graph.add_node("extract_node", self.app.make(ExtractNode, schema="session_context"))
-        graph.add_node("tools_node", self.app.make(ToolNode))
+        graph.add_node("start_node", self.app.make(StartNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("assistant_node", self.app.make(AssistantNode, goto="extract_node"))  # ty:ignore[invalid-argument-type]
+        graph.add_node("extract_node", self.app.make(ExtractNode, schema="session_context"))  # ty:ignore[invalid-argument-type]
+        graph.add_node("tools_node", self.app.make(ToolNode))  # ty:ignore[invalid-argument-type]
 
-        graph.add_node("end_node", self.app.make(EndNode))
+        graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
 
         # Define edges
         graph.add_edge(START, "start_node")
-        graph.add_edge("start_node", "assistant_node")
-
-        graph.add_edge("extract_node", "end_node")
-
-        graph.add_edge("end_node", END)
-
-        graph.add_edge("tools_node", "assistant_node")
 
         # Compile graph with memory and configuration
         checkpointer = await self.get_checkpointer()

@@ -1,4 +1,4 @@
-from langgraph.graph import END, START, StateGraph
+from langgraph.graph import START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
 from byte.agent.implementations.coder.agent import CoderAgent
@@ -28,16 +28,13 @@ class ShowAgent(CoderAgent):
         Usage: `graph = await agent.build()` -> returns compiled graph
         """
 
-        graph = StateGraph(BaseState)
-        graph.add_node("start_node", self.app.make(StartNode))
-        graph.add_node("show_node", self.app.make(ShowNode))
-        graph.add_node("end_node", self.app.make(EndNode))
+        graph = StateGraph(BaseState)  # ty:ignore[invalid-argument-type]
+        graph.add_node("start_node", self.app.make(StartNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("show_node", self.app.make(ShowNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
 
         # Define edges
         graph.add_edge(START, "start_node")
-        graph.add_edge("start_node", "show_node")
-        graph.add_edge("show_node", "end_node")
-        graph.add_edge("end_node", END)
 
         checkpointer = await self.get_checkpointer()
         return graph.compile(checkpointer=checkpointer)

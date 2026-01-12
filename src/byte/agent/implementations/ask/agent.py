@@ -27,15 +27,15 @@ class AskAgent(Agent):
         """
 
         # Create the state graph
-        graph = StateGraph(BaseState)
+        graph = StateGraph(BaseState)  # ty:ignore[invalid-argument-type]
 
         # Add nodes
-        graph.add_node("start_node", self.app.make(StartNode))
-        graph.add_node("assistant_node", self.app.make(AssistantNode))
-        graph.add_node("tools_node", self.app.make(ToolNode))
-        graph.add_node("end_node", self.app.make(EndNode))
+        graph.add_node("start_node", self.app.make(StartNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("assistant_node", self.app.make(AssistantNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("tools_node", self.app.make(ToolNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
 
-        graph.add_node("parse_blocks_node", self.app.make(DummyNode))
+        graph.add_node("parse_blocks_node", self.app.make(DummyNode))  # ty:ignore[invalid-argument-type]
 
         # Define edges
         graph.set_entry_point("start_node")

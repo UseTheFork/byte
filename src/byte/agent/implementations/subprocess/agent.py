@@ -17,14 +17,14 @@ class SubprocessAgent(Agent):
         """Build and compile the coder agent graph with memory and tools."""
 
         # Create the state graph
-        graph = StateGraph(BaseState, context_schema=AssistantContextSchema)
+        graph = StateGraph(BaseState, context_schema=AssistantContextSchema)  # ty:ignore[invalid-argument-type]
 
         # Add nodes
         graph.add_node(
             "subprocess_node",
-            self.app.make(SubprocessNode),
+            self.app.make(SubprocessNode),  # ty:ignore[invalid-argument-type]
         )
-        graph.add_node("end_node", self.app.make(EndNode))
+        graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
 
         # Define edges
         graph.add_edge(START, "subprocess_node")

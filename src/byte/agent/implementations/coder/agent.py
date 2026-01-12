@@ -29,14 +29,14 @@ class CoderAgent(Agent):
         """Build and compile the coder agent graph with memory and tools."""
 
         # Create the state graph
-        graph = StateGraph(BaseState)
+        graph = StateGraph(BaseState)  # ty:ignore[invalid-argument-type]
 
         # Add nodes
-        graph.add_node("start_node", self.app.make(StartNode))
-        graph.add_node("assistant_node", self.app.make(AssistantNode, goto="parse_blocks_node"))
-        graph.add_node("parse_blocks_node", self.app.make(ParseBlocksNode))
-        graph.add_node("lint_node", self.app.make(LintNode))
-        graph.add_node("end_node", self.app.make(EndNode))
+        graph.add_node("start_node", self.app.make(StartNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("assistant_node", self.app.make(AssistantNode, goto="parse_blocks_node"))  # ty:ignore[invalid-argument-type]
+        graph.add_node("parse_blocks_node", self.app.make(ParseBlocksNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("lint_node", self.app.make(LintNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
 
         # Define edges
         graph.add_edge(START, "start_node")

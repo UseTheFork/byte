@@ -53,28 +53,26 @@ class ConventionAgent(Agent):
         """
 
         # Create the state graph
-        graph = StateGraph(BaseState)
+        graph = StateGraph(BaseState)  # ty:ignore[invalid-argument-type]
 
         # Add nodes
-        graph.add_node("start_node", self.app.make(StartNode))
-        graph.add_node("assistant_node", self.app.make(AssistantNode, goto="validation_node"))
+        graph.add_node("start_node", self.app.make(StartNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("assistant_node", self.app.make(AssistantNode, goto="validation_node"))  # ty:ignore[invalid-argument-type]
         graph.add_node(
             "validation_node",
             self.app.make(
                 ValidationNode,
                 goto="extract_node",
                 validators=self.get_validators(),
-            ),
+            ),  # ty:ignore[invalid-argument-type]
         )
 
-        graph.add_node("extract_node", self.app.make(ExtractNode))
-        graph.add_node("tools_node", self.app.make(ToolNode))
-        graph.add_node("end_node", self.app.make(EndNode))
+        graph.add_node("extract_node", self.app.make(ExtractNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("tools_node", self.app.make(ToolNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
 
         # Define edges
         graph.add_edge(START, "start_node")
-        # graph.add_edge("start_node", "assistant_node")
-        # graph.add_edge("end_node", END)
 
         # Compile graph with memory and configuration
         return graph.compile()
