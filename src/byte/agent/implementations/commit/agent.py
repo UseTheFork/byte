@@ -43,6 +43,7 @@ class CommitAgent(Agent):
 
         # Dummy Nodes here
         graph.add_node("tools_node", self.app.make(DummyNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("extract_node", self.app.make(DummyNode))  # ty:ignore[invalid-argument-type]
         graph.add_node("parse_blocks_node", self.app.make(DummyNode))  # ty:ignore[invalid-argument-type]
 
         # Compile graph with memory and configuration
@@ -95,6 +96,7 @@ class CommitPlanAgent(Agent):
 
         # Dummy Nodes here
         graph.add_node("tools_node", self.app.make(DummyNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node("extract_node", self.app.make(DummyNode))  # ty:ignore[invalid-argument-type]
         graph.add_node("parse_blocks_node", self.app.make(DummyNode))  # ty:ignore[invalid-argument-type]
 
         # Define edges
