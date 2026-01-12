@@ -7,6 +7,7 @@ from byte.agent import (
     AssistantContextSchema,
     AssistantNode,
     BaseState,
+    DummyNode,
     EndNode,
     LintNode,
     ParseBlocksNode,
@@ -37,6 +38,8 @@ class CoderAgent(Agent):
         graph.add_node("parse_blocks_node", self.app.make(ParseBlocksNode))  # ty:ignore[invalid-argument-type]
         graph.add_node("lint_node", self.app.make(LintNode))  # ty:ignore[invalid-argument-type]
         graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
+
+        graph.add_node("tools_node", self.app.make(DummyNode))  # ty:ignore[invalid-argument-type]
 
         # Define edges
         graph.add_edge(START, "start_node")

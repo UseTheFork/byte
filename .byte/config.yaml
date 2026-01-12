@@ -101,7 +101,9 @@ presets:
   - src/byte/support/service_provider.py
   - src/byte/support/service.py
   editable_files:
+  - src/tests/base_test.py
   - src/byte/files/**
+  - src/tests/files/**
 
 - id: command
   conventions:
