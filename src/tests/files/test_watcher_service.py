@@ -172,7 +172,6 @@ class TestWatcherService(BaseTest):
         assert len(files) == initial_count
 
     @pytest.mark.asyncio
-    @pytest.mark.skip("TODO")
     async def test_detects_files_in_new_directories(self, application: Application):
         """Test that watcher detects files created in new directories."""
         from byte.files import FileDiscoveryService
@@ -185,6 +184,9 @@ class TestWatcherService(BaseTest):
         # Create a new directory
         new_dir = application.base_path("new_dir")
         new_dir.mkdir()
+
+        # Wait for watcher to process
+        await asyncio.sleep(0.5)
 
         # Create a file in the new directory
         new_file = new_dir / "file_in_new_dir.py"
@@ -330,7 +332,6 @@ class TestWatcherService(BaseTest):
         assert result is True
 
     @pytest.mark.asyncio
-    @pytest.mark.skip("TODO")
     async def test_handles_nested_directory_file_changes(self, application: Application):
         """Test that watcher detects changes in nested directories."""
         from byte.files import FileDiscoveryService
@@ -343,6 +344,8 @@ class TestWatcherService(BaseTest):
         # Create nested directory structure
         nested_dir = application.base_path("src/utils")
         nested_dir.mkdir(parents=True)
+
+        await asyncio.sleep(0.5)
 
         # Create a file in nested directory
         nested_file = nested_dir / "helper.py"

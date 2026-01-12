@@ -55,8 +55,14 @@ class FileService(Service):
 
         # Check if path contains wildcard patterns
         if "*" in path_str or "?" in path_str or "[" in path_str:
-            # Handle glob patterns
-            matching_paths = glob.glob(path_str, recursive=True)
+            # Handle glob patterns - resolve relative to base path
+            if not Path(path_str).is_absolute():
+                # Convert relative pattern to absolute by prepending base path
+                pattern_path = self.app["path"] / path_str
+                matching_paths = glob.glob(str(pattern_path), recursive=True)
+            else:
+                matching_paths = glob.glob(path_str, recursive=True)
+
             if not matching_paths:
                 return False
 
@@ -73,7 +79,11 @@ class FileService(Service):
             return success_count > 0
         else:
             # Handle single file path
-            path_obj = Path(path).resolve()
+            if not Path(path).is_absolute():
+                # Resolve relative paths from project base path
+                path_obj = (self.app["path"] / path).resolve()
+            else:
+                path_obj = Path(path).resolve()
 
             # Only add if file is in the discovery service
             if not path_obj.is_file() or str(path_obj) not in discovered_file_paths:
@@ -118,7 +128,7 @@ class FileService(Service):
 
                 # Convert absolute path back to relative for pattern matching
                 try:
-                    relative_path = str(Path(context_path).relative_to(Path.cwd()))
+                    relative_path = str(Path(context_path).relative_to(self.app["path"]))
                     if glob.fnmatch.fnmatch(relative_path, path_str) or glob.fnmatch.fnmatch(context_path, path_str):
                         matching_paths.append(context_path)
                 except ValueError:
@@ -137,7 +147,11 @@ class FileService(Service):
             return True
         else:
             # Handle single file path
-            path_obj = Path(path).resolve()
+            if not Path(path).is_absolute():
+                # Resolve relative paths from project base path
+                path_obj = (self.app["path"] / path).resolve()
+            else:
+                path_obj = Path(path).resolve()
             key = str(path_obj)
 
             # Only remove if file is in context
