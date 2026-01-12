@@ -23,6 +23,13 @@ class ConventionContextService(Service):
         Usage: `await service.boot()`
         """
         self.conventions = ArrayStore()
+        self.refresh()
+
+    def refresh(self) -> None:
+        """Reload convention files from the conventions directory.
+
+        Usage: `service.refresh()`
+        """
         conventions_dir = self.app["path.conventions"]
 
         if not conventions_dir.exists() or not conventions_dir.is_dir():
