@@ -1,3 +1,5 @@
+from typing import Literal
+
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
@@ -33,7 +35,9 @@ class ValidationNode(Node, UserInteractive):
         self.validators = validators
         self.goto = goto
 
-    async def __call__(self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]):
+    async def __call__(
+        self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
+    ) -> Command[Literal["end_node", "extract_node"]]:
         """Execute validation checks on the last assistant message.
 
         Runs configured validation checks (e.g., max_lines) on the message content.

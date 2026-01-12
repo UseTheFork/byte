@@ -5,7 +5,7 @@ from typing import List
 
 from langchain_core.messages import AIMessage, BaseMessage
 
-from byte import Service, log
+from byte import Service
 from byte.files import FileDiscoveryService, FileMode, FileService
 from byte.prompt_format import (
     EDIT_BLOCK_NAME,
@@ -125,15 +125,14 @@ class ParserService(Service, UserInteractive, ABC):
             # search_content = search_content.strip()
             # replace_content = replace_content.strip()
 
-            # TODO: Improve logging here.
-            log().debug(block_id)
-            log().debug(operation)
-            log().debug(file_path)
-            log().debug(search_content)
+            self.app["log"].debug(block_id)
+            self.app["log"].debug(operation)
+            self.app["log"].debug(file_path)
+            self.app["log"].debug(search_content)
 
             # Determine block type based on operation and file existence
             file_path_obj = Path(file_path.strip())
-            if not file_path_obj.is_absolute() and self.app["config"] and self.app["config"]:
+            if not file_path_obj.is_absolute():
                 file_path_obj = self.app.path(str(file_path_obj)).resolve()
             else:
                 file_path_obj = file_path_obj.resolve()
@@ -267,7 +266,7 @@ class ParserService(Service, UserInteractive, ABC):
 
             # If the path is relative, resolve it against the project root
             if not file_path.is_absolute():
-                file_path = self.app.path("file_path").resolve()
+                file_path = self.app.path(str(file_path)).resolve()
             else:
                 file_path = file_path.resolve()
 

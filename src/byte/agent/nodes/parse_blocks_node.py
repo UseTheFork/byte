@@ -1,4 +1,5 @@
 import re
+from typing import Literal
 
 from langchain_core.messages import AIMessage, RemoveMessage
 from langgraph.graph.state import RunnableConfig
@@ -405,7 +406,9 @@ class ParseBlocksNode(Node):
         # All blocks valid
         return components
 
-    async def __call__(self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]):
+    async def __call__(
+        self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
+    ) -> Command[Literal["end_node", "lint_node"]]:
         """Parse commands from the last assistant message."""
         self.console = self.app["console"]
         self.edit_format = self.app.make(EditFormatService)

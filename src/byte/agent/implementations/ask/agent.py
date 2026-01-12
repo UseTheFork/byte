@@ -1,7 +1,7 @@
 from langchain_core.language_models.chat_models import BaseChatModel
-from langgraph.graph import END, START, StateGraph
+from langgraph.graph import StateGraph
 
-from byte.agent import Agent, AssistantContextSchema, AssistantNode, BaseState, EndNode, StartNode, ToolNode
+from byte.agent import Agent, AssistantContextSchema, AssistantNode, BaseState, DummyNode, EndNode, StartNode, ToolNode
 from byte.agent.implementations.ask.prompt import ask_enforcement, ask_prompt
 from byte.llm import LLMService
 
@@ -35,13 +35,11 @@ class AskAgent(Agent):
         graph.add_node("tools_node", self.app.make(ToolNode))
         graph.add_node("end_node", self.app.make(EndNode))
 
-        # Define edges
-        graph.add_edge(START, "start_node")
-        graph.add_edge("start_node", "assistant_node")
-        graph.add_edge("assistant_node", "end_node")
-        graph.add_edge("end_node", END)
+        graph.add_node("parse_blocks_node", self.app.make(DummyNode))
 
-        graph.add_edge("tools_node", "assistant_node")
+        # Define edges
+        graph.set_entry_point("start_node")
+        graph.set_finish_point("end_node")
 
         # Compile graph with memory and configuration
         checkpointer = await self.get_checkpointer()

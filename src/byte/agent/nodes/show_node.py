@@ -1,3 +1,5 @@
+from typing import Literal
+
 from langchain_core.runnables import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
@@ -18,7 +20,7 @@ class ShowNode(AssistantNode):
         state: BaseState,
         runtime: Runtime[AssistantContextSchema],
         config: RunnableConfig,
-    ):
+    ) -> Command[Literal["end_node"]]:
         """Extract code blocks and prompt user to select one for clipboard copy."""
         agent_state, config = await self._generate_agent_state(state, config, runtime)
 

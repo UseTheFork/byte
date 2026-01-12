@@ -1,14 +1,22 @@
 from pathlib import Path
+from typing import Literal
 
 from langgraph.graph.state import RunnableConfig
+from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte.agent import BaseState, Node
+from byte.agent import AssistantContextSchema, BaseState, Node
 from byte.lint import LintService
 
 
 class LintNode(Node):
-    async def __call__(self, state: BaseState, config: RunnableConfig):
+    async def __call__(
+        self,
+        state: BaseState,
+        *,
+        runtime: Runtime[AssistantContextSchema],
+        config: RunnableConfig,
+    ) -> Command[Literal["end_node", "assistant_node"]]:
         lint_service = self.app.make(LintService)
 
         if not self.app["config"].lint.enable:

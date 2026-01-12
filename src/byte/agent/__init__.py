@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from byte.agent.nodes.assistant_node import AssistantNode
     from byte.agent.nodes.base_node import Node
     from byte.agent.nodes.copy_node import CopyNode
+    from byte.agent.nodes.dummy_node import DummyNode
     from byte.agent.nodes.end_node import EndNode
     from byte.agent.nodes.extract_node import ExtractNode, SessionContextFormatter
     from byte.agent.nodes.lint_node import LintNode
@@ -57,6 +58,7 @@ __all__ = (
     "ConventionCommand",
     "CopyAgent",
     "CopyNode",
+    "DummyNode",
     "EndNode",
     "ExtractNode",
     "LintNode",
@@ -103,6 +105,7 @@ _dynamic_imports = {
     "ConventionCommand": "implementations.conventions.command",
     "CopyAgent": "implementations.copy.agent",
     "CopyNode": "nodes.copy_node",
+    "DummyNode": "nodes.dummy_node",
     "EndNode": "nodes.end_node",
     "ExtractNode": "nodes.extract_node",
     "LintNode": "nodes.lint_node",

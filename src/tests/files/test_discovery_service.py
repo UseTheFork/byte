@@ -146,3 +146,40 @@ class TestDiscoveryService(BaseTest):
 
         # File in custom ignored directory should not be discovered
         assert "should_be_ignored.txt" not in file_names
+
+    @pytest.mark.asyncio
+    async def test_filter_files_by_extension(self, application: Application):
+        """Test that discovery service can filter files by extension."""
+        from byte.files import FileDiscoveryService
+
+        # Create files with different extensions
+        py_file = application.base_path("script.py")
+        py_file.write_text("# python script")
+
+        js_file = application.base_path("app.js")
+        js_file.write_text("// javascript app")
+
+        txt_file = application.base_path("notes.txt")
+        txt_file.write_text("text notes")
+
+        # Refresh discovery to pick up new files
+        discovery_service = application.make(FileDiscoveryService)
+        await discovery_service.refresh()
+
+        # Get only Python files
+        py_files = await discovery_service.get_files(".py")
+        py_file_names = [f.name for f in py_files]
+
+        # Should only include .py files
+        assert "script.py" in py_file_names
+        assert "app.js" not in py_file_names
+        assert "notes.txt" not in py_file_names
+
+        # Get only JavaScript files
+        js_files = await discovery_service.get_files(".js")
+        js_file_names = [f.name for f in js_files]
+
+        # Should only include .js files
+        assert "app.js" in js_file_names
+        assert "script.py" not in js_file_names
+        assert "notes.txt" not in js_file_names

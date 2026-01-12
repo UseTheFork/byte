@@ -1,7 +1,8 @@
-from typing import Any
+from typing import Literal
 
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
+from langgraph.types import Command
 
 from byte.agent import AssistantContextSchema, BaseState, MetadataSchema, Node
 from byte.prompt_format import EditFormatService
@@ -14,7 +15,7 @@ class StartNode(Node):
         *,
         runtime: Runtime[AssistantContextSchema],
         config: RunnableConfig,
-    ) -> Any:
+    ) -> Command[Literal["assistant_node"]]:
         edit_format = self.app.make(EditFormatService)
 
         result = {
@@ -27,4 +28,4 @@ class StartNode(Node):
             "metadata": MetadataSchema(iteration=0),
         }
 
-        return result
+        return Command(goto="assistant_node", update=result)

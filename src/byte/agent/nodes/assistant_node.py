@@ -1,3 +1,5 @@
+from typing import Literal
+
 from langchain_core.callbacks import get_usage_metadata_callback
 from langchain_core.messages import BaseMessage, HumanMessage
 from langchain_core.runnables import Runnable
@@ -398,7 +400,7 @@ class AssistantNode(Node):
         *,
         runtime: Runtime[AssistantContextSchema],
         config: RunnableConfig,
-    ):
+    ) -> Command[Literal["end_node", "parse_blocks_node", "tools_node"]]:
         while True:
             agent_state, config = await self._generate_agent_state(state, config, runtime)
 

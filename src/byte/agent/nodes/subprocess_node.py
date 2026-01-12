@@ -1,3 +1,5 @@
+from typing import Literal
+
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
@@ -39,7 +41,9 @@ class SubprocessNode(Node, UserInteractive):
 
         return should_add
 
-    async def __call__(self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]):
+    async def __call__(
+        self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
+    ) -> Command[Literal["end_node"]]:
         """Execute subprocess command and optionally add results to messages.
 
         Args:

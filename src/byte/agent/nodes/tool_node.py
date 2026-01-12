@@ -1,4 +1,5 @@
 import json
+from typing import Literal
 
 from langchain_core.messages import ToolMessage
 from langchain_core.runnables import RunnableConfig
@@ -14,7 +15,9 @@ from byte.support.utils import get_last_message
 
 
 class ToolNode(Node, UserInteractive):
-    async def __call__(self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]):
+    async def __call__(
+        self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
+    ) -> Command[Literal["assistant_node"]]:
         message = get_last_message(state["scratch_messages"])
 
         outputs = []

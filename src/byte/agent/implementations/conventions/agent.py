@@ -1,5 +1,4 @@
 from langchain_core.language_models.chat_models import BaseChatModel
-from langgraph.constants import END
 from langgraph.graph import START, StateGraph
 
 from byte.agent import (
@@ -74,8 +73,8 @@ class ConventionAgent(Agent):
 
         # Define edges
         graph.add_edge(START, "start_node")
-        graph.add_edge("start_node", "assistant_node")
-        graph.add_edge("end_node", END)
+        # graph.add_edge("start_node", "assistant_node")
+        # graph.add_edge("end_node", END)
 
         # Compile graph with memory and configuration
         return graph.compile()

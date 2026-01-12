@@ -1,10 +1,12 @@
 import re
+from typing import Literal
 
 import pyperclip
 from langgraph.graph.state import RunnableConfig
+from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte.agent import BaseState, Node
+from byte.agent import AssistantContextSchema, BaseState, Node
 from byte.support.mixins import UserInteractive
 from byte.support.utils import extract_content_from_message
 
@@ -139,7 +141,9 @@ class CopyNode(Node, UserInteractive):
         selected_idx = choices.index(selected_choice)
         return code_blocks[selected_idx]
 
-    async def __call__(self, state: BaseState, config: RunnableConfig):
+    async def __call__(
+        self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
+    ) -> Command[Literal["end_node"]]:
         """Extract code blocks and prompt user to select one for clipboard copy."""
         console = self.app["console"]
         messages = state["history_messages"]

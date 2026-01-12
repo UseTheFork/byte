@@ -82,7 +82,9 @@ class ExtractNode(Node, UserInteractive):
         self.schema = schema
         self.goto = goto
 
-    async def __call__(self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]):
+    async def __call__(
+        self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
+    ) -> Command[Literal["end_node"]]:
         """Execute content extraction based on configured schema.
 
         Extracts content from the last assistant message and formats it according

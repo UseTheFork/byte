@@ -1,5 +1,5 @@
 from langchain.chat_models import BaseChatModel
-from langgraph.graph import END, START, StateGraph
+from langgraph.graph import START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
 from byte.agent import (
@@ -40,11 +40,6 @@ class CoderAgent(Agent):
 
         # Define edges
         graph.add_edge(START, "start_node")
-        graph.add_edge("start_node", "assistant_node")
-        graph.add_edge("assistant_node", "parse_blocks_node")
-
-        graph.add_edge("lint_node", "end_node")
-        graph.add_edge("end_node", END)
 
         checkpointer = await self.get_checkpointer()
         return graph.compile(checkpointer=checkpointer)

@@ -1,6 +1,9 @@
+from typing import Literal
+
 from langchain.messages import HumanMessage, RemoveMessage
+from langgraph.graph import END
 from langgraph.graph.message import REMOVE_ALL_MESSAGES
-from langgraph.graph.state import END, RunnableConfig
+from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
@@ -10,7 +13,9 @@ from byte.support.utils import get_last_message
 
 
 class EndNode(Node):
-    async def __call__(self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]):
+    async def __call__(
+        self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
+    ) -> Command[Literal["__end__"]]:
         if runtime is not None and runtime.context is not None:
             payload = Payload(
                 event_type=EventType.END_NODE,
