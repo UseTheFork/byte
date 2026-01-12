@@ -1,11 +1,13 @@
+import inspect
 from pathlib import Path
 from typing import Callable, Optional, TypeVar
 
 from git import InvalidGitRepositoryError, Repo
 
 from byte import ServiceProvider
-from byte.foundation import Console, Container, EventBus, Kernel, Log, TaskManager
+from byte.foundation import Console, Container, EventBus, Kernel, TaskManager
 from byte.foundation.bootstrap import RegisterProviders
+from byte.logging import LogService, LogServiceProvider
 
 T = TypeVar("T")
 
@@ -27,7 +29,8 @@ class Application(Container):
     def _register_base_service_providers(self):
         """Register all of the base service providers."""
 
-        self.singleton(Log)
+        self.register(LogServiceProvider)
+
         self.singleton(EventBus)
         self.singleton(TaskManager)
         self.singleton(Console)
@@ -37,7 +40,6 @@ class Application(Container):
 
         Usage: Called internally during application initialization to bind log and console services.
         """
-        self.instance("log", self.log())
         self.instance("console", self.console())
 
         return self
@@ -93,10 +95,8 @@ class Application(Container):
 
     def bootstrap_with(self, bootstrappers: list) -> None:
         self._has_been_bootstrapped = True
-        log = self.make(Log)
 
         for bootstrapper in bootstrappers:
-            log.debug("Bootstrapping: {}", bootstrapper.__name__)
             instance = self.make(bootstrapper)
             instance.bootstrap(self)
 
@@ -183,12 +183,12 @@ class Application(Container):
 
         return self
 
-    def log(self) -> Log:
+    def log(self) -> LogService:
         """Get the Log service instance from the container.
 
         Usage: `app.log()` -> returns Log instance for logging operations
         """
-        return self.make(Log)
+        return self.make(LogService)
 
     def console(self) -> Console:
         """Get the Console service instance from the container.
@@ -421,3 +421,34 @@ class Application(Container):
     def terminate(self) -> None:
         """Terminate the application."""
         pass
+
+    def register(self, provider) -> ServiceProvider:
+        """
+        Register a service provider with the application.
+
+        """
+
+        # Check that provider extends ServiceProvider
+        if not (inspect.isclass(provider) and issubclass(provider, ServiceProvider)):
+            raise TypeError(
+                f"Provider {provider.__name__ if inspect.isclass(provider) else provider} must extend ServiceProvider"
+            )
+
+        self.singleton(provider)
+
+        # Instantiate the provider
+        provider = self.make(provider, app=self)
+
+        # Call the register method if it exists
+        if hasattr(provider, "register") and callable(provider.register):
+            provider.register()
+
+        # # Call the register services method if it exists
+        if hasattr(provider, "register_services") and callable(provider.register_services):
+            provider.register_services()
+
+        # Call the register services method if it exists
+        if hasattr(provider, "register_commands") and callable(provider.register_commands):
+            provider.register_commands()
+
+        return provider

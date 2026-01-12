@@ -11,7 +11,6 @@ if TYPE_CHECKING:
     from byte.foundation.container import Container
     from byte.foundation.event_bus import EventBus, EventType, Payload
     from byte.foundation.exceptions import ByteException
-    from byte.foundation.log import Log
     from byte.foundation.task_manager import TaskManager
 
 __all__ = (
@@ -22,7 +21,6 @@ __all__ = (
     "EventBus",
     "EventType",
     "Kernel",
-    "Log",
     "Payload",
     "TaskManager",
 )
@@ -36,7 +34,6 @@ _dynamic_imports = {
     "EventBus": "event_bus",
     "EventType": "event_bus",
     "Kernel": "console.kernel",
-    "Log": "log",
     "Payload": "event_bus",
     "TaskManager": "task_manager",
     # keep-sorted end

@@ -246,11 +246,9 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "grandalf" },
-    { name = "logot", extra = ["loguru"] },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
-    { name = "pytest-mock" },
     { name = "python-semantic-release" },
     { name = "ruff" },
     { name = "ssort" },
@@ -293,11 +291,9 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "grandalf", specifier = ">=0.8" },
-    { name = "logot", extras = ["loguru"], specifier = ">=1.5.1" },
     { name = "pytest", specifier = ">=8.4.2" },
     { name = "pytest-asyncio", specifier = ">=1.2.0" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
-    { name = "pytest-mock", specifier = ">=3.15.1" },
     { name = "python-semantic-release", specifier = ">=9.21.1" },
     { name = "ruff", specifier = ">=0.12.12" },
     { name = "ssort", specifier = ">=0.16.0" },
@@ -1021,20 +1017,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/0c/8e/3ea7a8e9ce8c530204964207af7f7778597f5a548dc1a489c0c0940561f3/langsmith-0.6.2.tar.gz", hash = "sha256:c2efd7ed61eed3b6fdbf158ea2e9862bc2636f2edc95e90d2faad9462773d097", size = 1739277, upload-time = "2026-01-08T23:17:40.504Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ed/e0/9d173dd2fa7f85d9ec4989f6f5a1a057d281daa8dada0ff8db0de0cb68aa/langsmith-0.6.2-py3-none-any.whl", hash = "sha256:1ea1a591f52683a5aeebdaa2b58458d72ce9598105dd8b29e16f7373631a6434", size = 282918, upload-time = "2026-01-08T23:17:38.858Z" },
-]
-
-[[package]]
-name = "logot"
-version = "1.5.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/4e/af/cd1c90235d604d388116fd9dc5fa106a2feca314b426bc0b071c60ad1bb5/logot-1.5.1.tar.gz", hash = "sha256:fbf83531e92059f3e6783850d355521da333ddee94a445aecc5867eb8a0db54f", size = 14215, upload-time = "2025-07-28T11:40:59.089Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/63/4c/0d17624e120c539243162fcc6d4b25506cd7eeee13fbb3fe16900059315c/logot-1.5.1-py3-none-any.whl", hash = "sha256:3a48e4c9e09ee6fd1e3f2032319b2038dc471d655fcce268b05d97d0531d21c1", size = 22034, upload-time = "2025-07-28T11:40:57.912Z" },
-]
-
-[package.optional-dependencies]
-loguru = [
-    { name = "loguru" },
 ]
 
 [[package]]
@@ -1832,18 +1814,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/5e/f7/c933acc76f5208b3b00089573cf6a2bc26dc80a8aece8f52bb7d6b1855ca/pytest_cov-7.0.0.tar.gz", hash = "sha256:33c97eda2e049a0c5298e91f519302a1334c26ac65c1a483d6206fd458361af1", size = 54328, upload-time = "2025-09-09T10:57:02.113Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ee/49/1377b49de7d0c1ce41292161ea0f721913fa8722c19fb9c1e3aa0367eecb/pytest_cov-7.0.0-py3-none-any.whl", hash = "sha256:3b8e9558b16cc1479da72058bdecf8073661c7f57f7d3c5f22a1c23507f2d861", size = 22424, upload-time = "2025-09-09T10:57:00.695Z" },
-]
-
-[[package]]
-name = "pytest-mock"
-version = "3.15.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pytest" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/68/14/eb014d26be205d38ad5ad20d9a80f7d201472e08167f0bb4361e251084a9/pytest_mock-3.15.1.tar.gz", hash = "sha256:1849a238f6f396da19762269de72cb1814ab44416fa73a8686deac10b0d87a0f", size = 34036, upload-time = "2025-09-16T16:37:27.081Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/5a/cc/06253936f4a7fa2e0f48dfe6d851d9c56df896a9ab09ac019d70b760619c/pytest_mock-3.15.1-py3-none-any.whl", hash = "sha256:0a25e2eb88fe5168d535041d09a4529a188176ae608a6d249ee65abc0949630d", size = 10095, upload-time = "2025-09-16T16:37:25.734Z" },
 ]
 
 [[package]]

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from typing import TYPE_CHECKING
 
 import git
@@ -29,6 +30,9 @@ class BaseTest:
 
         # Now we can Async boot all the providers
         await kernel.app.boot()
+
+        # we add a new logger here for pytest
+        application["log"].add(sys.stdout, colorize=True)
 
         return application
 

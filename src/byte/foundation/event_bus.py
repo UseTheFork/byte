@@ -5,7 +5,6 @@ import time
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, TypeVar
 
-from byte import Log
 from byte.support import ArrayStore
 
 if TYPE_CHECKING:
@@ -113,8 +112,7 @@ class EventBus:
 
             except Exception as e:
                 # TODO: This should get logging from the app and use that.
-                log = self.app.make(Log)
-                log.exception(e)
+                self.app["log"].exception(e)
                 print(f"Error in event listener for '{event_name}': {e}")
 
         return current_payload

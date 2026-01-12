@@ -1,7 +1,7 @@
 from contextvars import ContextVar
 from typing import Optional, Type, TypeVar
 
-from byte import Application, Log
+from byte import Application
 
 T = TypeVar("T")
 
@@ -20,9 +20,3 @@ def make[T](service_class: Type[T]) -> T:
     """Convenience method to get a service from the current container context."""
     app = get_application()
     return app.make(service_class)
-
-
-def log() -> Log:
-    """"""
-    app = get_application()
-    return app.make(Log)
