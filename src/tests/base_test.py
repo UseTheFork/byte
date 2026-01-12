@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 import git
 import pytest
 import pytest_asyncio
+import yaml
 
 from byte.config import ByteConfig
 
@@ -32,7 +33,7 @@ class BaseTest:
         return application
 
     @pytest.fixture
-    def git_repo(self, tmp_path):
+    def git_repo(self, tmp_path, config):
         """Create a temporary git repository for testing.
 
         Usage: Tests can use this fixture to get a Path to a git repo.
@@ -52,12 +53,19 @@ class BaseTest:
         byte_dir = repo_path / ".byte"
         byte_dir.mkdir()
 
+        # Create config.yaml with test configuration
+        config_data = config.model_dump(exclude_none=True, mode="json")
+        config_path = byte_dir / "config.yaml"
+
+        with open(config_path, "w") as f:
+            yaml.safe_dump(config_data, f, default_flow_style=False, sort_keys=False)
+
         # Create the other directories
         byte_cache_dir = repo_path / ".byte" / "cache"
         byte_cache_dir.mkdir()
 
         # Initial commit
-        repo.index.add(["README.md", ".gitignore"])
+        repo.index.add(["README.md", ".gitignore", ".byte/config.yaml"])
         repo.index.commit("Initial commit")
 
         yield repo_path
@@ -71,7 +79,7 @@ class BaseTest:
         os.environ["BYTE_ENV"] = "testing"
 
     @pytest.fixture
-    def test_config(self, git_repo):
+    def config(self):
         """Create a ByteConfig instance with a temporary git repository.
 
         Usage: Tests can use this fixture to get a configured ByteConfig.

@@ -44,6 +44,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "grandalf>=0.8",
+    "logot[loguru]>=1.5.1",
     "pytest>=8.4.2",
     "pytest-asyncio>=1.2.0",
     "pytest-cov>=7.0.0",
@@ -71,6 +72,15 @@ python-version = "3.12"
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["src/tests"]
+norecursedirs = "tmp.* build benchmark _site OLD"
+logot_capturer = "logot.loguru.LoguruCapturer"
+
+# addopts = -p no:warnings --show-capture=no
+# testpaths =
+#     tests/domain
+
+# ; env =
+# ;     BYTE_ANALYTICS=false
 
 [tool.ruff]
 target-version = "py312"

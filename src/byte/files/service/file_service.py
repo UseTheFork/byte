@@ -140,8 +140,8 @@ class FileService(Service):
             path_obj = Path(path).resolve()
             key = str(path_obj)
 
-            # Only remove if file is in context and in discovery service
-            if key in self._context_files and key in discovered_file_paths:
+            # Only remove if file is in context
+            if key in self._context_files:
                 del self._context_files[key]
                 # await self.event(FileRemoved(file_path=str(path_obj)))
                 return True

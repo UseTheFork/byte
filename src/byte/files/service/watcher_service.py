@@ -36,8 +36,11 @@ class FileWatcherService(Service):
             is_ignored = spec.match_file(str(relative_path)) or spec.match_file(str(relative_path) + "/")
 
             return not is_ignored
-        except (ValueError, RuntimeError):
-            return False
+        except (ValueError, RuntimeError) as e:
+            # If we can't determine if the file should be ignored, allow it through
+            # The handler will do additional checks
+            self.app["log"].debug(f"Error in watch filter for {path}: {e}")
+            return True
 
     async def _handle_file_change(self, file_path: Path, change_type: Change) -> None:
         """Handle file system changes and update discovery cache."""
@@ -68,7 +71,7 @@ class FileWatcherService(Service):
         try:
             async for changes in awatch(str(self.app["path"]), watch_filter=self._watch_filter):
                 for change_type, file_path_str in changes:
-                    # log.debug(f"File changed: {change_type} -> {file_path_str}")
+                    self.app["log"].debug(f"File changed: {change_type} -> {file_path_str}")
                     file_path = Path(file_path_str)
                     await self._handle_file_change(file_path, change_type)
         except Exception as e:

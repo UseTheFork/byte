@@ -246,6 +246,7 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "grandalf" },
+    { name = "logot", extra = ["loguru"] },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
@@ -291,6 +292,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "grandalf", specifier = ">=0.8" },
+    { name = "logot", extras = ["loguru"], specifier = ">=1.5.1" },
     { name = "pytest", specifier = ">=8.4.2" },
     { name = "pytest-asyncio", specifier = ">=1.2.0" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
@@ -1017,6 +1019,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/0c/8e/3ea7a8e9ce8c530204964207af7f7778597f5a548dc1a489c0c0940561f3/langsmith-0.6.2.tar.gz", hash = "sha256:c2efd7ed61eed3b6fdbf158ea2e9862bc2636f2edc95e90d2faad9462773d097", size = 1739277, upload-time = "2026-01-08T23:17:40.504Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ed/e0/9d173dd2fa7f85d9ec4989f6f5a1a057d281daa8dada0ff8db0de0cb68aa/langsmith-0.6.2-py3-none-any.whl", hash = "sha256:1ea1a591f52683a5aeebdaa2b58458d72ce9598105dd8b29e16f7373631a6434", size = 282918, upload-time = "2026-01-08T23:17:38.858Z" },
+]
+
+[[package]]
+name = "logot"
+version = "1.5.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/4e/af/cd1c90235d604d388116fd9dc5fa106a2feca314b426bc0b071c60ad1bb5/logot-1.5.1.tar.gz", hash = "sha256:fbf83531e92059f3e6783850d355521da333ddee94a445aecc5867eb8a0db54f", size = 14215, upload-time = "2025-07-28T11:40:59.089Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/63/4c/0d17624e120c539243162fcc6d4b25506cd7eeee13fbb3fe16900059315c/logot-1.5.1-py3-none-any.whl", hash = "sha256:3a48e4c9e09ee6fd1e3f2032319b2038dc471d655fcce268b05d97d0531d21c1", size = 22034, upload-time = "2025-07-28T11:40:57.912Z" },
+]
+
+[package.optional-dependencies]
+loguru = [
+    { name = "loguru" },
 ]
 
 [[package]]

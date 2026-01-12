@@ -41,7 +41,7 @@ class Log:
                 {"sink": log_file, "level": "DEBUG", "serialize": False, "backtrace": True},
                 {
                     "sink": RichHandler(markup=True),
-                    "level": "INFO",
+                    "level": "DEBUG",
                     "format": "{message}",
                     "filter": self._should_log_to_console,
                 },
