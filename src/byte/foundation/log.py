@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from loguru import logger
-from rich.logging import RichHandler
 
 if TYPE_CHECKING:
     from byte.foundation import Application
@@ -39,12 +38,12 @@ class Log:
         config = {
             "handlers": [
                 {"sink": log_file, "level": "DEBUG", "serialize": False, "backtrace": True},
-                {
-                    "sink": RichHandler(markup=True),
-                    "level": "DEBUG",
-                    "format": "{message}",
-                    "filter": self._should_log_to_console,
-                },
+                # {
+                #     "sink": RichHandler(markup=True),
+                #     "level": "DEBUG",
+                #     "format": "{message}",
+                #     "filter": self._should_log_to_console,
+                # },
             ],
         }
 

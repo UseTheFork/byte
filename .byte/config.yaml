@@ -124,6 +124,7 @@ presets:
   - src/byte/files/command/drop_file_command.py
   - src/byte/knowledge/command/web_command.py
   - src/byte/git/command/commit_command.py
+
 - id: mkdocs
   prompt: 'Using the `MKDOCS_STYLEGUIDE` and existing docs as examples, document  '
   conventions:
@@ -161,21 +162,24 @@ presets:
   - src/byte/agent/implementations/coder/**
   - src/byte/agent/implementations/commit/**
   - src/byte/agent/nodes/**
+
 - id: parser
   conventions:
-  - CODE_STYLEGUIDE.md
+  - CODE_PATTERNS.md
   - COMMENT_STYLEGUIDE.md
   - PROJECT_ARCHITECTURE.md
   - PYTHON_STYLEGUIDE.md
   read_only_files:
-  - src/byte/bootstrap.py
-  - src/byte/container.py
-  - src/byte/core/cli.py
-  - src/byte/core/config/config.py
-  - src/byte/main.py
-  - src/byte/core/mixins/**
-  - src/byte/core/utils/**
-  - src/byte/core/service/base_service.py
-  - src/byte/core/service_provider.py
+  - src/byte/foundation/container.py
+  - src/byte/foundation/application.py
+  - src/byte/foundation/console/kernel.py
+  - src/byte/foundation/console/console.py
+  - src/byte/config/config.py
+  - src/byte/support/utils/**
+  - src/byte/support/service_provider.py
+  - src/byte/support/service.py
   editable_files:
-  - src/byte/domain/prompt_format/**
+  - src/byte/agent/nodes/parse_blocks_node.py
+  - src/tests/base_test.py
+  - src/byte/prompt_format/**
+  - src/tests/prompt_format/**
