@@ -19,15 +19,6 @@ class Log:
     Usage: `log.debug("debug info")` -> logs debug information
     """
 
-    # TODO: need to figure this out.
-    def _should_log_to_console(self, record) -> bool:
-        """Filter function to only log to Rich when console is not in live mode."""
-        try:
-            return not self.app["console"].is_live()
-        except (KeyError, AttributeError):
-            # Console not available yet, allow logging
-            return True
-
     def __init__(self, app: Application):
         self.app = app
 
@@ -51,6 +42,15 @@ class Log:
         logger.configure(**config)
 
         self.log = logger
+
+    # TODO: need to figure this out.
+    def _should_log_to_console(self, record) -> bool:
+        """Filter function to only log to Rich when console is not in live mode."""
+        try:
+            return not self.app["console"].is_live()
+        except (KeyError, AttributeError):
+            # Console not available yet, allow logging
+            return True
 
     def __getattr__(self, name: str):
         """Proxy unknown method calls to the underlying Loguru logger.
