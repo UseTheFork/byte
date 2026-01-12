@@ -83,6 +83,8 @@ presets:
   - src/byte/support/utils/**
   - src/byte/support/service_provider.py
   - src/byte/support/service.py
+  editable_files:
+  - src/tests/base_test.py
 
 - id: files
   load_on_boot: false
