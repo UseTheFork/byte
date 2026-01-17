@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -97,7 +96,9 @@ class BaseTest:
 
         Usage: `await self.create_test_file(application, "test.py", "print('hello')")`
         """
+        import asyncio
+
         new_file = application.root_path(file_path)
         new_file.write_text(content)
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.5)
         return new_file

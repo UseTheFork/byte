@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 from typing import TYPE_CHECKING
 
 import pytest
@@ -410,10 +409,7 @@ class TestParserService(BaseTest):
         parser_service = application.make(ParserService)
 
         # Create a test file and add it as read-only
-        test_file = (git_repo / "readonly.py").resolve()
-        test_file.write_text("original content")
-
-        await asyncio.sleep(0.1)
+        test_file = await self.create_test_file(application, "readonly.py", "original content")
 
         await file_service.add_file(test_file, FileMode.READ_ONLY)
 

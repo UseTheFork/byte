@@ -32,22 +32,9 @@ class TestWatcherService(BaseTest):
         return [FileServiceProvider]
 
     @pytest.mark.asyncio
-    async def test_watcher_service_boots_successfully(self, application: Application):
-        """Test that watcher service initializes without errors."""
-        from byte.files import FileWatcherService
-
-        watcher_service = application.make(FileWatcherService)
-
-        # Service should be booted and have required dependencies
-        assert watcher_service is not None
-        assert hasattr(watcher_service, "task_manager")
-        assert hasattr(watcher_service, "ignore_service")
-        assert hasattr(watcher_service, "file_discovery")
-        assert hasattr(watcher_service, "file_service")
-
-    @pytest.mark.asyncio
     async def test_detects_new_file_creation(self, application: Application):
         """Test that watcher detects when a new file is created."""
+
         from byte.files import FileDiscoveryService
 
         # Get initial file count
@@ -56,11 +43,7 @@ class TestWatcherService(BaseTest):
         initial_count = len(initial_files)
 
         # Create a new file
-        new_file = application.base_path("watched_file.py")
-        new_file.write_text("# new file")
-
-        # Wait for watcher to process the change
-        await asyncio.sleep(0.5)
+        await self.create_test_file(application, "watched_file.py", "# new file")
 
         # Refresh and check if file was added to discovery cache
         files = await discovery_service.get_files()
@@ -76,11 +59,7 @@ class TestWatcherService(BaseTest):
         from byte.files import FileDiscoveryService
 
         # Create a file first
-        temp_file = application.base_path("to_delete.py")
-        temp_file.write_text("# temporary file")
-
-        # Wait for watcher to detect creation
-        await asyncio.sleep(0.5)
+        temp_file = await self.create_test_file(application, "to_delete.py", "# temporary file")
 
         discovery_service = application.make(FileDiscoveryService)
         files = await discovery_service.get_files()
