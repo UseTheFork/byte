@@ -21,6 +21,7 @@ class FileWatcherService(Service):
         We cache the ignore service's pathspec for efficient synchronous filtering.
         Usage: Used internally by awatch to determine which file changes to process.
         """
+
         if not self.app["path"]:
             return True
 
@@ -44,6 +45,7 @@ class FileWatcherService(Service):
 
     async def _handle_file_change(self, file_path: Path, change_type: Change) -> None:
         """Handle file system changes and update discovery cache."""
+
         if file_path.is_dir():
             return
 
@@ -66,8 +68,14 @@ class FileWatcherService(Service):
             )
         )
 
-    async def _watch_files(self) -> None:
+    async def _watch_files(
+        self,
+    ) -> None:
         """Main file watching loop."""
+        self.file_service = self.app.make(FileService)
+        self.ignore_service = self.app.make(FileIgnoreService)
+        self.file_discovery = self.app.make(FileDiscoveryService)
+
         try:
             async for changes in awatch(str(self.app["path"]), watch_filter=self._watch_filter):
                 for change_type, file_path_str in changes:
@@ -78,15 +86,7 @@ class FileWatcherService(Service):
             # log.exception(e)
             print(f"File watcher error: {e}")
 
-    def _start_watching(self) -> None:
+    async def _start_watching(self, app) -> None:
         """Start file system monitoring using TaskManager."""
-        self.task_manager.start_task("file_watcher", self._watch_files())
-
-    def boot(self) -> None:
-        """Initialize file watcher with TaskManager integration."""
-        self.task_manager = self.app.make(TaskManager)
-        self.ignore_service = self.app.make(FileIgnoreService)
-        self.file_discovery = self.app.make(FileDiscoveryService)
-        self.file_service = self.app.make(FileService)
-
-        self._start_watching()
+        task_manager = app.make(TaskManager)
+        task_manager.start_task("file_watcher", self._watch_files())
