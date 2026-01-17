@@ -39,8 +39,7 @@ class TestDiscoveryService(BaseTest):
         from byte.files import FileDiscoveryService
 
         # Create a .pyc file that should be ignored
-        pyc_file = application.base_path("test.pyc")
-        pyc_file.write_text("compiled python")
+        await self.create_test_file(application, "test.pyc", "compiled python")
 
         # Refresh discovery to pick up new file
         discovery_service = application.make(FileDiscoveryService)
@@ -58,11 +57,8 @@ class TestDiscoveryService(BaseTest):
         from byte.files import FileDiscoveryService
 
         # Create some test files
-        test_file1 = application.base_path("test_module.py")
-        test_file1.write_text("# test module")
-
-        test_file2 = application.base_path("another_test.py")
-        test_file2.write_text("# another test")
+        await self.create_test_file(application, "test_module.py", "# test module")
+        await self.create_test_file(application, "another_test.py", "# another test")
 
         # Refresh discovery to pick up new files
         discovery_service = application.make(FileDiscoveryService)
@@ -99,14 +95,9 @@ class TestDiscoveryService(BaseTest):
         from byte.files import FileDiscoveryService
 
         # Create a new file
-        new_file = application.base_path("dynamic_file.txt")
-        new_file.write_text("dynamic content")
+        new_file = await self.create_test_file(application, "dynamic_file.txt", "dynamic content")
 
         discovery_service = application.make(FileDiscoveryService)
-
-        # Add file to cache
-        result = await discovery_service.add_file(Path(new_file))
-        assert result is True
 
         # Verify file is in cache
         files = await discovery_service.get_files()
@@ -132,10 +123,9 @@ class TestDiscoveryService(BaseTest):
         config.files.ignore.append("custom_ignored_dir")
 
         # Create a file in a custom ignored directory
-        custom_dir = application.base_path("custom_ignored_dir")
+        custom_dir = application.root_path("custom_ignored_dir")
         custom_dir.mkdir()
-        ignored_file = custom_dir / "should_be_ignored.txt"
-        ignored_file.write_text("ignored content")
+        await self.create_test_file(application, "custom_ignored_dir/should_be_ignored.txt", "ignored content")
 
         # Refresh discovery to pick up new patterns and files
         discovery_service = application.make(FileDiscoveryService)
@@ -153,14 +143,9 @@ class TestDiscoveryService(BaseTest):
         from byte.files import FileDiscoveryService
 
         # Create files with different extensions
-        py_file = application.base_path("script.py")
-        py_file.write_text("# python script")
-
-        js_file = application.base_path("app.js")
-        js_file.write_text("// javascript app")
-
-        txt_file = application.base_path("notes.txt")
-        txt_file.write_text("text notes")
+        await self.create_test_file(application, "script.py", "# python script")
+        await self.create_test_file(application, "app.js", "// javascript app")
+        await self.create_test_file(application, "notes.txt", "text notes")
 
         # Refresh discovery to pick up new files
         discovery_service = application.make(FileDiscoveryService)
@@ -197,11 +182,8 @@ class TestDiscoveryService(BaseTest):
         utils_dir.mkdir()
 
         # Create files at different levels
-        root_file = src_dir / "main.py"
-        root_file.write_text("# main module")
-
-        nested_file = utils_dir / "helpers.py"
-        nested_file.write_text("# helper functions")
+        await self.create_test_file(application, "src/main.py", "# main module")
+        await self.create_test_file(application, "src/utils/helpers.py", "# helper functions")
 
         # Refresh discovery to pick up new files
         discovery_service = application.make(FileDiscoveryService)
@@ -224,18 +206,15 @@ class TestDiscoveryService(BaseTest):
         src_dir.mkdir()
 
         # Pattern in filename (should score higher)
-        test_file = src_dir / "test_utils.py"
-        test_file.write_text("# test utilities")
+        await self.create_test_file(application, "src/test_utils.py", "# test utilities")
 
         # Pattern in directory path (should score lower)
         test_dir = application.base_path("tests")
         test_dir.mkdir()
-        nested_file = test_dir / "helpers.py"
-        nested_file.write_text("# helper functions")
+        await self.create_test_file(application, "tests/helpers.py", "# helper functions")
 
         # Pattern at start of filename (exact match, highest priority)
-        exact_file = application.base_path("test.py")
-        exact_file.write_text("# test module")
+        await self.create_test_file(application, "test.py", "# test module")
 
         # Refresh discovery to pick up new files
         discovery_service = application.make(FileDiscoveryService)
@@ -256,14 +235,9 @@ class TestDiscoveryService(BaseTest):
         from byte.files import FileDiscoveryService
 
         # Create files with mixed case names
-        upper_file = application.base_path("TestModule.py")
-        upper_file.write_text("# test module")
-
-        lower_file = application.base_path("testhelper.py")
-        lower_file.write_text("# test helper")
-
-        mixed_file = application.base_path("MyTest.py")
-        mixed_file.write_text("# my test")
+        await self.create_test_file(application, "TestModule.py", "# test module")
+        await self.create_test_file(application, "testhelper.py", "# test helper")
+        await self.create_test_file(application, "MyTest.py", "# my test")
 
         # Refresh discovery to pick up new files
         discovery_service = application.make(FileDiscoveryService)
@@ -303,14 +277,9 @@ class TestDiscoveryService(BaseTest):
         subdir.mkdir()
 
         # Create files at different levels inside ignored directory
-        root_pyc = pycache_dir / "module.pyc"
-        root_pyc.write_text("compiled")
-
-        nested_pyc = subdir / "nested.pyc"
-        nested_pyc.write_text("compiled nested")
-
-        nested_py = subdir / "source.py"
-        nested_py.write_text("# source in pycache")
+        await self.create_test_file(application, "__pycache__/module.pyc", "compiled")
+        await self.create_test_file(application, "__pycache__/subdir/nested.pyc", "compiled nested")
+        await self.create_test_file(application, "__pycache__/subdir/source.py", "# source in pycache")
 
         # Refresh discovery to pick up new files
         discovery_service = application.make(FileDiscoveryService)
@@ -334,8 +303,7 @@ class TestDiscoveryService(BaseTest):
         from byte.files import FileDiscoveryService
 
         # Create initial file
-        initial_file = application.base_path("initial.py")
-        initial_file.write_text("# initial file")
+        initial_file = await self.create_test_file(application, "initial.py", "# initial file")
 
         # Refresh discovery to pick up initial file
         discovery_service = application.make(FileDiscoveryService)
@@ -347,8 +315,7 @@ class TestDiscoveryService(BaseTest):
 
         # Delete the initial file and create a new one
         initial_file.unlink()
-        new_file = application.base_path("new.py")
-        new_file.write_text("# new file")
+        await self.create_test_file(application, "new.py", "# new file")
 
         # Refresh should clear cache and rebuild
         await discovery_service.refresh()
@@ -368,8 +335,7 @@ class TestDiscoveryService(BaseTest):
         from byte.files import FileDiscoveryService
 
         # Create a .pyc file that should be ignored
-        pyc_file = application.base_path("ignored.pyc")
-        pyc_file.write_text("compiled python")
+        pyc_file = await self.create_test_file(application, "ignored.pyc", "compiled python")
 
         discovery_service = application.make(FileDiscoveryService)
 

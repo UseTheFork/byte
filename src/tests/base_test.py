@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import asyncio
 import sys
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import git
@@ -11,7 +13,7 @@ import yaml
 from byte.config import ByteConfig
 
 if TYPE_CHECKING:
-    pass
+    from byte import Application
 
 
 class BaseTest:
@@ -89,3 +91,13 @@ class BaseTest:
         Usage: Tests can use this fixture to get a configured ByteConfig.
         """
         return ByteConfig()
+
+    async def create_test_file(self, application: Application, file_path: str, content: str) -> Path:
+        """Create a test file with content and pause for file watcher processing.
+
+        Usage: `await self.create_test_file(application, "test.py", "print('hello')")`
+        """
+        new_file = application.root_path(file_path)
+        new_file.write_text(content)
+        await asyncio.sleep(0.1)
+        return new_file

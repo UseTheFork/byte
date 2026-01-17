@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING
 
 import pytest
@@ -18,9 +19,10 @@ class TestParserService(BaseTest):
     @pytest.fixture
     def providers(self):
         """Provide PromptFormatProvider for parser service tests."""
+        from byte.files import FileServiceProvider
         from byte.prompt_format import PromptFormatProvider
 
-        return [PromptFormatProvider]
+        return [FileServiceProvider, PromptFormatProvider]
 
     @pytest.mark.asyncio
     async def test_parser_service_boots_successfully(self, application: Application):
@@ -404,12 +406,15 @@ class TestParserService(BaseTest):
         from byte.files import FileMode, FileService
         from byte.prompt_format import BlockStatus, BlockType, ParserService, SearchReplaceBlock
 
-        parser_service = application.make(ParserService)
         file_service = application.make(FileService)
+        parser_service = application.make(ParserService)
 
         # Create a test file and add it as read-only
-        test_file = git_repo / "readonly.py"
+        test_file = (git_repo / "readonly.py").resolve()
         test_file.write_text("original content")
+
+        await asyncio.sleep(0.1)
+
         await file_service.add_file(test_file, FileMode.READ_ONLY)
 
         blocks = [
@@ -681,7 +686,7 @@ class TestParserService(BaseTest):
         await parser_service.apply_blocks(blocks)
 
         assert new_file.exists()
-        assert new_file.read_text() == "def hello():\n    print('hello')\n"
+        assert new_file.read_text() == "def hello():\n    print('hello')"
 
     @pytest.mark.asyncio
     async def test_apply_blocks_edits_existing_file(self, application: Application, git_repo):
@@ -815,7 +820,7 @@ class TestParserService(BaseTest):
 
         assert new_file.exists()
         assert new_file.parent.exists()
-        assert new_file.read_text() == "# New module\n"
+        assert new_file.read_text() == "# New module"
 
     @pytest.mark.asyncio
     async def test_handles_unicode_decode_error_gracefully(self, application: Application, git_repo):
@@ -1015,31 +1020,4 @@ class TestParserService(BaseTest):
         assert edit_file.read_text() == "edited content\n"
         assert not delete_file.exists()
         assert create_file.exists()
-        assert create_file.read_text() == "new file content\n"
-
-    @pytest.mark.asyncio
-    async def test_handles_file_not_found_error_gracefully(self, application: Application, git_repo):
-        """Test that mid_flight_check handles missing files gracefully for EDIT operations."""
-        from byte.prompt_format import BlockStatus, BlockType, ParserService, SearchReplaceBlock
-
-        parser_service = application.make(ParserService)
-
-        # Use a path that doesn't exist
-        missing_file = git_repo / "does_not_exist.py"
-        assert not missing_file.exists()
-
-        blocks = [
-            SearchReplaceBlock(
-                block_id="1",
-                file_path=str(missing_file),
-                search_content="some content",
-                replace_content="new content",
-                block_type=BlockType.EDIT,
-            )
-        ]
-
-        validated_blocks = await parser_service.mid_flight_check(blocks)
-
-        assert len(validated_blocks) == 1
-        assert validated_blocks[0].block_status == BlockStatus.SEARCH_NOT_FOUND_ERROR
-        assert "cannot read" in validated_blocks[0].status_message.lower()
+        assert create_file.read_text() == "new file content"

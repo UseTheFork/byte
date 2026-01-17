@@ -303,9 +303,8 @@ class TestLintService(BaseTest):
         assert failed == []
 
     @pytest.mark.asyncio
-    async def test_display_results_summary_returns_failed_commands(self, application: Application):
+    async def test_display_results_summary_returns_failed_commands(self, application: Application, mocker):
         """Test that display_results_summary returns failed commands."""
-        from unittest.mock import patch
 
         from byte.lint import LintFile, LintService
 
@@ -320,8 +319,9 @@ class TestLintService(BaseTest):
             stderr="error message",
         )
 
-        with patch.object(application["console"], "confirm", return_value=False):
-            _, failed = await service.display_results_summary([lint_result])
+        mocker.patch.object(application["console"], "confirm", return_value=False)
+
+        _, failed = await service.display_results_summary([lint_result])
 
         assert len(failed) == 1
         assert failed[0] == lint_result
