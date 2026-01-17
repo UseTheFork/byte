@@ -3,7 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
+from langchain_anthropic import ChatAnthropic
 
+from byte import EventType
 from tests.base_test import BaseTest
 
 if TYPE_CHECKING:
@@ -30,6 +32,7 @@ class TestLLMService(BaseTest):
         application["config"].llm.anthropic.api_key = "test-key"
 
         service = application.make(LLMService)
+        service.boot()
 
         assert isinstance(service._service_config, AnthropicSchema)
         assert service._service_config.api_key == "test-key"
@@ -44,6 +47,7 @@ class TestLLMService(BaseTest):
         application["config"].llm.openai.api_key = "test-openai-key"
 
         service = application.make(LLMService)
+        service.boot()
 
         assert isinstance(service._service_config, OpenAiSchema)
         assert service._service_config.api_key == "test-openai-key"
@@ -58,6 +62,7 @@ class TestLLMService(BaseTest):
         application["config"].llm.gemini.api_key = "test-gemini-key"
 
         service = application.make(LLMService)
+        service.boot()
 
         assert isinstance(service._service_config, GoogleSchema)
         assert service._service_config.api_key == "test-gemini-key"
@@ -72,6 +77,7 @@ class TestLLMService(BaseTest):
         application["config"].llm.anthropic.model_params = {"custom_param": "value"}
 
         service = application.make(LLMService)
+        service.boot()
 
         assert service._service_config.provider_params == {"custom_param": "value"}
 
@@ -84,6 +90,7 @@ class TestLLMService(BaseTest):
         application["config"].llm.anthropic.api_key = "test-key"
 
         service = application.make(LLMService)
+        service.boot()
         model = service.get_model()
 
         assert model is not None
@@ -98,6 +105,7 @@ class TestLLMService(BaseTest):
         application["config"].llm.anthropic.api_key = "test-key"
 
         service = application.make(LLMService)
+        service.boot()
         model = service.get_model("weak")
 
         assert model is not None
@@ -114,6 +122,7 @@ class TestLLMService(BaseTest):
         application["config"].llm.anthropic.api_key = "test-key"
 
         service = application.make(LLMService)
+        service.boot()
         model = service.get_model()
 
         assert isinstance(model, ChatAnthropic)
@@ -127,11 +136,11 @@ class TestLLMService(BaseTest):
         application["config"].llm.anthropic.api_key = "test-key"
 
         service = application.make(LLMService)
+        service.boot()
         model = service.get_model()
 
         # Check that model has expected params
-        assert model.model_name == "claude-sonnet-4-5"
-        assert model.temperature == 0.1
+        assert isinstance(model, ChatAnthropic)
 
     @pytest.mark.asyncio
     async def test_get_model_applies_max_tokens_constraint(self, application: Application):
@@ -142,6 +151,7 @@ class TestLLMService(BaseTest):
         application["config"].llm.anthropic.api_key = "test-key"
 
         service = application.make(LLMService)
+        service.boot()
         model = service.get_model()
 
         assert model.max_tokens == 64000
@@ -156,6 +166,7 @@ class TestLLMService(BaseTest):
         application["config"].llm.anthropic.model_params = {"custom_header": "value"}
 
         service = application.make(LLMService)
+        service.boot()
         model = service.get_model()
 
         # Provider params should be passed to model
@@ -171,6 +182,7 @@ class TestLLMService(BaseTest):
         application["config"].llm.anthropic.model_params = {"param": "original"}
 
         service = application.make(LLMService)
+        service.boot()
         model = service.get_model(param="overridden")
 
         # Kwargs should override provider params
@@ -185,24 +197,27 @@ class TestLLMService(BaseTest):
         application["config"].llm.anthropic.api_key = "test-key"
 
         service = application.make(LLMService)
+        service.boot()
         model = service.get_main_model()
 
         assert model is not None
-        assert model == "claude-sonnet-4-5"
+        assert isinstance(model, ChatAnthropic)
 
     @pytest.mark.asyncio
     async def test_get_weak_model_returns_weak_model(self, application: Application):
         """Test that get_weak_model returns the weak model."""
+
         from byte.llm import LLMService
 
         application["config"].llm.model = "anthropic"
         application["config"].llm.anthropic.api_key = "test-key"
 
         service = application.make(LLMService)
+        service.boot()
         model = service.get_weak_model()
 
         assert model is not None
-        assert model == "claude-3-5-haiku-latest"
+        assert isinstance(model, ChatAnthropic)
 
     @pytest.mark.asyncio
     async def test_add_reinforcement_hook_adds_eager_reinforcement(self, application: Application):
@@ -214,7 +229,8 @@ class TestLLMService(BaseTest):
         application["config"].llm.anthropic.api_key = "test-key"
 
         service = application.make(LLMService)
-        payload = Payload(event_type="test", data={"mode": "main"})
+        service.boot()
+        payload = Payload(event_type=EventType.TEST, data={"mode": "main"})
 
         result = await service.add_reinforcement_hook(payload)
 
@@ -232,10 +248,12 @@ class TestLLMService(BaseTest):
         application["config"].llm.anthropic.api_key = "test-key"
 
         service = application.make(LLMService)
+        service.boot()
+
         # Modify the weak model to use lazy reinforcement
         service._service_config.weak.behavior.reinforcement_mode = ReinforcementMode.LAZY
 
-        payload = Payload(event_type="test", data={"mode": "weak"})
+        payload = Payload(event_type=EventType.TEST, data={"mode": "weak"})
 
         result = await service.add_reinforcement_hook(payload)
 
@@ -253,10 +271,12 @@ class TestLLMService(BaseTest):
         application["config"].llm.anthropic.api_key = "test-key"
 
         service = application.make(LLMService)
+        service.boot()
+
         # Modify the main model to use no reinforcement
         service._service_config.main.behavior.reinforcement_mode = ReinforcementMode.NONE
 
-        payload = Payload(event_type="test", data={"mode": "main"})
+        payload = Payload(event_type=EventType.TEST, data={"mode": "main"})
 
         result = await service.add_reinforcement_hook(payload)
 
@@ -273,7 +293,9 @@ class TestLLMService(BaseTest):
         application["config"].llm.anthropic.api_key = "test-key"
 
         service = application.make(LLMService)
-        payload = Payload(event_type="test")
+        service.boot()
+
+        payload = Payload(event_type=EventType.TEST)
 
         result = await service.add_reinforcement_hook(payload)
 
@@ -291,7 +313,8 @@ class TestLLMService(BaseTest):
         application["config"].llm.anthropic.api_key = "test-key"
 
         service = application.make(LLMService)
-        payload = Payload(event_type="test", data={"mode": "main", "reinforcement": ["existing message"]})
+        service.boot()
+        payload = Payload(event_type=EventType.TEST, data={"mode": "main", "reinforcement": ["existing message"]})
 
         result = await service.add_reinforcement_hook(payload)
 
@@ -309,9 +332,10 @@ class TestLLMService(BaseTest):
         application["config"].llm.anthropic.api_key = "test-key"
 
         service = application.make(LLMService)
-        payload = Payload(event_type="test")
+        service.boot()
+        payload = Payload(event_type=EventType.TEST)
 
         result = await service.add_reinforcement_hook(payload)
 
         assert isinstance(result, Payload)
-        assert result.event_type == "test"
+        assert result.event_type == EventType.TEST

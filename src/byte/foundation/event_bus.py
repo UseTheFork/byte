@@ -36,6 +36,8 @@ class EventType(Enum):
     GATHER_PROJECT_CONTEXT = "gather_project_context"
     GATHER_REINFORCEMENT = "gather_reinforcement"
 
+    TEST = "test"
+
 
 class Payload:
     """Generic event payload that can carry any data using ArrayStore."""
