@@ -10,7 +10,6 @@ class LintFile:
 
     command: List[str]
     file: Path
-    full_command: str
     exit_code: int | None = None
     stdout: str = ""
     stderr: str = ""

@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 class LintCommand(BaseModel):
     command: List[str] = Field(
-        description="Command and arguments to execute for linting (e.g., ['ruff', 'check', '--fix'])"
+        description="Command and arguments to execute for linting (e.g., ['ruff', 'check', '--fix']). Use {file} placeholder to specify where the file path should be inserted, otherwise it will be appended to the end."
     )
     languages: List[str] = Field(
         description="List of language names this command handles (e.g., ['python', 'php']). Empty list means all files."

@@ -77,8 +77,8 @@ class LintService(Service, UserInteractive):
     async def _execute_lint_command(self, lint_file: LintFile, task_id: TaskID, git_root) -> LintFile:
         try:
             # Run the command and capture output
-            process = await asyncio.create_subprocess_shell(
-                lint_file.full_command,
+            process = await asyncio.create_subprocess_exec(
+                *lint_file.command,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
                 cwd=git_root,
@@ -91,7 +91,7 @@ class LintService(Service, UserInteractive):
 
             self.app["log"].debug(
                 "Executed lint command: {} in {} with exit code {}",
-                lint_file.full_command,
+                " ".join(lint_file.command),
                 git_root,
                 exit_code,
             )
@@ -273,12 +273,18 @@ class LintService(Service, UserInteractive):
                                     continue
                         # If no languages specified, process all files
 
-                        full_command = " ".join(command.command + [str(file_path)])
+                        # Check if any command part contains {file} placeholder
+                        if any("{file}" in part for part in command.command):
+                            # Replace {file} with actual file path
+                            command_parts = [part.replace("{file}", str(file_path)) for part in command.command]
+                        else:
+                            # Fallback to appending file path (current behavior)
+                            command_parts = command.command + [str(file_path)]
+
                         self._lint_stack[str(file_path)].append(
                             LintFile(
-                                command=command.command,
+                                command=command_parts,
                                 file=file_path,
-                                full_command=full_command,
                                 exit_code=0,
                             )
                         )
