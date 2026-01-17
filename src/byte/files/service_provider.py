@@ -41,14 +41,6 @@ class FileServiceProvider(ServiceProvider):
 
     async def boot(self):
         """Boot file services and register commands with registry."""
-        # Ensure ignore service is booted first for pattern loading
-        self.app.make(FileIgnoreService)
-
-        # Then boot file discovery which depends on ignore service
-        self.app.make(FileDiscoveryService)
-
-        # Boots the filewatcher service in to the task manager
-        self.app.make(FileWatcherService)
 
         # Set up event listener for PRE_PROMPT_TOOLKIT
         event_bus = self.app.make(EventBus)

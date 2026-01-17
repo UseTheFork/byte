@@ -56,10 +56,12 @@ class FileService(Service):
         # Check if path contains wildcard patterns
         if "*" in path_str or "?" in path_str or "[" in path_str:
             # Handle glob patterns - resolve relative to base path
-
-            # Convert relative pattern to absolute startting at the path root.
-            pattern_path = self.app.root_path(path_str)
-            matching_paths = glob.glob(str(pattern_path), recursive=True)
+            if not Path(path_str).is_absolute():
+                # Convert relative pattern to absolute by prepending base path
+                pattern_path = self.app["path"] / path_str
+                matching_paths = glob.glob(str(pattern_path), recursive=True)
+            else:
+                matching_paths = glob.glob(path_str, recursive=True)
 
             if not matching_paths:
                 return False
@@ -147,7 +149,7 @@ class FileService(Service):
             # Handle single file path
             if not Path(path).is_absolute():
                 # Resolve relative paths from project base path
-                path_obj = (self.app["path"] / path).resolve()
+                path_obj = (self.app["path.root"] / path).resolve()
             else:
                 path_obj = Path(path).resolve()
             key = str(path_obj)

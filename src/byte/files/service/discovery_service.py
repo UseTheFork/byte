@@ -30,10 +30,10 @@ class FileDiscoveryService(Service):
         Builds an in-memory index of project files for fast lookups and
         completions, filtering out ignored files and directories.
         """
-        if not self.app["path"] or not self.app["path"].exists():
+        if not self.app["path.root"] or not self.app["path.root"].exists():
             return
 
-        for root, dirs, files in os.walk(self.app["path"]):
+        for root, dirs, files in os.walk(self.app["path.root"]):
             root_path = Path(root)
 
             # Filter directories to avoid scanning ignored ones
@@ -43,7 +43,7 @@ class FileDiscoveryService(Service):
             for file in files:
                 file_path = root_path / file
                 if not self._is_ignored(file_path) and file_path.is_file():
-                    # log.debug(f"Discovered file: {file_path}")
+                    self.app["log"].debug(f"Discovered file: {file_path}")
                     self._all_files.add(file_path)
 
     def boot(self) -> None:
@@ -86,7 +86,7 @@ class FileDiscoveryService(Service):
         exact prefix matches, then fuzzy matches by relevance score.
         Usage: `matches = discovery.find_files('boot')` -> includes 'byte/bootstrap.py'
         """
-        if not self.app["path"]:
+        if not self.app["path.root"]:
             return []
 
         pattern_lower = pattern.lower()
@@ -95,7 +95,7 @@ class FileDiscoveryService(Service):
 
         for file_path in self._all_files:
             try:
-                relative_path = str(file_path.relative_to(self.app["path"]))
+                relative_path = str(file_path.relative_to(self.app["path.root"]))
                 relative_path_lower = relative_path.lower()
 
                 # Exact prefix match gets highest priority
@@ -122,7 +122,7 @@ class FileDiscoveryService(Service):
         # Combine exact matches first, then fuzzy matches
         all_matches = exact_matches + fuzzy_files
 
-        return sorted(all_matches, key=lambda p: str(p.relative_to(self.app["path"])))
+        return sorted(all_matches, key=lambda p: str(p.relative_to(self.app["path.root"])))
 
     async def add_file(self, path: Path) -> bool:
         """Add a newly discovered file to the cache.
