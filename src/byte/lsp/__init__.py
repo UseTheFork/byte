@@ -5,7 +5,13 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
-    from byte.lsp.config import LSPConfig, LSPServerConfig
+    from byte.lsp.config import (
+        ContainerServerConfig,
+        CustomServerConfig,
+        LocalServerConfig,
+        LSPConfig,
+        PresetServerConfig,
+    )
     from byte.lsp.schemas import (
         CompletionItem,
         Diagnostic,
@@ -26,6 +32,8 @@ if TYPE_CHECKING:
 
 __all__ = (
     "CompletionItem",
+    "ContainerServerConfig",
+    "CustomServerConfig",
     "Diagnostic",
     "DiagnosticSeverity",
     "HoverResult",
@@ -34,9 +42,11 @@ __all__ = (
     "LSPServerConfig",
     "LSPService",
     "LSPServiceProvider",
+    "LocalServerConfig",
     "Location",
     "LspServerState",
     "Position",
+    "PresetServerConfig",
     "Range",
     "TextDocumentIdentifier",
     "find_references",
@@ -52,7 +62,11 @@ _dynamic_imports = {
     "HoverResult": "schemas",
     "LSPClient": "service.lsp_client",
     "LSPConfig": "config",
+    "CustomServerConfig": "config",
+    "ContainerServerConfig": "config",
     "LSPServerConfig": "config",
+    "LocalServerConfig": "config",
+    "PresetServerConfig": "config",
     "LSPService": "service.lsp_service",
     "LSPServiceProvider": "service_provider",
     "Location": "schemas",

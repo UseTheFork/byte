@@ -56,14 +56,12 @@ cli:
   ui_theme: mocha
   syntax_theme: github-dark
 lsp:
-  enable: false
+  enable: true
   timeout: 30
   servers:
     python:
-      command:
-      - uv
-      - run
-      - jedi-language-server
+      preset: ty
+      server_type: local
       languages:
       - python
 presets:
