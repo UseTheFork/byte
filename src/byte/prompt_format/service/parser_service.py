@@ -266,12 +266,16 @@ class ParserService(Service, UserInteractive, ABC):
 
             # If the path is relative, resolve it against the project root
             if not file_path.is_absolute():
-                file_path = self.app.path(str(file_path)).resolve()
+                file_path = self.app.root_path(str(file_path)).resolve()
             else:
                 file_path = file_path.resolve()
 
+            self.app["log"].info(file_path)
+
             # Check if file is in read-only context
             file_context = file_service.get_file_context(file_path)
+            self.app["log"].info(file_context)
+            self.app["log"].info(file_context)
             if file_context and file_context.mode == FileMode.READ_ONLY:
                 block.block_status = BlockStatus.READ_ONLY_ERROR
                 block.status_message = f"Cannot edit read-only file: {block.file_path}"
@@ -310,7 +314,7 @@ class ParserService(Service, UserInteractive, ABC):
                 # Get project root from config
                 try:
                     # Use the resolved file_path for the check
-                    file_path.relative_to(self.app.path().resolve())
+                    file_path.relative_to(self.app.root_path().resolve())
                 except ValueError:
                     block.block_status = BlockStatus.FILE_OUTSIDE_PROJECT_ERROR
                     block.status_message = f"New file must be within project root: {block.file_path}"
@@ -391,7 +395,9 @@ class ParserService(Service, UserInteractive, ABC):
                         True,
                     ):
                         file_path.parent.mkdir(parents=True, exist_ok=True)
-                        file_path.write_text(block.replace_content, encoding="utf-8")
+
+                        content = block.replace_content.strip("\n")
+                        file_path.write_text(content, encoding="utf-8")
 
                         # Add the newly created file to context as editable
                         await file_discovery_service.add_file(file_path)
