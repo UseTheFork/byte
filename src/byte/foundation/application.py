@@ -5,7 +5,7 @@ from typing import Callable, Optional, TypeVar
 from git import InvalidGitRepositoryError, Repo
 
 from byte import ServiceProvider
-from byte.foundation import Console, Container, EventBus, Kernel, TaskManager
+from byte.foundation import Console, Container, FoundationServiceProvider, Kernel
 from byte.foundation.bootstrap import RegisterProviders
 from byte.logging import LogService, LogServiceProvider
 
@@ -30,10 +30,7 @@ class Application(Container):
         """Register all of the base service providers."""
 
         self.register(LogServiceProvider)
-
-        self.singleton(EventBus)
-        self.singleton(TaskManager)
-        self.singleton(Console)
+        self.register(FoundationServiceProvider)
 
     def _register_base_service_provider_bindings(self):
         """Register base service provider instances in the container.
@@ -124,6 +121,7 @@ class Application(Container):
         """
         self._booted_callbacks.append(callback)
 
+        # TODO: need to figure out how to make this async friendly
         if self.is_booted():
             callback(self)
 
@@ -157,7 +155,10 @@ class Application(Container):
 
         # Fire booted callbacks
         for callback in self._booted_callbacks:
-            callback(self)
+            if inspect.iscoroutinefunction(callback):
+                await callback(self)
+            else:
+                callback(self)
 
         self._booted = True
 
@@ -173,7 +174,7 @@ class Application(Container):
 
     def bind_paths_in_container(self):
         """Set the base paths."""
-        self.instance("path", self.path())
+        self.instance("path", self.root_path())
         self.instance("path.app", self.app_path())
         self.instance("path.root", self.root_path())
         self.instance("path.config", self.config_path())
