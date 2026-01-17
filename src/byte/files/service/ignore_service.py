@@ -24,8 +24,8 @@ class FileIgnoreService(Service):
         patterns = []
 
         # Load project-specific .gitignore only if we have a valid project root
-        if self.app["path"] is not None:
-            gitignore_path = self.app["path"] / ".gitignore"
+        if self.app["path.root"] is not None:
+            gitignore_path = self.app.root_path(".gitignore")
             if gitignore_path.exists():
                 try:
                     with open(gitignore_path, encoding="utf-8") as f:
@@ -45,7 +45,7 @@ class FileIgnoreService(Service):
         else:
             self.app["log"].debug("No ignore patterns loaded")
 
-        self._gitignore_spec = pathspec.PathSpec.from_lines("gitwildmatch", patterns)
+        self._gitignore_spec = pathspec.PathSpec.from_lines("gitignore", patterns)
 
     def boot(self) -> None:
         """Initialize service by loading and compiling ignore patterns."""
