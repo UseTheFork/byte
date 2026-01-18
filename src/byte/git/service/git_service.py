@@ -188,17 +188,10 @@ class GitService(Service, UserInteractive):
     async def get_diff(self) -> List[dict]:
         """Get structured diff data for changes in the repository.
 
-        Args:
-                other: Optional comparison target. Common values:
-                        - None: Compare working tree to index (unstaged changes)
-                        - "HEAD": Compare index to HEAD (staged changes)
-                        - "--cached": Same as "HEAD" (staged changes)
-
         Returns:
                 List of dictionaries containing diff information for each changed file
 
-        Usage: `await git_service.get_diff("HEAD")` -> get staged changes
-        Usage: `await git_service.get_diff()` -> get unstaged changes
+        Usage: `await git_service.get_diff()` -> get staged changes
         """
 
         staged_diff = self._repo.head.commit.diff()

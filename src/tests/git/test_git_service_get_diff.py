@@ -413,3 +413,162 @@ class TestGitServiceGetDiff(BaseTest):
         assert diff_data[0]["file"] == file_path
         assert diff_data[0]["is_modified"] is True
         assert diff_data[0]["diff"] is not None
+
+    @pytest.mark.asyncio
+    async def test_get_diff_file_mode_change(self, application: Application):
+        """Test get_diff when only file permissions change."""
+        from byte.git import GitService
+
+        # Create and commit a file
+        test_file = await self.create_test_file(application, "script.sh", "#!/bin/bash\necho 'hello'\n")
+
+        service = application.make(GitService)
+        repo = await service.get_repo()
+        file_path = str(test_file.relative_to(application.root_path()))
+        repo.index.add([file_path])
+        repo.index.commit("Add script")
+
+        # Change file mode to executable
+        import os
+
+        os.chmod(test_file, 0o755)
+        repo.index.add([file_path])
+
+        diff_data = await service.get_diff()
+
+        # Git should detect this as a modification
+        assert len(diff_data) == 1
+        assert diff_data[0]["file"] == file_path
+        assert diff_data[0]["change_type"] == "M"
+        assert diff_data[0]["is_modified"] is True
+
+    @pytest.mark.asyncio
+    async def test_get_diff_empty_file_added(self, application: Application):
+        """Test get_diff when adding a completely empty file."""
+        from byte.git import GitService
+
+        # Create an empty file
+        test_file = application.root_path("empty.txt")
+        test_file.touch()
+
+        service = application.make(GitService)
+        repo = await service.get_repo()
+        file_path = str(test_file.relative_to(application.root_path()))
+        repo.index.add([file_path])
+
+        diff_data = await service.get_diff()
+
+        assert len(diff_data) == 1
+        assert diff_data[0]["file"] == file_path
+        assert diff_data[0]["change_type"] == "A"
+        assert diff_data[0]["is_new"] is True
+        # Empty file should have no diff content
+        assert diff_data[0]["diff"] == "" or diff_data[0]["diff"] is None
+
+    @pytest.mark.asyncio
+    async def test_get_diff_file_with_unicode_content(self, application: Application):
+        """Test get_diff with files containing unicode/emoji characters in content."""
+        from byte.git import GitService
+
+        # Create file with unicode content
+        unicode_content = "Hello 世界 🌍\nEmoji test 🚀✨\n"
+        test_file = await self.create_test_file(application, "unicode.txt", unicode_content)
+
+        service = application.make(GitService)
+        repo = await service.get_repo()
+        file_path = str(test_file.relative_to(application.root_path()))
+        repo.index.add([file_path])
+
+        diff_data = await service.get_diff()
+
+        assert len(diff_data) == 1
+        assert diff_data[0]["file"] == file_path
+        assert diff_data[0]["change_type"] == "A"
+        assert diff_data[0]["is_new"] is True
+
+    @pytest.mark.asyncio
+    async def test_get_diff_line_ending_changes(self, application: Application):
+        """Test get_diff when only line endings change (LF ↔ CRLF)."""
+        from byte.git import GitService
+
+        # Create and commit file with LF endings
+        test_file = await self.create_test_file(application, "lineendings.txt", "line1\nline2\nline3\n")
+
+        service = application.make(GitService)
+        repo = await service.get_repo()
+        file_path = str(test_file.relative_to(application.root_path()))
+        repo.index.add([file_path])
+        repo.index.commit("Add file with LF")
+
+        # Change to CRLF endings
+        test_file.write_text("line1\r\nline2\r\nline3\r\n")
+        repo.index.add([file_path])
+
+        diff_data = await service.get_diff()
+
+        # Should detect as modification
+        assert len(diff_data) == 1
+        assert diff_data[0]["file"] == file_path
+        assert diff_data[0]["change_type"] == "M"
+        assert diff_data[0]["is_modified"] is True
+
+    @pytest.mark.asyncio
+    async def test_get_diff_file_becomes_empty(self, application: Application):
+        """Test get_diff when a file with content becomes empty."""
+        from byte.git import GitService
+
+        # Create and commit file with content
+        test_file = await self.create_test_file(application, "to_empty.txt", "original content\nmore content\n")
+
+        service = application.make(GitService)
+        repo = await service.get_repo()
+        file_path = str(test_file.relative_to(application.root_path()))
+        repo.index.add([file_path])
+        repo.index.commit("Add file with content")
+
+        # Make file empty
+        test_file.write_text("")
+        repo.index.add([file_path])
+
+        diff_data = await service.get_diff()
+
+        assert len(diff_data) == 1
+        assert diff_data[0]["file"] == file_path
+        assert diff_data[0]["change_type"] == "M"
+        assert diff_data[0]["is_modified"] is True
+        assert diff_data[0]["diff"] is not None
+        # Should show removal of content
+        assert "-original content" in diff_data[0]["diff"]
+
+    @pytest.mark.asyncio
+    async def test_get_diff_multiple_modifications_same_file(self, application: Application):
+        """Test get_diff shows only staged changes when file has both staged and unstaged modifications."""
+        from byte.git import GitService
+
+        # Create and commit a file
+        test_file = await self.create_test_file(application, "multi_mod.txt", "original\n")
+
+        service = application.make(GitService)
+        repo = await service.get_repo()
+        file_path = str(test_file.relative_to(application.root_path()))
+        repo.index.add([file_path])
+        repo.index.commit("Add file")
+
+        # Modify and stage
+        test_file.write_text("staged change\n")
+        repo.index.add([file_path])
+
+        # Modify again without staging
+        test_file.write_text("unstaged change\n")
+
+        diff_data = await service.get_diff()
+
+        # Should only show the staged change, not the unstaged one
+        assert len(diff_data) == 1
+        assert diff_data[0]["file"] == file_path
+        assert diff_data[0]["is_modified"] is True
+        assert diff_data[0]["diff"] is not None
+        # Should show staged change
+        assert "+staged change" in diff_data[0]["diff"]
+        # Should NOT show unstaged change
+        assert "unstaged change" not in diff_data[0]["diff"]
