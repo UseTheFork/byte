@@ -65,13 +65,23 @@ class SubprocessNode(Node, UserInteractive):
         if should_add:
             # Format the result using XML-like syntax
             result_message = [
-                Boundary.open(BoundaryType.CONTEXT, meta={"type": "subprocess execution"}),
-                f"<command>{subprocess_result.command}</command>",
-                f"<exit_code>{subprocess_result.exit_code}</exit_code><stdout>{subprocess_result.stdout}</stdout>",
+                Boundary.open(
+                    BoundaryType.CONTEXT,
+                    meta={
+                        "type": "subprocess execution",
+                        "command": subprocess_result.command,
+                        "exit_code": str(subprocess_result.exit_code),
+                    },
+                ),
+                Boundary.open(BoundaryType.STDOUT),
+                subprocess_result.stdout,
+                Boundary.close(BoundaryType.STDOUT),
             ]
 
             if subprocess_result.stderr:
-                result_message.append("<stderr>{subprocess_result.stderr}</stderr>")
+                result_message.append(Boundary.open(BoundaryType.STDERR))
+                result_message.append(subprocess_result.stderr)
+                result_message.append(Boundary.close(BoundaryType.STDERR))
             result_message.append(
                 Boundary.close(BoundaryType.CONTEXT),
             )

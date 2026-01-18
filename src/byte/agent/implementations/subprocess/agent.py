@@ -34,5 +34,11 @@ class SubprocessAgent(Agent):
         checkpointer = await self.get_checkpointer()
         return graph.compile(checkpointer=checkpointer)
 
-    async def get_assistant_runnable(self) -> None:
-        pass
+    async def get_assistant_runnable(self) -> AssistantContextSchema:
+        return AssistantContextSchema(
+            mode="none",
+            prompt=None,
+            main=None,
+            weak=None,
+            agent=self.__class__.__name__,
+        )

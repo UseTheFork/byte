@@ -26,6 +26,8 @@ class EndNode(Node):
             )
             await self.emit(payload)
 
+        self.app["log"].info(runtime.context.agent)
+
         # This is where we promote `scratch_messages` to `history_messages`
         update_dict = {
             **state,
@@ -38,10 +40,15 @@ class EndNode(Node):
             last_message = get_last_message(state["scratch_messages"])
             clear_scratch = RemoveMessage(id=REMOVE_ALL_MESSAGES)
 
-            # Create a HumanMessage from the user_request
-            user_message = HumanMessage(content=state["user_request"])
+            # For SubprocessAgent, skip adding user_message since the command is already in context
+            # TODO: this is gross we need a better way of doing this. maybe a hook that is part of the runtime?
+            if runtime.context.agent == "SubprocessAgent":
+                update_dict["history_messages"] = [last_message]
+            else:
+                # Create a HumanMessage from the user_request
+                user_message = HumanMessage(content=state["user_request"])
+                update_dict["history_messages"] = [user_message, last_message]
 
-            update_dict["history_messages"] = [user_message, last_message]
             update_dict["scratch_messages"] = clear_scratch
 
         return Command(

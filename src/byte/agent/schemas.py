@@ -51,10 +51,10 @@ class AssistantContextSchema:
     Usage: `ToolNode(tools=config.tools) if config.tools else None`
     """
 
-    mode: Literal["main", "weak"]  # Which model the runnable uses
-    prompt: BasePromptTemplate  # The prompt | llm chain to execute
-    main: BaseChatModel  # Reference to the main LLM for complex reasoning
-    weak: BaseChatModel  # Reference to the weak LLM for simple operations
+    mode: Literal["main", "weak", "none"]  # Which model the runnable uses
+    prompt: BasePromptTemplate | None  # The prompt | llm chain to execute
+    main: BaseChatModel | None  # Reference to the main LLM for complex reasoning
+    weak: BaseChatModel | None  # Reference to the weak LLM for simple operations
     agent: str  # Agent class name for identification
     tools: Optional[List[BaseTool]] = Field(default=None)  # Tools bound to LLM, if any
     enforcement: Optional[str] = Field(default=None)

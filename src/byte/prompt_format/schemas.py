@@ -32,6 +32,10 @@ class BoundaryType(str, Enum):
 
     CONTEXT = "context"
 
+    # Specific to command execution
+    STDOUT = "stdout"
+    STDERR = "stderr"
+
     SYSTEM_CONTEXT = "system_context"
 
 
