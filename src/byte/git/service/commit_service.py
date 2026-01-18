@@ -90,7 +90,7 @@ class CommitService(Service, UserInteractive):
         for commit_group in commit_plan.commits:
             # Stage files for this commit group
             for file_path in commit_group.files:
-                file_full_path = self.app["path"] / file_path
+                file_full_path = self.app.root_path(file_path)
                 if file_full_path.exists():
                     await self.git_service.add(file_path)
                 else:
@@ -133,10 +133,9 @@ class CommitService(Service, UserInteractive):
         description = description[0].lower() + description[1:] if description else description
         description = description.rstrip(".")
 
-        header = "".join(header_parts) + f": {description}"
-
-        # Build the full message
-        message_parts = [header]
+        # Prepare message parts list for later assembly
+        message_parts = []
+        breaking_change_footer = None
 
         # Only handle breaking changes if enabled in config
         if git_config.enable_breaking_changes and commit_message.breaking_change:
@@ -170,11 +169,21 @@ class CommitService(Service, UserInteractive):
 
                 # Add breaking change footer if message is present
                 if commit_message.breaking_change_message:
-                    message_parts.extend(["", f"BREAKING CHANGE: {commit_message.breaking_change_message}"])
+                    breaking_change_footer = f"BREAKING CHANGE: {commit_message.breaking_change_message}"
+
+        # Assemble header after breaking change confirmation
+        header = "".join(header_parts) + f": {description}"
+
+        # Build the full message
+        message_parts.append(header)
 
         # Only add body if enabled in config AND present in message
         if git_config.enable_body and commit_message.body:
             message_parts.extend(["", commit_message.body])
+
+        # Add breaking change footer if present
+        if breaking_change_footer:
+            message_parts.extend(["", breaking_change_footer])
 
         return "\n".join(message_parts)
 

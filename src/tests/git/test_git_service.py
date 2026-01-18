@@ -148,9 +148,8 @@ class TestGitService(BaseTest):
         assert latest_commit.message.strip() == commit_message
 
     @pytest.mark.asyncio
-    async def test_stage_changes_adds_unstaged_files(self, application: Application):
+    async def test_stage_changes_adds_unstaged_files(self, application: Application, mocker):
         """Test that stage_changes adds unstaged files to the index."""
-        from unittest.mock import AsyncMock, patch
 
         from byte.git import GitService
 
@@ -166,10 +165,9 @@ class TestGitService(BaseTest):
         # Modify the file (unstaged change)
         test_file.write_text("modified")
 
-        # Mock user confirmation to return True
-        with patch.object(service, "prompt_for_confirmation", new_callable=AsyncMock) as mock_confirm:
-            mock_confirm.return_value = True
-            await service.stage_changes()
+        mocker.patch.object(service, "prompt_for_confirmation", return_value=True)
+
+        await service.stage_changes()
 
         # Verify file is now staged
         staged_files = [item.a_path for item in repo.index.diff("HEAD")]
@@ -270,7 +268,8 @@ class TestGitService(BaseTest):
         await service.remove(file_path)
 
         # Verify deletion is staged
-        staged_changes = repo.index.diff("HEAD")
+        staged_changes = list(repo.head.commit.diff())
+
         assert any(item.a_path == file_path and item.change_type == "D" for item in staged_changes)
 
     @pytest.mark.asyncio
