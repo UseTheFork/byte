@@ -62,7 +62,6 @@ class ValidationNode(Node, UserInteractive):
         # Run all validators
         for validator in self.validators:
             errors = await validator.validate(message_content)
-            # AI: How should we now append errors here ai?
             validation_errors.extend(errors)
 
         if validation_errors:
