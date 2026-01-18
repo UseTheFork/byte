@@ -274,13 +274,13 @@ class TestGitService(BaseTest):
         repo.index.add([file_path])
 
         # Get staged diff
-        diff_data = await service.get_diff("HEAD")
+        diff_data = await service.get_diff()
 
         assert len(diff_data) > 0
         assert any(item["file"] == file_path for item in diff_data)
 
     @pytest.mark.asyncio
-    async def test_get_diff_returns_unstaged_changes(self, application: Application):
+    async def test_get_diff_doesnt_returns_unstaged_changes(self, application: Application):
         """Test that get_diff without argument returns unstaged changes."""
         from byte.git import GitService
 
@@ -299,8 +299,8 @@ class TestGitService(BaseTest):
         # Get unstaged diff
         diff_data = await service.get_diff()
 
-        assert len(diff_data) > 0
-        assert any(item["file"] == file_path for item in diff_data)
+        assert len(diff_data) == 0
+        assert not any(item["file"] == file_path for item in diff_data)
 
     @pytest.mark.asyncio
     async def test_get_diff_includes_change_type(self, application: Application):
@@ -315,7 +315,7 @@ class TestGitService(BaseTest):
         file_path = str(test_file.relative_to(application.root_path()))
         repo.index.add([file_path])
 
-        diff_data = await service.get_diff("HEAD")
+        diff_data = await service.get_diff()
 
         assert len(diff_data) > 0
         file_diff = next((item for item in diff_data if item["file"] == file_path), None)
@@ -341,7 +341,7 @@ class TestGitService(BaseTest):
         test_file.write_text("modified content")
         repo.index.add([file_path])
 
-        diff_data = await service.get_diff("HEAD")
+        diff_data = await service.get_diff()
 
         file_diff = next((item for item in diff_data if item["file"] == file_path), None)
         assert file_diff is not None
@@ -366,7 +366,7 @@ class TestGitService(BaseTest):
         test_file.unlink()
         repo.index.remove([file_path])
 
-        diff_data = await service.get_diff("HEAD")
+        diff_data = await service.get_diff()
 
         file_diff = next((item for item in diff_data if item["file"] == file_path), None)
         assert file_diff is not None
@@ -385,7 +385,7 @@ class TestGitService(BaseTest):
         file_path = str(test_file.relative_to(application.root_path()))
         repo.index.add([file_path])
 
-        diff_data = await service.get_diff("HEAD")
+        diff_data = await service.get_diff()
 
         file_diff = next((item for item in diff_data if item["file"] == file_path), None)
         assert file_diff is not None
@@ -407,7 +407,7 @@ class TestGitService(BaseTest):
         file_path = str(test_file.relative_to(application.root_path()))
         repo.index.add([file_path])
 
-        diff_data = await service.get_diff("HEAD")
+        diff_data = await service.get_diff()
 
         file_diff = next((item for item in diff_data if item["file"] == file_path), None)
         assert file_diff is not None
