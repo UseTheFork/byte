@@ -185,7 +185,7 @@ class GitService(Service, UserInteractive):
         """
         self._repo.index.remove([file_path])
 
-    async def get_diff(self, other: str | None = None) -> List[dict]:
+    async def get_diff(self) -> List[dict]:
         """Get structured diff data for changes in the repository.
 
         Args:
@@ -201,7 +201,7 @@ class GitService(Service, UserInteractive):
         Usage: `await git_service.get_diff()` -> get unstaged changes
         """
 
-        staged_diff = self._repo.index.diff(other)
+        staged_diff = self._repo.head.commit.diff()
 
         diff_data = []
         for diff_item in staged_diff:
@@ -209,11 +209,13 @@ class GitService(Service, UserInteractive):
 
             change_type = diff_item.change_type
 
+            self.app["log"].info(f"change_type: {diff_item.change_type}")
+
             match diff_item.change_type:
                 case "A":
-                    msg = f"deleted: {diff_item.a_path}"
-                case "D":
                     msg = f"new: {diff_item.a_path}"
+                case "D":
+                    msg = f"deleted: {diff_item.a_path}"
                 case "M":
                     msg = f"modified: {diff_item.a_path}"
                 case "R":
@@ -221,16 +223,32 @@ class GitService(Service, UserInteractive):
                 case _:
                     msg = f"type {diff_item.change_type}: {diff_item.a_path}"
 
-            if diff_item.b_blob and diff_item.a_blob:
-                for line in unified_diff(
-                    diff_item.b_blob.data_stream.read().decode("utf-8").splitlines(),
-                    diff_item.a_blob.data_stream.read().decode("utf-8").splitlines(),
-                    lineterm="",
-                ):
-                    diff_content += line + "\n"
+            if diff_item.a_blob and change_type == "M":
+                try:
+                    head_data = diff_item.a_blob.data_stream.read()
+                    # Check if binary (contains null bytes)
+                    if b"\0" not in head_data:
+                        # Text file - generate diff
+                        staged_entry = self._repo.index.entries.get((diff_item.a_path, 0))
+                        if staged_entry:
+                            staged_data = self._repo.odb.stream(staged_entry.binsha).read().decode("utf-8")
+                            head_data_str = head_data.decode("utf-8")
+
+                            for line in unified_diff(
+                                head_data_str.splitlines(),
+                                staged_data.splitlines(),
+                                lineterm="",
+                            ):
+                                diff_content += line + "\n"
+                    else:
+                        # Binary file - don't include diff content
+                        diff_content = None
+                except UnicodeDecodeError:
+                    # Binary file
+                    diff_content = None
 
             # Clear diff content for deletions since the file no longer exists
-            if change_type == "A":
+            if change_type == "D":
                 diff_content = None
 
             diff_data.append(
@@ -241,8 +259,8 @@ class GitService(Service, UserInteractive):
                     "msg": msg,
                     "is_renamed": change_type == "R",
                     "is_modified": change_type == "M",
-                    "is_new": change_type == "D",
-                    "is_deleted": change_type == "A",
+                    "is_new": change_type == "A",
+                    "is_deleted": change_type == "D",
                 }
             )
 

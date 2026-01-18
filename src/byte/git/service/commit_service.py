@@ -41,7 +41,7 @@ class CommitService(Service, UserInteractive):
         Usage: `prompt = await self.build_commit_prompt()`
         """
         # Extract staged changes for AI analysis
-        staged_diff = await self.git_service.get_diff("HEAD")
+        staged_diff = await self.git_service.get_diff()
 
         # Build formatted diff sections for each file
         diff_section = []
@@ -61,7 +61,7 @@ class CommitService(Service, UserInteractive):
             file_section.append(f"{msg}")
 
             # Include diff content only for non-deleted files
-            if change_type != "A" and diff_item["diff"]:
+            if change_type != "D" and diff_item["diff"]:
                 diff_section.append(diff_item["diff"])
 
             diff_section.append(Boundary.close(BoundaryType.CONTEXT))

@@ -96,9 +96,14 @@ class BaseTest:
 
         Usage: `await self.create_test_file(application, "test.py", "print('hello')")`
         """
-        import asyncio
 
         new_file = application.root_path(file_path)
         new_file.write_text(content)
-        await asyncio.sleep(0.5)
+        await self.do_pause()
         return new_file
+
+    async def do_pause(self, delay: float = 0.5):
+        """ """
+        import asyncio
+
+        await asyncio.sleep(delay)
