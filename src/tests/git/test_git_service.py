@@ -38,8 +38,7 @@ class TestGitService(BaseTest):
         from byte.git import GitService
 
         # Create and modify a file
-        test_file = application.root_path("test_modified.txt")
-        test_file.write_text("original content")
+        test_file = await self.create_test_file(application, "test_modified.txt", "original content")
 
         repo = await application.make(GitService).get_repo()
         repo.index.add([str(test_file.relative_to(application.root_path()))])
@@ -60,8 +59,7 @@ class TestGitService(BaseTest):
         from byte.git import GitService
 
         # Create an untracked file
-        untracked_file = application.root_path("untracked.txt")
-        untracked_file.write_text("untracked content")
+        await self.create_test_file(application, "untracked.txt", "untracked content")
 
         service = application.make(GitService)
         changed_files = await service.get_changed_files()
@@ -74,8 +72,7 @@ class TestGitService(BaseTest):
         from byte.git import GitService
 
         # Create an untracked file
-        untracked_file = application.root_path("untracked2.txt")
-        untracked_file.write_text("untracked content")
+        await self.create_test_file(application, "untracked2.txt", "untracked content")
 
         service = application.make(GitService)
         changed_files = await service.get_changed_files(include_untracked=False)
@@ -88,8 +85,7 @@ class TestGitService(BaseTest):
         from byte.git import GitService
 
         # Create and stage a file
-        staged_file = application.root_path("staged.txt")
-        staged_file.write_text("staged content")
+        staged_file = await self.create_test_file(application, "staged.txt", "staged content")
 
         repo = await application.make(GitService).get_repo()
         repo.index.add([str(staged_file.relative_to(application.root_path()))])
@@ -105,8 +101,7 @@ class TestGitService(BaseTest):
         from byte.git import GitService
 
         # Create a file that's both modified and staged
-        test_file = application.root_path("duplicate_test.txt")
-        test_file.write_text("original")
+        test_file = await self.create_test_file(application, "duplicate_test.txt", "original")
 
         repo = await application.make(GitService).get_repo()
         repo.index.add([str(test_file.relative_to(application.root_path()))])
@@ -132,8 +127,7 @@ class TestGitService(BaseTest):
         from byte.git import GitService
 
         # Create and stage a file
-        test_file = application.root_path("commit_test.txt")
-        test_file.write_text("test content")
+        test_file = await self.create_test_file(application, "commit_test.txt", "test content")
 
         service = application.make(GitService)
         repo = await service.get_repo()
@@ -154,8 +148,7 @@ class TestGitService(BaseTest):
         from byte.git import GitService
 
         # Create a file and commit it
-        test_file = application.root_path("stage_test.txt")
-        test_file.write_text("original")
+        test_file = await self.create_test_file(application, "stage_test.txt", "original")
 
         service = application.make(GitService)
         repo = await service.get_repo()
@@ -179,8 +172,7 @@ class TestGitService(BaseTest):
         from byte.git import GitService
 
         # Create and stage a file
-        test_file = application.root_path("reset_test.txt")
-        test_file.write_text("test content")
+        test_file = await self.create_test_file(application, "reset_test.txt", "test content")
 
         service = application.make(GitService)
         repo = await service.get_repo()
@@ -204,10 +196,8 @@ class TestGitService(BaseTest):
         from byte.git import GitService
 
         # Create and stage multiple files
-        file1 = application.root_path("reset_all_1.txt")
-        file1.write_text("content 1")
-        file2 = application.root_path("reset_all_2.txt")
-        file2.write_text("content 2")
+        file1 = await self.create_test_file(application, "reset_all_1.txt", "content 1")
+        file2 = await self.create_test_file(application, "reset_all_2.txt", "content 2")
 
         service = application.make(GitService)
         repo = await service.get_repo()
@@ -232,8 +222,7 @@ class TestGitService(BaseTest):
         from byte.git import GitService
 
         # Create a file
-        test_file = application.root_path("add_test.txt")
-        test_file.write_text("test content")
+        test_file = await self.create_test_file(application, "add_test.txt", "test content")
 
         service = application.make(GitService)
         repo = await service.get_repo()
@@ -252,8 +241,7 @@ class TestGitService(BaseTest):
         from byte.git import GitService
 
         # Create, commit, then delete a file
-        test_file = application.root_path("remove_test.txt")
-        test_file.write_text("test content")
+        test_file = await self.create_test_file(application, "remove_test.txt", "test content")
 
         service = application.make(GitService)
         repo = await service.get_repo()
@@ -278,8 +266,7 @@ class TestGitService(BaseTest):
         from byte.git import GitService
 
         # Create and stage a file
-        test_file = application.root_path("diff_test.txt")
-        test_file.write_text("test content")
+        test_file = await self.create_test_file(application, "diff_test.txt", "test content")
 
         service = application.make(GitService)
         repo = await service.get_repo()
@@ -298,8 +285,7 @@ class TestGitService(BaseTest):
         from byte.git import GitService
 
         # Create, commit, then modify a file
-        test_file = application.root_path("unstaged_diff.txt")
-        test_file.write_text("original")
+        test_file = await self.create_test_file(application, "unstaged_diff.txt", "original")
 
         service = application.make(GitService)
         repo = await service.get_repo()
@@ -322,8 +308,7 @@ class TestGitService(BaseTest):
         from byte.git import GitService
 
         # Create and stage a new file
-        test_file = application.root_path("change_type_test.txt")
-        test_file.write_text("new file")
+        test_file = await self.create_test_file(application, "change_type_test.txt", "new file")
 
         service = application.make(GitService)
         repo = await service.get_repo()
@@ -344,8 +329,7 @@ class TestGitService(BaseTest):
         from byte.git import GitService
 
         # Create, commit, then modify a file
-        test_file = application.root_path("diff_content_test.txt")
-        test_file.write_text("original content")
+        test_file = await self.create_test_file(application, "diff_content_test.txt", "original content")
 
         service = application.make(GitService)
         repo = await service.get_repo()
@@ -370,8 +354,7 @@ class TestGitService(BaseTest):
         from byte.git import GitService
 
         # Create, commit, then delete a file
-        test_file = application.root_path("deletion_test.txt")
-        test_file.write_text("content to delete")
+        test_file = await self.create_test_file(application, "deletion_test.txt", "content to delete")
 
         service = application.make(GitService)
         repo = await service.get_repo()
@@ -395,8 +378,7 @@ class TestGitService(BaseTest):
         from byte.git import GitService
 
         # Create and stage a new file
-        test_file = application.root_path("flags_test.txt")
-        test_file.write_text("new file")
+        test_file = await self.create_test_file(application, "flags_test.txt", "new file")
 
         service = application.make(GitService)
         repo = await service.get_repo()
@@ -418,8 +400,7 @@ class TestGitService(BaseTest):
         from byte.git import GitService
 
         # Create and stage a new file
-        test_file = application.root_path("message_test.txt")
-        test_file.write_text("new file")
+        test_file = await self.create_test_file(application, "message_test.txt", "new file")
 
         service = application.make(GitService)
         repo = await service.get_repo()
