@@ -17,8 +17,6 @@ class SubprocessAgent(Agent):
             [
                 "parse_blocks_node",
                 "extract_node",
-                "parse_blocks_node",
-                "subprocess_node",
                 "validation_node",
                 "assistant_node",
             ],
