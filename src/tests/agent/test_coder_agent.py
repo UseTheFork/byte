@@ -90,3 +90,138 @@ class TestCoderAgent(BaseTest):
         assert "Hi" in content
         assert "Hello" not in content
         assert "def greet(name):" in content
+
+    @pytest.mark.asyncio
+    @pytest.mark.vcr
+    async def test_coder_agent_deletes_file(
+        self,
+        application: Application,
+        mocker: MockerFixture,
+    ):
+        """Test that Coder Agent can delete an existing file."""
+        from byte.agent.implementations.coder.agent import CoderAgent
+
+        mocker.patch.object(UserInteractive, "prompt_for_confirmation", return_value=True)
+
+        # Create a test file
+        test_content = """def temporary_function():
+    pass
+"""
+        test_file = await self.create_test_file(application, "temp.py", test_content)
+
+        # Add file to file service
+        file_service = application.make(FileService)
+        await file_service.add_file(test_file, FileMode.EDITABLE)
+
+        # Verify file exists
+        assert test_file.exists()
+
+        # Create the agent
+        agent = application.make(CoderAgent)
+
+        # Request to delete the file
+        request = "Delete the temp.py file"
+
+        await agent.execute(request, display_mode="silent")
+
+        # Verify the file was deleted
+        assert not test_file.exists()
+
+    @pytest.mark.asyncio
+    @pytest.mark.vcr
+    async def test_coder_agent_creates_multiple_files(
+        self,
+        application: Application,
+        mocker: MockerFixture,
+    ):
+        """Test that Coder Agent can create multiple files in a single request."""
+        from byte.agent.implementations.coder.agent import CoderAgent
+
+        mocker.patch.object(UserInteractive, "prompt_for_confirmation", return_value=True)
+
+        # Create the agent
+        agent = application.make(CoderAgent)
+
+        # Request to create two files
+        request = "Create two files: utils.py with a helper function and config.py with a settings dictionary"
+
+        await agent.execute(request, display_mode="silent")
+
+        # Verify both files were created
+        utils_file = application.root_path("utils.py")
+        config_file = application.root_path("config.py")
+
+        assert utils_file.exists()
+        assert config_file.exists()
+
+        # Verify utils.py has a function
+        utils_content = utils_file.read_text()
+        assert "def" in utils_content
+        assert not utils_content.startswith("\n"), "File should not start with a blank line"
+
+        # Verify config.py has a dictionary
+        config_content = config_file.read_text()
+        assert "{" in config_content or "dict" in config_content.lower()
+        assert not config_content.startswith("\n"), "File should not start with a blank line"
+
+    @pytest.mark.asyncio
+    @pytest.mark.vcr
+    async def test_coder_agent_creates_edits_and_deletes_files(
+        self,
+        application: Application,
+        mocker: MockerFixture,
+    ):
+        """Test that Coder Agent can create, edit, and delete files in a single request."""
+        from byte.agent.implementations.coder.agent import CoderAgent
+
+        mocker.patch.object(UserInteractive, "prompt_for_confirmation", return_value=True)
+
+        # Create an existing file to edit
+        existing_content = """def calculate(a, b):
+    return a + b
+"""
+        existing_file = await self.create_test_file(application, "calculator.py", existing_content)
+
+        # Create a file to delete
+        delete_content = """def old_function():
+    pass
+"""
+        delete_file = await self.create_test_file(application, "old_code.py", delete_content)
+
+        # Add both files to file service
+        file_service = application.make(FileService)
+        await file_service.add_file(existing_file, FileMode.EDITABLE)
+        await file_service.add_file(delete_file, FileMode.EDITABLE)
+
+        # Verify initial state
+        assert existing_file.exists()
+        assert delete_file.exists()
+
+        # Create the agent
+        agent = application.make(CoderAgent)
+
+        # Request to create a new file, edit existing file, and delete old file
+        request = """Do three things:
+1. Create a new file called main.py with a main function that calls calculate
+2. Edit calculator.py to change the function to multiply instead of add
+3. Delete the old_code.py file as it's no longer needed"""
+
+        await agent.execute(request, display_mode="silent")
+
+        # Verify new file was created
+        main_file = application.root_path("main.py")
+        assert main_file.exists()
+        main_content = main_file.read_text()
+        assert "def main" in main_content
+        assert "calculate" in main_content
+        assert not main_content.startswith("\n"), "File should not start with a blank line"
+
+        # Verify existing file was edited
+        assert existing_file.exists()
+        edited_content = existing_file.read_text()
+        assert "def calculate(a, b):" in edited_content
+        assert "*" in edited_content or "multiply" in edited_content.lower()
+        assert "+" not in edited_content or "add" not in edited_content.lower()
+
+        # Verify old file was deleted
+        assert not delete_file.exists()
