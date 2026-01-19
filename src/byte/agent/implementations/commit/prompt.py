@@ -47,7 +47,7 @@ commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
                 ]
             ),
         ),
-        ("placeholder", "{commit_context}"),
+        ("placeholder", "{commit_guidelines}"),
         ("user", "{processed_user_request}"),
         ("placeholder", "{scratch_messages}"),
     ]
