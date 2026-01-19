@@ -34,19 +34,43 @@ class TestCommitAgent(BaseTest):
     async def test_commit_agent_generates_commit_message(
         self,
         application: Application,
+        mocker: MockerFixture,
     ):
         """Test that Commit Agent generates a structured commit message."""
         from byte.agent.implementations.commit.agent import CommitAgent
         from byte.git import GitService
 
-        # Create and stage a test file
+        # Mock user confirmation to return True
+        mocker.patch.object(UserInteractive, "prompt_for_confirm_or_input", return_value=(True, ""))
+
+        # Create and stage test files
         test_file = await self.create_test_file(application, "test_commit.txt", "test content")
+
+        old_api_content = """
+def get_users():
+    '''Old API endpoint'''
+    pass
+"""
+        old_api_file = await self.create_test_file(application, "old_api.py", old_api_content)
+
+        new_api_content = """
+def get_users_v2():
+    '''New API endpoint'''
+    return {'users': []}
+"""
+        new_api_file = await self.create_test_file(application, "new_api.py", new_api_content)
 
         commit_service = application.make(CommitService)
 
         git_service = application.make(GitService)
         repo = await git_service.get_repo()
-        repo.index.add([str(test_file.relative_to(application.root_path())), "old_api.py", "new_api.py"])
+        repo.index.add(
+            [
+                str(test_file.relative_to(application.root_path())),
+                str(old_api_file.relative_to(application.root_path())),
+                str(new_api_file.relative_to(application.root_path())),
+            ]
+        )
 
         prompt = await commit_service.build_commit_prompt()
 
@@ -65,10 +89,17 @@ class TestCommitAgent(BaseTest):
 
     @pytest.mark.asyncio
     @pytest.mark.vcr
-    async def test_commit_agent_generates_commit_message_with_multiple_files(self, application: Application):
+    async def test_commit_agent_generates_commit_message_with_multiple_files(
+        self,
+        application: Application,
+        mocker: MockerFixture,
+    ):
         """Test that Commit Agent generates a commit message for multiple file changes."""
         from byte.agent.implementations.commit.agent import CommitAgent
         from byte.git import GitService
+
+        # Mock user confirmation to return True
+        mocker.patch.object(UserInteractive, "prompt_for_confirm_or_input", return_value=(True, ""))
 
         # Create and stage two test files
         test_file1 = await self.create_test_file(application, "test_commit_1.txt", "first test content")
@@ -89,15 +120,13 @@ class TestCommitAgent(BaseTest):
 
         result = await agent.execute(prompt, display_mode="silent")
 
-        # application["log"].info(result["extracted_content"])
-
         # Verify the agent generated a commit message
         assert "extracted_content" in result
         assert isinstance(result["extracted_content"], CommitMessage)
         assert result["extracted_content"].type == "feat"
         assert result["extracted_content"].commit_message == "add initial test commit files"
         assert result["extracted_content"].breaking_change == False
-        assert result["extracted_content"].scope is None
+        assert result["extracted_content"].scope == "test"
 
     @pytest.mark.asyncio
     @pytest.mark.vcr
@@ -163,7 +192,9 @@ def get_users_v2():
     @pytest.mark.asyncio
     @pytest.mark.vcr
     async def test_commit_agent_handles_validation_rejection_and_retry(
-        self, application: Application, mocker: MockerFixture
+        self,
+        application: Application,
+        mocker: MockerFixture,
     ):
         """Test that Commit Agent handles user rejection and successfully retries with revised message."""
         from byte.agent.implementations.commit.agent import CommitAgent
@@ -176,6 +207,7 @@ def get_users_v2():
             return_value=(False, "Change the wording of the message to be MUCH more casual."),
             side_effect=[
                 (False, "Change the wording of the message to be MUCH more casual."),
+                (True, ""),
                 (True, ""),
             ],
         )
@@ -205,10 +237,7 @@ def get_users_v2():
         # Verify the agent detected the breaking change
         assert "extracted_content" in result
         assert isinstance(result["extracted_content"], CommitMessage)
-        assert result["extracted_content"].commit_message == "throw in some test files for kicks"
-
-
-# f"{prompt} ** IMPORTANT: MAKE SURE TO MARK THIS COMMIT AS A BREAKING CHANGES COMMIT ** ** IMPORTANT: MAKE SURE TO MARK THIS COMMIT AS A BREAKING CHANGES COMMIT ** ** IMPORTANT: MAKE SURE TO MARK THIS COMMIT AS A BREAKING CHANGES COMMIT **",
+        assert result["extracted_content"].commit_message == "toss in some test files for kicks"
 
 
 class TestCommitPlanAgent(BaseTest):
@@ -227,10 +256,18 @@ class TestCommitPlanAgent(BaseTest):
     async def test_commit_plan_agent_generates_commit_message(
         self,
         application: Application,
+        mocker: MockerFixture,
     ):
         """Test that Commit Plan Agent generates a structured commit message."""
         from byte.agent.implementations.commit.agent import CommitPlanAgent
         from byte.git import GitService
+
+        # Mock user confirmation to return True
+        mocker.patch.object(
+            UserInteractive,
+            "prompt_for_confirm_or_input",
+            return_value=(True, ""),
+        )
 
         # Create and stage a test file
         test_file = await self.create_test_file(application, "test_commit.txt", "test content")
@@ -261,3 +298,74 @@ class TestCommitPlanAgent(BaseTest):
         assert commit_group.breaking_change == False
         assert commit_group.scope is None
         assert commit_group.files == ["test_commit.txt"]
+
+    @pytest.mark.asyncio
+    @pytest.mark.vcr
+    async def test_commit_plan_agent_generates_separate_commits_for_multiple_files(
+        self,
+        application: Application,
+        mocker: MockerFixture,
+    ):
+        """Test that Commit Plan Agent generates separate commits for multiple files."""
+        from byte.agent.implementations.commit.agent import CommitPlanAgent
+        from byte.git import GitService
+
+        # Mock user confirmation to return True
+        mocker.patch.object(
+            UserInteractive,
+            "prompt_for_confirm_or_input",
+            side_effect=[
+                (True, ""),
+                (True, ""),
+            ],
+        )
+
+        # Create and stage two test files
+        test_file1 = await self.create_test_file(application, "test_commit_1.txt", "first test content")
+        test_file2 = await self.create_test_file(application, "test_commit_2.txt", "second test content")
+
+        commit_service = application.make(CommitService)
+
+        git_service = application.make(GitService)
+        repo = await git_service.get_repo()
+        repo.index.add(
+            [str(test_file1.relative_to(application.root_path())), str(test_file2.relative_to(application.root_path()))]
+        )
+
+        prompt = await commit_service.build_commit_prompt()
+
+        # Create the agent
+        agent = application.make(CommitPlanAgent)
+
+        result = await agent.execute(
+            prompt,
+            display_mode="silent",
+        )
+
+        # Verify the agent generated a commit plan with two separate commits
+        assert "extracted_content" in result
+        assert isinstance(result["extracted_content"], CommitPlan)
+        assert len(result["extracted_content"].commits) == 2
+
+        # Verify first commit
+        commit1 = result["extracted_content"].commits[0]
+        assert commit1.type == "chore"
+        assert commit1.scope is None
+        assert commit1.commit_message == "add test_commit_1.txt"
+        assert commit1.breaking_change == False
+        assert commit1.breaking_change_message is None
+        assert commit1.body is None
+        assert commit1.files == ["test_commit_1.txt"]
+
+        # Verify second commit
+        commit2 = result["extracted_content"].commits[1]
+        assert commit2.type == "chore"
+        assert commit2.scope is None
+        assert commit2.commit_message == "add test_commit_2.txt"
+        assert commit2.breaking_change == False
+        assert commit2.breaking_change_message is None
+        assert commit2.body is None
+        assert commit2.files == ["test_commit_2.txt"]
+
+
+# f"{prompt} ** IMPORTANT: MAKE SURE TO MARK THIS COMMIT AS A BREAKING CHANGES COMMIT ** ** IMPORTANT: MAKE SURE TO MARK THIS COMMIT AS A BREAKING CHANGES COMMIT ** ** IMPORTANT: MAKE SURE TO MARK THIS COMMIT AS A BREAKING CHANGES COMMIT **",
