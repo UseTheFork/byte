@@ -40,7 +40,6 @@ dependencies = [
     "langgraph>=1.0.2",
     "langchain-core>=1.0.2",
     "lsp-client>=0.3.1",
-    "pytest-mock>=3.15.1",
 ]
 
 [dependency-groups]
@@ -49,6 +48,8 @@ dev = [
     "pytest>=8.4.2",
     "pytest-asyncio>=1.2.0",
     "pytest-cov>=7.0.0",
+    "pytest-mock>=3.15.1",
+    "pytest-recording>=0.13.4",
     "python-semantic-release>=9.21.1",
     "ruff>=0.12.12",
     "ssort>=0.16.0",
@@ -74,7 +75,9 @@ python-version = "3.12"
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["src/tests"]
+markers = ["vcr: record/replay HTTP via VCR"]
 norecursedirs = "tmp.* build benchmark _site OLD"
+addopts = "--record-mode=once"
 # addopts = -p no:warnings --show-capture=no
 # testpaths =
 #     tests/domain

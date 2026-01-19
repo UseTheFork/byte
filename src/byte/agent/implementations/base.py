@@ -43,8 +43,8 @@ class Agent(ABC, Bootable, Eventable):
         """
         stream_rendering_service = self.app.make(StreamRenderingService)
 
-        self.app["log"].debug(mode)
-        self.app["log"].debug(chunk)
+        # self.app["log"].debug(mode)
+        # self.app["log"].debug(chunk)
 
         # Filter and process based on mode
         if mode == "messages":
@@ -92,6 +92,7 @@ class Agent(ABC, Bootable, Eventable):
             context=await self.get_assistant_runnable(),
         ):
             processed_event = await self._handle_stream_event(mode, chunk)
+
         return processed_event
 
     async def execute(
