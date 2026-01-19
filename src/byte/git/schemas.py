@@ -78,6 +78,30 @@ class CommitMessage(BaseModel):
 class CommitGroup(CommitMessage):
     files: list[str] = Field(..., description="List of file paths that are part of this commit.")
 
+    def format_with_files(self) -> str:
+        """Format the commit message with the list of files included.
+
+        Creates a formatted commit message string with files listed below:
+        <type>[optional scope][!]: <description>
+
+        [optional body]
+
+        [optional breaking change footer]
+
+        Files:
+        - file1.py
+        - file2.py
+
+        Usage: `formatted_msg = commit_group.format_with_files()`
+        """
+        message = self.format()
+
+        if self.files:
+            files_list = "\n".join(f"- {file}" for file in self.files)
+            message += f"\n\nFiles:\n{files_list}"
+
+        return message
+
 
 class CommitPlan(BaseModel):
     commits: list[CommitGroup] = Field(..., description="List of commit groups, each with a message and files.")
