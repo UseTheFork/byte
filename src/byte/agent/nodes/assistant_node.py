@@ -400,7 +400,7 @@ class AssistantNode(Node):
         *,
         runtime: Runtime[AssistantContextSchema],
         config: RunnableConfig,
-    ) -> Command[Literal["end_node", "parse_blocks_node", "tools_node"]]:
+    ) -> Command[Literal["end_node", "parse_blocks_node", "tools_node", "validation_node"]]:
         while True:
             agent_state, config = await self._generate_agent_state(state, config, runtime)
 
@@ -415,7 +415,7 @@ class AssistantNode(Node):
             # If we are requesting Structured output we can end with extracted being our structured output.
             if self.structured_output is not None:
                 return Command(
-                    goto="end_node",
+                    goto="validation_node",
                     update={
                         "extracted_content": result,
                         "errors": None,

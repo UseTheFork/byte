@@ -11,13 +11,21 @@ from byte.agent import (
     StartNode,
     ValidationNode,
 )
-from byte.agent.implementations.commit.prompt import commit_plan_prompt, commit_prompt
+from byte.agent.implementations.commit.prompt import commit_prompt
 from byte.git import CommitMessage, CommitPlan, CommitValidator
 from byte.llm import LLMService
 
 
 class CommitAgent(Agent):
     """Domain service for generating AI-powered git commit messages and creating commits."""
+
+    def get_validators(self):
+        return [
+            self.app.make(CommitValidator),
+        ]
+
+    def get_structured_output(self):
+        return CommitMessage
 
     async def build(self):
         """Build and compile the coder agent graph with memory and tools.
@@ -34,8 +42,18 @@ class CommitAgent(Agent):
         graph.add_node("start_node", self.app.make(StartNode))  # ty:ignore[invalid-argument-type]
         graph.add_node(
             "assistant_node",
-            self.app.make(AssistantNode, goto="extract_node", structured_output=CommitMessage),  # ty:ignore[invalid-argument-type]
+            self.app.make(AssistantNode, goto="validation_node", structured_output=self.get_structured_output()),  # ty:ignore[invalid-argument-type]
         )
+
+        graph.add_node(
+            "validation_node",
+            self.app.make(
+                ValidationNode,
+                goto="end_node",
+                validators=self.get_validators(),
+            ),  # ty:ignore[invalid-argument-type]
+        )
+
         graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
 
         # Define edges
@@ -63,7 +81,7 @@ class CommitAgent(Agent):
         )
 
 
-class CommitPlanAgent(Agent):
+class CommitPlanAgent(CommitAgent):
     """Domain service for generating AI-powered git commit messages and creating commits."""
 
     def get_validators(self):
@@ -71,49 +89,5 @@ class CommitPlanAgent(Agent):
             self.app.make(CommitValidator),
         ]
 
-    async def build(self):
-        """Build and compile the coder agent graph with memory and tools.
-
-        Creates a StateGraph optimized for coding tasks with specialized
-        prompts, file context integration, and development-focused routing.
-        Usage: `graph = await builder.build()` -> ready for coding assistance
-        """
-
-        # Create the state graph
-        graph = StateGraph(BaseState)
-
-        # Add nodes
-        graph.add_node("start_node", self.app.make(StartNode))  # ty:ignore[invalid-argument-type]
-        graph.add_node(
-            "assistant_node",
-            self.app.make(AssistantNode, goto="validation_node", structured_output=CommitPlan),  # ty:ignore[invalid-argument-type]
-        )
-        graph.add_node(
-            "validation_node",
-            self.app.make(ValidationNode, goto="extract_node", validators=self.get_validators()),  # ty:ignore[invalid-argument-type]
-        )
-        graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
-
-        # Dummy Nodes here
-        graph.add_node("tools_node", self.app.make(DummyNode))  # ty:ignore[invalid-argument-type]
-        graph.add_node("extract_node", self.app.make(DummyNode))  # ty:ignore[invalid-argument-type]
-        graph.add_node("parse_blocks_node", self.app.make(DummyNode))  # ty:ignore[invalid-argument-type]
-
-        # Define edges
-        graph.add_edge(START, "start_node")
-
-        # Compile graph with memory and configuration
-        return graph.compile()
-
-    async def get_assistant_runnable(self) -> AssistantContextSchema:
-        llm_service = self.app.make(LLMService)
-        main: BaseChatModel = llm_service.get_main_model()
-        weak: BaseChatModel = llm_service.get_weak_model()
-
-        return AssistantContextSchema(
-            mode="weak",
-            prompt=commit_plan_prompt,
-            main=main,
-            weak=weak,
-            agent=self.__class__.__name__,
-        )
+    def get_structured_output(self):
+        return CommitPlan

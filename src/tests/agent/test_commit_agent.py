@@ -3,8 +3,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
+from pytest_mock import MockerFixture
 
 from byte.git import CommitMessage, CommitPlan, CommitService
+from byte.support.mixins import UserInteractive
 from tests.base_test import BaseTest
 
 if TYPE_CHECKING:
@@ -18,9 +20,14 @@ class TestCommitAgent(BaseTest):
     def providers(self):
         """Provide AgentServiceProvider for commit agent tests."""
         from byte.agent import AgentServiceProvider
+        from byte.files import FileServiceProvider
         from byte.git import GitServiceProvider
 
-        return [AgentServiceProvider, GitServiceProvider]
+        return [
+            AgentServiceProvider,
+            FileServiceProvider,
+            GitServiceProvider,
+        ]
 
     @pytest.mark.asyncio
     @pytest.mark.vcr
@@ -94,10 +101,13 @@ class TestCommitAgent(BaseTest):
 
     @pytest.mark.asyncio
     @pytest.mark.vcr
-    async def test_commit_agent_detects_breaking_change(self, application: Application):
+    async def test_commit_agent_detects_breaking_change(self, application: Application, mocker: MockerFixture):
         """Test that Commit Agent detects and marks breaking changes."""
         from byte.agent.implementations.commit.agent import CommitAgent
         from byte.git import GitService
+
+        # Mock user confirmation to return True
+        mocker.patch.object(UserInteractive, "prompt_for_confirm_or_input", return_value=(True, ""))
 
         # Create a file that explicitly indicates a breaking change
         breaking_content = """
@@ -149,6 +159,53 @@ def get_users_v2():
         assert isinstance(result["extracted_content"], CommitMessage)
         assert result["extracted_content"].breaking_change == True
         assert result["extracted_content"].breaking_change_message is not None
+
+    @pytest.mark.asyncio
+    @pytest.mark.vcr
+    async def test_commit_agent_handles_validation_rejection_and_retry(
+        self, application: Application, mocker: MockerFixture
+    ):
+        """Test that Commit Agent handles user rejection and successfully retries with revised message."""
+        from byte.agent.implementations.commit.agent import CommitAgent
+        from byte.git import GitService
+
+        # Mock user confirmation to return True
+        mocker.patch.object(
+            UserInteractive,
+            "prompt_for_confirm_or_input",
+            return_value=(False, "Change the wording of the message to be MUCH more casual."),
+            side_effect=[
+                (False, "Change the wording of the message to be MUCH more casual."),
+                (True, ""),
+            ],
+        )
+
+        # Create and stage two test files
+        test_file1 = await self.create_test_file(application, "test_commit_1.txt", "first test content")
+        test_file2 = await self.create_test_file(application, "test_commit_2.txt", "second test content")
+
+        commit_service = application.make(CommitService)
+
+        git_service = application.make(GitService)
+        repo = await git_service.get_repo()
+        repo.index.add(
+            [str(test_file1.relative_to(application.root_path())), str(test_file2.relative_to(application.root_path()))]
+        )
+
+        prompt = await commit_service.build_commit_prompt()
+
+        # Create the agent
+        agent = application.make(CommitAgent)
+
+        result = await agent.execute(
+            prompt,
+            display_mode="silent",
+        )
+
+        # Verify the agent detected the breaking change
+        assert "extracted_content" in result
+        assert isinstance(result["extracted_content"], CommitMessage)
+        assert result["extracted_content"].commit_message == "throw in some test files for kicks"
 
 
 # f"{prompt} ** IMPORTANT: MAKE SURE TO MARK THIS COMMIT AS A BREAKING CHANGES COMMIT ** ** IMPORTANT: MAKE SURE TO MARK THIS COMMIT AS A BREAKING CHANGES COMMIT ** ** IMPORTANT: MAKE SURE TO MARK THIS COMMIT AS A BREAKING CHANGES COMMIT **",

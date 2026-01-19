@@ -6,7 +6,6 @@ from langgraph.types import Command
 
 from byte.agent import AssistantContextSchema, BaseState, Node, ValidationError, Validator
 from byte.support.mixins import UserInteractive
-from byte.support.utils import extract_content_from_message, get_last_message
 
 
 class ValidationNode(Node, UserInteractive):
@@ -37,7 +36,7 @@ class ValidationNode(Node, UserInteractive):
 
     async def __call__(
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
-    ) -> Command[Literal["end_node", "extract_node"]]:
+    ) -> Command[Literal["end_node", "extract_node", "assistant_node"]]:
         """Execute validation checks on the last assistant message.
 
         Runs configured validation checks (e.g., max_lines) on the message content.
@@ -54,20 +53,18 @@ class ValidationNode(Node, UserInteractive):
 
         Usage: Called automatically by LangGraph during graph execution
         """
-        last_message = get_last_message(state["scratch_messages"])
-        message_content = extract_content_from_message(last_message)
 
         validation_errors: list[ValidationError] = []
 
         # Run all validators
         for validator in self.validators:
-            errors = await validator.validate(message_content)
-            validation_errors.extend(errors)
+            errors = await validator.validate(state)
+            validation_errors.extend([error for error in errors if error is not None])
+
+        self.app["log"].debug(validation_errors)
 
         if validation_errors:
-            error_message = "# Fix the following issues:\n" + "\n".join(
-                error.to_string() for error in validation_errors
-            )
+            error_message = "# Fix the following issues:\n" + "\n".join(error.format() for error in validation_errors)
 
             console = self.app["console"]
             console.print_warning_panel(
@@ -75,6 +72,6 @@ class ValidationNode(Node, UserInteractive):
                 title="Validation Failed",
             )
 
-            return Command(goto="assistant_node", update={"errors": error_message})
+            return Command(goto="assistant_node", update={"errors": error_message, "extracted_content": None})
 
-        return Command(goto=self.goto)
+        return Command(goto=str(self.goto))

@@ -24,6 +24,7 @@ commit_plan_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
         ("placeholder", "{masked_messages}"),
         ("user", "{processed_user_request}"),
         ("placeholder", "{scratch_messages}"),
+        ("placeholder", "{errors}"),
     ]
 )
 
@@ -50,5 +51,6 @@ commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
         ("placeholder", "{commit_guidelines}"),
         ("user", "{processed_user_request}"),
         ("placeholder", "{scratch_messages}"),
+        ("placeholder", "{errors}"),
     ]
 )

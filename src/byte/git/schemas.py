@@ -33,6 +33,47 @@ class CommitMessage(BaseModel):
         "If breaking_change is True, describe the breaking changes here.",
     )
 
+    def format(self) -> str:
+        """Format the commit message according to conventional commit standards.
+
+        Creates a formatted commit message string from the model's attributes:
+        <type>[optional scope][!]: <description>
+
+        [optional body]
+
+        [optional breaking change footer]
+
+        Usage: `formatted_msg = commit_message.format()`
+        """
+        header_parts = [self.type]
+
+        if self.scope:
+            header_parts.append(f"({self.scope})")
+
+        description = self.commit_message
+        description = description[0].lower() + description[1:] if description else description
+        description = description.rstrip(".")
+
+        message_parts = []
+        breaking_change_footer = None
+
+        if self.breaking_change:
+            header_parts.append("!")
+
+            if self.breaking_change_message:
+                breaking_change_footer = f"BREAKING CHANGE: {self.breaking_change_message}"
+
+        header = "".join(header_parts) + f": {description}"
+        message_parts.append(header)
+
+        if self.body:
+            message_parts.extend(["", self.body])
+
+        if breaking_change_footer:
+            message_parts.extend(["", breaking_change_footer])
+
+        return "\n".join(message_parts)
+
 
 class CommitGroup(CommitMessage):
     files: list[str] = Field(..., description="List of file paths that are part of this commit.")

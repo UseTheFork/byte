@@ -2,7 +2,10 @@ from abc import ABC, abstractmethod
 
 from pydantic.dataclasses import dataclass
 
+from byte.agent import BaseState
+from byte.prompt_format import Boundary, BoundaryType
 from byte.support.mixins import Bootable
+from byte.support.utils import list_to_multiline_text
 
 
 @dataclass
@@ -14,15 +17,26 @@ class ValidationError:
     """
 
     message: str  # Human-readable error message
-    code: str | None = None  # Machine-readable error code (optional)
-    context: dict | None = None  # Additional context data (optional)
+    context: str | None = None  # context data for the error message
 
-    def to_string(self) -> str:
+    def format(self) -> str:
         """Format the validation error as a string.
 
-        Usage: `error.to_string()` -> "- Too many lines"
+        Usage: `error.format()`
         """
-        return f"- {self.message}"
+
+        return list_to_multiline_text(
+            [
+                Boundary.open(BoundaryType.ERROR),
+                "The following error occurred:",
+                f"{self.message}",
+                "",
+                "```",
+                f"{self.context}",
+                "```",
+                Boundary.close(BoundaryType.ERROR),
+            ]
+        )
 
 
 class Validator(ABC, Bootable):
@@ -32,7 +46,7 @@ class Validator(ABC, Bootable):
     """
 
     @abstractmethod
-    async def validate(self, content: str) -> list[ValidationError]:
+    async def validate(self, state: BaseState) -> list[ValidationError | None]:
         """Validate content and return list of error messages.
 
         Returns:
