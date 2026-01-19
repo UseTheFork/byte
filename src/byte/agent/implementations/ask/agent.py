@@ -1,7 +1,6 @@
 from langchain_core.language_models.chat_models import BaseChatModel
-from langgraph.graph import StateGraph
 
-from byte.agent import Agent, AssistantContextSchema, AssistantNode, BaseState, DummyNode, EndNode, StartNode, ToolNode
+from byte.agent import Agent, AssistantContextSchema, AssistantNode, ToolNode
 from byte.agent.implementations.ask.prompt import ask_enforcement, ask_prompt
 from byte.llm import LLMService
 
@@ -26,20 +25,18 @@ class AskAgent(Agent):
         Usage: `graph = await agent.build()`
         """
 
-        # Create the state graph
-        graph = StateGraph(BaseState)  # ty:ignore[invalid-argument-type]
+        graph = self.get_base_graph(
+            [
+                "extract_node",
+                "parse_blocks_node",
+                "subprocess_node",
+                "validation_node",
+            ],
+        )
 
         # Add nodes
-        graph.add_node("start_node", self.app.make(StartNode))  # ty:ignore[invalid-argument-type]
         graph.add_node("assistant_node", self.app.make(AssistantNode))  # ty:ignore[invalid-argument-type]
         graph.add_node("tools_node", self.app.make(ToolNode))  # ty:ignore[invalid-argument-type]
-        graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
-
-        graph.add_node("parse_blocks_node", self.app.make(DummyNode))  # ty:ignore[invalid-argument-type]
-
-        # Define edges
-        graph.set_entry_point("start_node")
-        graph.set_finish_point("end_node")
 
         # Compile graph with memory and configuration
         checkpointer = await self.get_checkpointer()

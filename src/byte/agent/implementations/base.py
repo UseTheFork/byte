@@ -2,10 +2,11 @@ import asyncio
 from abc import ABC, abstractmethod
 from typing import Any, Literal, Optional
 
+from langgraph.graph import StateGraph
 from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 
 from byte import EventType, Payload
-from byte.agent import AssistantContextSchema, BaseState
+from byte.agent import AssistantContextSchema, BaseState, DummyNode, EndNode, StartNode
 from byte.cli import (
     StreamRenderingService,
 )
@@ -168,6 +169,23 @@ class Agent(ABC, Bootable, Eventable):
 
     def get_tools(self):
         return []
+
+    def get_base_graph(self, dummy_nodes: list[str], start_node_goto="assistant_node") -> StateGraph:
+        # Create the state graph
+        graph = StateGraph(BaseState, context_schema=AssistantContextSchema)
+
+        # Setup the start and endNode for all graphs
+        graph.add_node("start_node", self.app.make(StartNode, goto=start_node_goto))  # ty:ignore[invalid-argument-type]
+        graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
+
+        for node_name in dummy_nodes:
+            graph.add_node(node_name, self.app.make(DummyNode))  # ty:ignore[invalid-argument-type]
+
+        # Define entry edges
+        graph.set_entry_point("start_node")
+        graph.set_finish_point("end_node")
+
+        return graph
 
     async def get_graph(self) -> CompiledStateGraph:
         """Get or create the agent graph with current tools.

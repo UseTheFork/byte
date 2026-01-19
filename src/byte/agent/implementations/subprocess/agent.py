@@ -1,11 +1,8 @@
-from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
 from byte.agent.implementations.base import Agent
-from byte.agent.nodes.end_node import EndNode
 from byte.agent.nodes.subprocess_node import SubprocessNode
 from byte.agent.schemas import AssistantContextSchema
-from byte.agent.state import BaseState
 
 
 class SubprocessAgent(Agent):
@@ -16,20 +13,23 @@ class SubprocessAgent(Agent):
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""
 
-        # Create the state graph
-        graph = StateGraph(BaseState, context_schema=AssistantContextSchema)  # ty:ignore[invalid-argument-type]
+        graph = self.get_base_graph(
+            [
+                "parse_blocks_node",
+                "extract_node",
+                "parse_blocks_node",
+                "subprocess_node",
+                "validation_node",
+                "assistant_node",
+            ],
+            "subprocess_node",
+        )
 
         # Add nodes
         graph.add_node(
             "subprocess_node",
             self.app.make(SubprocessNode),  # ty:ignore[invalid-argument-type]
         )
-        graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
-
-        # Define edges
-        graph.add_edge(START, "subprocess_node")
-        graph.add_edge("subprocess_node", "end_node")
-        graph.add_edge("end_node", END)
 
         checkpointer = await self.get_checkpointer()
         return graph.compile(checkpointer=checkpointer)

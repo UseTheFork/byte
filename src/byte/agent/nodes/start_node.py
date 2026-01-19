@@ -9,13 +9,20 @@ from byte.prompt_format import EditFormatService
 
 
 class StartNode(Node):
+    def boot(
+        self,
+        goto: str = "assistant_node",
+        **kwargs,
+    ):
+        self.goto = goto
+
     async def __call__(
         self,
         state: BaseState,
         *,
         runtime: Runtime[AssistantContextSchema],
         config: RunnableConfig,
-    ) -> Command[Literal["assistant_node"]]:
+    ) -> Command[Literal["subprocess_node", "assistant_node"]]:
         edit_format = self.app.make(EditFormatService)
 
         result = {
@@ -28,4 +35,7 @@ class StartNode(Node):
             "metadata": MetadataSchema(iteration=0),
         }
 
-        return Command(goto="assistant_node", update=result)
+        return Command(
+            goto=str(self.goto),
+            update=result,
+        )

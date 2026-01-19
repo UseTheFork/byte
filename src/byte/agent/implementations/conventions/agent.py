@@ -1,15 +1,11 @@
 from langchain_core.language_models.chat_models import BaseChatModel
-from langgraph.graph import START, StateGraph
 
 from byte.agent import (
     Agent,
     AssistantContextSchema,
     AssistantNode,
-    BaseState,
-    EndNode,
     ExtractNode,
     MaxLinesValidator,
-    StartNode,
     ToolNode,
     ValidationNode,
 )
@@ -52,11 +48,13 @@ class ConventionAgent(Agent):
         Usage: `graph = await agent.build()` -> returns compiled graph
         """
 
-        # Create the state graph
-        graph = StateGraph(BaseState)  # ty:ignore[invalid-argument-type]
+        graph = self.get_base_graph(
+            [
+                "parse_blocks_node",
+            ],
+        )
 
         # Add nodes
-        graph.add_node("start_node", self.app.make(StartNode))  # ty:ignore[invalid-argument-type]
         graph.add_node("assistant_node", self.app.make(AssistantNode, goto="validation_node"))  # ty:ignore[invalid-argument-type]
         graph.add_node(
             "validation_node",
@@ -69,10 +67,6 @@ class ConventionAgent(Agent):
 
         graph.add_node("extract_node", self.app.make(ExtractNode))  # ty:ignore[invalid-argument-type]
         graph.add_node("tools_node", self.app.make(ToolNode))  # ty:ignore[invalid-argument-type]
-        graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
-
-        # Define edges
-        graph.add_edge(START, "start_node")
 
         # Compile graph with memory and configuration
         return graph.compile()

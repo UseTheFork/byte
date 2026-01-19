@@ -1,14 +1,9 @@
 from langchain_core.language_models.chat_models import BaseChatModel
-from langgraph.graph import START, StateGraph
 
 from byte.agent import (
     Agent,
     AssistantContextSchema,
     AssistantNode,
-    BaseState,
-    DummyNode,
-    EndNode,
-    StartNode,
     ValidationNode,
 )
 from byte.agent.implementations.commit.prompt import commit_prompt
@@ -35,11 +30,15 @@ class CommitAgent(Agent):
         Usage: `graph = await builder.build()` -> ready for coding assistance
         """
 
-        # Create the state graph
-        graph = StateGraph(BaseState)
+        graph = self.get_base_graph(
+            [
+                "tools_node",
+                "extract_node",
+                "subprocess_node",
+                "parse_blocks_node",
+            ],
+        )
 
-        # Add nodes
-        graph.add_node("start_node", self.app.make(StartNode))  # ty:ignore[invalid-argument-type]
         graph.add_node(
             "assistant_node",
             self.app.make(AssistantNode, goto="validation_node", structured_output=self.get_structured_output()),  # ty:ignore[invalid-argument-type]
@@ -53,16 +52,6 @@ class CommitAgent(Agent):
                 validators=self.get_validators(),
             ),  # ty:ignore[invalid-argument-type]
         )
-
-        graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
-
-        # Define edges
-        graph.add_edge(START, "start_node")
-
-        # Dummy Nodes here
-        graph.add_node("tools_node", self.app.make(DummyNode))  # ty:ignore[invalid-argument-type]
-        graph.add_node("extract_node", self.app.make(DummyNode))  # ty:ignore[invalid-argument-type]
-        graph.add_node("parse_blocks_node", self.app.make(DummyNode))  # ty:ignore[invalid-argument-type]
 
         # Compile graph with memory and configuration
         return graph.compile()

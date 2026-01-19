@@ -1,7 +1,6 @@
-from langgraph.graph import START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
-from byte.agent import Agent, BaseState, CopyNode, EndNode
+from byte.agent import Agent, CopyNode
 
 
 class CopyAgent(Agent):
@@ -15,12 +14,14 @@ class CopyAgent(Agent):
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""
 
-        graph = StateGraph(BaseState)  # ty:ignore[invalid-argument-type]
-        graph.add_node("copy_node", self.app.make(CopyNode))  # ty:ignore[invalid-argument-type]
-        graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
+        graph = self.get_base_graph(
+            [
+                "parse_blocks_node",
+            ],
+            "copy_node",
+        )
 
-        # Define edges
-        graph.add_edge(START, "copy_node")
+        graph.add_node("copy_node", self.app.make(CopyNode))  # ty:ignore[invalid-argument-type]
 
         checkpointer = await self.get_checkpointer()
         return graph.compile(checkpointer=checkpointer)
