@@ -28,6 +28,8 @@ class CoderAgent(Agent):
             [
                 "tools_node",
                 "extract_node",
+                "subprocess_node",
+                "validation_node",
             ],
         )
 
