@@ -208,7 +208,7 @@ class Application(Container):
         Returns:
             The full path to the root directory or subdirectory.
         """
-        return self.join_paths(self.base_path(), path)
+        return self.join_paths(self.root_path(), path)
 
     def app_path(self, path: str = "") -> Path:
         """

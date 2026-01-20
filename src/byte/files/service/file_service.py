@@ -73,7 +73,7 @@ class FileService(Service):
                 # Only add files that are in the discovery service and are actual files
                 if path_obj.is_file() and str(path_obj) in discovered_file_paths:
                     key = str(path_obj)
-                    self._context_files[key] = FileContext(path=path_obj, mode=mode)
+                    self._context_files[key] = FileContext(path=path_obj, mode=mode, root_path=self.app["path"])
                     success_count += 1
 
             return success_count > 0
@@ -95,7 +95,7 @@ class FileService(Service):
             if key in self._context_files:
                 return False
 
-            self._context_files[key] = FileContext(path=path_obj, mode=mode)
+            self._context_files[key] = FileContext(path=path_obj, mode=mode, root_path=self.app["path"])
 
             await self._notify_file_added(key, mode)
 
@@ -128,7 +128,7 @@ class FileService(Service):
 
                 # Convert absolute path back to relative for pattern matching
                 try:
-                    relative_path = str(Path(context_path).relative_to(self.app["path.root"]))
+                    relative_path = str(Path(context_path).relative_to(self.app["path"]))
                     if glob.fnmatch.fnmatch(relative_path, path_str) or glob.fnmatch.fnmatch(context_path, path_str):
                         matching_paths.append(context_path)
                 except ValueError:
@@ -149,7 +149,7 @@ class FileService(Service):
             # Handle single file path
             if not Path(path).is_absolute():
                 # Resolve relative paths from project base path
-                path_obj = (self.app["path.root"] / path).resolve()
+                path_obj = (self.app.path(str(path))).resolve()
             else:
                 path_obj = Path(path).resolve()
             key = str(path_obj)
@@ -189,7 +189,7 @@ class FileService(Service):
         if key in self._context_files:
             # Create a new FileContext with the updated mode
             old_context = self._context_files[key]
-            self._context_files[key] = FileContext(path=old_context.path, mode=mode)
+            self._context_files[key] = FileContext(path=old_context.path, mode=mode, root_path=self.app["path"])
             return True
         return False
 

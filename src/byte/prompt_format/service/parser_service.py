@@ -374,6 +374,10 @@ class ParserService(Service, UserInteractive, ABC):
                 else:
                     file_path = file_path.resolve()
 
+                # self.app["log"].debug(block.block_type)
+                # self.app["log"].debug(file_path)
+                # self.app["log"].debug(file_path.exists())
+
                 # Handle operations based on block type first, not operation string
                 if block.block_type == BlockType.REMOVE:
                     # Remove file completely

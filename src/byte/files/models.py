@@ -19,6 +19,7 @@ class FileContext(BaseModel):
 
     path: Path
     mode: FileMode
+    root_path: Path
 
     @property
     def language(self) -> str:
@@ -33,7 +34,7 @@ class FileContext(BaseModel):
         """Get relative path string for display purposes."""
         try:
             # Try to get relative path from current working directory
-            return str(self.path.relative_to(Path.cwd()))
+            return str(self.path.relative_to(self.root_path))
         except ValueError:
             # If path is outside cwd, return absolute path
             return str(self.path)
