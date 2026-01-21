@@ -46,4 +46,3 @@ class Node(ABC, Bootable, Eventable):
         config: RunnableConfig,
     ) -> Any:
         """Execute the node logic. Must be implemented by subclasses."""
-        pass
