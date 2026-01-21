@@ -23,6 +23,18 @@ T = TypeVar("T")
 
 
 class GraphBuilder:
+    def __init__(self, app: Application, start_node: Type[Node] = AssistantNode, **kwargs):
+        if app is None:
+            raise ValueError("app parameter is required")
+        self.app = app
+        self._nodes = {}
+
+        # Discover all available Node classes from the agent module.
+        self._dummy_nodes = GraphBuilder.discover_node_classes()
+
+        self.add_node(StartNode, goto=start_node)
+        self.add_node(EndNode)
+
     @staticmethod
     def discover_node_classes() -> dict[str, Type]:
         """Discover all classes that extend the base Node class.
@@ -50,18 +62,6 @@ class GraphBuilder:
                 node_classes[node_string] = obj
 
         return node_classes
-
-    def __init__(self, app: Application, start_node: Type[Node] = AssistantNode, **kwargs):
-        if app is None:
-            raise ValueError("app parameter is required")
-        self.app = app
-        self._nodes = {}
-
-        # Discover all available Node classes from the agent module.
-        self._dummy_nodes = GraphBuilder.discover_node_classes()
-
-        self.add_node(StartNode, goto=start_node)
-        self.add_node(EndNode)
 
     def add_node(self, node: Type[Node], **kwargs):
         """Add a node to the graph builder.
@@ -91,6 +91,19 @@ class GraphBuilder:
         return node_instance
 
     def build(self, checkpointer=None) -> StateGraph:
+        """Build and compile the state graph with all registered nodes.
+
+        Creates a StateGraph with BaseState and AssistantContextSchema, adds all
+        registered nodes and dummy nodes, then sets up entry and finish points.
+
+        Args:
+            checkpointer: Optional checkpointer for state persistence
+
+        Returns:
+            Configured StateGraph ready for compilation
+
+        Usage: `graph = builder.build()` -> returns configured state graph
+        """
         graph = StateGraph(BaseState, context_schema=AssistantContextSchema)
 
         for node_name, node_instance in self._nodes.items():

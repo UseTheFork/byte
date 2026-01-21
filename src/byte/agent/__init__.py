@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.agent.exceptions import DummyNodeReachedException
     from byte.agent.implementations.ask.agent import AskAgent
     from byte.agent.implementations.ask.command import AskCommand
     from byte.agent.implementations.base import Agent
@@ -59,6 +60,7 @@ __all__ = (
     "CopyAgent",
     "CopyNode",
     "DummyNode",
+    "DummyNodeReachedException",
     "EndNode",
     "ExtractNode",
     "LintNode",
@@ -84,6 +86,7 @@ __all__ = (
     "replace_list",
     "replace_str",
     "update_metadata",
+    "update_metadata",
 )
 
 _dynamic_imports = {
@@ -106,6 +109,7 @@ _dynamic_imports = {
     "CopyAgent": "implementations.copy.agent",
     "CopyNode": "nodes.copy_node",
     "DummyNode": "nodes.dummy_node",
+    "DummyNodeReachedException": "exceptions",
     "EndNode": "nodes.end_node",
     "ExtractNode": "nodes.extract_node",
     "LintNode": "nodes.lint_node",
