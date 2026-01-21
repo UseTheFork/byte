@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from langchain.tools import tool
 
 from byte import get_application
@@ -31,7 +29,7 @@ async def read_files(file_paths: list[str]) -> str:
 
     for file_path in file_paths:
         # Check if file is in context first
-        file_context = FileContext(path=Path(file_path), mode=FileMode.READ_ONLY, root_path=app.path())
+        file_context = FileContext(path=app.path(file_path), mode=FileMode.READ_ONLY, root_path=app.path())
 
         if file_context:
             content = file_context.get_content()

@@ -45,7 +45,6 @@ class Agent(ABC, Bootable, Eventable):
         stream_rendering_service = self.app.make(StreamRenderingService)
 
         # self.app["log"].debug(mode)
-        # self.app["log"].debug(stream_rendering_service.)
         # self.app["log"].debug(chunk)
 
         # Filter and process based on mode
@@ -53,6 +52,13 @@ class Agent(ABC, Bootable, Eventable):
             # Handle LLM token streaming
             await stream_rendering_service.handle_message(chunk, self.__class__.__name__)
 
+        elif mode == "tasks":
+            await stream_rendering_service.handle_task(chunk, self.__class__.__name__)
+            # self.app["log"].debug(chunk)
+            # self.app["log"].debug(chunk.get("id"))
+            # self.app["log"].debug(chunk.get("name"))
+
+            pass
         elif mode == "updates":
             # Handle state updates after each step
             # await stream_rendering_service.handle_update(chunk)

@@ -17,8 +17,6 @@ if TYPE_CHECKING:
 class Console:
     """Console service for terminal output with themed styling."""
 
-    _console: RichConsole
-
     def __init__(self, app: Application, **kwargs):
         """Initialize the console with configured theme.
 
@@ -99,7 +97,7 @@ class Console:
 
         Usage: `max_width = console_service.width`
         """
-        return self._console.width
+        return self.console.width
 
     @property
     def height(self) -> int:
@@ -107,7 +105,7 @@ class Console:
 
         Usage: `max_height = console_service.height`
         """
-        return self._console.height
+        return self.console.height
 
     def print_success(self, message: str, **kwargs) -> None:
         """Print a success message with success styling.
@@ -123,7 +121,7 @@ class Console:
                 message: Success message to display
                 **kwargs: Additional keyword arguments passed to Console.print()
         """
-        self._console.print(f"[success]{message}[/success]", **kwargs)
+        self.console.print(f"[success]{message}[/success]", **kwargs)
 
     def print_warning(self, message: str, **kwargs) -> None:
         """Print a warning message with warning styling.
@@ -139,7 +137,7 @@ class Console:
                 message: Warning message to display
                 **kwargs: Additional keyword arguments passed to Console.print()
         """
-        self._console.print(f"[warning]{message}[/warning]", **kwargs)
+        self.console.print(f"[warning]{message}[/warning]", **kwargs)
 
     def print_error(self, message: str, **kwargs) -> None:
         """Print an error message with error styling.
@@ -155,7 +153,7 @@ class Console:
                 message: Error message to display
                 **kwargs: Additional keyword arguments passed to Console.print()
         """
-        self._console.print(f"[error]{message}[/error]", **kwargs)
+        self.console.print(f"[error]{message}[/error]", **kwargs)
 
     def print_info(self, message: str, **kwargs) -> None:
         """Print an informational message with info styling.
@@ -171,7 +169,7 @@ class Console:
                 message: Informational message to display
                 **kwargs: Additional keyword arguments passed to Console.print()
         """
-        self._console.print(f"[info]{message}[/info]", **kwargs)
+        self.console.print(f"[info]{message}[/info]", **kwargs)
 
     def print(self, *args, **kwargs) -> None:
         """Print to console with Rich formatting support.
@@ -188,7 +186,7 @@ class Console:
                 *args: Objects to print (strings, Rich renderables, etc.)
                 **kwargs: Keyword arguments passed to Console.print()
         """
-        self._console.print(*args, **kwargs)
+        self.console.print(*args, **kwargs)
 
     def syntax(self, *args, **kwargs):
         """Create a themed Syntax component for code display.
@@ -371,7 +369,7 @@ class Console:
                 `choice = service.select("Option 1", "Option 2", "Option 3")`
                 `choice = service.select(*options, title="Choose one")`
         """
-        kwargs.setdefault("console", self._console)
+        kwargs.setdefault("console", self.console)
         menu = Menu(*args, **kwargs)
         return menu.select()
 
@@ -392,7 +390,7 @@ class Console:
                 `choices = service.multiselect("Option 1", "Option 2", "Option 3")`
                 `choices = service.multiselect(*options, title="Choose multiple")`
         """
-        kwargs.setdefault("console", self._console)
+        kwargs.setdefault("console", self.console)
         menu = Menu(*args, **kwargs)
         return menu.multiselect()
 
@@ -413,7 +411,7 @@ class Console:
                 `if console.confirm("Continue?"): ...`
                 `if console.confirm("Delete file?", default=False): ...`
         """
-        kwargs.setdefault("console", self._console)
+        kwargs.setdefault("console", self.console)
         kwargs.setdefault("title", message)
         menu = Menu("Yes", "No", **kwargs)
         return menu.confirm(default=default)
@@ -428,4 +426,4 @@ class Console:
         Usage: `service.clear()` -> calls `service._console.clear()`
         Usage: `service.set_window_title("Byte")` -> calls `service._console.set_window_title("Byte")`
         """
-        return getattr(self._console, name)
+        return getattr(self.console, name)
