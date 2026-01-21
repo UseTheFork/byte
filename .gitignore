@@ -11,6 +11,7 @@
 # testing
 /coverage
 .coverage
+coverage.xml
 
 # next.js
 /.next/
