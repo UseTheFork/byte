@@ -25,7 +25,7 @@ class ShowAgent(CoderAgent):
         Usage: `graph = await agent.build()` -> returns compiled graph
         """
 
-        graph = GraphBuilder(self.app)
+        graph = GraphBuilder(self.app, start_node=ShowNode)
         graph.add_node(ShowNode)
 
         checkpointer = await self.get_checkpointer()

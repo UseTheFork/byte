@@ -78,12 +78,8 @@ class GraphBuilder:
 
         Usage: `builder.add_node(AssistantNode, goto="parse_blocks_node")`
         """
-
-        print(Str.class_to_snake_case(node))
         node_instance = self.app.make(node, **kwargs)
         node_name = Str.class_to_snake_case(node)
-
-        print(1)
 
         self._nodes[node_name] = node_instance
 

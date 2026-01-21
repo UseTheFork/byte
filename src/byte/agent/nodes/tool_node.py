@@ -9,7 +9,8 @@ from langgraph.types import Command
 from rich.pretty import Pretty
 from rich.text import Text
 
-from byte.agent import AssistantContextSchema, BaseState, ConstraintSchema, Node
+from byte.agent import AssistantContextSchema, AssistantNode, BaseState, ConstraintSchema, Node
+from byte.support import Str
 from byte.support.mixins import UserInteractive
 from byte.support.utils import get_last_message
 
@@ -26,7 +27,7 @@ class ToolNode(Node, UserInteractive):
 
         # Check if tools are available
         if not tools:
-            return Command(goto="assistant_node", update={"scratch_messages": []})
+            return Command(goto=Str.class_to_snake_case(AssistantNode), update={"scratch_messages": []})
 
         # Build a mapping of tool names to tool instances
         tools_by_name = {tool.name: tool for tool in tools}
@@ -53,7 +54,7 @@ class ToolNode(Node, UserInteractive):
 
                 # Send back to assistant_node but remove the last message.
                 return Command(
-                    goto="assistant_node",
+                    goto=Str.class_to_snake_case(AssistantNode),
                     update={"scratch_messages": [RemoveMessage(id=message.id)], "constraints": [constraint]},
                 )
 
@@ -74,4 +75,4 @@ class ToolNode(Node, UserInteractive):
                 )
             )
 
-        return Command(goto="assistant_node", update={"scratch_messages": outputs})
+        return Command(goto=Str.class_to_snake_case(AssistantNode), update={"scratch_messages": outputs})

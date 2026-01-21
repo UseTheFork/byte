@@ -44,8 +44,8 @@ _dynamic_imports = {
     "TaskManager": "foundation",
     "dd": "support.utils",
     "dump": "support.utils",
-    "make": "context",
     "get_application": "context",
+    "make": "context",
     # keep-sorted end
 }
 
