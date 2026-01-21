@@ -225,3 +225,55 @@ class TestCoderAgent(BaseTest):
 
         # Verify old file was deleted
         assert not delete_file.exists()
+
+    @pytest.mark.asyncio
+    @pytest.mark.vcr
+    async def test_coder_agent_edits_only_editable_file_with_readonly_present(
+        self,
+        application: Application,
+        mocker: MockerFixture,
+    ):
+        """Test that Coder Agent edits only the editable file when both read-only and editable files are present."""
+        from byte.agent.implementations.coder.agent import CoderAgent
+
+        mocker.patch.object(UserInteractive, "prompt_for_confirmation", return_value=True)
+
+        # Create a read-only file
+        readonly_content = """def readonly_function():
+    '''This function should not be modified'''
+    return "readonly"
+"""
+        readonly_file = await self.create_test_file(application, "readonly.py", readonly_content)
+
+        # Create an editable file
+        editable_content = """def editable_function():
+    '''This function can be modified'''
+    return "original"
+"""
+        editable_file = await self.create_test_file(application, "editable.py", editable_content)
+
+        # Add files to file service with appropriate modes
+        file_service = application.make(FileService)
+        await file_service.add_file(readonly_file, FileMode.READ_ONLY)
+        await file_service.add_file(editable_file, FileMode.EDITABLE)
+
+        # Create the agent
+        agent = application.make(CoderAgent)
+
+        # Request to edit the editable file
+        request = "Change the editable_function to return 'modified' instead of 'original'"
+
+        await agent.execute(request, display_mode="silent")
+
+        # Verify the editable file was modified
+        assert editable_file.exists()
+        editable_content_after = editable_file.read_text()
+        assert "modified" in editable_content_after
+        assert "original" not in editable_content_after
+        assert "def editable_function():" in editable_content_after
+
+        # Verify the read-only file was NOT modified
+        assert readonly_file.exists()
+        readonly_content_after = readonly_file.read_text()
+        assert readonly_content_after == readonly_content
+        assert "readonly" in readonly_content_after
