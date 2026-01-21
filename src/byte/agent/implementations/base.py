@@ -45,6 +45,7 @@ class Agent(ABC, Bootable, Eventable):
         stream_rendering_service = self.app.make(StreamRenderingService)
 
         # self.app["log"].debug(mode)
+        # self.app["log"].debug(stream_rendering_service.)
         # self.app["log"].debug(chunk)
 
         # Filter and process based on mode
