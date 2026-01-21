@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from langchain.tools import ToolRuntime, tool
+from langchain.tools import tool
 
-from byte.agent import AssistantContextSchema
+from byte import get_application
 from byte.files import FileContext, FileMode
 from byte.prompt_format import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
@@ -11,7 +11,7 @@ from byte.support.utils import list_to_multiline_text
 @tool(
     parse_docstring=True,
 )
-async def read_files(file_paths: list[str], runtime: ToolRuntime[AssistantContextSchema]) -> str:
+async def read_files(file_paths: list[str]) -> str:
     """Read the contents of a file from the project.
 
     This tool reads files that are available in the project's file discovery
@@ -25,11 +25,13 @@ async def read_files(file_paths: list[str], runtime: ToolRuntime[AssistantContex
         The contents of the file, or an error message if the file cannot be read
     """
 
+    app = get_application()
+
     final_content = []
 
     for file_path in file_paths:
         # Check if file is in context first
-        file_context = FileContext(path=Path(file_path), mode=FileMode.READ_ONLY)
+        file_context = FileContext(path=Path(file_path), mode=FileMode.READ_ONLY, root_path=app.path())
 
         if file_context:
             content = file_context.get_content()

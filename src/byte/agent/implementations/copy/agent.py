@@ -15,7 +15,7 @@ class CopyAgent(Agent):
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""
 
-        graph = GraphBuilder(self.app)
+        graph = GraphBuilder(self.app, start_node=CopyNode)
         graph.add_node(CopyNode)
 
         checkpointer = await self.get_checkpointer()

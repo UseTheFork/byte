@@ -9,6 +9,7 @@ from byte.foundation.bootstrap import (
     LoadEnvironmentVariables,
     PrepareEnvironment,
     RegisterProviders,
+    SetContext,
 )
 
 if TYPE_CHECKING:
@@ -27,6 +28,7 @@ class Kernel:
             LoadConsoleArgs,
             PrepareEnvironment,
             LoadConfiguration,
+            SetContext,
             HandleExceptions,
             RegisterProviders,
             # BootProviders,

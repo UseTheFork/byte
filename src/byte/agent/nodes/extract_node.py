@@ -1,4 +1,4 @@
-from typing import Literal, cast
+from typing import Literal, Type, cast
 
 from langchain_core.messages import AIMessage
 from langchain_core.prompts import ChatPromptTemplate
@@ -7,8 +7,9 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 from pydantic import BaseModel, Field
 
-from byte.agent import AssistantContextSchema, BaseState, Node
+from byte.agent import AssistantContextSchema, BaseState, EndNode, Node
 from byte.prompt_format import Boundary, BoundaryType
+from byte.support import Str
 from byte.support.mixins import UserInteractive
 from byte.support.utils import extract_content_from_message, get_last_message, list_to_multiline_text
 
@@ -67,7 +68,7 @@ class ExtractNode(Node, UserInteractive):
 
     def boot(
         self,
-        goto: str = "end_node",
+        goto: Type[Node] = EndNode,
         schema: Literal["text", "session_context"] = "text",
         **kwargs,
     ):
@@ -77,10 +78,10 @@ class ExtractNode(Node, UserInteractive):
                 goto: Next node to route to after extraction (default: "end_node")
                 schema: Output format - "text" for plain extraction or "session_context" for structured formatting
 
-        Usage: `await node.boot(goto="end_node", schema="session_context")`
+        Usage: `await node.boot(goto=EndNode, schema="session_context")`
         """
         self.schema = schema
-        self.goto = goto
+        self.goto = Str.class_to_snake_case(goto)
 
     async def __call__(
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
@@ -106,7 +107,7 @@ class ExtractNode(Node, UserInteractive):
 
         if self.schema == "text":
             output = extract_content_from_message(last_message)
-            return Command(goto=self.goto, update={"extracted_content": output})
+            return Command(goto=str(self.goto), update={"extracted_content": output})
 
         if self.schema == "session_context":
             weak_model = runtime.context.weak
@@ -118,4 +119,4 @@ class ExtractNode(Node, UserInteractive):
             result = cast(AIMessage, output.get("raw"))
             await self._track_token_usage(result, "weak")
 
-        return Command(goto=self.goto, update={"extracted_content": output.get("parsed")})
+        return Command(goto=str(self.goto), update={"extracted_content": output.get("parsed")})

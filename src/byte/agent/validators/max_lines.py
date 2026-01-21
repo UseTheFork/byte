@@ -6,9 +6,9 @@ from byte.support.utils import extract_content_from_message, get_last_message
 class MaxLinesValidator(Validator):
     """Validates content doesn't exceed maximum line count."""
 
-    def boot(self, **kwargs):
+    def boot(self, max_lines=100, **kwargs):
         # Access max_lines from stored kwargs
-        self.max_lines = self.kwargs.get("max_lines", 100)  # default to 100 if not provided
+        self.max_lines = max_lines  # default to 100 if not provided
 
     async def validate(self, state: BaseState) -> list[ValidationError | None]:
         last_message = get_last_message(state["scratch_messages"])

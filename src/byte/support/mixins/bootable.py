@@ -17,7 +17,7 @@ class Bootable:
         self.app = app
         self.args = args
         self.kwargs = kwargs
-        super().__init__(*args, **kwargs)
+        super().__init__()
 
     def _boot_mixins(self, **kwargs) -> None:
         """Automatically boot all mixins that have boot_{mixin_name} methods."""
