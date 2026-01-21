@@ -1,18 +1,15 @@
 from langchain_core.language_models.chat_models import BaseChatModel
-from langgraph.graph import START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
 from byte.agent import (
     Agent,
     AssistantContextSchema,
     AssistantNode,
-    BaseState,
-    EndNode,
     ExtractNode,
-    StartNode,
     ToolNode,
 )
 from byte.agent.implementations.research.prompt import research_prompt
+from byte.agent.utils.graph_builder import GraphBuilder
 from byte.llm import LLMService
 from byte.lsp.tools.find_references import find_references
 from byte.lsp.tools.get_definition import get_definition
@@ -39,23 +36,14 @@ class ResearchAgent(Agent):
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""
 
-        # Create the assistant and runnable
-        graph = StateGraph(BaseState)  # ty:ignore[invalid-argument-type]
-
-        # Add nodes
-        graph.add_node("start_node", self.app.make(StartNode))  # ty:ignore[invalid-argument-type]
-        graph.add_node("assistant_node", self.app.make(AssistantNode, goto="extract_node"))  # ty:ignore[invalid-argument-type]
-        graph.add_node("extract_node", self.app.make(ExtractNode, schema="session_context"))  # ty:ignore[invalid-argument-type]
-        graph.add_node("tools_node", self.app.make(ToolNode))  # ty:ignore[invalid-argument-type]
-
-        graph.add_node("end_node", self.app.make(EndNode))  # ty:ignore[invalid-argument-type]
-
-        # Define edges
-        graph.add_edge(START, "start_node")
+        graph = GraphBuilder(self.app)
+        graph.add_node(AssistantNode, goto=ExtractNode)
+        graph.add_node(ExtractNode, schema="session_context")
+        graph.add_node(ToolNode)
 
         # Compile graph with memory and configuration
         checkpointer = await self.get_checkpointer()
-        return graph.compile(checkpointer=checkpointer)
+        return graph.build().compile(checkpointer=checkpointer)
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
         llm_service = self.app.make(LLMService)

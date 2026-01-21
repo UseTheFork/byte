@@ -4,6 +4,7 @@ import inspect
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Type, TypeVar, Union, overload
 
+from byte.support import Str
 from byte.support.mixins import Bootable
 
 T = TypeVar("T")
@@ -66,9 +67,7 @@ class Container:
         Returns:
             String representation of the abstract type.
         """
-        if isinstance(abstract, type):
-            return f"{abstract.__module__}.{abstract.__qualname__}"
-        return abstract
+        return Str.class_to_string(abstract)
 
     def bind(self, service_class: Type[T], concrete: Optional[Callable[[], T]] = None) -> None:
         """Register a transient service binding.

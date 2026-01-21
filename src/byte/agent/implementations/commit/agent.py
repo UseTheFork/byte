@@ -4,9 +4,11 @@ from byte.agent import (
     Agent,
     AssistantContextSchema,
     AssistantNode,
+    EndNode,
     ValidationNode,
 )
 from byte.agent.implementations.commit.prompt import commit_prompt
+from byte.agent.utils.graph_builder import GraphBuilder
 from byte.git import CommitMessage, CommitPlan, CommitValidator
 from byte.llm import LLMService
 
@@ -30,28 +32,13 @@ class CommitAgent(Agent):
         Usage: `graph = await builder.build()` -> ready for coding assistance
         """
 
-        graph = self.get_base_graph(
-            [
-                "tools_node",
-                "extract_node",
-                "subprocess_node",
-                "parse_blocks_node",
-            ],
-        )
+        graph = GraphBuilder(self.app)
 
-        graph.add_node(
-            "assistant_node",
-            self.app.make(AssistantNode, goto="validation_node", structured_output=self.get_structured_output()),  # ty:ignore[invalid-argument-type]
-        )
+        # Add nodes
+        graph.add_node(AssistantNode, goto=ValidationNode, structured_output=self.get_structured_output())
+        graph.add_node(ValidationNode, goto=EndNode, validators=self.get_validators())
 
-        graph.add_node(
-            "validation_node",
-            self.app.make(
-                ValidationNode,
-                goto="end_node",
-                validators=self.get_validators(),
-            ),  # ty:ignore[invalid-argument-type]
-        )
+        return graph.build().compile()
 
         # Compile graph with memory and configuration
         return graph.compile()

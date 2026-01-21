@@ -1,10 +1,13 @@
-from typing import List, Literal, Optional
+from typing import TYPE_CHECKING, List, Literal, Optional
 
 from langchain.chat_models import BaseChatModel
 from langchain.tools import BaseTool
 from langchain_core.prompts import BasePromptTemplate
 from pydantic import Field
 from pydantic.dataclasses import dataclass
+
+if TYPE_CHECKING:
+    pass
 
 
 @dataclass

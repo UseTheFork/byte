@@ -3,6 +3,7 @@ from langgraph.graph.state import CompiledStateGraph
 from byte.agent.implementations.base import Agent
 from byte.agent.nodes.subprocess_node import SubprocessNode
 from byte.agent.schemas import AssistantContextSchema
+from byte.agent.utils.graph_builder import GraphBuilder
 
 
 class SubprocessAgent(Agent):
@@ -13,24 +14,11 @@ class SubprocessAgent(Agent):
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""
 
-        graph = self.get_base_graph(
-            [
-                "parse_blocks_node",
-                "extract_node",
-                "validation_node",
-                "assistant_node",
-            ],
-            "subprocess_node",
-        )
-
-        # Add nodes
-        graph.add_node(
-            "subprocess_node",
-            self.app.make(SubprocessNode),  # ty:ignore[invalid-argument-type]
-        )
+        graph = GraphBuilder(self.app, SubprocessNode)
+        graph.add_node(SubprocessNode)
 
         checkpointer = await self.get_checkpointer()
-        return graph.compile(checkpointer=checkpointer)
+        return graph.build().compile(checkpointer=checkpointer)
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
         return AssistantContextSchema(

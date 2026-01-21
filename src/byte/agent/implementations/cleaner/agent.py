@@ -1,12 +1,11 @@
 from langchain.chat_models import BaseChatModel
 from langchain.messages import HumanMessage
-from langgraph.constants import END
-from langgraph.graph import START, StateGraph
 from langgraph.types import Command
 from rich.markdown import Markdown
 
-from byte.agent import Agent, AssistantContextSchema, AssistantNode, BaseState, EndNode, ExtractNode, StartNode
+from byte.agent import Agent, AssistantContextSchema, AssistantNode, BaseState, ExtractNode
 from byte.agent.implementations.cleaner.prompt import cleaner_prompt
+from byte.agent.utils.graph_builder import GraphBuilder
 from byte.llm import LLMService
 from byte.support.mixins import UserInteractive
 
@@ -63,27 +62,14 @@ class CleanerAgent(Agent, UserInteractive):
         Usage: `graph = await agent.build()` -> ready for content cleaning
         """
 
-        # Create the state graph
-        graph = StateGraph(BaseState)
+        graph = GraphBuilder(self.app)
+        graph.add_node(AssistantNode, goto=ExtractNode)
+        graph.add_node(ExtractNode)
 
-        # Add nodes
-        graph.add_node("start_node", self.app.make(StartNode))
-        graph.add_node("assistant_node", self.app.make(AssistantNode, goto="extract_node"))
-        graph.add_node("extract_node", self.app.make(ExtractNode))
-        graph.add_node("end_node", self.app.make(EndNode))
-
-        graph.add_node("confirm_content_node", self._confirm_content)
-
-        # Define edges
-        graph.add_edge(START, "start_node")
-        graph.add_edge("start_node", "assistant_node")
-        graph.add_edge("assistant_node", "extract_node")
-        graph.add_edge("extract_node", "confirm_content_node")
-        graph.add_edge("confirm_content_node", "end_node")
-        graph.add_edge("end_node", END)
+        # graph.add_node("confirm_content_node", self._confirm_content)
 
         # Compile graph without memory for stateless operation
-        return graph.compile()
+        return graph.build().compile()
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
         llm_service = self.app.make(LLMService)

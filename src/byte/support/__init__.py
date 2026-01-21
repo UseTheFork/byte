@@ -8,14 +8,16 @@ if TYPE_CHECKING:
     from byte.support.concerns.array_store import ArrayStore
     from byte.support.service import Service
     from byte.support.service_provider import ServiceProvider
+    from byte.support.string import Str
 
-__all__ = ("ArrayStore", "Service", "ServiceProvider")
+__all__ = ("ArrayStore", "Service", "ServiceProvider", "Str")
 
 _dynamic_imports = {
     # keep-sorted start
     "ArrayStore": "concerns.array_store",
     "Service": "service",
     "ServiceProvider": "service_provider",
+    "Str": "string",
     # keep-sorted end
 }
 

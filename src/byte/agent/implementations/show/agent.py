@@ -2,6 +2,7 @@ from langgraph.graph.state import CompiledStateGraph
 
 from byte.agent.implementations.coder.agent import CoderAgent
 from byte.agent.nodes.show_node import ShowNode
+from byte.agent.utils.graph_builder import GraphBuilder
 
 
 class ShowAgent(CoderAgent):
@@ -24,13 +25,8 @@ class ShowAgent(CoderAgent):
         Usage: `graph = await agent.build()` -> returns compiled graph
         """
 
-        graph = self.get_base_graph(
-            [
-                "parse_blocks_node",
-            ],
-        )
-
-        graph.add_node("show_node", self.app.make(ShowNode))  # ty:ignore[invalid-argument-type]
+        graph = GraphBuilder(self.app)
+        graph.add_node(ShowNode)
 
         checkpointer = await self.get_checkpointer()
-        return graph.compile(checkpointer=checkpointer)
+        return graph.build().compile(checkpointer=checkpointer)

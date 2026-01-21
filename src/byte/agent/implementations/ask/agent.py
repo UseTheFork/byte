@@ -2,6 +2,7 @@ from langchain_core.language_models.chat_models import BaseChatModel
 
 from byte.agent import Agent, AssistantContextSchema, AssistantNode, ToolNode
 from byte.agent.implementations.ask.prompt import ask_enforcement, ask_prompt
+from byte.agent.utils.graph_builder import GraphBuilder
 from byte.llm import LLMService
 
 
@@ -25,22 +26,15 @@ class AskAgent(Agent):
         Usage: `graph = await agent.build()`
         """
 
-        graph = self.get_base_graph(
-            [
-                "extract_node",
-                "parse_blocks_node",
-                "subprocess_node",
-                "validation_node",
-            ],
-        )
+        graph = GraphBuilder(self.app)
 
         # Add nodes
-        graph.add_node("assistant_node", self.app.make(AssistantNode))  # ty:ignore[invalid-argument-type]
-        graph.add_node("tools_node", self.app.make(ToolNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node(AssistantNode)
+        graph.add_node(ToolNode)
 
         # Compile graph with memory and configuration
         checkpointer = await self.get_checkpointer()
-        return graph.compile(checkpointer=checkpointer)
+        return graph.build().compile(checkpointer=checkpointer)
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
         llm_service = self.app.make(LLMService)

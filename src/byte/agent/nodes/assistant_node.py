@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Type
 
 from langchain_core.callbacks import get_usage_metadata_callback
 from langchain_core.messages import BaseMessage, HumanMessage
@@ -9,22 +9,23 @@ from langgraph.types import Command
 from pydantic import BaseModel
 
 from byte import EventType, Payload
-from byte.agent import AssistantContextSchema, BaseState, Node
+from byte.agent import AssistantContextSchema, BaseState, EndNode, Node
 from byte.files import FileService
 from byte.git import CommitService
 from byte.prompt_format import Boundary, BoundaryType, EditFormatService
+from byte.support import Str
 from byte.support.utils import dd, list_to_multiline_text
 
 
 class AssistantNode(Node):
     def boot(
         self,
-        goto: str = "end_node",
+        goto: Type[Node] = EndNode,
         structured_output: BaseModel | None = None,
         **kwargs,
     ):
         self.structured_output = structured_output
-        self.goto = goto
+        self.goto = Str.class_to_snake_case(goto)
 
     def _create_runnable(self, context: AssistantContextSchema) -> Runnable:
         """Create the runnable chain from context configuration.
@@ -400,7 +401,7 @@ class AssistantNode(Node):
         *,
         runtime: Runtime[AssistantContextSchema],
         config: RunnableConfig,
-    ) -> Command[Literal["end_node", "parse_blocks_node", "tools_node", "validation_node"]]:
+    ) -> Command[Literal["end_node", "parse_blocks_node", "tool_node", "validation_node"]]:
         while True:
             agent_state, config = await self._generate_agent_state(state, config, runtime)
 
@@ -443,7 +444,7 @@ class AssistantNode(Node):
 
             elif result.tool_calls and len(result.tool_calls) > 0:
                 return Command(
-                    goto="tools_node",
+                    goto="tool_node",
                     update={
                         "scratch_messages": [result],
                         "errors": None,
@@ -453,7 +454,7 @@ class AssistantNode(Node):
                 break
 
         return Command(
-            goto=self.goto,
+            goto=str(self.goto),
             update={
                 "scratch_messages": [result],
                 "errors": None,

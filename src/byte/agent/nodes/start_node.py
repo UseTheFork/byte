@@ -1,20 +1,21 @@
-from typing import Literal
+from typing import Type
 
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte.agent import AssistantContextSchema, BaseState, MetadataSchema, Node
+from byte.agent import AssistantContextSchema, AssistantNode, BaseState, MetadataSchema, Node
 from byte.prompt_format import EditFormatService
+from byte.support import Str
 
 
 class StartNode(Node):
     def boot(
         self,
-        goto: str = "assistant_node",
+        goto: Type[Node] = AssistantNode,
         **kwargs,
     ):
-        self.goto = goto
+        self.goto = Str.class_to_snake_case(goto)
 
     async def __call__(
         self,
@@ -22,7 +23,7 @@ class StartNode(Node):
         *,
         runtime: Runtime[AssistantContextSchema],
         config: RunnableConfig,
-    ) -> Command[Literal["subprocess_node", "assistant_node"]]:
+    ) -> Command[str]:
         edit_format = self.app.make(EditFormatService)
 
         result = {

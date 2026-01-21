@@ -10,6 +10,7 @@ from byte.agent import (
     ValidationNode,
 )
 from byte.agent.implementations.conventions.prompt import conventions_prompt
+from byte.agent.utils.graph_builder import GraphBuilder
 from byte.files.tools.read_files import read_files
 from byte.llm import LLMService
 
@@ -48,28 +49,14 @@ class ConventionAgent(Agent):
         Usage: `graph = await agent.build()` -> returns compiled graph
         """
 
-        graph = self.get_base_graph(
-            [
-                "parse_blocks_node",
-            ],
-        )
+        graph = GraphBuilder(self.app)
 
-        # Add nodes
-        graph.add_node("assistant_node", self.app.make(AssistantNode, goto="validation_node"))  # ty:ignore[invalid-argument-type]
-        graph.add_node(
-            "validation_node",
-            self.app.make(
-                ValidationNode,
-                goto="extract_node",
-                validators=self.get_validators(),
-            ),  # ty:ignore[invalid-argument-type]
-        )
+        graph.add_node(AssistantNode, goto=ValidationNode)
+        graph.add_node(ValidationNode, goto=ExtractNode, validators=self.get_validators())
+        graph.add_node(ExtractNode)
+        graph.add_node(ToolNode)
 
-        graph.add_node("extract_node", self.app.make(ExtractNode))  # ty:ignore[invalid-argument-type]
-        graph.add_node("tools_node", self.app.make(ToolNode))  # ty:ignore[invalid-argument-type]
-
-        # Compile graph with memory and configuration
-        return graph.compile()
+        return graph.build().compile()
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
         llm_service = self.app.make(LLMService)

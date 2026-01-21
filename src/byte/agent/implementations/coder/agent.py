@@ -9,6 +9,7 @@ from byte.agent import (
     ParseBlocksNode,
 )
 from byte.agent.implementations.coder.prompt import coder_prompt
+from byte.agent.utils.graph_builder import GraphBuilder
 from byte.llm import LLMService
 from byte.prompt_format import EditFormatService
 
@@ -24,22 +25,15 @@ class CoderAgent(Agent):
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""
 
-        graph = self.get_base_graph(
-            [
-                "tools_node",
-                "extract_node",
-                "subprocess_node",
-                "validation_node",
-            ],
-        )
+        graph = GraphBuilder(self.app)
 
         # Add nodes
-        graph.add_node("assistant_node", self.app.make(AssistantNode, goto="parse_blocks_node"))  # ty:ignore[invalid-argument-type]
-        graph.add_node("parse_blocks_node", self.app.make(ParseBlocksNode))  # ty:ignore[invalid-argument-type]
-        graph.add_node("lint_node", self.app.make(LintNode))  # ty:ignore[invalid-argument-type]
+        graph.add_node(AssistantNode, goto="parse_blocks_node")
+        graph.add_node(ParseBlocksNode)
+        graph.add_node(LintNode)
 
         checkpointer = await self.get_checkpointer()
-        return graph.compile(checkpointer=checkpointer)
+        return graph.build().compile(checkpointer=checkpointer)
 
     async def get_assistant_runnable(self) -> AssistantContextSchema:
         llm_service = self.app.make(LLMService)

@@ -1,10 +1,11 @@
-from typing import Literal
+from typing import Literal, Type
 
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte.agent import AssistantContextSchema, BaseState, Node, ValidationError, Validator
+from byte.agent import AssistantContextSchema, BaseState, EndNode, Node, ValidationError, Validator
+from byte.support import Str
 from byte.support.mixins import UserInteractive
 
 
@@ -20,7 +21,7 @@ class ValidationNode(Node, UserInteractive):
     def boot(
         self,
         validators: list[Validator],
-        goto: str = "end_node",
+        goto: Type[Node] = EndNode,
         **kwargs,
     ):
         """Initialize the validation node with constraints and routing configuration.
@@ -32,7 +33,7 @@ class ValidationNode(Node, UserInteractive):
         Usage: `await node.boot(goto="end_node", max_lines=100)`
         """
         self.validators = validators
-        self.goto = goto
+        self.goto = Str.class_to_snake_case(goto)
 
     async def __call__(
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
