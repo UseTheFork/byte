@@ -8,6 +8,14 @@ from byte.cli import MarkdownStream, RuneSpinner
 from byte.support import Service
 from byte.support.utils import extract_content_from_message, extract_json_from_message
 
+# AI: I want to refractor this but need help.
+# In general `handle_task` is our entrypoint. The only node that will use the steam render is  the `assistant_node` like we have.
+# We should display the spinner to start
+# We should Start the stream render the first time we hit `_handle_ai_message`
+# we also need to build in logic for `_start_tool_message` this should happend in
+# handle_message. Once we start reciving tokens for a tool use we should end the stream and show the tool spinner IE `_start_tool_message`
+# ai?
+
 
 class StreamRenderingService(Service):
     """Service for rendering streaming AI responses with rich formatting and visual feedback.
@@ -32,6 +40,8 @@ class StreamRenderingService(Service):
         self.agent_name = ""
         self.display_mode = "verbose"
         self.spinner = None
+        self.stream_started = False
+        self.tool_spinner_started = False
         self.active_stream = MarkdownStream(
             console=self.console.console,
             mdargs={"code_theme": self.app["config"].cli.syntax_theme},
@@ -60,9 +70,7 @@ class StreamRenderingService(Service):
             await self.active_stream.update(self.accumulated_content, final=final)
 
     async def _handle_tool_message(self, message_chunk, metadata):
-        if not self.spinner:
-            await self.end_stream_render()
-            await self.start_spinner("Using Tool...")
+        pass
 
     async def _handle_ai_message(self, message_chunk, metadata):
         """Handle AI assistant message chunks with content accumulation and stream management.
@@ -72,7 +80,13 @@ class StreamRenderingService(Service):
         Usage: Called internally when processing AIMessageChunk instances
         """
 
-        # Append message content to accumulated content
+        # Start stream on first content (transition from spinner)
+        if message_chunk.content and not self.stream_started:
+            await self.stop_spinner()
+            await self.start_stream_render()
+            self.stream_started = True
+
+        # Accumulate and render content
         if message_chunk.content:
             self.accumulated_content += extract_content_from_message(message_chunk)
             if self.display_mode == "verbose":
@@ -81,16 +95,20 @@ class StreamRenderingService(Service):
             if extract_json_from_message(message_chunk) is not None:
                 await self.end_stream_render()
 
+        # Handle tool usage - end stream, start tool spinner
+        if hasattr(message_chunk, "tool_call_chunks") and message_chunk.tool_call_chunks:
+            if not self.tool_spinner_started:
+                await self.end_stream_render()
+                await self.start_spinner("Using Tool...")
+                self.tool_spinner_started = True
+
+        # Check for stream ending conditions
         if hasattr(message_chunk, "response_metadata"):
-            # Check for stream ending conditions
             if (
                 message_chunk.response_metadata.get("stop_reason") == "end_turn"
                 or message_chunk.response_metadata.get("stop_reason") == "tool_use"
             ):
                 await self.end_stream_render()
-
-                # if message_chunk.response_metadata.get("stop_reason") == "tool_use":
-                #     await self._start_tool_message()
 
     async def _end_tool_message(self, message_chunk, metadata):
         """Handle completion of tool execution with spinner restart.
@@ -99,10 +117,9 @@ class StreamRenderingService(Service):
         to indicate AI is processing the tool output for next response.
         Usage: Called automatically when ToolMessage chunks are received
         """
-        # PLaceholder for maybe displaying the result of the tool message?
-        self.console.print()
-        # Restart the spinner since usually the AI will think after this.
-        await self.start_spinner()
+        await self.stop_spinner()
+        await self.start_spinner("Thinking...")
+        self.tool_spinner_started = False
 
     async def _handle_default_message(self, message_chunk, metadata):
         """Handle non-AI, non-Tool message types with basic content processing.
@@ -122,16 +139,16 @@ class StreamRenderingService(Service):
     async def handle_task(self, chunk, agent_name: str):
         self.current_stream_id = f"{chunk.get('name')}:{chunk.get('id')}"
         self.agent_name = agent_name
-
-        # Check if this is the start of an assistant task by verifying input exists and is not None
         is_start = chunk.get("input") is not None
 
-        # self.app["log"].info(is_start)
         if chunk.get("name") == "assistant_node":
             if is_start:
-                await self.start_stream_render()
+                await self.start_spinner("Thinking...")
+                self.stream_started = False
+                self.tool_spinner_started = False
             else:
                 await self.end_stream_render()
+                await self.stop_spinner()
 
     async def handle_message(self, chunk, agent_name: str):
         """Handle streaming message chunks from AI agents with type-specific processing.
@@ -144,29 +161,11 @@ class StreamRenderingService(Service):
 
         message_chunk, metadata = chunk
 
-        # self.app["log"].debug(message_chunk)
-        # self.app["log"].debug(isinstance(message_chunk, ToolMessageChunk))
-
-        # Set the Agent "class" as the Agent Name
-
-        # Handle different message types with isinstance checks
         if isinstance(message_chunk, AIMessageChunk):
-            # self.app["log"].debug(message_chunk)
-
-            # Handle AI assistant responses - normal streaming content
-            if message_chunk.tool_call_chunks:
-                await self._handle_tool_message(message_chunk, metadata)
-                # self.app["log"].debug(message_chunk.tool_call_chunks)
-            else:
-                await self._handle_ai_message(message_chunk, metadata)
-
+            await self._handle_ai_message(message_chunk, metadata)
         elif isinstance(message_chunk, ToolMessage):
-            # Handle tool execution results - might want different formatting
-            # await self._end_tool_message(message_chunk, metadata)
-            pass
-
+            await self._end_tool_message(message_chunk, metadata)
         else:
-            # Handle other message types with default behavior
             await self._handle_default_message(message_chunk, metadata)
 
     async def end_stream_render(self):

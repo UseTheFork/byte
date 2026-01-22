@@ -84,8 +84,6 @@ class TestStreamRenderingService(BaseTest):
 
         captured_output = captured_console.getvalue()
 
-        application["log"].info(captured_output)
-
         assert captured_output == ""
 
     @pytest.mark.asyncio
@@ -131,10 +129,10 @@ class TestStreamRenderingService(BaseTest):
 
         captured_output = captured_console.getvalue()
 
-        # application["log"].info(application["env"])
+        # application["log"].info(captured_output)
 
-        assert "Thinking..." in captured_output
-        assert "Ask Agent" in captured_output
+        assert captured_output.count("Thinking...") == 1
+        assert captured_output.count("Ask Agent") == 1
 
     @pytest.mark.asyncio
     @pytest.mark.vcr
@@ -176,9 +174,9 @@ function greet(name) {
 
         await agent.execute(focus.focus_message, display_mode="verbose")
 
-        captured_output = captured_console.getvalue()
+        # application["log"].info(result.keys())
 
-        application["log"].info(captured_output)
+        captured_output = captured_console.getvalue()
 
         assert captured_output.count("Using Tool") == 1
         assert captured_output.count("Convention Agent") == 2
