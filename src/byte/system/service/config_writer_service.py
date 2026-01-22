@@ -1,6 +1,6 @@
 import yaml
 
-from byte import Service, dd
+from byte import Service
 from byte.presets.config import PresetsConfig
 
 
@@ -20,8 +20,7 @@ class ConfigWriterService(Service):
         Usage: `await service.append_preset(new_preset)`
         """
 
-        config_path = self.app["path.config"]
-        dd(config_path)
+        config_path = self.app.config_path("config.yaml")
 
         # Read existing config
         with open(config_path) as f:
@@ -39,4 +38,4 @@ class ConfigWriterService(Service):
 
         # Write updated config back to file
         with open(config_path, "w") as f:
-            yaml.safe_dump(config_data, f, default_flow_style=False, sort_keys=False)
+            yaml.safe_dump(config_data, f, default_flow_style=True, sort_keys=False)
