@@ -8,14 +8,6 @@ from byte.cli import MarkdownStream, RuneSpinner
 from byte.support import Service
 from byte.support.utils import extract_content_from_message, extract_json_from_message
 
-# AI: I want to refractor this but need help.
-# In general `handle_task` is our entrypoint. The only node that will use the steam render is  the `assistant_node` like we have.
-# We should display the spinner to start
-# We should Start the stream render the first time we hit `_handle_ai_message`
-# we also need to build in logic for `_start_tool_message` this should happend in
-# handle_message. Once we start reciving tokens for a tool use we should end the stream and show the tool spinner IE `_start_tool_message`
-# ai?
-
 
 class StreamRenderingService(Service):
     """Service for rendering streaming AI responses with rich formatting and visual feedback.
@@ -246,7 +238,7 @@ class StreamRenderingService(Service):
             # Start with animated spinner
             self.console.set_live()
             spinner = RuneSpinner(text=message, size=15)
-            transient = self.app.is_production()
+            transient = not self.app.running_unit_tests()
             self.spinner = Live(spinner, console=self.console.console, transient=transient, refresh_per_second=20)
             self.spinner.start()
 
