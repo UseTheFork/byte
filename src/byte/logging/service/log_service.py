@@ -24,6 +24,10 @@ class LogService(Service):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # Make sure we have a config and cache path
+        self.app.config_path().mkdir(exist_ok=True)
+        self.app.cache_path().mkdir(exist_ok=True)
+
         # Clear log files on boot
         log_file = self.app.cache_path("byte.log")
         log_file.write_text("")
