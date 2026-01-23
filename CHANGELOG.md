@@ -1,6 +1,576 @@
 # CHANGELOG
 
 
+## v1.0.0 (2026-01-23)
+
+### Bug Fixes
+
+- Correct typo in project_information_and_context variable name
+  ([`295ba97`](https://github.com/UseTheFork/byte/commit/295ba97ac2c8e6ffee2fe816423e8c58b08bfb23))
+
+- Ensure config and cache paths exist on log service init
+  ([`faf307b`](https://github.com/UseTheFork/byte/commit/faf307b3e85234c5b7a14fe77fb4f20385c94f31))
+
+- Improve diff retrieval and change type detection in git service
+  ([`5a98502`](https://github.com/UseTheFork/byte/commit/5a985023f96099af6da8f2369641894245eea15e))
+
+Changes include: - Modify get_diff() to retrieve staged changes from HEAD commit - Correct change
+  type detection and mapping - Add better handling for binary files - Improve diff generation for
+  modified files
+
+- Resolve file paths relative to application base path
+  ([`ca2e102`](https://github.com/UseTheFork/byte/commit/ca2e1025b5c83b4cc4b87c8f148c50e61192bd2e))
+
+Update file path resolution to use application base path for relative paths. This ensures consistent
+  file path handling across file discovery and matching operations. Removed skipped tests and added
+  small delays to improve watcher service test reliability.
+
+- Update spinner transient mode for unit tests
+  ([`078088e`](https://github.com/UseTheFork/byte/commit/078088e403fb4efce16d0ff44a1506f52bcf9ee3))
+
+### Build System
+
+- Add pytest-mock dependency for testing
+  ([`d2c3bb6`](https://github.com/UseTheFork/byte/commit/d2c3bb6f74ba57e9ccfdaf25cbaffc3b8f0fc0e6))
+
+- Configure dependabot for weekly updates
+  ([`42dce10`](https://github.com/UseTheFork/byte/commit/42dce1062bf54a9b32cee7a7f5e7f842a2c3dd66))
+
+- Fix semantic release version path
+  ([`a3af03a`](https://github.com/UseTheFork/byte/commit/a3af03ac7f626eeed483aa6a205232b5775e88d3))
+
+- Increase semantic-release verbosity to debug release process
+  ([`de011f6`](https://github.com/UseTheFork/byte/commit/de011f6a3869501ff6b52558954986b92411ac7f))
+
+- Update justfile to run pytest with coverage
+  ([`6287838`](https://github.com/UseTheFork/byte/commit/628783832dc955c4709b2eb0a078c27a697f417e))
+
+### Chores
+
+- Add placeholder test files for config writer and prepare environment
+  ([`55a2260`](https://github.com/UseTheFork/byte/commit/55a2260a3284772353df6a447ccdd62aa62da6b9))
+
+- Clean up exception handling and application flow
+  ([`095fa7c`](https://github.com/UseTheFork/byte/commit/095fa7cd87356ad0f52230d558ff0b345365e2fe))
+
+- Comment out documentation generation steps in release workflow
+  ([`70bec7a`](https://github.com/UseTheFork/byte/commit/70bec7aff0e30bd309645a8e057ac842f81d13a4))
+
+- Remove changelog from release commit message
+  ([`0990711`](https://github.com/UseTheFork/byte/commit/0990711284aa2b52f8792df0262ef525e5535424))
+
+- Remove git-cliff from development environment
+  ([`f0f70b1`](https://github.com/UseTheFork/byte/commit/f0f70b1af7d9ffe4f0dc88c26207056c55ec1715))
+
+- Remove project architecture document
+  ([`8346bf2`](https://github.com/UseTheFork/byte/commit/8346bf23af48fbfa687fe6217fe411922101d20f))
+
+- Remove unused bootstrap file
+  ([`577d5ac`](https://github.com/UseTheFork/byte/commit/577d5ac967ac583990fab6e6ee4599aed4b9881c))
+
+- Reorganize test files and fixtures
+  ([`243920a`](https://github.com/UseTheFork/byte/commit/243920aac37151640079c03508ad2abd0f099b74))
+
+- Update byte-ai-cli dependency to 0.7.1
+  ([`23e98a8`](https://github.com/UseTheFork/byte/commit/23e98a884132e1cb7f79df03052c2aa147d538e4))
+
+- Update config for agent node conventions
+  ([`eed0aa4`](https://github.com/UseTheFork/byte/commit/eed0aa4f900fc0ca8f5af3849cf89bb7ef5daddf))
+
+- Update config to include editable test files
+  ([`37dc211`](https://github.com/UseTheFork/byte/commit/37dc2112f0374b187f3f88d992acf6d03ef71a8b))
+
+- Update gitignore to include coverage.xml
+  ([`9310470`](https://github.com/UseTheFork/byte/commit/9310470df707de611bd16898c1002fbe870372fd))
+
+- Update semantic release and project configuration
+  ([`8a0cd4c`](https://github.com/UseTheFork/byte/commit/8a0cd4c41eef31d2fb96b81fccec121fbfa639bd))
+
+- Update test cassette files
+  ([`0c35de5`](https://github.com/UseTheFork/byte/commit/0c35de5b946ff71f91b1e80a2f8401135d7f7efd))
+
+### Code Style
+
+- Improve markdown table formatting in settings reference
+  ([`f569667`](https://github.com/UseTheFork/byte/commit/f5696677231f76a6a33be3b6f03658aa6be0e665))
+
+### Features
+
+- Add commit agent test infrastructure with VCR support
+  ([`8f9b399`](https://github.com/UseTheFork/byte/commit/8f9b3994948e6ac6e65ab3f8185555f53d49b777))
+
+Introduces test infrastructure for commit agent with pytest-recording for HTTP interaction
+  recording. Includes: - New test files for commit agent - Fake chat model utility - VCR cassette
+  recording configuration - Updated dependencies to include pytest-recording
+
+- Add configurable display modes for stream rendering service
+  ([`bd9697b`](https://github.com/UseTheFork/byte/commit/bd9697b72dba4a526a0ec076b627798c2e22a137))
+
+- Add dummy node exception for graph routing errors
+  ([`9d269f3`](https://github.com/UseTheFork/byte/commit/9d269f34a2ad08a076cf872bafdcee87f8ba7189))
+
+Introduces a new DummyNodeReachedException to handle unexpected routing in agent graphs. This helps
+  identify and debug routing issues by raising an explicit exception when a dummy node is reached
+  during execution.
+
+- Add DummyNode and update node return types for LangGraph compatibility
+  ([`d4b83e4`](https://github.com/UseTheFork/byte/commit/d4b83e4f40890e7073b710540cb85e6feb6f4866))
+
+This change introduces several updates to improve compatibility with LangGraph:
+
+- Added a new DummyNode for placeholder/passthrough node functionality - Updated node method
+  signatures to explicitly return Command with specific goto types - Removed direct usage of START
+  and END constants in favor of LangGraph's graph configuration methods - Standardized node return
+  types to provide more explicit routing information
+
+These changes enhance the flexibility and type safety of the agent node implementations.
+
+- Add environment detection and configuration support
+  ([`b330cec`](https://github.com/UseTheFork/byte/commit/b330cec160effefa5a9c73e3380bf190f95afb6f))
+
+Introduces environment detection mechanisms and configuration support: - Added AppConfig to
+  ByteConfig for environment management - Implemented environment detection methods in Application -
+  Updated various services to use new environment configuration - Added environment-specific helper
+  methods
+
+- Add extract node to commit agent graph
+  ([`0e48a4b`](https://github.com/UseTheFork/byte/commit/0e48a4bb86f2879a559a4f4d96b088264c08fe8a))
+
+- Add file path placeholder support for lint commands
+  ([`3fd1a73`](https://github.com/UseTheFork/byte/commit/3fd1a73debd4b30b27bbb9cd9de0a6cc754cc0dc))
+
+Enhance lint command configuration to support {file} placeholder for flexible file path insertion.
+  Removes full_command attribute and updates command execution to handle file path dynamically.
+
+- Add first boot setup for byte environment
+  ([`f03c82a`](https://github.com/UseTheFork/byte/commit/f03c82a615634554e8486792778ec35d2cbdf340))
+
+- Add foundation service provider
+  ([`dbd2c3b`](https://github.com/UseTheFork/byte/commit/dbd2c3b33dff6799ee5742a8530d7b0452fa987f))
+
+- Add method to format commit message with files
+  ([`511ad40`](https://github.com/UseTheFork/byte/commit/511ad4017a734a02a1e94a5edf1428139aa8195e))
+
+- Add refresh method to convention context service
+  ([`80d2910`](https://github.com/UseTheFork/byte/commit/80d291087c4b6b11c98b0cd6097a68e0873b7296))
+
+- Add subprocess agent implementation and related changes
+  ([`470eb0a`](https://github.com/UseTheFork/byte/commit/470eb0af7a8fa7d86ba85692e7bdcd7e15ee20ef))
+
+- Enhance file discovery service with comprehensive test coverage
+  ([`f9e0fdc`](https://github.com/UseTheFork/byte/commit/f9e0fdc69a265c0c17fbf82b4142c79819ca1513))
+
+Added extensive test cases for FileDiscoveryService to validate: - Nested directory file discovery -
+  Fuzzy file matching - Case-insensitive search - Handling of ignored directories - Caching and
+  refresh behavior - Handling of unreadable and binary files
+
+- Enhance test infrastructure with logot and improved fixtures
+  ([`0a49cd3`](https://github.com/UseTheFork/byte/commit/0a49cd3819e8dffcd2c216b4cab6e47299eb97a7))
+
+Add logot for better log capturing in tests, update test fixtures to support more flexible
+  configuration, and improve logging and debugging capabilities. Changes include: - Add logot
+  dependency with loguru support - Update pytest configuration to use logot capturer - Modify base
+  test fixtures to create config.yaml in git repo - Adjust log levels to DEBUG for more detailed
+  testing - Add config fixture in test watcher service - Skip some incomplete test methods
+
+- Implement enhanced LSP configuration with preset and custom server support
+  ([`96a6e14`](https://github.com/UseTheFork/byte/commit/96a6e14bdad8ac568b02b40a7c0683ace5daaffd))
+
+This commit introduces a more flexible LSP configuration system:
+
+- Add support for preset LSP servers from lsp-client - Implement new server configuration types:
+  PresetServerConfig, LocalServerConfig, ContainerServerConfig, and CustomServerConfig - Update LSP
+  service to work with the new configuration system - Add support for different server types (local
+  and container) - Integrate with lsp-client library for improved LSP functionality - Refactor LSP
+  service methods to use the new client interface
+
+- Introduce new application foundation and bootstrapping
+  ([`da5eb98`](https://github.com/UseTheFork/byte/commit/da5eb98a2c103a5b94993b6b9800646bdb636bb7))
+
+### Ops
+
+- Update deploy docs workflow to use full checkout
+  ([`0ad3b54`](https://github.com/UseTheFork/byte/commit/0ad3b54db5625d5da3bcf28e27c624cb7a12b087))
+
+### Refactoring
+
+- Add type ignore comments for StateGraph initialization and node creation
+  ([`f084379`](https://github.com/UseTheFork/byte/commit/f084379cb7331658c74a580cf97779cbe210c97b))
+
+Add type ignore comments to suppress type checking warnings for StateGraph initialization and node
+  creation across multiple agent implementations. This helps maintain type compatibility while
+  working with dynamic graph construction.
+
+- Cleanup and simplify various project configurations and test infrastructure
+  ([`e0b7185`](https://github.com/UseTheFork/byte/commit/e0b7185192a5140414465f3f201a9bac5ce5f56b))
+
+This commit includes several minor refactorings: - Simplified type hints and method signatures -
+  Updated configuration and test infrastructure - Reorganized import statements and type checking -
+  Minor code cleanup across multiple files
+
+- Consolidate test utilities and remove base test class
+  ([`ae196ef`](https://github.com/UseTheFork/byte/commit/ae196ef6c93ede6aca653df9e783ead1fad420e2))
+
+This commit refactors the test infrastructure by: - Removing the BaseTest class - Creating a new
+  utils.py file with common test utilities - Updating test files to use the new utility functions -
+  Removing unnecessary utils directory - Renaming test cassette files to follow consistent naming
+  conventions
+
+- Enhance agent and stream rendering implementations
+  ([`499c3ae`](https://github.com/UseTheFork/byte/commit/499c3aefccb41ce788cd78b8ed2bde8da265e48e))
+
+- Enhance commit agent validation workflow
+  ([`3ea99f8`](https://github.com/UseTheFork/byte/commit/3ea99f853b106f1e51d8ca86d8f3e4e02ad77421))
+
+Introduces a more interactive validation process for commit messages: - Add user confirmation step
+  in commit validator - Support retry mechanism for commit message generation - Improve error
+  handling and logging - Update validation node to support more flexible routing
+
+- Enhance exception handling and logging
+  ([`840ebc6`](https://github.com/UseTheFork/byte/commit/840ebc6abe0e9f8b69236e621c8fcd0bd7e9bfa0))
+
+- Extract file creation logic into a helper method in git service tests
+  ([`484834c`](https://github.com/UseTheFork/byte/commit/484834c4fdfed44582f3c973b8a32a4350bd3861))
+
+- Extract providers list to main module for reuse
+  ([`9db435f`](https://github.com/UseTheFork/byte/commit/9db435fcf968aebb520d6418ce50f0c3064023b0))
+
+BREAKING CHANGE: Moved providers list from individual scripts to main module, which may require
+  updating import statements in existing code that previously defined providers locally
+
+- Improve application path and git repository handling
+  ([`fc744d4`](https://github.com/UseTheFork/byte/commit/fc744d45b2395999a6ba5ca266f848278030b7d2))
+
+- Improve commit message generation and file path handling
+  ([`2e3c1f6`](https://github.com/UseTheFork/byte/commit/2e3c1f62a0d4dae4d4e65f4690b0b91277298c38))
+
+Refactored commit message generation to separate breaking change footer and improve file path
+  resolution. Updated test utilities to use mocker instead of unittest.mock.
+
+- Improve commit validator with message numbering and formatting
+  ([`c7572ab`](https://github.com/UseTheFork/byte/commit/c7572ab81d0ecbf8b1a7358e342a9f335283d95b))
+
+- Improve error handling and logging in various services
+  ([`dab5b3e`](https://github.com/UseTheFork/byte/commit/dab5b3ecedf1c2f6e7f43dccdfb43c2f1e941028))
+
+- Improve file parsing and creation methods
+  ([`bbd9709`](https://github.com/UseTheFork/byte/commit/bbd9709aed635974f508620be1d6792643a340ad))
+
+- Improve file service and hierarchy generation
+  ([`0b13e90`](https://github.com/UseTheFork/byte/commit/0b13e906433bb550ea7f2974aa136572c819b421))
+
+- Improve stream rendering service logic and state management
+  ([`e179c08`](https://github.com/UseTheFork/byte/commit/e179c08b33d026f96c55a40865cc039f6f967251))
+
+Refactored stream rendering service to: - Add explicit state tracking for stream and tool spinner -
+  Improve handling of AI message chunks and tool usage - Simplify message handling logic - Ensure
+  consistent spinner and stream rendering behavior
+
+- Improve task manager error handling
+  ([`bdd857c`](https://github.com/UseTheFork/byte/commit/bdd857c4abe44f680c9a3e5e5c7f510e9eed6752))
+
+- Modify convention generation and loading process
+  ([`835c799`](https://github.com/UseTheFork/byte/commit/835c79980139b61f2a760d255b049cec29575994))
+
+- Modify parser service default confirmation behavior
+  ([`fa775e3`](https://github.com/UseTheFork/byte/commit/fa775e3a934906599d16da93458743f33bcc1102))
+
+- Modify service provider and application boot process
+  ([`78a533e`](https://github.com/UseTheFork/byte/commit/78a533e4d117a35e70119b2894a37d88187fc6a1))
+
+- Remove async from service boot methods and method calls
+  ([`96d493c`](https://github.com/UseTheFork/byte/commit/96d493c016f1ade5a4b872a573db0ffec65ce0f6))
+
+This commit removes async/await from service boot methods and method calls across the project. The
+  changes include:
+
+- Removing `async` from boot methods in various services - Updating method calls to remove `await`
+  for boot and make methods - Adjusting import paths and references to reflect the synchronous
+  changes - Removing unnecessary async/await decorators and keywords
+
+The goal is to simplify the service initialization and method invocation process by making it
+  synchronous.
+
+- Remove commented AI guidance in validation node
+  ([`4439d87`](https://github.com/UseTheFork/byte/commit/4439d879453742fb2906a16a63e32d3e39ae5f1f))
+
+- Remove debug logging in assistant node
+  ([`b4defc6`](https://github.com/UseTheFork/byte/commit/b4defc6972604faf23199d0d73bb2432391f95af))
+
+- Remove debug print and use config path method
+  ([`168eb86`](https://github.com/UseTheFork/byte/commit/168eb868661abe097ea015e74e2c2a6029a94af9))
+
+- Remove duplicate node from subprocess agent pipeline
+  ([`5cb3d58`](https://github.com/UseTheFork/byte/commit/5cb3d58ffa5b726da0b3f585d0411ee82efafb02))
+
+- Remove pass from base_node execute method
+  ([`5528b56`](https://github.com/UseTheFork/byte/commit/5528b56d1a07b0eb250e5cb82a164d0942996a2d))
+
+- Remove self parameter from pytest fixtures
+  ([`1b77ece`](https://github.com/UseTheFork/byte/commit/1b77ece1724472c643a5bf6a732b813d96ace5af))
+
+- Remove unused imports and commented code
+  ([`fef6775`](https://github.com/UseTheFork/byte/commit/fef6775b03f8ed688f222b8103d90dc845df5b9c))
+
+- Remove version tracking from src/byte/__init__.py
+  ([`6369423`](https://github.com/UseTheFork/byte/commit/636942305f8a9d07c3aba406d49887e13bbc524c))
+
+- Rename and reorganize mixins and utility modules
+  ([`21d946c`](https://github.com/UseTheFork/byte/commit/21d946c3221ab51710987868aca897773be04f76))
+
+- Reorganize CLI and domain modules
+  ([`4c3a249`](https://github.com/UseTheFork/byte/commit/4c3a249d339bea9e797a03efba2d968f15bad8d9))
+
+- Reorganize config module and remove unused test fixture
+  ([`6582eeb`](https://github.com/UseTheFork/byte/commit/6582eeb2338b14dbaa565b9308a202548f72d984))
+
+- Reorganize log method placement in log module
+  ([`e264d0d`](https://github.com/UseTheFork/byte/commit/e264d0deee5d492a64b7cf2d0e0a370e99572174))
+
+- Reorganize project structure and move utils
+  ([`9a837a5`](https://github.com/UseTheFork/byte/commit/9a837a5541ad5ef20b9039152bceb4f951cf5b8b))
+
+- Replace self.make() with self.app.make() and add container access methods
+  ([`c07463b`](https://github.com/UseTheFork/byte/commit/c07463b79266964b94a938e10cdfa554a2042515))
+
+This refactoring introduces several key changes: - Replaced direct `self.make()` calls with
+  `self.app.make()` across multiple files - Added new container access methods like `__getitem__`
+  and `log()`, `console()` to Application - Improved type hinting and overloading for container
+  methods - Simplified dependency injection and service resolution
+
+The changes improve the consistency of service resolution and provide more explicit ways to access
+  application services.
+
+- Restructure console and configuration components
+  ([`0e5113e`](https://github.com/UseTheFork/byte/commit/0e5113e1154a27299480e5fe9ebaa9693ee46752))
+
+- Restructure logging and testing modules
+  ([`8a8689b`](https://github.com/UseTheFork/byte/commit/8a8689b31114bd00698a8f5089ffe6f90a5eb720))
+
+- Restructure logging service and remove unused dependencies
+  ([`361d9e0`](https://github.com/UseTheFork/byte/commit/361d9e0f4a286a06bf4fe0e3472da9b29746d3f5))
+
+- Restructure project architecture and module imports
+  ([`6bc5adb`](https://github.com/UseTheFork/byte/commit/6bc5adbab4cfc082aa2e602ebc3aba088f2de543))
+
+- Restructure project architecture and module organization
+  ([`079e155`](https://github.com/UseTheFork/byte/commit/079e15501076b64091dbc797c514190f699cf98d))
+
+Major refactoring of project structure: - Reorganized modules across different packages - Moved CLI
+  and domain-specific components to new locations - Simplified import paths and module dependencies
+  - Removed redundant files and consolidated core functionality
+
+- Restructure project architecture documentation
+  ([`9eb64b4`](https://github.com/UseTheFork/byte/commit/9eb64b4c4650d56fed1f1531199c76e34af0850f))
+
+- Restructure project imports and module organization
+  ([`af44bd9`](https://github.com/UseTheFork/byte/commit/af44bd98d8f70527dd77a4f6a93ea12c15e2fa2c))
+
+Major refactoring of project structure: - Reorganized import paths from domain-based to more direct
+  imports - Removed redundant domain and core directories - Updated import statements across
+  multiple files - Simplified service provider and container initialization - Removed unnecessary
+  async/await calls in service methods - Standardized service initialization and boot processes
+
+- Restructure project imports and module organization
+  ([`5975eb4`](https://github.com/UseTheFork/byte/commit/5975eb47cb830ff339c4aa129bf7913197029a1f))
+
+- Restructure project modules and import paths
+  ([`c1dc2f9`](https://github.com/UseTheFork/byte/commit/c1dc2f97233183c406866b6d04735954f63b0d89))
+
+Major refactoring of project structure: - Moved most modules from `byte/` to `byte/domain/` -
+  Updated import paths across the entire project - Simplified and consolidated import statements -
+  Removed redundant domain prefixes in import paths - Reorganized package hierarchy to improve code
+  organization
+
+- Simplify agent graph construction with graph builder
+  ([`63c0ed3`](https://github.com/UseTheFork/byte/commit/63c0ed37e6af9b126e1da53885b941b4170f0f1d))
+
+Introduces a new GraphBuilder utility to streamline agent graph construction across different agent
+  implementations. This refactoring:
+
+- Removes repetitive graph setup code - Simplifies node addition with type-based node registration -
+  Improves type safety and readability - Reduces boilerplate in agent implementations - Adds support
+  for more flexible node configuration
+
+- Simplify agent graph initialization with base graph method
+  ([`620cf60`](https://github.com/UseTheFork/byte/commit/620cf60b0402c049d625956d86dbb525c5b105d4))
+
+Introduce a new get_base_graph method in the base Agent class to standardize graph initialization
+  across different agent implementations. This reduces code duplication and provides a more
+  consistent way of creating state graphs with start and end nodes.
+
+- Simplify application configuration and environment handling
+  ([`3c48e2d`](https://github.com/UseTheFork/byte/commit/3c48e2d7ca35af5d9d5be13b7960579db17239e3))
+
+Key changes: - Simplified container and application access patterns - Improved environment detection
+  logic - Removed unused imports and commented-out code - Added debug flag to AppConfig -
+  Standardized service provider and bootstrap methods - Removed development-specific code from core
+  modules
+
+- Simplify CLI entry point
+  ([`8f355e8`](https://github.com/UseTheFork/byte/commit/8f355e8987afbe2f869466f7bae5f961c72ff756))
+
+- Simplify configuration and bootstrap process
+  ([`18b3215`](https://github.com/UseTheFork/byte/commit/18b321521a7c18a5defe64be2c52354b741a8976))
+
+- Simplify dependency injection and configuration management
+  ([`f9431b2`](https://github.com/UseTheFork/byte/commit/f9431b256bfd3779e2781fe8f44bc0289c054f4b))
+
+Major architectural changes to simplify dependency injection and configuration management:
+
+- Remove `Configurable` and `Injectable` mixins - Modify `Bootable` mixin to require `app` parameter
+  - Update service and command classes to use `self.app` instead of `self.make()` - Standardize
+  service initialization with `app` parameter - Replace direct config access with
+  `self.app["config"]` - Simplify service and command class inheritance
+
+These changes reduce complexity in dependency resolution and make the application's dependency
+  injection more explicit and straightforward.
+
+- Simplify import statements and module structure
+  ([`5879d8f`](https://github.com/UseTheFork/byte/commit/5879d8f67922d042befaf34574df78bde9ad34ed))
+
+- Simplify stream rendering service and console logging
+  ([`4cf85bc`](https://github.com/UseTheFork/byte/commit/4cf85bc19872717bfddd92b8670987bba41e928f))
+
+Refactored stream rendering and console services to: - Remove redundant logging statements -
+  Simplify method signatures - Improve spinner and stream rendering logic - Remove unnecessary
+  commented-out code - Enhance flexibility of console and stream rendering methods
+
+- Update application context and import management
+  ([`199a4ad`](https://github.com/UseTheFork/byte/commit/199a4add064cb4d41bd6784c98d64a0df97c8d2c))
+
+Refactors how application context is managed and imported across the project: - Removes direct
+  application_context usage - Adds get_application() method - Updates import statements and method
+  signatures - Simplifies context setting and retrieval
+
+- Update bootstrap process with new environment loading
+  ([`d7271bf`](https://github.com/UseTheFork/byte/commit/d7271bf0643b4b6dfc9e90a274773b2df21578b5))
+
+- Update commit prompt template with commit guidelines placeholder
+  ([`1ae5d29`](https://github.com/UseTheFork/byte/commit/1ae5d2951650e1bdcb48eb31c14828ac681162c0))
+
+- Update convention context service type hints
+  ([`7ddc336`](https://github.com/UseTheFork/byte/commit/7ddc336f53937daa3172cb536ca1b52e90c40c86))
+
+- Update file context and path resolution methods
+  ([`38bb90b`](https://github.com/UseTheFork/byte/commit/38bb90b3f0fb58a4b2ec7e7d8d75e0f0ad080f89))
+
+- Update file discovery and service methods
+  ([`5a7ceca`](https://github.com/UseTheFork/byte/commit/5a7ceca122835d81d10d0318a722b9b46801f789))
+
+- Update file services to use consistent path handling
+  ([`33a7a47`](https://github.com/UseTheFork/byte/commit/33a7a479446364d2a4de1fe0feb35a73abae3165))
+
+- Update get_diff method to default to staged changes
+  ([`4c9e8ad`](https://github.com/UseTheFork/byte/commit/4c9e8ad22720456a063408ab3a7318c895fbb633))
+
+Simplify method signature and documentation to clarify default behavior of getting staged changes.
+  Removed unnecessary argument documentation and updated usage comment to reflect the default
+  behavior.
+
+- Update import statements and script structure for commands and settings generation
+  ([`ae78fe9`](https://github.com/UseTheFork/byte/commit/ae78fe9cbcc4007792d19746100016890a877830))
+
+- Update lint service with improved error handling and progress tracking
+  ([`37f75bf`](https://github.com/UseTheFork/byte/commit/37f75bfa950bc6015e06c85bbbd61e021a7c74d1))
+
+- Update logging and console services with enhanced methods
+  ([`0c242a2`](https://github.com/UseTheFork/byte/commit/0c242a20797d98170f9fac7e4db6117d223d509c))
+
+- Update max lines validator to use state and message extraction
+  ([`61278d2`](https://github.com/UseTheFork/byte/commit/61278d2ae7b7977e9ea8f359f07f9216dcf9f371))
+
+- Update node routing and graph builder logic
+  ([`d179fd6`](https://github.com/UseTheFork/byte/commit/d179fd685c4010cf388d7e1cc628e68d8b3090ab))
+
+- Update path resolution and gitignore handling to use new root_path method
+  ([`e0b0e76`](https://github.com/UseTheFork/byte/commit/e0b0e76c23392ca3f0b97b07d888e174d42ab31f))
+
+- Update project configuration and file structure
+  ([`0623916`](https://github.com/UseTheFork/byte/commit/062391601f7cd84af8eb12ffaf290e793a82cc72))
+
+Reorganize project structure, update read-only and editable files in configuration. Modify paths for
+  core components and adjust parser conventions.
+
+- Update project structure and convention paths
+  ([`a87934b`](https://github.com/UseTheFork/byte/commit/a87934b184a50cc966f2dac68a759f371da47d46))
+
+Reorganize project directory structure, updating read-only files and convention paths. Modify
+  service and command implementations to use new application foundation paths.
+
+- Update Python style guide dependency injection example
+  ([`7f1f5e4`](https://github.com/UseTheFork/byte/commit/7f1f5e447706e40ff4710308d21b12d680d49bcf))
+
+- **foundation**: Improve application bootstrapping and logging infrastructure
+  ([`c21da91`](https://github.com/UseTheFork/byte/commit/c21da91c3801e684c14b755e8275c0bb122ea0d7))
+
+Refactored application bootstrapping process to: - Add explicit logging support - Simplify async
+  method calls - Improve debug logging during provider registration - Standardize service provider
+  initialization
+
+- **foundation**: Update console and event bus initialization with application context
+  ([`6e31174`](https://github.com/UseTheFork/byte/commit/6e31174c3468d71ac470cb78e38c30fd278a086f))
+
+- **knowledge**: Reorganize imports and simplify service initialization
+  ([`eebeaf5`](https://github.com/UseTheFork/byte/commit/eebeaf54c67a2cad5d2a0876d0389781730e21bd))
+
+### Testing
+
+- Add comprehensive tests for parser service
+  ([`f7a07aa`](https://github.com/UseTheFork/byte/commit/f7a07aa295152d5a7e7556e42430aad734ea2bba))
+
+- Add memory service test suite
+  ([`8237b44`](https://github.com/UseTheFork/byte/commit/8237b44495352d05ad3b1bbaabd2ff99334bdfaf))
+
+- Add pytest-mock dependency for testing
+  ([`cf5f5c6`](https://github.com/UseTheFork/byte/commit/cf5f5c616f2d3949ad151803285f64cd7d4ad5c0))
+
+- Add test cassettes for commit agent scenarios
+  ([`9958a94`](https://github.com/UseTheFork/byte/commit/9958a94da7e8a202381997eb2146e5874ff24122))
+
+- Add test file for agent analytics service
+  ([`c02ebbc`](https://github.com/UseTheFork/byte/commit/c02ebbcb8e209c6e58d17ea6d633f5f09fe441a4))
+
+- Add test file for subprocess agent
+  ([`e297aa1`](https://github.com/UseTheFork/byte/commit/e297aa1eb5a6f5dc2e3be6ee7d3b2cd28718586e))
+
+- Add test files for ignore and watcher services
+  ([`909f8f1`](https://github.com/UseTheFork/byte/commit/909f8f1999a1565851de13435b3448bede715449))
+
+- Add test for command registry
+  ([`fd358ca`](https://github.com/UseTheFork/byte/commit/fd358ca5b45d5fc93929e66de5eb81cddca6ec76))
+
+- Add test for editing only editable files
+  ([`8336b23`](https://github.com/UseTheFork/byte/commit/8336b23c5d5fe62b021bcd85cfed8f7858f49631))
+
+- Add test for session context service
+  ([`5a01693`](https://github.com/UseTheFork/byte/commit/5a01693c25320f9a56844617fb4f892a31badc08))
+
+- Add test suite for git service
+  ([`0797dd6`](https://github.com/UseTheFork/byte/commit/0797dd689af76330167b23b5d58e255132a0cb9d))
+
+- Add tests for coder agent file operations
+  ([`ab5fe7e`](https://github.com/UseTheFork/byte/commit/ab5fe7e1b27cbfc72939ef7275150c2d1cede971))
+
+- Add tests for coder agent functionality
+  ([`22b9367`](https://github.com/UseTheFork/byte/commit/22b93679019e73106f75a4c491e9c79e5f58bf52))
+
+- Enhance base test utilities and file creation methods
+  ([`e6053b6`](https://github.com/UseTheFork/byte/commit/e6053b67eafedbdb6499236ede4a0990b4c1a143))
+
+- Update commit agent tests with new scenarios and mocking
+  ([`f2b1837`](https://github.com/UseTheFork/byte/commit/f2b18372befd24ff952003ee0e92f39de23df177))
+
+- Update git service test cases to check staged diff behavior
+  ([`7835cf4`](https://github.com/UseTheFork/byte/commit/7835cf47a83d0141b9e30885bacb125ba8684be3))
+
+- Update LLM service tests with boot method and EventType
+  ([`a33b37a`](https://github.com/UseTheFork/byte/commit/a33b37aa139050a7464d5a3fb4bbf44b554c2d5e))
+
+- Update test utilities and watcher service tests
+  ([`cc2753e`](https://github.com/UseTheFork/byte/commit/cc2753efaa6b7a930f9b107a400ec5d30528d92d))
+
+
 ## v0.7.1 (2025-12-31)
 
 ### Bug Fixes
@@ -27,6 +597,11 @@
 
 - Update release workflow and build configuration
   ([`44044db`](https://github.com/UseTheFork/byte/commit/44044db056bc405340c24a0a6c9168a5debf786b))
+
+### Continuous Integration
+
+- Add verification step to release workflow
+  ([`3400690`](https://github.com/UseTheFork/byte/commit/3400690a4195157a923b7a4ea0c9e518edfa9a09))
 
 
 ## v0.7.0 (2025-12-31)
