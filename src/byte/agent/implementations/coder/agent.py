@@ -1,0 +1,53 @@
+from langchain.chat_models import BaseChatModel
+from langgraph.graph.state import CompiledStateGraph
+
+from byte.agent import (
+    Agent,
+    AssistantContextSchema,
+    AssistantNode,
+    LintNode,
+    ParseBlocksNode,
+)
+from byte.agent.implementations.coder.prompt import coder_prompt
+from byte.agent.utils.graph_builder import GraphBuilder
+from byte.llm import LLMService
+from byte.prompt_format import EditFormatService
+
+
+class CoderAgent(Agent):
+    """Domain service for the coder agent specialized in software development.
+
+    Pure domain service that handles coding logic without UI concerns.
+    Integrates with file context, memory, and development tools through
+    the actor system for clean separation of concerns.
+    """
+
+    async def build(self) -> CompiledStateGraph:
+        """Build and compile the coder agent graph with memory and tools."""
+
+        graph = GraphBuilder(self.app)
+
+        # Add nodes
+        graph.add_node(AssistantNode, goto="parse_blocks_node")
+        graph.add_node(ParseBlocksNode)
+        graph.add_node(LintNode)
+
+        checkpointer = await self.get_checkpointer()
+        return graph.build().compile(checkpointer=checkpointer)
+
+    async def get_assistant_runnable(self) -> AssistantContextSchema:
+        llm_service = self.app.make(LLMService)
+        main: BaseChatModel = llm_service.get_main_model()
+        weak: BaseChatModel = llm_service.get_weak_model()
+
+        edit_format_service = self.app.make(EditFormatService)
+
+        return AssistantContextSchema(
+            mode="main",
+            prompt=coder_prompt,
+            main=main,
+            weak=weak,
+            enforcement=edit_format_service.prompts.enforcement,
+            recovery_steps=edit_format_service.prompts.recovery_steps,
+            agent=self.__class__.__name__,
+        )

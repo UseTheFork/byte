@@ -11,9 +11,11 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
 
-from byte.bootstrap import bootstrap, shutdown
-from byte.core.config.config import ByteConfig
-from byte.domain.cli.service.command_registry import Command, CommandRegistry
+# from byte.domain.cli.service.command_registry import Command, CommandRegistry
+from byte import Application, Command
+from byte.cli import CommandRegistry
+from byte.foundation import Kernel
+from byte.main import PROVIDERS
 
 
 def group_commands_by_category(commands: Dict[str, Command]) -> Dict[str, List[tuple[str, Command]]]:
@@ -88,26 +90,25 @@ async def generate_commands_md() -> None:
 
     Usage: `await generate_commands_md()`
     """
-    # Bootstrap minimal app to get registry
-    config = ByteConfig()
-    container = await bootstrap(config)
 
-    try:
-        # Get the registry with all registered commands
-        registry = await container.make(CommandRegistry)
+    app = Application.configure(Path(__file__).parent, PROVIDERS).create()
 
-        # Generate markdown content
-        markdown = create_commands_markdown(registry._slash_commands)
+    kernel = app.make(Kernel, app=app)
+    kernel.bootstrap()
 
-        # Write to docs/reference/commands.md
-        output_file = Path(__file__).parent.parent.parent / "docs" / "reference" / "commands.md"
-        output_file.parent.mkdir(parents=True, exist_ok=True)
-        output_file.write_text(markdown, encoding="utf-8")
+    # Now we can Async boot all the providers
+    await kernel.app.boot()
 
-        print(f"Commands documentation written to {output_file}")
+    registry = app.make(CommandRegistry)
 
-    finally:
-        await shutdown(container)
+    markdown = create_commands_markdown(registry._slash_commands)
+
+    # Write to docs/reference/commands.md
+    output_file = Path(__file__).parent.parent.parent / "docs" / "reference" / "commands.md"
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    output_file.write_text(markdown, encoding="utf-8")
+
+    print(f"Commands documentation written to {output_file}")
 
 
 def main():
@@ -115,6 +116,7 @@ def main():
 
     Usage: `python src/scripts/commands_to_md.py`
     """
+
     asyncio.run(generate_commands_md())
 
 

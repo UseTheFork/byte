@@ -1,25 +1,24 @@
-# Project Architecture Convention
+# Directory Structure & Module Organization Convention
 
 ## Key Principles
 
-- **Domain-Driven Design**: Features organized by domain (files, git, agent) with clear boundaries
-- **Dependency Injection**: Container-based DI with two-phase initialization (register → boot)
-- **Service Provider Pattern**: Each domain has a ServiceProvider that encapsulates registration
-- **Mixin Composition**: Services compose behavior (Bootable, Injectable, Eventable, Configurable)
+- **Domain-driven structure**: Features organized by domain (`files/`, `git/`, `agent/`) with clear boundaries
+- **Two-phase initialization**: Register bindings first, boot dependencies second
+- **Mixin composition**: Services compose behavior through mixins rather than deep inheritance
+- **Lazy resolution**: Services instantiated only when first requested via `make()`
 
 ## Directory Structure
 
 ```
 src/byte/
-├── core/                    # Framework primitives (Container, EventBus)
-│   ├── service/            # Base service classes
-│   └── mixins/             # Reusable behavior mixins
-└── domain/{domain}/         # Feature domains
-    ├── config.py           # Domain configuration schema
-    ├── service_provider.py # Registration & boot logic
-    ├── service/            # Business logic services
-    ├── command/            # User-facing commands
-    └── agent/              # AI agent implementations
+├── foundation/          # Core framework (Container, Application, Bootstrap)
+├── support/            # Base classes & mixins (Service, ServiceProvider)
+│   └── mixins/        # Reusable behavior (Bootable, Injectable, Eventable)
+└── {domain}/          # Feature domains (files, git, agent, llm, etc.)
+    ├── service/       # Business logic services
+    ├── command/       # User-facing CLI commands
+    ├── config.py      # Domain configuration schema
+    └── service_provider.py  # Registration & boot logic
 ```
 
 ## Service Provider Pattern
@@ -32,45 +31,48 @@ class FileServiceProvider(ServiceProvider):
     def commands(self) -> List[Type[Command]]:
         return [AddFileCommand, DropFileCommand]  # Auto-registered & booted
 
-    async def boot(self, container: Container):
+    async def boot(self) -> None:
         # Phase 2: Wire dependencies, register event listeners
-        event_bus = await container.make(EventBus)
-        event_bus.on(EventType.PRE_PROMPT, self.hook_method)
+        event_bus = self.app.make(EventBus)
+        event_bus.on(EventType.FILE_ADDED, self.handle_file_added)
 ```
 
-Bootstrap order in `bootstrap.py` matters: core services first, domain services after.
+**Bootstrap order matters**: Core services first, domain services after. See `RegisterProviders.merge()`.
 
 ## Base Classes
 
 - **Service**: `ABC + Bootable + Injectable + Eventable + Configurable` - business logic
+- **Command**: `ABC + Bootable + Injectable + Configurable + UserInteractive` - CLI commands
 - **Agent**: `ABC + Bootable + Injectable + Eventable + Configurable` - AI workflows
 - **Node**: `ABC + Bootable + Configurable + Eventable` - LangGraph nodes
-- **Command**: `ABC + Bootable + Injectable + Configurable + UserInteractive` - user commands
 
 All implement `async def boot()` for initialization requiring container access.
 
 ## Dependency Resolution
 
-- Register: `app.singleton(Service)` or `app.bind(Service)` for transient
-- Resolve: `service = await self.make(ServiceClass)` from any Bootable/Injectable
-- Auto-boot: Services implementing Bootable are booted on first `make()`
-- Lazy: Services instantiated only when first requested
+```python
+# ✅ Always use self.make()
+service = self.app.make(FileService)  # From Injectable mixin
+
+# Registration patterns
+app.singleton(FileService)  # Single instance, cached
+app.bind(FileService)       # New instance per make()
+```
+
+**Auto-boot**: Services implementing `Bootable` are booted on first `make()` via `ensure_booted()`.
 
 ## Event-Driven Communication
 
 ```python
-# Register listener in ServiceProvider.boot()
-event_bus.on(EventType.FILE_ADDED, self.handle_file_added)
+# Register in ServiceProvider.boot()
+event_bus.on(EventType.FILE_ADDED.value, self.handle_file_added)
 
 # Emit from Eventable services
-await self.emit(Payload(event_type=EventType.FILE_ADDED, data={...}))
+await self.emit(Payload(event_type=EventType.FILE_ADDED, data={"path": path}))
 ```
-
-Decouples domains, allows multiple listeners, enables hooks without tight coupling.
 
 ## Things to Avoid
 
-- ❌ Direct instantiation (`FileService()`) → use `await self.make(ServiceClass)`
+- ❌ Direct instantiation → use `self.make(ServiceClass)`
 - ❌ Global state outside Container → register as singleton
-- ❌ Synchronous `__init__` for I/O → use `async def boot()`
 - ❌ Cross-domain concrete imports → depend on abstractions or use events

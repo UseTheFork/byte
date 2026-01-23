@@ -21,7 +21,7 @@
 - Abstract: `ABC` + `@abstractmethod` for interfaces
 - Inherit base classes: `Service`, `Command`, `Agent`, `Node`
 - Use mixins: `Bootable`, `Injectable`, `Eventable`, `Configurable`
-- Dependency injection: Accept container in `__init__`, use `await self.make(ServiceClass)`
+- Dependency injection: Accept container in `__init__`, use `await self.app.make(ServiceClass)`
 
 ## Async/Await
 

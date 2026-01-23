@@ -4,23 +4,6 @@ default:
   @just --list
 
 
-[group('Aider')]
-[doc('General')]
-ai:
-		aider \
-		--no-show-release-notes \
-		--model sonnet \
-		--watch-files \
-		--no-detect-urls \
-		--git-commit-verify \
-		--read .byte/conventions/COMMENT_STYLEGUIDE.md \
-		--read .byte/conventions/PYTHON_STYLEGUIDE.md \
-		--file src/byte/bootstrap.py \
-		--file src/byte/container.py \
-		--file src/byte/main.py \
-		--lint-cmd "just lint" \
-		--add-gitignore-files
-
-[doc('Lint files')]
-lint files:
-		pre-commit run --files {{files}}
+[doc('Run Pytest With Coverage Report')]
+test:
+		uv run pytest --cov-report=xml --cov-report=term-missing --cov=src/byte src/tests/

@@ -2,5 +2,6 @@
   "basedpyright.analysis.autoImportCompletions": true,
   "basedpyright.importStrategy": "useBundled",
   "basedpyright.analysis.diagnosticMode": "workspace",
-  "editor.insertSpaces": true
+  "editor.insertSpaces": true,
+  "ty.path": [".venv/bin/ty"]
 }

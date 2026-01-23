@@ -60,49 +60,71 @@ lsp:
   timeout: 30
   servers:
     python:
-      command:
-      - uv
-      - run
-      - jedi-language-server
+      preset: ty
+      server_type: local
       languages:
       - python
 presets:
 - id: base
   load_on_boot: false
   conventions:
-  - CODE_STYLEGUIDE.md
+  - CODE_PATTERNS.md
   - COMMENT_STYLEGUIDE.md
   - PROJECT_ARCHITECTURE.md
   - PYTHON_STYLEGUIDE.md
   read_only_files:
-  - src/byte/bootstrap.py
-  - src/byte/container.py
-  - src/byte/core/cli.py
-  - src/byte/core/config/config.py
-  - src/byte/main.py
-  - src/byte/core/mixins/**
-  - src/byte/core/utils/**
-  - src/byte/core/service/base_service.py
-  - src/byte/core/service_provider.py
+  - src/byte/foundation/container.py
+  - src/byte/foundation/application.py
+  - src/byte/foundation/console/kernel.py
+  - src/byte/foundation/console/console.py
+  - src/byte/config/config.py
+  - src/byte/support/utils/**
+  - src/byte/support/service_provider.py
+  - src/byte/support/service.py
+  editable_files:
+  - src/tests/base_test.py
+
+- id: files
+  load_on_boot: false
+  conventions:
+  - CODE_PATTERNS.md
+  - COMMENT_STYLEGUIDE.md
+  - PROJECT_ARCHITECTURE.md
+  - PYTHON_STYLEGUIDE.md
+  read_only_files:
+  - src/byte/foundation/container.py
+  - src/byte/foundation/application.py
+  - src/byte/foundation/console/kernel.py
+  - src/byte/foundation/console/console.py
+  - src/byte/config/config.py
+  - src/byte/support/utils/**
+  - src/byte/support/service_provider.py
+  - src/byte/support/service.py
+  editable_files:
+  - src/tests/base_test.py
+  - src/byte/files/**
+  - src/tests/files/**
 
 - id: command
   conventions:
-  - CODE_STYLEGUIDE.md
+  - CODE_PATTERNS.md
   - COMMENT_STYLEGUIDE.md
   - PROJECT_ARCHITECTURE.md
   - PYTHON_STYLEGUIDE.md
   read_only_files:
-  - src/byte/bootstrap.py
-  - src/byte/container.py
-  - src/byte/core/cli.py
-  - src/byte/core/config/config.py
-  - src/byte/main.py
-  - src/byte/domain/cli/service/command_registry.py
-  - src/byte/core/mixins/user_interactive.py
-  - src/byte/domain/files/command/add_file_command.py
-  - src/byte/domain/files/command/drop_file_command.py
-  - src/byte/domain/knowledge/command/web_command.py
-  - src/byte/domain/git/command/commit_command.py
+  - src/byte/foundation/container.py
+  - src/byte/foundation/application.py
+  - src/byte/foundation/console/kernel.py
+  - src/byte/foundation/console/console.py
+  - src/byte/config/config.py
+  - src/byte/support/utils/**
+  - src/byte/support/mixins/user_interactive.py
+  - src/byte/cli/service/command_registry.py
+  - src/byte/files/command/add_file_command.py
+  - src/byte/files/command/drop_file_command.py
+  - src/byte/knowledge/command/web_command.py
+  - src/byte/git/command/commit_command.py
+
 - id: mkdocs
   prompt: 'Using the `MKDOCS_STYLEGUIDE` and existing docs as examples, document  '
   conventions:
@@ -117,6 +139,7 @@ presets:
   - docs/concepts/lint.md
   - docs/concepts/file-context.md
   - .byte/config.yaml
+  
 - id: agent
   conventions:
   - CODE_STYLEGUIDE.md
@@ -124,36 +147,44 @@ presets:
   - PROJECT_ARCHITECTURE.md
   - PYTHON_STYLEGUIDE.md
   read_only_files:
-  - src/byte/bootstrap.py
-  - src/byte/container.py
-  - src/byte/core/cli.py
-  - src/byte/core/config/config.py
-  - src/byte/main.py
+  - src/byte/foundation/container.py
+  - src/byte/foundation/application.py
+  - src/byte/foundation/console/kernel.py
+  - src/byte/foundation/console/console.py
+  - src/byte/config/config.py
+  - src/byte/support/utils/**
+  - src/byte/support/mixins/**
+  - src/byte/support/service_provider.py
+  - src/byte/support/service.py
   editable_files:
-  - src/byte/domain/agent/state.py
-  - src/byte/domain/agent/reducers.py
-  - src/byte/domain/agent/schemas.py
-  - src/byte/domain/agent/service_provider.py
-  - src/byte/domain/agent/implementations/base.py
-  - src/byte/domain/agent/implementations/ask/**
-  - src/byte/domain/agent/implementations/coder/**
-  - src/byte/domain/agent/implementations/commit/**
-  - src/byte/domain/agent/nodes/**
+  - src/byte/agent/state.py
+  - src/byte/agent/reducers.py
+  - src/byte/agent/schemas.py
+  - src/byte/agent/service_provider.py
+  - src/byte/agent/implementations/base.py
+  - src/byte/agent/nodes/base_node.py
+  - src/tests/agent/test_commit_agent.py
+  - src/byte/agent/nodes/start_node.py
+  - src/byte/agent/nodes/end_node.py
+  - src/byte/agent/nodes/assistant_node.py
+
 - id: parser
   conventions:
-  - CODE_STYLEGUIDE.md
+  - CODE_PATTERNS.md
   - COMMENT_STYLEGUIDE.md
   - PROJECT_ARCHITECTURE.md
   - PYTHON_STYLEGUIDE.md
   read_only_files:
-  - src/byte/bootstrap.py
-  - src/byte/container.py
-  - src/byte/core/cli.py
-  - src/byte/core/config/config.py
-  - src/byte/main.py
-  - src/byte/core/mixins/**
-  - src/byte/core/utils/**
-  - src/byte/core/service/base_service.py
-  - src/byte/core/service_provider.py
+  - src/byte/foundation/container.py
+  - src/byte/foundation/application.py
+  - src/byte/foundation/console/kernel.py
+  - src/byte/foundation/console/console.py
+  - src/byte/config/config.py
+  - src/byte/support/utils/**
+  - src/byte/support/service_provider.py
+  - src/byte/support/service.py
   editable_files:
-  - src/byte/domain/prompt_format/**
+  - src/byte/agent/nodes/parse_blocks_node.py
+  - src/tests/base_test.py
+  - src/byte/prompt_format/**
+  - src/tests/prompt_format/**
