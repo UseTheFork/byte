@@ -147,14 +147,15 @@ jobs:
         with:
           name: ${{ needs.build.outputs.lock-file-artifact }}
 
-      - name: Setup | Generate commands documentation
-        run: uv run python src/scripts/commands_to_md.py
+      # - name: Setup | Generate commands documentation
+      #   run: uv run python src/scripts/commands_to_md.py
       
-      - name: Setup | Generate settings documentation
-        run: uv run python src/scripts/settings_to_md.py
+      # - name: Setup | Generate settings documentation
+      #   run: uv run python src/scripts/settings_to_md.py
 
       - name: Setup | Stage Lock File for Version Commit
-        run: git add uv.lock docs/
+        run: git add uv.lock
+        # run: git add uv.lock docs/
 
       - name: Release | Create Release
         id: release
