@@ -11,9 +11,23 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
 
-from byte.bootstrap import bootstrap, shutdown
-from byte.core import ByteConfig
-from byte.domain.cli.service.command_registry import Command, CommandRegistry
+# from byte.domain.cli.service.command_registry import Command, CommandRegistry
+from byte import Application, Command
+from byte.agent import AgentServiceProvider
+from byte.analytics import AnalyticsProvider
+from byte.cli import CLIServiceProvider, CommandRegistry
+from byte.development import DevelopmentServiceProvider
+from byte.files import FileServiceProvider
+from byte.foundation import Kernel
+from byte.git import GitServiceProvider
+from byte.knowledge import KnowledgeServiceProvider
+from byte.lint import LintServiceProvider
+from byte.llm import LLMServiceProvider
+from byte.memory import MemoryServiceProvider
+from byte.presets import PresetsProvider
+from byte.prompt_format import PromptFormatProvider
+from byte.system import SystemServiceProvider
+from byte.web import WebServiceProvider
 
 
 def group_commands_by_category(commands: Dict[str, Command]) -> Dict[str, List[tuple[str, Command]]]:
@@ -88,26 +102,44 @@ async def generate_commands_md() -> None:
 
     Usage: `await generate_commands_md()`
     """
-    # Bootstrap minimal app to get registry
-    config = ByteConfig()
-    container = await bootstrap(config)
 
-    try:
-        # Get the registry with all registered commands
-        registry = await container.make(CommandRegistry)
+    providers = [
+        CLIServiceProvider,
+        MemoryServiceProvider,
+        KnowledgeServiceProvider,
+        FileServiceProvider,
+        # ToolsServiceProvider,
+        LLMServiceProvider,
+        GitServiceProvider,
+        LintServiceProvider,
+        AgentServiceProvider,
+        # LSPServiceProvider,
+        AnalyticsProvider,
+        PromptFormatProvider,
+        WebServiceProvider,
+        PresetsProvider,
+        DevelopmentServiceProvider,
+        SystemServiceProvider,
+    ]
 
-        # Generate markdown content
-        markdown = create_commands_markdown(registry._slash_commands)
+    app = Application.configure(Path(__file__).parent, providers).create()
 
-        # Write to docs/reference/commands.md
-        output_file = Path(__file__).parent.parent.parent / "docs" / "reference" / "commands.md"
-        output_file.parent.mkdir(parents=True, exist_ok=True)
-        output_file.write_text(markdown, encoding="utf-8")
+    kernel = app.make(Kernel, app=app)
+    kernel.bootstrap()
 
-        print(f"Commands documentation written to {output_file}")
+    # Now we can Async boot all the providers
+    await kernel.app.boot()
 
-    finally:
-        await shutdown(container)
+    registry = app.make(CommandRegistry)
+
+    markdown = create_commands_markdown(registry._slash_commands)
+
+    # Write to docs/reference/commands.md
+    output_file = Path(__file__).parent.parent.parent / "docs" / "reference" / "commands.md"
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    output_file.write_text(markdown, encoding="utf-8")
+
+    print(f"Commands documentation written to {output_file}")
 
 
 def main():
@@ -115,6 +147,7 @@ def main():
 
     Usage: `python src/scripts/commands_to_md.py`
     """
+
     asyncio.run(generate_commands_md())
 
 
