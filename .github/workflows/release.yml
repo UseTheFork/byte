@@ -163,7 +163,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          uv run semantic-release -v --strict version --skip-build
+          uv run semantic-release -vv --strict version --skip-build
           uv run semantic-release publish
 
     outputs:
