@@ -927,6 +927,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#git" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Git
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#lint" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1144,6 +1155,17 @@
     <span class="md-ellipsis">
       
         Files &gt; Watch
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#git" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Git
       
     </span>
   </a>
@@ -1433,6 +1455,55 @@
 </tr>
 </tbody>
 </table>
+<h2 id="git"><a class="toclink" href="#git">Git</a></h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable_scopes</code></td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>Enable scope selection for conventional commits</td>
+</tr>
+<tr>
+<td><code>enable_breaking_changes</code></td>
+<td><code>boolean</code></td>
+<td><code>true</code></td>
+<td>Enable breaking change detection and confirmation</td>
+</tr>
+<tr>
+<td><code>enable_body</code></td>
+<td><code>boolean</code></td>
+<td><code>true</code></td>
+<td>Enable commit message body generation</td>
+</tr>
+<tr>
+<td><code>scopes</code></td>
+<td><code>array[string]</code></td>
+<td>-</td>
+<td>Available scopes for conventional commits</td>
+</tr>
+<tr>
+<td><code>description_guidelines</code></td>
+<td><code>array[string]</code></td>
+<td>-</td>
+<td>Additional guidelines for commit descriptions</td>
+</tr>
+<tr>
+<td><code>max_description_length</code></td>
+<td><code>integer</code></td>
+<td><code>72</code></td>
+<td>Maximum character length for commit descriptions</td>
+</tr>
+</tbody>
+</table>
 <h2 id="lint"><a class="toclink" href="#lint">Lint</a></h2>
 <p>Code linting and formatting configuration</p>
 <table>
@@ -1474,7 +1545,7 @@
 <td><code>command</code></td>
 <td><code>array[string]</code></td>
 <td>-</td>
-<td>Command and arguments to execute for linting (e.g., ['ruff', 'check', '--fix'])</td>
+<td>Command and arguments to execute for linting (e.g., ['ruff', 'check', '--fix']). Use {file} placeholder to specify where the file path should be inserted, otherwise it will be appended to the end.</td>
 </tr>
 <tr>
 <td><code>languages</code></td>
@@ -1628,54 +1699,14 @@
 </tbody>
 </table>
 <h2 id="presets"><a class="toclink" href="#presets">Presets</a></h2>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Type</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>id</code></td>
-<td><code>string</code></td>
-<td>-</td>
-<td>Unique identifier for the preset, used in /preset <id> command</td>
-</tr>
-<tr>
-<td><code>read_only_files</code></td>
-<td><code>array[string]</code></td>
-<td>-</td>
-<td>Files to add to read-only context</td>
-</tr>
-<tr>
-<td><code>editable_files</code></td>
-<td><code>array[string]</code></td>
-<td>-</td>
-<td>Files to add to editable context</td>
-</tr>
-<tr>
-<td><code>conventions</code></td>
-<td><code>array[string]</code></td>
-<td>-</td>
-<td>Convention files to load</td>
-</tr>
-<tr>
-<td><code>prompt</code></td>
-<td><code>string | null</code></td>
-<td>-</td>
-<td>Preset prompt to load into chat input</td>
-</tr>
-<tr>
-<td><code>load_on_boot</code></td>
-<td><code>boolean</code></td>
-<td><code>false</code></td>
-<td>Automatically load this preset when byte starts</td>
-</tr>
-</tbody>
-</table>
+<p>| Field             | Type            | Default | Description                                                    |
+| ----------------- | --------------- | ------- | -------------------------------------------------------------- | ------------------------------------- |
+| <code>id</code>              | <code>string</code>        | -       | Unique identifier for the preset, used in /preset <id> command |
+| <code>read_only_files</code> | <code>array[string]</code> | -       | Files to add to read-only context                              |
+| <code>editable_files</code>  | <code>array[string]</code> | -       | Files to add to editable context                               |
+| <code>conventions</code>     | <code>array[string]</code> | -       | Convention files to load                                       |
+| <code>prompt</code>          | <code>string         | null</code>   | -                                                              | Preset prompt to load into chat input |
+| <code>load_on_boot</code>    | <code>boolean</code>       | <code>false</code> | Automatically load this preset when byte starts                |</p>
 <h2 id="web"><a class="toclink" href="#web">Web</a></h2>
 <table>
 <thead>
