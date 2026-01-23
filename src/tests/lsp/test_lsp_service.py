@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def providers(self):
+def providers():
     """Provide LSPServiceProvider for LSP service tests."""
     from byte.lsp import LSPServiceProvider
 

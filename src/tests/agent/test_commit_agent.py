@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def providers(self):
+def providers():
     """Provide AgentServiceProvider for commit agent tests."""
     from byte.agent import AgentServiceProvider
     from byte.files import FileServiceProvider

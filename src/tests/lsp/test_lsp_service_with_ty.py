@@ -20,7 +20,7 @@ def providers():
 
 
 @pytest.fixture
-def config(self):
+def config():
     """Create a ByteConfig instance with Ty LSP enabled."""
     from byte.config import ByteConfig
     from byte.lsp import PresetServerConfig
