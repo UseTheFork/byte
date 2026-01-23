@@ -145,7 +145,7 @@ build-backend = "uv_build"
 [tool.semantic_release]
 version_toml = [
     "pyproject.toml:project.version",
-    ".src/byte/__init__.py:__version__",
+    "./src/byte/__init__.py:__version__",
 ]
 build_command = """
   uv lock --upgrade-package byte-ai-cli
