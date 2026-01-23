@@ -13,21 +13,9 @@ from typing import Dict, List
 
 # from byte.domain.cli.service.command_registry import Command, CommandRegistry
 from byte import Application, Command
-from byte.agent import AgentServiceProvider
-from byte.analytics import AnalyticsProvider
-from byte.cli import CLIServiceProvider, CommandRegistry
-from byte.development import DevelopmentServiceProvider
-from byte.files import FileServiceProvider
+from byte.cli import CommandRegistry
 from byte.foundation import Kernel
-from byte.git import GitServiceProvider
-from byte.knowledge import KnowledgeServiceProvider
-from byte.lint import LintServiceProvider
-from byte.llm import LLMServiceProvider
-from byte.memory import MemoryServiceProvider
-from byte.presets import PresetsProvider
-from byte.prompt_format import PromptFormatProvider
-from byte.system import SystemServiceProvider
-from byte.web import WebServiceProvider
+from byte.main import PROVIDERS
 
 
 def group_commands_by_category(commands: Dict[str, Command]) -> Dict[str, List[tuple[str, Command]]]:
@@ -103,26 +91,7 @@ async def generate_commands_md() -> None:
     Usage: `await generate_commands_md()`
     """
 
-    providers = [
-        CLIServiceProvider,
-        MemoryServiceProvider,
-        KnowledgeServiceProvider,
-        FileServiceProvider,
-        # ToolsServiceProvider,
-        LLMServiceProvider,
-        GitServiceProvider,
-        LintServiceProvider,
-        AgentServiceProvider,
-        # LSPServiceProvider,
-        AnalyticsProvider,
-        PromptFormatProvider,
-        WebServiceProvider,
-        PresetsProvider,
-        DevelopmentServiceProvider,
-        SystemServiceProvider,
-    ]
-
-    app = Application.configure(Path(__file__).parent, providers).create()
+    app = Application.configure(Path(__file__).parent, PROVIDERS).create()
 
     kernel = app.make(Kernel, app=app)
     kernel.bootstrap()

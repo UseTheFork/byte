@@ -165,7 +165,7 @@ def schema_to_markdown(schema: Dict[str, Any]) -> str:
         if prop.get("exclude", False):
             continue
 
-        if field_name == "development" or field_name == "system":
+        if field_name == "development" or field_name == "system" or field_name == "app":
             continue
 
         # Check for direct $ref OR array with $ref items OR anyOf with array
