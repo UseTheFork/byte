@@ -137,7 +137,7 @@ class PrepareEnvironment(Bootstrapper):
             yaml.dump(
                 config.model_dump(mode="json"),
                 f,
-                default_flow_style=True,
+                default_flow_style=False,
                 sort_keys=False,
                 allow_unicode=True,
             )
@@ -224,7 +224,7 @@ class PrepareEnvironment(Bootstrapper):
 
         self._prepare_directories(app)
 
-        if not self.is_first_boot(app):
+        if self.is_first_boot(app):
             self._run_first_boot_setup(app)
 
     def is_first_boot(self, app: Application) -> bool:
@@ -233,4 +233,4 @@ class PrepareEnvironment(Bootstrapper):
         Usage: `if await initializer.is_first_boot(): ...`
         """
 
-        return not app.config_path().exists()
+        return not app.config_path("config.yaml").exists()
