@@ -149,7 +149,7 @@ build_command = """
   uv build
 """
 commit_subject = "chore: release v{version}"
-commit_message = "chore: release v{version}\n\n{changelog}"
+commit_message = "chore: release v{version}"
 commit_parser = "conventional"
 logging_use_named_masks = false
 major_on_zero = true
