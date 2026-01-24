@@ -1,0 +1,279 @@
+interactions:
+- request:
+    body: '{"max_tokens":8192,"messages":[{"role":"user","content":[{"type":"text","text":"<rules
+      type=\"Allowed Commit Types\">\n- **feat**: Commits that add or remove a new
+      feature to the API or UI\n- **fix**: Commits that fix an API or UI bug of a
+      preceded feat commit\n- **refactor**: Commits that rewrite/restructure code
+      without changing API or UI behaviour\n- **perf**: Commits that improve performance
+      (special refactor commits)\n- **style**: Commits that do not affect meaning
+      (white-space, formatting, missing semi-colons, etc)\n- **test**: Commits that
+      add missing tests or correct existing tests\n- **build**: Commits that affect
+      build components (build tool, CI pipeline, dependencies, project version, etc)\n-
+      **ops**: Commits that affect operational components (infrastructure, deployment,
+      backup, recovery, etc)\n- **docs**: Commits that affect documentation only\n-
+      **chore**: Commits that represent tasks (initial commit, modifying .gitignore,
+      etc)\n</rules>\n<rules type=\"Commit Description Guidelines\">\n- Use imperative
+      mood (e.g., ''add feature'' not ''added feature'' or ''adding feature'')\n-
+      Start with lowercase letter\n- Do not end with a period\n- Keep under 72 characters\n-
+      Be concise and descriptive\n- Focus on what the change does, not how it does
+      it\n</rules>\n<rules type=\"Allowed Commit Scopes\">\n</rules>\n<rules type=\"Field
+      Inclusion Rules\">\n- DO NOT include `scope` in the commit message\n</rules>"},{"type":"text","text":"<context
+      type=\"Diff\" change_type=\"A\" file=\"new_api.py\">\n</context>\n<context type=\"Diff\"
+      change_type=\"A\" file=\"old_api.py\">\n</context>\n<context type=\"Diff\" change_type=\"A\"
+      file=\"test_commit.txt\">\n</context><context type=\"Files\">\nnew: new_api.py\nnew:
+      old_api.py\nnew: test_commit.txt\n</context>"}]}],"model":"claude-3-5-haiku-latest","stream":true,"system":"<task>\nYou
+      are an expert software engineer that generates concise, one-line Git commit
+      messages based on the provided diffs.\nReview the provided context and diffs
+      which are about to be committed to a git repo.\nReview the diffs carefully.\nIMPORTANT:
+      You MUST follow the commit guidelines provided in the Rules section below.\nRead
+      and apply ALL rules for commit types, scopes, and description formatting.\n</task>","temperature":0.1,"tool_choice":{"type":"tool","name":"CommitPlan"},"tools":[{"name":"CommitPlan","input_schema":{"properties":{"commits":{"description":"List
+      of commit groups, each with a message and files.","items":{"properties":{"type":{"description":"The
+      commit type. Refer to the <rules type=''Allowed Commit Types''> section for
+      valid types and their descriptions.","type":"string"},"scope":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"description":"OPTIONAL
+      scope providing additional contextual information. Refer to the <rules type=''Allowed
+      Commit Scopes''> section for valid scope values."},"commit_message":{"description":"The
+      description part of the commit message only (without the type prefix). Refer
+      to the <rules type=''Commit Description Guidelines''> section for formatting
+      requirements.","type":"string"},"breaking_change":{"default":false,"description":"Flag
+      indicating whether this commit introduces a breaking change.","type":"boolean"},"breaking_change_message":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"description":"REQUIRED
+      if breaking_change is True AND the commit_message isn''t sufficiently informative.
+      Describes the breaking change."},"body":{"anyOf":[{"type":"string"},{"type":"null"}],"default":null,"description":"OPTIONAL
+      body with motivation for the change and contrast with previous behavior. Only
+      needed if the commit_message isn''t sufficiently informative. Use imperative,
+      present tense: ''change'' not ''changed'' nor ''changes''. Should explain why
+      the change was made, not what was changed (code shows that). If breaking_change
+      is True, describe the breaking changes here."},"files":{"description":"List
+      of file paths that are part of this commit.","items":{"type":"string"},"type":"array"}},"required":["type","commit_message","files"],"type":"object"},"type":"array"}},"required":["commits"],"type":"object"},"description":""}]}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4149'
+      Content-Type:
+      - application/json
+      Host:
+      - api.anthropic.com
+      User-Agent:
+      - AsyncAnthropic/Python 0.75.0
+      X-Stainless-Arch:
+      - x64
+      X-Stainless-Async:
+      - async:asyncio
+      X-Stainless-Lang:
+      - python
+      X-Stainless-OS:
+      - Linux
+      X-Stainless-Package-Version:
+      - 0.75.0
+      X-Stainless-Runtime:
+      - CPython
+      X-Stainless-Runtime-Version:
+      - 3.12.11
+      anthropic-version:
+      - '2023-06-01'
+      x-api-key:
+      - XXXX
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-timeout:
+      - NOT_GIVEN
+    method: POST
+    uri: https://api.anthropic.com/v1/messages
+  response:
+    body:
+      string: 'event: message_start
+
+        data: {"type":"message_start","message":{"model":"claude-3-5-haiku-20241022","id":"msg_011cnFrGLNVFPkLCwSUJwtFA","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":1395,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":15,"service_tier":"standard"}}      }
+
+
+        event: content_block_start
+
+        data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_01RKjzNhhfDNgehYcZnPKbvs","name":"CommitPlan","input":{}}    }
+
+
+        event: ping
+
+        data: {"type": "ping"}
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":""}      }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"com"}              }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"mits\":
+        [{"}              }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\"typ"}              }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"e\":"}
+        }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\"chore\",\"co"}     }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"mmit_me"}
+        }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"ssage"}        }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\":\"add
+        "}              }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"initia"}  }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"l
+        project f"}               }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"iles\",\"fi"}               }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"les\":[\"new_a"}          }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"pi.p"}           }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"y\",\"old_api."}            }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"py"}        }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\",\"test"}
+        }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"_co"}          }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"mmit.txt\""}            }
+
+
+        event: content_block_delta
+
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"]}]}"}      }
+
+
+        event: content_block_stop
+
+        data: {"type":"content_block_stop","index":0}
+
+
+        event: message_delta
+
+        data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"input_tokens":1395,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":89}               }
+
+
+        event: message_stop
+
+        data: {"type":"message_stop"          }
+
+
+        '
+    headers:
+      CF-RAY:
+      - 9c328c500b509032-BOS
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - text/event-stream; charset=utf-8
+      Date:
+      - Sat, 24 Jan 2026 21:15:47 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Robots-Tag:
+      - none
+      anthropic-organization-id:
+      - cda99ffa-1f58-4491-997b-b46793c65453
+      anthropic-ratelimit-input-tokens-limit:
+      - '400000'
+      anthropic-ratelimit-input-tokens-remaining:
+      - '399000'
+      anthropic-ratelimit-input-tokens-reset:
+      - '2026-01-24T21:15:46Z'
+      anthropic-ratelimit-output-tokens-limit:
+      - '80000'
+      anthropic-ratelimit-output-tokens-remaining:
+      - '80000'
+      anthropic-ratelimit-output-tokens-reset:
+      - '2026-01-24T21:15:46Z'
+      anthropic-ratelimit-requests-limit:
+      - '4000'
+      anthropic-ratelimit-requests-remaining:
+      - '3999'
+      anthropic-ratelimit-requests-reset:
+      - '2026-01-24T21:15:46Z'
+      anthropic-ratelimit-tokens-limit:
+      - '480000'
+      anthropic-ratelimit-tokens-remaining:
+      - '479000'
+      anthropic-ratelimit-tokens-reset:
+      - '2026-01-24T21:15:46Z'
+      cf-cache-status:
+      - DYNAMIC
+      request-id:
+      - req_011CXStwnUriNoNouqg89PdT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-envoy-upstream-service-time:
+      - '841'
+    status:
+      code: 200
+      message: OK
+version: 1

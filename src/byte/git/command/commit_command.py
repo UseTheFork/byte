@@ -45,29 +45,32 @@ class CommitCommand(Command):
         Usage: Called automatically when user types `/commit`
         """
 
-        console = self.app["console"]
-        await self.git_service.stage_changes()
-
-        repo = await self.git_service.get_repo()
-
-        # Validate staged changes exist to prevent empty commits
-        if not repo.index.diff("HEAD"):
-            console.print_warning("No staged changes to commit.")
-            return
-
         try:
-            lint_service = self.app.make(LintService)
-            lint_commands = await lint_service()
+            console = self.app["console"]
+            await self.git_service.stage_changes()
 
-            do_fix, failed_commands = await lint_service.display_results_summary(lint_commands)
-            if do_fix:
-                joined_lint_errors = lint_service.format_lint_errors(failed_commands)
-                agent_service = self.app.make(AgentService)
-                await agent_service.execute_agent(joined_lint_errors, CoderAgent)
-        except (LintConfigException, InputCancelledError):
-            pass
+            # Validate staged changes exist to prevent empty commits
 
-        try:
+            diff = await self.git_service.get_diff()
+            if not diff:
+                console.print_warning("No staged changes to commit.")
+                return
+
+            try:
+                lint_service = self.app.make(LintService)
+                lint_commands = await lint_service()
+
+                do_fix, failed_commands = await lint_service.display_results_summary(lint_commands)
+                if do_fix:
+                    joined_lint_errors = lint_service.format_lint_errors(failed_commands)
+                    agent_service = self.app.make(AgentService)
+                    await agent_service.execute_agent(joined_lint_errors, CoderAgent)
+            except LintConfigException:
+                pass
+
+            # Stage the changes again if anything changed via the lint.
+            await self.git_service.stage_changes()
+
             prompt = await self.commit_service.build_commit_prompt()
 
             commit_type = await self.prompt_for_select(
@@ -89,4 +92,4 @@ class CommitCommand(Command):
                 await self.git_service.commit(formatted_message)
 
         except InputCancelledError:
-            pass
+            return

@@ -64,7 +64,8 @@ def git_repo(tmp_path, config):
     readme.write_text("# Test Project\n\nThis is a test project.\n")
 
     gitignore = repo_path / ".gitignore"
-    gitignore.write_text("*.pyc\n__pycache__/\n.pytest_cache/\n")
+
+    gitignore.write_text("*.pyc\n__pycache__/\n.pytest_cache/\n.byte/*\n")
 
     # Create .byte directory
     byte_dir = repo_path / ".byte"
