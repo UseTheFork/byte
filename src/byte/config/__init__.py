@@ -21,8 +21,8 @@ _dynamic_imports = {
     # keep-sorted start
     "ByteConfig": "byte_config",
     "ByteConfigException": "exceptions",
-    "Repository": "repository",
     "Migrator": "migrator",
+    "Repository": "repository",
     # keep-sorted end
 }
 

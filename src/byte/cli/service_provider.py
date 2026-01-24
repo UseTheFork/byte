@@ -31,7 +31,6 @@ class CLIServiceProvider(ServiceProvider):
         )
 
     async def boot_messages(self, payload: Payload) -> Payload:
-        config = self.app["config"]
         console = self.app["console"]
 
         messages = payload.get("messages", [])
