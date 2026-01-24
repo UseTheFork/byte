@@ -148,7 +148,6 @@ class InteractionService(Service):
 
         except (EOFError, KeyboardInterrupt):
             # Return default confirmation on interrupt
-
             raise InputCancelledError
         except Exception:
             # Fallback if container/console not available
