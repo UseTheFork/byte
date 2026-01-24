@@ -94,7 +94,7 @@ async def test_migration_001_migrates_model_to_main_and_weak(git_repo_v0: Path, 
     assert migrated_config["version"] == "1.0.0"
     assert "model" not in migrated_config["llm"]
     assert migrated_config["llm"]["main_model"]["model"] == "claude-sonnet-4-5"
-    assert migrated_config["llm"]["main_model"]["weak_model"] == "claude-sonnet-4-5"
+    assert migrated_config["llm"]["weak_model"]["model"] == "claude-sonnet-4-5"
 
 
 @pytest.mark.asyncio
