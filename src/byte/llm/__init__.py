@@ -6,44 +6,35 @@ from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
     from byte.llm.schemas import (
-        AnthropicSchema,
-        GoogleSchema,
-        LLMSchema,
         ModelBehavior,
         ModelConstraints,
         ModelParams,
+        ModelProvider,
         ModelSchema,
-        OpenAiSchema,
         ReinforcementMode,
     )
     from byte.llm.service.llm_service import LLMService
     from byte.llm.service_provider import LLMServiceProvider
 
 __all__ = (
-    "AnthropicSchema",
-    "GoogleSchema",
-    "LLMSchema",
     "LLMService",
     "LLMServiceProvider",
     "ModelBehavior",
     "ModelConstraints",
     "ModelParams",
+    "ModelProvider",
     "ModelSchema",
-    "OpenAiSchema",
     "ReinforcementMode",
 )
 
 _dynamic_imports = {
-    "AnthropicSchema": "schemas",
-    "GoogleSchema": "schemas",
-    "LLMSchema": "schemas",
     "LLMService": "service.llm_service",
     "LLMServiceProvider": "service_provider",
     "ModelBehavior": "schemas",
     "ModelConstraints": "schemas",
+    "ModelProvider": "schemas",
     "ModelParams": "schemas",
     "ModelSchema": "schemas",
-    "OpenAiSchema": "schemas",
     "ReinforcementMode": "schemas",
 }
 

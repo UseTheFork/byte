@@ -6,8 +6,11 @@ from typing import TYPE_CHECKING
 
 import pytest
 from langchain_anthropic import ChatAnthropic
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 
 from byte import EventType
+from byte.llm import LLMService, ModelSchema
 
 if TYPE_CHECKING:
     from byte import Application
@@ -24,49 +27,55 @@ def providers():
 @pytest.mark.asyncio
 async def test_boot_configures_anthropic_schema(application: Application):
     """Test that boot configures AnthropicSchema when anthropic is selected."""
-    from byte.llm import AnthropicSchema, LLMService
 
     # Set anthropic as the model
-    application["config"].llm.model = "anthropic"
-    application["config"].llm.anthropic.api_key = "test-key"
+    application["config"].llm.providers.anthropic.enable = True
+    application["config"].llm.providers.anthropic.api_key = "test-key"
 
     service = application.make(LLMService)
     service.boot()
 
-    assert isinstance(service._service_config, AnthropicSchema)
-    assert service._service_config.api_key == "test-key"
+    assert isinstance(service._main_schema, ModelSchema)
+    assert service._main_schema.model_class == ChatAnthropic
+    assert service._main_schema.provider.api_key == "test-key"
 
 
 @pytest.mark.asyncio
-async def test_boot_configures_openai_schema(application: Application):
+async def test_boot_configures_openai_schema(application: Application, monkeypatch):
     """Test that boot configures OpenAiSchema when openai is selected."""
-    from byte.llm import LLMService, OpenAiSchema
+    from byte.llm import LLMService
 
     # Set openai as the model
-    application["config"].llm.model = "openai"
-    application["config"].llm.openai.api_key = "test-openai-key"
+    application["config"].llm.providers.anthropic.enable = False
+    application["config"].llm.providers.gemini.enable = False
+    application["config"].llm.providers.openai.enable = True
+    application["config"].llm.providers.openai.api_key = "test-key"
 
     service = application.make(LLMService)
     service.boot()
 
-    assert isinstance(service._service_config, OpenAiSchema)
-    assert service._service_config.api_key == "test-openai-key"
+    assert isinstance(service._main_schema, ModelSchema)
+    assert service._main_schema.model_class == ChatOpenAI
+    assert service._main_schema.provider.api_key == "test-key"
 
 
 @pytest.mark.asyncio
 async def test_boot_configures_gemini_schema(application: Application):
     """Test that boot configures GoogleSchema when gemini is selected."""
-    from byte.llm import GoogleSchema, LLMService
+    from byte.llm import LLMService
 
     # Set gemini as the model
-    application["config"].llm.model = "gemini"
-    application["config"].llm.gemini.api_key = "test-gemini-key"
+    application["config"].llm.providers.anthropic.enable = False
+    application["config"].llm.providers.openai.enable = False
+    application["config"].llm.providers.gemini.enable = True
+    application["config"].llm.providers.gemini.api_key = "test-key"
 
     service = application.make(LLMService)
     service.boot()
 
-    assert isinstance(service._service_config, GoogleSchema)
-    assert service._service_config.api_key == "test-gemini-key"
+    assert isinstance(service._main_schema, ModelSchema)
+    assert service._main_schema.model_class == ChatGoogleGenerativeAI
+    assert service._main_schema.provider.api_key == "test-key"
 
 
 @pytest.mark.asyncio
@@ -75,22 +84,18 @@ async def test_boot_copies_provider_params(application: Application):
     from byte.llm import LLMService
 
     # Set provider params
-    application["config"].llm.model = "anthropic"
-    application["config"].llm.anthropic.model_params = {"custom_param": "value"}
+    application["config"].llm.main_model.extra_params = {"custom_param": "value"}
 
     service = application.make(LLMService)
     service.boot()
 
-    assert service._service_config.provider_params == {"custom_param": "value"}
+    assert service._main_schema.extra_params == {"custom_param": "value"}
 
 
 @pytest.mark.asyncio
 async def test_get_model_returns_main_model_by_default(application: Application):
     """Test that get_model returns main model when no type specified."""
     from byte.llm import LLMService
-
-    application["config"].llm.model = "anthropic"
-    application["config"].llm.anthropic.api_key = "test-key"
 
     service = application.make(LLMService)
     service.boot()
@@ -104,9 +109,6 @@ async def test_get_model_returns_main_model_by_default(application: Application)
 async def test_get_model_returns_weak_model_when_specified(application: Application):
     """Test that get_model returns weak model when type is 'weak'."""
     from byte.llm import LLMService
-
-    application["config"].llm.model = "anthropic"
-    application["config"].llm.anthropic.api_key = "test-key"
 
     service = application.make(LLMService)
     service.boot()
@@ -123,9 +125,6 @@ async def test_get_model_uses_correct_model_class(application: Application):
 
     from byte.llm import LLMService
 
-    application["config"].llm.model = "anthropic"
-    application["config"].llm.anthropic.api_key = "test-key"
-
     service = application.make(LLMService)
     service.boot()
     model = service.get_model()
@@ -138,24 +137,19 @@ async def test_get_model_applies_model_params(application: Application):
     """Test that get_model applies params from model schema."""
     from byte.llm import LLMService
 
-    application["config"].llm.model = "anthropic"
-    application["config"].llm.anthropic.api_key = "test-key"
-
     service = application.make(LLMService)
     service.boot()
     model = service.get_model()
 
     # Check that model has expected params
     assert isinstance(model, ChatAnthropic)
+    assert service._main_schema.params.model == "claude-sonnet-4-5"
 
 
 @pytest.mark.asyncio
 async def test_get_model_applies_max_tokens_constraint(application: Application):
     """Test that get_model applies max_tokens from constraints."""
     from byte.llm import LLMService
-
-    application["config"].llm.model = "anthropic"
-    application["config"].llm.anthropic.api_key = "test-key"
 
     service = application.make(LLMService)
     service.boot()
@@ -169,9 +163,7 @@ async def test_get_model_merges_provider_params(application: Application):
     """Test that get_model merges provider_params from schema."""
     from byte.llm import LLMService
 
-    application["config"].llm.model = "anthropic"
-    application["config"].llm.anthropic.api_key = "test-key"
-    application["config"].llm.anthropic.model_params = {"custom_header": "value"}
+    application["config"].llm.providers.anthropic.extra_params = {"custom_header": "value"}
 
     service = application.make(LLMService)
     service.boot()
@@ -186,9 +178,7 @@ async def test_get_model_kwargs_override_provider_params(application: Applicatio
     """Test that kwargs passed to get_model override provider_params."""
     from byte.llm import LLMService
 
-    application["config"].llm.model = "anthropic"
-    application["config"].llm.anthropic.api_key = "test-key"
-    application["config"].llm.anthropic.model_params = {"param": "original"}
+    application["config"].llm.main_model.extra_params = {"param": "original"}
 
     service = application.make(LLMService)
     service.boot()
@@ -202,9 +192,6 @@ async def test_get_model_kwargs_override_provider_params(application: Applicatio
 async def test_get_main_model_returns_main_model(application: Application):
     """Test that get_main_model returns the main model."""
     from byte.llm import LLMService
-
-    application["config"].llm.model = "anthropic"
-    application["config"].llm.anthropic.api_key = "test-key"
 
     service = application.make(LLMService)
     service.boot()
@@ -220,9 +207,6 @@ async def test_get_weak_model_returns_weak_model(application: Application):
 
     from byte.llm import LLMService
 
-    application["config"].llm.model = "anthropic"
-    application["config"].llm.anthropic.api_key = "test-key"
-
     service = application.make(LLMService)
     service.boot()
     model = service.get_weak_model()
@@ -236,9 +220,6 @@ async def test_add_reinforcement_hook_adds_eager_reinforcement(application: Appl
     """Test that add_reinforcement_hook adds eager reinforcement messages."""
     from byte import Payload
     from byte.llm import LLMService
-
-    application["config"].llm.model = "anthropic"
-    application["config"].llm.anthropic.api_key = "test-key"
 
     service = application.make(LLMService)
     service.boot()
@@ -257,14 +238,11 @@ async def test_add_reinforcement_hook_adds_lazy_reinforcement(application: Appli
     from byte import Payload
     from byte.llm import LLMService, ReinforcementMode
 
-    application["config"].llm.model = "anthropic"
-    application["config"].llm.anthropic.api_key = "test-key"
-
     service = application.make(LLMService)
     service.boot()
 
     # Modify the weak model to use lazy reinforcement
-    service._service_config.weak.behavior.reinforcement_mode = ReinforcementMode.LAZY
+    service._weak_schema.behavior.reinforcement_mode = ReinforcementMode.LAZY
 
     payload = Payload(event_type=EventType.TEST, data={"mode": "weak"})
 
@@ -281,14 +259,11 @@ async def test_add_reinforcement_hook_skips_none_mode(application: Application):
     from byte import Payload
     from byte.llm import LLMService, ReinforcementMode
 
-    application["config"].llm.model = "anthropic"
-    application["config"].llm.anthropic.api_key = "test-key"
-
     service = application.make(LLMService)
     service.boot()
 
     # Modify the main model to use no reinforcement
-    service._service_config.main.behavior.reinforcement_mode = ReinforcementMode.NONE
+    service._main_schema.behavior.reinforcement_mode = ReinforcementMode.NONE
 
     payload = Payload(event_type=EventType.TEST, data={"mode": "main"})
 
@@ -303,9 +278,6 @@ async def test_add_reinforcement_hook_uses_main_mode_by_default(application: App
     """Test that add_reinforcement_hook uses main mode when mode not specified."""
     from byte import Payload
     from byte.llm import LLMService
-
-    application["config"].llm.model = "anthropic"
-    application["config"].llm.anthropic.api_key = "test-key"
 
     service = application.make(LLMService)
     service.boot()
@@ -325,9 +297,6 @@ async def test_add_reinforcement_hook_extends_existing_reinforcement(application
     from byte import Payload
     from byte.llm import LLMService
 
-    application["config"].llm.model = "anthropic"
-    application["config"].llm.anthropic.api_key = "test-key"
-
     service = application.make(LLMService)
     service.boot()
     payload = Payload(event_type=EventType.TEST, data={"mode": "main", "reinforcement": ["existing message"]})
@@ -344,9 +313,6 @@ async def test_add_reinforcement_hook_returns_payload(application: Application):
     """Test that add_reinforcement_hook returns the modified payload."""
     from byte import Payload
     from byte.llm import LLMService
-
-    application["config"].llm.model = "anthropic"
-    application["config"].llm.anthropic.api_key = "test-key"
 
     service = application.make(LLMService)
     service.boot()

@@ -3,10 +3,9 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
-import yaml
-
 from byte.config import ByteConfig
 from byte.foundation.bootstrap.bootstrapper import Bootstrapper
+from byte.support import Yaml
 
 if TYPE_CHECKING:
     from byte.foundation import Application
@@ -24,17 +23,11 @@ class LoadConfiguration(Bootstrapper):
             name: The configuration key name.
             path: The path to the configuration file.
         """
-        config = {}  # Initialize before the if block
 
-        # Load the configuration file
         config_file_path = app.config_path("config.yaml")
-        if config_file_path.exists():
-            with open(config_file_path) as f:
-                config = yaml.safe_load(f)
+        return Yaml.load_as_dict(config_file_path)
 
-        return config if config is not None else {}
-
-    def _load_llm_api_keys(self, app: Application, config: ByteConfig):
+    def _load_llm_providers(self, app: Application, config: ByteConfig):
         """Load and configure LLM API keys from environment variables.
 
         Detects available API keys and enables corresponding LLM providers.
@@ -43,20 +36,20 @@ class LoadConfiguration(Bootstrapper):
         # Auto-detect and configure Anthropic
         anthropic_key = os.getenv("ANTHROPIC_API_KEY", "")
         if anthropic_key:
-            config.llm.anthropic.enable = True
-            config.llm.anthropic.api_key = anthropic_key
+            config.llm.providers.anthropic.enable = True
+            config.llm.providers.anthropic.api_key = anthropic_key
 
         # Auto-detect and configure Anthropic
         gemini_key = os.getenv("GEMINI_API_KEY", "")
         if gemini_key:
-            config.llm.gemini.enable = True
-            config.llm.gemini.api_key = gemini_key
+            config.llm.providers.gemini.enable = True
+            config.llm.providers.gemini.api_key = gemini_key
 
         # Auto-detect and configure OpenAI
         openai_key = os.getenv("OPENAI_API_KEY", "")
         if openai_key:
-            config.llm.openai.enable = True
-            config.llm.openai.api_key = openai_key
+            config.llm.providers.openai.enable = True
+            config.llm.providers.openai.api_key = openai_key
 
     def _load_boot_config(self, app: Application, config: ByteConfig):
         """Load boot configuration from CLI arguments.
@@ -112,7 +105,7 @@ class LoadConfiguration(Bootstrapper):
         config = app.instance("config", ByteConfig(**yaml_config))
         self._setup_console(app, config)
         self._setup_environment(app, config)
-        self._load_llm_api_keys(app, config)
+        self._load_llm_providers(app, config)
         self._load_boot_config(app, config)
 
         app.detect_environment(lambda: config.app.env)

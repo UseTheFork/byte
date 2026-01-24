@@ -1,6 +1,15 @@
-from typing import Any, Dict, Literal
+from typing import Any, Dict
 
 from pydantic import BaseModel, Field
+
+
+class LLMModelConfig(BaseModel):
+    """Configuration for a specific LLM model."""
+
+    model: str = Field(default="", description="The model identifier to use")
+    extra_params: Dict[str, Any] = Field(
+        default_factory=dict, description="Additional parameters to pass to the model initialization"
+    )
 
 
 class LLMProviderConfig(BaseModel):
@@ -8,18 +17,23 @@ class LLMProviderConfig(BaseModel):
 
     enable: bool = Field(default=False, description="Whether this LLM provider is enabled and available for use")
     api_key: str = Field(default="", description="API key for authenticating with the LLM provider", exclude=True)
-    model_params: Dict[str, Any] = Field(
+    extra_params: Dict[str, Any] = Field(
         default_factory=dict, description="Additional parameters to pass to the model initialization"
     )
+
+
+class ProvidersConfig(BaseModel):
+    """Configuration for all LLM providers."""
+
+    gemini: LLMProviderConfig = LLMProviderConfig()
+    anthropic: LLMProviderConfig = LLMProviderConfig()
+    openai: LLMProviderConfig = LLMProviderConfig()
 
 
 class LLMConfig(BaseModel):
     """LLM domain configuration with provider-specific settings."""
 
-    model: Literal["anthropic", "gemini", "openai"] = Field(
-        default="anthropic", description="The LLM provider to use for AI operations"
-    )
+    main_model: LLMModelConfig = LLMModelConfig()
+    weak_model: LLMModelConfig = LLMModelConfig()
 
-    gemini: LLMProviderConfig = LLMProviderConfig()
-    anthropic: LLMProviderConfig = LLMProviderConfig()
-    openai: LLMProviderConfig = LLMProviderConfig()
+    providers: ProvidersConfig = ProvidersConfig()
