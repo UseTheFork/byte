@@ -59,6 +59,7 @@ def captured_console(
     console = RichConsole(file=string_io, theme=byte_theme)
 
     mocker.patch.object(Console, "console", console)
+    mocker.patch.object(application["console"], "console", console)
 
     return string_io
 

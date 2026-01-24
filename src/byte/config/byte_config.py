@@ -28,10 +28,11 @@ class BootConfig(BaseModel):
 class AppConfig(BaseModel):
     env: str = Field(default="production", exclude=True, description="XXXX")
     debug: bool = Field(default=False, exclude=True, description="XXXX")
+    version: str = Field(default="0.0.0", exclude=True, description="XXXX")
 
 
 class ByteConfig(BaseModel):
-    dotenv_loaded: bool = Field(default=False, exclude=True, description="Whether a .env file was successfully loaded")
+    version: str = Field(default="0.0.0", exclude=True, description="XXXX")
 
     # keep-sorted start
     app: AppConfig = Field(default_factory=AppConfig)

@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Type
-
-from byte import EventBus, EventType, Payload, Service, ServiceProvider
+from byte import EventBus, EventType, Payload, ServiceProvider
 from byte.llm import LLMService
 
 
@@ -14,9 +12,6 @@ class LLMServiceProvider(ServiceProvider):
     provider preference via BYTE_LLM_PROVIDER environment variable.
     Usage: Register with container to enable AI functionality throughout app
     """
-
-    def services(self) -> List[Type[Service]]:
-        return [LLMService]
 
     async def boot(self) -> None:
         """Boot LLM services and display configuration information.
@@ -42,8 +37,8 @@ class LLMServiceProvider(ServiceProvider):
     async def boot_messages(self, payload: Payload) -> Payload:
         llm_service = self.app.make(LLMService)
         # Display active model configuration for user awareness
-        main_model = llm_service._service_config.main.params.model
-        weak_model = llm_service._service_config.weak.params.model
+        main_model = llm_service._main_schema.params.model
+        weak_model = llm_service._weak_schema.params.model
 
         messages = payload.get("messages", [])
         messages.append(f"[muted]Main model:[/muted] [primary]{main_model}[/primary]")

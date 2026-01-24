@@ -7,7 +7,8 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.cli import Command
     from byte.context import get_application, make
-    from byte.foundation import Application, Console, EventBus, EventType, Log, Payload, TaskManager
+    from byte.foundation import Application, Console, EventBus, EventType, Payload, TaskManager
+    from byte.logging import LogService
     from byte.support import Service, ServiceProvider
     from byte.support.utils import dd, dump
 
@@ -18,6 +19,7 @@ __all__ = (
     "EventBus",
     "EventType",
     "Log",
+    "LogService",
     "Payload",
     "Service",
     "ServiceProvider",
@@ -35,7 +37,7 @@ _dynamic_imports = {
     "Console": "foundation",
     "EventBus": "foundation",
     "EventType": "foundation",
-    "Log": "foundation",
+    "LogService": "logging",
     "Payload": "foundation",
     "Service": "support",
     "ServiceProvider": "support",

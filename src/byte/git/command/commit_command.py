@@ -1,8 +1,7 @@
 from argparse import Namespace
 
 from byte.agent import AgentService, CoderAgent, CommitAgent, CommitPlanAgent
-from byte.cli import ByteArgumentParser, Command
-from byte.config import ByteConfigException
+from byte.cli import ByteArgumentParser, Command, InputCancelledError
 from byte.git import GitService
 from byte.git.service.commit_service import CommitService
 from byte.lint import LintConfigException, LintService
@@ -45,14 +44,15 @@ class CommitCommand(Command):
 
         Usage: Called automatically when user types `/commit`
         """
+
         try:
             console = self.app["console"]
             await self.git_service.stage_changes()
 
-            repo = await self.git_service.get_repo()
-
             # Validate staged changes exist to prevent empty commits
-            if not repo.index.diff("HEAD"):
+
+            diff = await self.git_service.get_diff()
+            if not diff:
                 console.print_warning("No staged changes to commit.")
                 return
 
@@ -68,6 +68,9 @@ class CommitCommand(Command):
             except LintConfigException:
                 pass
 
+            # Stage the changes again if anything changed via the lint.
+            await self.git_service.stage_changes()
+
             prompt = await self.commit_service.build_commit_prompt()
 
             commit_type = await self.prompt_for_select(
@@ -79,7 +82,6 @@ class CommitCommand(Command):
             if commit_type == "Commit Plan":
                 commit_agent = self.app.make(CommitPlanAgent)
                 commit_result = await commit_agent.execute(request=prompt, display_mode="thinking")
-                # log.debug(commit_result)
                 await self.commit_service.process_commit_plan(commit_result["extracted_content"])
             elif commit_type == "Single Commit":
                 commit_agent = self.app.make(CommitAgent)
@@ -88,10 +90,6 @@ class CommitCommand(Command):
                     commit_result["extracted_content"]
                 )
                 await self.git_service.commit(formatted_message)
-        except ByteConfigException as e:
-            console = self.app["console"]
-            console.print_error_panel(
-                str(e),
-                title="Configuration Error",
-            )
+
+        except InputCancelledError:
             return

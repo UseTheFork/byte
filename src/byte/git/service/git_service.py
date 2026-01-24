@@ -117,7 +117,7 @@ class GitService(Service, UserInteractive):
                     # User declined retry, exit loop
                     continue_commit = False
 
-    async def stage_changes(self) -> None:
+    async def stage_changes(self, force: bool = False) -> None:
         """Check for unstaged changes and offer to add them to the commit.
 
         Args:
@@ -128,7 +128,9 @@ class GitService(Service, UserInteractive):
         """
         console = self.app["console"]
         unstaged_changes = self._repo.index.diff(None)  # None compares working tree to index
-        if unstaged_changes:
+        untracked_files = self._repo.untracked_files
+
+        if unstaged_changes or untracked_files:
             file_list = []
             for change in unstaged_changes:
                 change_type = (
@@ -136,20 +138,28 @@ class GitService(Service, UserInteractive):
                 )
                 file_list.append(f"  • {change.a_path} ({change_type})")
 
+            for untracked in untracked_files:  # Add this loop
+                file_list.append(f"  • {untracked} (new)")
+
             files_display = "\n".join(file_list)
 
+            total_changes = len(unstaged_changes) + len(untracked_files)
+
             console.print_panel(
-                f"Found {len(unstaged_changes)} unstaged changes:\n\n{files_display}",
+                f"Found {len(unstaged_changes)} unstaged changes and {len(untracked_files)} untracked changes:\n\n{files_display}",
                 title="[warning]Unstaged Changes[/warning]",
                 border_style="warning",
             )
 
-            user_input = await self.prompt_for_confirmation("Add unstaged changes to commit?", True)
+            if not force:
+                user_input = await self.prompt_for_confirmation("Add unstaged and untracked changes to commit?", True)
+            else:
+                user_input = True
 
             if user_input:
                 # Add all unstaged changes
                 self._repo.git.add("--all")
-                console.print_success(f"Added {len(unstaged_changes)} unstaged changes to commit")
+                console.print_success(f"Added {total_changes} changes to commit")
 
     async def reset(self, file_path: str | None = None) -> None:
         """Unstage files from the git index.

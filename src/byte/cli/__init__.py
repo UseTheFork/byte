@@ -6,6 +6,7 @@ from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
     from byte.cli.argparse.base import ByteArgumentParser
+    from byte.cli.exceptions import InputCancelledError
     from byte.cli.rich.markdown import CodeBlock, Heading, Markdown
     from byte.cli.rich.menu import Menu, MenuInputHandler, MenuRenderer, MenuState, MenuStyle
     from byte.cli.rich.panel_rule import PanelBottom, PanelTop
@@ -27,6 +28,7 @@ __all__ = (
     "Command",
     "CommandRegistry",
     "Heading",
+    "InputCancelledError",
     "InteractionService",
     "Markdown",
     "MarkdownStream",
@@ -54,6 +56,7 @@ _dynamic_imports = {
     "Command": "service.command_registry",
     "CommandRegistry": "service.command_registry",
     "Heading": "rich.markdown",
+    "InputCancelledError": "exceptions",
     "InteractionService": "service.interactions_service",
     "Markdown": "rich.markdown",
     "MarkdownStream": "utils.formatters",

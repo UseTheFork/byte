@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+from importlib import metadata
 from typing import TYPE_CHECKING
 
 import git
@@ -63,7 +64,8 @@ def git_repo(tmp_path, config):
     readme.write_text("# Test Project\n\nThis is a test project.\n")
 
     gitignore = repo_path / ".gitignore"
-    gitignore.write_text("*.pyc\n__pycache__/\n.pytest_cache/\n")
+
+    gitignore.write_text("*.pyc\n__pycache__/\n.pytest_cache/\n.byte/*\n")
 
     # Create .byte directory
     byte_dir = repo_path / ".byte"
@@ -71,6 +73,10 @@ def git_repo(tmp_path, config):
 
     # Create config.yaml with test configuration
     config_data = config.model_dump(exclude_none=True, mode="json")
+
+    version = metadata.version("byte-ai-cli")
+    config_data["version"] = version
+
     config_path = byte_dir / "config.yaml"
 
     with open(config_path, "w") as f:

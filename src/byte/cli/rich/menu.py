@@ -420,15 +420,14 @@ class Menu:
                         return selected
 
                     if action == "cancel" and esc:
-                        self._cancel(live)
-                        return None
+                        raise KeyboardInterrupt
 
                     if action in ("up", "down"):
                         self._handle_navigation(action, live)
 
                 except (KeyboardInterrupt, EOFError):
                     self._cancel(live)
-                    return None
+                    raise KeyboardInterrupt
 
     def multiselect(self, esc: bool = True) -> list[str] | None:
         """Multiple selection mode.
@@ -459,8 +458,7 @@ class Menu:
                         return self.state.selected_options
 
                     if action == "cancel" and esc:
-                        self._cancel(live)
-                        return None
+                        raise KeyboardInterrupt
 
                     if action == "toggle":
                         self.state.toggle_selection()
@@ -471,7 +469,7 @@ class Menu:
 
                 except (KeyboardInterrupt, EOFError):
                     self._cancel(live)
-                    return None
+                    raise KeyboardInterrupt
 
     def _handle_horizontal_navigation(self, action: str, live: Live) -> None:
         """Handle left/right navigation for horizontal menu.
@@ -552,12 +550,11 @@ class Menu:
                         return selected
 
                     if action == "cancel" and esc:
-                        self._cancel(live)
-                        return None
+                        raise KeyboardInterrupt
 
                     if action in ("left", "right"):
                         self._handle_horizontal_navigation(action, live)
 
                 except (KeyboardInterrupt, EOFError):
                     self._cancel(live)
-                    return None
+                    raise KeyboardInterrupt

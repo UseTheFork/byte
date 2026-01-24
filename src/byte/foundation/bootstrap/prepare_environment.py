@@ -4,11 +4,10 @@ import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, Optional
 
-import yaml
-
 from byte.cli import Menu
 from byte.config import ByteConfig
 from byte.foundation.bootstrap.bootstrapper import Bootstrapper
+from byte.support import Yaml
 
 if TYPE_CHECKING:
     from byte.foundation import Application
@@ -118,11 +117,12 @@ class PrepareEnvironment(Bootstrapper):
 
     def _setup_config(self, app: Application) -> None:
         # Initialize LLM configuration
-        llm_model = self._init_llm(app)
+        # llm_model = self._init_llm(app)
+
+        # TODO: need to make choosing a LLM smarter. Should load and let user select a provider if they want to.
 
         # Build config with selected LLM model
         config = ByteConfig()
-        config.llm.model = llm_model
 
         # Initialize files configuration
         config = self._init_files(app, config)
@@ -133,14 +133,7 @@ class PrepareEnvironment(Bootstrapper):
         # Write the configuration template to the YAML file
 
         config_path = app.config_path("config.yaml")
-        with open(config_path, "w") as f:
-            yaml.dump(
-                config.model_dump(mode="json"),
-                f,
-                default_flow_style=False,
-                sort_keys=False,
-                allow_unicode=True,
-            )
+        Yaml.save(config_path, config.model_dump(mode="json"))
 
         app["console"].print_success(f"Created configuration file at {config_path}\n")
 

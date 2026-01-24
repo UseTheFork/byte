@@ -9,8 +9,15 @@ if TYPE_CHECKING:
     from byte.support.service import Service
     from byte.support.service_provider import ServiceProvider
     from byte.support.string import Str
+    from byte.support.yaml import Yaml
 
-__all__ = ("ArrayStore", "Service", "ServiceProvider", "Str")
+__all__ = (
+    "ArrayStore",
+    "Service",
+    "ServiceProvider",
+    "Str",
+    "Yaml",
+)
 
 _dynamic_imports = {
     # keep-sorted start
@@ -18,6 +25,7 @@ _dynamic_imports = {
     "Service": "service",
     "ServiceProvider": "service_provider",
     "Str": "string",
+    "Yaml": "yaml",
     # keep-sorted end
 }
 

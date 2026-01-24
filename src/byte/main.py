@@ -14,6 +14,7 @@ from byte.git import GitServiceProvider
 from byte.knowledge import KnowledgeServiceProvider
 from byte.lint import LintServiceProvider
 from byte.llm import LLMServiceProvider
+from byte.lsp import LSPServiceProvider
 from byte.memory import MemoryServiceProvider
 from byte.presets import PresetsProvider
 from byte.prompt_format import PromptFormatProvider
@@ -30,7 +31,7 @@ PROVIDERS = [
     GitServiceProvider,
     LintServiceProvider,
     AgentServiceProvider,
-    # LSPServiceProvider,
+    LSPServiceProvider,
     AnalyticsProvider,
     PromptFormatProvider,
     WebServiceProvider,

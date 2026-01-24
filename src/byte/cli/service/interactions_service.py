@@ -2,6 +2,7 @@ from typing import List, Optional
 
 from rich.prompt import Prompt
 
+from byte.cli import InputCancelledError
 from byte.support import Service
 
 
@@ -27,9 +28,8 @@ class InteractionService(Service):
                 default=default,
             )
 
-        except EOFError:
-            # Fallback if container/console not available
-            return default
+        except (EOFError, KeyboardInterrupt):
+            raise InputCancelledError
 
     async def select(self, message: str, choices: List[str], default: Optional[str] = None) -> str | None:
         """Ask user to select from multiple options.
@@ -57,10 +57,8 @@ class InteractionService(Service):
 
             return result
 
-        except EOFError:
-            if default:
-                return default
-            return choices[0] if choices else ""
+        except (EOFError, KeyboardInterrupt):
+            raise InputCancelledError
         except Exception:
             # Fallback if container/console not available
             if default:
@@ -95,9 +93,7 @@ class InteractionService(Service):
             return result
 
         except (EOFError, KeyboardInterrupt):
-            if default and 1 <= default <= len(choices):
-                return choices[default - 1]
-            return choices[0] if choices else ""
+            raise InputCancelledError
         except Exception:
             # Fallback if container/console not available
             if default and 1 <= default <= len(choices):
@@ -120,7 +116,7 @@ class InteractionService(Service):
             return str(result)
 
         except (EOFError, KeyboardInterrupt):
-            return default
+            raise InputCancelledError
         except Exception:
             # Fallback if container/console not available
             return default
@@ -152,7 +148,7 @@ class InteractionService(Service):
 
         except (EOFError, KeyboardInterrupt):
             # Return default confirmation on interrupt
-            return (default_confirm, None)
+            raise InputCancelledError
         except Exception:
             # Fallback if container/console not available
             return (default_confirm, None)

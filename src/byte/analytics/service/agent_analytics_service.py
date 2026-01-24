@@ -38,6 +38,9 @@ class AgentAnalyticsService(Service):
         self.usage.last.output = token_usage.output_tokens
         self.usage.last.type = "weak"
 
+    def get_cost_per_token(self, cost) -> float:
+        return cost / 1000000
+
     async def usage_panel_hook(self, payload: Payload) -> Payload:
         """Display token usage analytics panel with progress bars.
 
@@ -51,22 +54,28 @@ class AgentAnalyticsService(Service):
 
         # Calculate usage percentages
         main_percentage = min(
-            (self.usage.main.context / llm_service._service_config.main.constraints.max_input_tokens) * 100,
+            (self.usage.main.context / llm_service._main_schema.constraints.max_input_tokens) * 100,
             100,
         )
 
         weak_cost = (
-            self.usage.weak.total.input * llm_service._service_config.weak.constraints.input_cost_per_token
-        ) + (self.usage.weak.total.output * llm_service._service_config.weak.constraints.output_cost_per_token)
+            self.usage.weak.total.input
+            * self.get_cost_per_token(llm_service._weak_schema.constraints.input_cost_per_token)
+        ) + (
+            self.usage.weak.total.output
+            * self.get_cost_per_token(llm_service._weak_schema.constraints.output_cost_per_token)
+        )
 
         main_cost = (
-            self.usage.main.total.input * llm_service._service_config.main.constraints.input_cost_per_token
-        ) + (self.usage.main.total.output * llm_service._service_config.main.constraints.output_cost_per_token)
-
-        # llm_service._service_config.main.model
+            self.usage.main.total.input
+            * self.get_cost_per_token(llm_service._main_schema.constraints.input_cost_per_token)
+        ) + (
+            self.usage.main.total.output
+            * self.get_cost_per_token(llm_service._main_schema.constraints.output_cost_per_token)
+        )
 
         progress = ProgressBar(
-            total=llm_service._service_config.main.constraints.max_input_tokens,
+            total=llm_service._main_schema.constraints.max_input_tokens,
             completed=self.usage.main.context,
             complete_style="success",
         )
@@ -77,12 +86,20 @@ class AgentAnalyticsService(Service):
         last_message_type = self.usage.last.type
         if last_message_type == "main":
             last_message_cost = (
-                self.usage.last.input * llm_service._service_config.main.constraints.input_cost_per_token
-            ) + (self.usage.last.output * llm_service._service_config.main.constraints.output_cost_per_token)
+                self.usage.last.input
+                * self.get_cost_per_token(llm_service._main_schema.constraints.input_cost_per_token)
+            ) + (
+                self.usage.last.output
+                * self.get_cost_per_token(llm_service._main_schema.constraints.output_cost_per_token)
+            )
         elif last_message_type == "weak":
             last_message_cost = (
-                self.usage.last.input * llm_service._service_config.weak.constraints.input_cost_per_token
-            ) + (self.usage.last.output * llm_service._service_config.weak.constraints.output_cost_per_token)
+                self.usage.last.input
+                * self.get_cost_per_token(llm_service._weak_schema.constraints.input_cost_per_token)
+            ) + (
+                self.usage.last.output
+                * self.get_cost_per_token(llm_service._weak_schema.constraints.output_cost_per_token)
+            )
         else:
             last_message_cost = 0.0
 

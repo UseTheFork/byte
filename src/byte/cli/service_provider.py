@@ -31,7 +31,6 @@ class CLIServiceProvider(ServiceProvider):
         )
 
     async def boot_messages(self, payload: Payload) -> Payload:
-        config = self.app["config"]
         console = self.app["console"]
 
         messages = payload.get("messages", [])
@@ -72,10 +71,11 @@ class CLIServiceProvider(ServiceProvider):
         # Add a break betwean the logo and the rest of the content
         messages.append("")
 
-        messages.append(f"[muted]Version:[/muted] [primary]{config.system.version}[/primary]")
+        messages.append(f"[muted]Version:[/muted] [primary]{self.app['version']}[/primary]")
 
-        if config.dotenv_loaded:
-            messages.append(f"[muted]Env File Found:[/muted] [primary]{config.dotenv_loaded}[/primary]")
+        # TODO: this should use the bootstraper
+        # if config.dotenv_loaded:
+        #     messages.append(f"[muted]Env File Found:[/muted] [primary]{config.dotenv_loaded}[/primary]")
 
         messages.append(f"[muted]Project Root:[/muted] [primary]{self.app['path.root']}[/primary]")
 

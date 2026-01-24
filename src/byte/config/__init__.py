@@ -7,11 +7,13 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.config.byte_config import ByteConfig
     from byte.config.exceptions import ByteConfigException
+    from byte.config.migrator import Migrator
     from byte.config.repository import Repository
 
 __all__ = (
     "ByteConfig",
     "ByteConfigException",
+    "Migrator",
     "Repository",
 )
 
@@ -19,6 +21,7 @@ _dynamic_imports = {
     # keep-sorted start
     "ByteConfig": "byte_config",
     "ByteConfigException": "exceptions",
+    "Migrator": "migrator",
     "Repository": "repository",
     # keep-sorted end
 }

@@ -1,10 +1,7 @@
 from enum import Enum
-from typing import Any, Dict, Type
+from typing import Any, Dict, Optional, Type
 
 from langchain.chat_models import BaseChatModel
-from langchain_anthropic import ChatAnthropic
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 
 
@@ -62,165 +59,19 @@ class ModelBehavior(BaseModel):
     reinforcement_mode: ReinforcementMode = ReinforcementMode.NONE
 
 
+class ModelProvider(BaseModel):
+    """Configuration for an LLM provider with API credentials and parameters."""
+
+    api_key: str = ""
+    params: Dict[str, Any] = Field(default_factory=dict)
+
+
 class ModelSchema(BaseModel):
     """Configuration for the main LLM model used for primary tasks."""
 
+    model_class: Optional[Type[BaseChatModel]] = None
     params: ModelParams = Field(default_factory=ModelParams)
     constraints: ModelConstraints = Field(default_factory=ModelConstraints)
     behavior: ModelBehavior = Field(default_factory=ModelBehavior)
-
-
-class LLMSchema(BaseModel):
-    """Base schema for LLM provider configuration with dual-model support.
-
-    Defines the structure for LLM providers that use a main model for complex tasks
-    and a weaker model for simpler, cost-effective operations.
-    Usage: `schema = LLMSchema(api_key="...", main=ModelSchema(...), weak=ModelSchema(...))`
-    """
-
-    model_class: Type[BaseChatModel]
-    api_key: str = ""
-    provider_params: Dict[str, Any] = Field(default_factory=dict)
-    main: ModelSchema = Field(default_factory=ModelSchema)
-    weak: ModelSchema = Field(default_factory=ModelSchema)
-
-
-class AnthropicSchema(LLMSchema):
-    """Anthropic-specific LLM configuration with Claude model defaults.
-
-    Provides pre-configured settings for Anthropic's Claude models, including
-    Claude Sonnet for main tasks and Claude Haiku for lightweight operations.
-    Usage: `schema = AnthropicSchema(api_key="...")` -> defaults to Claude models
-    """
-
-    model_class: Type[BaseChatModel] = ChatAnthropic
-    main: ModelSchema = Field(
-        default_factory=lambda: ModelSchema(
-            params=ModelParams(
-                model="claude-sonnet-4-5",
-                temperature=0.1,
-            ),
-            constraints=ModelConstraints(
-                max_input_tokens=200000,
-                max_output_tokens=64000,
-                input_cost_per_token=0.000003,
-                output_cost_per_token=0.000015,
-            ),
-            behavior=ModelBehavior(
-                reinforcement_mode=ReinforcementMode.EAGER,
-            ),
-        )
-    )
-    weak: ModelSchema = Field(
-        default_factory=lambda: ModelSchema(
-            params=ModelParams(
-                model="claude-3-5-haiku-latest",
-                temperature=0.1,
-            ),
-            constraints=ModelConstraints(
-                max_input_tokens=200000,
-                max_output_tokens=8192,
-                input_cost_per_token=(0.80 / 1000000),
-                output_cost_per_token=(4 / 1000000),
-            ),
-            behavior=ModelBehavior(
-                reinforcement_mode=ReinforcementMode.NONE,
-            ),
-        )
-    )
-
-
-class OpenAiSchema(LLMSchema):
-    """OpenAI-specific LLM configuration with GPT model defaults.
-
-    Provides pre-configured settings for OpenAI's GPT models, including
-    GPT-5 for main tasks and GPT-5-mini for lightweight operations with caching support.
-    Usage: `schema = OpenAiSchema(api_key="...")` -> defaults to GPT models
-    """
-
-    model_class: Type[BaseChatModel] = ChatOpenAI
-    main: ModelSchema = Field(
-        default_factory=lambda: ModelSchema(
-            params=ModelParams(
-                model="gpt-5",
-                temperature=0.1,
-                stream_usage=True,
-            ),
-            constraints=ModelConstraints(
-                max_input_tokens=400000,
-                max_output_tokens=128000,
-                input_cost_per_token=(1.25 / 1000000),
-                output_cost_per_token=(10 / 1000000),
-                input_cost_per_token_cached=(0.125 / 1000000),
-            ),
-            behavior=ModelBehavior(
-                reinforcement_mode=ReinforcementMode.NONE,
-            ),
-        )
-    )
-    weak: ModelSchema = Field(
-        default_factory=lambda: ModelSchema(
-            params=ModelParams(
-                model="gpt-5-mini",
-                temperature=0.1,
-                stream_usage=True,
-            ),
-            constraints=ModelConstraints(
-                max_input_tokens=400000,
-                max_output_tokens=128000,
-                input_cost_per_token=(0.25 / 1000000),
-                output_cost_per_token=(2 / 1000000),
-                input_cost_per_token_cached=(0.025 / 1000000),
-            ),
-            behavior=ModelBehavior(
-                reinforcement_mode=ReinforcementMode.NONE,
-            ),
-        )
-    )
-
-
-class GoogleSchema(LLMSchema):
-    """Google-specific LLM configuration with Gemini model defaults.
-
-    Provides pre-configured settings for Google's Gemini models, including
-    Gemini 2.5 Pro for main tasks and Gemini 2.5 Flash for lightweight operations with caching support.
-    Usage: `schema = GoogleSchema(api_key="...")` -> defaults to Gemini models
-    """
-
-    model_class: Type[BaseChatModel] = ChatGoogleGenerativeAI
-    main: ModelSchema = Field(
-        default_factory=lambda: ModelSchema(
-            params=ModelParams(
-                model="gemini-2.5-pro",
-                temperature=0.1,
-            ),
-            constraints=ModelConstraints(
-                max_input_tokens=200000,
-                max_output_tokens=65536,
-                input_cost_per_token=(2.5 / 1000000),
-                output_cost_per_token=(15 / 1000000),
-                input_cost_per_token_cached=(0.25 / 1000000),
-            ),
-            behavior=ModelBehavior(
-                reinforcement_mode=ReinforcementMode.NONE,
-            ),
-        )
-    )
-    weak: ModelSchema = Field(
-        default_factory=lambda: ModelSchema(
-            params=ModelParams(
-                model="gemini-2.5-flash-lite",
-                temperature=0.1,
-            ),
-            constraints=ModelConstraints(
-                max_input_tokens=200000,
-                max_output_tokens=65536,
-                input_cost_per_token=(0.3 / 1000000),
-                output_cost_per_token=(2.5 / 1000000),
-                input_cost_per_token_cached=(0.03 / 1000000),
-            ),
-            behavior=ModelBehavior(
-                reinforcement_mode=ReinforcementMode.NONE,
-            ),
-        )
-    )
+    provider: ModelProvider = Field(default_factory=ModelProvider)
+    extra_params: Dict[str, Any] = Field(default_factory=dict, description="Additional parameters to pass to the model")
