@@ -64,7 +64,7 @@ class CommitCommand(Command):
                 joined_lint_errors = lint_service.format_lint_errors(failed_commands)
                 agent_service = self.app.make(AgentService)
                 await agent_service.execute_agent(joined_lint_errors, CoderAgent)
-        except LintConfigException:
+        except (LintConfigException, InputCancelledError):
             pass
 
         try:
@@ -79,7 +79,6 @@ class CommitCommand(Command):
             if commit_type == "Commit Plan":
                 commit_agent = self.app.make(CommitPlanAgent)
                 commit_result = await commit_agent.execute(request=prompt, display_mode="thinking")
-                # log.debug(commit_result)
                 await self.commit_service.process_commit_plan(commit_result["extracted_content"])
             elif commit_type == "Single Commit":
                 commit_agent = self.app.make(CommitAgent)
