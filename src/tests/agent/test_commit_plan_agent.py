@@ -37,8 +37,8 @@ async def test_commit_plan_agent_generates_commit_message(
     # Mock user confirmation to return True
     mocker.patch.object(
         UserInteractive,
-        "prompt_for_confirm_or_input",
-        return_value=(True, ""),
+        "prompt_for_confirmation",
+        return_value=True,
     )
 
     # Create and stage a test file
@@ -85,11 +85,8 @@ async def test_commit_plan_agent_generates_separate_commits_for_multiple_files(
     # Mock user confirmation to return True
     mocker.patch.object(
         UserInteractive,
-        "prompt_for_confirm_or_input",
-        side_effect=[
-            (True, ""),
-            (True, ""),
-        ],
+        "prompt_for_confirmation",
+        return_value=True,
     )
 
     # Create and stage two test files
