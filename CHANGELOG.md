@@ -1,6 +1,78 @@
 # CHANGELOG
 
 
+## v1.1.0 (2026-01-24)
+
+### Bug Fixes
+
+- Correct weak model config path in migrator test
+  ([`e5bccb0`](https://github.com/UseTheFork/byte/commit/e5bccb0990a774419669a5f91d17bf7d7c446474))
+
+### Features
+
+- Add configuration version and migration support
+  ([`3495b93`](https://github.com/UseTheFork/byte/commit/3495b93db45ea29faf99aebf4814faf07a9fb41b))
+
+Introduces version tracking for configuration and a migration mechanism to handle configuration
+  updates between different versions of the application. Key changes include:
+
+- Added version field to configuration - Created migrator to handle config version transitions -
+  Updated LLM service to support default model selection - Improved configuration bootstrapping
+  process - Added support for retrieving application version dynamically
+
+- Add input cancellation handling for interactive prompts
+  ([`85780ca`](https://github.com/UseTheFork/byte/commit/85780cac0763bf0b975ad76ce83bf3bff52ad16b))
+
+- Enable lsp service provider
+  ([`b3fb3f5`](https://github.com/UseTheFork/byte/commit/b3fb3f5db59e964164bdf0e27dfd81cb623ebda5))
+
+- Improve commit command to handle untracked files and staged changes
+  ([`d87e299`](https://github.com/UseTheFork/byte/commit/d87e29914964d2cb139373766462b8ed9b3ff73a))
+
+### Refactoring
+
+- Handle input cancelled error in commit command
+  ([`b04c2ff`](https://github.com/UseTheFork/byte/commit/b04c2ff3f63a17eb0a709711e732d417e33509b6))
+
+- Modify commit validation workflow
+  ([`78ce60e`](https://github.com/UseTheFork/byte/commit/78ce60e4a25cca56f3cfdd25bc5b44e74e3327d3))
+
+- Raise input cancelled error on interrupt
+  ([`e99046c`](https://github.com/UseTheFork/byte/commit/e99046cf88c50bc14e952254d8bc5f06c86020f1))
+
+- Remove unused config variable in service provider
+  ([`065ae1e`](https://github.com/UseTheFork/byte/commit/065ae1e891b8a0697014b32aadd495e3fa390d00))
+
+- Restructure llm configuration and model management
+  ([`d8de1f6`](https://github.com/UseTheFork/byte/commit/d8de1f6a9c4b26dfa68d6c2b5b1787d415a47d5f))
+
+Major refactoring of LLM configuration and model management:
+
+- Replaced provider-specific schemas with a more flexible ModelSchema - Introduced providers
+  configuration with enable/disable flags - Added support for dynamic model configuration via
+  models_data.yaml - Simplified LLM service configuration and model selection - Updated
+  configuration structure to support multiple providers - Improved model initialization and
+  parameter handling - Removed hardcoded provider-specific model configurations
+
+Breaking changes: - Removed AnthropicSchema, OpenAiSchema, and GoogleSchema - Changed LLM
+  configuration structure in config.py - Modified LLMService to use new configuration approach -
+  Updated tests to work with new configuration model
+
+- Simplify keyboard interrupt handling in menu interactions
+  ([`6d6fa18`](https://github.com/UseTheFork/byte/commit/6d6fa186f00e26a4e987ebfb66ad1603950b40e5))
+
+- Update analytics and service provider with cost calculation and env loading
+  ([`e11610f`](https://github.com/UseTheFork/byte/commit/e11610fd248aa21fc7708a4682301a5404a90902))
+
+- Update console panel method for commit validation
+  ([`f855ab3`](https://github.com/UseTheFork/byte/commit/f855ab3b770efee787444e2272e3444af6c06285))
+
+### Testing
+
+- Update test mocks for user confirmation
+  ([`5fb5171`](https://github.com/UseTheFork/byte/commit/5fb517132aa3e411edb0e34cf9668d44b8ad4f30))
+
+
 ## v1.0.0 (2026-01-23)
 
 ### Bug Fixes
