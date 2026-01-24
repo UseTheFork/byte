@@ -28,7 +28,7 @@ class CommitValidator(Validator, UserInteractive):
         else:
             formatted_content = content.format()
 
-        self.app["console"].print_panel(
+        self.app["console"].print_warning_panel(
             formatted_content,
             title=f"Commit Message ({message_number} / {total_number})",
         )
