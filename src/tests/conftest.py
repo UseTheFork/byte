@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+from importlib import metadata
 from typing import TYPE_CHECKING
 
 import git
@@ -71,6 +72,10 @@ def git_repo(tmp_path, config):
 
     # Create config.yaml with test configuration
     config_data = config.model_dump(exclude_none=True, mode="json")
+
+    version = metadata.version("byte-ai-cli")
+    config_data["version"] = version
+
     config_path = byte_dir / "config.yaml"
 
     with open(config_path, "w") as f:

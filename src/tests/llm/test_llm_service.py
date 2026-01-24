@@ -41,6 +41,26 @@ async def test_boot_configures_anthropic_schema(application: Application):
 
 
 @pytest.mark.asyncio
+async def test_boot_uses_default_when_provider_name_set(application: Application):
+    """Test that boot uses default model when provider name is set as model."""
+
+    # Set provider name as the model
+    application["config"].llm.providers.anthropic.enable = True
+    application["config"].llm.providers.anthropic.api_key = "test-key"
+    application["config"].llm.main_model.model = "anthropic"
+
+    application["config"].llm.providers.openai.enable = True
+    application["config"].llm.providers.openai.api_key = "test-key"
+    application["config"].llm.weak_model.model = "openai"
+
+    service = application.make(LLMService)
+    service.boot()
+
+    assert service._main_schema.params.model == "claude-sonnet-4-5"
+    assert service._weak_schema.params.model == "gpt-5-mini"
+
+
+@pytest.mark.asyncio
 async def test_boot_configures_openai_schema(application: Application, monkeypatch):
     """Test that boot configures OpenAiSchema when openai is selected."""
     from byte.llm import LLMService

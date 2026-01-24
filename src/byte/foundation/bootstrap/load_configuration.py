@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import os
+from importlib import metadata
 from typing import TYPE_CHECKING
 
-from byte.config import ByteConfig
+from byte.config import ByteConfig, Migrator
 from byte.foundation.bootstrap.bootstrapper import Bootstrapper
 from byte.support import Yaml
 
@@ -89,9 +90,26 @@ class LoadConfiguration(Bootstrapper):
 
         flags = args.get("flags", [])
         byte_debug = os.getenv("BYTE_DEBUG", "").lower() in ("true", "1", "yes")
-
         if "debug" in flags or byte_debug:
             config.app.debug = True
+
+    def _migrate(self, app: Application, config: dict) -> dict:
+        """Migrate configuration from older versions to current version.
+
+        Checks if config version matches current app version. If not, runs
+        sequential migrations to bring config up to date.
+        Usage: `config = self._migrate(app, config_dict)`
+        """
+
+        version = metadata.version("byte-ai-cli")
+        app.instance("version", version)
+
+        # Versions match no need to migrate.
+        if config.get("version", "0.0.0") == version:
+            return config
+
+        migrator = Migrator(app)
+        return migrator.handle(config)
 
     def bootstrap(self, app: Application) -> None:
         """
@@ -102,7 +120,11 @@ class LoadConfiguration(Bootstrapper):
         """
 
         yaml_config = self._load_configuration_file(app)
-        config = app.instance("config", ByteConfig(**yaml_config))
+
+        # Before we load the config we check to see if it needs to be migrated from an old version.
+        migrated_config = self._migrate(app, yaml_config)
+
+        config = app.instance("config", ByteConfig(**migrated_config))
         self._setup_console(app, config)
         self._setup_environment(app, config)
         self._load_llm_providers(app, config)

@@ -72,7 +72,7 @@ class CLIServiceProvider(ServiceProvider):
         # Add a break betwean the logo and the rest of the content
         messages.append("")
 
-        messages.append(f"[muted]Version:[/muted] [primary]{config.system.version}[/primary]")
+        messages.append(f"[muted]Version:[/muted] [primary]{self.app['version']}[/primary]")
 
         # TODO: this should use the bootstraper
         # if config.dotenv_loaded:

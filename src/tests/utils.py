@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from byte import Application
 
 
-async def do_pause(delay: float = 0.5):
+async def do_pause(delay: float = 0.2):
     """ """
     import asyncio
 

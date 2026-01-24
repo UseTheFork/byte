@@ -1,5 +1,8 @@
 llm:
-  model: anthropic
+  main_model:
+    model: anthropic
+  weak_model:
+    model: anthropic
 lint:
   enable: true
   commands:
@@ -83,7 +86,6 @@ presets:
   - src/byte/support/service.py
   editable_files:
   - src/tests/base_test.py
-
 - id: files
   load_on_boot: false
   conventions:
@@ -104,7 +106,6 @@ presets:
   - src/tests/base_test.py
   - src/byte/files/**
   - src/tests/files/**
-
 - id: command
   conventions:
   - CODE_PATTERNS.md
@@ -124,7 +125,6 @@ presets:
   - src/byte/files/command/drop_file_command.py
   - src/byte/knowledge/command/web_command.py
   - src/byte/git/command/commit_command.py
-
 - id: mkdocs
   prompt: 'Using the `MKDOCS_STYLEGUIDE` and existing docs as examples, document  '
   conventions:
@@ -139,7 +139,6 @@ presets:
   - docs/concepts/lint.md
   - docs/concepts/file-context.md
   - .byte/config.yaml
-  
 - id: agent
   conventions:
   - CODE_STYLEGUIDE.md
@@ -167,7 +166,6 @@ presets:
   - src/byte/agent/nodes/start_node.py
   - src/byte/agent/nodes/end_node.py
   - src/byte/agent/nodes/assistant_node.py
-
 - id: parser
   conventions:
   - CODE_PATTERNS.md
@@ -188,3 +186,4 @@ presets:
   - src/tests/base_test.py
   - src/byte/prompt_format/**
   - src/tests/prompt_format/**
+version: 1.0.0

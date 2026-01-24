@@ -11,7 +11,7 @@ T = TypeVar("T")
 
 
 if TYPE_CHECKING:
-    from byte import Application, Console, Log
+    from byte import Application, Console, LogService
     from byte.config import ByteConfig, Repository
 
 
@@ -216,7 +216,10 @@ class Container:
     def __getitem__(self, abstract: Literal["config"], **kwargs) -> ByteConfig: ...
 
     @overload
-    def __getitem__(self, abstract: Literal["log"], **kwargs) -> Log: ...
+    def __getitem__(self, abstract: Literal["version"], **kwargs) -> str: ...
+
+    @overload
+    def __getitem__(self, abstract: Literal["log"], **kwargs) -> LogService: ...
 
     @overload
     def __getitem__(self, abstract: Literal["app"], **kwargs) -> Application: ...

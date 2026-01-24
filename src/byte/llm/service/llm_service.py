@@ -27,6 +27,30 @@ class LLMService(Service):
     Usage: `service = LLMService(app)` -> provider-specific implementation
     """
 
+    def _get_default_model_for_provider(self, provider: str, model_type: str = "main") -> str:
+        """Get default model ID for a specific provider.
+
+        Args:
+            provider: Provider name ("anthropic", "openai", "google")
+            model_type: Either "main" or "weak"
+
+        Returns:
+            Default model ID for the provider
+
+        Raises:
+            ByteConfigException: If provider is not recognized
+        """
+        defaults = {
+            "anthropic": ("claude-sonnet-4-5", "claude-3-5-haiku-latest"),
+            "openai": ("gpt-5", "gpt-5-mini"),
+            "google": ("gemini-2.5-pro", "gemini-2.5-flash-lite"),
+        }
+
+        if provider not in defaults:
+            raise ByteConfigException(f"Unknown provider: {provider}")
+
+        return defaults[provider][0] if model_type == "main" else defaults[provider][1]
+
     def _get_default_models(self) -> tuple[str, str]:
         """Get default main and weak model IDs based on enabled providers.
 
@@ -164,12 +188,19 @@ class LLMService(Service):
         main_model_id = self.app["config"].llm.main_model.model
         weak_model_id = self.app["config"].llm.weak_model.model
 
-        # Use defaults if models are not set
-        if not main_model_id or not weak_model_id:
-            default_main, default_weak = self._get_default_models()
-            if not main_model_id:
+        # Use provider-specific defaults if models are not set or if they match provider names
+        if not main_model_id or main_model_id in ("anthropic", "openai", "google"):
+            if main_model_id in ("anthropic", "openai", "google"):
+                main_model_id = self._get_default_model_for_provider(main_model_id, "main")
+            else:
+                default_main, _ = self._get_default_models()
                 main_model_id = default_main
-            if not weak_model_id:
+
+        if not weak_model_id or weak_model_id in ("anthropic", "openai", "google"):
+            if weak_model_id in ("anthropic", "openai", "google"):
+                weak_model_id = self._get_default_model_for_provider(weak_model_id, "weak")
+            else:
+                _, default_weak = self._get_default_models()
                 weak_model_id = default_weak
 
         # Verify main_model exists in models_data
