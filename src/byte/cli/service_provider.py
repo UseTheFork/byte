@@ -74,8 +74,9 @@ class CLIServiceProvider(ServiceProvider):
 
         messages.append(f"[muted]Version:[/muted] [primary]{config.system.version}[/primary]")
 
-        if config.dotenv_loaded:
-            messages.append(f"[muted]Env File Found:[/muted] [primary]{config.dotenv_loaded}[/primary]")
+        # TODO: this should use the bootstraper
+        # if config.dotenv_loaded:
+        #     messages.append(f"[muted]Env File Found:[/muted] [primary]{config.dotenv_loaded}[/primary]")
 
         messages.append(f"[muted]Project Root:[/muted] [primary]{self.app['path.root']}[/primary]")
 
