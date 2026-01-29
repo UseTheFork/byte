@@ -47,14 +47,14 @@ class AssistantNode(Node):
 
         # Bind Structred output if provided.
         if self.structured_output is not None:
-            model = model.with_structured_output(self.structured_output)
+            model = model.with_structured_output(self.structured_output)  # ty:ignore[invalid-argument-type]
 
         # Bind tools if provided
         if context.tools is not None and len(context.tools) > 0:
-            model = model.bind_tools(context.tools, parallel_tool_calls=False)
+            model = model.bind_tools(context.tools, parallel_tool_calls=False)  # ty:ignore[unresolved-attribute]
 
         # Assemble the chain
-        runnable = context.prompt | model
+        runnable = context.prompt | model  # ty:ignore[unsupported-operator]
 
         return runnable
 

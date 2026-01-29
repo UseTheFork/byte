@@ -116,13 +116,11 @@ edit_format_system = list_to_multiline_text(
     ]
 )
 
-edit_format_enforcement = list_to_multiline_text(
-    [
-        "Search Content:",
-        "- Never put content on the same line as the opening tag.",
-        "- Must EXACTLY MATCH existing file content, character for character",
-    ]
-)
+edit_format_enforcement = [
+    "Search Content:",
+    "- Never put content on the same line as the opening tag.",
+    "- Must EXACTLY MATCH existing file content, character for character",
+]
 
 edit_format_recovery_steps = list_to_multiline_text(
     [

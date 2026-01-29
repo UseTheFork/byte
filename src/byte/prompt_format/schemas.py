@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List
 
 from pydantic.dataclasses import dataclass
 
@@ -63,7 +64,7 @@ class EditFormatPrompts:
     """"""
 
     system: str
-    enforcement: str
+    enforcement: List[str]
     recovery_steps: str
     examples: list[tuple[str, str]]
 
