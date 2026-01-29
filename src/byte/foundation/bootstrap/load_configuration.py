@@ -81,18 +81,6 @@ class LoadConfiguration(Bootstrapper):
         console.syntax_theme = config.cli.syntax_theme
         console.setup_console()
 
-    def _setup_environment(self, app: Application, config: ByteConfig):
-        """Configure application environment settings including debug mode.
-
-        Usage: `self._setup_environment(app, config)`
-        """
-        args = app["args"]
-
-        flags = args.get("flags", [])
-        byte_debug = os.getenv("BYTE_DEBUG", "").lower() in ("true", "1", "yes")
-        if "debug" in flags or byte_debug:
-            config.app.debug = True
-
     def _migrate(self, app: Application, config: dict) -> dict:
         """Migrate configuration from older versions to current version.
 
@@ -126,7 +114,6 @@ class LoadConfiguration(Bootstrapper):
 
         config = app.instance("config", ByteConfig(**migrated_config))
         self._setup_console(app, config)
-        self._setup_environment(app, config)
         self._load_llm_providers(app, config)
         self._load_boot_config(app, config)
 
