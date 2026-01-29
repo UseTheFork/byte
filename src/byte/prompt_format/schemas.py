@@ -41,6 +41,12 @@ class BoundaryType(str, Enum):
     SYSTEM_CONTEXT = "system_context"
 
 
+class AICommentType(Enum):
+    """Type of ai comment operation."""
+
+    AI = "AI"
+
+
 class BlockType(Enum):
     """Type of edit block operation."""
 

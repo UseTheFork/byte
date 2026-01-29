@@ -1,4 +1,5 @@
 from byte.prompt_format import EDIT_BLOCK_NAME, Boundary, BoundaryType
+from byte.prompt_format.schemas import AICommentType
 from byte.support.utils import list_to_multiline_text
 
 edit_format_system = list_to_multiline_text(
@@ -18,11 +19,12 @@ edit_format_system = list_to_multiline_text(
         Boundary.open(
             BoundaryType.FILE, meta={"path": "full/file/path", "operation": "operation_type", "block_id": "1"}
         ),
-        Boundary.open(BoundaryType.SEARCH),
-        "content to find (can be empty)",
+        Boundary.open(BoundaryType.SEARCH) + Boundary.notice("new line here"),
+        "[exact charector for charector content to find"
+        + Boundary.notice("(including comments and ai messages, can be empty)"),
         Boundary.close(BoundaryType.SEARCH),
-        Boundary.open(BoundaryType.REPLACE),
-        "content to replace with (can be empty)",
+        Boundary.open(BoundaryType.REPLACE) + Boundary.notice("new line here"),
+        "[content to replace with]" + Boundary.notice("(can be empty)"),
         Boundary.close(BoundaryType.REPLACE),
         Boundary.close(BoundaryType.FILE),
         "```",
@@ -117,9 +119,9 @@ edit_format_system = list_to_multiline_text(
 )
 
 edit_format_enforcement = [
-    "Search Content:",
+    Boundary.open(BoundaryType.SEARCH) + " Tag Rules:",
     "- Never put content on the same line as the opening tag.",
-    "- Must EXACTLY MATCH existing file content, character for character",
+    f"- Must EXACTLY MATCH existing file content, character for character including comments and {AICommentType.AI} comments.",
 ]
 
 edit_format_recovery_steps = list_to_multiline_text(

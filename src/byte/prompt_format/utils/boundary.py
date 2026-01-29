@@ -146,3 +146,29 @@ class Boundary:
             return f"**{content}**"
         else:
             raise ValueError(f"Unsupported format_style: {format_style}")
+
+    @staticmethod
+    def important(
+        content: str,
+        format_style: Literal["xml", "markdown"] = "xml",
+    ) -> str:
+        """Wrap content in important tags to emphasize important information.
+
+        Args:
+                content: The content to wrap
+                format_style: Output format style ('xml' or 'markdown')
+
+        Returns:
+                Formatted important string with content
+
+        Usage: `Boundary.important("Please review carefully", "xml")`
+        """
+        if format_style not in ("xml", "markdown"):
+            raise ValueError(f"format_style must be 'xml' or 'markdown', got {format_style!r}")
+
+        if format_style == "xml":
+            return f"<important>**{content}**</important>"
+        elif format_style == "markdown":
+            return f"**{content}**"
+        else:
+            raise ValueError(f"Unsupported format_style: {format_style}")

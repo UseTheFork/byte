@@ -13,7 +13,7 @@ commit_plan_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
                     "You are an expert software engineer that generates organized Git commits based on the provided staged files and diffs.",
                     "Review the staged files and diffs which are about to be committed to a git repo.",
                     "Review the diffs carefully and group related changes together.",
-                    "IMPORTANT: You MUST follow the commit guidelines provided in the Rules section below.",
+                    Boundary.critical("You MUST follow the commit guidelines provided in the Rules section below."),
                     "Read and apply ALL rules for commit types, scopes, and description formatting.",
                     "Group files logically by the nature of their changes (e.g., all files related to a single feature, bug fix, or refactor).",
                     Boundary.close(BoundaryType.TASK),
@@ -39,10 +39,10 @@ commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
             list_to_multiline_text(
                 [
                     Boundary.open(BoundaryType.TASK),
-                    "You are an expert software engineer that generates concise, one-line Git commit messages based on the provided diffs.",
+                    "You are an expert software engineer that generates concise, Git commit messages based on the provided diffs.",
                     "Review the provided context and diffs which are about to be committed to a git repo.",
                     "Review the diffs carefully.",
-                    "IMPORTANT: You MUST follow the commit guidelines provided in the Rules section below.",
+                    Boundary.critical("You MUST follow the commit guidelines provided in the Rules section below."),
                     "Read and apply ALL rules for commit types, scopes, and description formatting.",
                     Boundary.close(BoundaryType.TASK),
                 ]
