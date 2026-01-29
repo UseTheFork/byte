@@ -1,9 +1,15 @@
+from typing import List, Type
+
+from byte.development import RecordResponseService
 from byte.foundation import EventBus, EventType, Payload
-from byte.support import ServiceProvider
+from byte.support import Service, ServiceProvider
 
 
 class DevelopmentServiceProvider(ServiceProvider):
     """"""
+
+    def services(self) -> List[Type[Service]]:
+        return [RecordResponseService]
 
     async def boot(self):
         """Boot UI services."""
