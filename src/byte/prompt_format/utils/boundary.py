@@ -120,3 +120,81 @@ class Boundary:
             return f"**{content}**"
         else:
             raise ValueError(f"Unsupported format_style: {format_style}")
+
+    @staticmethod
+    def critical(
+        content: str,
+        format_style: Literal["xml", "markdown"] = "xml",
+    ) -> str:
+        """Wrap content in critical tags to emphasize critical information.
+
+        Args:
+                content: The content to wrap
+                format_style: Output format style ('xml' or 'markdown')
+
+        Returns:
+                Formatted critical string with content
+
+        Usage: `Boundary.critical("This action cannot be undone", "xml")`
+        """
+        if format_style not in ("xml", "markdown"):
+            raise ValueError(f"format_style must be 'xml' or 'markdown', got {format_style!r}")
+
+        if format_style == "xml":
+            return f"<critical>**{content}**</critical>"
+        elif format_style == "markdown":
+            return f"**{content}**"
+        else:
+            raise ValueError(f"Unsupported format_style: {format_style}")
+
+    @staticmethod
+    def important(
+        content: str,
+        format_style: Literal["xml", "markdown"] = "xml",
+    ) -> str:
+        """Wrap content in important tags to emphasize important information.
+
+        Args:
+                content: The content to wrap
+                format_style: Output format style ('xml' or 'markdown')
+
+        Returns:
+                Formatted important string with content
+
+        Usage: `Boundary.important("Please review carefully", "xml")`
+        """
+        if format_style not in ("xml", "markdown"):
+            raise ValueError(f"format_style must be 'xml' or 'markdown', got {format_style!r}")
+
+        if format_style == "xml":
+            return f"<important>**{content}**</important>"
+        elif format_style == "markdown":
+            return f"**{content}**"
+        else:
+            raise ValueError(f"Unsupported format_style: {format_style}")
+
+    @staticmethod
+    def warning(
+        content: str,
+        format_style: Literal["xml", "markdown"] = "xml",
+    ) -> str:
+        """Wrap content in warning tags to emphasize warning information.
+
+        Args:
+                content: The content to wrap
+                format_style: Output format style ('xml' or 'markdown')
+
+        Returns:
+                Formatted warning string with content
+
+        Usage: `Boundary.warning("This may cause unexpected behavior", "xml")`
+        """
+        if format_style not in ("xml", "markdown"):
+            raise ValueError(f"format_style must be 'xml' or 'markdown', got {format_style!r}")
+
+        if format_style == "xml":
+            return f"<warning>**{content}**</warning>"
+        elif format_style == "markdown":
+            return f"**{content}**"
+        else:
+            raise ValueError(f"Unsupported format_style: {format_style}")

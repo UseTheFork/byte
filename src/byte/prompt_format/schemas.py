@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List
 
 from pydantic.dataclasses import dataclass
 
@@ -10,6 +11,7 @@ class BoundaryType(str, Enum):
 
     ROLE = "role"
     TASK = "task"
+    USER_REQUEST = "user_request"
     RULES = "rules"
     GOAL = "goal"
     RESPONSE_FORMAT = "response_format"
@@ -39,6 +41,12 @@ class BoundaryType(str, Enum):
     SYSTEM_CONTEXT = "system_context"
 
 
+class AICommentType(Enum):
+    """Type of ai comment operation."""
+
+    AI = "AI"
+
+
 class BlockType(Enum):
     """Type of edit block operation."""
 
@@ -62,7 +70,7 @@ class EditFormatPrompts:
     """"""
 
     system: str
-    enforcement: str
+    enforcement: List[str]
     recovery_steps: str
     examples: list[tuple[str, str]]
 

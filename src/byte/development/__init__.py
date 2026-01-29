@@ -6,13 +6,18 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.development.service.record_response_service import RecordResponseService
     from byte.development.service_provider import DevelopmentServiceProvider
 
-__all__ = ("DevelopmentServiceProvider",)
+__all__ = (
+    "DevelopmentServiceProvider",
+    "RecordResponseService",
+)
 
 _dynamic_imports = {
     # keep-sorted start
     "DevelopmentServiceProvider": "service_provider",
+    "RecordResponseService": "service.record_response_service",
     # keep-sorted end
 }
 
