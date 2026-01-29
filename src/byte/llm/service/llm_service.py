@@ -303,8 +303,8 @@ class LLMService(Service):
             # Add strong reinforcement for eager mode
             reinforcement.extend(
                 [
-                    "IMPORTANT: Pay careful attention to the scope of the user's request."
-                    "- DO what they ask, but no more."
+                    "IMPORTANT: Pay careful attention to the scope of the user's request.",
+                    "- DO what they ask, but no more.",
                     "- DO NOT improve, comment, fix or modify unrelated parts of the code in any way!",
                 ]
             )
@@ -313,8 +313,8 @@ class LLMService(Service):
             # Add gentle reinforcement for lazy mode
             reinforcement.extend(
                 [
-                    "IMPORTANT: You are diligent and tireless!"
-                    "- You NEVER leave comments describing code without implementing it!"
+                    "IMPORTANT: You are diligent and tireless!",
+                    "- You NEVER leave comments describing code without implementing it!",
                     "- You always COMPLETELY IMPLEMENT the needed code!",
                 ]
             )

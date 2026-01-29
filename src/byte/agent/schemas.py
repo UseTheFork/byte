@@ -60,7 +60,7 @@ class AssistantContextSchema:
     weak: BaseChatModel | None  # Reference to the weak LLM for simple operations
     agent: str  # Agent class name for identification
     tools: Optional[List[BaseTool]] = Field(default=None)  # Tools bound to LLM, if any
-    enforcement: Optional[str] = Field(default=None)
+    enforcement: Optional[List[str]] = Field(default=None)
     recovery_steps: Optional[str] = Field(default=None)
 
 
