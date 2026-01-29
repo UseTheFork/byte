@@ -1,6 +1,44 @@
 # CHANGELOG
 
 
+## v1.2.0 (2026-01-29)
+
+### Chores
+
+- Configure dependabot to target development branch
+  ([`f6fc50f`](https://github.com/UseTheFork/byte/commit/f6fc50f033c73fc832ef51bfc0a9bc8483980211))
+
+- Remove outdated convention documentation
+  ([`e4e9b51`](https://github.com/UseTheFork/byte/commit/e4e9b513cdba3542a8c5ec450535e07f4ed1a093))
+
+### Features
+
+- Add boundary methods for important and critical text formatting
+  ([`66658fa`](https://github.com/UseTheFork/byte/commit/66658fae23f2019de74c4ddae22cd8701c3ce8c2))
+
+Introduces new Boundary methods: - `important()` for emphasizing important information - Refactors
+  existing critical text formatting - Adds support for both XML and markdown formatting styles
+
+These changes improve text emphasis and formatting capabilities in the prompt system
+
+- Add record response service for tracking agent interactions
+  ([`b751175`](https://github.com/UseTheFork/byte/commit/b751175ec11cfaea63c4c23f3fd2321717453d14))
+
+### Refactoring
+
+- Improve message formatting and boundary handling
+  ([`98d9a97`](https://github.com/UseTheFork/byte/commit/98d9a9765d5ae669c6e15465598cdc11773bc11f))
+
+- Improve type hints and simplify enforcement list handling
+  ([`ae14ff0`](https://github.com/UseTheFork/byte/commit/ae14ff01c76f0bcb2c7864c059fb355dc7aaf3bf))
+
+- Update enforcement and reinforcement message handling
+  ([`b8b74d4`](https://github.com/UseTheFork/byte/commit/b8b74d49d39bfb419d6e5580da2f6055141bf8a2))
+
+- Update list handling in ai comment watcher and add warning method to boundary utils
+  ([`fa3d02f`](https://github.com/UseTheFork/byte/commit/fa3d02f7f28bba601a171dc82834ada54a5f0347))
+
+
 ## v1.1.0 (2026-01-24)
 
 ### Bug Fixes
