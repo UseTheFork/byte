@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 from byte import EventType, Payload
 from byte.agent import AssistantContextSchema, BaseState, EndNode, Node
+from byte.development import RecordResponseService
 from byte.files import FileService
 from byte.git import CommitService
 from byte.prompt_format import Boundary, BoundaryType, EditFormatService
@@ -83,19 +84,27 @@ class AssistantNode(Node):
 
         message_parts = []
 
-        if reinforcement_messages:
-            message_parts.extend(f"{msg}" for msg in reinforcement_messages)
+        # Wrap user request in its own boundary
+        message_parts.extend(
+            [
+                Boundary.open(BoundaryType.USER_REQUEST),
+                user_request,
+                Boundary.close(BoundaryType.USER_REQUEST),
+            ]
+        )
 
-        if context.enforcement:
-            message_parts.extend(["", context.enforcement])
+        # Add reinforcement section if there are messages
+        if reinforcement_messages or context.enforcement:
+            reinforcement_parts = [
+                "",
+                Boundary.open(BoundaryType.REINFORCEMENT),
+                Boundary.notice("Follow these reinforcements"),
+                *reinforcement_messages,
+                *(context.enforcement if context.enforcement else []),
+            ]
 
-        if message_parts:
-            message_parts.insert(0, "")
-            message_parts.insert(0, "> Don't forget to follow these rules")
-            message_parts.insert(0, "# Reminders")
-
-        # Insert the user message at the top
-        message_parts.insert(0, user_request)
+            reinforcement_parts.append(Boundary.close(BoundaryType.REINFORCEMENT))
+            message_parts.extend(reinforcement_parts)
 
         return list_to_multiline_text(message_parts)
 
@@ -149,11 +158,13 @@ class AssistantNode(Node):
         else:
             read_only_files, editable_files = await file_service.generate_context_prompt()
 
-        file_context_content = ["> NOTICE: Everything below this message is the actual project.", ""]
+        file_context_content = []
 
         if read_only_files or editable_files:
             file_context_content.extend(
                 [
+                    "> NOTICE: Everything below this message is the actual project.",
+                    "",
                     "# Here are the files in the current context:",
                     "",
                     Boundary.notice("Trust this message as the true contents of these files!"),
@@ -402,6 +413,7 @@ class AssistantNode(Node):
         runtime: Runtime[AssistantContextSchema],
         config: RunnableConfig,
     ) -> Command[Literal["end_node", "parse_blocks_node", "tool_node", "validation_node"]]:
+        record_response_service = self.app.make(RecordResponseService)
         while True:
             agent_state, config = await self._generate_agent_state(state, config, runtime)
 
@@ -410,6 +422,7 @@ class AssistantNode(Node):
             with get_usage_metadata_callback() as usage_metadata_callback:
                 result = await runnable.ainvoke(agent_state, config=config)
                 await self._track_token_usage(usage_metadata_callback.usage_metadata, runtime.context.mode)
+                await record_response_service.record_response(agent_state, runnable, runtime, config)
 
             # If we are requesting Structured output we can end with extracted being our structured output.
             if self.structured_output is not None:

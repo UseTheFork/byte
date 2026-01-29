@@ -10,6 +10,7 @@ class BoundaryType(str, Enum):
 
     ROLE = "role"
     TASK = "task"
+    USER_REQUEST = "user_request"
     RULES = "rules"
     GOAL = "goal"
     RESPONSE_FORMAT = "response_format"
