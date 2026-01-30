@@ -100,6 +100,7 @@ class ChromiumService(Service):
                             text_content = cleaner.apply_pipeline(element, **config)
 
                             if text_content.strip():
+                                self.app["log"].info(f"Parsed successfully with {parser.__class__.__name__}...")
                                 break
 
                 return text_content
