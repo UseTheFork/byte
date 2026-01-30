@@ -226,6 +226,17 @@ class GitService(Service, UserInteractive):
                 case _:
                     msg = f"type {diff_item.change_type}: {diff_item.a_path}"
 
+            if change_type == "A" and diff_item.b_blob:
+                try:
+                    staged_data = diff_item.b_blob.data_stream.read()
+                    # Check if binary
+                    if b"\0" not in staged_data:
+                        diff_content = staged_data.decode("utf-8")
+                    else:
+                        diff_content = None
+                except UnicodeDecodeError:
+                    diff_content = None
+
             if diff_item.a_blob and change_type == "M":
                 try:
                     head_data = diff_item.a_blob.data_stream.read()

@@ -376,7 +376,6 @@ class FileService(Service):
             return "No project root configured"
 
         result = self.generate_project_hierarchy_tree(self.app["path"])
-        self.app["log"].debug(result)
 
         return f"Project Structure:\n{result}"
 
