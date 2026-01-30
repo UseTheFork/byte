@@ -1,4 +1,589 @@
+<html class="" lang="en" data-content_root="./" data-readthedocs-tool="sphinx" data-readthedocs-tool-theme="furo"><head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1">
+<style type="text/css">:root, :host {
+  --fa-font-solid: normal 900 1em/1 "Font Awesome 7 Free";
+  --fa-font-regular: normal 400 1em/1 "Font Awesome 7 Free";
+  --fa-font-light: normal 300 1em/1 "Font Awesome 7 Pro";
+  --fa-font-thin: normal 100 1em/1 "Font Awesome 7 Pro";
+  --fa-font-duotone: normal 900 1em/1 "Font Awesome 7 Duotone";
+  --fa-font-duotone-regular: normal 400 1em/1 "Font Awesome 7 Duotone";
+  --fa-font-duotone-light: normal 300 1em/1 "Font Awesome 7 Duotone";
+  --fa-font-duotone-thin: normal 100 1em/1 "Font Awesome 7 Duotone";
+  --fa-font-brands: normal 400 1em/1 "Font Awesome 7 Brands";
+  --fa-font-sharp-solid: normal 900 1em/1 "Font Awesome 7 Sharp";
+  --fa-font-sharp-regular: normal 400 1em/1 "Font Awesome 7 Sharp";
+  --fa-font-sharp-light: normal 300 1em/1 "Font Awesome 7 Sharp";
+  --fa-font-sharp-thin: normal 100 1em/1 "Font Awesome 7 Sharp";
+  --fa-font-sharp-duotone-solid: normal 900 1em/1 "Font Awesome 7 Sharp Duotone";
+  --fa-font-sharp-duotone-regular: normal 400 1em/1 "Font Awesome 7 Sharp Duotone";
+  --fa-font-sharp-duotone-light: normal 300 1em/1 "Font Awesome 7 Sharp Duotone";
+  --fa-font-sharp-duotone-thin: normal 100 1em/1 "Font Awesome 7 Sharp Duotone";
+  --fa-font-slab-regular: normal 400 1em/1 "Font Awesome 7 Slab";
+  --fa-font-slab-press-regular: normal 400 1em/1 "Font Awesome 7 Slab Press";
+  --fa-font-whiteboard-semibold: normal 600 1em/1 "Font Awesome 7 Whiteboard";
+  --fa-font-thumbprint-light: normal 300 1em/1 "Font Awesome 7 Thumbprint";
+  --fa-font-notdog-solid: normal 900 1em/1 "Font Awesome 7 Notdog";
+  --fa-font-notdog-duo-solid: normal 900 1em/1 "Font Awesome 7 Notdog Duo";
+  --fa-font-etch-solid: normal 900 1em/1 "Font Awesome 7 Etch";
+  --fa-font-jelly-regular: normal 400 1em/1 "Font Awesome 7 Jelly";
+  --fa-font-jelly-fill-regular: normal 400 1em/1 "Font Awesome 7 Jelly Fill";
+  --fa-font-jelly-duo-regular: normal 400 1em/1 "Font Awesome 7 Jelly Duo";
+  --fa-font-chisel-regular: normal 400 1em/1 "Font Awesome 7 Chisel";
+  --fa-font-utility-semibold: normal 600 1em/1 "Font Awesome 7 Utility";
+  --fa-font-utility-duo-semibold: normal 600 1em/1 "Font Awesome 7 Utility Duo";
+  --fa-font-utility-fill-semibold: normal 600 1em/1 "Font Awesome 7 Utility Fill";
+}
 
+.svg-inline--fa {
+  box-sizing: content-box;
+  display: var(--fa-display, inline-block);
+  height: 1em;
+  overflow: visible;
+  vertical-align: -0.125em;
+  width: var(--fa-width, 1.25em);
+}
+.svg-inline--fa.fa-2xs {
+  vertical-align: 0.1em;
+}
+.svg-inline--fa.fa-xs {
+  vertical-align: 0em;
+}
+.svg-inline--fa.fa-sm {
+  vertical-align: -0.0714285714em;
+}
+.svg-inline--fa.fa-lg {
+  vertical-align: -0.2em;
+}
+.svg-inline--fa.fa-xl {
+  vertical-align: -0.25em;
+}
+.svg-inline--fa.fa-2xl {
+  vertical-align: -0.3125em;
+}
+.svg-inline--fa.fa-pull-left,
+.svg-inline--fa .fa-pull-start {
+  float: inline-start;
+  margin-inline-end: var(--fa-pull-margin, 0.3em);
+}
+.svg-inline--fa.fa-pull-right,
+.svg-inline--fa .fa-pull-end {
+  float: inline-end;
+  margin-inline-start: var(--fa-pull-margin, 0.3em);
+}
+.svg-inline--fa.fa-li {
+  width: var(--fa-li-width, 2em);
+  inset-inline-start: calc(-1 * var(--fa-li-width, 2em));
+  inset-block-start: 0.25em; /* syncing vertical alignment with Web Font rendering */
+}
+
+.fa-layers-counter, .fa-layers-text {
+  display: inline-block;
+  position: absolute;
+  text-align: center;
+}
+
+.fa-layers {
+  display: inline-block;
+  height: 1em;
+  position: relative;
+  text-align: center;
+  vertical-align: -0.125em;
+  width: var(--fa-width, 1.25em);
+}
+.fa-layers .svg-inline--fa {
+  inset: 0;
+  margin: auto;
+  position: absolute;
+  transform-origin: center center;
+}
+
+.fa-layers-text {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transform-origin: center center;
+}
+
+.fa-layers-counter {
+  background-color: var(--fa-counter-background-color, #ff253a);
+  border-radius: var(--fa-counter-border-radius, 1em);
+  box-sizing: border-box;
+  color: var(--fa-inverse, #fff);
+  line-height: var(--fa-counter-line-height, 1);
+  max-width: var(--fa-counter-max-width, 5em);
+  min-width: var(--fa-counter-min-width, 1.5em);
+  overflow: hidden;
+  padding: var(--fa-counter-padding, 0.25em 0.5em);
+  right: var(--fa-right, 0);
+  text-overflow: ellipsis;
+  top: var(--fa-top, 0);
+  transform: scale(var(--fa-counter-scale, 0.25));
+  transform-origin: top right;
+}
+
+.fa-layers-bottom-right {
+  bottom: var(--fa-bottom, 0);
+  right: var(--fa-right, 0);
+  top: auto;
+  transform: scale(var(--fa-layers-scale, 0.25));
+  transform-origin: bottom right;
+}
+
+.fa-layers-bottom-left {
+  bottom: var(--fa-bottom, 0);
+  left: var(--fa-left, 0);
+  right: auto;
+  top: auto;
+  transform: scale(var(--fa-layers-scale, 0.25));
+  transform-origin: bottom left;
+}
+
+.fa-layers-top-right {
+  top: var(--fa-top, 0);
+  right: var(--fa-right, 0);
+  transform: scale(var(--fa-layers-scale, 0.25));
+  transform-origin: top right;
+}
+
+.fa-layers-top-left {
+  left: var(--fa-left, 0);
+  right: auto;
+  top: var(--fa-top, 0);
+  transform: scale(var(--fa-layers-scale, 0.25));
+  transform-origin: top left;
+}
+
+.fa-1x {
+  font-size: 1em;
+}
+
+.fa-2x {
+  font-size: 2em;
+}
+
+.fa-3x {
+  font-size: 3em;
+}
+
+.fa-4x {
+  font-size: 4em;
+}
+
+.fa-5x {
+  font-size: 5em;
+}
+
+.fa-6x {
+  font-size: 6em;
+}
+
+.fa-7x {
+  font-size: 7em;
+}
+
+.fa-8x {
+  font-size: 8em;
+}
+
+.fa-9x {
+  font-size: 9em;
+}
+
+.fa-10x {
+  font-size: 10em;
+}
+
+.fa-2xs {
+  font-size: calc(10 / 16 * 1em); /* converts a 10px size into an em-based value that's relative to the scale's 16px base */
+  line-height: calc(1 / 10 * 1em); /* sets the line-height of the icon back to that of it's parent */
+  vertical-align: calc((6 / 10 - 0.375) * 1em); /* vertically centers the icon taking into account the surrounding text's descender */
+}
+
+.fa-xs {
+  font-size: calc(12 / 16 * 1em); /* converts a 12px size into an em-based value that's relative to the scale's 16px base */
+  line-height: calc(1 / 12 * 1em); /* sets the line-height of the icon back to that of it's parent */
+  vertical-align: calc((6 / 12 - 0.375) * 1em); /* vertically centers the icon taking into account the surrounding text's descender */
+}
+
+.fa-sm {
+  font-size: calc(14 / 16 * 1em); /* converts a 14px size into an em-based value that's relative to the scale's 16px base */
+  line-height: calc(1 / 14 * 1em); /* sets the line-height of the icon back to that of it's parent */
+  vertical-align: calc((6 / 14 - 0.375) * 1em); /* vertically centers the icon taking into account the surrounding text's descender */
+}
+
+.fa-lg {
+  font-size: calc(20 / 16 * 1em); /* converts a 20px size into an em-based value that's relative to the scale's 16px base */
+  line-height: calc(1 / 20 * 1em); /* sets the line-height of the icon back to that of it's parent */
+  vertical-align: calc((6 / 20 - 0.375) * 1em); /* vertically centers the icon taking into account the surrounding text's descender */
+}
+
+.fa-xl {
+  font-size: calc(24 / 16 * 1em); /* converts a 24px size into an em-based value that's relative to the scale's 16px base */
+  line-height: calc(1 / 24 * 1em); /* sets the line-height of the icon back to that of it's parent */
+  vertical-align: calc((6 / 24 - 0.375) * 1em); /* vertically centers the icon taking into account the surrounding text's descender */
+}
+
+.fa-2xl {
+  font-size: calc(32 / 16 * 1em); /* converts a 32px size into an em-based value that's relative to the scale's 16px base */
+  line-height: calc(1 / 32 * 1em); /* sets the line-height of the icon back to that of it's parent */
+  vertical-align: calc((6 / 32 - 0.375) * 1em); /* vertically centers the icon taking into account the surrounding text's descender */
+}
+
+.fa-width-auto {
+  --fa-width: auto;
+}
+
+.fa-fw,
+.fa-width-fixed {
+  --fa-width: 1.25em;
+}
+
+.fa-ul {
+  list-style-type: none;
+  margin-inline-start: var(--fa-li-margin, 2.5em);
+  padding-inline-start: 0;
+}
+.fa-ul > li {
+  position: relative;
+}
+
+.fa-li {
+  inset-inline-start: calc(-1 * var(--fa-li-width, 2em));
+  position: absolute;
+  text-align: center;
+  width: var(--fa-li-width, 2em);
+  line-height: inherit;
+}
+
+/* Heads Up: Bordered Icons will not be supported in the future!
+  - This feature will be deprecated in the next major release of Font Awesome (v8)!
+  - You may continue to use it in this version *v7), but it will not be supported in Font Awesome v8.
+*/
+/* Notes:
+* --@{v.$css-prefix}-border-width = 1/16 by default (to render as ~1px based on a 16px default font-size)
+* --@{v.$css-prefix}-border-padding =
+  ** 3/16 for vertical padding (to give ~2px of vertical whitespace around an icon considering it's vertical alignment)
+  ** 4/16 for horizontal padding (to give ~4px of horizontal whitespace around an icon)
+*/
+.fa-border {
+  border-color: var(--fa-border-color, #eee);
+  border-radius: var(--fa-border-radius, 0.1em);
+  border-style: var(--fa-border-style, solid);
+  border-width: var(--fa-border-width, 0.0625em);
+  box-sizing: var(--fa-border-box-sizing, content-box);
+  padding: var(--fa-border-padding, 0.1875em 0.25em);
+}
+
+.fa-pull-left,
+.fa-pull-start {
+  float: inline-start;
+  margin-inline-end: var(--fa-pull-margin, 0.3em);
+}
+
+.fa-pull-right,
+.fa-pull-end {
+  float: inline-end;
+  margin-inline-start: var(--fa-pull-margin, 0.3em);
+}
+
+.fa-beat {
+  animation-name: fa-beat;
+  animation-delay: var(--fa-animation-delay, 0s);
+  animation-direction: var(--fa-animation-direction, normal);
+  animation-duration: var(--fa-animation-duration, 1s);
+  animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+  animation-timing-function: var(--fa-animation-timing, ease-in-out);
+}
+
+.fa-bounce {
+  animation-name: fa-bounce;
+  animation-delay: var(--fa-animation-delay, 0s);
+  animation-direction: var(--fa-animation-direction, normal);
+  animation-duration: var(--fa-animation-duration, 1s);
+  animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+  animation-timing-function: var(--fa-animation-timing, cubic-bezier(0.28, 0.84, 0.42, 1));
+}
+
+.fa-fade {
+  animation-name: fa-fade;
+  animation-delay: var(--fa-animation-delay, 0s);
+  animation-direction: var(--fa-animation-direction, normal);
+  animation-duration: var(--fa-animation-duration, 1s);
+  animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+  animation-timing-function: var(--fa-animation-timing, cubic-bezier(0.4, 0, 0.6, 1));
+}
+
+.fa-beat-fade {
+  animation-name: fa-beat-fade;
+  animation-delay: var(--fa-animation-delay, 0s);
+  animation-direction: var(--fa-animation-direction, normal);
+  animation-duration: var(--fa-animation-duration, 1s);
+  animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+  animation-timing-function: var(--fa-animation-timing, cubic-bezier(0.4, 0, 0.6, 1));
+}
+
+.fa-flip {
+  animation-name: fa-flip;
+  animation-delay: var(--fa-animation-delay, 0s);
+  animation-direction: var(--fa-animation-direction, normal);
+  animation-duration: var(--fa-animation-duration, 1s);
+  animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+  animation-timing-function: var(--fa-animation-timing, ease-in-out);
+}
+
+.fa-shake {
+  animation-name: fa-shake;
+  animation-delay: var(--fa-animation-delay, 0s);
+  animation-direction: var(--fa-animation-direction, normal);
+  animation-duration: var(--fa-animation-duration, 1s);
+  animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+  animation-timing-function: var(--fa-animation-timing, linear);
+}
+
+.fa-spin {
+  animation-name: fa-spin;
+  animation-delay: var(--fa-animation-delay, 0s);
+  animation-direction: var(--fa-animation-direction, normal);
+  animation-duration: var(--fa-animation-duration, 2s);
+  animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+  animation-timing-function: var(--fa-animation-timing, linear);
+}
+
+.fa-spin-reverse {
+  --fa-animation-direction: reverse;
+}
+
+.fa-pulse,
+.fa-spin-pulse {
+  animation-name: fa-spin;
+  animation-direction: var(--fa-animation-direction, normal);
+  animation-duration: var(--fa-animation-duration, 1s);
+  animation-iteration-count: var(--fa-animation-iteration-count, infinite);
+  animation-timing-function: var(--fa-animation-timing, steps(8));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fa-beat,
+  .fa-bounce,
+  .fa-fade,
+  .fa-beat-fade,
+  .fa-flip,
+  .fa-pulse,
+  .fa-shake,
+  .fa-spin,
+  .fa-spin-pulse {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+@keyframes fa-beat {
+  0%, 90% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(var(--fa-beat-scale, 1.25));
+  }
+}
+@keyframes fa-bounce {
+  0% {
+    transform: scale(1, 1) translateY(0);
+  }
+  10% {
+    transform: scale(var(--fa-bounce-start-scale-x, 1.1), var(--fa-bounce-start-scale-y, 0.9)) translateY(0);
+  }
+  30% {
+    transform: scale(var(--fa-bounce-jump-scale-x, 0.9), var(--fa-bounce-jump-scale-y, 1.1)) translateY(var(--fa-bounce-height, -0.5em));
+  }
+  50% {
+    transform: scale(var(--fa-bounce-land-scale-x, 1.05), var(--fa-bounce-land-scale-y, 0.95)) translateY(0);
+  }
+  57% {
+    transform: scale(1, 1) translateY(var(--fa-bounce-rebound, -0.125em));
+  }
+  64% {
+    transform: scale(1, 1) translateY(0);
+  }
+  100% {
+    transform: scale(1, 1) translateY(0);
+  }
+}
+@keyframes fa-fade {
+  50% {
+    opacity: var(--fa-fade-opacity, 0.4);
+  }
+}
+@keyframes fa-beat-fade {
+  0%, 100% {
+    opacity: var(--fa-beat-fade-opacity, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(var(--fa-beat-fade-scale, 1.125));
+  }
+}
+@keyframes fa-flip {
+  50% {
+    transform: rotate3d(var(--fa-flip-x, 0), var(--fa-flip-y, 1), var(--fa-flip-z, 0), var(--fa-flip-angle, -180deg));
+  }
+}
+@keyframes fa-shake {
+  0% {
+    transform: rotate(-15deg);
+  }
+  4% {
+    transform: rotate(15deg);
+  }
+  8%, 24% {
+    transform: rotate(-18deg);
+  }
+  12%, 28% {
+    transform: rotate(18deg);
+  }
+  16% {
+    transform: rotate(-22deg);
+  }
+  20% {
+    transform: rotate(22deg);
+  }
+  32% {
+    transform: rotate(-12deg);
+  }
+  36% {
+    transform: rotate(12deg);
+  }
+  40%, 100% {
+    transform: rotate(0deg);
+  }
+}
+@keyframes fa-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.fa-rotate-90 {
+  transform: rotate(90deg);
+}
+
+.fa-rotate-180 {
+  transform: rotate(180deg);
+}
+
+.fa-rotate-270 {
+  transform: rotate(270deg);
+}
+
+.fa-flip-horizontal {
+  transform: scale(-1, 1);
+}
+
+.fa-flip-vertical {
+  transform: scale(1, -1);
+}
+
+.fa-flip-both,
+.fa-flip-horizontal.fa-flip-vertical {
+  transform: scale(-1, -1);
+}
+
+.fa-rotate-by {
+  transform: rotate(var(--fa-rotate-angle, 0));
+}
+
+.svg-inline--fa .fa-primary {
+  fill: var(--fa-primary-color, currentColor);
+  opacity: var(--fa-primary-opacity, 1);
+}
+
+.svg-inline--fa .fa-secondary {
+  fill: var(--fa-secondary-color, currentColor);
+  opacity: var(--fa-secondary-opacity, 0.4);
+}
+
+.svg-inline--fa.fa-swap-opacity .fa-primary {
+  opacity: var(--fa-secondary-opacity, 0.4);
+}
+
+.svg-inline--fa.fa-swap-opacity .fa-secondary {
+  opacity: var(--fa-primary-opacity, 1);
+}
+
+.svg-inline--fa mask .fa-primary,
+.svg-inline--fa mask .fa-secondary {
+  fill: black;
+}
+
+.svg-inline--fa.fa-inverse {
+  fill: var(--fa-inverse, #fff);
+}
+
+.fa-stack {
+  display: inline-block;
+  height: 2em;
+  line-height: 2em;
+  position: relative;
+  vertical-align: middle;
+  width: 2.5em;
+}
+
+.fa-inverse {
+  color: var(--fa-inverse, #fff);
+}
+
+.svg-inline--fa.fa-stack-1x {
+  --fa-width: 1.25em;
+  height: 1em;
+  width: var(--fa-width);
+}
+.svg-inline--fa.fa-stack-2x {
+  --fa-width: 2.5em;
+  height: 2em;
+  width: var(--fa-width);
+}
+
+.fa-stack-1x,
+.fa-stack-2x {
+  inset: 0;
+  margin: auto;
+  position: absolute;
+  z-index: var(--fa-stack-z-index, auto);
+}</style><link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="CHANGELOG" href="misc/psr_changelog.html">
+
+    <!-- Generated with Sphinx 7.4.7 and Furo 2025.12.19 -->
+        <title>python-semantic-release 10.5.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079">
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb">
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b">
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #eeffcc;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style><script async="" type="text/javascript" src="/_/static/javascript/readthedocs-addons.js"></script><meta name="readthedocs-project-slug" content="python-semantic-release"><meta name="readthedocs-version-slug" content="latest"><meta name="readthedocs-resolver-filename" content="/"><meta name="readthedocs-http-status" content="200"><script id="ethicaladsjs" type="text/javascript" async="true" src="https://media.ethicalads.io/media/client/beta/ethicalads.min.js"></script></head>
+  <body data-theme="auto" data-new-gr-c-s-check-loaded="14.1270.0" data-gr-ext-installed="">
     
     <script>
       document.body.dataset.theme = localStorage.getItem("theme") || "auto";
@@ -113,7 +698,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">python-semantic-release 10.5.3 documentation</div></a>
+      <a href="#"><div class="brand">python-semantic-release 10.5.3 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -132,128 +717,128 @@
   <aside class="sidebar-drawer">
     <div class="sidebar-container">
       
-      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
   <span class="sidebar-brand-text">python-semantic-release 10.5.3 documentation</span>
   
-</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../misc/psr_changelog.html">What's New</a></li>
-<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Concepts</a><input aria-label="Toggle navigation of Concepts" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Commit Parsing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="changelog_templates.html">Version Change Reports</a></li>
-<li class="toctree-l2"><a class="reference internal" href="multibranch_releases.html">Multibranch Releases</a></li>
-<li class="toctree-l2"><a class="reference internal" href="strict_mode.html">Strict Mode</a></li>
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="misc/psr_changelog.html">What's New</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="concepts/index.html">Concepts</a><input aria-label="Toggle navigation of Concepts" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="concepts/getting_started.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts/commit_parsing.html">Commit Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts/changelog_templates.html">Version Change Reports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts/multibranch_releases.html">Multibranch Releases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts/strict_mode.html">Strict Mode</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../api/commands.html">CLI</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../configuration/index.html">Configuration</a><input aria-label="Toggle navigation of Configuration" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../configuration/configuration-guides/index.html">Guides</a><input aria-label="Toggle navigation of Guides" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../configuration/configuration-guides/monorepos.html">Monorepos</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../configuration/configuration-guides/uv_integration.html">UV Project Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/commands.html">CLI</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="configuration/index.html">Configuration</a><input aria-label="Toggle navigation of Configuration" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="configuration/configuration-guides/index.html">Guides</a><input aria-label="Toggle navigation of Guides" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="configuration/configuration-guides/monorepos.html">Monorepos</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration/configuration-guides/uv_integration.html">UV Project Setup</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../configuration/configuration.html">Options</a></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../configuration/automatic-releases/index.html">Automated Releases</a><input aria-label="Toggle navigation of Automated Releases" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../configuration/automatic-releases/travis.html">Travis CI</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../configuration/automatic-releases/github-actions.html">GitHub Actions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../configuration/automatic-releases/cronjobs.html">Cron Job Publishing</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../upgrading/index.html">Upgrading PSR</a><input aria-label="Toggle navigation of Upgrading PSR" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../upgrading/10-upgrade.html">Upgrading to v10</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../upgrading/09-upgrade.html">Upgrading to v9</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../upgrading/08-upgrade.html">Upgrading to v8</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../misc/troubleshooting.html">Troubleshooting</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../api/modules/modules.html">API</a><input aria-label="Toggle navigation of API" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../api/modules/semantic_release.html">semantic_release package</a><input aria-label="Toggle navigation of semantic_release package" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../api/modules/semantic_release.changelog.html">semantic_release.changelog package</a><input aria-label="Toggle navigation of semantic_release.changelog package" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.changelog.context.html">semantic_release.changelog.context module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.changelog.release_history.html">semantic_release.changelog.release_history module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.changelog.template.html">semantic_release.changelog.template module</a></li>
-</ul>
-</li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../api/modules/semantic_release.cli.html">semantic_release.cli package</a><input aria-label="Toggle navigation of semantic_release.cli package" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4 has-children"><a class="reference internal" href="../api/modules/semantic_release.cli.commands.html">semantic_release.cli.commands package</a><input aria-label="Toggle navigation of semantic_release.cli.commands package" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="../api/modules/semantic_release.cli.commands.changelog.html">semantic_release.cli.commands.changelog module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../api/modules/semantic_release.cli.commands.generate_config.html">semantic_release.cli.commands.generate_config module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../api/modules/semantic_release.cli.commands.main.html">semantic_release.cli.commands.main module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../api/modules/semantic_release.cli.commands.publish.html">semantic_release.cli.commands.publish module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../api/modules/semantic_release.cli.commands.version.html">semantic_release.cli.commands.version module</a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.cli.changelog_writer.html">semantic_release.cli.changelog_writer module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.cli.cli_context.html">semantic_release.cli.cli_context module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.cli.config.html">semantic_release.cli.config module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.cli.const.html">semantic_release.cli.const module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.cli.github_actions_output.html">semantic_release.cli.github_actions_output module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.cli.masking_filter.html">semantic_release.cli.masking_filter module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.cli.util.html">semantic_release.cli.util module</a></li>
-</ul>
-</li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../api/modules/semantic_release.commit_parser.html">semantic_release.commit_parser package</a><input aria-label="Toggle navigation of semantic_release.commit_parser package" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4 has-children"><a class="reference internal" href="../api/modules/semantic_release.commit_parser.conventional.html">semantic_release.commit_parser.conventional package</a><input aria-label="Toggle navigation of semantic_release.commit_parser.conventional package" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="../api/modules/semantic_release.commit_parser.conventional.options.html">semantic_release.commit_parser.conventional.options module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../api/modules/semantic_release.commit_parser.conventional.options_monorepo.html">semantic_release.commit_parser.conventional.options_monorepo module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../api/modules/semantic_release.commit_parser.conventional.parser.html">semantic_release.commit_parser.conventional.parser module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../api/modules/semantic_release.commit_parser.conventional.parser_monorepo.html">semantic_release.commit_parser.conventional.parser_monorepo module</a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.commit_parser.angular.html">semantic_release.commit_parser.angular module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.commit_parser.emoji.html">semantic_release.commit_parser.emoji module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.commit_parser.scipy.html">semantic_release.commit_parser.scipy module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.commit_parser.tag.html">semantic_release.commit_parser.tag module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.commit_parser.token.html">semantic_release.commit_parser.token module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.commit_parser.util.html">semantic_release.commit_parser.util module</a></li>
-</ul>
-</li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../api/modules/semantic_release.hvcs.html">semantic_release.hvcs package</a><input aria-label="Toggle navigation of semantic_release.hvcs package" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.hvcs.bitbucket.html">semantic_release.hvcs.bitbucket module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.hvcs.gitea.html">semantic_release.hvcs.gitea module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.hvcs.github.html">semantic_release.hvcs.github module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.hvcs.gitlab.html">semantic_release.hvcs.gitlab module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.hvcs.remote_hvcs_base.html">semantic_release.hvcs.remote_hvcs_base module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.hvcs.token_auth.html">semantic_release.hvcs.token_auth module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.hvcs.util.html">semantic_release.hvcs.util module</a></li>
-</ul>
-</li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../api/modules/semantic_release.version.html">semantic_release.version package</a><input aria-label="Toggle navigation of semantic_release.version package" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4 has-children"><a class="reference internal" href="../api/modules/semantic_release.version.declarations.html">semantic_release.version.declarations package</a><input aria-label="Toggle navigation of semantic_release.version.declarations package" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="../api/modules/semantic_release.version.declarations.enum.html">semantic_release.version.declarations.enum module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../api/modules/semantic_release.version.declarations.file.html">semantic_release.version.declarations.file module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../api/modules/semantic_release.version.declarations.i_version_replacer.html">semantic_release.version.declarations.i_version_replacer module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../api/modules/semantic_release.version.declarations.pattern.html">semantic_release.version.declarations.pattern module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../api/modules/semantic_release.version.declarations.toml.html">semantic_release.version.declarations.toml module</a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.version.algorithm.html">semantic_release.version.algorithm module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.version.declaration.html">semantic_release.version.declaration module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.version.translator.html">semantic_release.version.translator module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../api/modules/semantic_release.version.version.html">semantic_release.version.version module</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../api/modules/semantic_release.const.html">semantic_release.const module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../api/modules/semantic_release.enums.html">semantic_release.enums module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../api/modules/semantic_release.errors.html">semantic_release.errors module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../api/modules/semantic_release.gitproject.html">semantic_release.gitproject module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../api/modules/semantic_release.globals.html">semantic_release.globals module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../api/modules/semantic_release.helpers.html">semantic_release.helpers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration/configuration.html">Options</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="configuration/automatic-releases/index.html">Automated Releases</a><input aria-label="Toggle navigation of Automated Releases" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="configuration/automatic-releases/travis.html">Travis CI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration/automatic-releases/github-actions.html">GitHub Actions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration/automatic-releases/cronjobs.html">Cron Job Publishing</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../contributing/index.html">Contributing</a><input aria-label="Toggle navigation of Contributing" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../contributing/contributing_guide.html">Contributing Guide</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="upgrading/index.html">Upgrading PSR</a><input aria-label="Toggle navigation of Upgrading PSR" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="upgrading/10-upgrade.html">Upgrading to v10</a></li>
+<li class="toctree-l2"><a class="reference internal" href="upgrading/09-upgrade.html">Upgrading to v9</a></li>
+<li class="toctree-l2"><a class="reference internal" href="upgrading/08-upgrade.html">Upgrading to v8</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="misc/troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/modules/modules.html">API</a><input aria-label="Toggle navigation of API" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/modules/semantic_release.html">semantic_release package</a><input aria-label="Toggle navigation of semantic_release package" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/modules/semantic_release.changelog.html">semantic_release.changelog package</a><input aria-label="Toggle navigation of semantic_release.changelog package" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.changelog.context.html">semantic_release.changelog.context module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.changelog.release_history.html">semantic_release.changelog.release_history module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.changelog.template.html">semantic_release.changelog.template module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/modules/semantic_release.cli.html">semantic_release.cli package</a><input aria-label="Toggle navigation of semantic_release.cli package" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="api/modules/semantic_release.cli.commands.html">semantic_release.cli.commands package</a><input aria-label="Toggle navigation of semantic_release.cli.commands package" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/modules/semantic_release.cli.commands.changelog.html">semantic_release.cli.commands.changelog module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/modules/semantic_release.cli.commands.generate_config.html">semantic_release.cli.commands.generate_config module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/modules/semantic_release.cli.commands.main.html">semantic_release.cli.commands.main module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/modules/semantic_release.cli.commands.publish.html">semantic_release.cli.commands.publish module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/modules/semantic_release.cli.commands.version.html">semantic_release.cli.commands.version module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.cli.changelog_writer.html">semantic_release.cli.changelog_writer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.cli.cli_context.html">semantic_release.cli.cli_context module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.cli.config.html">semantic_release.cli.config module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.cli.const.html">semantic_release.cli.const module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.cli.github_actions_output.html">semantic_release.cli.github_actions_output module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.cli.masking_filter.html">semantic_release.cli.masking_filter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.cli.util.html">semantic_release.cli.util module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/modules/semantic_release.commit_parser.html">semantic_release.commit_parser package</a><input aria-label="Toggle navigation of semantic_release.commit_parser package" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="api/modules/semantic_release.commit_parser.conventional.html">semantic_release.commit_parser.conventional package</a><input aria-label="Toggle navigation of semantic_release.commit_parser.conventional package" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/modules/semantic_release.commit_parser.conventional.options.html">semantic_release.commit_parser.conventional.options module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/modules/semantic_release.commit_parser.conventional.options_monorepo.html">semantic_release.commit_parser.conventional.options_monorepo module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/modules/semantic_release.commit_parser.conventional.parser.html">semantic_release.commit_parser.conventional.parser module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/modules/semantic_release.commit_parser.conventional.parser_monorepo.html">semantic_release.commit_parser.conventional.parser_monorepo module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.commit_parser.angular.html">semantic_release.commit_parser.angular module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.commit_parser.emoji.html">semantic_release.commit_parser.emoji module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.commit_parser.scipy.html">semantic_release.commit_parser.scipy module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.commit_parser.tag.html">semantic_release.commit_parser.tag module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.commit_parser.token.html">semantic_release.commit_parser.token module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.commit_parser.util.html">semantic_release.commit_parser.util module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/modules/semantic_release.hvcs.html">semantic_release.hvcs package</a><input aria-label="Toggle navigation of semantic_release.hvcs package" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.hvcs.bitbucket.html">semantic_release.hvcs.bitbucket module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.hvcs.gitea.html">semantic_release.hvcs.gitea module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.hvcs.github.html">semantic_release.hvcs.github module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.hvcs.gitlab.html">semantic_release.hvcs.gitlab module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.hvcs.remote_hvcs_base.html">semantic_release.hvcs.remote_hvcs_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.hvcs.token_auth.html">semantic_release.hvcs.token_auth module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.hvcs.util.html">semantic_release.hvcs.util module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/modules/semantic_release.version.html">semantic_release.version package</a><input aria-label="Toggle navigation of semantic_release.version package" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="api/modules/semantic_release.version.declarations.html">semantic_release.version.declarations package</a><input aria-label="Toggle navigation of semantic_release.version.declarations package" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/modules/semantic_release.version.declarations.enum.html">semantic_release.version.declarations.enum module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/modules/semantic_release.version.declarations.file.html">semantic_release.version.declarations.file module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/modules/semantic_release.version.declarations.i_version_replacer.html">semantic_release.version.declarations.i_version_replacer module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/modules/semantic_release.version.declarations.pattern.html">semantic_release.version.declarations.pattern module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/modules/semantic_release.version.declarations.toml.html">semantic_release.version.declarations.toml module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.version.algorithm.html">semantic_release.version.algorithm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.version.declaration.html">semantic_release.version.declaration module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.version.translator.html">semantic_release.version.translator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/modules/semantic_release.version.version.html">semantic_release.version.version module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/modules/semantic_release.const.html">semantic_release.const module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/modules/semantic_release.enums.html">semantic_release.enums module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/modules/semantic_release.errors.html">semantic_release.errors module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/modules/semantic_release.gitproject.html">semantic_release.gitproject module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/modules/semantic_release.globals.html">semantic_release.globals module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/modules/semantic_release.helpers.html">semantic_release.helpers module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="contributing/index.html">Contributing</a><input aria-label="Toggle navigation of Contributing" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing/contributing_guide.html">Contributing Guide</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/python-semantic-release/python-semantic-release">View on GitHub</a></li>
@@ -277,7 +862,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/concepts/commit_parsing.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/index.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -295,641 +880,402 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="commit-parsing">
-<span id="id1"></span><h1>Commit Parsing<a class="headerlink" href="#commit-parsing" title="Link to this heading">¶</a></h1>
-<p>One of the core components of Python Semantic Release (PSR) is the commit parser. The
-commit parser is responsible for parsing a Project’s Git Repository commit history
-to extract insights about project changes and make decisions based on this insight.</p>
-<p>The primary decision that PSR makes based on the commit history is whether or not
-to release a new version of the project, and if so, what version number to release.
-This decision is made based on the commit message descriptions of the change impact
-introduced by the commit. The change impact describes the impact to the end consumers
-of the project. Depending on the type of change, the version number will be
-incremented according to the <a class="reference external" href="https://semver.org/">Semantic Versioning</a> specification (semver).
-It is the commit parser’s job to extract the change impact from the commit message to
-determine the severity of the changes and then subsequently determine the semver level
-that the version should be bumped to for the next release.</p>
-<p>The commit parser is also responsible for interpreting other aspects of the commit
-message which can be used to generate a helpful and detailed changelog. This includes
-extracting the type of change, the scope of the change, any breaking change descriptions,
-any linked pull/merge request numbers, and any linked issue numbers.</p>
-<p>PSR provides several <a class="reference internal" href="#commit-parser-builtin"><span class="std std-ref">built-in commit parsers</span></a> to handle
-a variety of different commit message styles. If the built-in parsers do not meet your
-needs, you can write your own <a class="reference internal" href="#commit-parser-custom-parser"><span class="std std-ref">custom parser</span></a>
-to handle your specific commit message style.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>PSR’s built-in commit parsers are designed to be flexible enough to provide a
-convenient way to generate the most effective changelogs we can, which means some
-features are added beyond the scope of the original commit message style guidelines.</p>
-<p>Other tools may not follow the same conventions as PSR’s guideline extensions, so
-if you plan to use any similar programs in tandem with PSR, you should be aware of the
-differences in feature support and fall back to the official format guidelines if
-necessary.</p>
+          <section id="python-semantic-release">
+<h1>Python Semantic Release<a class="headerlink" href="#python-semantic-release" title="Link to this heading">¶</a></h1>
+<p><a class="reference external" href="https://pypi.org/project/python-semantic-release/"><img alt="pypi" src="https://img.shields.io/pypi/v/python-semantic-release?label=PyPI&amp;logo=pypi"></a> <a class="reference external" href="https://anaconda.org/conda-forge/python-semantic-release"><img alt="conda-forge" src="https://img.shields.io/conda/vn/conda-forge/python-semantic-release?logo=anaconda"></a> <a class="reference external" href="https://github.com/python-semantic-release/python-semantic-release/releases/latest"><img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/python-semantic-release/python-semantic-release?display_date=published_at"></a> <a class="reference external" href="https://pypistats.org/packages/python-semantic-release"><img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dm/python-semantic-release"></a> <a class="reference external" href="https://github.com/python-semantic-release/python-semantic-release/blob/master/LICENSE"><img alt="PyPI - License" src="https://img.shields.io/pypi/l/python-semantic-release?color=blue"></a> <a class="reference external" href="https://github.com/python-semantic-release/python-semantic-release/issues"><img alt="GitHub Issues" src="https://img.shields.io/github/issues/python-semantic-release/python-semantic-release"></a></p>
+<p><strong>Python Semantic Release (PSR)</strong> provides an automated release mechanism
+determined by SemVer and Commit Message Conventions for your Git projects.</p>
+<p>The purpose of this project is to detect what the next version of the
+project should be from parsing the latest commit messages. If the commit messages
+describe changes that would require a major, minor or patch version bump, PSR
+will automatically bump the version number accordingly. PSR, however, does not
+stop there but will help automate the whole release process. It will update the
+project code and distribution artifact, upload the artifact and post changelogs
+to a remotely hosted Version Control System (VCS).</p>
+<p>The tool is designed to run inside of a CI/CD pipeline service, but it can
+also be run locally.</p>
+<p>This project was originally inspired by the <a class="reference external" href="https://github.com/semantic-release/semantic-release">semantic-release</a> project for JavaScript
+by <em>Stephan Bönnemann</em>, but the codebases have significantly deviated since then, as
+PSR as driven towards the goal of providing flexible changelogs and simple initial setup.</p>
+<section id="installation" class="">
+<span id="id1"></span><h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>python-semantic-release
+semantic-release<span class="w"> </span>--help
+</pre></div>
+</div>
+<p>Python Semantic Release is also available from <a class="reference external" href="https://anaconda.org/conda-forge/python-semantic-release">conda-forge</a> or as a
+<a class="reference internal" href="configuration/automatic-releases/github-actions.html#gh-actions"><span class="std std-ref">GitHub Action</span></a>.</p>
+<p>Read more about the setup and configuration in our <a class="reference internal" href="#inline-getting-started-guide"><span class="std std-ref">Getting Started Guide</span></a>.</p>
+</section>
+<section id="documentation-contents" class="">
+<h2>Documentation Contents<a class="headerlink" href="#documentation-contents" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="misc/psr_changelog.html">What's New</a></li>
+<li class="toctree-l1"><a class="reference internal" href="concepts/index.html">Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/commands.html">CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration/index.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading PSR</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc/troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules/modules.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/python-semantic-release/python-semantic-release">View on GitHub</a></li>
+</ul>
 </div>
 <hr class="docutils">
-<section id="built-in-commit-parsers" class="">
-<span id="commit-parser-builtin"></span><h2>Built-in Commit Parsers<a class="headerlink" href="#built-in-commit-parsers" title="Link to this heading">¶</a></h2>
-<p>The following parsers are built in to Python Semantic Release:</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="#commit-parser-builtin-conventional"><span class="std std-ref">ConventionalCommitParser</span></a></p></li>
-<li><p><a class="reference internal" href="#commit-parser-builtin-conventional-monorepo"><span class="std std-ref">ConventionalCommitMonorepoParser</span></a> <em>(available in v10.4.0+)</em></p></li>
-<li><p><a class="reference internal" href="#commit-parser-builtin-angular"><span class="std std-ref">AngularCommitParser</span></a> <em>(deprecated in v9.19.0)</em></p></li>
-<li><p><a class="reference internal" href="#commit-parser-builtin-emoji"><span class="std std-ref">EmojiCommitParser</span></a></p></li>
-<li><p><a class="reference internal" href="#commit-parser-builtin-scipy"><span class="std std-ref">ScipyCommitParser</span></a></p></li>
-<li><p><a class="reference internal" href="#commit-parser-builtin-tag"><span class="std std-ref">TagCommitParser</span></a> <em>(deprecated in v9.12.0)</em></p></li>
-</ul>
-<hr class="docutils">
-<section id="conventional-commits-parser" class="active">
-<span id="commit-parser-builtin-conventional"></span><h3>Conventional Commits Parser<a class="headerlink" href="#conventional-commits-parser" title="Link to this heading">¶</a></h3>
-<p><em>Introduced in v9.19.0</em></p>
-<p>A parser that is designed to parse commits formatted according to the
-<a class="reference external" href="https://www.conventionalcommits.org/en/v1.0.0">Conventional Commits Specification</a>.  The parser is implemented with the following
-logic in relation to PSR’s core features:</p>
-<ul class="simple">
-<li><p><strong>Version Bump Determination</strong>: This parser extracts the commit type from the subject
-line of the commit (the first line of a commit message). This type is matched against
-the configuration mapping to determine the level bump for the specific commit. If the
-commit type is not found in the configuration mapping, the commit is considered a
-non-parsable commit and will return it as a ParseError object and ultimately a commit
-of type <code class="docutils literal notranslate"><span class="pre">"unknown"</span></code>. The configuration mapping contains lists of commit types that
-correspond to the level bump for each commit type. Some commit types are still valid
-do not trigger a level bump, such as <code class="docutils literal notranslate"><span class="pre">"chore"</span></code> or <code class="docutils literal notranslate"><span class="pre">"docs"</span></code>. You can also configure
-the default level bump
-<a class="reference internal" href="../configuration/configuration.html#config-commit-parser-options"><span class="std std-ref">commit_parser_options.default_level_bump</span></a> if desired.
-To trigger a major release, the commit message body must contain a paragraph that begins
-with <code class="docutils literal notranslate"><span class="pre">BREAKING</span> <span class="pre">CHANGE:</span></code>. This will override the level bump determined by the commit type.</p></li>
-<li><p><strong>Changelog Generation</strong>: PSR will group commits in the changelog by the commit type used
-in the commit message. The commit type shorthand is converted to a more human-friendly
-section heading and then used as the version section title of the changelog and release
-notes. Under the section title, the parsed commit descriptions are listed out in full. If
-the commit includes an optional scope, then the scope is prefixed on to the first line of
-the commit description. If a commit has any breaking change prefixed paragraphs in the
-commit message body, those paragraphs are separated out into a “Breaking Changes” section
-in the changelog (Breaking Changes section is available from the default changelog in
-v9.15.0). Each breaking change paragraph is listed in a bulleted list format across the
-entire version. A single commit is allowed to have more than one breaking change
-prefixed paragraph (as opposed to the <a class="reference external" href="https://www.conventionalcommits.org/en/v1.0.0">Conventional Commits Specification</a>). Commits
-with an optional scope and a breaking change will have the scope prefixed on to the
-breaking change paragraph. Parsing errors will return a ParseError object and ultimately
-a commit of type <code class="docutils literal notranslate"><span class="pre">"unknown"</span></code>. Unknown commits are consolidated into an “Unknown” section
-in the changelog by the default template. To remove unwanted commits from the changelog
-that normally are placed in the “unknown” section, consider the use of the configuration
-option <a class="reference internal" href="../configuration/configuration.html#config-changelog-exclude-commit-patterns"><span class="std std-ref">changelog.exclude_commit_patterns</span></a>
-to ignore those commit styles.</p></li>
-<li><p><strong>Pull/Merge Request Identifier Detection</strong>: This parser implements PSR’s
-<a class="reference internal" href="#commit-parser-builtin-linked-merge-request-detection"><span class="std std-ref">Common Linked Merge Request Detection</span></a> to identify and extract
-pull/merge request numbers. The parser will return a string value if a pull/merge
-request number is found in the commit message. If no pull/merge request number is
-found, the parser will return an empty string.</p></li>
-<li><p><strong>Linked Issue Identifier Detection</strong>: This parser implements PSR’s
-<a class="reference internal" href="#commit-parser-builtin-issue-number-detection"><span class="std std-ref">Common Issue Identifier Detection</span></a> to identify and extract issue numbers.
-The parser will return a tuple of issue numbers as strings if any are found in the commit
-message. If no issue numbers are found, the parser will return an empty tuple.</p></li>
-<li><p><strong>Squash Commit Evaluation</strong>: This parser implements PSR’s
-<a class="reference internal" href="#commit-parser-builtin-squash-commit-evaluation"><span class="std std-ref">Common Squash Commit Evaluation</span></a> to identify and extract each commit
-message as a separate commit message within a single squashed commit. You can toggle this
-feature on/off via the <a class="reference internal" href="../configuration/configuration.html#config-commit-parser-options"><span class="std std-ref">commit_parser_options</span></a> setting.</p></li>
-<li><p><strong>Release Notice Footer Detection</strong>: This parser implements PSR’s
-<a class="reference internal" href="#commit-parser-builtin-release-notice-footer-detection"><span class="std std-ref">Common Release Notice Footer Detection</span></a>, which is a custom extension
-to traditional <a class="reference external" href="https://www.conventionalcommits.org/en/v1.0.0">Conventional Commits Specification</a> to use the <code class="docutils literal notranslate"><span class="pre">NOTICE</span></code> keyword as a git
-footer to document additional release information that is not considered a breaking change.</p></li>
-</ul>
-<p><strong>Limitations</strong>:</p>
-<ul class="simple">
-<li><p>Commits with the <code class="docutils literal notranslate"><span class="pre">revert</span></code> type are not currently supported. Track the implementation
-of this feature in the issue <a class="reference external" href="https://github.com/python-semantic-release/python-semantic-release/issues/402">#402</a>.</p></li>
-</ul>
-<p>If no commit parser options are provided via the configuration, the parser will use PSR’s
-built-in
-<a class="reference internal" href="../api/modules/semantic_release.commit_parser.conventional.options.html#semantic_release.commit_parser.conventional.options.ConventionalCommitParserOptions" title="semantic_release.commit_parser.conventional.options.ConventionalCommitParserOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">defaults</span></code></a>.</p>
-<hr class="docutils">
 </section>
-<section id="conventional-commits-monorepo-parser">
-<span id="commit-parser-builtin-conventional-monorepo"></span><h3>Conventional Commits Monorepo Parser<a class="headerlink" href="#conventional-commits-monorepo-parser" title="Link to this heading">¶</a></h3>
-<p><em>Introduced in v10.4.0</em></p>
+<section id="getting-started" class="">
+<span id="inline-getting-started-guide"></span><h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading">¶</a></h2>
+<p>If you haven’t done so already, install Python Semantic Release locally following the
+<a class="reference internal" href="#installation"><span class="std std-ref">installation instructions</span></a>.</p>
+<p>If you are using a CI/CD service, you may not have to add Python Semantic Release to your
+project’s dependencies permanently, but for the duration of this guide for the initial
+setup, you will need to have it installed locally.</p>
+<section id="configuring-psr" class="">
+<h3>Configuring PSR<a class="headerlink" href="#configuring-psr" title="Link to this heading">¶</a></h3>
+<p>Python Semantic Release ships with a reasonable default configuration but some aspects <strong>MUST</strong> be
+customized to your project. To view the default configuration, run the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>semantic-release<span class="w"> </span>generate-config
+</pre></div>
+</div>
+<p>The output of the above command is the default configuration in TOML format without any modifications.
+If this is fine for your project, then you do not need to configure anything else.</p>
+<p>PSR accepts overrides to the default configuration keys individually. If you don’t define the
+key-value pair in your configuration file, the default value will be used.</p>
+<p>By default, Python Semantic Release will look for configuration overrides in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> under
+the TOML table <code class="docutils literal notranslate"><span class="pre">[tool.semantic_release]</span></code>. You may specify a different file using the
+<code class="docutils literal notranslate"><span class="pre">-c/--config</span></code> option, for example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># In TOML format with top level table [semantic_release]</span>
+semantic-release<span class="w"> </span>-c<span class="w"> </span>releaserc.toml
+
+<span class="c1"># In JSON format with top level object key {"semantic_release": {}}</span>
+semantic-release<span class="w"> </span>-c<span class="w"> </span>releaserc.json
+</pre></div>
+</div>
+<p>The easiest way to get started is to output the default configuration to a file,
+delete keys you do not need to override, and then edit the remaining keys to suit your project.</p>
+<p>To set up in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>, run the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># In file redirect in bash</span>
+semantic-release<span class="w"> </span>generate-config<span class="w"> </span>--pyproject<span class="w"> </span>&gt;&gt;<span class="w"> </span>pyproject.toml
+
+<span class="c1"># Open your editor to edit the configuration</span>
+vim<span class="w"> </span>pyproject.toml
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="api/commands.html#cmd-generate-config"><span class="std std-ref">semantic-release generate-config</span></a></p></li>
+<li><p><a class="reference internal" href="configuration/index.html#configuration"><span class="std std-ref">Configuration</span></a></p></li>
+</ul>
+</div>
+<section id="configuring-the-version-stamp-feature" class="">
+<h4>Configuring the Version Stamp Feature<a class="headerlink" href="#configuring-the-version-stamp-feature" title="Link to this heading">¶</a></h4>
+<p>One of the best features of Python Semantic Release is the ability to automatically stamp the
+new version number into your project files, so you don’t have to manually update the version upon
+each release. The version that is stamped is automatically determined by Python Semantic Release
+from your commit messages which compliments automated versioning seamlessly.</p>
+<p>The most crucial version stamp is the one in your project metadata, which is used by
+the Python Package Index (PyPI) and other package managers to identify the version of your package.</p>
+<p>For Python projects, this is typically the <code class="docutils literal notranslate"><span class="pre">version</span></code> field in your <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file. First,
+set up your project metadata with the base <code class="docutils literal notranslate"><span class="pre">version</span></code> value. If you are starting with a brand new project,
+set <code class="docutils literal notranslate"><span class="pre">project.version</span> <span class="pre">=</span> <span class="pre">"0.0.0"</span></code>.  If you are working on an existing project, set it to the last
+version number you released. Do not include any <code class="docutils literal notranslate"><span class="pre">v</span></code> prefix.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>In order for this parser to be effective, please review the section titled
-<a class="reference internal" href="../configuration/configuration-guides/monorepos.html#monorepos"><span class="std std-ref">Releasing Packages from a Monorepo</span></a> for details on file structure, configurations, and release actions.</p>
+<p>The version number must be a valid SemVer version, which means it should follow the format
+<code class="docutils literal notranslate"><span class="pre">MAJOR.MINOR.PATCH</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">1.0.0</span></code>). Python Semantic Release does NOT support Canonical
+version values defined in the <a class="reference external" href="https://peps.python.org/pep-0440/">PEP 440</a> specification at this time. See
+<a class="reference external" href="https://github.com/python-semantic-release/python-semantic-release/issues/455">Issue #455</a>
+for more details. Note that you can still define a SemVer version in the <code class="docutils literal notranslate"><span class="pre">project.version</span></code>
+field, and when your build is generated, the build tool will automatically generate a PEP 440
+compliant version as long as you do <strong>NOT</strong> use a non-pep440 compliant pre-release token.</p>
 </div>
-<p>This parser is an extension of the <a class="reference internal" href="#commit-parser-builtin-conventional"><span class="std std-ref">Conventional Commits Parser</span></a>, designed specifically
-for monorepo environments. A monorepo environment is defined as a single source control repository
-that contains multiple packages, each of which can be released independently and may have different
-version numbers.</p>
-<p>This parser introduces two new configuration options that determine which packages are affected
-by a commit. These options control whether a commit is considered for version determination,
-changelog generation, and other release actions for the relevant packages. The 2 new
-configuration options are
-<a class="reference internal" href="../api/modules/semantic_release.commit_parser.conventional.options_monorepo.html#semantic_release.commit_parser.conventional.options_monorepo.ConventionalCommitMonorepoParserOptions.path_filters" title="semantic_release.commit_parser.conventional.options_monorepo.ConventionalCommitMonorepoParserOptions.path_filters"><code class="xref py py-class docutils literal notranslate"><span class="pre">path_filters</span></code></a>
-and
-<a class="reference internal" href="../api/modules/semantic_release.commit_parser.conventional.options_monorepo.html#semantic_release.commit_parser.conventional.options_monorepo.ConventionalCommitMonorepoParserOptions.scope_prefix" title="semantic_release.commit_parser.conventional.options_monorepo.ConventionalCommitMonorepoParserOptions.scope_prefix"><code class="xref py py-class docutils literal notranslate"><span class="pre">scope_prefix</span></code></a>.</p>
-<p><strong>Features</strong>:</p>
-<ul class="simple">
-<li><p><strong>Package Specific Commit Filtering</strong>: For monorepo support, this parser uses 2 filtering rules
-to determine if a commit should be considered for a specific package. The first rule is based on
-file paths that are changed in the commit and the second rule is based on the optional scope
-prefix defined in the commit message. If either rule matches, then the commit is considered
-relevant to that package and will be used in version determination, changelog generation, etc,
-for that package. If neither rule matches, then the commit is ignored for that package. File
-path filtering rules are applied first and are the primary way to determine package relevance. The
-<a class="reference internal" href="../api/modules/semantic_release.commit_parser.conventional.options_monorepo.html#semantic_release.commit_parser.conventional.options_monorepo.ConventionalCommitMonorepoParserOptions.path_filters" title="semantic_release.commit_parser.conventional.options_monorepo.ConventionalCommitMonorepoParserOptions.path_filters"><code class="xref py py-class docutils literal notranslate"><span class="pre">path_filters</span></code></a>
-option allows for specifying a list of file path patterns and will also support negated patterns
-to ignore specific paths that otherwise would be selected from the file glob pattern.  Negated
-patterns are defined by prefixing the pattern with an exclamation point (<code class="docutils literal notranslate"><span class="pre">!</span></code>). File path
-filtering is quite effective by itself but to handle the edge cases, the parser has the
-<a class="reference internal" href="../api/modules/semantic_release.commit_parser.conventional.options_monorepo.html#semantic_release.commit_parser.conventional.options_monorepo.ConventionalCommitMonorepoParserOptions.scope_prefix" title="semantic_release.commit_parser.conventional.options_monorepo.ConventionalCommitMonorepoParserOptions.scope_prefix"><code class="xref py py-class docutils literal notranslate"><span class="pre">scope_prefix</span></code></a>
-configuration option to allow the developer to specifically define when the commit is relevant
-to the package. In monorepo setups, there are often shared files between packages (generally at
-the root project level) that are modified occasionally but not always relevant to the package
-being released. Since you do not want to define this path in the package configuration as it may
-not be relevant to the release, then this parser will look for a match with the scope prefix.
-The scope prefix is a regular expression that is used to match the text inside the scope field
-of a Conventional Commit. The scope prefix is optional and is used only if file path filtering
-does not match. Commits that have matching files in the commit will be considered relevant to
-the package <strong>regardless</strong> if a scope prefix exists or if it matches.</p></li>
-<li><p><strong>Version Bump Determination</strong>: Once package-specific commit filtering is applied, the relevant
-commits are passed to the Conventional Commits Parser for evaluation and then used for version
-bump determination. See <a class="reference internal" href="#commit-parser-builtin-conventional"><span class="std std-ref">Conventional Commits Parser</span></a> for details.</p></li>
-<li><p><strong>Changelog Generation</strong>: Once package-specific commit filtering is applied, the relevant
-commits are passed to the Conventional Commits Parser for evaluation and then used for
-changelog generation. See <a class="reference internal" href="#commit-parser-builtin-conventional"><span class="std std-ref">Conventional Commits Parser</span></a> for details.</p></li>
-<li><p><strong>Pull/Merge Request Identifier Detection</strong>: Once package-specific commit filtering is applied,
-the relevant commits are passed to the Conventional Commits Parser for pull/merge request
-identifier detection. See <a class="reference internal" href="#commit-parser-builtin-linked-merge-request-detection"><span class="std std-ref">Common Linked Merge Request Detection</span></a> for details.</p></li>
-<li><p><strong>Linked Issue Identifier Detection</strong>: Once package-specific commit filtering is applied, the
-relevant commits are passed to the Conventional Commits Parser for linked issue identifier
-detection. See <a class="reference internal" href="#commit-parser-builtin-issue-number-detection"><span class="std std-ref">Common Issue Identifier Detection</span></a> for details.</p></li>
-<li><p><strong>Squash Commit Evaluation</strong>: Squashed commits are separated out into individual commits with
-the same set of changed files <strong>BEFORE</strong> the package-specific commit filtering is applied.
-Each pseudo-commit is then subjected to the same filtering rules as regular commits. See
-<a class="reference internal" href="#commit-parser-builtin-squash-commit-evaluation"><span class="std std-ref">Common Squash Commit Evaluation</span></a> for details.</p></li>
-<li><p><strong>Release Notice Footer Detection</strong>: Once package-specific commit filtering is applied, the
-relevant commits are passed to the Conventional Commits Parser for release notice footer
-detection. See <a class="reference internal" href="#commit-parser-builtin-release-notice-footer-detection"><span class="std std-ref">Common Release Notice Footer Detection</span></a> for details.</p></li>
-</ul>
-<p><strong>Limitations</strong>:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">revert</span></code> commit type is NOT supported, see <a class="reference internal" href="#commit-parser-builtin-conventional"><span class="std std-ref">Conventional Commits Parser</span></a>’s
-limitations for details.</p></li>
-</ul>
-<p>If no commit parser options are provided via the configuration, the parser will use PSR’s
-built-in
-<a class="reference internal" href="../api/modules/semantic_release.commit_parser.conventional.options_monorepo.html#semantic_release.commit_parser.conventional.options_monorepo.ConventionalCommitMonorepoParserOptions" title="semantic_release.commit_parser.conventional.options_monorepo.ConventionalCommitMonorepoParserOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">defaults</span></code></a>.</p>
-<hr class="docutils">
-</section>
-<section id="angular-commit-parser">
-<span id="commit-parser-builtin-angular"></span><h3>Angular Commit Parser<a class="headerlink" href="#angular-commit-parser" title="Link to this heading">¶</a></h3>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This parser was deprecated in <code class="docutils literal notranslate"><span class="pre">v9.19.0</span></code>. It will be removed in a future release.
-This parser is being replaced by the <a class="reference internal" href="#commit-parser-builtin-conventional"><span class="std std-ref">Conventional Commits Parser</span></a>.</p>
-</div>
-<p>A parser that is designed to parse commits formatted according to the
-<a class="reference external" href="https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits">Angular Commit Style Guidelines</a>.  The parser is implemented with the following
-logic in relation to how PSR’s core features:</p>
-<ul class="simple">
-<li><p><strong>Version Bump Determination</strong>: This parser extracts the commit type from the subject
-line of the commit (the first line of a commit message). This type is matched against
-the configuration mapping to determine the level bump for the specific commit. If the
-commit type is not found in the configuration mapping, the commit is considered a
-non-parsable commit and will return it as a ParseError object and ultimately a commit
-of type <code class="docutils literal notranslate"><span class="pre">"unknown"</span></code>. The configuration mapping contains lists of commit types that
-correspond to the level bump for each commit type. Some commit types are still valid
-do not trigger a level bump, such as <code class="docutils literal notranslate"><span class="pre">"chore"</span></code> or <code class="docutils literal notranslate"><span class="pre">"docs"</span></code>. You can also configure
-the default level bump
-<a class="reference internal" href="../configuration/configuration.html#config-commit-parser-options"><span class="std std-ref">commit_parser_options.default_level_bump</span></a> if desired.
-To trigger a major release, the commit message body must contain a paragraph that begins
-with <code class="docutils literal notranslate"><span class="pre">BREAKING</span> <span class="pre">CHANGE:</span></code>. This will override the level bump determined by the commit type.</p></li>
-<li><p><strong>Changelog Generation</strong>: PSR will group commits in the changelog by the commit type used
-in the commit message. The commit type shorthand is converted to a more human-friendly
-section heading and then used as the version section title of the changelog and release
-notes. Under the section title, the parsed commit descriptions are listed out in full. If
-the commit includes an optional scope, then the scope is prefixed on to the first line of
-the commit description. If a commit has any breaking change prefixed paragraphs in the
-commit message body, those paragraphs are separated out into a “Breaking Changes” section
-in the changelog (Breaking Changes section is available from the default changelog in
-v9.15.0). Each breaking change paragraph is listed in a bulleted list format across the
-entire version. A single commit is allowed to have more than one breaking change
-prefixed paragraph (as opposed to the <a class="reference external" href="https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits">Angular Commit Style Guidelines</a>). Commits
-with an optional scope and a breaking change will have the scope prefixed on to the
-breaking change paragraph. Parsing errors will return a ParseError object and ultimately
-a commit of type <code class="docutils literal notranslate"><span class="pre">"unknown"</span></code>. Unknown commits are consolidated into an “Unknown” section
-in the changelog by the default template. To remove unwanted commits from the changelog
-that normally are placed in the “unknown” section, consider the use of the configuration
-option <a class="reference internal" href="../configuration/configuration.html#config-changelog-exclude-commit-patterns"><span class="std std-ref">changelog.exclude_commit_patterns</span></a>
-to ignore those commit styles.</p></li>
-<li><p><strong>Pull/Merge Request Identifier Detection</strong>: This parser implements PSR’s
-<a class="reference internal" href="#commit-parser-builtin-linked-merge-request-detection"><span class="std std-ref">Common Linked Merge Request Detection</span></a> to identify and extract
-pull/merge request numbers. The parser will return a string value if a pull/merge
-request number is found in the commit message. If no pull/merge request number is
-found, the parser will return an empty string. <em>Feature available in v9.13.0+.</em></p></li>
-<li><p><strong>Linked Issue Identifier Detection</strong>: This parser implements PSR’s
-<a class="reference internal" href="#commit-parser-builtin-issue-number-detection"><span class="std std-ref">Common Issue Identifier Detection</span></a> to identify and extract issue numbers.
-The parser will return a tuple of issue numbers as strings if any are found in the commit
-message. If no issue numbers are found, the parser will return an empty tuple. <em>Feature
-available in v9.15.0+.</em></p></li>
-<li><p><strong>Squash Commit Evaluation</strong>: This parser implements PSR’s
-<a class="reference internal" href="#commit-parser-builtin-squash-commit-evaluation"><span class="std std-ref">Common Squash Commit Evaluation</span></a> to identify and extract each commit
-message as a separate commit message within a single squashed commit. You can toggle this
-feature on/off via the <a class="reference internal" href="../configuration/configuration.html#config-commit-parser-options"><span class="std std-ref">commit_parser_options</span></a> setting. <em>Feature available in
-v9.17.0+.</em></p></li>
-<li><p><strong>Release Notice Footer Detection</strong>: This parser implements PSR’s
-<a class="reference internal" href="#commit-parser-builtin-release-notice-footer-detection"><span class="std std-ref">Common Release Notice Footer Detection</span></a>, which is a custom extension
-to traditional <a class="reference external" href="https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits">Angular Commit Style Guidelines</a> to use the <code class="docutils literal notranslate"><span class="pre">NOTICE</span></code> keyword as a git
-footer to document additional release information that is not considered a breaking change.
-<em>Feature available in v9.18.0+.</em></p></li>
-</ul>
-<p><strong>Limitations</strong>:</p>
-<ul class="simple">
-<li><p>Commits with the <code class="docutils literal notranslate"><span class="pre">revert</span></code> type are not currently supported. Track the implementation
-of this feature in the issue <a class="reference external" href="https://github.com/python-semantic-release/python-semantic-release/issues/402">#402</a>.</p></li>
-</ul>
-<p>If no commit parser options are provided via the configuration, the parser will use PSR’s
-built-in <a class="reference internal" href="../api/modules/semantic_release.commit_parser.angular.html#semantic_release.commit_parser.angular.AngularParserOptions" title="semantic_release.commit_parser.angular.AngularParserOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">defaults</span></code></a>.</p>
-<hr class="docutils">
-</section>
-<section id="emoji-commit-parser">
-<span id="commit-parser-builtin-emoji"></span><h3>Emoji Commit Parser<a class="headerlink" href="#emoji-commit-parser" title="Link to this heading">¶</a></h3>
-<p>A parser that is designed to parse commits formatted to the <a class="reference external" href="https://gitmoji.dev/specification">Gitmoji Specification</a>
-with a few additional features that the specification does not cover but provide similar
-functionality expected from a Semantic Release tool.  As the <a class="reference external" href="https://gitmoji.dev/specification">Gitmoji Specification</a>
-describes, the emojis can be specified in either the unicode format or the shortcode
-text format. See the <a class="reference external" href="https://gitmoji.dev/specification">Gitmoji Specification</a> for the pros and cons for which format
-to use, but regardless, the configuration options must match the format used in the
-commit messages. The parser is implemented with the following logic in relation to
-how PSR’s core features:</p>
-<ul class="simple">
-<li><p><strong>Version Bump Determination</strong>: This parser only looks for emojis in the subject
-line of the commit (the first line of a commit message). If more than one emoji is
-found, the emoji configured with the highest priority is selected for the change impact
-for the specific commit. The emoji with the highest priority is the one configured in the
-<code class="docutils literal notranslate"><span class="pre">major</span></code> configuration option, followed by the <code class="docutils literal notranslate"><span class="pre">minor</span></code>, and <code class="docutils literal notranslate"><span class="pre">patch</span></code> in descending
-priority order. If no emoji is found in the subject line, the commit is classified as
-other and will default to the level bump defined by the configuration option
-<a class="reference internal" href="../configuration/configuration.html#config-commit-parser-options"><span class="std std-ref">commit_parser_options.default_level_bump</span></a>.</p></li>
-<li><p><strong>Changelog Generation</strong>: PSR will group commits in the changelog by the emoji type used
-in the commit message. The emoji is used as the version section title and the commit
-descriptions are listed under that section. No emojis are removed from the commit message
-so each will be listed in the changelog and release notes. When more than one emoji is
-found in the subject line of a commit, the emoji with the highest priority is the one
-that will influence the grouping of the commit in the changelog. Commits containing no
-emojis or non-configured emojis are consolidated into an “Other” section. To remove
-unwanted commits from the changelog that would normally be added into the “other”
-section, consider the use of the configuration option
-<a class="reference internal" href="../configuration/configuration.html#config-changelog-exclude-commit-patterns"><span class="std std-ref">changelog.exclude_commit_patterns</span></a>
-to ignore those commit styles.</p></li>
-<li><p><strong>Pull/Merge Request Identifier Detection</strong>: This parser implements PSR’s
-<a class="reference internal" href="#commit-parser-builtin-linked-merge-request-detection"><span class="std std-ref">Common Linked Merge Request Detection</span></a> to identify and extract
-pull/merge request numbers. The parser will return a string value if a pull/merge
-request number is found in the commit message. If no pull/merge request number is
-found, the parser will return an empty string. <em>Feature available in v9.13.0+.</em></p></li>
-<li><p><strong>Linked Issue Identifier Detection</strong>: [Disabled by default] This parser implements PSR’s
-<a class="reference internal" href="#commit-parser-builtin-issue-number-detection"><span class="std std-ref">Common Issue Identifier Detection</span></a> to identify and extract issue numbers.
-The parser will return a tuple of issue numbers as strings if any are found in the commit
-message. If no issue numbers are found, the parser will return an empty tuple. This feature
-is disabled by default since it is not a part of the <a class="reference external" href="https://gitmoji.dev/specification">Gitmoji Specification</a> but can be
-enabled by setting the configuration option <code class="docutils literal notranslate"><span class="pre">commit_parser_options.parse_linked_issues</span></code>
-to <code class="docutils literal notranslate"><span class="pre">true</span></code>. <em>Feature available in v9.15.0+.</em></p></li>
-<li><p><strong>Squash Commit Evaluation</strong>: This parser implements PSR’s
-<a class="reference internal" href="#commit-parser-builtin-squash-commit-evaluation"><span class="std std-ref">Common Squash Commit Evaluation</span></a> to identify and extract each commit
-message as a separate commit message within a single squashed commit. You can toggle this
-feature on/off via the <a class="reference internal" href="../configuration/configuration.html#config-commit-parser-options"><span class="std std-ref">commit_parser_options</span></a> setting. <em>Feature available in
-v9.17.0+.</em></p></li>
-<li><p><strong>Release Notice Footer Detection</strong>: This parser implements PSR’s
-<a class="reference internal" href="#commit-parser-builtin-release-notice-footer-detection"><span class="std std-ref">Common Release Notice Footer Detection</span></a>, which is a custom extension
-that uses the <code class="docutils literal notranslate"><span class="pre">NOTICE</span></code> keyword as a git footer to document additional release information
-that is not considered a breaking change. <em>Feature available in v9.18.0+.</em></p></li>
-</ul>
-<p>If no commit parser options are provided via the configuration, the parser will use PSR’s
-built-in <a class="reference internal" href="../api/modules/semantic_release.commit_parser.emoji.html#semantic_release.commit_parser.emoji.EmojiParserOptions" title="semantic_release.commit_parser.emoji.EmojiParserOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">defaults</span></code></a>.</p>
-<hr class="docutils">
-</section>
-<section id="scipy-commit-parser">
-<span id="commit-parser-builtin-scipy"></span><h3>Scipy Commit Parser<a class="headerlink" href="#scipy-commit-parser" title="Link to this heading">¶</a></h3>
-<p>A parser that is designed to parse commits formatted according to the
-<a class="reference external" href="https://scipy.github.io/devdocs/dev/contributor/development_workflow.html#writing-the-commit-message">Scipy Commit Style Guidelines</a>. This is essentially a variation of the <a class="reference external" href="https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits">Angular Commit Style
-Guidelines</a> with all different commit types. Because of this small variance, this parser
-only extends our <a class="reference internal" href="#commit-parser-builtin-angular"><span class="std std-ref">Angular Commit Parser</span></a> parser with pre-defined scipy commit types
-in the default Scipy Parser Options and all other features are inherited.</p>
-<p><strong>Limitations</strong>:</p>
-<ul class="simple">
-<li><p>Commits with the <code class="docutils literal notranslate"><span class="pre">REV</span></code> type are not currently supported. Track the implementation
-of this feature in the issue <a class="reference external" href="https://github.com/python-semantic-release/python-semantic-release/issues/402">#402</a>.</p></li>
-</ul>
-<p>If no commit parser options are provided via the configuration, the parser will use PSR’s
-built-in <a class="reference internal" href="../api/modules/semantic_release.commit_parser.scipy.html#semantic_release.commit_parser.scipy.ScipyParserOptions" title="semantic_release.commit_parser.scipy.ScipyParserOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">defaults</span></code></a>.</p>
-<hr class="docutils">
-</section>
-<section id="tag-commit-parser">
-<span id="commit-parser-builtin-tag"></span><h3>Tag Commit Parser<a class="headerlink" href="#tag-commit-parser" title="Link to this heading">¶</a></h3>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This parser was deprecated in <code class="docutils literal notranslate"><span class="pre">v9.12.0</span></code>. It will be removed in a future release.</p>
-</div>
-<p>The original parser from v1.0.0 of Python Semantic Release. Similar to the
-emoji parser above, but with less features.</p>
-<p>If no commit parser options are provided via the configuration, the parser will use PSR’s
-built-in <a class="reference internal" href="../api/modules/semantic_release.commit_parser.tag.html#semantic_release.commit_parser.tag.TagParserOptions" title="semantic_release.commit_parser.tag.TagParserOptions"><code class="xref py py-class docutils literal notranslate"><span class="pre">defaults</span></code></a>.</p>
-<hr class="docutils">
-</section>
-<section id="common-linked-merge-request-detection">
-<span id="commit-parser-builtin-linked-merge-request-detection"></span><h3>Common Linked Merge Request Detection<a class="headerlink" href="#common-linked-merge-request-detection" title="Link to this heading">¶</a></h3>
-<p><em>Introduced in v9.13.0</em></p>
-<p>All of the PSR built-in parsers implement common pull/merge request identifier detection
-logic to extract pull/merge request numbers from the commit message regardless of the
-VCS platform. The parsers evaluate the subject line for a parenthesis-enclosed number
-at the end of the line. PSR’s parsers will return a string value if a pull/merge request
-number is found in the commit message. If no pull/merge request number is found, the
-parsers will return an empty string.</p>
-<p><strong>Examples</strong>:</p>
-<p><em>All of the following will extract a MR number of “x123”, where ‘x’ is the character prefix</em></p>
-<ol class="arabic simple">
-<li><p>BitBucket: <code class="docutils literal notranslate"><span class="pre">Merged</span> <span class="pre">in</span> <span class="pre">feat/my-awesome-feature</span>&nbsp; <span class="pre">(pull</span> <span class="pre">request</span> <span class="pre">#123)</span></code></p></li>
-<li><p>GitHub: <code class="docutils literal notranslate"><span class="pre">feat:</span> <span class="pre">add</span> <span class="pre">new</span> <span class="pre">feature</span>&nbsp; <span class="pre">(#123)</span></code></p></li>
-<li><p>GitLab: <code class="docutils literal notranslate"><span class="pre">fix:</span> <span class="pre">resolve</span> <span class="pre">an</span> <span class="pre">issue</span> <span class="pre">(!123)</span></code></p></li>
-</ol>
-<hr class="docutils">
-</section>
-<section id="common-issue-identifier-detection">
-<span id="commit-parser-builtin-issue-number-detection"></span><h3>Common Issue Identifier Detection<a class="headerlink" href="#common-issue-identifier-detection" title="Link to this heading">¶</a></h3>
-<p><em>Introduced in v9.15.0</em></p>
-<p>All of the PSR built-in parsers implement common issue identifier detection logic,
-which is similar to many VCS platforms such as GitHub, GitLab, and BitBucket. The
-parsers will look for common issue closure text prefixes in the <a class="reference external" href="https://git-scm.com/docs/git-interpret-trailers">Git Trailer format</a>
-in the commit message to identify and extract issue numbers. The detection logic is
-not strict to any specific issue tracker as we try to provide a flexible approach
-to identifying issue numbers but in order to be flexible, it is <strong>required</strong> to the
-use the <a class="reference external" href="https://git-scm.com/docs/git-interpret-trailers">Git Trailer format</a> with a colon (<code class="docutils literal notranslate"><span class="pre">:</span></code>) as the token separator.</p>
-<p>PSR attempts to support all variants of issue closure text prefixes, but not all will work
-for your VCS. PSR supports the following case-insensitive prefixes and their conjugations
-(plural, present, &amp; past tense):</p>
-<ul class="simple">
-<li><p>close (closes, closing, closed)</p></li>
-<li><p>fix (fixes, fixing, fixed)</p></li>
-<li><p>resolve (resolves, resolving, resolved)</p></li>
-<li><p>implement (implements, implementing, implemented)</p></li>
-</ul>
-<p>PSR also allows for a more flexible approach to identifying more than one issue number without
-the need of extra git trailers (although PSR does support multiple git trailers). PSR support
-various list formats which can be used to identify more than one issue in a list. This format
-will not necessarily work on your VCS. PSR currently support the following list formats:</p>
-<ul class="simple">
-<li><p>comma-separated (ex. <code class="docutils literal notranslate"><span class="pre">Closes:</span> <span class="pre">#123,</span> <span class="pre">#456,</span> <span class="pre">#789</span></code>)</p></li>
-<li><p>space-separated (ex. <code class="docutils literal notranslate"><span class="pre">resolve:</span> <span class="pre">#123</span> <span class="pre">#456</span> <span class="pre">#789</span></code>)</p></li>
-<li><p>semicolon-separated (ex. <code class="docutils literal notranslate"><span class="pre">Fixes:</span> <span class="pre">#123;</span> <span class="pre">#456;</span> <span class="pre">#789</span></code>)</p></li>
-<li><p>slash-separated (ex. <code class="docutils literal notranslate"><span class="pre">close:</span> <span class="pre">#123/#456/#789</span></code>)</p></li>
-<li><p>ampersand-separated (ex. <code class="docutils literal notranslate"><span class="pre">Implement:</span> <span class="pre">#123</span> <span class="pre">&amp;</span> <span class="pre">#789</span></code>)</p></li>
-<li><p>and-separated (ex. <code class="docutils literal notranslate"><span class="pre">Resolve:</span> <span class="pre">#123</span> <span class="pre">and</span> <span class="pre">#456</span> <span class="pre">and</span> <span class="pre">#789</span></code>)</p></li>
-<li><p>mixed (ex. <code class="docutils literal notranslate"><span class="pre">Closed:</span> <span class="pre">#123,</span> <span class="pre">#456,</span> <span class="pre">and</span> <span class="pre">#789</span></code> or <code class="docutils literal notranslate"><span class="pre">Fixes:</span> <span class="pre">#123,</span> <span class="pre">#456</span> <span class="pre">&amp;</span> <span class="pre">#789</span></code>)</p></li>
-</ul>
-<p>All the examples above use the most common issue number prefix (<code class="docutils literal notranslate"><span class="pre">#</span></code>) but PSR is flexible
-to support other prefixes used by VCS platforms or issue trackers such as JIRA (ex. <code class="docutils literal notranslate"><span class="pre">ABC-###</span></code>).</p>
-<p>The parsers will return a tuple of issue numbers as strings if any are found in the commit
-message. Strings are returned to ensure that the any issue number prefix characters are
-preserved (ex. <code class="docutils literal notranslate"><span class="pre">#123</span></code> or <code class="docutils literal notranslate"><span class="pre">ABC-123</span></code>). If no issue numbers are found, the parsers will
-return an empty tuple.</p>
-<p><strong>References</strong>:</p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://support.atlassian.com/bitbucket-cloud/docs/resolve-issues-automatically-when-users-push-code/">BitBucket: Resolving Issues Automatically</a></p></li>
-<li><p><a class="reference external" href="https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue">GitHub: Linking Issue to PR</a></p></li>
-<li><p><a class="reference external" href="https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#default-closing-pattern">GitLab: Default Closing Patterns</a></p></li>
-</ul>
-<hr class="docutils">
-</section>
-<section id="common-release-notice-footer-detection">
-<span id="commit-parser-builtin-release-notice-footer-detection"></span><h3>Common Release Notice Footer Detection<a class="headerlink" href="#common-release-notice-footer-detection" title="Link to this heading">¶</a></h3>
-<p><em>Introduced in v9.18.0*</em></p>
-<p>All of the PSR built-in parsers implement common release notice footer detection logic
-to identify and extract a <code class="docutils literal notranslate"><span class="pre">NOTICE</span></code> git trailer that documents any additional release
-information the developer wants to provide to the software consumer. The idea extends
-from the concept of the <code class="docutils literal notranslate"><span class="pre">BREAKING</span> <span class="pre">CHANGE:</span></code> git trailer to document any breaking change
-descriptions but the <code class="docutils literal notranslate"><span class="pre">NOTICE</span></code> trailer is intended to document any information that is
-below the threshold of a breaking change while still important for the software consumer
-to be aware of. Common uses would be to provide deprecation warnings or more detailed
-change usage information for that release. Parsers will collapse single newlines after
-the <code class="docutils literal notranslate"><span class="pre">NOTICE</span></code> trailer into a single line paragraph. Commits may have more than one
-<code class="docutils literal notranslate"><span class="pre">NOTICE</span></code> trailer in a single commit message. Each
-<a class="reference internal" href="../api/modules/semantic_release.commit_parser.token.html#semantic_release.commit_parser.token.ParsedCommit" title="semantic_release.commit_parser.token.ParsedCommit"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParsedCommit</span></code></a> will have
-a <code class="docutils literal notranslate"><span class="pre">release_notices</span></code> attribute that is a tuple of string paragraphs to identify each
-release notice.</p>
-<p>In the default changelog and release notes template, these release notices will be
-formatted into their own section called <strong>Additional Release Information</strong>. Each will
-include any commit scope defined and each release notice in alphabetical order.</p>
-<hr class="docutils">
-</section>
-<section id="common-squash-commit-evaluation">
-<span id="commit-parser-builtin-squash-commit-evaluation"></span><h3>Common Squash Commit Evaluation<a class="headerlink" href="#common-squash-commit-evaluation" title="Link to this heading">¶</a></h3>
-<p><em>Introduced in v9.17.0</em></p>
-<p>All of the PSR built-in parsers implement common squash commit evaluation logic to identify
-and extract individual commit messages from a single squashed commit. The parsers will
-look for common squash commit delimiters and multiple matches of the commit message
-format to identify each individual commit message that was squashed. The parsers will
-return a list containing each commit message as a separate commit object. Squashed commits
-will be evaluated individually for both the level bump and changelog generation. If no
-squash commits are found, a list with the single commit object will be returned.</p>
-<p>Currently, PSR has been tested against GitHub, BitBucket, and official <code class="docutils literal notranslate"><span class="pre">git</span></code> squash
-merge commit messages. GitLab does not have a default template for squash commit messages
-but can be customized per project or server. If you are using GitLab, you will need to
-ensure that the squash commit message format is similar to the example below.</p>
-<p><strong>Example</strong>:</p>
-<p><em>The following example will extract three separate commit messages from a single GitHub
-formatted squash commit message of conventional commit style:</em></p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>feat(config): add new config option (#123)
-
-* refactor(config): change the implementation of config loading
-
-* docs(configuration): defined new config option for the project
+<p>Your project metadata might look like this in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">project</span><span class="p">]</span>
+<span class="n">name</span> <span class="o">=</span> <span class="s2">"my-package"</span>
+<span class="n">version</span> <span class="o">=</span> <span class="s2">"0.0.0"</span>  <span class="c1"># Set this to the last released version or "0.0.0" for new projects</span>
+<span class="n">description</span> <span class="o">=</span> <span class="s2">"A sample Python package"</span>
 </pre></div>
 </div>
-<p>When parsed with the default conventional-commit parser with squash commits toggled on,
-the version bump will be determined by the highest level bump of the three commits (in
-this case, a minor bump because of the feature commit) and the release notes would look
-similar to the following:</p>
-<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gu">## Features</span>
+<p>To configure PSR to automatically update this version number, you need to specify the file and value
+to update in your configuration. Since <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> uses TOML format, you will add the
+replacement specification to the <code class="docutils literal notranslate"><span class="pre">tool.semantic_release.version_toml</span></code> list. Update the following
+configuration in your <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file to include the version variable location:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.semantic_release]</span>
+<span class="n">version_toml</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"pyproject.toml:project.version"</span><span class="p">]</span>
 
-<span class="k">-</span><span class="w"> </span><span class="gs">**config**</span>: add new config option (#123)
-
-<span class="gu">## Documentation</span>
-
-<span class="k">-</span><span class="w"> </span><span class="gs">**configuration**</span>: defined new config option for the project (#123)
-
-<span class="gu">## Refactoring</span>
-
-<span class="k">-</span><span class="w"> </span><span class="gs">**config**</span>: change the implementation of config loading (#123)
+<span class="c1"># Alternatively, if you are using poetry's 'version' key, then you would use:</span>
+<span class="n">version_toml</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"pyproject.toml:tool.poetry.version"</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>Merge request numbers and commit hash values will be the same across all extracted
-commits. Additionally, any <a class="reference internal" href="../configuration/configuration.html#config-changelog-exclude-commit-patterns"><span class="std std-ref">exclude_commit_patterns</span></a> will be
-applied individually to each extracted commit so if you are have an exclusion match
-for ignoring <code class="docutils literal notranslate"><span class="pre">refactor</span></code> commits, the second commit in the example above would be
-excluded from the changelog.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>When squash commit evaluation is enabled, if you squashed a higher level bump commit
-into the body of a lower level bump commit, the higher level bump commit will be
-evaluated as the level bump for the entire squashed commit. This includes breaking
-change descriptions.</p>
-</div>
-<hr class="docutils">
-</section>
-<section id="customization">
-<span id="commit-parser-builtin-customization"></span><h3>Customization<a class="headerlink" href="#customization" title="Link to this heading">¶</a></h3>
-<p>Each of the built-in parsers can be customized by providing overrides in the
-<a class="reference internal" href="../configuration/configuration.html#config-commit-parser-options"><span class="std std-ref">commit_parser_options</span></a> setting of the configuration file. This can
-be used to toggle parsing features on and off or to add, modify, or remove the
-commit types that are used to determine the level bump for a commit. Review the
-API documentation for the specific parser’s options class to see what changes to
-the default behavior can be made.</p>
-<hr class="docutils">
-</section>
-</section>
-<section id="custom-parsers">
-<span id="commit-parser-custom-parser"></span><h2>Custom Parsers<a class="headerlink" href="#custom-parsers" title="Link to this heading">¶</a></h2>
-<p>Custom parsers can be written to handle commit message styles that are not covered
-by the built-in parsers or by option customization of the built-in parsers.</p>
-<p>Python Semantic Release provides several building blocks to help you write your parser.
-To maintain compatibility with how Python Semantic Release will invoke your parser, you
-should use the appropriate object as described below, or create your own object as a
-subclass of the original which maintains the same interface. Type parameters are defined
-where appropriate to assist with static type-checking.</p>
-<p>The <a class="reference internal" href="../configuration/configuration.html#config-commit-parser"><span class="std std-ref">commit_parser</span></a> option, if set to a string which
-does not match one of Python Semantic Release’s built-in commit parsers, will be
-used to attempt to dynamically import a custom commit parser class.</p>
-<p>In order to use your custom parser, you must provide how to import the module and class
-via the configuration option. There are two ways to provide the import string:</p>
-<ol class="arabic">
-<li><p><strong>File Path &amp; Class</strong>: The format is <code class="docutils literal notranslate"><span class="pre">"path/to/module_file.py:ClassName"</span></code>. This
-is the easiest way to provide a custom parser. This method allows you to store your
-custom parser directly in the repository with no additional installation steps. PSR
-will locate the file, load the module, and instantiate the class. Relative paths are
-recommended and it should be provided relative to the current working directory. This
-import variant is available in v9.16.0 and later.</p></li>
-<li><p><strong>Module Path &amp; Class</strong>: The format is <code class="docutils literal notranslate"><span class="pre">"package.module_name:ClassName"</span></code>. This
-method allows you to store your custom parser in a package that is installed in the
-same environment as PSR. This method is useful if you want to share your custom parser
-across multiple repositories. To share it across multiple repositories generally you will
-need to publish the parser as its own separate package and then <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> it into
-the current virtual environment. You can also keep it in the same repository as your
-project as long as it is in the current directory of the virtual environment and is
-locatable by the Python import system. You may need to set the <code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code> environment
-variable if you have a more complex directory structure.  This import variant is available
-in v8.0.0 and later.</p>
-<p>To test that your custom parser is importable, you can run the following command in the
-directory where PSR will be executed:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">"from package.module_name import ClassName"</span>
+<p>If you have other TOML files where you want to stamp the version, you can add them to the
+<code class="docutils literal notranslate"><span class="pre">version_toml</span></code> list as well. In the above example, there is an implicit assumption that
+you only want the version as the raw number format. If you want to specify the full tag
+value (e.g. v-prefixed version), then include <code class="docutils literal notranslate"><span class="pre">:tf</span></code> for “tag format” at the end of the
+version variable specification.</p>
+<p>For non-TOML formatted files (such as JSON or YAML files), you can use the
+<a class="reference internal" href="configuration/configuration.html#config-version-variables"><span class="std std-ref">version_variables</span></a> configuration key instead. This feature uses an advanced
+Regular Expression to find and replace the version variable in the specified files.</p>
+<p>For Python files, its much more effective to use <code class="docutils literal notranslate"><span class="pre">importlib</span></code> instead which will allow you to
+dynamically import the version from your package metadata and not require your project to commit
+the version number bump to the repository. For example, in your package’s base <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># my_package/__init__.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib.metadata</span><span class="w"> </span><span class="kn">import</span> <span class="n">version</span> <span class="k">as</span> <span class="n">get_version</span>
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="n">get_version</span><span class="p">(</span><span class="n">__package__</span><span class="p">)</span>
+<span class="c1"># Note: __package__ must match your 'project.name' as defined in pyproject.toml</span>
 </pre></div>
 </div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p>Configuration specification of <a class="reference internal" href="configuration/configuration.html#config-version-toml"><span class="std std-ref">version_toml</span></a></p></li>
+<li><p>Configuration specification of <a class="reference internal" href="configuration/configuration.html#config-version-variables"><span class="std std-ref">version_variables</span></a></p></li>
+</ul>
+</div>
+</section>
+<section id="using-psr-to-build-your-project" class="">
+<h4>Using PSR to Build your Project<a class="headerlink" href="#using-psr-to-build-your-project" title="Link to this heading">¶</a></h4>
+<p>PSR provides a convenient way to build your project artifacts as part of the versioning process
+now that you have stamped the version into your project files. To enable this, you will need
+to specify the build command in your configuration. This command will be executed after
+the next version has been determined, and stamped into your files but before a release tag has
+been created.</p>
+<p>To set up the build command, add the following to your <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.semantic_release]</span>
+<span class="n">build_command</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"python -m build --sdist --wheel ."</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="configuration/configuration.html#config-build-command"><span class="std std-ref">build_command</span></a> - Configuration specification for the build command.</p></li>
+<li><p><a class="reference internal" href="configuration/configuration.html#config-build-command-env"><span class="std std-ref">build_command_env</span></a> - Configuration specification for the build command environment variables.</p></li>
+</ul>
+</div>
+</section>
+<section id="choosing-a-commit-message-parser" class="">
+<h4>Choosing a Commit Message Parser<a class="headerlink" href="#choosing-a-commit-message-parser" title="Link to this heading">¶</a></h4>
+<p>PSR uses commit messages to determine the type of version bump that should be applied
+to your project. PSR supports multiple commit message parsing styles, allowing you to choose
+the one that best fits your project’s needs. Choose <strong>one</strong> of the supported commit parsers
+defined in <a class="reference internal" href="concepts/commit_parsing.html#commit-parsing"><span class="std std-ref">Commit Parsing</span></a>, or provide your own and configure it in your
+<code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file.</p>
+<p>Each commit parser has its own default configuration options so if you want to customize the parser
+behavior, you will need to specify the parser options you want to override.</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.semantic_release]</span>
+<span class="n">commit_parser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"conventional"</span>
+
+<span class="k">[tool.semantic_release.commit_parser_options]</span>
+<span class="n">minor_tags</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"feat"</span><span class="p">]</span>
+<span class="n">patch_tags</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"fix"</span><span class="p">,</span><span class="w"> </span><span class="s2">"perf"</span><span class="p">]</span>
+<span class="n">parse_squash_commits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">ignore_merge_commits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+</pre></div>
+</div>
+</section>
+<section id="choosing-your-changelog" class="active">
+<h4>Choosing your Changelog<a class="headerlink" href="#choosing-your-changelog" title="Link to this heading">¶</a></h4>
+<p>Prior to creating a release, PSR will generate a changelog from the commit messages of your
+project. The changelog is extremely customizable from the format to the content of each section.
+PSR ships with a default changelog template that will be used if you do not provide custom
+templates. The default should be sufficient for most projects and has its own set of configuration
+options.</p>
+<p>For basic customization, you can choose either an traditional Markdown formatted changelog (default)
+or if you want to integrate with a Sphinx Documentation project, you can use the
+reStructuredText (RST) format. You can also choose the file name and location of where to write the
+default changelog.</p>
+<p>To set your changelog location and changelog format, add the following to your <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.semantic_release.changelog.default_templates]</span>
+<span class="n">changelog_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"docs/source/CHANGELOG.rst"</span>
+<span class="n">output_format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"rst"</span><span class="w"> </span><span class="c1"># or "md" for Markdown format</span>
+</pre></div>
+</div>
+<p>Secondly, the more important aspect of configuring your changelog is to define Commit Exclusion
+Patterns or patterns that will be used to filter out commits from the changelog. PSR does <strong>NOT</strong> (yet)
+come with a built-in set of exclusion patterns, so you will need to define them yourself. These commit
+patterns should be in line with your project’s commit parser configuration.</p>
+<p>To set commit exclusion patterns for a conventional commits parsers, add the following to your
+<code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.semantic_release.changelog]</span>
+<span class="c1"># Recommended patterns for conventional commits parser that is scope aware</span>
+<span class="n">exclude_commit_patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s1">'''chore(?:\([^)]*?\))?: .+'''</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'''ci(?:\([^)]*?\))?: .+'''</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'''refactor(?:\([^)]*?\))?: .+'''</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'''style(?:\([^)]*?\))?: .+'''</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'''test(?:\([^)]*?\))?: .+'''</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'''build\((?!deps\): .+)'''</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'''Initial [Cc]ommit.*'''</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="configuration/configuration.html#config-changelog"><span class="std std-ref">Changelog</span></a> - Customize your changelog</p></li>
+<li><p><a class="reference internal" href="configuration/configuration.html#config-changelog-mode"><span class="std std-ref">changelog.mode</span></a> - Choose the changelog mode (‘update’ or ‘init’)</p></li>
+<li><p><a class="reference internal" href="concepts/changelog_templates.html#changelog-templates-migrating-existing-changelog"><span class="std std-ref">Migrating an Existing Changelog</span></a></p></li>
+</ul>
+</div>
+</section>
+<section id="defining-your-release-branches">
+<h4>Defining your Release Branches<a class="headerlink" href="#defining-your-release-branches" title="Link to this heading">¶</a></h4>
+<p>PSR provides a powerful feature to manage release types across multiple branches which can
+allow you to configure your project to have different release branches for different purposes,
+such as pre-release branches, beta branches, and your stable releases.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Remember this is basic python import rules so the package name is optional and generally
-packages are defined by a directory with <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> files.</p>
+<p>Most projects that do <strong>NOT</strong> publish pre-releases will be fine with PSR’s built-in default.</p>
 </div>
-</li>
-</ol>
-<section id="tokens">
-<span id="commit-parser-tokens"></span><h3>Tokens<a class="headerlink" href="#tokens" title="Link to this heading">¶</a></h3>
-<p>The tokens built into Python Semantic Release’s commit parsing mechanism are inspired
-by both the error-handling mechanism in <a class="reference external" href="https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html">Rust’s error handling</a> and its
-implementation in <a class="reference external" href="https://github.com/psf/black/blob/main/src/black/rusty.py">black</a>. It is documented that <a class="reference external" href="https://docs.python.org/3/faq/design.html#how-fast-are-exceptions">catching exceptions in Python is
-slower</a> than the equivalent guard implemented using <code class="docutils literal notranslate"><span class="pre">if/else</span></code> checking when
-exceptions are actually caught, so although <code class="docutils literal notranslate"><span class="pre">try/except</span></code> blocks are cheap if no
-exception is raised, commit parsers should always return an object such as
-<a class="reference internal" href="../api/modules/semantic_release.commit_parser.token.html#semantic_release.commit_parser.token.ParseError" title="semantic_release.commit_parser.token.ParseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParseError</span></code></a>
-instead of raising an error immediately. This is to avoid catching a potentially large
-number of parsing errors being caught as the commit history of a repository is being
-parsed. Python Semantic Release does not raise an exception if a commit cannot be parsed.</p>
-<p>Python Semantic Release uses <a class="reference internal" href="../api/modules/semantic_release.commit_parser.token.html#semantic_release.commit_parser.token.ParsedCommit" title="semantic_release.commit_parser.token.ParsedCommit"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParsedCommit</span></code></a>
-as the return type of a successful parse operation, and
-<a class="reference internal" href="../api/modules/semantic_release.commit_parser.token.html#semantic_release.commit_parser.token.ParseError" title="semantic_release.commit_parser.token.ParseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParseError</span></code></a>
-as the return type from an unsuccessful parse of a commit. You should review the API
-documentation linked to understand the fields available on each of these objects.</p>
-<p>It is important to note, the <a class="reference internal" href="../api/modules/semantic_release.commit_parser.token.html#semantic_release.commit_parser.token.ParseError" title="semantic_release.commit_parser.token.ParseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParseError</span></code></a>
-implements an additional method, <code class="docutils literal notranslate"><span class="pre">raise_error</span></code>. This method raises a
-<a class="reference internal" href="../api/modules/semantic_release.errors.html#semantic_release.errors.CommitParseError" title="semantic_release.errors.CommitParseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">CommitParseError</span></code></a> with the message
-contained in the <code class="docutils literal notranslate"><span class="pre">error</span></code> field, as a convenience.</p>
-<p>In Python Semantic Release, the type <code class="docutils literal notranslate"><span class="pre">semantic_release.commit_parser.token.ParseResult</span></code>
-is defined as <code class="docutils literal notranslate"><span class="pre">ParseResultType[ParsedCommit,</span> <span class="pre">ParseError]</span></code>, as a convenient shorthand.</p>
-<p><code class="xref py py-class docutils literal notranslate"><span class="pre">ParseResultType</span></code> is a
-generic type, which is the <code class="docutils literal notranslate"><span class="pre">Union</span></code> of its two type parameters. One of the types in this
-union should be the type returned on a successful parse of the <code class="docutils literal notranslate"><span class="pre">commit</span></code>, while the other
-should be the type returned on an unsuccessful parse of the <code class="docutils literal notranslate"><span class="pre">commit</span></code>.</p>
-<p>A custom parser result type, therefore, could be implemented as follows:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">MyParsedCommit</span></code> subclasses <a class="reference internal" href="../api/modules/semantic_release.commit_parser.token.html#semantic_release.commit_parser.token.ParsedCommit" title="semantic_release.commit_parser.token.ParsedCommit"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParsedCommit</span></code></a></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">MyParseError</span></code> subclasses <a class="reference internal" href="../api/modules/semantic_release.commit_parser.token.html#semantic_release.commit_parser.token.ParseError" title="semantic_release.commit_parser.token.ParseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParseError</span></code></a></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">MyParseResult</span> <span class="pre">=</span> <span class="pre">ParseResultType[MyParsedCommit,</span> <span class="pre">MyParseError]</span></code></p></li>
-</ul>
-<p>Internally, Python Semantic Release uses <code class="docutils literal notranslate"><span class="pre">isinstance()</span></code> to determine if the result
-of parsing a commit was a success or not, so you should check that your custom result
-and error types return <code class="docutils literal notranslate"><span class="pre">True</span></code> from <code class="docutils literal notranslate"><span class="pre">isinstance(&lt;object&gt;,</span> <span class="pre">ParsedCommit)</span></code> and
-<code class="docutils literal notranslate"><span class="pre">isinstance(&lt;object&gt;,</span> <span class="pre">ParseError)</span></code> respectively.</p>
-<p>While it’s not advisable to remove any of the fields that are available in the built-in
-token types, currently only the <code class="docutils literal notranslate"><span class="pre">bump</span></code> field of the successful result type is used to
-determine how the version should be incremented as part of this release. However, it’s
-perfectly possible to add additional fields to your tokens which can be populated by
-your parser; these fields will then be available on each commit in your
-<a class="reference internal" href="changelog_templates.html#changelog-templates"><span class="std std-ref">changelog template</span></a>, so you can make additional information
-available.</p>
-</section>
-<section id="parser-options">
-<span id="commit-parser-parser-options"></span><h3>Parser Options<a class="headerlink" href="#parser-options" title="Link to this heading">¶</a></h3>
-<p>When writing your own parser, you should accompany the parser with an “options” class
-which accepts the appropriate keyword arguments. This class’ <code class="docutils literal notranslate"><span class="pre">__init__</span></code> method should
-store the values that are needed for parsing appropriately. Python Semantic Release will
-pass any configuration options from the configuration file’s
-<a class="reference internal" href="../configuration/configuration.html#config-commit-parser-options"><span class="std std-ref">commit_parser_options</span></a>, into your custom parser options
-class. To ensure that the configuration options are passed correctly, the options class
-should inherit from the
-<code class="xref py py-class docutils literal notranslate"><span class="pre">ParserOptions</span></code> class.</p>
-<p>The “options” class is used to validate the options which are configured in the repository,
-and to provide default values for these options where appropriate.</p>
-</section>
-<section id="commit-parsers">
-<span id="commit-parsing-commit-parsers"></span><h3>Commit Parsers<a class="headerlink" href="#commit-parsers" title="Link to this heading">¶</a></h3>
-<p>The commit parsers that are built into Python Semantic Release implement an instance
-method called <code class="docutils literal notranslate"><span class="pre">parse</span></code>, which takes a single parameter <code class="docutils literal notranslate"><span class="pre">commit</span></code> of type
-<a class="reference external" href="gitpython-commit-object">git.objects.commit.Commit</a>, and returns the type
-<code class="docutils literal notranslate"><span class="pre">ParseResultType</span></code>.</p>
-<p>To be compatible with Python Semantic Release, a commit parser must subclass
-<code class="xref py py-class docutils literal notranslate"><span class="pre">CommitParser</span></code>.
-A subclass must implement the following:</p>
-<ul class="simple">
-<li><p>A class-level attribute <code class="docutils literal notranslate"><span class="pre">parser_options</span></code>, which must be set to
-<code class="xref py py-class docutils literal notranslate"><span class="pre">ParserOptions</span></code> or a
-subclass of this.</p></li>
-<li><p>An <code class="docutils literal notranslate"><span class="pre">__init__</span></code> method which takes a single parameter, <code class="docutils literal notranslate"><span class="pre">options</span></code>, that should be
-of the same type as the class’ <code class="docutils literal notranslate"><span class="pre">parser_options</span></code> attribute.</p></li>
-<li><p>A method, <code class="docutils literal notranslate"><span class="pre">parse</span></code>, which takes a single parameter <code class="docutils literal notranslate"><span class="pre">commit</span></code> that is of type
-<a class="reference external" href="gitpython-commit-object">git.objects.commit.Commit</a>, and returns
-<code class="xref py py-class docutils literal notranslate"><span class="pre">ParseResult</span></code>, or a
-subclass of this.</p></li>
-</ul>
-<p>By default, the constructor for
-<code class="xref py py-class docutils literal notranslate"><span class="pre">CommitParser</span></code>
-will set the <code class="docutils literal notranslate"><span class="pre">options</span></code> parameter on the <code class="docutils literal notranslate"><span class="pre">options</span></code> attribute of the parser, so there
-is no need to override this in order to access <code class="docutils literal notranslate"><span class="pre">self.options</span></code> during the <code class="docutils literal notranslate"><span class="pre">parse</span></code>
-method. However, if you have any parsing logic that needs to be done only once, it may
-be a good idea to perform this logic during parser instantiation rather than inside the
-<code class="docutils literal notranslate"><span class="pre">parse</span></code> method. The parse method will be called once per commit in the repository’s
-history during parsing, so the effect of slow parsing logic within the <code class="docutils literal notranslate"><span class="pre">parse</span></code> method
-will be magnified significantly for projects with sizeable Git histories.</p>
-<p>Commit Parsers have two type parameters, “TokenType” and “OptionsType”. The first
-is the type which is returned by the <code class="docutils literal notranslate"><span class="pre">parse</span></code> method, and the second is the type
-of the “options” class for this parser.</p>
-<p>Therefore, a custom commit parser could be implemented via:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyParserOptions</span><span class="p">(</span><span class="n">semantic_release</span><span class="o">.</span><span class="n">ParserOptions</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">prefix</span> <span class="o">=</span> <span class="n">message_prefix</span> <span class="o">*</span> <span class="mi">2</span>
-
-
-<span class="k">class</span><span class="w"> </span><span class="nc">MyCommitParser</span><span class="p">(</span>
-    <span class="n">semantic_release</span><span class="o">.</span><span class="n">CommitParser</span><span class="p">[</span><span class="n">semantic_release</span><span class="o">.</span><span class="n">ParseResult</span><span class="p">,</span> <span class="n">MyParserOptions</span><span class="p">]</span>
-<span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">commit</span><span class="p">:</span> <span class="n">git</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">commit</span><span class="o">.</span><span class="n">Commit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">semantic_release</span><span class="o">.</span><span class="n">ParseResult</span><span class="p">:</span>
-        <span class="o">...</span>
+<p>To define an alpha pre-release branch when you are working on a fix or new feature, you can
+add the following to your <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.semantic_release.branches.alpha]</span>
+<span class="c1"># Matches branches with the prefixes 'feat/', 'fix/', or 'perf/'.</span>
+<span class="n">match</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"^(feat|fix|perf)/.+"</span>
+<span class="n">prerelease</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">prerelease_token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"alpha"</span>
 </pre></div>
 </div>
+<p>Any time you execute <code class="docutils literal notranslate"><span class="pre">semantic-release</span> <span class="pre">version</span></code> on a branch with the prefix
+<code class="docutils literal notranslate"><span class="pre">feat/</span></code>, <code class="docutils literal notranslate"><span class="pre">fix/</span></code>, or <code class="docutils literal notranslate"><span class="pre">perf/</span></code>, PSR will determine if a version bump is needed and if so,
+the resulting version will be a pre-release version with the <code class="docutils literal notranslate"><span class="pre">alpha</span></code> token. For example,</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Branch</p></th>
+<th class="head"><p>Version Bump</p></th>
+<th class="head"><p>Current Version</p></th>
+<th class="head"><p>Next Version</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>main</p></td>
+<td><p>Patch</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1.0.0</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1.0.1</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>fix/bug-1</p></td>
+<td><p>Patch</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1.0.0</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1.0.1-alpha.1</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="concepts/multibranch_releases.html#multibranch-releases"><span class="std std-ref">Multibranch Releases</span></a> - Learn about multi-branch releases and how to configure them.</p></li>
+</ul>
+</div>
+</section>
+<section id="configuring-vcs-releases">
+<h4>Configuring VCS Releases<a class="headerlink" href="#configuring-vcs-releases" title="Link to this heading">¶</a></h4>
+<p>You can set up Python Semantic Release to create Releases in your remote version
+control system, so you can publish assets and release notes for your project.</p>
+<p>In order to do so, you will need to place an authentication token in the
+appropriate environment variable so that Python Semantic Release can authenticate
+with the remote VCS to push tags, create releases, or upload files.</p>
+<section id="github-gh-token">
+<h5>GitHub (<code class="docutils literal notranslate"><span class="pre">GH_TOKEN</span></code>)<a class="headerlink" href="#github-gh-token" title="Link to this heading">¶</a></h5>
+<p>For local publishing to GitHub, you should use a personal access token and
+store it in your environment variables. Specify the name of the environment
+variable in your configuration setting <a class="reference internal" href="configuration/configuration.html#config-remote-token"><span class="std std-ref">remote.token</span></a>.
+The default is <code class="docutils literal notranslate"><span class="pre">GH_TOKEN</span></code>.</p>
+<p>To generate a token go to <a class="reference external" href="https://github.com/settings/tokens">https://github.com/settings/tokens</a> and click on
+“Generate new token”.</p>
+<p>For Personal Access Token (classic), you will need the <code class="docutils literal notranslate"><span class="pre">repo</span></code> scope to write
+(ie. push) to the repository.</p>
+<p>For fine-grained Personal Access Tokens, you will need the <a class="reference external" href="https://docs.github.com/en/rest/authentication/permissions-required-for-fine-grained-personal-access-tokens#repository-permissions-for-contents">contents</a>
+permission.</p>
+</section>
+<section id="gitlab-gitlab-token">
+<h5>GitLab (<code class="docutils literal notranslate"><span class="pre">GITLAB_TOKEN</span></code>)<a class="headerlink" href="#gitlab-gitlab-token" title="Link to this heading">¶</a></h5>
+<p>A personal access token from GitLab. This is used for authenticating when pushing
+tags, publishing releases etc. This token should be stored in the <code class="docutils literal notranslate"><span class="pre">GITLAB_TOKEN</span></code>
+environment variable.</p>
+</section>
+<section id="gitea-gitea-token">
+<h5>Gitea (<code class="docutils literal notranslate"><span class="pre">GITEA_TOKEN</span></code>)<a class="headerlink" href="#gitea-gitea-token" title="Link to this heading">¶</a></h5>
+<p>A personal access token from Gitea. This token should be stored in the <code class="docutils literal notranslate"><span class="pre">GITEA_TOKEN</span></code>
+environment variable.</p>
+</section>
+<section id="bitbucket-bitbucket-token">
+<h5>Bitbucket (<code class="docutils literal notranslate"><span class="pre">BITBUCKET_TOKEN</span></code>)<a class="headerlink" href="#bitbucket-bitbucket-token" title="Link to this heading">¶</a></h5>
+<p>Bitbucket does not support uploading releases but can still benefit from automated tags
+and changelogs. The user has three options to push changes to the repository:</p>
+<ol class="arabic simple">
+<li><p>Use SSH keys.</p></li>
+<li><p>Use an <a class="reference external" href="https://support.atlassian.com/bitbucket-cloud/docs/push-back-to-your-repository/#App-secret">App Secret</a>, store the secret in the <code class="docutils literal notranslate"><span class="pre">BITBUCKET_TOKEN</span></code> environment variable
+and the username in <code class="docutils literal notranslate"><span class="pre">BITBUCKET_USER</span></code>.</p></li>
+<li><p>Use an <a class="reference external" href="https://support.atlassian.com/bitbucket-cloud/docs/repository-access-tokens">Access Token</a> for the repository and store it in the <code class="docutils literal notranslate"><span class="pre">BITBUCKET_TOKEN</span></code>
+environment variable.</p></li>
+</ol>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="configuration/configuration.html#config-changelog"><span class="std std-ref">Changelog</span></a> - customize your project’s changelog.</p></li>
+<li><p><a class="reference internal" href="concepts/changelog_templates.html#changelog-templates-custom-release-notes"><span class="std std-ref">Custom Release Notes</span></a> - customize the published release notes</p></li>
+<li><p><a class="reference internal" href="api/commands.html#cmd-version-option-vcs-release"><span class="std std-ref">version –vcs-release/–no-vcs-release</span></a> - enable/disable VCS release
+creation.</p></li>
+</ul>
+</div>
+</section>
+</section>
+</section>
+<section id="testing-your-configuration">
+<h3>Testing your Configuration<a class="headerlink" href="#testing-your-configuration" title="Link to this heading">¶</a></h3>
+<p>It’s time to test your configuration!</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. Run the command in no-operation mode to see what would happen</span>
+semantic-release<span class="w"> </span>-v<span class="w"> </span>--noop<span class="w"> </span>version
+
+<span class="c1"># 2. If the output looks reasonable, try to run the command without any history changes</span>
+<span class="c1">#    '-vv' will give you verbose debug output, which is useful for troubleshooting</span>
+<span class="c1">#    commit parsing issues.</span>
+semantic-release<span class="w"> </span>-vv<span class="w"> </span>version<span class="w"> </span>--no-commit<span class="w"> </span>--no-tag
+
+<span class="c1"># 3. Evaluate your repository to see the changes that were made but not committed</span>
+<span class="c1">#    - Check the version number in your pyproject.toml</span>
+<span class="c1">#    - Check the distribution files from the build command</span>
+<span class="c1">#    - Check the changelog file for the new release notes</span>
+
+<span class="c1"># 4. If everything looks good, make sure to commit/save your configuration changes</span>
+git<span class="w"> </span>add<span class="w"> </span>pyproject.toml
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"chore(config): configure Python Semantic Release"</span>
+
+<span class="c1"># 5. Now, try to run the release command with your history changes but without pushing</span>
+semantic-release<span class="w"> </span>-v<span class="w"> </span>version<span class="w"> </span>--no-push<span class="w"> </span>--no-vcs-release
+
+<span class="c1"># 6. Check the result on your local repository</span>
+git<span class="w"> </span>status
+git<span class="w"> </span>log<span class="w"> </span>--graph<span class="w"> </span>--decorate<span class="w"> </span>--all
+
+<span class="c1"># 7a. If you are happy with the release history and resulting commit &amp; tag,</span>
+<span class="c1">#     reverse your changes before trying the full release command.</span>
+git<span class="w"> </span>tag<span class="w"> </span>-d<span class="w"> </span>v0.0.1<span class="w">  </span><span class="c1"># replace with the actual version you released</span>
+git<span class="w"> </span>reset<span class="w"> </span>--hard<span class="w"> </span>HEAD~1
+
+<span class="c1"># 7b. [Optional] Once you have configured a remote VCS token, try</span>
+<span class="c1">#     running the full release command to update the remote repository.</span>
+semantic-release<span class="w"> </span>version<span class="w"> </span>--push<span class="w"> </span>--vcs-release
+<span class="c1">#    This is optional as you may not want a personal access token set up or make</span>
+<span class="c1">#    make the release permanent yet.</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="api/commands.html#cmd-version"><span class="std std-ref">semantic-release version</span></a></p></li>
+<li><p><a class="reference internal" href="misc/troubleshooting.html#troubleshooting-verbosity"><span class="std std-ref">Increasing Verbosity</span></a></p></li>
+</ul>
+</div>
+</section>
+<section id="configuring-ci-cd">
+<h3>Configuring CI/CD<a class="headerlink" href="#configuring-ci-cd" title="Link to this heading">¶</a></h3>
+<p>PSR is meant to help you release at speed! See our CI/CD Configuration guides under the
+<a class="reference internal" href="configuration/automatic-releases/index.html#automatic"><span class="std std-ref">Automated Releases</span></a> section.</p>
 </section>
 </section>
 </section>
@@ -939,26 +1285,16 @@ of the “options” class for this parser.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="changelog_templates.html">
+          <a class="next-page" href="misc/psr_changelog.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Version Change Reports</div>
+                <div class="title">CHANGELOG</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="getting_started.html">
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-              <div class="page-info">
-                <div class="context">
-                  <span>Previous</span>
-                </div>
-                
-                <div class="title">Getting Started</div>
-                
-              </div>
-            </a>
+          
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -989,25 +1325,27 @@ of the “options” class for this parser.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Commit Parsing</a><ul>
-<li class=""><a class="reference internal" href="#built-in-commit-parsers">Built-in Commit Parsers</a><ul>
-<li class="scroll-current"><a class="reference internal" href="#conventional-commits-parser">Conventional Commits Parser</a></li>
-<li><a class="reference internal" href="#conventional-commits-monorepo-parser">Conventional Commits Monorepo Parser</a></li>
-<li><a class="reference internal" href="#angular-commit-parser">Angular Commit Parser</a></li>
-<li><a class="reference internal" href="#emoji-commit-parser">Emoji Commit Parser</a></li>
-<li><a class="reference internal" href="#scipy-commit-parser">Scipy Commit Parser</a></li>
-<li><a class="reference internal" href="#tag-commit-parser">Tag Commit Parser</a></li>
-<li><a class="reference internal" href="#common-linked-merge-request-detection">Common Linked Merge Request Detection</a></li>
-<li><a class="reference internal" href="#common-issue-identifier-detection">Common Issue Identifier Detection</a></li>
-<li><a class="reference internal" href="#common-release-notice-footer-detection">Common Release Notice Footer Detection</a></li>
-<li><a class="reference internal" href="#common-squash-commit-evaluation">Common Squash Commit Evaluation</a></li>
-<li><a class="reference internal" href="#customization">Customization</a></li>
+<li><a class="reference internal" href="#">Python Semantic Release</a><ul>
+<li class=""><a class="reference internal" href="#installation">Installation</a></li>
+<li class=""><a class="reference internal" href="#documentation-contents">Documentation Contents</a></li>
+<li class=""><a class="reference internal" href="#getting-started">Getting Started</a><ul>
+<li class=""><a class="reference internal" href="#configuring-psr">Configuring PSR</a><ul>
+<li class=""><a class="reference internal" href="#configuring-the-version-stamp-feature">Configuring the Version Stamp Feature</a></li>
+<li class=""><a class="reference internal" href="#using-psr-to-build-your-project">Using PSR to Build your Project</a></li>
+<li class=""><a class="reference internal" href="#choosing-a-commit-message-parser">Choosing a Commit Message Parser</a></li>
+<li class="scroll-current"><a class="reference internal" href="#choosing-your-changelog">Choosing your Changelog</a></li>
+<li><a class="reference internal" href="#defining-your-release-branches">Defining your Release Branches</a></li>
+<li><a class="reference internal" href="#configuring-vcs-releases">Configuring VCS Releases</a><ul>
+<li><a class="reference internal" href="#github-gh-token">GitHub (<code class="docutils literal notranslate"><span class="pre">GH_TOKEN</span></code>)</a></li>
+<li><a class="reference internal" href="#gitlab-gitlab-token">GitLab (<code class="docutils literal notranslate"><span class="pre">GITLAB_TOKEN</span></code>)</a></li>
+<li><a class="reference internal" href="#gitea-gitea-token">Gitea (<code class="docutils literal notranslate"><span class="pre">GITEA_TOKEN</span></code>)</a></li>
+<li><a class="reference internal" href="#bitbucket-bitbucket-token">Bitbucket (<code class="docutils literal notranslate"><span class="pre">BITBUCKET_TOKEN</span></code>)</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#custom-parsers">Custom Parsers</a><ul>
-<li><a class="reference internal" href="#tokens">Tokens</a></li>
-<li><a class="reference internal" href="#parser-options">Parser Options</a></li>
-<li><a class="reference internal" href="#commit-parsers">Commit Parsers</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#testing-your-configuration">Testing your Configuration</a></li>
+<li><a class="reference internal" href="#configuring-ci-cd">Configuring CI/CD</a></li>
 </ul>
 </li>
 </ul>
@@ -1021,9 +1359,9 @@ of the “options” class for this parser.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=695067f2"></script>
-    <script src="../_static/doctools.js?v=9a2dae69"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+</div><script src="_static/documentation_options.js?v=695067f2"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
     
-<readthedocs-flyout></readthedocs-flyout><readthedocs-notification class="raised toast"></readthedocs-notification><readthedocs-search class="raised floating"></readthedocs-search><readthedocs-hotkeys></readthedocs-hotkeys>
+<readthedocs-flyout></readthedocs-flyout><readthedocs-notification class="raised toast"></readthedocs-notification><readthedocs-search class="raised floating"></readthedocs-search><readthedocs-hotkeys></readthedocs-hotkeys></body><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration><dc88729c-2b61-46c7-81f6-2efa0af604df></dc88729c-2b61-46c7-81f6-2efa0af604df></html>
