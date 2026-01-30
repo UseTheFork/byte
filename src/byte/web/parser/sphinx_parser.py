@@ -60,10 +60,10 @@ class SphinxParser(BaseWebParser):
         """Extract the main content element from Sphinx or ReadTheDocs HTML.
 
         Args:
-                soup: BeautifulSoup object containing the HTML content
+            soup: BeautifulSoup object containing the HTML content
 
         Returns:
-                BeautifulSoup Tag containing the main content, or None if not found
+            BeautifulSoup Tag containing the main content, or None if not found
 
         Usage: `element = parser.extract_content_element(soup)` -> Tag or None
         """
@@ -71,10 +71,12 @@ class SphinxParser(BaseWebParser):
         html_tags = [
             ("div", {"role": "main"}),
             ("main", {"id": "main-content"}),
-            ("div", {"class": "body"}),
-            ("div", {"class": "document"}),
-            ("div", {"class": "documentwrapper"}),
+            ("div", {"class": lambda x: x and "body" in x}),
+            ("div", {"class": lambda x: x and "document" in x}),
+            ("div", {"class": lambda x: x and "documentwrapper" in x}),
             ("main", {}),
+            ("article", {"role": "main"}),
+            ("div", {"itemprop": "articleBody"}),
         ]
 
         # Search for main content element

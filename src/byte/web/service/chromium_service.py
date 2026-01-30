@@ -73,7 +73,7 @@ class ChromiumService(Service):
                 await tab.go_to(url)
 
                 spinner.text = "Extracting content..."
-                html_content = await tab.execute_script("return document.body.innerHTML")
+                html_content = await tab.execute_script("return document.documentElement.outerHTML")
 
                 spinner.text = "Converting to markdown..."
                 html_content = html_content.get("result", {}).get("result", {}).get("value", "")
