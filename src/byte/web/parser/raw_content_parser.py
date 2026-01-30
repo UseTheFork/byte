@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
 from byte.web.parser.base import BaseWebParser
 
@@ -24,6 +25,35 @@ class RawContentParser(BaseWebParser):
         Usage: `if parser.can_parse(soup, url)` -> True
         """
         return True
+
+    def extract_content_element(self, soup: BeautifulSoup) -> Tag | None:
+        """Extract the entire soup as the content element.
+
+        Args:
+                soup: BeautifulSoup object containing the HTML content
+
+        Returns:
+                The entire BeautifulSoup object
+
+        Usage: `element = parser.extract_content_element(soup)` -> soup
+        """
+        return soup
+
+    def get_cleaning_config(self) -> dict:
+        """Get the cleaning pipeline configuration for raw content parser.
+
+        Returns:
+                Dictionary with cleaning pipeline settings (no markdown conversion)
+
+        Usage: `config = parser.get_cleaning_config()` -> dict
+        """
+        return {
+            "remove_unwanted": False,
+            "filter_links": False,
+            "link_ratio": 1.0,
+            "normalize": False,
+            "to_markdown": False,
+        }
 
     def parse(self, soup: BeautifulSoup) -> str:
         """Extract raw text content without any processing.

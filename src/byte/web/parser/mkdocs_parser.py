@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
 from byte.web.parser.base import BaseWebParser
 
@@ -10,7 +11,7 @@ class MkDocsParser(BaseWebParser):
     and filtering out navigation, search, and other non-content elements.
     """
 
-    def __init__(self, exclude_links_ratio: float = 1.0):
+    def boot(self, exclude_links_ratio: float = 1.0, **kwargs):
         """Initialize MkDocs parser.
 
         Args:
@@ -46,6 +47,49 @@ class MkDocsParser(BaseWebParser):
             return True
 
         return False
+
+    def extract_content_element(self, soup: BeautifulSoup) -> Tag | None:
+        """Extract the main content element from MkDocs HTML.
+
+        Args:
+                soup: BeautifulSoup object containing the HTML content
+
+        Returns:
+                BeautifulSoup Tag containing the main content, or None if not found
+
+        Usage: `element = parser.extract_content_element(soup)` -> Tag or None
+        """
+        # Default tags to search for main content
+        html_tags = [
+            ("article", {"class": "md-content__inner"}),
+            ("div", {"class": "md-content"}),
+            ("main", {}),
+            ("article", {}),
+        ]
+
+        # Search for main content element
+        for tag, attrs in html_tags:
+            element = soup.find(tag, attrs)
+            if element is not None:
+                return element
+
+        return None
+
+    def get_cleaning_config(self) -> dict:
+        """Get the cleaning pipeline configuration for MkDocs parser.
+
+        Returns:
+                Dictionary with cleaning pipeline settings
+
+        Usage: `config = parser.get_cleaning_config()` -> dict
+        """
+        return {
+            "remove_unwanted": True,
+            "filter_links": True,
+            "link_ratio": self.exclude_links_ratio,
+            "normalize": False,
+            "to_markdown": True,
+        }
 
     def parse(self, soup: BeautifulSoup) -> str:
         """Extract and clean text content from MkDocs HTML.

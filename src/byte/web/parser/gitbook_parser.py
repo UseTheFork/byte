@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
 from byte.web.parser.base import BaseWebParser
 
@@ -10,7 +11,7 @@ class GitBookParser(BaseWebParser):
     and filtering out navigation, sidebars, and other non-content elements.
     """
 
-    def __init__(self, exclude_links_ratio: float = 1.0) -> None:
+    def boot(self, exclude_links_ratio: float = 1.0, **kwargs) -> None:
         """Initialize GitBook parser.
 
         Args:
@@ -48,6 +49,49 @@ class GitBookParser(BaseWebParser):
             return True
 
         return False
+
+    def extract_content_element(self, soup: BeautifulSoup) -> Tag | None:
+        """Extract the main content element from GitBook HTML.
+
+        Args:
+                soup: BeautifulSoup object containing the HTML content
+
+        Returns:
+                BeautifulSoup Tag containing the main content, or None if not found
+
+        Usage: `element = parser.extract_content_element(soup)` -> Tag or None
+        """
+        # GitBook v2+ uses main tag or specific classes
+        content_selectors = [
+            ("main", {}),
+            ("div", {"class": lambda x: x and "page-inner" in x}),
+            ("div", {"class": lambda x: x and "markdown-section" in x}),
+            ("article", {}),
+        ]
+
+        for tag, attrs in content_selectors:
+            content = soup.find(tag, attrs)
+            if content:
+                return content
+
+        # Fallback to body if nothing found
+        return soup.find("body")
+
+    def get_cleaning_config(self) -> dict:
+        """Get the cleaning pipeline configuration for GitBook parser.
+
+        Returns:
+                Dictionary with cleaning pipeline settings
+
+        Usage: `config = parser.get_cleaning_config()` -> dict
+        """
+        return {
+            "remove_unwanted": True,
+            "filter_links": True,
+            "link_ratio": self.exclude_links_ratio,
+            "normalize": False,
+            "to_markdown": True,
+        }
 
     def parse(self, soup: BeautifulSoup) -> str:
         """Extract and clean text content from GitBook HTML.

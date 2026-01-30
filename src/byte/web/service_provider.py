@@ -2,6 +2,7 @@ from typing import List, Type
 
 from byte import Service, ServiceProvider
 from byte.web import ChromiumService
+from byte.web.service.content_cleaner import ContentCleaner
 
 
 class WebServiceProvider(ServiceProvider):
@@ -13,4 +14,4 @@ class WebServiceProvider(ServiceProvider):
     """
 
     def services(self) -> List[Type[Service]]:
-        return [ChromiumService]
+        return [ChromiumService, ContentCleaner]

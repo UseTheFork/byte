@@ -4,15 +4,15 @@ from bs4.element import Tag
 from byte.web.parser.base import BaseWebParser
 
 
-class ReadTheDocsParser(BaseWebParser):
-    """Parser for ReadTheDocs documentation sites.
+class SphinxParser(BaseWebParser):
+    """Parser for Sphinx documentation sites.
 
-    Extracts main content from ReadTheDocs pages by identifying specific HTML tags
-    and filtering out navigation, index pages, and other non-content elements.
+    Extracts main content from Sphinx-generated documentation by identifying
+    specific HTML structure and filtering out navigation and sidebar elements.
     """
 
-    def boot(self, exclude_links_ratio: float = 1.0):
-        """Initialize ReadTheDocs parser.
+    def boot(self, exclude_links_ratio: float = 1.0, **kwargs):
+        """Initialize Sphinx parser.
 
         Args:
                 exclude_links_ratio: The ratio of links:content to exclude pages from.
@@ -22,34 +22,34 @@ class ReadTheDocsParser(BaseWebParser):
         self.exclude_links_ratio = exclude_links_ratio
 
     def can_parse(self, soup: BeautifulSoup, url: str) -> bool:
-        """Determine if this is a ReadTheDocs page.
+        """Determine if this is a Sphinx-generated page.
 
         Args:
                 soup: BeautifulSoup object containing the HTML content
                 url: The URL of the page being parsed
 
         Returns:
-                True if this appears to be a ReadTheDocs page
+                True if this appears to be a Sphinx page
 
         Usage: `if parser.can_parse(soup, url)` -> boolean
         """
-        # Check for common ReadTheDocs indicators
-        if "readthedocs" in url.lower():
+        # Check for Sphinx-specific meta tags
+        sphinx_meta = soup.find("meta", attrs={"name": "generator", "content": lambda x: x and "sphinx" in x.lower()})  # pyright: ignore[reportCallIssue]
+        if sphinx_meta:
             return True
 
-        # Check for ReadTheDocs-specific meta tags or classes
-        rtd_meta = soup.find("meta", attrs={"name": "generator", "content": lambda x: x and "sphinx" in x.lower()})  # pyright: ignore[reportCallIssue]
-        if rtd_meta:
+        # Check for common Sphinx HTML structure
+        if soup.find("div", class_="document") or soup.find("div", class_="documentwrapper"):
             return True
 
-        # Check for common ReadTheDocs HTML structure
-        if soup.find("div", {"role": "main"}) or soup.find("main", {"id": "main-content"}):
+        # Check for Sphinx-specific classes
+        if soup.find("div", class_="body") and soup.find("div", class_="sphinxsidebar"):
             return True
 
         return False
 
     def extract_content_element(self, soup: BeautifulSoup) -> Tag | None:
-        """Extract the main content element from ReadTheDocs HTML.
+        """Extract the main content element from Sphinx HTML.
 
         Args:
                 soup: BeautifulSoup object containing the HTML content
@@ -61,12 +61,15 @@ class ReadTheDocsParser(BaseWebParser):
         """
         # Default tags to search for main content
         html_tags = [
+            ("div", {"class": "body"}),
+            ("div", {"class": "document"}),
+            ("div", {"class": "documentwrapper"}),
             ("div", {"role": "main"}),
-            ("main", {"id": "main-content"}),
+            ("main", {}),
         ]
 
         # Search for main content element
-        for tag, attrs in html_tags[::-1]:
+        for tag, attrs in html_tags:
             element = soup.find(tag, attrs)  # pyright: ignore[reportCallIssue]
             if element is not None:
                 return element
@@ -74,7 +77,7 @@ class ReadTheDocsParser(BaseWebParser):
         return None
 
     def get_cleaning_config(self) -> dict:
-        """Get the cleaning pipeline configuration for ReadTheDocs parser.
+        """Get the cleaning pipeline configuration for Sphinx parser.
 
         Returns:
                 Dictionary with cleaning pipeline settings
@@ -90,7 +93,7 @@ class ReadTheDocsParser(BaseWebParser):
         }
 
     def parse(self, soup: BeautifulSoup) -> str:
-        """Extract and clean text content from ReadTheDocs HTML.
+        """Extract and clean text content from Sphinx HTML.
 
         Args:
                 soup: BeautifulSoup object containing the HTML content
@@ -102,14 +105,17 @@ class ReadTheDocsParser(BaseWebParser):
         """
         # Default tags to search for main content
         html_tags = [
+            ("div", {"class": "body"}),
+            ("div", {"class": "document"}),
+            ("div", {"class": "documentwrapper"}),
             ("div", {"role": "main"}),
-            ("main", {"id": "main-content"}),
+            ("main", {}),
         ]
 
         element = None
 
         # Search for main content element
-        for tag, attrs in html_tags[::-1]:
+        for tag, attrs in html_tags:
             element = soup.find(tag, attrs)  # pyright: ignore[reportCallIssue]
             if element is not None:
                 break

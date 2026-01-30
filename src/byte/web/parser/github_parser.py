@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
 from byte.web.parser.base import BaseWebParser
 
@@ -10,7 +11,7 @@ class GitHubParser(BaseWebParser):
     from GitHub pages while filtering out navigation and UI elements.
     """
 
-    def __init__(self, exclude_links_ratio: float = 0.5) -> None:
+    def boot(self, exclude_links_ratio: float = 0.5, **kwargs) -> None:
         """Initialize the GitHub parser.
 
         Args:
@@ -45,6 +46,56 @@ class GitHubParser(BaseWebParser):
             return True
 
         return False
+
+    def extract_content_element(self, soup: BeautifulSoup) -> Tag | None:
+        """Extract the main content element from GitHub HTML.
+
+        Args:
+                soup: BeautifulSoup object containing the HTML content
+
+        Returns:
+                BeautifulSoup Tag containing the main content, or None if not found
+
+        Usage: `element = parser.extract_content_element(soup)` -> Tag or None
+        """
+        # README content
+        readme = soup.find("article", class_="markdown-body")
+        if readme:
+            return readme
+
+        # File content view
+        file_content = soup.find("div", {"data-target": "react-app.reactRoot"})
+        if file_content:
+            return file_content
+
+        # Repository about section
+        about = soup.find("div", class_="BorderGrid-cell")
+        if about:
+            return about
+
+        # Fallback to main element
+        main = soup.find("main")
+        if main:
+            return main
+
+        # Last resort: use body
+        return soup.find("body")
+
+    def get_cleaning_config(self) -> dict:
+        """Get the cleaning pipeline configuration for GitHub parser.
+
+        Returns:
+                Dictionary with cleaning pipeline settings
+
+        Usage: `config = parser.get_cleaning_config()` -> dict
+        """
+        return {
+            "remove_unwanted": True,
+            "filter_links": True,
+            "link_ratio": self.exclude_links_ratio,
+            "normalize": False,
+            "to_markdown": True,
+        }
 
     def parse(self, soup: BeautifulSoup) -> str:
         """Extract and clean text content from GitHub HTML.
