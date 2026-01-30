@@ -34,7 +34,7 @@ class MkDocsParser(BaseWebParser):
         Usage: `if parser.can_parse(soup, url)` -> boolean
         """
         # Check for MkDocs-specific meta tags
-        mkdocs_meta = soup.find("meta", attrs={"name": "generator", "content": lambda x: x and "mkdocs" in x.lower()})  # pyright: ignore[reportCallIssue]
+        mkdocs_meta = soup.find("meta", attrs={"name": "generator", "content": lambda x: x and "mkdocs" in x.lower()})
         if mkdocs_meta:
             return True
 
@@ -90,35 +90,3 @@ class MkDocsParser(BaseWebParser):
             "normalize": False,
             "to_markdown": True,
         }
-
-    def parse(self, soup: BeautifulSoup) -> str:
-        """Extract and clean text content from MkDocs HTML.
-
-        Args:
-                soup: BeautifulSoup object containing the HTML content
-
-        Returns:
-                Cleaned text content as a string
-
-        Usage: `text = parser.parse(soup)` -> cleaned text
-        """
-        # Default tags to search for main content
-        html_tags = [
-            ("article", {"class": "md-content__inner"}),
-            ("div", {"class": "md-content"}),
-            ("main", {}),
-            ("article", {}),
-        ]
-
-        element = None
-
-        # Search for main content element
-        for tag, attrs in html_tags:
-            element = soup.find(tag, attrs)
-            if element is not None:
-                break
-
-        if element is not None and self._get_link_ratio(element) <= self.exclude_links_ratio:
-            return self._to_markdown(element)
-        else:
-            return ""

@@ -13,7 +13,6 @@ if TYPE_CHECKING:
     from byte.web.parser.github_parser import GitHubParser
     from byte.web.parser.mkdocs_parser import MkDocsParser
     from byte.web.parser.raw_content_parser import RawContentParser
-    from byte.web.parser.readthedocs_parser import ReadTheDocsParser
     from byte.web.parser.sphinx_parser import SphinxParser
     from byte.web.service.chromium_service import ChromiumService
     from byte.web.service.content_cleaner import ContentCleaner
@@ -28,7 +27,6 @@ __all__ = (
     "GitHubParser",
     "MkDocsParser",
     "RawContentParser",
-    "ReadTheDocsParser",
     "SphinxParser",
     "WebConfig",
     "WebNotEnabledException",
@@ -45,7 +43,6 @@ _dynamic_imports = {
     "GitHubParser": "parser.github_parser",
     "MkDocsParser": "parser.mkdocs_parser",
     "RawContentParser": "parser.raw_content_parser",
-    "ReadTheDocsParser": "parser.readthedocs_parser",
     "SphinxParser": "parser.sphinx_parser",
     "WebConfig": "config",
     "WebNotEnabledException": "exceptions",

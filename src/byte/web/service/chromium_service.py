@@ -14,7 +14,6 @@ from byte.web.parser.gitbook_parser import GitBookParser
 from byte.web.parser.github_parser import GitHubParser
 from byte.web.parser.mkdocs_parser import MkDocsParser
 from byte.web.parser.raw_content_parser import RawContentParser
-from byte.web.parser.readthedocs_parser import ReadTheDocsParser
 from byte.web.parser.sphinx_parser import SphinxParser
 from byte.web.service.content_cleaner import ContentCleaner
 
@@ -31,7 +30,6 @@ class ChromiumService(Service):
         """Initialize the service with available parsers."""
         self.parsers: List[Type[BaseWebParser]] = [
             SphinxParser,
-            ReadTheDocsParser,
             GitBookParser,
             GitHubParser,
             MkDocsParser,

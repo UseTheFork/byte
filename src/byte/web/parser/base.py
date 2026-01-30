@@ -43,20 +43,6 @@ class BaseWebParser(ABC, Bootable):
         """
         pass
 
-    @abstractmethod
-    def parse(self, soup: BeautifulSoup) -> str:
-        """Extract and clean text content from the HTML.
-
-        Args:
-                soup: BeautifulSoup object containing the HTML content
-
-        Returns:
-                Cleaned text content as a string
-
-        Usage: `text = parser.parse(soup)` -> cleaned text
-        """
-        pass
-
     def get_cleaning_config(self) -> dict:
         """Get the cleaning pipeline configuration for this parser.
 

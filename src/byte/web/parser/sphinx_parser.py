@@ -22,19 +22,23 @@ class SphinxParser(BaseWebParser):
         self.exclude_links_ratio = exclude_links_ratio
 
     def can_parse(self, soup: BeautifulSoup, url: str) -> bool:
-        """Determine if this is a Sphinx-generated page.
+        """Determine if this is a Sphinx-generated page or ReadTheDocs site.
 
         Args:
                 soup: BeautifulSoup object containing the HTML content
                 url: The URL of the page being parsed
 
         Returns:
-                True if this appears to be a Sphinx page
+                True if this appears to be a Sphinx or ReadTheDocs page
 
         Usage: `if parser.can_parse(soup, url)` -> boolean
         """
+        # Check for ReadTheDocs URL
+        if "readthedocs" in url.lower():
+            return True
+
         # Check for Sphinx-specific meta tags
-        sphinx_meta = soup.find("meta", attrs={"name": "generator", "content": lambda x: x and "sphinx" in x.lower()})  # pyright: ignore[reportCallIssue]
+        sphinx_meta = soup.find("meta", attrs={"name": "generator", "content": lambda x: x and "sphinx" in x.lower()})
         if sphinx_meta:
             return True
 
@@ -46,10 +50,14 @@ class SphinxParser(BaseWebParser):
         if soup.find("div", class_="body") and soup.find("div", class_="sphinxsidebar"):
             return True
 
+        # Check for ReadTheDocs-specific structure
+        if soup.find("div", {"role": "main"}) or soup.find("main", {"id": "main-content"}):
+            return True
+
         return False
 
     def extract_content_element(self, soup: BeautifulSoup) -> Tag | None:
-        """Extract the main content element from Sphinx HTML.
+        """Extract the main content element from Sphinx or ReadTheDocs HTML.
 
         Args:
                 soup: BeautifulSoup object containing the HTML content
@@ -59,18 +67,19 @@ class SphinxParser(BaseWebParser):
 
         Usage: `element = parser.extract_content_element(soup)` -> Tag or None
         """
-        # Default tags to search for main content
+        # Default tags to search for main content (Sphinx and ReadTheDocs)
         html_tags = [
+            ("div", {"role": "main"}),
+            ("main", {"id": "main-content"}),
             ("div", {"class": "body"}),
             ("div", {"class": "document"}),
             ("div", {"class": "documentwrapper"}),
-            ("div", {"role": "main"}),
             ("main", {}),
         ]
 
         # Search for main content element
         for tag, attrs in html_tags:
-            element = soup.find(tag, attrs)  # pyright: ignore[reportCallIssue]
+            element = soup.find(tag, attrs)
             if element is not None:
                 return element
 
@@ -91,36 +100,3 @@ class SphinxParser(BaseWebParser):
             "normalize": False,
             "to_markdown": True,
         }
-
-    def parse(self, soup: BeautifulSoup) -> str:
-        """Extract and clean text content from Sphinx HTML.
-
-        Args:
-                soup: BeautifulSoup object containing the HTML content
-
-        Returns:
-                Cleaned text content as a string
-
-        Usage: `text = parser.parse(soup)` -> cleaned text
-        """
-        # Default tags to search for main content
-        html_tags = [
-            ("div", {"class": "body"}),
-            ("div", {"class": "document"}),
-            ("div", {"class": "documentwrapper"}),
-            ("div", {"role": "main"}),
-            ("main", {}),
-        ]
-
-        element = None
-
-        # Search for main content element
-        for tag, attrs in html_tags:
-            element = soup.find(tag, attrs)  # pyright: ignore[reportCallIssue]
-            if element is not None:
-                break
-
-        if element is not None and self._get_link_ratio(element) <= self.exclude_links_ratio:
-            return self._to_markdown(element)
-        else:
-            return ""

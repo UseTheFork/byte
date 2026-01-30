@@ -54,16 +54,3 @@ class RawContentParser(BaseWebParser):
             "normalize": False,
             "to_markdown": False,
         }
-
-    def parse(self, soup: BeautifulSoup) -> str:
-        """Extract raw text content without any processing.
-
-        Args:
-                soup: BeautifulSoup object containing the HTML content
-
-        Returns:
-                Raw text content as a string
-
-        Usage: `text = parser.parse(soup)` -> raw text
-        """
-        return self._get_clean_text(soup)
