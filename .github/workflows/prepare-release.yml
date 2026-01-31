@@ -96,3 +96,14 @@ jobs:
       
       - name: Setup | Push changes to staging
         run: git push origin ${{ github.ref_name }}
+
+      - name: Setup | Fetch development branch
+        run: git fetch origin development:development
+
+      - name: Setup | Merge changes to development
+        run: |
+          git checkout development
+          git merge ${{ github.ref_name }} --no-edit
+
+      - name: Setup | Push changes to development
+        run: git push origin development
