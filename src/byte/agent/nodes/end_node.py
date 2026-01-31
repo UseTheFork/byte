@@ -32,6 +32,11 @@ class EndNode(Node):
             )
             await self.emit(payload)
 
+        if state["parsed_blocks"]:
+            if runtime.context.agent == "CoderAgent":
+                clipboard_service = self.app.make(ClipboardService)
+                self.app.dispatch_task(clipboard_service.extract_from_blocks(state["parsed_blocks"]))
+
         # This is where we promote `scratch_messages` to `history_messages`
         update_dict = {
             **state,
@@ -39,15 +44,9 @@ class EndNode(Node):
             "user_request": "",
         }
 
-        # Only update messages if there are scratch messages to process
-        if state["parsed_blocks"]:
-            if runtime.context.agent == "CoderAgent":
-                clipboard_service = self.app.make(ClipboardService)
-                self.app.dispatch_task(clipboard_service.extract_from_blocks(state["parsed_blocks"]))
-
-        # self.metadata.erase_history
         metadata = state["metadata"]
 
+        # Only update messages if there are scratch messages to process
         if state["scratch_messages"] and not metadata.erase_history:
             self.app["log"].info(state["scratch_messages"])
 

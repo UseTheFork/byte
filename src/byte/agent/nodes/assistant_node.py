@@ -84,15 +84,22 @@ class AssistantNode(Node):
 
         message_parts = []
 
-        # TODO: We need to check if the user_request is already wrapped in a boundry and if it is not wrap it again.
-        # Wrap user request in its own boundary
-        message_parts.extend(
-            [
-                Boundary.open(BoundaryType.USER_REQUEST),
-                user_request,
-                Boundary.close(BoundaryType.USER_REQUEST),
-            ]
-        )
+        # Check if user_request already starts with XML-like tags
+        stripped_request = user_request.lstrip()
+        starts_with_xml = stripped_request.startswith("<")
+
+        if starts_with_xml:
+            # User request already has XML structure, don't wrap it
+            message_parts.append(user_request)
+        else:
+            # Wrap user request in its own boundary
+            message_parts.extend(
+                [
+                    Boundary.open(BoundaryType.USER_REQUEST),
+                    user_request,
+                    Boundary.close(BoundaryType.USER_REQUEST),
+                ]
+            )
 
         # Add reinforcement section if there are messages
         if reinforcement_messages or context.enforcement:
