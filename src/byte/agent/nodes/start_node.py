@@ -1,5 +1,7 @@
 from typing import Type
 
+from langchain.messages import RemoveMessage
+from langgraph.graph.message import REMOVE_ALL_MESSAGES
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
@@ -29,11 +31,17 @@ class StartNode(Node):
         result = {
             "agent": runtime.context.agent,
             "edit_format_system": edit_format.prompts.system,
+            # We always remove scratch no matter what.
+            "scratch_messages": [RemoveMessage(id=REMOVE_ALL_MESSAGES)],
             "masked_messages": [],
             "examples": edit_format.prompts.examples,
-            "donts": [],
+            "parsed_blocks": [],
+            "extracted_content": None,
             "errors": None,
-            "metadata": MetadataSchema(iteration=0),
+            "metadata": MetadataSchema(
+                iteration=0,
+                erase_history=False,
+            ),
         }
 
         return Command(
