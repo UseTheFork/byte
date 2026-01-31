@@ -10,10 +10,10 @@ from byte.cli import (
     StreamRenderingService,
 )
 from byte.memory import MemoryService
-from byte.support.mixins import Bootable, Eventable
+from byte.support.mixins import Bootable, Configurable, Eventable
 
 
-class Agent(ABC, Bootable, Eventable):
+class Agent(ABC, Bootable, Eventable, Configurable):
     """Base class for all agent services providing common graph management functionality.
 
     Defines the interface for agent services with lazy-loaded graph compilation,
@@ -142,6 +142,7 @@ class Agent(ABC, Bootable, Eventable):
         # Create a task so we can cancel it properly
         stream_task = asyncio.create_task(self._run_stream(graph, initial_state, config, stream_rendering_service))
 
+        # TODO: need to add a special spinner here showing the task is being cancelled
         try:
             processed_event = await stream_task
         except KeyboardInterrupt:

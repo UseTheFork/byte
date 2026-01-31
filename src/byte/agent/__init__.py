@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.agent.command.config_agent_command import ConfigAgentCommand
     from byte.agent.exceptions import DummyNodeReachedException
     from byte.agent.implementations.ask.agent import AskAgent
     from byte.agent.implementations.ask.command import AskCommand
@@ -34,8 +35,17 @@ if TYPE_CHECKING:
     from byte.agent.nodes.tool_node import ToolNode
     from byte.agent.nodes.validation_node import ValidationNode
     from byte.agent.reducers import add_constraints, replace_list, replace_str, update_metadata
-    from byte.agent.schemas import AssistantContextSchema, ConstraintSchema, MetadataSchema, TokenUsageSchema
+    from byte.agent.schemas import (
+        AgentConfigBoolSchema,
+        AgentConfigStringSchema,
+        AssistantContextSchema,
+        ConstraintSchema,
+        MetadataSchema,
+        PromptSettingsSchema,
+        TokenUsageSchema,
+    )
     from byte.agent.service.agent_service import AgentService
+    from byte.agent.service.agent_settings_service import AgentSettingsService
     from byte.agent.service_provider import AgentServiceProvider
     from byte.agent.state import BaseState
     from byte.agent.validators.base import ValidationError, Validator
@@ -43,8 +53,11 @@ if TYPE_CHECKING:
 
 __all__ = (
     "Agent",
+    "AgentConfigBoolSchema",
+    "AgentConfigStringSchema",
     "AgentService",
     "AgentServiceProvider",
+    "AgentSettingsService",
     "AskAgent",
     "AskCommand",
     "AssistantContextSchema",
@@ -54,6 +67,7 @@ __all__ = (
     "CoderAgent",
     "CommitAgent",
     "CommitPlanAgent",
+    "ConfigAgentCommand",
     "ConstraintSchema",
     "ConventionAgent",
     "ConventionCommand",
@@ -68,6 +82,7 @@ __all__ = (
     "MetadataSchema",
     "Node",
     "ParseBlocksNode",
+    "PromptSettingsSchema",
     "ResearchAgent",
     "ResearchCommand",
     "SessionContextFormatter",
@@ -92,8 +107,11 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "Agent": "implementations.base",
+    "AgentConfigBoolSchema": "schemas",
+    "AgentConfigStringSchema": "schemas",
     "AgentService": "service.agent_service",
     "AgentServiceProvider": "service_provider",
+    "AgentSettingsService": "service.agent_settings_service",
     "AskAgent": "implementations.ask.agent",
     "AskCommand": "implementations.ask.command",
     "AssistantContextSchema": "schemas",
@@ -103,6 +121,7 @@ _dynamic_imports = {
     "CoderAgent": "implementations.coder.agent",
     "CommitAgent": "implementations.commit.agent",
     "CommitPlanAgent": "implementations.commit.agent",
+    "ConfigAgentCommand": "command.config_agent_command",
     "ConstraintSchema": "schemas",
     "ConventionAgent": "implementations.conventions.agent",
     "ConventionCommand": "implementations.conventions.command",
@@ -117,6 +136,7 @@ _dynamic_imports = {
     "MetadataSchema": "schemas",
     "Node": "nodes.base_node",
     "ParseBlocksNode": "nodes.parse_blocks_node",
+    "PromptSettingsSchema": "schemas",
     "ResearchAgent": "implementations.research.agent",
     "ResearchCommand": "implementations.research.command",
     "SessionContextFormatter": "nodes.extract_node",

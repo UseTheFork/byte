@@ -39,6 +39,40 @@ class ConstraintSchema:
 
 
 @dataclass
+class AgentConfigSchema:
+    """Base schema for agent configuration settings."""
+
+    name: str  # Human-readable name of the setting
+    description: str  # Human-readable description of the setting
+
+
+@dataclass
+class AgentConfigBoolSchema(AgentConfigSchema):
+    """Boolean configuration setting for agents."""
+
+    value: bool = Field(default=False)
+
+
+@dataclass
+class AgentConfigStringSchema(AgentConfigSchema):
+    """String configuration setting for agents."""
+
+    value: str = Field(default="")
+
+
+@dataclass
+class PromptSettingsSchema:
+    """Settings for controlling prompt behavior and content.
+
+    Boolean flags to enable or disable specific prompt features.
+
+    Usage: `settings = PromptSettingsSchema(has_project_hierarchy=True)`
+    """
+
+    has_project_hierarchy: bool = Field(default=False)
+
+
+@dataclass
 class AssistantContextSchema:
     """Configuration for agent assistant including LLM, runnable chain, and tools.
 
@@ -59,6 +93,7 @@ class AssistantContextSchema:
     main: BaseChatModel | None  # Reference to the main LLM for complex reasoning
     weak: BaseChatModel | None  # Reference to the weak LLM for simple operations
     agent: str  # Agent class name for identification
+    prompt_settings: PromptSettingsSchema = Field(default_factory=PromptSettingsSchema)  # Settings for prompt behavior
     tools: Optional[List[BaseTool]] = Field(default=None)  # Tools bound to LLM, if any
     enforcement: Optional[List[str]] = Field(default=None)
     recovery_steps: Optional[str] = Field(default=None)

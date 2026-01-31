@@ -7,21 +7,26 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.support.mixins.bootable import Bootable
     from byte.support.mixins.conditionable import Conditionable
+    from byte.support.mixins.configurable import Configurable
     from byte.support.mixins.eventable import Eventable
     from byte.support.mixins.user_interactive import UserInteractive
 
 __all__ = (
     "Bootable",
     "Conditionable",
+    "Configurable",
     "Eventable",
     "UserInteractive",
 )
 
 _dynamic_imports = {
+    # keep-sorted start
     "Bootable": "bootable",
     "Conditionable": "conditionable",
+    "Configurable": "configurable",
     "Eventable": "eventable",
     "UserInteractive": "user_interactive",
+    # keep-sorted end
 }
 
 
