@@ -86,3 +86,6 @@ jobs:
       - name: Setup | Commit changes
         run: |
           git commit -m "chore: update documentation and configuration"
+      
+      - name: Setup | Push changes to staging
+        run: git push origin ${{ github.ref_name }}
