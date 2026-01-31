@@ -1,8 +1,7 @@
 from typing import Literal
 
-from langchain.messages import HumanMessage, RemoveMessage
+from langchain.messages import HumanMessage
 from langgraph.graph import END
-from langgraph.graph.message import REMOVE_ALL_MESSAGES
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
@@ -14,6 +13,12 @@ from byte.support.utils import get_last_message
 
 
 class EndNode(Node):
+    """Finalize agent execution by promoting scratch messages to history and emitting end events.
+
+    Usage: Automatically invoked by LangGraph when agent workflow completes.
+    Handles message promotion, clipboard extraction, and state cleanup.
+    """
+
     async def __call__(
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
     ) -> Command[Literal["__end__"]]:
@@ -40,9 +45,13 @@ class EndNode(Node):
                 clipboard_service = self.app.make(ClipboardService)
                 self.app.dispatch_task(clipboard_service.extract_from_blocks(state["parsed_blocks"]))
 
-        if state["scratch_messages"]:
+        # self.metadata.erase_history
+        metadata = state["metadata"]
+
+        if state["scratch_messages"] and not metadata.erase_history:
+            self.app["log"].info(state["scratch_messages"])
+
             last_message = get_last_message(state["scratch_messages"])
-            clear_scratch = RemoveMessage(id=REMOVE_ALL_MESSAGES)
 
             # we only need to copy from Ask and Coder agents.
             if runtime.context.agent == "AskAgent":
@@ -57,8 +66,6 @@ class EndNode(Node):
                 # Create a HumanMessage from the user_request
                 user_message = HumanMessage(content=state["user_request"])
                 update_dict["history_messages"] = [user_message, last_message]
-
-            update_dict["scratch_messages"] = clear_scratch
 
         return Command(
             goto=END,
