@@ -9,6 +9,7 @@ from langgraph.types import Command
 
 from byte import EventType, Payload
 from byte.agent import AssistantContextSchema, BaseState, Node
+from byte.clipboard import ClipboardService
 from byte.support.utils import get_last_message
 
 
@@ -26,8 +27,6 @@ class EndNode(Node):
             )
             await self.emit(payload)
 
-        self.app["log"].info(runtime.context.agent)
-
         # This is where we promote `scratch_messages` to `history_messages`
         update_dict = {
             **state,
@@ -36,9 +35,19 @@ class EndNode(Node):
         }
 
         # Only update messages if there are scratch messages to process
+        if state["parsed_blocks"]:
+            if runtime.context.agent == "CoderAgent":
+                clipboard_service = self.app.make(ClipboardService)
+                self.app.dispatch_task(clipboard_service.extract_from_blocks(state["parsed_blocks"]))
+
         if state["scratch_messages"]:
             last_message = get_last_message(state["scratch_messages"])
             clear_scratch = RemoveMessage(id=REMOVE_ALL_MESSAGES)
+
+            # we only need to copy from Ask and Coder agents.
+            if runtime.context.agent == "AskAgent":
+                clipboard_service = self.app.make(ClipboardService)
+                self.app.dispatch_task(clipboard_service.extract_from_message(last_message))
 
             # For SubprocessAgent, skip adding user_message since the command is already in context
             # TODO: this is gross we need a better way of doing this. maybe a hook that is part of the runtime?
