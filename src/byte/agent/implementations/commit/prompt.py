@@ -54,3 +54,7 @@ commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
         ("placeholder", "{errors}"),
     ]
 )
+
+commit_enforcement = [
+    "- When creating a Commit Plan, ALL provided files MUST be included in the plan. Do not omit any files from the staged changes.",
+]
