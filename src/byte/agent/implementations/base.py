@@ -95,16 +95,23 @@ class Agent(ABC, Bootable, Eventable, Configurable):
 
         Usage: Called internally by execute() to run the stream in a cancellable task
         """
-        processed_event = None
-        async for mode, chunk in graph.astream(
-            input=initial_state,
-            config=config,
-            stream_mode=["values", "updates", "messages", "custom", "tasks"],
-            context=await self.get_assistant_runnable(),
-        ):
-            processed_event = await self._handle_stream_event(mode, chunk)
+        try:
+            processed_event = None
+            async for mode, chunk in graph.astream(
+                input=initial_state,
+                config=config,
+                stream_mode=["values", "updates", "messages", "custom", "tasks"],
+                context=await self.get_assistant_runnable(),
+            ):
+                processed_event = await self._handle_stream_event(mode, chunk)
 
-        return processed_event
+            return processed_event
+        except asyncio.CancelledError:
+            print("Task cleaning up...")
+            print("Task cleaning up...")
+            print("Task cleaning up...")
+            print("Task cleaning up...")
+            return None
 
     async def execute(
         self,
@@ -142,13 +149,12 @@ class Agent(ABC, Bootable, Eventable, Configurable):
         stream_rendering_service.set_display_mode(display_mode)
 
         await stream_rendering_service.start_spinner()
-
-        # Create a task so we can cancel it properly
-        stream_task = asyncio.create_task(self._run_stream(graph, initial_state, config, stream_rendering_service))
-
         try:
+            # Create a task so we can cancel it properly
+            stream_task = asyncio.create_task(self._run_stream(graph, initial_state, config, stream_rendering_service))
+
             processed_event = await stream_task
-        except asyncio.CancelledError:
+        except KeyboardInterrupt:
             # Cancel the stream task properly
             self.app["log"].info("Agent execution cancelled by user")
             await stream_rendering_service.end_stream()
@@ -163,7 +169,13 @@ class Agent(ABC, Bootable, Eventable, Configurable):
 
             if not stream_task.done():
                 stream_task.cancel()
+                print(123)
+                print(123)
+                print(123)
             try:
+                print(456)
+                print(456)
+                print(456)
                 await stream_task  # Re-await to catch the cancelation error.
             except asyncio.CancelledError:
                 pass
