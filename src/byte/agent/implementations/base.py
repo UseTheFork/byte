@@ -7,6 +7,7 @@ from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 from byte import EventType, Payload
 from byte.agent import AssistantContextSchema, BaseState
 from byte.cli import (
+    RuneSpinner,
     StreamRenderingService,
 )
 from byte.memory import MemoryService
@@ -145,18 +146,29 @@ class Agent(ABC, Bootable, Eventable, Configurable):
         # Create a task so we can cancel it properly
         stream_task = asyncio.create_task(self._run_stream(graph, initial_state, config, stream_rendering_service))
 
-        # TODO: need to add a special spinner here showing the task is being cancelled
         try:
             processed_event = await stream_task
-        except KeyboardInterrupt:
+        except asyncio.CancelledError:
             # Cancel the stream task properly
             self.app["log"].info("Agent execution cancelled by user")
-            if not stream_task.done:
+            await stream_rendering_service.end_stream()
+
+            # Show cancellation spinner
+            from rich.live import Live
+
+            spinner = RuneSpinner(text="cancelling...", size=15, colors=["error", "warning"])
+            console = self.app["console"]
+            cancel_live = Live(spinner, console=console.console, transient=True, refresh_per_second=20)
+            cancel_live.start()
+
+            if not stream_task.done():
                 stream_task.cancel()
             try:
                 await stream_task  # Re-await to catch the cancelation error.
             except asyncio.CancelledError:
                 pass
+
+            cancel_live.stop()
             return None
         finally:
             await stream_rendering_service.end_stream()
