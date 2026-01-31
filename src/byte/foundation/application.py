@@ -389,9 +389,12 @@ class Application(Container):
 
     async def handle_command(self, input: list[str]) -> int:
         # dispatcher = self.make(Dispatcher)
-        kernel = self.make(Kernel, app=self)
-        status = await kernel.handle(input)
-        kernel.terminate()
+        try:
+            kernel = self.make(Kernel, app=self)
+            status = await kernel.handle(input)
+            kernel.terminate()
+        except KeyboardInterrupt:
+            pass
 
         return status
 

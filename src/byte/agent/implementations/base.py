@@ -7,7 +7,6 @@ from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 from byte import EventType, Payload
 from byte.agent import AssistantContextSchema, BaseState
 from byte.cli import (
-    RuneSpinner,
     StreamRenderingService,
 )
 from byte.memory import MemoryService
@@ -107,10 +106,6 @@ class Agent(ABC, Bootable, Eventable, Configurable):
 
             return processed_event
         except asyncio.CancelledError:
-            print("Task cleaning up...")
-            print("Task cleaning up...")
-            print("Task cleaning up...")
-            print("Task cleaning up...")
             return None
 
     async def execute(
@@ -155,33 +150,15 @@ class Agent(ABC, Bootable, Eventable, Configurable):
 
             processed_event = await stream_task
         except KeyboardInterrupt:
+            await asyncio.sleep(0.2)
             # Cancel the stream task properly
             self.app["log"].info("Agent execution cancelled by user")
-            await stream_rendering_service.end_stream()
-
-            # Show cancellation spinner
-            from rich.live import Live
-
-            spinner = RuneSpinner(text="cancelling...", size=15, colors=["error", "warning"])
-            console = self.app["console"]
-            cancel_live = Live(spinner, console=console.console, transient=True, refresh_per_second=20)
-            cancel_live.start()
 
             if not stream_task.done():
                 stream_task.cancel()
-                print(123)
-                print(123)
-                print(123)
-            try:
-                print(456)
-                print(456)
-                print(456)
-                await stream_task  # Re-await to catch the cancelation error.
-            except asyncio.CancelledError:
-                pass
+            await asyncio.gather(stream_task, return_exceptions=False)
 
-            cancel_live.stop()
-            return None
+            processed_event = None
         finally:
             await stream_rendering_service.end_stream()
 
