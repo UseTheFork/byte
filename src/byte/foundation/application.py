@@ -4,7 +4,7 @@ from typing import Callable, Optional, TypeVar
 
 from git import InvalidGitRepositoryError, Repo
 
-from byte import ServiceProvider
+from byte import ServiceProvider, TaskManager
 from byte.foundation import Console, Container, FoundationServiceProvider, Kernel
 from byte.foundation.bootstrap import RegisterProviders
 from byte.logging import LogService, LogServiceProvider
@@ -453,3 +453,11 @@ class Application(Container):
             provider.register_commands()
 
         return provider
+
+    def dispatch_task(self, coro):
+        """Dispatch a fire-and-forget background task with auto-generated name.
+
+        Usage: `app.dispatch_task(some_async_function())` -> starts task in background
+        """
+        task_manager = self.make(TaskManager)
+        return task_manager.dispatch_task(coro)

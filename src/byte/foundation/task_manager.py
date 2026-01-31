@@ -34,6 +34,13 @@ class TaskManager(Bootable):
             self._tasks[name].cancel()
             del self._tasks[name]
 
+    def dispatch_task(self, coro):
+        """Dispatch a fire-and-forget background task with auto-generated name"""
+        import uuid
+
+        name = f"task_{uuid.uuid4().hex[:8]}"
+        return self.start_task(name, coro)
+
     async def shutdown(self):
         """Stop all tasks"""
         for task in self._tasks.values():
