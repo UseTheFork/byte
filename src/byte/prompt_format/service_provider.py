@@ -1,7 +1,7 @@
 from typing import List, Type
 
-from byte import Command, Service, ServiceProvider
-from byte.prompt_format import CopyCommand, EditFormatService, ParserService, ShellCommandService
+from byte import Service, ServiceProvider
+from byte.prompt_format import EditFormatService, ParserService, ShellCommandService
 
 
 class PromptFormatProvider(ServiceProvider):
@@ -18,9 +18,4 @@ class PromptFormatProvider(ServiceProvider):
             EditFormatService,
             ParserService,
             ShellCommandService,
-        ]
-
-    def commands(self) -> List[Type[Command]]:
-        return [
-            CopyCommand,
         ]

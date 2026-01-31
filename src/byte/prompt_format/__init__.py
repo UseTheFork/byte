@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
-    from byte.prompt_format.command.copy_command import CopyCommand
     from byte.prompt_format.config import EditFormatConfig
     from byte.prompt_format.constants import EDIT_BLOCK_NAME
     from byte.prompt_format.exceptions import (
@@ -38,7 +37,6 @@ __all__ = (
     "BlockType",
     "Boundary",
     "BoundaryType",
-    "CopyCommand",
     "EditFormatConfig",
     "EditFormatError",
     "EditFormatPrompts",
@@ -63,7 +61,6 @@ _dynamic_imports = {
     "BlockType": "schemas",
     "Boundary": "utils.boundary",
     "BoundaryType": "schemas",
-    "CopyCommand": "command.copy_command",
     "EDIT_BLOCK_NAME": "constants",
     "EditFormatConfig": "config",
     "EditFormatError": "exceptions",
