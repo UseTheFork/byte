@@ -47,7 +47,7 @@ class AssistantNode(Node):
 
         # Bind Structred output if provided.
         if self.structured_output is not None:
-            model = model.with_structured_output(self.structured_output)  # ty:ignore[invalid-argument-type]
+            model = model.with_structured_output(self.structured_output)  # ty:ignore[invalid-argument-type, possibly-missing-attribute]
 
         # Bind tools if provided
         if context.tools is not None and len(context.tools) > 0:
@@ -84,6 +84,7 @@ class AssistantNode(Node):
 
         message_parts = []
 
+        # TODO: We need to check if the user_request is already wrapped in a boundry and if it is not wrap it again.
         # Wrap user request in its own boundary
         message_parts.extend(
             [
@@ -367,15 +368,23 @@ class AssistantNode(Node):
     async def _generate_agent_state(self, state: BaseState, config, runtime: Runtime[AssistantContextSchema]) -> tuple:
         agent_state = {**state}
 
+        prompt_settings = runtime.context.prompt_settings
+
         edit_format_system, edit_format_examples = await self._gather_edit_format()
         agent_state["edit_format_system"] = edit_format_system
         agent_state["examples"] = edit_format_examples
 
         agent_state["project_information_and_context"] = await self._gather_project_context()
-        agent_state["project_hierarchy"] = await self._gather_project_hierarchy()
+
+        if prompt_settings.has_project_hierarchy:
+            agent_state["project_hierarchy"] = await self._gather_project_hierarchy()
+
         agent_state["commit_guidelines"] = await self._gather_commit_guidelines()
+
         agent_state["file_context"] = await self._gather_file_context()
+
         agent_state["file_context_with_line_numbers"] = await self._gather_file_context(True)
+
         agent_state["constraints_context"] = await self._gather_constraints(state)
 
         agent_state["masked_messages"] = await self._gather_masked_messages(state)
