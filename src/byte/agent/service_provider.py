@@ -14,8 +14,6 @@ from byte.agent import (
     ConfigAgentCommand,
     ConventionAgent,
     ConventionCommand,
-    CopyAgent,
-    CopyNode,
     EndNode,
     ExtractNode,
     LintNode,
@@ -56,7 +54,6 @@ class AgentServiceProvider(ServiceProvider):
             CommitAgent,
             CommitPlanAgent,
             ConventionAgent,
-            CopyAgent,
             ResearchAgent,
             ShowAgent,
             SubprocessAgent,
@@ -78,7 +75,6 @@ class AgentServiceProvider(ServiceProvider):
         return [
             # keep-sorted start
             AssistantNode,
-            CopyNode,
             EndNode,
             ExtractNode,
             LintNode,

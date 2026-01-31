@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     from byte.agent.implementations.commit.agent import CommitAgent, CommitPlanAgent
     from byte.agent.implementations.conventions.agent import ConventionAgent
     from byte.agent.implementations.conventions.command import ConventionCommand
-    from byte.agent.implementations.copy.agent import CopyAgent
     from byte.agent.implementations.research.agent import ResearchAgent
     from byte.agent.implementations.research.command import ResearchCommand
     from byte.agent.implementations.show.agent import ShowAgent
@@ -23,7 +22,6 @@ if TYPE_CHECKING:
     from byte.agent.implementations.subprocess.agent import SubprocessAgent
     from byte.agent.nodes.assistant_node import AssistantNode
     from byte.agent.nodes.base_node import Node
-    from byte.agent.nodes.copy_node import CopyNode
     from byte.agent.nodes.dummy_node import DummyNode
     from byte.agent.nodes.end_node import EndNode
     from byte.agent.nodes.extract_node import ExtractNode, SessionContextFormatter
@@ -71,8 +69,6 @@ __all__ = (
     "ConstraintSchema",
     "ConventionAgent",
     "ConventionCommand",
-    "CopyAgent",
-    "CopyNode",
     "DummyNode",
     "DummyNodeReachedException",
     "EndNode",
@@ -125,8 +121,6 @@ _dynamic_imports = {
     "ConstraintSchema": "schemas",
     "ConventionAgent": "implementations.conventions.agent",
     "ConventionCommand": "implementations.conventions.command",
-    "CopyAgent": "implementations.copy.agent",
-    "CopyNode": "nodes.copy_node",
     "DummyNode": "nodes.dummy_node",
     "DummyNodeReachedException": "exceptions",
     "EndNode": "nodes.end_node",
