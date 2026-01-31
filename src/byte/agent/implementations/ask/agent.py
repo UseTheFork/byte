@@ -27,6 +27,9 @@ class AskAgent(Agent):
             }
         )
 
+    def get_enforcement(self):
+        return ask_enforcement
+
     async def build(self):
         """Build and compile the ask agent graph with memory and MCP tools.
 
@@ -58,7 +61,7 @@ class AskAgent(Agent):
         assistant_context_schema = AssistantContextSchema(
             mode="main",
             prompt=ask_prompt,
-            enforcement=ask_enforcement,
+            enforcement=self.get_enforcement(),
             main=main,
             weak=weak,
             agent=self.__class__.__name__,

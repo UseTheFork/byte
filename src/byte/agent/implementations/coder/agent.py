@@ -22,6 +22,14 @@ class CoderAgent(Agent):
     the actor system for clean separation of concerns.
     """
 
+    def get_enforcement(self):
+        edit_format_service = self.app.make(EditFormatService)
+        return edit_format_service.prompts.enforcement
+
+    def get_recovery_steps(self):
+        edit_format_service = self.app.make(EditFormatService)
+        return edit_format_service.prompts.recovery_steps
+
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""
 
@@ -40,14 +48,12 @@ class CoderAgent(Agent):
         main: BaseChatModel = llm_service.get_main_model()
         weak: BaseChatModel = llm_service.get_weak_model()
 
-        edit_format_service = self.app.make(EditFormatService)
-
         return AssistantContextSchema(
             mode="main",
             prompt=coder_prompt,
             main=main,
             weak=weak,
-            enforcement=edit_format_service.prompts.enforcement,
-            recovery_steps=edit_format_service.prompts.recovery_steps,
+            enforcement=self.get_enforcement(),
+            recovery_steps=self.get_recovery_steps(),
             agent=self.__class__.__name__,
         )

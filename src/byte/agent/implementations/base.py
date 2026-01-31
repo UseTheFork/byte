@@ -1,6 +1,6 @@
 import asyncio
 from abc import ABC, abstractmethod
-from typing import Any, Literal, Optional
+from typing import Any, List, Literal, Optional
 
 from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 
@@ -23,6 +23,9 @@ class Agent(ABC, Bootable, Eventable, Configurable):
     """
 
     _graph: Optional[CompiledStateGraph] = None
+
+    def get_enforcement(self) -> List[str]:
+        return []
 
     @abstractmethod
     async def build(self) -> CompiledStateGraph:
