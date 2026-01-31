@@ -45,6 +45,8 @@ jobs:
 
   prepare-docs:
     runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_API_KEY: fake-key
     # needs:
       # - build
       # - test-e2e
