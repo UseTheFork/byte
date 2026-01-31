@@ -1,0 +1,91 @@
+on:
+  push:
+    branches:
+      - staging
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+
+  # test-e2e:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Setup | Checkout Repository
+  #       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+  #       with:
+  #         ref: ${{ github.sha }}
+  #         fetch-depth: 1
+
+  #     - name: Setup | Download Distribution Artifacts
+  #       uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4.3.0
+  #       if: ${{ needs.build.outputs.new-release-detected == 'true' }}
+  #       id: artifact-download
+  #       with:
+  #         name: ${{ needs.build.outputs.distribution-artifacts }}
+  #         path: ./dist
+
+  #     - name: Setup | Install uv
+  #       uses: asdf-vm/actions/install@1902764435ca0dd2f3388eea723a4f92a4eb8302  # v4.0.2
+
+  #     - name: Setup | Install Python & Project dependencies
+  #       run: uv sync --extra test
+
+  #     - name: Setup | Install distribution artifact
+  #       if: ${{ steps.artifact-download.outcome == 'success' }}
+  #       run: |
+  #         uv pip uninstall my-package
+  #         uv pip install dist/python_semantic_release-*.whl
+
+  #     - name: Test | Run pytest
+  #       run: uv run pytest -vv tests/e2e
+
+  prepare-docs:
+    runs-on: ubuntu-latest
+    # needs:
+      # - build
+      # - test-e2e
+
+    concurrency:
+      group: ${{ github.workflow }}-pre-release-${{ github.ref_name }}
+      cancel-in-progress: true
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Setup | Checkout Repository on Release Branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Setup | Force release branch to be at workflow sha
+        run: git reset --hard ${{ github.sha }}
+
+      - name: Setup | Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name:  Docs | Update available commands
+        run: uv run python src/scripts/commands_to_md.py
+      
+      - name:  Docs | Update Setting options
+        run: uv run python src/scripts/settings_to_md.py
+
+      - name: Docs | Update Models
+        run: uv run python src/scripts/update_models.py
+
+      - name: Setup | Stage updated documentation
+        run: git add .
+      
+      - name: Setup | Commit changes
+        run: |
+          git commit -m "chore: update documentation and configuration"
+      
+      - name: Setup | Push changes to staging
+        run: git push origin ${{ github.ref_name }}
