@@ -20,6 +20,7 @@ class MetadataSchema:
     """
 
     iteration: int = Field(default=0)
+    erase_history: bool = Field(default=False)
 
 
 @dataclass
