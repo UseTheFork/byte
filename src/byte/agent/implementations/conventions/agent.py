@@ -6,6 +6,7 @@ from byte.agent import (
     AssistantNode,
     ExtractNode,
     MaxLinesValidator,
+    PromptSettingsSchema,
     ToolNode,
     ValidationNode,
 )
@@ -66,6 +67,9 @@ class ConventionAgent(Agent):
         return AssistantContextSchema(
             mode="main",
             prompt=conventions_prompt,
+            prompt_settings=PromptSettingsSchema(
+                has_project_hierarchy=True,
+            ),
             main=main,
             weak=weak,
             agent=self.__class__.__name__,
