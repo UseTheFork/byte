@@ -21,7 +21,7 @@ class CopyCommand(Command):
     def parser(self) -> ByteArgumentParser:
         parser = ByteArgumentParser(
             prog=self.name,
-            description="Copy code blocks from the last message to clipboard",
+            description="Copy code blocks from message history to clipboard",
         )
         return parser
 
