@@ -33,6 +33,9 @@ class AskAgent(Agent):
     def get_user_template(self):
         return ask_user_template
 
+    def get_prompt(self):
+        return ask_prompt
+
     async def build(self):
         """Build and compile the ask agent graph with memory and MCP tools.
 
@@ -63,7 +66,7 @@ class AskAgent(Agent):
 
         assistant_context_schema = AssistantContextSchema(
             mode="main",
-            prompt=ask_prompt,
+            prompt=self.get_prompt(),
             user_template=self.get_user_template(),
             enforcement=self.get_enforcement(),
             main=main,

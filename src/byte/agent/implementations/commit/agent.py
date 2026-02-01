@@ -26,6 +26,9 @@ class CommitAgent(Agent):
             self.app.make(CommitValidator),
         ]
 
+    def get_prompt(self):
+        return commit_prompt
+
     def get_user_template(self):
         return commit_user_template
 
@@ -58,7 +61,7 @@ class CommitAgent(Agent):
 
         return AssistantContextSchema(
             mode="weak",
-            prompt=commit_prompt,
+            prompt=self.get_prompt(),
             user_template=self.get_user_template(),
             enforcement=self.get_enforcement(),
             main=main,

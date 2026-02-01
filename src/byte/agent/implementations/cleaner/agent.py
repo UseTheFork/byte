@@ -1,10 +1,7 @@
 from langchain.chat_models import BaseChatModel
-from langchain.messages import HumanMessage
-from langgraph.types import Command
-from rich.markdown import Markdown
 
-from byte.agent import Agent, AssistantContextSchema, AssistantNode, BaseState, ExtractNode
-from byte.agent.implementations.cleaner.prompt import cleaner_prompt
+from byte.agent import Agent, AssistantContextSchema, AssistantNode, ExtractNode, UserConfirmValidator, ValidationNode
+from byte.agent.implementations.cleaner.prompt import cleaner_prompt, cleaner_user_template
 from byte.agent.utils.graph_builder import GraphBuilder
 from byte.llm import LLMService
 from byte.support.mixins import UserInteractive
@@ -18,41 +15,16 @@ class CleanerAgent(Agent, UserInteractive):
     Usage: `agent = await container.make(CleanerAgent); clean = await agent.execute(state)`
     """
 
-    async def _confirm_content(self, state: BaseState):
-        """Ask user to confirm the cleaned content or provide modifications.
+    def get_validators(self):
+        return [
+            self.app.make(UserConfirmValidator),
+        ]
 
-        Displays the extracted content and prompts user to either accept it
-        or provide feedback for modification.
-        Usage: `result = await agent._confirm_content(state)` -> updated state
-        """
+    def get_user_template(self):
+        return cleaner_user_template
 
-        console = self.app["console"]
-
-        cleaned_content = state.get("extracted_content", "")
-
-        markdown_rendered = Markdown(cleaned_content)
-
-        console.print_panel(
-            markdown_rendered,
-            title="Cleaned Content",
-        )
-
-        confirmed, user_input = await self.prompt_for_confirm_or_input(
-            "Use this cleaned content?",
-            "Please provide instructions for how to modify the content:",
-            default_confirm=True,
-        )
-
-        if confirmed:
-            # User accepted the content, proceed to end
-            return Command(goto="end_node")
-        else:
-            # User wants modifications, add their feedback to messages
-            error_message = HumanMessage(
-                content=f"Please revise the cleaned content based on this feedback: {user_input}"
-            )
-
-            return Command(goto="assistant_node", update={"history_messages": [error_message]})
+    def get_prompt(self):
+        return cleaner_prompt
 
     async def build(self):
         """Build and compile the cleaner agent graph.
@@ -63,10 +35,9 @@ class CleanerAgent(Agent, UserInteractive):
         """
 
         graph = GraphBuilder(self.app)
-        graph.add_node(AssistantNode, goto=ExtractNode)
+        graph.add_node(AssistantNode, goto=ValidationNode)
+        graph.add_node(ValidationNode, goto=ExtractNode, validators=self.get_validators())
         graph.add_node(ExtractNode)
-
-        # graph.add_node("confirm_content_node", self._confirm_content)
 
         # Compile graph without memory for stateless operation
         return graph.build().compile()
@@ -78,7 +49,8 @@ class CleanerAgent(Agent, UserInteractive):
 
         return AssistantContextSchema(
             mode="weak",
-            prompt=cleaner_prompt,
+            user_template=self.get_user_template(),
+            prompt=self.get_prompt(),
             main=main,
             weak=weak,
             agent=self.__class__.__name__,

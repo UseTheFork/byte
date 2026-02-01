@@ -36,6 +36,9 @@ class ResearchAgent(Agent):
     def get_user_template(self):
         return research_user_template
 
+    def get_prompt(self):
+        return research_prompt
+
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""
 
@@ -56,7 +59,7 @@ class ResearchAgent(Agent):
         return AssistantContextSchema(
             mode="main",
             user_template=self.get_user_template(),
-            prompt=research_prompt,
+            prompt=self.get_prompt(),
             main=main,
             weak=weak,
             agent=self.__class__.__name__,

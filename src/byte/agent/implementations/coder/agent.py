@@ -33,6 +33,9 @@ class CoderAgent(Agent):
     def get_user_template(self):
         return coder_user_template
 
+    def get_prompt(self):
+        return coder_prompt
+
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""
 
@@ -53,7 +56,7 @@ class CoderAgent(Agent):
 
         return AssistantContextSchema(
             mode="main",
-            prompt=coder_prompt,
+            prompt=self.get_prompt(),
             user_template=self.get_user_template(),
             main=main,
             weak=weak,

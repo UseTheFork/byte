@@ -32,6 +32,9 @@ class ConventionAgent(Agent):
     def get_user_template(self):
         return conventions_user_template
 
+    def get_prompt(self):
+        return conventions_prompt
+
     def get_tools(self):
         return [read_files]
 
@@ -70,7 +73,7 @@ class ConventionAgent(Agent):
         return AssistantContextSchema(
             mode="main",
             user_template=self.get_user_template(),
-            prompt=conventions_prompt,
+            prompt=self.get_prompt(),
             prompt_settings=PromptSettingsSchema(
                 has_project_hierarchy=True,
             ),
