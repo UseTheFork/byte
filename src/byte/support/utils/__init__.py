@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from byte.support.utils.extract_content_from_message import extract_content_from_message
     from byte.support.utils.extract_json_from_message import extract_json_from_message
     from byte.support.utils.get_language_from_filename import get_language_from_filename
+    from byte.support.utils.get_last_ai_message import get_last_ai_message
     from byte.support.utils.get_last_message import get_last_message
     from byte.support.utils.list_to_multiline_text import list_to_multiline_text
     from byte.support.utils.parse_partial_json import parse_partial_json
@@ -21,6 +22,7 @@ __all__ = (
     "extract_content_from_message",
     "extract_json_from_message",
     "get_language_from_filename",
+    "get_last_ai_message",
     "get_last_message",
     "list_to_multiline_text",
     "parse_partial_json",
@@ -35,6 +37,7 @@ _dynamic_imports = {
     "extract_content_from_message": "extract_content_from_message",
     "extract_json_from_message": "extract_json_from_message",
     "get_language_from_filename": "get_language_from_filename",
+    "get_last_ai_message": "get_last_ai_message",
     "get_last_message": "get_last_message",
     "list_to_multiline_text": "list_to_multiline_text",
     "parse_partial_json": "parse_partial_json",

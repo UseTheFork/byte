@@ -9,7 +9,7 @@ from langgraph.types import Command
 from byte import EventType, Payload
 from byte.agent import AssistantContextSchema, BaseState, Node
 from byte.clipboard import ClipboardService
-from byte.support.utils import get_last_message
+from byte.support.utils import get_last_ai_message
 
 
 class EndNode(Node):
@@ -50,7 +50,7 @@ class EndNode(Node):
         if state["scratch_messages"] and not metadata.erase_history:
             self.app["log"].info(state["scratch_messages"])
 
-            last_message = get_last_message(state["scratch_messages"])
+            last_message = get_last_ai_message(state["scratch_messages"])
 
             # we only need to copy from Ask and Coder agents.
             if runtime.context.agent == "AskAgent":

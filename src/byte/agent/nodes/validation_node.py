@@ -1,5 +1,6 @@
 from typing import Literal, Type
 
+from langchain_core.messages import HumanMessage
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
@@ -73,6 +74,6 @@ class ValidationNode(Node, UserInteractive):
                 title="Validation Failed",
             )
 
-            return Command(goto="assistant_node", update={"errors": error_message, "extracted_content": None})
+            return Command(goto="assistant_node", update={"scratch_messages": HumanMessage(error_message)})
 
         return Command(goto=str(self.goto))
