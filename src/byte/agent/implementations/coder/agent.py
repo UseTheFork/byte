@@ -30,6 +30,9 @@ class CoderAgent(Agent):
         edit_format_service = self.app.make(EditFormatService)
         return edit_format_service.prompts.recovery_steps
 
+    def get_user_template(self):
+        return coder_user_template
+
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""
 
@@ -51,7 +54,7 @@ class CoderAgent(Agent):
         return AssistantContextSchema(
             mode="main",
             prompt=coder_prompt,
-            user_template=coder_user_template,
+            user_template=self.get_user_template(),
             main=main,
             weak=weak,
             enforcement=self.get_enforcement(),

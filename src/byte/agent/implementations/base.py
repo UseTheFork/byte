@@ -28,6 +28,10 @@ class Agent(ABC, Bootable, Eventable, Configurable):
         return []
 
     @abstractmethod
+    def get_user_template(self) -> List[str]:
+        pass
+
+    @abstractmethod
     async def build(self) -> CompiledStateGraph:
         """Build and compile the agent graph with memory and tools.
 
