@@ -8,7 +8,7 @@ from byte.agent import (
     LintNode,
     ParseBlocksNode,
 )
-from byte.agent.implementations.coder.prompt import coder_prompt
+from byte.agent.implementations.coder.prompt import coder_prompt, coder_user_template
 from byte.agent.utils.graph_builder import GraphBuilder
 from byte.llm import LLMService
 from byte.prompt_format import EditFormatService
@@ -51,6 +51,7 @@ class CoderAgent(Agent):
         return AssistantContextSchema(
             mode="main",
             prompt=coder_prompt,
+            user_template=coder_user_template,
             main=main,
             weak=weak,
             enforcement=self.get_enforcement(),
