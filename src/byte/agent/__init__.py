@@ -48,6 +48,7 @@ if TYPE_CHECKING:
     from byte.agent.state import BaseState
     from byte.agent.validators.base import ValidationError, Validator
     from byte.agent.validators.max_lines import MaxLinesValidator
+    from byte.agent.validators.user_confirm_validator import UserConfirmValidator
 
 __all__ = (
     "Agent",
@@ -90,6 +91,7 @@ __all__ = (
     "SubprocessNode",
     "TokenUsageSchema",
     "ToolNode",
+    "UserConfirmValidator",
     "ValidationError",
     "ValidationNode",
     "Validator",
@@ -142,6 +144,7 @@ _dynamic_imports = {
     "SubprocessNode": "nodes.subprocess_node",
     "TokenUsageSchema": "schemas",
     "ToolNode": "nodes.tool_node",
+    "UserConfirmValidator": "validators.user_confirm_validator",
     "ValidationError": "validators.base",
     "ValidationNode": "nodes.validation_node",
     "Validator": "validators.base",
