@@ -1,9 +1,10 @@
 import re
+from typing import Optional
 
 from langchain_core.messages import BaseMessage
 
 from byte import Service
-from byte.clipboard.schemas import CodeBlock
+from byte.clipboard.schemas import BlockType, CodeBlock
 from byte.prompt_format import SearchReplaceBlock
 from byte.support.utils import extract_content_from_message, get_language_from_filename
 
@@ -42,7 +43,7 @@ class ClipboardService(Service):
         for language, code_content in matches:
             # Use "text" as default language if not specified
             lang = language if language else "text"
-            blocks.append(CodeBlock(language=lang, content=code_content.strip()))
+            blocks.append(CodeBlock(language=lang, content=code_content.strip(), type="message"))
 
         return blocks
 
@@ -58,7 +59,6 @@ class ClipboardService(Service):
         code_blocks = self._extract_code_blocks(content)
         self.code_blocks.extend(code_blocks)
 
-    # AI: update the doc string ai!
     async def extract_from_blocks(self, parsed_blocks: list[SearchReplaceBlock]):
         """Extract code blocks from parsed SearchReplaceBlock instances and store them.
 
@@ -76,12 +76,28 @@ class ClipboardService(Service):
             code_block = CodeBlock(
                 language=language,
                 content=block.replace_content,
+                type="block",
             )
             self.code_blocks.append(code_block)
 
-    def get_code_blocks(self) -> list[CodeBlock]:
-        """Get all stored code blocks from the session.
+    def get_code_blocks(self, block_type: Optional[BlockType] = None) -> list[CodeBlock]:
+        """Get all stored code blocks from the session, optionally filtered by type.
 
         Usage: `blocks = service.get_code_blocks()`
+        Usage: `blocks = service.get_code_blocks(block_type="message")`
         """
-        return self.code_blocks
+        if block_type is None:
+            return self.code_blocks
+
+        return [block for block in self.code_blocks if block.type == block_type]
+
+    def clear_code_blocks(self, block_type: Optional[BlockType] = None) -> None:
+        """Clear stored code blocks from the session, optionally filtered by type.
+
+        Usage: `service.clear_code_blocks()` -> clears all blocks
+        Usage: `service.clear_code_blocks(block_type="message")` -> clears only message blocks
+        """
+        if block_type is None:
+            self.code_blocks.clear()
+        else:
+            self.code_blocks = [block for block in self.code_blocks if block.type != block_type]
