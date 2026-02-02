@@ -971,10 +971,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#llm-gemini" class="md-nav__link">
+  <a href="#llm-main-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Llm &gt; Gemini
+        Llm &gt; Main Model
       
     </span>
   </a>
@@ -982,10 +982,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#llm-anthropic" class="md-nav__link">
+  <a href="#llm-weak-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Llm &gt; Anthropic
+        Llm &gt; Weak Model
       
     </span>
   </a>
@@ -993,10 +993,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#llm-openai" class="md-nav__link">
+  <a href="#llm-providers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Llm &gt; Openai
+        Llm &gt; Providers
       
     </span>
   </a>
@@ -1206,10 +1206,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#llm-gemini" class="md-nav__link">
+  <a href="#llm-main-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Llm &gt; Gemini
+        Llm &gt; Main Model
       
     </span>
   </a>
@@ -1217,10 +1217,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#llm-anthropic" class="md-nav__link">
+  <a href="#llm-weak-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Llm &gt; Anthropic
+        Llm &gt; Weak Model
       
     </span>
   </a>
@@ -1228,10 +1228,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#llm-openai" class="md-nav__link">
+  <a href="#llm-providers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Llm &gt; Openai
+        Llm &gt; Providers
       
     </span>
   </a>
@@ -1567,103 +1567,91 @@
 </thead>
 <tbody>
 <tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="llm-main-model"><a class="toclink" href="#llm-main-model">Llm &gt; Main Model</a></h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
 <td><code>model</code></td>
-<td><code>anthropic, gemini, openai</code></td>
+<td><code>string</code></td>
+<td>-</td>
+<td>The model identifier to use</td>
+</tr>
+<tr>
+<td><code>extra_params</code></td>
+<td><code>object</code></td>
+<td>-</td>
+<td>Additional parameters to pass to the model initialization</td>
+</tr>
+</tbody>
+</table>
+<h2 id="llm-weak-model"><a class="toclink" href="#llm-weak-model">Llm &gt; Weak Model</a></h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>model</code></td>
+<td><code>string</code></td>
+<td>-</td>
+<td>The model identifier to use</td>
+</tr>
+<tr>
+<td><code>extra_params</code></td>
+<td><code>object</code></td>
+<td>-</td>
+<td>Additional parameters to pass to the model initialization</td>
+</tr>
+</tbody>
+</table>
+<h2 id="llm-providers"><a class="toclink" href="#llm-providers">Llm &gt; Providers</a></h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gemini</code></td>
+<td><code>LLMProviderConfig</code></td>
+<td><code>{'enable': False, 'extra_params': {}}</code></td>
+<td></td>
+</tr>
+<tr>
 <td><code>anthropic</code></td>
-<td>The LLM provider to use for AI operations</td>
-</tr>
-</tbody>
-</table>
-<h2 id="llm-gemini"><a class="toclink" href="#llm-gemini">Llm &gt; Gemini</a></h2>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Type</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>enable</code></td>
-<td><code>boolean</code></td>
-<td><code>false</code></td>
-<td>Whether this LLM provider is enabled and available for use</td>
+<td><code>LLMProviderConfig</code></td>
+<td><code>{'enable': False, 'extra_params': {}}</code></td>
+<td></td>
 </tr>
 <tr>
-<td><code>api_key</code></td>
-<td><code>string</code></td>
-<td>-</td>
-<td>API key for authenticating with the LLM provider</td>
-</tr>
-<tr>
-<td><code>model_params</code></td>
-<td><code>object</code></td>
-<td>-</td>
-<td>Additional parameters to pass to the model initialization</td>
-</tr>
-</tbody>
-</table>
-<h2 id="llm-anthropic"><a class="toclink" href="#llm-anthropic">Llm &gt; Anthropic</a></h2>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Type</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>enable</code></td>
-<td><code>boolean</code></td>
-<td><code>false</code></td>
-<td>Whether this LLM provider is enabled and available for use</td>
-</tr>
-<tr>
-<td><code>api_key</code></td>
-<td><code>string</code></td>
-<td>-</td>
-<td>API key for authenticating with the LLM provider</td>
-</tr>
-<tr>
-<td><code>model_params</code></td>
-<td><code>object</code></td>
-<td>-</td>
-<td>Additional parameters to pass to the model initialization</td>
-</tr>
-</tbody>
-</table>
-<h2 id="llm-openai"><a class="toclink" href="#llm-openai">Llm &gt; Openai</a></h2>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Type</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>enable</code></td>
-<td><code>boolean</code></td>
-<td><code>false</code></td>
-<td>Whether this LLM provider is enabled and available for use</td>
-</tr>
-<tr>
-<td><code>api_key</code></td>
-<td><code>string</code></td>
-<td>-</td>
-<td>API key for authenticating with the LLM provider</td>
-</tr>
-<tr>
-<td><code>model_params</code></td>
-<td><code>object</code></td>
-<td>-</td>
-<td>Additional parameters to pass to the model initialization</td>
+<td><code>openai</code></td>
+<td><code>LLMProviderConfig</code></td>
+<td><code>{'enable': False, 'extra_params': {}}</code></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -1699,14 +1687,54 @@
 </tbody>
 </table>
 <h2 id="presets"><a class="toclink" href="#presets">Presets</a></h2>
-<p>| Field             | Type            | Default | Description                                                    |
-| ----------------- | --------------- | ------- | -------------------------------------------------------------- | ------------------------------------- |
-| <code>id</code>              | <code>string</code>        | -       | Unique identifier for the preset, used in /preset <id> command |
-| <code>read_only_files</code> | <code>array[string]</code> | -       | Files to add to read-only context                              |
-| <code>editable_files</code>  | <code>array[string]</code> | -       | Files to add to editable context                               |
-| <code>conventions</code>     | <code>array[string]</code> | -       | Convention files to load                                       |
-| <code>prompt</code>          | <code>string         | null</code>   | -                                                              | Preset prompt to load into chat input |
-| <code>load_on_boot</code>    | <code>boolean</code>       | <code>false</code> | Automatically load this preset when byte starts                |</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>string</code></td>
+<td>-</td>
+<td>Unique identifier for the preset, used in /preset <id> command</td>
+</tr>
+<tr>
+<td><code>read_only_files</code></td>
+<td><code>array[string]</code></td>
+<td>-</td>
+<td>Files to add to read-only context</td>
+</tr>
+<tr>
+<td><code>editable_files</code></td>
+<td><code>array[string]</code></td>
+<td>-</td>
+<td>Files to add to editable context</td>
+</tr>
+<tr>
+<td><code>conventions</code></td>
+<td><code>array[string]</code></td>
+<td>-</td>
+<td>Convention files to load</td>
+</tr>
+<tr>
+<td><code>prompt</code></td>
+<td><code>string | null</code></td>
+<td>-</td>
+<td>Preset prompt to load into chat input</td>
+</tr>
+<tr>
+<td><code>load_on_boot</code></td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>Automatically load this preset when byte starts</td>
+</tr>
+</tbody>
+</table>
 <h2 id="web"><a class="toclink" href="#web">Web</a></h2>
 <table>
 <thead>
