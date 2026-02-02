@@ -17,8 +17,6 @@ if TYPE_CHECKING:
     from byte.agent.implementations.conventions.command import ConventionCommand
     from byte.agent.implementations.research.agent import ResearchAgent
     from byte.agent.implementations.research.command import ResearchCommand
-    from byte.agent.implementations.show.agent import ShowAgent
-    from byte.agent.implementations.show.command import ShowCommand
     from byte.agent.implementations.subprocess.agent import SubprocessAgent
     from byte.agent.nodes.assistant_node import AssistantNode
     from byte.agent.nodes.base_node import Node
@@ -48,6 +46,7 @@ if TYPE_CHECKING:
     from byte.agent.state import BaseState
     from byte.agent.validators.base import ValidationError, Validator
     from byte.agent.validators.max_lines import MaxLinesValidator
+    from byte.agent.validators.user_confirm_validator import UserConfirmValidator
 
 __all__ = (
     "Agent",
@@ -82,14 +81,13 @@ __all__ = (
     "ResearchAgent",
     "ResearchCommand",
     "SessionContextFormatter",
-    "ShowAgent",
-    "ShowCommand",
     "ShowNode",
     "StartNode",
     "SubprocessAgent",
     "SubprocessNode",
     "TokenUsageSchema",
     "ToolNode",
+    "UserConfirmValidator",
     "ValidationError",
     "ValidationNode",
     "Validator",
@@ -134,14 +132,13 @@ _dynamic_imports = {
     "ResearchAgent": "implementations.research.agent",
     "ResearchCommand": "implementations.research.command",
     "SessionContextFormatter": "nodes.extract_node",
-    "ShowAgent": "implementations.show.agent",
-    "ShowCommand": "implementations.show.command",
     "ShowNode": "nodes.show_node",
     "StartNode": "nodes.start_node",
     "SubprocessAgent": "implementations.subprocess.agent",
     "SubprocessNode": "nodes.subprocess_node",
     "TokenUsageSchema": "schemas",
     "ToolNode": "nodes.tool_node",
+    "UserConfirmValidator": "validators.user_confirm_validator",
     "ValidationError": "validators.base",
     "ValidationNode": "nodes.validation_node",
     "Validator": "validators.base",

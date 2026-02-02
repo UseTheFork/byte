@@ -10,7 +10,7 @@ from byte.agent import (
     ToolNode,
     ValidationNode,
 )
-from byte.agent.implementations.conventions.prompt import conventions_prompt
+from byte.agent.implementations.conventions.prompt import conventions_prompt, conventions_user_template
 from byte.agent.utils.graph_builder import GraphBuilder
 from byte.files.tools.read_files import read_files
 from byte.llm import LLMService
@@ -28,6 +28,12 @@ class ConventionAgent(Agent):
     # Convention agent dosent use or update the main memory.
     async def get_checkpointer(self):
         return None
+
+    def get_user_template(self):
+        return conventions_user_template
+
+    def get_prompt(self):
+        return conventions_prompt
 
     def get_tools(self):
         return [read_files]
@@ -66,7 +72,8 @@ class ConventionAgent(Agent):
 
         return AssistantContextSchema(
             mode="main",
-            prompt=conventions_prompt,
+            user_template=self.get_user_template(),
+            prompt=self.get_prompt(),
             prompt_settings=PromptSettingsSchema(
                 has_project_hierarchy=True,
             ),

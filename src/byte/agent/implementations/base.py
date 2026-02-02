@@ -28,6 +28,26 @@ class Agent(ABC, Bootable, Eventable, Configurable):
         return []
 
     @abstractmethod
+    def get_user_template(self) -> List[str]:
+        """Get the user message template for this agent.
+
+        Must be implemented by subclasses to return their specific user message
+        template, which defines how user requests are formatted in prompts.
+        Usage: Override in subclass to provide domain-specific user message formatting
+        """
+        pass
+
+    @abstractmethod
+    def get_prompt(self):
+        """Get the ChatPromptTemplate for this agent.
+
+        Must be implemented by subclasses to return their specific ChatPromptTemplate,
+        which defines the overall prompt structure including system and user messages.
+        Usage: Override in subclass to provide domain-specific prompt templates
+        """
+        pass
+
+    @abstractmethod
     async def build(self) -> CompiledStateGraph:
         """Build and compile the agent graph with memory and tools.
 

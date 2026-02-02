@@ -10,8 +10,8 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.shortcuts import PromptSession
 from rich.console import Group
 
-from byte.agent import AgentService, SubprocessAgent
-from byte.cli import CommandRegistry
+from byte.agent import AgentService
+from byte.cli import CommandRegistry, SubprocessService
 from byte.foundation import EventType, Payload
 from byte.support import Service
 
@@ -124,7 +124,7 @@ class PromptToolkitService(Service):
         else:
             console.print_error(f"Unknown command: /{command_name}")
 
-    async def _handle_subcommand_input(self, user_input: str):
+    async def _handle_subcommand_input(self, user_input: str) -> str | None:
         """Parse and execute subcommands starting with !.
 
         Args:
@@ -135,8 +135,13 @@ class PromptToolkitService(Service):
 
         user_input = user_input[1:]
 
-        subprocess_agent = self.app.make(SubprocessAgent)
-        await subprocess_agent.execute(user_input, display_mode="silent")
+        subprocess_service = self.app.make(SubprocessService)
+        subprocess_result = await subprocess_service.run_and_confirm(user_input)
+
+        if subprocess_result:
+            return subprocess_result
+
+        return None
 
     async def execute(self):
         """Display prompt, capture user input, and route to appropriate handler.
@@ -216,7 +221,11 @@ class PromptToolkitService(Service):
             if user_input.startswith("/"):
                 await self._handle_command_input(user_input)
             elif user_input.startswith("!"):
-                await self._handle_subcommand_input(user_input)
+                # TODO: How do we send this to a specific agent
+                user_input = await self._handle_subcommand_input(user_input)
+
+                if user_input:
+                    await agent_service.execute_agent(user_input, active_agent)
             else:
                 # Only execute agent if user provided non-empty input
                 if user_input.strip():

@@ -6,6 +6,7 @@ from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
     from byte.clipboard.command.copy_command import CopyCommand
+    from byte.clipboard.command.copy_drop_command import CopyDropCommand
     from byte.clipboard.service.clipboard_service import ClipboardService
     from byte.clipboard.service_provider import ClipboardServiceProvider
 
@@ -13,6 +14,7 @@ __all__ = (
     "ClipboardService",
     "ClipboardServiceProvider",
     "CopyCommand",
+    "CopyDropCommand",
 )
 
 _dynamic_imports = {
@@ -20,6 +22,7 @@ _dynamic_imports = {
     "ClipboardService": "service.clipboard_service",
     "ClipboardServiceProvider": "service_provider",
     "CopyCommand": "command.copy_command",
+    "CopyDropCommand": "command.copy_drop_command",
     # keep-sorted end
 }
 

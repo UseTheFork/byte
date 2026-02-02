@@ -8,7 +8,7 @@ from byte.agent import (
     LintNode,
     ParseBlocksNode,
 )
-from byte.agent.implementations.coder.prompt import coder_prompt
+from byte.agent.implementations.coder.prompt import coder_prompt, coder_user_template
 from byte.agent.utils.graph_builder import GraphBuilder
 from byte.llm import LLMService
 from byte.prompt_format import EditFormatService
@@ -30,6 +30,12 @@ class CoderAgent(Agent):
         edit_format_service = self.app.make(EditFormatService)
         return edit_format_service.prompts.recovery_steps
 
+    def get_user_template(self):
+        return coder_user_template
+
+    def get_prompt(self):
+        return coder_prompt
+
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""
 
@@ -50,7 +56,8 @@ class CoderAgent(Agent):
 
         return AssistantContextSchema(
             mode="main",
-            prompt=coder_prompt,
+            prompt=self.get_prompt(),
+            user_template=self.get_user_template(),
             main=main,
             weak=weak,
             enforcement=self.get_enforcement(),

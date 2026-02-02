@@ -1,7 +1,7 @@
 from typing import List, Type
 
 from byte import Command, Service, ServiceProvider
-from byte.clipboard import ClipboardService, CopyCommand
+from byte.clipboard import ClipboardService, CopyCommand, CopyDropCommand
 
 
 class ClipboardServiceProvider(ServiceProvider):
@@ -14,5 +14,8 @@ class ClipboardServiceProvider(ServiceProvider):
 
     def commands(self) -> List[Type[Command]]:
         return [
+            # keep-sorted start
             CopyCommand,
+            CopyDropCommand,
+            # keep-sorted end
         ]

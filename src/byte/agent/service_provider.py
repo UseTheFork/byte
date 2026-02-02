@@ -21,9 +21,6 @@ from byte.agent import (
     ParseBlocksNode,
     ResearchAgent,
     ResearchCommand,
-    ShowAgent,
-    ShowCommand,
-    ShowNode,
     StartNode,
     SubprocessAgent,
     SubprocessNode,
@@ -55,7 +52,6 @@ class AgentServiceProvider(ServiceProvider):
             CommitPlanAgent,
             ConventionAgent,
             ResearchAgent,
-            ShowAgent,
             SubprocessAgent,
             # keep-sorted end
         ]
@@ -67,7 +63,6 @@ class AgentServiceProvider(ServiceProvider):
             ConfigAgentCommand,
             ConventionCommand,
             ResearchCommand,
-            ShowCommand,
             # keep-sorted end
         ]
 
@@ -79,7 +74,6 @@ class AgentServiceProvider(ServiceProvider):
             ExtractNode,
             LintNode,
             ParseBlocksNode,
-            ShowNode,
             StartNode,
             SubprocessNode,
             ToolNode,

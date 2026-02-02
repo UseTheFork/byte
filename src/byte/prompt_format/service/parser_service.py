@@ -27,6 +27,7 @@ from byte.prompt_format.service.parser_service_prompt import (
     practice_messages,
 )
 from byte.support.mixins import UserInteractive
+from byte.support.utils import list_to_multiline_text
 
 
 class ParserService(Service, UserInteractive, ABC):
@@ -441,7 +442,7 @@ class ParserService(Service, UserInteractive, ABC):
 
     async def replace_blocks_in_historic_messages_hook(
         self, messages: list[BaseMessage], mask_message_count: int | None = None
-    ) -> list[BaseMessage]:
+    ) -> str:
         # Get mask_message_count from parameter or fall back to config
         mask_count = (
             mask_message_count
@@ -458,7 +459,13 @@ class ParserService(Service, UserInteractive, ABC):
         preserve_from_ai_index = total_ai_messages - ai_messages_to_preserve
 
         # Create masked_messages list identical to messages except for processed AIMessages
-        masked_messages = []
+        masked_messages = [
+            Boundary.open(BoundaryType.CONVERSATION_HISTORY),
+            Boundary.open(BoundaryType.HEADING),
+            "Below is the conversation history between you and the user",
+            Boundary.open(BoundaryType.HEADING),
+            Boundary.notice("Edit blocks removed from older messages for brevity."),
+        ]
         ai_message_counter = 0
 
         for message in messages:
@@ -469,15 +476,41 @@ class ParserService(Service, UserInteractive, ABC):
                 if not isinstance(message.content, list) and not is_within_mask_range:
                     # Create a copy of the message with blocks removed
                     masked_content = await self.remove_blocks_from_content(str(message.content))
-                    masked_message = AIMessage(content=masked_content)
-                    masked_messages.append(masked_message)
+                    masked_messages.append(
+                        list_to_multiline_text(
+                            [
+                                Boundary.open(BoundaryType.AGENT_MESSAGE),
+                                masked_content,
+                                Boundary.close(BoundaryType.AGENT_MESSAGE),
+                            ]
+                        )
+                    )
                 else:
                     # Keep original message unchanged
-                    masked_messages.append(message)
-
+                    masked_messages.append(
+                        list_to_multiline_text(
+                            [
+                                Boundary.open(BoundaryType.AGENT_MESSAGE),
+                                str(message.content),
+                                Boundary.close(BoundaryType.AGENT_MESSAGE),
+                            ]
+                        )
+                    )
                 ai_message_counter += 1
             else:
                 # Keep non-AIMessages unchanged
-                masked_messages.append(message)
+                masked_messages.append(
+                    list_to_multiline_text(
+                        [
+                            Boundary.open(BoundaryType.USER_MESSAGE),
+                            str(message.content),
+                            Boundary.close(BoundaryType.USER_MESSAGE),
+                        ]
+                    )
+                )
 
-        return masked_messages
+        masked_messages.append(
+            Boundary.close(BoundaryType.CONVERSATION_HISTORY),
+        )
+
+        return list_to_multiline_text(masked_messages)

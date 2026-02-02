@@ -1,7 +1,7 @@
 from langchain_core.language_models.chat_models import BaseChatModel
 
 from byte.agent import Agent, AgentConfigBoolSchema, AssistantContextSchema, AssistantNode, ToolNode
-from byte.agent.implementations.ask.prompt import ask_enforcement, ask_prompt
+from byte.agent.implementations.ask.prompt import ask_enforcement, ask_prompt, ask_user_template
 from byte.agent.utils.graph_builder import GraphBuilder
 from byte.llm import LLMService
 
@@ -29,6 +29,12 @@ class AskAgent(Agent):
 
     def get_enforcement(self):
         return ask_enforcement
+
+    def get_user_template(self):
+        return ask_user_template
+
+    def get_prompt(self):
+        return ask_prompt
 
     async def build(self):
         """Build and compile the ask agent graph with memory and MCP tools.
@@ -60,7 +66,8 @@ class AskAgent(Agent):
 
         assistant_context_schema = AssistantContextSchema(
             mode="main",
-            prompt=ask_prompt,
+            prompt=self.get_prompt(),
+            user_template=self.get_user_template(),
             enforcement=self.get_enforcement(),
             main=main,
             weak=weak,

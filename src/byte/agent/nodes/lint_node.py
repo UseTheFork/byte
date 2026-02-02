@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Literal
 
+from langchain_core.messages import HumanMessage
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
@@ -30,6 +31,6 @@ class LintNode(Node):
         do_fix, failed_commands = await lint_service.display_results_summary(lint_commands)
         if do_fix:
             joined_lint_errors = lint_service.format_lint_errors(failed_commands)
-            return Command(goto="assistant_node", update={"errors": joined_lint_errors})
+            return Command(goto="assistant_node", update={"scratch_messages": HumanMessage(joined_lint_errors)})
 
         return Command(goto="end_node")

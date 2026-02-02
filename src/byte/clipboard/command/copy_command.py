@@ -1,4 +1,5 @@
 from argparse import Namespace
+from typing import List
 
 from byte import Command
 from byte.cli import ByteArgumentParser, CodeBlockNavigator
@@ -18,10 +19,21 @@ class CopyCommand(Command):
         return "copy"
 
     @property
+    def category(self) -> str:
+        return "Clipboard"
+
+    @property
     def parser(self) -> ByteArgumentParser:
         parser = ByteArgumentParser(
             prog=self.name,
-            description="Copy code blocks from the last message to clipboard",
+            description="Copy code blocks from message history to clipboard",
+        )
+        parser.add_argument(
+            "--type",
+            type=str,
+            choices=["message", "block"],
+            default=None,
+            help="Filter code blocks by type (message or block)",
         )
         return parser
 
@@ -32,8 +44,9 @@ class CopyCommand(Command):
         clipboard_service = self.app.make(ClipboardService)
         console = self.app["console"]
 
-        # Get all stored code blocks
-        code_blocks = clipboard_service.get_code_blocks()
+        # Get all stored code blocks, optionally filtered by type
+        block_type = args.type if args.type else None
+        code_blocks = clipboard_service.get_code_blocks(block_type=block_type)
 
         if not code_blocks:
             console.print_warning("No code blocks found in the session.")
@@ -47,3 +60,9 @@ class CopyCommand(Command):
             # Copy to clipboard
             pyperclip.copy(selected_block.content)
             console.print_success(f"Copied {selected_block.language} code block to clipboard!")
+
+    async def get_completions(self, text: str) -> List[str]:
+        """Provide completions for the --type argument."""
+        if "--type" in text or text.startswith("-"):
+            return ["--type message", "--type block"]
+        return []

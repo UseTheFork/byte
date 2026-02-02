@@ -2,10 +2,11 @@ import re
 from pathlib import Path
 from typing import List, Optional
 
-from byte import Payload, Service, TaskManager
+from byte import Payload, Service
 from byte.agent import AskAgent, CoderAgent
 from byte.cli import PromptToolkitService
 from byte.files import FileMode, FileService
+from byte.prompt_format.schemas import AICommentType
 from byte.support.utils import list_to_multiline_text
 
 
@@ -27,7 +28,6 @@ class AICommentWatcherService(Service):
         if not self.app["config"].files.watch.enable:
             return
 
-        self.task_manager = self.app.make(TaskManager)
         self.file_service = self.app.make(FileService)
 
         # Subscribe to file change events from FileWatcherService
@@ -140,8 +140,7 @@ class AICommentWatcherService(Service):
 
     async def _auto_add_file_to_context(self, file_path: Path, mode: FileMode = FileMode.EDITABLE) -> bool:
         """Automatically add file to context when AI comment is detected."""
-        file_service = self.app.make(FileService)
-        return await file_service.add_file(file_path, mode)
+        return await self.file_service.add_file(file_path, mode)
 
     async def _handle_file_modified(self, file_path: Path) -> bool:
         """Handle file modification by scanning for AI comments."""
@@ -183,8 +182,7 @@ class AICommentWatcherService(Service):
 
         Returns a dict with prompt and agent info for the first AI comment found, or None if no triggers found.
         """
-        file_service = self.app.make(FileService)
-        context_files = file_service.list_files()  # Get all files in context
+        context_files = self.file_service.list_files()  # Get all files in context
         gathered_comments = []
         action_type = None
         ai_instruction = []
@@ -233,13 +231,11 @@ class AICommentWatcherService(Service):
             return {
                 "prompt": list_to_multiline_text(
                     [
-                        "# Task",
-                        'I\'ve written task instructions in code comments marked with "AI:".',
+                        f'I\'ve written task instructions in code comments marked with "{AICommentType.AI}:" or "{AICommentType.AI}!" and extracted them below.',
                         "",
                         "# Extracted instructions:",
                         f"{ai_instruction}",
                         "",
-                        '> **IMPORTANT**: Execute these instructions following the project\'s coding standards and conventions. If multiple tasks are present, complete them in the order they appear. After successfully implementing all changes, remove the "AI:" comment markers from the code.',
                     ]
                 ),
                 "agent_type": CoderAgent,
@@ -249,17 +245,10 @@ class AICommentWatcherService(Service):
             return {
                 "prompt": list_to_multiline_text(
                     [
-                        'I\'ve written questions in code comments marked with "AI:".',
+                        f'I\'ve written questions in code comments marked with "{AICommentType.AI}:" or "{AICommentType.AI}?" and extracted them below.',
                         "",
                         "Extracted questions:",
                         f"{ai_instruction}",
-                        "",
-                        "Provide clear, well-structured answers based on the code context. Include:",
-                        "- Direct answer to each question",
-                        "- Relevant code examples or references when applicable",
-                        "- Recommendations or best practices if appropriate",
-                        "",
-                        "Provide a clear, concise, helpful answer based on the code context.",
                     ]
                 ),
                 "agent_type": AskAgent,
@@ -284,10 +273,31 @@ class AICommentWatcherService(Service):
     async def add_reinforcement_hook(self, payload: Payload) -> Payload:
         prompt_toolkit_service = self.app.make(PromptToolkitService)
         if prompt_toolkit_service.is_interrupted():
+            active_agent = payload.get("agent", None)
             reinforcement_list = payload.get("reinforcement", [])
-            reinforcement_list.extend(
-                ['- After successfully implementing all changes, remove the "AI:" comment markers from the code.']
-            )
+
+            if active_agent == "AskAgent":
+                reinforcement_list.extend(
+                    [
+                        "",
+                        "- Provide clear, well-structured answers based on the code context. Include:",
+                        "  - Direct answer to each question",
+                        "  - Relevant code examples or references when applicable",
+                        "  - Recommendations or best practices if appropriate",
+                    ]
+                )
+
+            if active_agent == "CoderAgent":
+                reinforcement_list.extend(
+                    [
+                        "",
+                        '- After successfully implementing all changes, remove the "AI:" comment markers from the code.',
+                        "> **IMPORTANT**: Execute the users request following the project's coding standards and conventions.",
+                        "If multiple tasks are present, complete them in the order they appear.",
+                        'After successfully implementing all changes, remove the "AI:" comment markers from the code.',
+                    ]
+                )
+
             payload.set("reinforcement", reinforcement_list)
 
         return payload
