@@ -46,6 +46,8 @@ class BoundaryType(str, Enum):
 
     SYSTEM_CONTEXT = "system_context"
 
+    NOTE = "note"
+
     HEADING = "heading"
 
     CONVERSATION_HISTORY = "conversation_history"
