@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.agent.command.config_agent_command import ConfigAgentCommand
     from byte.agent.exceptions import DummyNodeReachedException
     from byte.agent.implementations.ask.agent import AskAgent
     from byte.agent.implementations.ask.command import AskCommand
@@ -14,15 +15,11 @@ if TYPE_CHECKING:
     from byte.agent.implementations.commit.agent import CommitAgent, CommitPlanAgent
     from byte.agent.implementations.conventions.agent import ConventionAgent
     from byte.agent.implementations.conventions.command import ConventionCommand
-    from byte.agent.implementations.copy.agent import CopyAgent
     from byte.agent.implementations.research.agent import ResearchAgent
     from byte.agent.implementations.research.command import ResearchCommand
-    from byte.agent.implementations.show.agent import ShowAgent
-    from byte.agent.implementations.show.command import ShowCommand
     from byte.agent.implementations.subprocess.agent import SubprocessAgent
     from byte.agent.nodes.assistant_node import AssistantNode
     from byte.agent.nodes.base_node import Node
-    from byte.agent.nodes.copy_node import CopyNode
     from byte.agent.nodes.dummy_node import DummyNode
     from byte.agent.nodes.end_node import EndNode
     from byte.agent.nodes.extract_node import ExtractNode, SessionContextFormatter
@@ -34,17 +31,30 @@ if TYPE_CHECKING:
     from byte.agent.nodes.tool_node import ToolNode
     from byte.agent.nodes.validation_node import ValidationNode
     from byte.agent.reducers import add_constraints, replace_list, replace_str, update_metadata
-    from byte.agent.schemas import AssistantContextSchema, ConstraintSchema, MetadataSchema, TokenUsageSchema
+    from byte.agent.schemas import (
+        AgentConfigBoolSchema,
+        AgentConfigStringSchema,
+        AssistantContextSchema,
+        ConstraintSchema,
+        MetadataSchema,
+        PromptSettingsSchema,
+        TokenUsageSchema,
+    )
     from byte.agent.service.agent_service import AgentService
+    from byte.agent.service.agent_settings_service import AgentSettingsService
     from byte.agent.service_provider import AgentServiceProvider
     from byte.agent.state import BaseState
     from byte.agent.validators.base import ValidationError, Validator
     from byte.agent.validators.max_lines import MaxLinesValidator
+    from byte.agent.validators.user_confirm_validator import UserConfirmValidator
 
 __all__ = (
     "Agent",
+    "AgentConfigBoolSchema",
+    "AgentConfigStringSchema",
     "AgentService",
     "AgentServiceProvider",
+    "AgentSettingsService",
     "AskAgent",
     "AskCommand",
     "AssistantContextSchema",
@@ -54,11 +64,10 @@ __all__ = (
     "CoderAgent",
     "CommitAgent",
     "CommitPlanAgent",
+    "ConfigAgentCommand",
     "ConstraintSchema",
     "ConventionAgent",
     "ConventionCommand",
-    "CopyAgent",
-    "CopyNode",
     "DummyNode",
     "DummyNodeReachedException",
     "EndNode",
@@ -68,17 +77,17 @@ __all__ = (
     "MetadataSchema",
     "Node",
     "ParseBlocksNode",
+    "PromptSettingsSchema",
     "ResearchAgent",
     "ResearchCommand",
     "SessionContextFormatter",
-    "ShowAgent",
-    "ShowCommand",
     "ShowNode",
     "StartNode",
     "SubprocessAgent",
     "SubprocessNode",
     "TokenUsageSchema",
     "ToolNode",
+    "UserConfirmValidator",
     "ValidationError",
     "ValidationNode",
     "Validator",
@@ -92,8 +101,11 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "Agent": "implementations.base",
+    "AgentConfigBoolSchema": "schemas",
+    "AgentConfigStringSchema": "schemas",
     "AgentService": "service.agent_service",
     "AgentServiceProvider": "service_provider",
+    "AgentSettingsService": "service.agent_settings_service",
     "AskAgent": "implementations.ask.agent",
     "AskCommand": "implementations.ask.command",
     "AssistantContextSchema": "schemas",
@@ -103,11 +115,10 @@ _dynamic_imports = {
     "CoderAgent": "implementations.coder.agent",
     "CommitAgent": "implementations.commit.agent",
     "CommitPlanAgent": "implementations.commit.agent",
+    "ConfigAgentCommand": "command.config_agent_command",
     "ConstraintSchema": "schemas",
     "ConventionAgent": "implementations.conventions.agent",
     "ConventionCommand": "implementations.conventions.command",
-    "CopyAgent": "implementations.copy.agent",
-    "CopyNode": "nodes.copy_node",
     "DummyNode": "nodes.dummy_node",
     "DummyNodeReachedException": "exceptions",
     "EndNode": "nodes.end_node",
@@ -117,17 +128,17 @@ _dynamic_imports = {
     "MetadataSchema": "schemas",
     "Node": "nodes.base_node",
     "ParseBlocksNode": "nodes.parse_blocks_node",
+    "PromptSettingsSchema": "schemas",
     "ResearchAgent": "implementations.research.agent",
     "ResearchCommand": "implementations.research.command",
     "SessionContextFormatter": "nodes.extract_node",
-    "ShowAgent": "implementations.show.agent",
-    "ShowCommand": "implementations.show.command",
     "ShowNode": "nodes.show_node",
     "StartNode": "nodes.start_node",
     "SubprocessAgent": "implementations.subprocess.agent",
     "SubprocessNode": "nodes.subprocess_node",
     "TokenUsageSchema": "schemas",
     "ToolNode": "nodes.tool_node",
+    "UserConfirmValidator": "validators.user_confirm_validator",
     "ValidationError": "validators.base",
     "ValidationNode": "nodes.validation_node",
     "Validator": "validators.base",

@@ -1,7 +1,7 @@
 import argparse
 from argparse import Namespace
 
-from byte.agent import AgentService, AskAgent
+from byte.agent import AskAgent
 from byte.cli import ByteArgumentParser, Command
 
 
@@ -37,5 +37,5 @@ class AskCommand(Command):
         the complete interaction flow including AI response generation and display.
         """
 
-        agent_service = self.app.make(AgentService)
-        await agent_service.execute_agent(raw_args, AskAgent)
+        agent_instance = self.app.make(AskAgent)
+        await agent_instance.execute(raw_args)

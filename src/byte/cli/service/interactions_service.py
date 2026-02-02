@@ -84,12 +84,6 @@ class InteractionService(Service):
 
             result = console.select(*choices, title=message, start_index=start_index)
 
-            # If user pressed escape, return default or first choice
-            if result is None:
-                if default and 1 <= default <= len(choices):
-                    return choices[default - 1]
-                return choices[0] if choices else ""
-
             return result
 
         except (EOFError, KeyboardInterrupt):

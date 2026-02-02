@@ -1,7 +1,7 @@
 from typing import Literal, Type
 
 from langchain_core.callbacks import get_usage_metadata_callback
-from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_core.messages import HumanMessage
 from langchain_core.runnables import Runnable
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 from byte import EventType, Payload
 from byte.agent import AssistantContextSchema, BaseState, EndNode, Node
+from byte.agent.utils.prompt_assembler import PromptAssembler
 from byte.development import RecordResponseService
 from byte.files import FileService
 from byte.git import CommitService
@@ -47,7 +48,7 @@ class AssistantNode(Node):
 
         # Bind Structred output if provided.
         if self.structured_output is not None:
-            model = model.with_structured_output(self.structured_output)  # ty:ignore[invalid-argument-type]
+            model = model.with_structured_output(self.structured_output)  # ty:ignore[invalid-argument-type, possibly-missing-attribute]
 
         # Bind tools if provided
         if context.tools is not None and len(context.tools) > 0:
@@ -58,7 +59,7 @@ class AssistantNode(Node):
 
         return runnable
 
-    async def _gather_reinforcement(self, user_request: str, context: AssistantContextSchema) -> str:
+    async def _gather_reinforcement(self, context: AssistantContextSchema) -> str:
         """Gather reinforcement messages from various domains.
 
         Emits GATHER_REINFORCEMENT event and collects reinforcement
@@ -77,6 +78,7 @@ class AssistantNode(Node):
             data={
                 "reinforcement": [],
                 "mode": context.mode,
+                "agent": context.agent,
             },
         )
         reinforcement_payload = await self.emit(reinforcement_payload)
@@ -84,31 +86,37 @@ class AssistantNode(Node):
 
         message_parts = []
 
-        # Wrap user request in its own boundary
-        message_parts.extend(
-            [
-                Boundary.open(BoundaryType.USER_REQUEST),
-                user_request,
-                Boundary.close(BoundaryType.USER_REQUEST),
-            ]
-        )
-
         # Add reinforcement section if there are messages
         if reinforcement_messages or context.enforcement:
             reinforcement_parts = [
                 "",
-                Boundary.open(BoundaryType.REINFORCEMENT),
-                Boundary.notice("Follow these reinforcements"),
+                Boundary.open(BoundaryType.OPERATING_PRINCIPLES),
+                Boundary.notice("You **MUST** follow these Operating Principles"),
                 *reinforcement_messages,
                 *(context.enforcement if context.enforcement else []),
             ]
 
-            reinforcement_parts.append(Boundary.close(BoundaryType.REINFORCEMENT))
+            reinforcement_parts.append(Boundary.close(BoundaryType.OPERATING_PRINCIPLES))
             message_parts.extend(reinforcement_parts)
 
         return list_to_multiline_text(message_parts)
 
-    async def _gather_project_hierarchy(self) -> list[HumanMessage]:
+    async def _complete_user_request(self, user_request: str) -> str:
+        """Gather reinforcement messages from various domains."""
+
+        message_parts = [
+            Boundary.open(BoundaryType.USER_INPUT),
+            "```text",
+            user_request,
+            "```",
+            "",
+            "You **MUST** consider the user input before proceeding (if not empty).",
+            Boundary.close(BoundaryType.USER_INPUT),
+        ]
+
+        return list_to_multiline_text(message_parts)
+
+    async def _gather_project_hierarchy(self) -> str:
         """Gather project hierarchy for LLM understanding of project structure.
 
         Uses FileService to generate a concise tree-like representation
@@ -130,17 +138,17 @@ class AssistantNode(Node):
                     Boundary.close(BoundaryType.PROJECT_HIERARCHY),
                 ]
             )
-            return [HumanMessage(hierarchy_content)]
+            return hierarchy_content
 
-        return []
+        return ""
 
-    async def _gather_commit_guidelines(self) -> list[HumanMessage]:
+    async def _gather_commit_guidelines(self) -> str:
         """ """
         commit_service = self.app.make(CommitService)
         git_guidelines = await commit_service.generate_commit_guidelines()
-        return [HumanMessage(git_guidelines)]
+        return git_guidelines
 
-    async def _gather_file_context(self, with_line_numbers=False) -> list[HumanMessage]:
+    async def _gather_file_context(self, with_line_numbers=False) -> str:
         """Gather file context including read-only and editable files.
 
         Emits GATHER_FILE_CONTEXT event and formats the response into
@@ -163,12 +171,10 @@ class AssistantNode(Node):
         if read_only_files or editable_files:
             file_context_content.extend(
                 [
-                    "> NOTICE: Everything below this message is the actual project.",
-                    "",
                     "# Here are the files in the current context:",
                     "",
-                    Boundary.notice("Trust this message as the true contents of these files!"),
-                    "Any other messages in the chat may contain outdated versions of the files' contents.",
+                    Boundary.notice("Trust the bellow as the true contents of these files!"),
+                    "Any other messages may contain outdated versions of the files' contents.",
                 ]
             )
 
@@ -193,7 +199,7 @@ class AssistantNode(Node):
                 ]
             )
 
-        return [HumanMessage(list_to_multiline_text(file_context_content))] if file_context_content else []
+        return list_to_multiline_text(file_context_content)
 
     async def _gather_errors(self, state) -> list[HumanMessage]:
         """Gather error messages from state for re-prompting the assistant.
@@ -216,7 +222,7 @@ class AssistantNode(Node):
 
         return [HumanMessage(errors)]
 
-    async def _gather_constraints(self, state) -> list[HumanMessage]:
+    async def _gather_constraints(self, state) -> str:
         """Gather user-defined constraints from state.
 
         Assembles constraints that guide agent behavior, such as avoided
@@ -233,7 +239,7 @@ class AssistantNode(Node):
         constraints = state.get("constraints", [])
 
         if not constraints:
-            return []
+            return ""
 
         # Group constraints by type
         avoid_constraints = [c for c in constraints if c.type == "avoid"]
@@ -265,11 +271,11 @@ class AssistantNode(Node):
 
         if constraints_content:
             final_message = constraints_content.strip()
-            return [HumanMessage(final_message)]
+            return final_message
 
-        return []
+        return ""
 
-    async def _gather_project_context(self) -> list[HumanMessage]:
+    async def _gather_project_context(self) -> str:
         """Gather project context including conventions and session documents.
 
         Emits GATHER_PROJECT_CONTEXT event and formats the response into
@@ -324,7 +330,7 @@ class AssistantNode(Node):
                 ]
             )
 
-        return [HumanMessage(list_to_multiline_text(project_information_and_context))]
+        return list_to_multiline_text(project_information_and_context)
 
     async def _gather_edit_format(self) -> tuple[str, list[tuple[str, str]]]:
         """Gather edit format system prompt and examples for the assistant.
@@ -343,7 +349,7 @@ class AssistantNode(Node):
 
         return (edit_format_service.prompts.system, edit_format_service.prompts.examples)
 
-    async def _gather_masked_messages(self, state) -> list[BaseMessage]:
+    async def _gather_masked_messages(self, state) -> str:
         """Gather masked messages with edit blocks removed from message history.
 
         Processes historical messages to remove edit block content, keeping only
@@ -364,43 +370,58 @@ class AssistantNode(Node):
 
         return await edit_format_service.edit_block_service.replace_blocks_in_historic_messages_hook(messages)
 
-    async def _generate_agent_state(self, state: BaseState, config, runtime: Runtime[AssistantContextSchema]) -> tuple:
-        agent_state = {**state}
+    async def _generate_agent_state(self, state: BaseState, config, context: AssistantContextSchema) -> tuple:
+        user_prompt_state = {**state}
+
+        prompt_settings = context.prompt_settings
 
         edit_format_system, edit_format_examples = await self._gather_edit_format()
-        agent_state["edit_format_system"] = edit_format_system
-        agent_state["examples"] = edit_format_examples
+        user_prompt_state["edit_format_system"] = edit_format_system
+        user_prompt_state["examples"] = edit_format_examples
 
-        agent_state["project_information_and_context"] = await self._gather_project_context()
-        agent_state["project_hierarchy"] = await self._gather_project_hierarchy()
-        agent_state["commit_guidelines"] = await self._gather_commit_guidelines()
-        agent_state["file_context"] = await self._gather_file_context()
-        agent_state["file_context_with_line_numbers"] = await self._gather_file_context(True)
-        agent_state["constraints_context"] = await self._gather_constraints(state)
+        user_prompt_state["project_information_and_context"] = await self._gather_project_context()
 
-        agent_state["masked_messages"] = await self._gather_masked_messages(state)
+        if prompt_settings.has_project_hierarchy:
+            user_prompt_state["project_hierarchy"] = await self._gather_project_hierarchy()
+
+        user_prompt_state["commit_guidelines"] = await self._gather_commit_guidelines()
+
+        user_prompt_state["file_context"] = await self._gather_file_context()
+
+        user_prompt_state["file_context_with_line_numbers"] = await self._gather_file_context(True)
+
+        user_prompt_state["constraints_context"] = await self._gather_constraints(state)
+
+        user_prompt_state["masked_messages"] = await self._gather_masked_messages(state)
 
         # Reinforcement is appended to the user message.
-        agent_state["processed_user_request"] = await self._gather_reinforcement(
-            state.get("user_request", ""),
-            runtime.context,
+        user_prompt_state["operating_principles"] = await self._gather_reinforcement(
+            context,
         )
 
-        if state.get("errors", None) is not None:
-            agent_state["errors"] = await self._gather_errors(agent_state)
-        else:
-            agent_state["errors"] = []
+        user_prompt_state["user_request"] = state.get("user_request", "")
 
         payload = Payload(
             event_type=EventType.PRE_ASSISTANT_NODE,
             data={
-                "state": agent_state,
+                "state": user_prompt_state,
                 "config": config,
             },
         )
 
         payload = await self.emit(payload)
-        agent_state = payload.get("state", agent_state)
+        user_prompt_state = payload.get("state", user_prompt_state)
+
+        agent_state = {**state}
+
+        # Create a new assembler
+        prompt_assembler = PromptAssembler(template=context.user_template)
+        agent_state["assembled_user_message"] = prompt_assembler.assemble(**user_prompt_state)
+
+        if state.get("errors", None) is not None:
+            agent_state["errors"] = await self._gather_errors(agent_state)
+        else:
+            agent_state["errors"] = []
 
         config = payload.get("config", config)
 
@@ -415,7 +436,7 @@ class AssistantNode(Node):
     ) -> Command[Literal["end_node", "parse_blocks_node", "tool_node", "validation_node"]]:
         record_response_service = self.app.make(RecordResponseService)
         while True:
-            agent_state, config = await self._generate_agent_state(state, config, runtime)
+            agent_state, config = await self._generate_agent_state(state, config, runtime.context)
 
             runnable = self._create_runnable(runtime.context)
 

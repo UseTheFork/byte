@@ -7,6 +7,7 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.agent import AssistantContextSchema, BaseState, Node
+from byte.cli import InputCancelledError
 from byte.prompt_format import (
     EDIT_BLOCK_NAME,
     BlockStatus,
@@ -18,10 +19,11 @@ from byte.prompt_format import (
     RawSearchReplaceBlock,
     SearchReplaceBlock,
 )
+from byte.support.mixins import UserInteractive
 from byte.support.utils import extract_content_from_message, get_last_message, list_to_multiline_text
 
 
-class ParseBlocksNode(Node):
+class ParseBlocksNode(Node, UserInteractive):
     """Parse and validate edit blocks from assistant messages.
 
     This node handles the complete lifecycle of edit block processing:
@@ -418,12 +420,24 @@ class ParseBlocksNode(Node):
         self.metadata.iteration += 1
 
         if self.metadata.iteration >= 4:
-            should_continue = self.console.confirm(
-                "Failed to parse blocks after 5 attempts. Continue trying?",
-                default=False,
-            )
+            try:
+                should_continue = self.prompt_for_confirmation(
+                    "Failed to parse blocks after 5 attempts. Continue trying?",
+                    default=False,
+                )
+
+            except InputCancelledError:
+                should_continue = False
+
             if not should_continue:
-                return Command(goto="end_node")
+                # Dont store this invocation in memory
+                self.metadata.erase_history = True
+                return Command(
+                    goto="end_node",
+                    update={
+                        "metadata": self.metadata,
+                    },
+                )
 
         # Check to make sure the raw blocks can be parsed in general even if some have errors
         # to be parasable a raw block must have an id and a start / end tag.

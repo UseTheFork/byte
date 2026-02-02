@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from rich.console import RenderResult
 from rich.spinner import Spinner
 from rich.text import Text
@@ -18,6 +20,7 @@ class RuneSpinner(Spinner):
         *,
         speed: float = 1.0,
         size: int = 6,
+        colors: list[str] | None = None,
     ) -> None:
         """Initialize the animated spinner.
 
@@ -31,8 +34,9 @@ class RuneSpinner(Spinner):
         super().__init__("dots", text, style=None, speed=speed)
         self.size = size
         self.runes = list("0123456789abcdefABCDEF~!@#$%^&*()+=_")
+        self.colors = colors if colors is not None else ["primary", "secondary", "text"]
 
-    def render(self, time: float) -> "RenderResult":
+    def render(self, time: float) -> RenderResult:  # ty:ignore[invalid-method-override]
         """Render the animated spinner with cycling runes.
 
         Args:
@@ -48,9 +52,6 @@ class RuneSpinner(Spinner):
         elapsed = (time - self.start_time) * self.speed
         frame_no = int(elapsed * 25)  # 25 fps for rune cycling
 
-        # Available theme colors to randomly pick from
-        colors = ["primary", "secondary", "text"]
-
         # Generate animated runes
         animated_chars = []
         for i in range(self.size):
@@ -61,13 +62,13 @@ class RuneSpinner(Spinner):
 
             # Randomly pick color using the same seeding approach for consistency
             color_seed = (frame_no + i) * 37  # Different prime for color selection
-            color_index = color_seed % len(colors)
-            color = colors[color_index]
+            color_index = color_seed % len(self.colors)
+            color = self.colors[color_index]
             animated_chars.append(f"[{color}]{char}[/{color}]")
 
         spinner_text = "".join(animated_chars)
 
         if not self.text:
-            return Text.from_markup(spinner_text)  # pyright: ignore[reportReturnType]
+            return Text.from_markup(spinner_text)  # ty:ignore[invalid-return-type]
         else:
-            return Text.from_markup(f"{spinner_text} {self.text}")  # pyright: ignore[reportReturnType]
+            return Text.from_markup(f"{spinner_text} {self.text}")  # ty:ignore[invalid-return-type]

@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
 from byte.web.parser.base import BaseWebParser
 
@@ -10,7 +11,7 @@ class GitBookParser(BaseWebParser):
     and filtering out navigation, sidebars, and other non-content elements.
     """
 
-    def __init__(self, exclude_links_ratio: float = 1.0) -> None:
+    def boot(self, exclude_links_ratio: float = 1.0, **kwargs) -> None:
         """Initialize GitBook parser.
 
         Args:
@@ -36,7 +37,7 @@ class GitBookParser(BaseWebParser):
             return True
 
         # Check for GitBook-specific meta tags
-        gitbook_meta = soup.find("meta", attrs={"name": "generator", "content": lambda x: x and "gitbook" in x.lower()})  # pyright: ignore[reportCallIssue]
+        gitbook_meta = soup.find("meta", attrs={"name": "generator", "content": lambda x: x and "gitbook" in x.lower()})
         if gitbook_meta:
             return True
 
@@ -49,20 +50,17 @@ class GitBookParser(BaseWebParser):
 
         return False
 
-    def parse(self, soup: BeautifulSoup) -> str:
-        """Extract and clean text content from GitBook HTML.
+    def extract_content_element(self, soup: BeautifulSoup) -> Tag | None:
+        """Extract the main content element from GitBook HTML.
 
         Args:
                 soup: BeautifulSoup object containing the HTML content
 
         Returns:
-                Cleaned markdown content as a string
+                BeautifulSoup Tag containing the main content, or None if not found
 
-        Usage: `text = parser.parse(soup)` -> markdown text
+        Usage: `element = parser.extract_content_element(soup)` -> Tag or None
         """
-        # Try to find the main content area
-        content = None
-
         # GitBook v2+ uses main tag or specific classes
         content_selectors = [
             ("main", {}),
@@ -74,36 +72,23 @@ class GitBookParser(BaseWebParser):
         for tag, attrs in content_selectors:
             content = soup.find(tag, attrs)
             if content:
-                break
+                return content
 
         # Fallback to body if nothing found
-        if not content:
-            content = soup.find("body")
+        return soup.find("body")
 
-        if not content:
-            return ""
+    def get_cleaning_config(self) -> dict:
+        """Get the cleaning pipeline configuration for GitBook parser.
 
-        # Remove navigation, sidebars, and other UI elements
-        for element in content.find_all(["nav", "header", "footer", "aside"]):
-            element.decompose()
+        Returns:
+                Dictionary with cleaning pipeline settings
 
-        # Remove GitBook-specific UI elements
-        for class_name in [
-            "navigation",
-            "book-summary",
-            "book-header",
-            "toolbar",
-            "page-wrapper",
-        ]:
-            for element in content.find_all(class_=lambda x: x and class_name in x):  # pyright: ignore[reportCallIssue]
-                element.decompose()
-
-        # Filter out sections with high link ratios
-        for section in content.find_all(["div", "section"]):
-            if self._get_link_ratio(section) > self.exclude_links_ratio:
-                section.decompose()
-
-        if self._get_link_ratio(content) <= self.exclude_links_ratio:
-            return self._to_markdown(content)
-        else:
-            return ""
+        Usage: `config = parser.get_cleaning_config()` -> dict
+        """
+        return {
+            "remove_unwanted": True,
+            "filter_links": True,
+            "link_ratio": self.exclude_links_ratio,
+            "normalize": False,
+            "to_markdown": True,
+        }

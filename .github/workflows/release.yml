@@ -222,6 +222,49 @@ jobs:
         pip install byte-ai-cli
         python -c "from importlib.metadata import version; print(version('byte-ai-cli'))"
 
+  sync-branches:
+    name: Sync branches
+    needs: [build, release]
+    if: needs.release.outputs.released == 'true'
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Setup | Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+      
+      - name: Setup | Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Setup | Fetch staging branch
+        run: git fetch origin staging:staging
+      
+      - name: Setup | Merge changes to staging
+        run: |
+          git checkout staging
+          git merge ${{ github.ref_name }} --no-edit
+      
+      - name: Setup | Push changes to staging
+        run: git push origin staging
+      
+      - name: Setup | Fetch development branch
+        run: git fetch origin development:development
+      
+      - name: Setup | Merge changes to development
+        run: |
+          git checkout development
+          git merge staging --no-edit
+      
+      - name: Setup | Push changes to development
+        run: git push origin development
+
   deploy-docs:
     name: Deploy Documentation
     needs:

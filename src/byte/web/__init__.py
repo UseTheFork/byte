@@ -13,19 +13,21 @@ if TYPE_CHECKING:
     from byte.web.parser.github_parser import GitHubParser
     from byte.web.parser.mkdocs_parser import MkDocsParser
     from byte.web.parser.raw_content_parser import RawContentParser
-    from byte.web.parser.readthedocs_parser import ReadTheDocsParser
+    from byte.web.parser.sphinx_parser import SphinxParser
     from byte.web.service.chromium_service import ChromiumService
+    from byte.web.service.content_cleaner import ContentCleaner
     from byte.web.service_provider import WebServiceProvider
 
 __all__ = (
     "BaseWebParser",
     "ChromiumService",
+    "ContentCleaner",
     "GenericParser",
     "GitBookParser",
     "GitHubParser",
     "MkDocsParser",
     "RawContentParser",
-    "ReadTheDocsParser",
+    "SphinxParser",
     "WebConfig",
     "WebNotEnabledException",
     "WebServiceProvider",
@@ -35,12 +37,13 @@ _dynamic_imports = {
     # keep-sorted start
     "BaseWebParser": "parser.base",
     "ChromiumService": "service.chromium_service",
+    "ContentCleaner": "service.content_cleaner",
     "GenericParser": "parser.generic_parser",
     "GitBookParser": "parser.gitbook_parser",
     "GitHubParser": "parser.github_parser",
     "MkDocsParser": "parser.mkdocs_parser",
     "RawContentParser": "parser.raw_content_parser",
-    "ReadTheDocsParser": "parser.readthedocs_parser",
+    "SphinxParser": "parser.sphinx_parser",
     "WebConfig": "config",
     "WebNotEnabledException": "exceptions",
     "WebServiceProvider": "service_provider",

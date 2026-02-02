@@ -1,7 +1,7 @@
 from argparse import Namespace
 
 from byte.agent import CleanerAgent
-from byte.cli import ByteArgumentParser, Command, Markdown
+from byte.cli import ByteArgumentParser, Command, InputCancelledError, Markdown
 from byte.config import ByteConfigException
 from byte.knowledge import SessionContextModel, SessionContextService
 from byte.support.mixins import UserInteractive
@@ -66,11 +66,14 @@ class WebCommand(Command, UserInteractive):
             title=f"Content: {url}",
         )
 
-        choice = await self.prompt_for_select_numbered(
-            "Add this content to the LLM context?",
-            choices=["Yes", "Clean with LLM", "No"],
-            default=1,
-        )
+        try:
+            choice = await self.prompt_for_select_numbered(
+                "Add this content to the LLM context?",
+                choices=["Yes", "Clean with LLM", "No"],
+                default=1,
+            )
+        except InputCancelledError:
+            return
 
         if choice == "Yes":
             console.print_success("Content added to context")
@@ -92,7 +95,7 @@ class WebCommand(Command, UserInteractive):
 
             if cleaned_content:
                 console.print_success("Content cleaned and added to context")
-                key = slugify(args)
+                key = slugify(raw_args)
                 model = self.app.make(SessionContextModel, type="web", key=key, content=cleaned_content)
                 session_context_service.add_context(model)
             else:

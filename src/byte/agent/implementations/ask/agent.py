@@ -1,7 +1,7 @@
 from langchain_core.language_models.chat_models import BaseChatModel
 
-from byte.agent import Agent, AssistantContextSchema, AssistantNode, ToolNode
-from byte.agent.implementations.ask.prompt import ask_enforcement, ask_prompt
+from byte.agent import Agent, AgentConfigBoolSchema, AssistantContextSchema, AssistantNode, ToolNode
+from byte.agent.implementations.ask.prompt import ask_enforcement, ask_prompt, ask_user_template
 from byte.agent.utils.graph_builder import GraphBuilder
 from byte.llm import LLMService
 
@@ -15,6 +15,26 @@ class AskAgent(Agent):
 
     Usage: `agent = await container.make(AskAgent); response = await agent.run(state)`
     """
+
+    def boot_configurable(self, **kwargs):
+        self.config().set(
+            {
+                "has_project_hierarchy": AgentConfigBoolSchema(
+                    name="Project Hierarchy",
+                    description="Include project directory structure in prompts?",
+                    value=False,
+                ),
+            }
+        )
+
+    def get_enforcement(self):
+        return ask_enforcement
+
+    def get_user_template(self):
+        return ask_user_template
+
+    def get_prompt(self):
+        return ask_prompt
 
     async def build(self):
         """Build and compile the ask agent graph with memory and MCP tools.
@@ -44,11 +64,19 @@ class AskAgent(Agent):
         # test: RunnableSerializable[dict[Any, Any], BaseMessage] = ask_prompt | main
         # main.bind_tools(mcp_tools, parallel_tool_calls=False)
 
-        return AssistantContextSchema(
+        assistant_context_schema = AssistantContextSchema(
             mode="main",
-            prompt=ask_prompt,
-            enforcement=ask_enforcement,
+            prompt=self.get_prompt(),
+            user_template=self.get_user_template(),
+            enforcement=self.get_enforcement(),
             main=main,
             weak=weak,
             agent=self.__class__.__name__,
         )
+
+        # Get the config schema object and check its value
+        has_hierarchy_config = self.config().get("has_project_hierarchy")
+        if has_hierarchy_config and isinstance(has_hierarchy_config, AgentConfigBoolSchema):
+            assistant_context_schema.prompt_settings.has_project_hierarchy = has_hierarchy_config.value
+
+        return assistant_context_schema

@@ -22,6 +22,7 @@ class BaseState(TypedDict):
     user_request: str
 
     constraints: Annotated[list[ConstraintSchema], add_constraints]
+
     masked_messages: list[AnyMessage]
 
     agent: str
@@ -29,7 +30,7 @@ class BaseState(TypedDict):
     errors: Annotated[str | None, replace_str]
     examples: list[AnyMessage]
 
-    extracted_content: str | dict
+    extracted_content: str | dict | None
 
     # These are specific to Coder
     edit_format_system: str

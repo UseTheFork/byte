@@ -8,7 +8,7 @@ from byte.agent import (
     LintNode,
     ParseBlocksNode,
 )
-from byte.agent.implementations.coder.prompt import coder_prompt
+from byte.agent.implementations.coder.prompt import coder_prompt, coder_user_template
 from byte.agent.utils.graph_builder import GraphBuilder
 from byte.llm import LLMService
 from byte.prompt_format import EditFormatService
@@ -21,6 +21,20 @@ class CoderAgent(Agent):
     Integrates with file context, memory, and development tools through
     the actor system for clean separation of concerns.
     """
+
+    def get_enforcement(self):
+        edit_format_service = self.app.make(EditFormatService)
+        return edit_format_service.prompts.enforcement
+
+    def get_recovery_steps(self):
+        edit_format_service = self.app.make(EditFormatService)
+        return edit_format_service.prompts.recovery_steps
+
+    def get_user_template(self):
+        return coder_user_template
+
+    def get_prompt(self):
+        return coder_prompt
 
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""
@@ -40,14 +54,13 @@ class CoderAgent(Agent):
         main: BaseChatModel = llm_service.get_main_model()
         weak: BaseChatModel = llm_service.get_weak_model()
 
-        edit_format_service = self.app.make(EditFormatService)
-
         return AssistantContextSchema(
             mode="main",
-            prompt=coder_prompt,
+            prompt=self.get_prompt(),
+            user_template=self.get_user_template(),
             main=main,
             weak=weak,
-            enforcement=edit_format_service.prompts.enforcement,
-            recovery_steps=edit_format_service.prompts.recovery_steps,
+            enforcement=self.get_enforcement(),
+            recovery_steps=self.get_recovery_steps(),
             agent=self.__class__.__name__,
         )

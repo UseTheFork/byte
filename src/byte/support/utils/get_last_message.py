@@ -10,7 +10,7 @@ def get_last_message(state):
         if not state:
             raise ValueError("No messages found in empty list state")
         return state[-1]
-    elif messages := state.get("history_messages", []):
+    elif messages := state.get("scratch_messages", []):
         return messages[-1]
     else:
         raise ValueError(f"No messages found in input state: {state}")

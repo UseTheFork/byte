@@ -1,6 +1,6 @@
 import asyncio
 from abc import ABC, abstractmethod
-from typing import Any, Literal, Optional
+from typing import Any, List, Literal, Optional
 
 from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 
@@ -10,10 +10,10 @@ from byte.cli import (
     StreamRenderingService,
 )
 from byte.memory import MemoryService
-from byte.support.mixins import Bootable, Eventable
+from byte.support.mixins import Bootable, Configurable, Eventable
 
 
-class Agent(ABC, Bootable, Eventable):
+class Agent(ABC, Bootable, Eventable, Configurable):
     """Base class for all agent services providing common graph management functionality.
 
     Defines the interface for agent services with lazy-loaded graph compilation,
@@ -23,6 +23,29 @@ class Agent(ABC, Bootable, Eventable):
     """
 
     _graph: Optional[CompiledStateGraph] = None
+
+    def get_enforcement(self) -> List[str]:
+        return []
+
+    @abstractmethod
+    def get_user_template(self) -> List[str]:
+        """Get the user message template for this agent.
+
+        Must be implemented by subclasses to return their specific user message
+        template, which defines how user requests are formatted in prompts.
+        Usage: Override in subclass to provide domain-specific user message formatting
+        """
+        pass
+
+    @abstractmethod
+    def get_prompt(self):
+        """Get the ChatPromptTemplate for this agent.
+
+        Must be implemented by subclasses to return their specific ChatPromptTemplate,
+        which defines the overall prompt structure including system and user messages.
+        Usage: Override in subclass to provide domain-specific prompt templates
+        """
+        pass
 
     @abstractmethod
     async def build(self) -> CompiledStateGraph:
@@ -91,16 +114,19 @@ class Agent(ABC, Bootable, Eventable):
 
         Usage: Called internally by execute() to run the stream in a cancellable task
         """
-        processed_event = None
-        async for mode, chunk in graph.astream(
-            input=initial_state,
-            config=config,
-            stream_mode=["values", "updates", "messages", "custom", "tasks"],
-            context=await self.get_assistant_runnable(),
-        ):
-            processed_event = await self._handle_stream_event(mode, chunk)
+        try:
+            processed_event = None
+            async for mode, chunk in graph.astream(
+                input=initial_state,
+                config=config,
+                stream_mode=["values", "updates", "messages", "custom", "tasks"],
+                context=await self.get_assistant_runnable(),
+            ):
+                processed_event = await self._handle_stream_event(mode, chunk)
 
-        return processed_event
+            return processed_event
+        except asyncio.CancelledError:
+            return None
 
     async def execute(
         self,
@@ -138,22 +164,21 @@ class Agent(ABC, Bootable, Eventable):
         stream_rendering_service.set_display_mode(display_mode)
 
         await stream_rendering_service.start_spinner()
-
-        # Create a task so we can cancel it properly
-        stream_task = asyncio.create_task(self._run_stream(graph, initial_state, config, stream_rendering_service))
-
         try:
+            # Create a task so we can cancel it properly
+            stream_task = asyncio.create_task(self._run_stream(graph, initial_state, config, stream_rendering_service))
+
             processed_event = await stream_task
         except KeyboardInterrupt:
+            await asyncio.sleep(0.2)
             # Cancel the stream task properly
             self.app["log"].info("Agent execution cancelled by user")
-            if not stream_task.done:
+
+            if not stream_task.done():
                 stream_task.cancel()
-            try:
-                await stream_task  # Re-await to catch the cancelation error.
-            except asyncio.CancelledError:
-                pass
-            return None
+            await asyncio.gather(stream_task, return_exceptions=False)
+
+            processed_event = None
         finally:
             await stream_rendering_service.end_stream()
 

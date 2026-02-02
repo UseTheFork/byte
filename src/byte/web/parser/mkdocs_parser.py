@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
 from byte.web.parser.base import BaseWebParser
 
@@ -10,7 +11,7 @@ class MkDocsParser(BaseWebParser):
     and filtering out navigation, search, and other non-content elements.
     """
 
-    def __init__(self, exclude_links_ratio: float = 1.0):
+    def boot(self, exclude_links_ratio: float = 1.0, **kwargs):
         """Initialize MkDocs parser.
 
         Args:
@@ -33,7 +34,7 @@ class MkDocsParser(BaseWebParser):
         Usage: `if parser.can_parse(soup, url)` -> boolean
         """
         # Check for MkDocs-specific meta tags
-        mkdocs_meta = soup.find("meta", attrs={"name": "generator", "content": lambda x: x and "mkdocs" in x.lower()})  # pyright: ignore[reportCallIssue]
+        mkdocs_meta = soup.find("meta", attrs={"name": "generator", "content": lambda x: x and "mkdocs" in x.lower()})
         if mkdocs_meta:
             return True
 
@@ -47,16 +48,16 @@ class MkDocsParser(BaseWebParser):
 
         return False
 
-    def parse(self, soup: BeautifulSoup) -> str:
-        """Extract and clean text content from MkDocs HTML.
+    def extract_content_element(self, soup: BeautifulSoup) -> Tag | None:
+        """Extract the main content element from MkDocs HTML.
 
         Args:
                 soup: BeautifulSoup object containing the HTML content
 
         Returns:
-                Cleaned text content as a string
+                BeautifulSoup Tag containing the main content, or None if not found
 
-        Usage: `text = parser.parse(soup)` -> cleaned text
+        Usage: `element = parser.extract_content_element(soup)` -> Tag or None
         """
         # Default tags to search for main content
         html_tags = [
@@ -66,15 +67,26 @@ class MkDocsParser(BaseWebParser):
             ("article", {}),
         ]
 
-        element = None
-
         # Search for main content element
         for tag, attrs in html_tags:
             element = soup.find(tag, attrs)
             if element is not None:
-                break
+                return element
 
-        if element is not None and self._get_link_ratio(element) <= self.exclude_links_ratio:
-            return self._to_markdown(element)
-        else:
-            return ""
+        return None
+
+    def get_cleaning_config(self) -> dict:
+        """Get the cleaning pipeline configuration for MkDocs parser.
+
+        Returns:
+                Dictionary with cleaning pipeline settings
+
+        Usage: `config = parser.get_cleaning_config()` -> dict
+        """
+        return {
+            "remove_unwanted": True,
+            "filter_links": True,
+            "link_ratio": self.exclude_links_ratio,
+            "normalize": False,
+            "to_markdown": True,
+        }

@@ -7,6 +7,7 @@ from pydantic import ValidationError
 from byte.agent import AgentServiceProvider
 from byte.analytics import AnalyticsProvider
 from byte.cli import CLIServiceProvider
+from byte.clipboard import ClipboardServiceProvider
 from byte.development import DevelopmentServiceProvider
 from byte.files import FileServiceProvider
 from byte.foundation import Application
@@ -36,6 +37,7 @@ PROVIDERS = [
     PromptFormatProvider,
     WebServiceProvider,
     PresetsProvider,
+    ClipboardServiceProvider,
     DevelopmentServiceProvider,
     SystemServiceProvider,
 ]

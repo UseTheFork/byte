@@ -7,7 +7,12 @@ from byte.agent import (
     EndNode,
     ValidationNode,
 )
-from byte.agent.implementations.commit.prompt import commit_prompt
+from byte.agent.implementations.commit.prompt import (
+    commit_enforcement,
+    commit_plan_user_template,
+    commit_prompt,
+    commit_user_template,
+)
 from byte.agent.utils.graph_builder import GraphBuilder
 from byte.git import CommitMessage, CommitPlan, CommitValidator
 from byte.llm import LLMService
@@ -20,6 +25,12 @@ class CommitAgent(Agent):
         return [
             self.app.make(CommitValidator),
         ]
+
+    def get_prompt(self):
+        return commit_prompt
+
+    def get_user_template(self):
+        return commit_user_template
 
     def get_structured_output(self):
         return CommitMessage
@@ -50,7 +61,9 @@ class CommitAgent(Agent):
 
         return AssistantContextSchema(
             mode="weak",
-            prompt=commit_prompt,
+            prompt=self.get_prompt(),
+            user_template=self.get_user_template(),
+            enforcement=self.get_enforcement(),
             main=main,
             weak=weak,
             agent=self.__class__.__name__,
@@ -64,6 +77,12 @@ class CommitPlanAgent(CommitAgent):
         return [
             self.app.make(CommitValidator),
         ]
+
+    def get_enforcement(self):
+        return commit_enforcement
+
+    def get_user_template(self):
+        return commit_plan_user_template
 
     def get_structured_output(self):
         return CommitPlan

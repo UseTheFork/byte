@@ -10,6 +10,7 @@ from rich.pretty import Pretty
 from rich.text import Text
 
 from byte.agent import AssistantContextSchema, AssistantNode, BaseState, ConstraintSchema, Node
+from byte.cli import InputCancelledError
 from byte.support import Str
 from byte.support.mixins import UserInteractive
 from byte.support.utils import get_last_message
@@ -38,7 +39,10 @@ class ToolNode(Node, UserInteractive):
             pretty = Pretty(tool_call)
             console.print_panel(pretty)
 
-            run_tool = await self.prompt_for_confirmation(f"Use {tool_call['name']}", True)
+            try:
+                run_tool = await self.prompt_for_confirmation(f"Use {tool_call['name']}", True)
+            except InputCancelledError:
+                run_tool = None
 
             if run_tool:
                 tool_result = await tools_by_name[tool_call["name"]].ainvoke(tool_call["args"])
@@ -62,7 +66,10 @@ class ToolNode(Node, UserInteractive):
             result_pretty = Text(tool_result)
             console.print_panel(result_pretty, title="Tool Result")
 
-            add_result = await self.prompt_for_confirmation("Add this result to the response?", True)
+            try:
+                add_result = await self.prompt_for_confirmation("Add this result to the response?", True)
+            except InputCancelledError:
+                add_result = None
 
             if not add_result:
                 tool_result = {"result": "User did not find the results useful for the task."}

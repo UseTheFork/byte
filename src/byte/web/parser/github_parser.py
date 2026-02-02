@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
 from byte.web.parser.base import BaseWebParser
 
@@ -10,7 +11,7 @@ class GitHubParser(BaseWebParser):
     from GitHub pages while filtering out navigation and UI elements.
     """
 
-    def __init__(self, exclude_links_ratio: float = 0.5) -> None:
+    def boot(self, exclude_links_ratio: float = 0.5, **kwargs) -> None:
         """Initialize the GitHub parser.
 
         Args:
@@ -46,73 +47,52 @@ class GitHubParser(BaseWebParser):
 
         return False
 
-    def parse(self, soup: BeautifulSoup) -> str:
-        """Extract and clean text content from GitHub HTML.
+    def extract_content_element(self, soup: BeautifulSoup) -> Tag | None:
+        """Extract the main content element from GitHub HTML.
 
         Args:
                 soup: BeautifulSoup object containing the HTML content
 
         Returns:
-                Cleaned text content as a string
+                BeautifulSoup Tag containing the main content, or None if not found
 
-        Usage: `text = parser.parse(soup)` -> cleaned text
+        Usage: `element = parser.extract_content_element(soup)` -> Tag or None
         """
-        # Try to find the main content area
-        content = None
-
         # README content
         readme = soup.find("article", class_="markdown-body")
         if readme:
-            content = readme
+            return readme
 
         # File content view
-        if not content:
-            file_content = soup.find("div", {"data-target": "react-app.reactRoot"})
-            if file_content:
-                content = file_content
+        file_content = soup.find("div", {"data-target": "react-app.reactRoot"})
+        if file_content:
+            return file_content
 
         # Repository about section
-        if not content:
-            about = soup.find("div", class_="BorderGrid-cell")
-            if about:
-                content = about
+        about = soup.find("div", class_="BorderGrid-cell")
+        if about:
+            return about
 
         # Fallback to main element
-        if not content:
-            content = soup.find("main")
+        main = soup.find("main")
+        if main:
+            return main
 
         # Last resort: use body
-        if not content:
-            content = soup.find("body")
+        return soup.find("body")
 
-        if not content:
-            return ""
+    def get_cleaning_config(self) -> dict:
+        """Get the cleaning pipeline configuration for GitHub parser.
 
-        # Remove navigation, headers, footers, and other UI elements
-        for element in content.find_all(
-            [
-                "nav",
-                "header",
-                "footer",
-                "aside",
-            ]
-        ):
-            element.decompose()
+        Returns:
+                Dictionary with cleaning pipeline settings
 
-        # Remove GitHub-specific UI elements
-        for class_name in [
-            "Header",
-            "footer",
-            "AppHeader",
-            "react-code-view-header",
-            "react-code-view-bottom-padding",
-        ]:
-            for element in content.find_all(class_=class_name):
-                element.decompose()
-
-        # Filter out sections with high link ratios (likely navigation)
-        for section in content.find_all(["div", "section"]):
-            if self._get_link_ratio(section) > self.exclude_links_ratio:
-                section.decompose()
-
-        return self._to_markdown(content)
+        Usage: `config = parser.get_cleaning_config()` -> dict
+        """
+        return {
+            "remove_unwanted": True,
+            "filter_links": True,
+            "link_ratio": self.exclude_links_ratio,
+            "normalize": False,
+            "to_markdown": True,
+        }

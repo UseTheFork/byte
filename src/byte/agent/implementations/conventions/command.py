@@ -2,7 +2,7 @@ from argparse import Namespace
 
 from byte.agent import ConventionAgent
 from byte.agent.implementations.conventions.constants import FOCUS_MESSAGES, ConventionFocus
-from byte.cli import ByteArgumentParser, Command
+from byte.cli import ByteArgumentParser, Command, InputCancelledError
 from byte.knowledge import ConventionContextService
 from byte.support.mixins import UserInteractive
 from byte.support.utils import slugify
@@ -73,35 +73,38 @@ class ConventionCommand(Command, UserInteractive):
         return FOCUS_MESSAGES.get(convention_type)
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
-        convention_type = await self.prompt_convention_type()
+        try:
+            convention_type = await self.prompt_convention_type()
 
-        if not convention_type:
+            if not convention_type:
+                return
+
+            if convention_type == "Other":
+                focus = await self.prompt_custom_convention()
+            else:
+                focus = self.get_convention_focus(convention_type)
+
+            if not focus:
+                return
+
+            convention_agent = self.app.make(ConventionAgent)
+            convention: dict = await convention_agent.execute(
+                focus.focus_message,
+            )
+
+            # Write the convention content to a file
+            convention_file_path = self.app.conventions_path(focus.file_name)
+            convention_file_path.parent.mkdir(parents=True, exist_ok=True)
+            convention_file_path.write_text(convention["extracted_content"])
+
+            # refresh the Conventions in the session by `rebooting` the Service
+            convention_context_service = self.app.make(ConventionContextService)
+            convention_context_service.boot()
+
+            console = self.app["console"]
+            console.print_success_panel(
+                f"Convention document generated and saved to {focus.file_name}\n\nThe convention has been loaded into the session context and is now available for AI reference.",
+                title="Convention Generated",
+            )
+        except InputCancelledError:
             return
-
-        if convention_type == "Other":
-            focus = await self.prompt_custom_convention()
-        else:
-            focus = self.get_convention_focus(convention_type)
-
-        if not focus:
-            return
-
-        convention_agent = self.app.make(ConventionAgent)
-        convention: dict = await convention_agent.execute(
-            focus.focus_message,
-        )
-
-        # Write the convention content to a file
-        convention_file_path = self.app.conventions_path(focus.file_name)
-        convention_file_path.parent.mkdir(parents=True, exist_ok=True)
-        convention_file_path.write_text(convention["extracted_content"])
-
-        # refresh the Conventions in the session by `rebooting` the Service
-        convention_context_service = self.app.make(ConventionContextService)
-        convention_context_service.boot()
-
-        console = self.app["console"]
-        console.print_success_panel(
-            f"Convention document generated and saved to {focus.file_name}\n\nThe convention has been loaded into the session context and is now available for AI reference.",
-            title="Convention Generated",
-        )

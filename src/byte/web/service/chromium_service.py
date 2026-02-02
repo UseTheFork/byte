@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Type
 
 from bs4 import BeautifulSoup
 from pydoll.browser.chromium import Chrome
@@ -14,7 +14,8 @@ from byte.web.parser.gitbook_parser import GitBookParser
 from byte.web.parser.github_parser import GitHubParser
 from byte.web.parser.mkdocs_parser import MkDocsParser
 from byte.web.parser.raw_content_parser import RawContentParser
-from byte.web.parser.readthedocs_parser import ReadTheDocsParser
+from byte.web.parser.sphinx_parser import SphinxParser
+from byte.web.service.content_cleaner import ContentCleaner
 
 
 class ChromiumService(Service):
@@ -27,13 +28,13 @@ class ChromiumService(Service):
 
     def boot(self) -> None:
         """Initialize the service with available parsers."""
-        self.parsers: List[BaseWebParser] = [
-            ReadTheDocsParser(),
-            GitBookParser(),
-            GitHubParser(),
-            MkDocsParser(),
-            GenericParser(),
-            RawContentParser(),
+        self.parsers: List[Type[BaseWebParser]] = [
+            SphinxParser,
+            GitBookParser,
+            GitHubParser,
+            MkDocsParser,
+            GenericParser,
+            RawContentParser,
         ]
 
     async def do_scrape(self, url: str) -> str:
@@ -72,7 +73,7 @@ class ChromiumService(Service):
                 await tab.go_to(url)
 
                 spinner.text = "Extracting content..."
-                html_content = await tab.execute_script("return document.body.innerHTML")
+                html_content = await tab.execute_script("return document.documentElement.outerHTML")
 
                 spinner.text = "Converting to markdown..."
                 html_content = html_content.get("result", {}).get("result", {}).get("value", "")
@@ -83,12 +84,23 @@ class ChromiumService(Service):
                 )
 
                 # Try to find a suitable parser for this content
-                parser = None
-                for p in self.parsers:
-                    if p.can_parse(soup, url):
-                        parser = p
-                        break
+                text_content = ""
+                for parser_class in self.parsers:
+                    parser = self.app.make(parser_class)
+                    if parser.can_parse(soup, url):
+                        spinner.text = f"Parsing with {parser.__class__.__name__}..."
+                        self.app["log"].info(f"Parsing with {parser.__class__.__name__}...")
 
-                spinner.text = f"Parsing with {parser.__class__.__name__}..."
-                text_content = parser.parse(soup)  # pyright: ignore[reportOptionalMemberAccess]
+                        # Extract content element
+                        element = parser.extract_content_element(soup)
+                        if element is not None:
+                            # Apply cleaning pipeline
+                            cleaner = self.app.make(ContentCleaner)
+                            config = parser.get_cleaning_config()
+                            text_content = cleaner.apply_pipeline(element, **config)
+
+                            if text_content.strip():
+                                self.app["log"].info(f"Parsed successfully with {parser.__class__.__name__}...")
+                                break
+
                 return text_content

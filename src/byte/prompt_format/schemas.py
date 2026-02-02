@@ -11,10 +11,12 @@ class BoundaryType(str, Enum):
 
     ROLE = "role"
     TASK = "task"
-    USER_REQUEST = "user_request"
-    RULES = "rules"
+    USER_INPUT = "user_input"
+
     GOAL = "goal"
     RESPONSE_FORMAT = "response_format"
+
+    RULES = "rules"
 
     ERROR = "error"
 
@@ -29,6 +31,10 @@ class BoundaryType(str, Enum):
     PROJECT_HIERARCHY = "project_hierarchy"
     CONSTRAINTS = "constraints"
 
+    # Operating Constraints
+    OPERATING_CONSTRAINTS = "operating_constraints"
+    OPERATING_PRINCIPLES = "operating_principles"
+
     CRITICAL_REQUIREMENTS = "response_requirements"
     RECOVERY_STEPS = "recovery_steps"
 
@@ -39,6 +45,14 @@ class BoundaryType(str, Enum):
     STDERR = "stderr"
 
     SYSTEM_CONTEXT = "system_context"
+
+    NOTE = "note"
+
+    HEADING = "heading"
+
+    CONVERSATION_HISTORY = "conversation_history"
+    AGENT_MESSAGE = "agent_message"
+    USER_MESSAGE = "user_message"
 
 
 class AICommentType(Enum):

@@ -1,10 +1,13 @@
 from abc import ABC, abstractmethod
 
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 from markdownify import markdownify
 
+from byte.support.mixins import Bootable
 
-class BaseWebParser(ABC):
+
+class BaseWebParser(ABC, Bootable):
     """Abstract base class for web content parsers.
 
     Each parser implementation should identify if it can handle specific HTML content
@@ -27,18 +30,34 @@ class BaseWebParser(ABC):
         pass
 
     @abstractmethod
-    def parse(self, soup: BeautifulSoup) -> str:
-        """Extract and clean text content from the HTML.
+    def extract_content_element(self, soup: BeautifulSoup) -> Tag | None:
+        """Extract the main content element from the HTML.
 
         Args:
                 soup: BeautifulSoup object containing the HTML content
 
         Returns:
-                Cleaned text content as a string
+                BeautifulSoup Tag containing the main content, or None if not found
 
-        Usage: `text = parser.parse(soup)` -> cleaned text
+        Usage: `element = parser.extract_content_element(soup)` -> Tag or None
         """
         pass
+
+    def get_cleaning_config(self) -> dict:
+        """Get the cleaning pipeline configuration for this parser.
+
+        Returns:
+                Dictionary with cleaning pipeline settings
+
+        Usage: `config = parser.get_cleaning_config()` -> dict
+        """
+        return {
+            "remove_unwanted": True,
+            "filter_links": False,
+            "link_ratio": 0.5,
+            "normalize": False,
+            "to_markdown": True,
+        }
 
     def _process_element(self, element, elements_to_skip: list, newline_elements: list) -> str:
         """Traverse through HTML tree recursively to preserve newline and skip unwanted elements.
