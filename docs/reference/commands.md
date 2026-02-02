@@ -47,12 +47,32 @@ positional arguments:
 
 ```
 
-### `/show`
+
+## Clipboard
+
+### `/copy`
 
 ```
-usage: show
+usage: copy [--type {message,block}]
 
-Display the current conversation history and context
+Copy code blocks from message history to clipboard
+
+options:
+  --type {message,block}
+                        Filter code blocks by type (message or block)
+
+```
+
+### `/copy:drop`
+
+```
+usage: copy:drop [--type {message,block}]
+
+Clear code blocks from the clipboard session
+
+options:
+  --type {message,block}
+                        Filter code blocks by type (message or block)
 
 ```
 
@@ -152,15 +172,6 @@ Create an AI-powered git commit with automatic staging and linting
 
 ```
 
-### `/copy`
-
-```
-usage: copy
-
-Copy code blocks from the last message to clipboard
-
-```
-
 ### `/exit`
 
 ```
@@ -228,6 +239,15 @@ Clear conversation history and start a new thread
 usage: reset
 
 Reset conversation history and clear file context completely
+
+```
+
+### `/show`
+
+```
+usage: show
+
+Display the current conversation history and context
 
 ```
 
