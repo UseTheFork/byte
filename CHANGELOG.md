@@ -1,6 +1,300 @@
 # CHANGELOG
 
 
+## v1.3.0 (2026-02-02)
+
+### Bug Fixes
+
+- Bump langgraph from 1.0.5 to 1.0.7
+  ([`e1b36a1`](https://github.com/UseTheFork/byte/commit/e1b36a165fd674e62aeea3c82dbe06e0ba088104))
+
+Bumps [langgraph](https://github.com/langchain-ai/langgraph) from 1.0.5 to 1.0.7. - [Release
+  notes](https://github.com/langchain-ai/langgraph/releases) -
+  [Commits](https://github.com/langchain-ai/langgraph/compare/1.0.5...1.0.7)
+
+--- updated-dependencies: - dependency-name: langgraph dependency-version: 1.0.7
+
+dependency-type: direct:production
+
+update-type: version-update:semver-patch ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+- Bump mkdocstrings from 1.0.0 to 1.0.2
+  ([`136133a`](https://github.com/UseTheFork/byte/commit/136133ac5420a499863f0d33aec54c40bce2488a))
+
+Bumps [mkdocstrings](https://github.com/mkdocstrings/mkdocstrings) from 1.0.0 to 1.0.2. - [Release
+  notes](https://github.com/mkdocstrings/mkdocstrings/releases) -
+  [Changelog](https://github.com/mkdocstrings/mkdocstrings/blob/main/CHANGELOG.md) -
+  [Commits](https://github.com/mkdocstrings/mkdocstrings/compare/1.0.0...1.0.2)
+
+--- updated-dependencies: - dependency-name: mkdocstrings dependency-version: 1.0.2
+
+dependency-type: direct:development
+
+update-type: version-update:semver-patch ...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+
+- Convert message content to string in record response service
+  ([`4e97615`](https://github.com/UseTheFork/byte/commit/4e97615e47dab1429cc5c23ca8901b2a6761b9a0))
+
+### Build System
+
+- Update dependencies and build system requirements
+  ([`19a1983`](https://github.com/UseTheFork/byte/commit/19a198347b8c7071d6a30e4f8f1b1193e63e52eb))
+
+- Update main with clipboard service provider
+  ([`517b0b5`](https://github.com/UseTheFork/byte/commit/517b0b5388b820291d741021669ca3aa4b3d39b0))
+
+### Chores
+
+- Add github workflow for preparing release documentation
+  ([`648bf44`](https://github.com/UseTheFork/byte/commit/648bf44a64ebd579254eb7b08aa6cb87d69e3450))
+
+- Add step to push changes to staging branch
+  ([`24a59cc`](https://github.com/UseTheFork/byte/commit/24a59cc37ab890915bcc4cc186d03a77d27008df))
+
+- Configure git user for github-actions bot in release workflow
+  ([`01125df`](https://github.com/UseTheFork/byte/commit/01125df35c7cd63bdbc299f1371cc8e5cd038176))
+
+- Update documentation and configuration
+  ([`eee8be2`](https://github.com/UseTheFork/byte/commit/eee8be230d6d0ed2d1229054dc3f1e04558a31ad))
+
+- Update documentation and configuration
+  ([`8ecce42`](https://github.com/UseTheFork/byte/commit/8ecce4255e95631c8466f44e8f4a531646749a6f))
+
+- Update vscode settings and remove unused configurations
+  ([`2cb6647`](https://github.com/UseTheFork/byte/commit/2cb664771ff936eef81309c1e1a8bd9079441b76))
+
+### Documentation
+
+- Add project architecture convention document
+  ([`65e90fc`](https://github.com/UseTheFork/byte/commit/65e90fc01e0f8a67ee8780ddc737fb284965ccc7))
+
+### Features
+
+- Add cancellation spinner for agent execution
+  ([`6832c94`](https://github.com/UseTheFork/byte/commit/6832c9471986e961ec22bcb355100231248314eb))
+
+Implement a custom RuneSpinner to provide visual feedback when an agent execution is cancelled. The
+  spinner now supports: - Customizable color palette - Dynamic rune generation - Transient display
+  during cancellation process
+
+- Add clipboard extraction to end node
+  ([`ce71bf3`](https://github.com/UseTheFork/byte/commit/ce71bf3edd14f2abf2207cb2da371a120df57a72))
+
+- Add clipboard service for code block management
+  ([`89fa2cc`](https://github.com/UseTheFork/byte/commit/89fa2ccb44398882051f54e586064becf74999f8))
+
+- Add code block navigator for interactive selection
+  ([`cd62305`](https://github.com/UseTheFork/byte/commit/cd62305e2ae8305a7a154bfbab3ea4f3e0861c32))
+
+- Add commit enforcement rule to prompt module
+  ([`e17d50b`](https://github.com/UseTheFork/byte/commit/e17d50b2c97a888ece7e9319d8cdf3e102e91c1d))
+
+- Add configurable agent settings framework
+  ([`c049280`](https://github.com/UseTheFork/byte/commit/c0492805d0768b4c98dc07fc34062776250b3fe3))
+
+- Add copy:drop command to manage clipboard code blocks
+  ([`ed2a2be`](https://github.com/UseTheFork/byte/commit/ed2a2be4fe33e970e52aa8cea9b02c40c7b30ada))
+
+Introduces a new command to clear code blocks from the clipboard session
+
+- Add CopyDropCommand to drop code blocks - Enhance ClipboardService with block type filtering -
+  Update schemas to include block type - Add type filtering to copy and drop commands - Provide
+  optional type-based filtering for code blocks
+
+- Add dispatch_task method to application
+  ([`3802e76`](https://github.com/UseTheFork/byte/commit/3802e76c18f034471dc763bb843f5042b8640405))
+
+- Add interactive subprocess result handling
+  ([`a31f66c`](https://github.com/UseTheFork/byte/commit/a31f66c318014652fb29646fdb14db0bd52be0d7))
+
+Enhance subprocess command execution with user interaction: - Add ability to display subprocess
+  results in a panel - Prompt user to add subprocess output to conversation context - Allow optional
+  user notes with subprocess results - Modify subprocess handling to support more interactive
+  workflows
+
+- Add logging for successful text parsing in chromium service
+  ([`4fd7e20`](https://github.com/UseTheFork/byte/commit/4fd7e200aa15dedcea62a934e54ed7eb15c410cb))
+
+- Add project hierarchy configuration for ask agent
+  ([`3a8fa3a`](https://github.com/UseTheFork/byte/commit/3a8fa3a0ccd5eec80396f775a6f3e8a0e991deda))
+
+- Add project hierarchy setting to conventions agent
+  ([`1e46978`](https://github.com/UseTheFork/byte/commit/1e469783dc4cc2dfe565223d88282c2c50a6f021))
+
+- Add prompt assembler for dynamic template rendering
+  ([`b22fd5b`](https://github.com/UseTheFork/byte/commit/b22fd5b8ca0312d8dd3a7bb5742d2a0b7fbaa314))
+
+- Add user confirmation validator for interactive validation
+  ([`dd4dbe1`](https://github.com/UseTheFork/byte/commit/dd4dbe1e6815325455705eea6f20106b38966580))
+
+- Enhance web content parsing with content extraction and cleaning pipeline
+  ([`472fd5b`](https://github.com/UseTheFork/byte/commit/472fd5b11194bbe9926dc95ee2c0a4cfc0ae63a6))
+
+Introduces significant improvements to web content parsing: - Add extract_content_element method to
+  web parsers - Implement get_cleaning_config method for parser-specific configurations - Create
+  ContentCleaner service for flexible content processing - Update ChromiumService to use new content
+  extraction and cleaning pipeline - Add support for Sphinx documentation parser - Improve parser
+  initialization with boot method instead of __init__
+
+These changes provide more robust and configurable web content extraction across different
+  documentation platforms.
+
+- Expose CodeBlockNavigator in cli module
+  ([`6b815fa`](https://github.com/UseTheFork/byte/commit/6b815fa447fbd7e58c250d3abf3c8aa0b6b66376))
+
+- Handle input cancellation in convention and tool nodes
+  ([`f19466b`](https://github.com/UseTheFork/byte/commit/f19466bc8ef209c3d609a2abc25b6cb2057309c5))
+
+- Implement config agent command for interactive settings
+  ([`67173c3`](https://github.com/UseTheFork/byte/commit/67173c3a5c52b4e3bf8a70d30d6fd9836f5b9ca1))
+
+- Improve content extraction for sphinx and web parsing
+  ([`8d69db1`](https://github.com/UseTheFork/byte/commit/8d69db1ad697bf5a93f8529206cadd6b9e0e4831))
+
+### Ops
+
+- Add branch synchronization workflow step to release process
+  ([`7666937`](https://github.com/UseTheFork/byte/commit/7666937b8f5ba0ef5acc823e5f586dd512914c62))
+
+- Add fake api key for prepare-docs workflow
+  ([`98ccb37`](https://github.com/UseTheFork/byte/commit/98ccb37e223afab9f056d7e51d9ba3f4953c7334))
+
+- Update prepare-release workflow to merge changes to development branch
+  ([`58e974f`](https://github.com/UseTheFork/byte/commit/58e974f485500b62f9585edc04b80083a2d56cb8))
+
+### Refactoring
+
+- Add get_prompt method to base agent implementation
+  ([`3771d8e`](https://github.com/UseTheFork/byte/commit/3771d8e7a2461e105b163426f3d5266fb8a33c89))
+
+- Add get_user_template method to base and agent implementations
+  ([`75fffdf`](https://github.com/UseTheFork/byte/commit/75fffdfda4d4efc78bf8ee54c5981cb7170a7b95))
+
+- Enhance prompt format schemas with new boundary types
+  ([`1063372`](https://github.com/UseTheFork/byte/commit/1063372c71738ee84b4f2c656a7bab95598e30ea))
+
+- Extend metadata schema with erase history flag
+  ([`a0e93dd`](https://github.com/UseTheFork/byte/commit/a0e93dd8a32999687936cdb109f16c53b69fc505))
+
+Add erase_history boolean field to MetadataSchema to control message history preservation
+
+- Extract user template to separate variables in prompt files
+  ([`a04f091`](https://github.com/UseTheFork/byte/commit/a04f091649118c55699a36553cd8f35eeced0daa))
+
+- Improve copy command description for clarity
+  ([`3b93ac0`](https://github.com/UseTheFork/byte/commit/3b93ac0757bddfc37d468ed4712c7a410cdda461))
+
+- Improve end node message handling and state management
+  ([`445a0cd`](https://github.com/UseTheFork/byte/commit/445a0cde2f48976c809f8f9f1cc55a98f8d49dac))
+
+Enhance message processing logic in EndNode: - Remove unused imports - Add docstring explaining
+  node's purpose - Conditionally promote messages based on metadata - Remove explicit message
+  clearing
+
+- Improve task cancellation and error handling in stream execution
+  ([`b536a26`](https://github.com/UseTheFork/byte/commit/b536a26fba3906ab366a976a1cf3f72629c390c7))
+
+Refactors the stream execution method to: - Handle asyncio.CancelledError in _run_stream method -
+  Move stream task creation inside try block - Replace CancelledError with KeyboardInterrupt for
+  user cancellation - Add proper cleanup and logging for task cancellation
+
+Removes redundant print statements that were likely used for debugging
+
+- Improve user request wrapping logic in assistant node
+  ([`a254e5d`](https://github.com/UseTheFork/byte/commit/a254e5d1591d2a88559b60210af6a79bbc51e734))
+
+Modify the wrapping of user requests to handle XML-like structured inputs more intelligently: -
+  Check if user request already starts with XML tags - Skip wrapping if XML structure is detected -
+  Maintain existing boundary wrapping for plain text inputs
+
+- Initialize state with default values and clear scratch messages
+  ([`b960402`](https://github.com/UseTheFork/byte/commit/b960402513e39c09d7f342e2484030b674a479be))
+
+Update StartNode state initialization: - Always clear scratch messages - Set default values for
+  parsed_blocks and extracted_content - Add erase_history flag to metadata
+
+- Modify parser service to return formatted masked messages
+  ([`a0401fe`](https://github.com/UseTheFork/byte/commit/a0401fe89bb9827211a75ab758ac8cbf2f5ab899))
+
+- Remove copy agent and node implementations
+  ([`eb2122c`](https://github.com/UseTheFork/byte/commit/eb2122ca2611d4a66a6d61cae7caebaec47767e8))
+
+- Remove copy command from prompt format
+  ([`c60ea25`](https://github.com/UseTheFork/byte/commit/c60ea25cfad015d8003024181ec29032c6985a84))
+
+- Remove debug log and add content retrieval for added files
+  ([`4aac4a4`](https://github.com/UseTheFork/byte/commit/4aac4a41377be0b63221e370184688f8b477f2e4))
+
+- Remove readthedocs parser and consolidate parsing logic
+  ([`145ccc9`](https://github.com/UseTheFork/byte/commit/145ccc92bb6685ea421068decb291dfc01290a58))
+
+Consolidate parsing logic by removing the separate ReadTheDocs parser and integrating its
+  functionality into the Sphinx parser. This simplifies the parser structure and reduces code
+  duplication. Key changes include:
+
+- Remove ReadTheDocsParser - Update Sphinx parser to handle ReadTheDocs sites - Remove
+  ReadTheDocsParser references from imports and parser lists - Simplify content extraction methods
+  across parsers
+
+- Remove show agent and move show command to memory module
+  ([`6d9a23b`](https://github.com/UseTheFork/byte/commit/6d9a23beee39d7e6c844d659145711375250611c))
+
+This refactoring moves the show functionality from the agent module to the memory module: - Deleted
+  show agent and command from agent implementations - Added new show command in memory module -
+  Updated imports and service providers accordingly - Simplified assistant node and other related
+  files
+
+- Restructure prompt templates with user template and assembler
+  ([`b774719`](https://github.com/UseTheFork/byte/commit/b7747197a3ba91850bb9bc08949fd94cf5a619da))
+
+- Simplify agent and application interrupt handling
+  ([`5f2b64c`](https://github.com/UseTheFork/byte/commit/5f2b64c9a57133db7f7c911fc2713b01c6b6e7c9))
+
+Remove unnecessary debug print statements and spinner logic Streamline keyboard interrupt handling
+  in both agent and application Reduce code complexity by removing redundant cancellation steps
+
+- Update agents to use get_enforcement method
+  ([`8afe9e5`](https://github.com/UseTheFork/byte/commit/8afe9e53dedc2cdaa52f34f908189af1fbc9e198))
+
+- Update ai comment watcher with more flexible comment handling
+  ([`41cb281`](https://github.com/UseTheFork/byte/commit/41cb281b4117c669f65b2610dae6376ca512edc8))
+
+- Update cleaner agent prompt and user template
+  ([`7d2878a`](https://github.com/UseTheFork/byte/commit/7d2878afc6f46e6e64220b38a4230b6c67a449c2))
+
+- Update interactions service to handle default selection
+  ([`62f5d9d`](https://github.com/UseTheFork/byte/commit/62f5d9d1aa46c3e7db0ddabc63763fd74dcfd5b4))
+
+- Update message handling in nodes and utils
+  ([`ca19427`](https://github.com/UseTheFork/byte/commit/ca19427b03f0258113a04bb8af784ea40c40fefe))
+
+- Update parse blocks node with user interaction handling
+  ([`c75e594`](https://github.com/UseTheFork/byte/commit/c75e594f9219da7f5f3a05359efbd3bda6a5d0d5))
+
+Modify ParseBlocksNode to handle user interactions: - Add UserInteractive mixin - Implement graceful
+  handling of input cancellation - Add metadata flag for history erasure on max iterations
+
+- Update state schema with optional extracted content
+  ([`25ac65b`](https://github.com/UseTheFork/byte/commit/25ac65bd96d399c6a45149d2ee12bdb003df0c29))
+
+Modify state schema: - Make extracted_content nullable - Minor formatting adjustments
+
+### Testing
+
+- Add test files for various web parsers
+  ([`add603a`](https://github.com/UseTheFork/byte/commit/add603ad29db24877443095652f91d47d28ef413))
+
+- Add test fixtures for web parser service
+  ([`59ae9c0`](https://github.com/UseTheFork/byte/commit/59ae9c01996a874877385eabe1a3c06b963aae7c))
+
+- Update fixtures to include all html
+  ([`5ea5fe2`](https://github.com/UseTheFork/byte/commit/5ea5fe20070b65f5b3561fe2606dc94bf8110e8a))
+
+
 ## v1.2.0 (2026-01-29)
 
 ### Chores
@@ -31,6 +325,9 @@ These changes improve text emphasis and formatting capabilities in the prompt sy
 
 - Improve type hints and simplify enforcement list handling
   ([`ae14ff0`](https://github.com/UseTheFork/byte/commit/ae14ff01c76f0bcb2c7864c059fb355dc7aaf3bf))
+
+- Remove _setup_environment method from load configuration
+  ([`26329a1`](https://github.com/UseTheFork/byte/commit/26329a1b3ef7780e4f3aa4cb51fb83166e449838))
 
 - Update enforcement and reinforcement message handling
   ([`b8b74d4`](https://github.com/UseTheFork/byte/commit/b8b74d49d39bfb419d6e5580da2f6055141bf8a2))
