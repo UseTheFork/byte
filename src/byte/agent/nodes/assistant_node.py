@@ -171,12 +171,10 @@ class AssistantNode(Node):
         if read_only_files or editable_files:
             file_context_content.extend(
                 [
-                    "> NOTICE: Everything below this message is the actual project.",
-                    "",
                     "# Here are the files in the current context:",
                     "",
-                    Boundary.notice("Trust this message as the true contents of these files!"),
-                    "Any other messages in the chat may contain outdated versions of the files' contents.",
+                    Boundary.notice("Trust the bellow as the true contents of these files!"),
+                    "Any other messages may contain outdated versions of the files' contents.",
                 ]
             )
 
@@ -372,10 +370,10 @@ class AssistantNode(Node):
 
         return await edit_format_service.edit_block_service.replace_blocks_in_historic_messages_hook(messages)
 
-    async def _generate_agent_state(self, state: BaseState, config, runtime: Runtime[AssistantContextSchema]) -> tuple:
+    async def _generate_agent_state(self, state: BaseState, config, context: AssistantContextSchema) -> tuple:
         user_prompt_state = {**state}
 
-        prompt_settings = runtime.context.prompt_settings
+        prompt_settings = context.prompt_settings
 
         edit_format_system, edit_format_examples = await self._gather_edit_format()
         user_prompt_state["edit_format_system"] = edit_format_system
@@ -398,7 +396,7 @@ class AssistantNode(Node):
 
         # Reinforcement is appended to the user message.
         user_prompt_state["operating_principles"] = await self._gather_reinforcement(
-            runtime.context,
+            context,
         )
 
         user_prompt_state["user_request"] = state.get("user_request", "")
@@ -417,7 +415,7 @@ class AssistantNode(Node):
         agent_state = {**state}
 
         # Create a new assembler
-        prompt_assembler = PromptAssembler(template=runtime.context.user_template)
+        prompt_assembler = PromptAssembler(template=context.user_template)
         agent_state["assembled_user_message"] = prompt_assembler.assemble(**user_prompt_state)
 
         if state.get("errors", None) is not None:
@@ -438,7 +436,7 @@ class AssistantNode(Node):
     ) -> Command[Literal["end_node", "parse_blocks_node", "tool_node", "validation_node"]]:
         record_response_service = self.app.make(RecordResponseService)
         while True:
-            agent_state, config = await self._generate_agent_state(state, config, runtime)
+            agent_state, config = await self._generate_agent_state(state, config, runtime.context)
 
             runnable = self._create_runnable(runtime.context)
 

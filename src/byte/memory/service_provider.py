@@ -1,7 +1,7 @@
 from typing import List, Type
 
 from byte import Command, Service, ServiceProvider
-from byte.memory import ClearCommand, MemoryService, ResetCommand
+from byte.memory import ClearCommand, MemoryService, ResetCommand, ShowCommand
 
 
 class MemoryServiceProvider(ServiceProvider):
@@ -17,4 +17,4 @@ class MemoryServiceProvider(ServiceProvider):
         return [MemoryService]
 
     def commands(self) -> List[Type[Command]]:
-        return [ClearCommand, ResetCommand]
+        return [ClearCommand, ResetCommand, ShowCommand]
