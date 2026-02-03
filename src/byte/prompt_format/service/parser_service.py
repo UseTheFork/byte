@@ -126,11 +126,6 @@ class ParserService(Service, UserInteractive, ABC):
             # search_content = search_content.strip()
             # replace_content = replace_content.strip()
 
-            self.app["log"].debug(block_id)
-            self.app["log"].debug(operation)
-            self.app["log"].debug(file_path)
-            self.app["log"].debug(search_content)
-
             # Determine block type based on operation and file existence
             file_path_obj = Path(file_path.strip())
             if not file_path_obj.is_absolute():
@@ -467,6 +462,8 @@ class ParserService(Service, UserInteractive, ABC):
             Boundary.notice("Edit blocks removed from older messages for brevity."),
         ]
         ai_message_counter = 0
+
+        # AI: Add a if here if messages is empty then we should insert a genaric note like the conversation history is empty ai!
 
         for message in messages:
             if isinstance(message, AIMessage):

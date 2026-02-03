@@ -30,6 +30,7 @@ class BoundaryType(str, Enum):
     REINFORCEMENT = "reinforcement"
     PROJECT_HIERARCHY = "project_hierarchy"
     CONSTRAINTS = "constraints"
+    PLAN = "agent_plan"
 
     # Operating Constraints
     OPERATING_CONSTRAINTS = "operating_constraints"

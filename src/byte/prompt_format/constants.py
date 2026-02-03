@@ -1,1 +1,1 @@
-EDIT_BLOCK_NAME = "Pseudo-XML Edit"
+EDIT_BLOCK_NAME = "XML Response"
