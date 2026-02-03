@@ -421,7 +421,7 @@ class ParseBlocksNode(Node, UserInteractive):
 
         if self.metadata.iteration >= 4:
             try:
-                should_continue = self.prompt_for_confirmation(
+                should_continue = await self.prompt_for_confirmation(
                     "Failed to parse blocks after 5 attempts. Continue trying?",
                     default=False,
                 )
