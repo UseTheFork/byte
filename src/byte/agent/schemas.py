@@ -98,7 +98,6 @@ class AssistantContextSchema:
     prompt_settings: PromptSettingsSchema = Field(default_factory=PromptSettingsSchema)  # Settings for prompt behavior
     tools: Optional[List[BaseTool]] = Field(default=None)  # Tools bound to LLM, if any
     enforcement: Optional[List[str]] = Field(default=None)
-    recovery_steps: Optional[str] = Field(default=None)
 
 
 @dataclass

@@ -33,7 +33,6 @@ class BaseState(TypedDict):
     extracted_content: str | dict | None
 
     # These are specific to Coder
-    edit_format_system: str
     parsed_blocks: list[SearchReplaceBlock]
 
     # This is specific to subprocess

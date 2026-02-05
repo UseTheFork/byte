@@ -7,10 +7,11 @@ from typing_extensions import List
 
 from byte import EventType, Payload
 from byte.agent import AssistantContextSchema, BaseState
-from byte.code_operations import Boundary, BoundaryType, EditFormatService
+from byte.code_operations import EditBlockService, edit_block_messages
 from byte.conventions import ConventionContextService
 from byte.files import FileService
 from byte.git import CommitService
+from byte.support import Boundary, BoundaryType
 from byte.support.mixins import Bootable, Eventable
 from byte.support.utils import list_to_multiline_text
 
@@ -295,23 +296,6 @@ class PromptAssembler(Bootable, Eventable):
 
         return list_to_multiline_text(project_information_and_context)
 
-    async def _gather_edit_format(self) -> tuple[str, list[tuple[str, str]]]:
-        """Gather edit format system prompt and examples for the assistant.
-
-        Retrieves the configured edit format prompts from EditFormatService,
-        which may include both file edit blocks and shell command capabilities
-        depending on configuration.
-
-        Returns:
-                Tuple containing (system_prompt, examples) where system_prompt is the
-                instruction text and examples is a list of (user, assistant) message pairs
-
-        Usage: `system_prompt, examples = await self._gather_edit_format()`
-        """
-        edit_format_service = self.app.make(EditFormatService)
-
-        return (edit_format_service.prompts.system, edit_format_service.prompts.examples)
-
     async def _gather_masked_messages(self, state) -> str:
         """Gather masked messages with edit blocks removed from message history.
 
@@ -328,19 +312,17 @@ class PromptAssembler(Bootable, Eventable):
 
         Usage: `masked_messages = await self._gather_masked_messages(state)`
         """
-        edit_format_service = self.app.make(EditFormatService)
+        edit_block_service = self.app.make(EditBlockService)
         messages = state.get("history_messages", [])
 
-        return await edit_format_service.edit_block_service.replace_blocks_in_historic_messages_hook(messages)
+        return await edit_block_service.replace_blocks_in_historic_messages_hook(messages)
 
     async def generate_state(self, state: BaseState, config, context: AssistantContextSchema) -> dict:
         user_prompt_state = {**state}
 
         prompt_settings = context.prompt_settings
 
-        edit_format_system, edit_format_examples = await self._gather_edit_format()
-        user_prompt_state["edit_format_system"] = edit_format_system
-        user_prompt_state["examples"] = edit_format_examples
+        user_prompt_state["examples"] = edit_block_messages
 
         user_prompt_state["project_information_and_context"] = await self._gather_project_context()
 
