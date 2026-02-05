@@ -22,7 +22,7 @@ class UserInteractive:
 
     app: Application
 
-    async def prompt_for_input(self, message):
+    async def prompt_for_input(self, message) -> str | None:
         """Prompt the user for general input via the input actor.
 
         Sends a request to the UserInteractionActor to display the input prompt,
