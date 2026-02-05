@@ -3,14 +3,11 @@ from typing import Literal
 
 from langchain_core.messages import ToolMessage
 from langchain_core.runnables import RunnableConfig
-from langgraph.graph.message import RemoveMessage
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 from rich.pretty import Pretty
-from rich.text import Text
 
-from byte.agent import AssistantContextSchema, AssistantNode, BaseState, ConstraintSchema, Node
-from byte.cli import InputCancelledError
+from byte.agent import AssistantContextSchema, AssistantNode, BaseState, Node
 from byte.support import Str
 from byte.support.mixins import UserInteractive
 from byte.support.utils import get_last_message
@@ -37,42 +34,9 @@ class ToolNode(Node, UserInteractive):
             console = self.app["console"]
 
             pretty = Pretty(tool_call)
-            console.print_panel(pretty)
+            console.print_info_panel(pretty, title=f"Using Tool: {tool_call['name']}")
 
-            try:
-                run_tool = await self.prompt_for_confirmation(f"Use {tool_call['name']}", True)
-            except InputCancelledError:
-                run_tool = None
-
-            if run_tool:
-                tool_result = await tools_by_name[tool_call["name"]].ainvoke(tool_call["args"])
-            else:
-                tool_result = {"result": "User declined tool call."}
-
-                # Create constraint to avoid this tool with these specific arguments
-                constraint = ConstraintSchema(
-                    type="avoid",
-                    description=f"Do not use {tool_call['name']} with arguments: {json.dumps(tool_call['args'])}",
-                    source="declined_tool",
-                )
-
-                # Send back to assistant_node but remove the last message.
-                return Command(
-                    goto=Str.class_to_snake_case(AssistantNode),
-                    update={"scratch_messages": [RemoveMessage(id=message.id)], "constraints": [constraint]},
-                )
-
-            # Display tool result and confirm if it should be added to response
-            result_pretty = Text(tool_result)
-            console.print_panel(result_pretty, title="Tool Result")
-
-            try:
-                add_result = await self.prompt_for_confirmation("Add this result to the response?", True)
-            except InputCancelledError:
-                add_result = None
-
-            if not add_result:
-                tool_result = {"result": "User did not find the results useful for the task."}
+            tool_result = await tools_by_name[tool_call["name"]].ainvoke(tool_call["args"])
 
             outputs.append(
                 ToolMessage(
