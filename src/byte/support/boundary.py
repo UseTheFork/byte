@@ -1,6 +1,69 @@
+from enum import Enum
 from typing import Literal
 
-from byte.code_operations import BoundaryType
+
+class BoundaryType(str, Enum):
+    """Type of boundary marker for content sections."""
+
+    ROLE = "role"
+    TASK = "task"
+    USER_INPUT = "user_input"
+
+    GOAL = "goal"
+    RESPONSE_FORMAT = "response_format"
+
+    RULES = "rules"
+
+    ERROR = "error"
+
+    NAME = "name"
+    DESCRIPTION = "description"
+    LOCATION = "location"
+
+    AVAILABLE_CONVENTIONS = "available_conventions"
+    CONVENTION = "convention"
+
+    SESSION_CONTEXT = "session_context"
+    SHELL_COMMAND = "shell_command"
+
+    FILE = "file"
+
+    EDIT_BLOCK = "edit_block"
+    SEARCH = "search"
+    REPLACE = "replace"
+    EXAMPLE = "example"
+    REINFORCEMENT = "reinforcement"
+    PROJECT_HIERARCHY = "project_hierarchy"
+    CONSTRAINTS = "constraints"
+    PLAN = "agent_plan"
+
+    # Operating Constraints
+    OPERATING_CONSTRAINTS = "operating_constraints"
+    OPERATING_PRINCIPLES = "operating_principles"
+
+    CRITICAL_REQUIREMENTS = "response_requirements"
+    RECOVERY_STEPS = "recovery_steps"
+
+    RESPONSE_TEMPLATE = "response_template"
+
+    CONTEXT = "context"
+
+    # Specific to command execution
+    STDOUT = "stdout"
+    STDERR = "stderr"
+
+    SYSTEM_CONTEXT = "system_context"
+
+    NOTE = "note"
+
+    HEADING = "heading"
+
+    CONVERSATION_HISTORY = "conversation_history"
+    AGENT_MESSAGE = "agent_message"
+    USER_MESSAGE = "user_message"
+
+    def __str__(self):
+        return self.value
 
 
 class Boundary:

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.support.boundary import Boundary, BoundaryType
     from byte.support.concerns.array_store import ArrayStore
     from byte.support.service import Service
     from byte.support.service_provider import ServiceProvider
@@ -13,6 +14,8 @@ if TYPE_CHECKING:
 
 __all__ = (
     "ArrayStore",
+    "Boundary",
+    "BoundaryType",
     "Service",
     "ServiceProvider",
     "Str",
@@ -22,6 +25,8 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "ArrayStore": "concerns.array_store",
+    "Boundary": "boundary",
+    "BoundaryType": "boundary",
     "Service": "service",
     "ServiceProvider": "service_provider",
     "Str": "string",

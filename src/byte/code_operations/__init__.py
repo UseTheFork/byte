@@ -5,34 +5,32 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.code_operations.constants import EDIT_BLOCK_NAME
+    from byte.code_operations.exceptions import NoBlocksFoundError, PreFlightCheckError, PreFlightUnparsableError
+    from byte.code_operations.prompts import edit_block_enforcement, edit_block_messages
     from byte.code_operations.schemas import (
         BlockStatus,
         BlockType,
-        BoundaryType,
         EditFormatPrompts,
         RawSearchReplaceBlock,
         SearchReplaceBlock,
         ShellCommandBlock,
     )
-    from byte.code_operations.service.edit_format_service import EditFormatService
-    from byte.code_operations.service.parser_service import ParserService
+    from byte.code_operations.service.edit_block_service import EditBlockService
     from byte.code_operations.service.shell_command_service import ShellCommandService
     from byte.code_operations.service_provider import PromptFormatProvider
-    from byte.code_operations.utils.boundary import Boundary
 
 __all__ = (
     "EDIT_BLOCK_NAME",
     "BlockStatus",
     "BlockType",
-    "Boundary",
-    "BoundaryType",
+    "EditBlockService",
     "EditFormatConfig",
     "EditFormatError",
     "EditFormatPrompts",
     "EditFormatService",
     "FileOutsideProjectError",
     "NoBlocksFoundError",
-    "ParserService",
     "PreFlightCheckError",
     "PreFlightUnparsableError",
     "PromptFormatProvider",
@@ -42,22 +40,22 @@ __all__ = (
     "SearchReplaceBlock",
     "ShellCommandBlock",
     "ShellCommandService",
+    "edit_block_enforcement",
+    "edit_block_messages",
 )
 
 _dynamic_imports = {
     # keep-sorted start
     "BlockStatus": "schemas",
     "BlockType": "schemas",
-    "Boundary": "utils.boundary",
-    "BoundaryType": "schemas",
     "EDIT_BLOCK_NAME": "constants",
+    "EditBlockService": "service.edit_block_service",
     "EditFormatConfig": "config",
     "EditFormatError": "exceptions",
     "EditFormatPrompts": "schemas",
     "EditFormatService": "service.edit_format_service",
     "FileOutsideProjectError": "exceptions",
     "NoBlocksFoundError": "exceptions",
-    "ParserService": "service.parser_service",
     "PreFlightCheckError": "exceptions",
     "PreFlightUnparsableError": "exceptions",
     "PromptFormatProvider": "service_provider",
@@ -67,6 +65,8 @@ _dynamic_imports = {
     "SearchReplaceBlock": "schemas",
     "ShellCommandBlock": "schemas",
     "ShellCommandService": "service.shell_command_service",
+    "edit_block_enforcement": "prompts",
+    "edit_block_messages": "prompts",
     # keep-sorted end
 }
 
