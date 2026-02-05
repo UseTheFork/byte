@@ -7,10 +7,10 @@ from typing_extensions import List
 
 from byte import EventType, Payload
 from byte.agent import AssistantContextSchema, BaseState
+from byte.code_operations import Boundary, BoundaryType, EditFormatService
 from byte.conventions import ConventionContextService
 from byte.files import FileService
 from byte.git import CommitService
-from byte.prompt_format import Boundary, BoundaryType, EditFormatService
 from byte.support.mixins import Bootable, Eventable
 from byte.support.utils import list_to_multiline_text
 

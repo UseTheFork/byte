@@ -1,5 +1,5 @@
-from byte.prompt_format import EDIT_BLOCK_NAME, Boundary, BoundaryType
-from byte.prompt_format.schemas import AICommentType
+from byte.code_operations import EDIT_BLOCK_NAME, Boundary, BoundaryType
+from byte.code_operations.schemas import AICommentType
 from byte.support.utils import list_to_multiline_text
 
 edit_format_system = list_to_multiline_text(

@@ -6,8 +6,8 @@ from typing import Dict, List, Optional, Union
 from rich.columns import Columns
 
 from byte import EventType, Payload, Service
+from byte.code_operations import Boundary, BoundaryType
 from byte.files import FileContext, FileDiscoveryService, FileMode
-from byte.prompt_format import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 
 

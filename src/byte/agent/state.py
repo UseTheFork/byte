@@ -3,7 +3,7 @@ from typing import Annotated, TypedDict
 from langgraph.graph.message import AnyMessage, add_messages
 
 from byte.agent import ConstraintSchema, MetadataSchema, add_constraints, replace_str, update_metadata
-from byte.prompt_format import SearchReplaceBlock
+from byte.code_operations import SearchReplaceBlock
 
 
 class BaseState(TypedDict):

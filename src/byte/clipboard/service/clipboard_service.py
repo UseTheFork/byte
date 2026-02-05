@@ -5,7 +5,7 @@ from langchain_core.messages import BaseMessage
 
 from byte import Service
 from byte.clipboard.schemas import BlockType, CodeBlock
-from byte.prompt_format import SearchReplaceBlock
+from byte.code_operations import SearchReplaceBlock
 from byte.support.utils import extract_content_from_message, get_language_from_filename
 
 

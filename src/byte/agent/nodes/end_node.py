@@ -9,7 +9,7 @@ from langgraph.types import Command
 from byte import EventType, Payload
 from byte.agent import AssistantContextSchema, BaseState, Node
 from byte.clipboard import ClipboardService
-from byte.prompt_format import Boundary, BoundaryType
+from byte.code_operations import Boundary, BoundaryType
 from byte.support.utils import get_last_ai_message, list_to_multiline_text
 
 

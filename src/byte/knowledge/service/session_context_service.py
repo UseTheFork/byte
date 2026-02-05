@@ -1,8 +1,8 @@
 from typing import Optional
 
 from byte import Payload, Service
+from byte.code_operations import Boundary, BoundaryType
 from byte.knowledge import SessionContextModel
-from byte.prompt_format import Boundary, BoundaryType
 from byte.support import ArrayStore
 from byte.support.utils import list_to_multiline_text
 

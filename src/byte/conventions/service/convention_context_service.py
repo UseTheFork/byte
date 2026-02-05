@@ -4,8 +4,8 @@ import html
 
 from byte import Service
 from byte.agent import BaseState
+from byte.code_operations import Boundary, BoundaryType
 from byte.parsing import SkillParsingService
-from byte.prompt_format import Boundary, BoundaryType
 from byte.support import ArrayStore
 from byte.support.utils import list_to_multiline_text
 

@@ -7,7 +7,7 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.agent import AssistantContextSchema, AssistantNode, BaseState, MetadataSchema, Node
-from byte.prompt_format import EditFormatService
+from byte.code_operations import EditFormatService
 from byte.support import Str
 
 

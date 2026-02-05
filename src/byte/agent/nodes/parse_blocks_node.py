@@ -8,7 +8,7 @@ from langgraph.types import Command
 
 from byte.agent import AssistantContextSchema, BaseState, Node
 from byte.cli import InputCancelledError
-from byte.prompt_format import (
+from byte.code_operations import (
     EDIT_BLOCK_NAME,
     BlockStatus,
     BlockType,

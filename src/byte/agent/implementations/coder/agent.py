@@ -11,9 +11,9 @@ from byte.agent import (
 )
 from byte.agent.implementations.coder.prompt import coder_prompt, coder_user_template
 from byte.agent.utils.graph_builder import GraphBuilder
+from byte.code_operations import EditFormatService
 from byte.conventions import load_conventions
 from byte.llm import LLMService
-from byte.prompt_format import EditFormatService
 
 
 class CoderAgent(Agent):

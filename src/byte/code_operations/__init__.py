@@ -5,18 +5,7 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
-    from byte.prompt_format.config import EditFormatConfig
-    from byte.prompt_format.constants import EDIT_BLOCK_NAME
-    from byte.prompt_format.exceptions import (
-        EditFormatError,
-        FileOutsideProjectError,
-        NoBlocksFoundError,
-        PreFlightCheckError,
-        PreFlightUnparsableError,
-        ReadOnlyFileError,
-        SearchContentNotFoundError,
-    )
-    from byte.prompt_format.schemas import (
+    from byte.code_operations.schemas import (
         BlockStatus,
         BlockType,
         BoundaryType,
@@ -25,11 +14,11 @@ if TYPE_CHECKING:
         SearchReplaceBlock,
         ShellCommandBlock,
     )
-    from byte.prompt_format.service.edit_format_service import EditFormatService
-    from byte.prompt_format.service.parser_service import ParserService
-    from byte.prompt_format.service.shell_command_service import ShellCommandService
-    from byte.prompt_format.service_provider import PromptFormatProvider
-    from byte.prompt_format.utils.boundary import Boundary
+    from byte.code_operations.service.edit_format_service import EditFormatService
+    from byte.code_operations.service.parser_service import ParserService
+    from byte.code_operations.service.shell_command_service import ShellCommandService
+    from byte.code_operations.service_provider import PromptFormatProvider
+    from byte.code_operations.utils.boundary import Boundary
 
 __all__ = (
     "EDIT_BLOCK_NAME",

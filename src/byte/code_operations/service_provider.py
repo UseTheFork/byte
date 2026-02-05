@@ -1,7 +1,7 @@
 from typing import List, Type
 
 from byte import Service, ServiceProvider
-from byte.prompt_format import EditFormatService, ParserService, ShellCommandService
+from byte.code_operations import EditFormatService, ParserService, ShellCommandService
 
 
 class PromptFormatProvider(ServiceProvider):

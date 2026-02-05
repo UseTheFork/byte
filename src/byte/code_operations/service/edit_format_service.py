@@ -1,9 +1,9 @@
 from byte import Service
-from byte.prompt_format import (
+from byte.code_operations import (
     EditFormatPrompts,
     ParserService,
 )
-from byte.prompt_format.service.shell_command_prompt import (
+from byte.code_operations.service.shell_command_prompt import (
     shell_command_system,
     shell_practice_messages,
 )

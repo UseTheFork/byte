@@ -8,7 +8,7 @@ from langgraph.types import Command
 from pydantic import BaseModel, Field
 
 from byte.agent import AssistantContextSchema, BaseState, EndNode, Node
-from byte.prompt_format import Boundary, BoundaryType
+from byte.code_operations import Boundary, BoundaryType
 from byte.support import Str
 from byte.support.mixins import UserInteractive
 from byte.support.utils import extract_content_from_message, get_last_message, list_to_multiline_text

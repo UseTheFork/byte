@@ -152,7 +152,7 @@ class SearchReplaceBlock:
 
         Usage: `error_msg = block.to_error_format()` -> formatted error block
         """
-        from byte.prompt_format.utils.boundary import Boundary
+        from byte.code_operations.utils.boundary import Boundary
 
         sections = [
             Boundary.open(BoundaryType.ERROR, meta={"operation": self.block_type.value, "block_id": self.block_id}),
@@ -183,7 +183,7 @@ class SearchReplaceBlock:
 
         Usage: `formatted = block.to_search_replace_format()` -> formatted block string
         """
-        from byte.prompt_format.utils.boundary import Boundary
+        from byte.code_operations.utils.boundary import Boundary
 
         sections = [
             Boundary.open(

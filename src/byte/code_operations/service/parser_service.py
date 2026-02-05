@@ -6,8 +6,7 @@ from typing import List
 from langchain_core.messages import AIMessage, BaseMessage
 
 from byte import Service
-from byte.files import FileDiscoveryService, FileMode, FileService
-from byte.prompt_format import (
+from byte.code_operations import (
     EDIT_BLOCK_NAME,
     BlockStatus,
     BlockType,
@@ -20,12 +19,13 @@ from byte.prompt_format import (
     RawSearchReplaceBlock,
     SearchReplaceBlock,
 )
-from byte.prompt_format.service.parser_service_prompt import (
+from byte.code_operations.service.parser_service_prompt import (
     edit_format_enforcement,
     edit_format_recovery_steps,
     edit_format_system,
     practice_messages,
 )
+from byte.files import FileDiscoveryService, FileMode, FileService
 from byte.support.mixins import UserInteractive
 from byte.support.utils import list_to_multiline_text
 

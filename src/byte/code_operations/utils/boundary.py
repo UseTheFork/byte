@@ -1,6 +1,6 @@
 from typing import Literal
 
-from byte.prompt_format import BoundaryType
+from byte.code_operations import BoundaryType
 
 
 class Boundary:

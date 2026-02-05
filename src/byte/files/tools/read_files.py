@@ -1,8 +1,8 @@
 from langchain.tools import tool
 
 from byte import get_application
+from byte.code_operations import Boundary, BoundaryType
 from byte.files import FileContext, FileMode
-from byte.prompt_format import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 
 
