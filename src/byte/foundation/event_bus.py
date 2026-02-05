@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 
-class EventType(Enum):
+class EventType(str, Enum):
     POST_BOOT = "post_boot"
 
     PRE_PROMPT_TOOLKIT = "pre_prompt_toolkit"
@@ -32,6 +32,8 @@ class EventType(Enum):
 
     PRE_ASSISTANT_NODE = "pre_assistant_node"
     POST_ASSISTANT_NODE = "post_assistant_node"
+
+    GATHER_AVAILABLE_CONVENTIONS = "gather_available_conventions"
 
     GATHER_PROJECT_CONTEXT = "gather_project_context"
     GATHER_REINFORCEMENT = "gather_reinforcement"
