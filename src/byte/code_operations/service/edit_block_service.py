@@ -10,39 +10,25 @@ from byte.code_operations import (
     EDIT_BLOCK_NAME,
     BlockStatus,
     BlockType,
-    Boundary,
-    BoundaryType,
     EditFormatPrompts,
     NoBlocksFoundError,
-    PreFlightCheckError,
     PreFlightUnparsableError,
-    RawSearchReplaceBlock,
     SearchReplaceBlock,
 )
-from byte.code_operations.service.parser_service_prompt import (
-    edit_format_enforcement,
-    edit_format_recovery_steps,
-    edit_format_system,
-    practice_messages,
-)
 from byte.files import FileDiscoveryService, FileMode, FileService
+from byte.support import Boundary, BoundaryType
 from byte.support.mixins import UserInteractive
 from byte.support.utils import list_to_multiline_text
 
 
-class ParserService(Service, UserInteractive, ABC):
+class EditBlockService(Service, UserInteractive, ABC):
     prompts: EditFormatPrompts
     edit_blocks: List[SearchReplaceBlock]
-    match_pattern = r"<file\s+([^>]+)>\s*<search>(.*?)</search>\s*<replace>(.*?)</replace>\s*</file>"
+
+    match_pattern = rf"<{BoundaryType.EDIT_BLOCK}\s+([^>]+)>\s*<{BoundaryType.SEARCH}>(.*?)</{BoundaryType.SEARCH}>\s*<{BoundaryType.REPLACE}>(.*?)</{BoundaryType.REPLACE}>\s*</{BoundaryType.EDIT_BLOCK}>"
 
     def boot(self):
         self.edit_blocks = []
-        self.prompts = EditFormatPrompts(
-            system=edit_format_system,
-            enforcement=edit_format_enforcement,
-            recovery_steps=edit_format_recovery_steps,
-            examples=practice_messages,
-        )
 
     async def remove_blocks_from_content(self, content: str) -> str:
         """Remove pseudo-XML blocks from content and replace with summary message.
@@ -103,10 +89,10 @@ class ParserService(Service, UserInteractive, ABC):
         blocks = []
 
         # Pattern to match pseudo-XML file blocks with search/replace content
-        # <file path="..." operation="...">
+        # <edit_block path="..." operation="...">
         #   <search>...</search>
         #   <replace>...</replace>
-        # </file>
+        # </edit_block>
         pattern = self.match_pattern
 
         matches = re.findall(pattern, content, re.DOTALL)
@@ -164,8 +150,8 @@ class ParserService(Service, UserInteractive, ABC):
         an exception if any blocks are missing this required identifier.
         """
 
-        file_blocks_with_id = re.findall(r'<file\s+[^>]*block_id="[^"]+', content)
-        file_blocks_total = re.findall(r"<file\s+", content)
+        file_blocks_with_id = re.findall(rf'<{BoundaryType.EDIT_BLOCK}\s+[^>]*block_id="[^"]+', content)
+        file_blocks_total = re.findall(rf"<{BoundaryType.EDIT_BLOCK}\s+", content)
 
         blocks_with_id_count = len(file_blocks_with_id)
         total_blocks_count = len(file_blocks_total)
@@ -182,15 +168,25 @@ class ParserService(Service, UserInteractive, ABC):
 
         Raises NoBlocksFoundError if no file blocks are found.
         """
-        file_open_count = len(re.findall(r"<file\s+[^>]*>", content))
+        file_open_count = len(re.findall(rf"<{BoundaryType.EDIT_BLOCK}\s+[^>]*>", content))
 
         if file_open_count == 0:
             raise NoBlocksFoundError(f"No {EDIT_BLOCK_NAME} blocks found in content.")
 
     async def check_file_tags_balanced(self, content: str) -> None:
-        """foo"""
-        file_open_count = len(re.findall(r"<file\s+[^>]*>", content))
-        file_close_count = content.count("</file>")
+        """Validate that edit_block opening and closing tags are properly balanced.
+
+        Counts occurrences of opening and closing edit_block tags and raises an exception
+        if they don't match, indicating malformed blocks.
+
+        Args:
+            content: Content string to validate
+
+        Raises:
+            PreFlightUnparsableError: If opening and closing tags don't match
+        """
+        file_open_count = len(re.findall(rf"<{BoundaryType.EDIT_BLOCK}\s+[^>]*>", content))
+        file_close_count = content.count(f"</{BoundaryType.EDIT_BLOCK}>")
 
         if file_open_count != file_close_count:
             raise PreFlightUnparsableError(
@@ -199,47 +195,27 @@ class ParserService(Service, UserInteractive, ABC):
                 f"Opening and closing tags must match."
             )
 
-    async def parse_content_to_raw_blocks(self, content: str) -> list[RawSearchReplaceBlock]:
-        """Validate that block markers are properly balanced.
+    async def check_single_block_tags_balanced(self, raw_content: str) -> tuple[bool, str]:
+        """Validate that search/replace tags are balanced in a single block.
 
-        Counts occurrences of required XML tags and raises an exception
-        if they don't match, indicating malformed blocks.
+        Returns:
+            Tuple of (is_valid, error_message)
         """
-
-        file_open_count = len(re.findall(r"<file\s+[^>]*>", content))
-        file_close_count = content.count("</file>")
-        search_count = content.count("<search>")
-        search_close_count = content.count("</search>")
-        replace_count = content.count("<replace>")
-        replace_close_count = content.count("</replace>")
-
-        if file_open_count != file_close_count:
-            raise PreFlightCheckError(
-                f"Malformed {EDIT_BLOCK_NAME} blocks: "
-                f"<file> tags={file_open_count}, </file> tags={file_close_count}. "
-                f"Opening and closing tags must match."
-            )
+        search_count = raw_content.count("<search>")
+        search_close_count = raw_content.count("</search>")
+        replace_count = raw_content.count("<replace>")
+        replace_close_count = raw_content.count("</replace>")
 
         if search_count != search_close_count:
-            raise PreFlightCheckError(
-                f"Malformed {EDIT_BLOCK_NAME} blocks: "
-                f"<search> tags={search_count}, </search> tags={search_close_count}. "
-                f"Opening and closing tags must match."
-            )
+            return False, f"<search> tags={search_count}, </search> tags={search_close_count}"
 
         if replace_count != replace_close_count:
-            raise PreFlightCheckError(
-                f"Malformed {EDIT_BLOCK_NAME} blocks: "
-                f"<replace> tags={replace_count}, </replace> tags={replace_close_count}. "
-                f"Opening and closing tags must match."
-            )
+            return False, f"<replace> tags={replace_count}, </replace> tags={replace_close_count}"
 
         if search_count != replace_count:
-            raise PreFlightCheckError(
-                f"Malformed {EDIT_BLOCK_NAME} blocks: "
-                f"<search> tags={search_count}, <replace> tags={replace_count}. "
-                f"Each file block must have matching search and replace tags."
-            )
+            return False, f"<search> tags={search_count}, <replace> tags={replace_count}"
+
+        return True, ""
 
     async def mid_flight_check(self, blocks: List[SearchReplaceBlock]) -> List[SearchReplaceBlock]:
         """Validate parsed edit blocks against file system and context constraints.
