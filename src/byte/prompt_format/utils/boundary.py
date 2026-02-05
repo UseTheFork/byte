@@ -115,9 +115,9 @@ class Boundary:
             raise ValueError(f"format_style must be 'xml' or 'markdown', got {format_style!r}")
 
         if format_style == "xml":
-            return f"<notice>**{content}**</notice>"
+            return f"<notice>{content}</notice>"
         elif format_style == "markdown":
-            return f"**{content}**"
+            return f"{content}"
         else:
             raise ValueError(f"Unsupported format_style: {format_style}")
 

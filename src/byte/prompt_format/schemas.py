@@ -20,7 +20,13 @@ class BoundaryType(str, Enum):
 
     ERROR = "error"
 
+    NAME = "name"
+    DESCRIPTION = "description"
+    LOCATION = "location"
+
+    AVAILABLE_CONVENTIONS = "available_conventions"
     CONVENTION = "convention"
+
     SESSION_CONTEXT = "session_context"
     SHELL_COMMAND = "shell_command"
     FILE = "file"
@@ -38,6 +44,8 @@ class BoundaryType(str, Enum):
 
     CRITICAL_REQUIREMENTS = "response_requirements"
     RECOVERY_STEPS = "recovery_steps"
+
+    RESPONSE_TEMPLATE = "response_template"
 
     CONTEXT = "context"
 

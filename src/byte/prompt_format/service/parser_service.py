@@ -194,8 +194,8 @@ class ParserService(Service, UserInteractive, ABC):
 
         if file_open_count != file_close_count:
             raise PreFlightUnparsableError(
-                f"Malformed {EDIT_BLOCK_NAME} blocks: "
-                f"<file> tags={file_open_count}, </file> tags={file_close_count}. "
+                f"Malformed {EDIT_BLOCK_NAME} blocks:"
+                f"<file> tags={file_open_count}, </file> tags={file_close_count}."
                 f"Opening and closing tags must match."
             )
 
@@ -457,13 +457,15 @@ class ParserService(Service, UserInteractive, ABC):
         masked_messages = [
             Boundary.open(BoundaryType.CONVERSATION_HISTORY),
             Boundary.open(BoundaryType.HEADING),
-            "Below is the conversation history between you and the user",
+            "Below is the conversation history between Byte agents and the user.",
             Boundary.open(BoundaryType.HEADING),
-            Boundary.notice("Edit blocks removed from older messages for brevity."),
         ]
         ai_message_counter = 0
 
-        # AI: Add a if here if messages is empty then we should insert a genaric note like the conversation history is empty ai!
+        if not messages:
+            masked_messages.append("The conversation history is empty.")
+            masked_messages.append(Boundary.close(BoundaryType.CONVERSATION_HISTORY))
+            return list_to_multiline_text(masked_messages)
 
         for message in messages:
             if isinstance(message, AIMessage):
@@ -473,41 +475,16 @@ class ParserService(Service, UserInteractive, ABC):
                 if not isinstance(message.content, list) and not is_within_mask_range:
                     # Create a copy of the message with blocks removed
                     masked_content = await self.remove_blocks_from_content(str(message.content))
-                    masked_messages.append(
-                        list_to_multiline_text(
-                            [
-                                Boundary.open(BoundaryType.AGENT_MESSAGE),
-                                masked_content,
-                                Boundary.close(BoundaryType.AGENT_MESSAGE),
-                            ]
-                        )
-                    )
+                    masked_messages.append(masked_content)
                 else:
                     # Keep original message unchanged
-                    masked_messages.append(
-                        list_to_multiline_text(
-                            [
-                                Boundary.open(BoundaryType.AGENT_MESSAGE),
-                                str(message.content),
-                                Boundary.close(BoundaryType.AGENT_MESSAGE),
-                            ]
-                        )
-                    )
+                    masked_messages.append(message.content)
                 ai_message_counter += 1
             else:
                 # Keep non-AIMessages unchanged
-                masked_messages.append(
-                    list_to_multiline_text(
-                        [
-                            Boundary.open(BoundaryType.USER_MESSAGE),
-                            str(message.content),
-                            Boundary.close(BoundaryType.USER_MESSAGE),
-                        ]
-                    )
-                )
+                masked_messages.append(message.content)
 
-        masked_messages.append(
-            Boundary.close(BoundaryType.CONVERSATION_HISTORY),
-        )
+        masked_messages.append(Boundary.notice("You **MUST** consider the conversation history before proceeding."))
+        masked_messages.append(Boundary.close(BoundaryType.CONVERSATION_HISTORY))
 
         return list_to_multiline_text(masked_messages)
