@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from pydantic.dataclasses import dataclass
 
 from byte.agent import BaseState
-from byte.code_operations import Boundary, BoundaryType
+from byte.support import Boundary, BoundaryType
 from byte.support.mixins import Bootable
 from byte.support.utils import list_to_multiline_text
 

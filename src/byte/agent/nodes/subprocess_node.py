@@ -6,7 +6,7 @@ from langgraph.types import Command
 
 from byte.agent import AssistantContextSchema, BaseState, Node
 from byte.cli import SubprocessService
-from byte.code_operations import Boundary, BoundaryType
+from byte.support import Boundary, BoundaryType
 from byte.support.mixins import UserInteractive
 from byte.support.utils import list_to_multiline_text
 

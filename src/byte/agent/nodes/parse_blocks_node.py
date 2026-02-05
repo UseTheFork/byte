@@ -12,13 +12,14 @@ from byte.code_operations import (
     EDIT_BLOCK_NAME,
     BlockStatus,
     BlockType,
-    EditFormatService,
+    EditBlockService,
     NoBlocksFoundError,
     PreFlightCheckError,
     PreFlightUnparsableError,
     RawSearchReplaceBlock,
     SearchReplaceBlock,
 )
+from byte.support import BoundaryType
 from byte.support.mixins import UserInteractive
 from byte.support.utils import extract_content_from_message, get_last_message, list_to_multiline_text
 
@@ -56,9 +57,7 @@ class ParseBlocksNode(Node, UserInteractive):
         content = extract_content_from_message(message)
 
         # Pattern to match file blocks with block_id
-        pattern = (
-            r'<file\s+([^>]*block_id="([^"]+)"[^>]*)>\s*<search>(.*?)</search>\s*<replace>(.*?)</replace>\s*</file>'
-        )
+        pattern = rf'<{BoundaryType.EDIT_BLOCK}\s+([^>]*block_id="([^"]+)"[^>]*)>\s*<{BoundaryType.SEARCH}>(.*?)</{BoundaryType.SEARCH}>\s*<{BoundaryType.REPLACE}>(.*?)</{BoundaryType.REPLACE}>\s*</{BoundaryType.EDIT_BLOCK}>'
 
         result = []
         last_end = 0
@@ -158,6 +157,18 @@ class ParseBlocksNode(Node, UserInteractive):
         self,
         state: BaseState,
     ) -> Command | list[str | RawSearchReplaceBlock]:
+        """Parse scratch messages into raw blocks and validate their syntax.
+
+        Builds final message content by merging blocks across iterations using block_id,
+        validates block syntax, and returns to assistant if any blocks fail validation.
+
+        Args:
+            state: Current state containing scratch_messages to parse
+
+        Returns:
+            Command to return to assistant if validation fails, otherwise list of
+            text strings and RawSearchReplaceBlock objects
+        """
         # Build final message from all iterations
         final_components = await self._build_final_message_from_iterations(state)
 
@@ -189,7 +200,7 @@ class ParseBlocksNode(Node, UserInteractive):
             error_parts = []
             for block in failed_blocks:
                 error_parts.append(f"Block ID: {block.block_id}")
-                error_parts.append(f"Status: {block.block_status.value}")
+                error_parts.append(f"Status: {block.block_status}")
                 error_parts.append(f"Issue: {block.status_message}")
                 error_parts.append(f"\n{block.raw_content}\n")
 
@@ -223,13 +234,31 @@ class ParseBlocksNode(Node, UserInteractive):
         self,
         state: BaseState,
     ) -> Command | None:
+        """Validate raw block syntax from the last scratch message.
+
+        Performs pre-flight validation checks on raw edit blocks including:
+        - Checking that blocks exist in the message
+        - Validating all blocks have block_id attributes
+        - Ensuring all block tags are properly balanced
+
+        If validation fails, returns a Command to route back to the assistant
+        with error details for correction. If validation passes, returns None
+        to continue processing.
+
+        Args:
+            state: Current state containing scratch_messages to validate
+
+        Returns:
+            Command to assistant_node with error details if validation fails,
+            Command to end_node if no blocks found, or None if validation passes
+        """
         last_message = get_last_message(state["scratch_messages"])
         response_text = extract_content_from_message(last_message)
 
         try:
-            await self.edit_format.edit_block_service.check_blocks_exist(response_text)
-            await self.edit_format.edit_block_service.check_block_ids(response_text)
-            await self.edit_format.edit_block_service.check_file_tags_balanced(response_text)
+            await self.edit_block_service.check_blocks_exist(response_text)
+            await self.edit_block_service.check_block_ids(response_text)
+            await self.edit_block_service.check_file_tags_balanced(response_text)
         except Exception as e:
             if isinstance(e, NoBlocksFoundError):
                 return Command(goto="end_node")
@@ -245,7 +274,7 @@ class ParseBlocksNode(Node, UserInteractive):
                         "```",
                         "No changes were applied. Add block_id to all blocks and retry.",
                         f"Reply with ONLY the corrected *{EDIT_BLOCK_NAME}*.",
-                        self.runtime.context.recovery_steps or "",
+                        "",
                     ]
                 )
 
@@ -262,13 +291,12 @@ class ParseBlocksNode(Node, UserInteractive):
                         "```",
                         "No changes were applied. Fix the malformed blocks and retry with corrected syntax.",
                         f"Reply with ALL *{EDIT_BLOCK_NAME}* (corrected and uncorrected) plus any other content from your original message.",
-                        self.runtime.context.recovery_steps or "",
+                        "",
                     ]
                 )
 
                 return Command(goto="assistant_node", update={"errors": error_message, "metadata": self.metadata})
 
-            # log.exception(e)
             raise
 
     async def _parse_single_raw_block(self, raw_block: RawSearchReplaceBlock) -> SearchReplaceBlock:
@@ -276,8 +304,27 @@ class ParseBlocksNode(Node, UserInteractive):
 
         Uses the existing regex pattern from ParserService to extract structured data.
         """
+        # Check tag balance first
+        is_valid, error_msg = await self.edit_block_service.check_single_block_tags_balanced(raw_block.raw_content)
+
+        if not is_valid:
+            # Mark block as invalid and return early
+            raw_block.block_status = BlockStatus.PARSE_ERROR
+            raw_block.status_message = f"Unbalanced tags: {error_msg}"
+
+            # Return a minimal SearchReplaceBlock with error status
+            return SearchReplaceBlock(
+                block_id=raw_block.block_id,
+                file_path="",
+                search_content="",
+                replace_content="",
+                block_type=BlockType.EDIT,
+                block_status=raw_block.block_status,
+                status_message=raw_block.status_message,
+            )
+
         # Use the same pattern from ParserService
-        pattern = self.edit_format.edit_block_service.match_pattern
+        pattern = self.edit_block_service.match_pattern
 
         match = re.search(pattern, raw_block.raw_content, re.DOTALL)
 
@@ -288,7 +335,7 @@ class ParseBlocksNode(Node, UserInteractive):
         attr_string, search_content, replace_content = match.groups()
 
         # Parse attributes (reuse logic from ParserService._parse_attributes)
-        attrs = self.edit_format.edit_block_service._parse_attributes(attr_string)
+        attrs = self.edit_block_service._parse_attributes(attr_string)
 
         file_path = attrs.get("path", "").strip()
         operation = attrs.get("operation", "").strip()
@@ -358,7 +405,7 @@ class ParseBlocksNode(Node, UserInteractive):
         blocks = [c for c in components if isinstance(c, SearchReplaceBlock)]
 
         # Run mid_flight_check to validate against file system
-        validated_blocks = await self.edit_format.edit_block_service.mid_flight_check(blocks)
+        validated_blocks = await self.edit_block_service.mid_flight_check(blocks)
 
         # Check for failed blocks
         failed_blocks = [block for block in validated_blocks if block.block_status != BlockStatus.VALID]
@@ -413,7 +460,7 @@ class ParseBlocksNode(Node, UserInteractive):
     ) -> Command[Literal["end_node", "lint_node"]]:
         """Parse commands from the last assistant message."""
         self.console = self.app["console"]
-        self.edit_format = self.app.make(EditFormatService)
+        self.edit_block_service = self.app.make(EditBlockService)
         self.runtime = runtime
 
         self.metadata = state["metadata"]
@@ -461,7 +508,7 @@ class ParseBlocksNode(Node, UserInteractive):
         parsed_blocks = [c for c in result if isinstance(c, SearchReplaceBlock)]
 
         # Apply the blocks
-        parsed_blocks = await self.edit_format.edit_block_service.apply_blocks(parsed_blocks)
+        parsed_blocks = await self.edit_block_service.apply_blocks(parsed_blocks)
 
         # Assemble final scratch message combining all content and correct blocks
         final_components = []

@@ -1,6 +1,6 @@
 from langchain_core.prompts import ChatPromptTemplate
 
-from byte.code_operations import Boundary, BoundaryType
+from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 
 coder_user_template = [
@@ -19,6 +19,7 @@ coder_user_template = [
     "- If the request is ambiguous, ask clarifying questions before proceeding",
     "- Keep changes simple don't build more then what is asked for",
     Boundary.close(BoundaryType.OPERATING_CONSTRAINTS),
+    "{available_conventions}",
     "{project_hierarchy}",
     "{project_information_and_context}",
     "{file_context}",

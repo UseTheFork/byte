@@ -1,6 +1,6 @@
 from langchain_core.prompts import ChatPromptTemplate
 
-from byte.code_operations import Boundary, BoundaryType
+from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 
 research_user_template = [
