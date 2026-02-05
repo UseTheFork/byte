@@ -6,7 +6,6 @@ from byte.knowledge import (
     ContextAddFileCommand,
     ContextDropCommand,
     ContextListCommand,
-    ConventionContextService,
     SessionContextModel,
     SessionContextService,
     WebCommand,
@@ -24,7 +23,6 @@ class KnowledgeServiceProvider(ServiceProvider):
 
     def services(self) -> List[Type[Service]]:
         return [
-            ConventionContextService,
             SessionContextService,
             CLIContextDisplayService,
         ]
@@ -45,16 +43,9 @@ class KnowledgeServiceProvider(ServiceProvider):
 
         # Set up event listener for PRE_PROMPT_TOOLKIT
         event_bus = self.app.make(EventBus)
-        conventions_service = self.app.make(ConventionContextService)
         session_context_service = self.app.make(SessionContextService)
 
         cli_context_display_service = self.app.make(CLIContextDisplayService)
-
-        # Register listener that calls list_in_context_files before each prompt
-        event_bus.on(
-            EventType.GATHER_PROJECT_CONTEXT.value,
-            conventions_service.add_project_context_hook,
-        )
 
         # Register listener that calls list_in_context_files before each prompt
         event_bus.on(

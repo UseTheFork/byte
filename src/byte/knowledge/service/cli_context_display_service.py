@@ -1,8 +1,8 @@
 from rich.table import Table
 
 from byte import Payload, Service
+from byte.conventions import ConventionContextService
 from byte.knowledge import (
-    ConventionContextService,
     SessionContextService,
 )
 
