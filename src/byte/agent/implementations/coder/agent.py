@@ -7,9 +7,11 @@ from byte.agent import (
     AssistantNode,
     LintNode,
     ParseBlocksNode,
+    ToolNode,
 )
 from byte.agent.implementations.coder.prompt import coder_prompt, coder_user_template
 from byte.agent.utils.graph_builder import GraphBuilder
+from byte.conventions import load_conventions
 from byte.llm import LLMService
 from byte.prompt_format import EditFormatService
 
@@ -36,6 +38,9 @@ class CoderAgent(Agent):
     def get_prompt(self):
         return coder_prompt
 
+    def get_tools(self):
+        return [load_conventions]
+
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""
 
@@ -45,6 +50,7 @@ class CoderAgent(Agent):
         graph.add_node(AssistantNode, goto="parse_blocks_node")
         graph.add_node(ParseBlocksNode)
         graph.add_node(LintNode)
+        graph.add_node(ToolNode)
 
         checkpointer = await self.get_checkpointer()
         return graph.build().compile(checkpointer=checkpointer)
@@ -63,4 +69,5 @@ class CoderAgent(Agent):
             enforcement=self.get_enforcement(),
             recovery_steps=self.get_recovery_steps(),
             agent=self.__class__.__name__,
+            tools=self.get_tools(),
         )

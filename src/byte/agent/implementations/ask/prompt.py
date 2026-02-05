@@ -4,6 +4,7 @@ from byte.prompt_format import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 
 ask_user_template = [
+    "{masked_messages}",
     Boundary.open(BoundaryType.USER_INPUT),
     "```text",
     "{user_request}",
@@ -11,9 +12,6 @@ ask_user_template = [
     "",
     "You **MUST** consider the user input before proceeding (if not empty).",
     Boundary.close(BoundaryType.USER_INPUT),
-    "",
-    "{masked_messages}",
-    "",
     Boundary.open(BoundaryType.OPERATING_CONSTRAINTS),
     "- Always use best practices when coding",
     "- Respect and use existing conventions, libraries, etc that are already present in the code base",
@@ -30,6 +28,7 @@ ask_user_template = [
     "- Provide context for suggested changes",
     "- Focus on actionable findings, not exhaustive documentation",
     Boundary.close(BoundaryType.RESPONSE_FORMAT),
+    "{available_conventions}",
     "{project_hierarchy}",
     "{project_information_and_context}",
     "{file_context}",
@@ -43,6 +42,7 @@ ask_prompt = ChatPromptTemplate.from_messages(
             list_to_multiline_text(
                 [
                     Boundary.open(BoundaryType.ROLE),
+                    "You are Byte, a human-in-the-loop AI coding agent.",
                     "Act as an expert software developer.",
                     Boundary.close(BoundaryType.ROLE),
                 ]

@@ -3,7 +3,7 @@ from argparse import Namespace
 from byte.agent import ConventionAgent
 from byte.agent.implementations.conventions.constants import FOCUS_MESSAGES, ConventionFocus
 from byte.cli import ByteArgumentParser, Command, InputCancelledError
-from byte.knowledge import ConventionContextService
+from byte.conventions import ConventionContextService
 from byte.support.mixins import UserInteractive
 from byte.support.utils import slugify
 
