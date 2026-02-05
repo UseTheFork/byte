@@ -13,7 +13,6 @@ from byte.agent import (
     CommitPlanAgent,
     ConfigAgentCommand,
     ConventionAgent,
-    ConventionCommand,
     EndNode,
     ExtractNode,
     LintNode,
@@ -61,7 +60,6 @@ class AgentServiceProvider(ServiceProvider):
             # keep-sorted start
             AskCommand,
             ConfigAgentCommand,
-            ConventionCommand,
             ResearchCommand,
             # keep-sorted end
         ]

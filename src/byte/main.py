@@ -9,6 +9,7 @@ from byte.analytics import AnalyticsProvider
 from byte.cli import CLIServiceProvider
 from byte.clipboard import ClipboardServiceProvider
 from byte.code_operations import PromptFormatProvider
+from byte.conventions.service_provider import ConventionsServiceProvider
 from byte.development import DevelopmentServiceProvider
 from byte.files import FileServiceProvider
 from byte.foundation import Application
@@ -27,6 +28,7 @@ PROVIDERS = [
     MemoryServiceProvider,
     KnowledgeServiceProvider,
     FileServiceProvider,
+    ConventionsServiceProvider,
     # ToolsServiceProvider,
     LLMServiceProvider,
     GitServiceProvider,

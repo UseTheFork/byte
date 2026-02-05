@@ -1,7 +1,7 @@
 from typing import List, Type
 
 from byte import Command, Service, ServiceProvider
-from byte.conventions import ConventionContextService
+from byte.conventions import ConventionCommand, ConventionContextService
 
 
 class ConventionsServiceProvider(ServiceProvider):
@@ -19,4 +19,4 @@ class ConventionsServiceProvider(ServiceProvider):
         ]
 
     def commands(self) -> List[Type[Command]]:
-        return []
+        return [ConventionCommand]
