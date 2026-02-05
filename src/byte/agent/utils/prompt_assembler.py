@@ -7,6 +7,7 @@ from typing_extensions import List
 
 from byte import EventType, Payload
 from byte.agent import AssistantContextSchema, BaseState
+from byte.conventions import ConventionContextService
 from byte.files import FileService
 from byte.git import CommitService
 from byte.prompt_format import Boundary, BoundaryType, EditFormatService
@@ -232,6 +233,11 @@ class PromptAssembler(Bootable, Eventable):
 
         return ""
 
+    async def gather_available_conventions(self, state: BaseState) -> str:
+        """ """
+        convention_context_service = self.app.make(ConventionContextService)
+        return await convention_context_service.get_available_conventions(state)
+
     async def _gather_project_context(self) -> str:
         """Gather project context including conventions and session documents.
 
@@ -350,6 +356,10 @@ class PromptAssembler(Bootable, Eventable):
         user_prompt_state["constraints_context"] = await self._gather_constraints(state)
 
         user_prompt_state["masked_messages"] = await self._gather_masked_messages(state)
+
+        user_prompt_state["available_conventions"] = await self.gather_available_conventions(state)
+
+        self.app["log"].info(user_prompt_state["available_conventions"])
 
         # Reinforcement is appended to the user message.
         user_prompt_state["operating_principles"] = await self._gather_reinforcement(
