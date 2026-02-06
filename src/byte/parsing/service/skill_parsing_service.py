@@ -237,3 +237,30 @@ class SkillParsingService(Service):
         _, body = self.parse_frontmatter(content)
 
         return body
+
+    def format_skill(self, name: str, description: str, content: str, metadata: Optional[dict[str, str]] = None) -> str:
+        """Format a complete skill string with YAML frontmatter.
+
+        Args:
+            name: Skill name (kebab-case, max 64 chars)
+            description: Skill description (max 1024 chars)
+            content: Markdown body content
+            metadata: Optional key-value metadata pairs
+
+        Returns:
+            Fully formatted skill string with frontmatter and content
+
+        Usage: `skill_str = service.format_skill("my-skill", "Does something", "# Content")`
+        Usage: `skill_str = service.format_skill("my-skill", "Does something", "# Content", {"key": "value"})`
+        """
+        lines = ["---", f"name: {name}", f"description: {description}"]
+
+        if metadata:
+            lines.append("metadata:")
+            for key, value in metadata.items():
+                lines.append(f"  {key}: {value}")
+
+        lines.append("---")
+        lines.append(content)
+
+        return "\n".join(lines)
