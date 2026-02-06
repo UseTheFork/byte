@@ -39,7 +39,7 @@ class ConventionCommand(Command, UserInteractive):
         Usage: `convention_type = await self.prompt_convention_type()` -> returns selected convention type
         """
 
-        choices = list(FOCUS_MESSAGES.keys()) + ["Other"]
+        choices = list(FOCUS_MESSAGES.keys())
 
         return await self.prompt_for_select(
             "What type of convention would you like to generate?", choices, default="Language Style Guide"

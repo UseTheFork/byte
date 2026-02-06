@@ -27,9 +27,7 @@ class CLIContextDisplayService(Service):
             f"{key}" for key in context_items.keys()
         )
 
-        convention_markdown = "[secondary]Conventions[/secondary]\n" + "\n".join(
-            f"{key}" for key in convention_items.keys()
-        )
+        convention_markdown = f"[secondary]Conventions:[/secondary] {len(convention_items)} loaded"
 
         grid = Table.grid(expand=True)
         grid.add_column(ratio=1)
