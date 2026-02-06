@@ -10,6 +10,7 @@ from byte.knowledge import (
     SessionContextService,
     WebCommand,
 )
+from byte.knowledge.command.context_add_command import ContextAddCommand
 
 
 class KnowledgeServiceProvider(ServiceProvider):
@@ -33,6 +34,7 @@ class KnowledgeServiceProvider(ServiceProvider):
             ContextListCommand,
             ContextDropCommand,
             ContextAddFileCommand,
+            ContextAddCommand,
         ]
 
     def register(self):

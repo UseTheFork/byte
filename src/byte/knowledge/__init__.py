@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.knowledge.command.context_add_command import ContextAddCommand
     from byte.knowledge.command.context_add_file_command import ContextAddFileCommand
     from byte.knowledge.command.context_drop_command import ContextDropCommand
     from byte.knowledge.command.context_list_command import ContextListCommand
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
 
 __all__ = (
     "CLIContextDisplayService",
+    "ContextAddCommand",
     "ContextAddFileCommand",
     "ContextDropCommand",
     "ContextListCommand",
@@ -28,6 +30,7 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "CLIContextDisplayService": "service.cli_context_display_service",
+    "ContextAddCommand": "command.context_add_command",
     "ContextAddFileCommand": "command.context_add_file_command",
     "ContextDropCommand": "command.context_drop_command",
     "ContextListCommand": "command.context_list_command",
