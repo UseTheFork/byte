@@ -23,6 +23,8 @@ class BoundaryType(str, Enum):
     AVAILABLE_CONVENTIONS = "available_conventions"
     CONVENTION = "convention"
 
+    REFERENCE = "reference"
+
     SESSION_CONTEXT = "session_context"
     SHELL_COMMAND = "shell_command"
 
