@@ -4,7 +4,7 @@ import html
 
 from byte import Service
 from byte.agent import BaseState
-from byte.parsing import SkillParsingService
+from byte.parsing import ConventionParsingService
 from byte.support import ArrayStore, Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 
@@ -38,13 +38,14 @@ class ConventionContextService(Service):
         if not conventions_dir.exists() or not conventions_dir.is_dir():
             return
 
-        # Iterate over all .md files in the conventions directory
-        skill_parsing_service = self.app.make(SkillParsingService)
+        # Iterate over conventions directory and subdirectories
+        convention_parsing_service = self.app.make(ConventionParsingService)
 
-        for md_file in sorted(conventions_dir.glob(pattern="*.md", case_sensitive=False)):
-            # Parse the skill properties from the markdown file
-            properties = skill_parsing_service.read_properties(md_file)
-            # Store SkillProperties keyed by name
+        for md_file in sorted(conventions_dir.rglob("*.md")):
+            # Parse the convention properties from the markdown file
+            properties = convention_parsing_service.read_properties(md_file)
+
+            # Store ConventionProperties keyed by name
             self.conventions.add(properties.name, properties)
 
     def add_convention(self, filename: str) -> ConventionContextService:
@@ -58,8 +59,8 @@ class ConventionContextService(Service):
             return self
 
         try:
-            skill_parsing_service = self.app.make(SkillParsingService)
-            properties = skill_parsing_service.read_properties(md_file)
+            convention_parsing_service = self.app.make(ConventionParsingService)
+            properties = convention_parsing_service.read_properties(md_file)
             self.conventions.add(properties.name, properties)
         except Exception:
             pass
@@ -101,6 +102,8 @@ class ConventionContextService(Service):
             )
 
             for convention_props in self.conventions.all().values():
+                convention_location = self.app.conventions_path(convention_props.filename())
+
                 lines.append(
                     list_to_multiline_text(
                         [
@@ -112,7 +115,7 @@ class ConventionContextService(Service):
                             html.escape(convention_props.description),
                             Boundary.close(BoundaryType.DESCRIPTION),
                             Boundary.open(BoundaryType.LOCATION),
-                            convention_props.location,
+                            html.escape(str(convention_location)),
                             Boundary.close(BoundaryType.LOCATION),
                             Boundary.close(BoundaryType.CONVENTION),
                         ]

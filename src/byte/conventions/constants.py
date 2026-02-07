@@ -5,7 +5,6 @@ class ConventionFocus(BaseModel):
     """Configuration for a convention type's focus and output."""
 
     focus_message: str
-    file_name: str
     requires_user_input: bool
 
 
@@ -18,7 +17,6 @@ FOCUS_MESSAGES = {
             "authentication and authorization patterns, error handling and logging, "
             "and backend-specific architectural patterns."
         ),
-        file_name="BACKEND_CODE_PATTERNS",
         requires_user_input=False,
     ),
     "Code Patterns": ConventionFocus(
@@ -27,7 +25,6 @@ FOCUS_MESSAGES = {
             "common design patterns used, error handling approaches, "
             "async/await patterns, dependency injection, and recurring code structures."
         ),
-        file_name="CODE_PATTERNS",
         requires_user_input=False,
     ),
     "Comment Standards": ConventionFocus(
@@ -36,7 +33,6 @@ FOCUS_MESSAGES = {
             "docstring format and requirements, inline comment style, "
             "when to comment vs self-documenting code, and documentation best practices."
         ),
-        file_name="COMMENT_STANDARDS",
         requires_user_input=False,
     ),
     "Documentation": ConventionFocus(
@@ -46,7 +42,6 @@ FOCUS_MESSAGES = {
             "content organization, writing style and tone, "
             "code example standards, and documentation maintenance practices."
         ),
-        file_name="DOCUMENTATION_STANDARDS",
         requires_user_input=False,
     ),
     "Domain Documentation": ConventionFocus(
@@ -57,7 +52,6 @@ FOCUS_MESSAGES = {
             "domain-specific patterns and conventions, and integration points with other domains. "
             "Focus on the following domain:"
         ),
-        file_name="DOMAIN_DOCUMENTATION",
         requires_user_input=True,
     ),
     "Frontend Code Patterns": ConventionFocus(
@@ -67,7 +61,6 @@ FOCUS_MESSAGES = {
             "UI/UX patterns, event handling, API integration patterns, "
             "and frontend-specific design patterns."
         ),
-        file_name="FRONTEND_CODE_PATTERNS",
         requires_user_input=False,
     ),
     "Language Style Guide": ConventionFocus(
@@ -76,7 +69,6 @@ FOCUS_MESSAGES = {
             "naming conventions, code formatting, type hints, imports, "
             "class and function structure, and language-specific best practices."
         ),
-        file_name="LANGUAGE_STYLE_GUIDE",
         requires_user_input=False,
     ),
     "Project Architecture": ConventionFocus(
@@ -85,7 +77,6 @@ FOCUS_MESSAGES = {
             "directory structure, module organization, dependency patterns, "
             "separation of concerns, and architectural principles used in this codebase."
         ),
-        file_name="PROJECT_ARCHITECTURE",
         requires_user_input=False,
     ),
     "Project Tooling": ConventionFocus(
@@ -96,7 +87,6 @@ FOCUS_MESSAGES = {
             "task runners, linting and formatting tools, "
             "and tooling configuration standards."
         ),
-        file_name="PROJECT_TOOLING",
         requires_user_input=False,
     ),
     "Testing Code Patterns": ConventionFocus(
@@ -106,13 +96,11 @@ FOCUS_MESSAGES = {
             "unit test patterns, integration test patterns, mocking and fixtures, "
             "test naming conventions, and testing best practices."
         ),
-        file_name="TESTING_CODE_PATTERNS",
         requires_user_input=False,
     ),
     # keep-sorted end
     "Other": ConventionFocus(
         focus_message=(""),
-        file_name="",
         requires_user_input=True,
     ),
 }

@@ -4,8 +4,8 @@ from byte.agent import ConventionAgent
 from byte.cli import ByteArgumentParser, Command, InputCancelledError
 from byte.conventions import FOCUS_MESSAGES, ConventionContextService
 from byte.conventions.constants import ConventionFocus
+from byte.parsing import ConventionParsingService
 from byte.support.mixins import UserInteractive
-from byte.support.utils import slugify
 
 
 class ConventionCommand(Command, UserInteractive):
@@ -42,7 +42,8 @@ class ConventionCommand(Command, UserInteractive):
         choices = list(FOCUS_MESSAGES.keys())
 
         return await self.prompt_for_select(
-            "What type of convention would you like to generate?", choices, default="Language Style Guide"
+            "What type of convention would you like to generate?",
+            choices,
         )
 
     async def prompt_custom_convention(self, template: ConventionFocus) -> ConventionFocus | None:
@@ -58,18 +59,12 @@ class ConventionCommand(Command, UserInteractive):
         if not focus_message:
             return None
 
-        filename_input = await self.prompt_for_input("Enter a filename for this convention (without extension)")
-        if not filename_input:
-            return None
-
         # If template provided, append user input to template values
         if template:
             final_focus_message = f"{template.focus_message} {focus_message}"
-            final_file_name = f"{template.file_name}_{slugify(filename_input, '_').upper()}"
 
         return ConventionFocus(
             focus_message=final_focus_message,
-            file_name=final_file_name,
             requires_user_input=template.requires_user_input,
         )
 
@@ -100,22 +95,24 @@ class ConventionCommand(Command, UserInteractive):
                 return
 
             convention_agent = self.app.make(ConventionAgent)
-            convention: dict = await convention_agent.execute(
+            result: dict = await convention_agent.execute(
                 focus.focus_message,
             )
 
+            convention_parsing_service = self.app.make(ConventionParsingService)
+            convention = convention_parsing_service.parse(result["extracted_content"])
+
             # Write the convention content to a file
-            convention_file_path = self.app.conventions_path(f"{focus.file_name}.md")
+            convention_file_path = self.app.conventions_path(convention.filename())
             convention_file_path.parent.mkdir(parents=True, exist_ok=True)
-            convention_file_path.write_text(convention["extracted_content"])
+            convention_file_path.write_text(result["extracted_content"])
 
             # refresh the Conventions in the session by `rebooting` the Service
             convention_context_service = self.app.make(ConventionContextService)
             convention_context_service.boot()
 
-            console = self.app["console"]
-            console.print_success_panel(
-                f"Convention document generated and saved to {focus.file_name}",
+            self.app["console"].print_success_panel(
+                f"Convention document generated and saved to {convention.filename()}",
                 title="Convention Generated",
             )
         except InputCancelledError:
