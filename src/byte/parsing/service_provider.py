@@ -1,5 +1,6 @@
 from typing import List, Type
 
+from byte.parsing.service.conventions_parsing_service import ConventionsParsingService
 from byte.parsing.service.skill_parsing_service import SkillParsingService
 from byte.support import Service, ServiceProvider
 
@@ -11,4 +12,4 @@ class ParsingServiceProvider(ServiceProvider):
     """
 
     def services(self) -> List[Type[Service]]:
-        return [SkillParsingService]
+        return [SkillParsingService, ConventionsParsingService]

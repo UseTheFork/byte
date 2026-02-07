@@ -1,7 +1,7 @@
 from langchain_core.tools import tool
 
 from byte.context import make
-from byte.parsing import SkillParsingService
+from byte.parsing import ConventionParsingService
 
 
 @tool(parse_docstring=True)
@@ -16,10 +16,10 @@ async def load_conventions(file_path: str) -> str:
     Returns:
             The contents of the convention file, or an error message if the file cannot be read
     """
-    skill_parsing_service = make(SkillParsingService)
+    convention_parsing_service = make(ConventionParsingService)
 
     try:
-        content = skill_parsing_service.read_skill_content(file_path)
+        content = convention_parsing_service.read_content(file_path)
         return content
     except Exception as e:
         return f"Error loading convention file '{file_path}': {e!s}"
