@@ -1,33 +1,31 @@
-"""Service for parsing and validating SKILL.md files."""
+"""Service for parsing and validating CONVENTION.md files."""
 
-import unicodedata
 from pathlib import Path
 from typing import Optional
 
-from byte.parsing import ParsingService, SkillProperties, ValidationError
+from byte.parsing import ConventionProperties, ParsingService, ValidationError
 
-MAX_SKILL_NAME_LENGTH = 64
+MAX_CONVENTION_NAME_LENGTH = 64
 MAX_DESCRIPTION_LENGTH = 1024
 
-# Allowed frontmatter fields for skills
+# Allowed frontmatter fields for convention
 ALLOWED_FIELDS = {
     "name",
     "description",
-    "metadata",
 }
 
 
-class SkillParsingService(ParsingService):
-    """Service for parsing and validating SKILL.md files.
+class ConventionParsingService(ParsingService):
+    """Service for parsing and validating CONVENTION.md files.
 
-    Provides methods to find, parse, validate, and generate prompts from
-    skill directories containing SKILL.md files with YAML frontmatter.
+    Provides methods to parse, validate, and generate convention files
+    containing CONVENTION.md files with YAML frontmatter.
 
-    Usage: `service = app.make(SkillParsingService)`
-    Usage: `properties = service.read_properties(skill_dir)`
+    Usage: `service = app.make(ConventionParsingService)`
+    Usage: `properties = service.read_properties(convention_path)`
     """
 
-    def read_properties(self, file_path: Path | str) -> SkillProperties:
+    def read_properties(self, file_path: Path | str) -> ConventionProperties:
         """Read skill properties from Path md frontmatter.
 
         This function parses the frontmatter and returns properties.
@@ -37,7 +35,7 @@ class SkillParsingService(ParsingService):
             file_path: Path to the skill file (Path or str)
 
         Returns:
-            SkillProperties with parsed metadata
+            ConventionProperties with parsed metadata
 
         Raises:
             ParseError: If SKILL.md is missing or has invalid YAML
@@ -46,9 +44,9 @@ class SkillParsingService(ParsingService):
         Usage: `properties = service.read_properties(Path("/skills/my-skill.md"))`
         Usage: `properties = service.read_properties("/skills/my-skill.md")`
         """
-        skill_path = Path(file_path)
+        convention_path = Path(file_path)
 
-        content = skill_path.read_text()
+        content = convention_path.read_text()
         metadata, _ = self.parse_frontmatter(content)
 
         if "name" not in metadata:
@@ -64,20 +62,16 @@ class SkillParsingService(ParsingService):
         if not isinstance(description, str) or not description.strip():
             raise ValidationError("Field 'description' must be a non-empty string")
 
-        return SkillProperties(
+        return ConventionProperties(
             name=name.strip(),
             description=description.strip(),
-            location=str(skill_path),
             metadata=metadata.get("metadata"),
         )
 
     def validate_name(self, name: str) -> list[str]:
-        """Validate skill name format and directory match.
+        """Validate convention name format.
 
-        Skill names support i18n characters (Unicode letters) plus hyphens.
-        Names must be lowercase and cannot start/end with hyphens.
-
-        Usage: `errors = service.validate_name("my-skill")`
+        Usage: `errors = service.validate_name("my-convention")`
         """
         errors = []
 
@@ -85,23 +79,9 @@ class SkillParsingService(ParsingService):
             errors.append("Field 'name' must be a non-empty string")
             return errors
 
-        name = unicodedata.normalize("NFKC", name.strip())
-
-        if len(name) > MAX_SKILL_NAME_LENGTH:
-            errors.append(f"Skill name '{name}' exceeds {MAX_SKILL_NAME_LENGTH} character limit ({len(name)} chars)")
-
-        if name != name.lower():
-            errors.append(f"Skill name '{name}' must be lowercase")
-
-        if name.startswith("-") or name.endswith("-"):
-            errors.append("Skill name cannot start or end with a hyphen")
-
-        if "--" in name:
-            errors.append("Skill name cannot contain consecutive hyphens")
-
-        if not all(c.isalnum() or c == "-" for c in name):
+        if len(name) > MAX_CONVENTION_NAME_LENGTH:
             errors.append(
-                f"Skill name '{name}' contains invalid characters. Only letters, digits, and hyphens are allowed."
+                f"Convention name '{name}' exceeds {MAX_CONVENTION_NAME_LENGTH} character limit ({len(name)} chars)"
             )
 
         return errors
@@ -109,7 +89,7 @@ class SkillParsingService(ParsingService):
     def validate_description(self, description: str) -> list[str]:
         """Validate description format.
 
-        Usage: `errors = service.validate_description("My skill description")`
+        Usage: `errors = service.validate_description("My convention description")`
         """
         errors = []
 
@@ -137,19 +117,19 @@ class SkillParsingService(ParsingService):
         return errors
 
     async def validate_metadata(self, metadata: dict, file_path: Optional[Path] = None) -> list[str]:
-        """Validate parsed skill metadata.
+        """Validate parsed convention metadata.
 
         This is the core validation function that works on already-parsed metadata,
         avoiding duplicate file I/O when called from the parser.
 
         Args:
             metadata: Parsed YAML frontmatter dictionary
-            skill_dir: Optional path to skill directory (for name-directory match check)
+            file_path: Optional path to convention file (for additional validation checks)
 
         Returns:
             List of validation error messages. Empty list means valid.
 
-        Usage: `errors = await service.validate_metadata(metadata, skill_dir)`
+        Usage: `errors = await service.validate_metadata(metadata, file_path)`
         """
         errors = []
 
@@ -170,19 +150,19 @@ class SkillParsingService(ParsingService):
     def format(
         self, name: str, description: str, content: str, metadata: Optional[dict[str, str]] = None, **kwargs
     ) -> str:
-        """Format a complete skill string with YAML frontmatter.
+        """Format a complete convention string with YAML frontmatter.
 
         Args:
-            name: Skill name (kebab-case, max 64 chars)
-            description: Skill description (max 1024 chars)
+            name: Convention name (max 64 chars)
+            description: Convention description (max 1024 chars)
             content: Markdown body content
             metadata: Optional key-value metadata pairs
 
         Returns:
-            Fully formatted skill string with frontmatter and content
+            Fully formatted convention string with frontmatter and content
 
-        Usage: `skill_str = service.format("my-skill", "Does something", "# Content")`
-        Usage: `skill_str = service.format("my-skill", "Does something", "# Content", {"key": "value"})`
+        Usage: `convention_str = service.format("my-convention", "Does something", "# Content")`
+        Usage: `convention_str = service.format("my-convention", "Does something", "# Content", {"key": "value"})`
         """
         lines = ["---", f"name: {name}", f"description: {description}"]
 
@@ -196,14 +176,14 @@ class SkillParsingService(ParsingService):
 
         return "\n".join(lines)
 
-    def parse(self, content: str) -> SkillProperties:
-        """Parse a complete skill string with YAML frontmatter into SkillProperties.
+    def parse(self, content: str) -> ConventionProperties:
+        """Parse a complete skill string with YAML frontmatter into ConventionProperties.
 
         Args:
             content: The complete file content including frontmatter and body
 
         Returns:
-            SkillProperties object with parsed metadata and content
+            ConventionProperties object with parsed metadata and content
 
         Raises:
             ParseError: If the content has invalid YAML or missing frontmatter
@@ -226,10 +206,9 @@ class SkillParsingService(ParsingService):
         if not isinstance(description, str) or not description.strip():
             raise ValidationError("Field 'description' must be a non-empty string")
 
-        return SkillProperties(
+        return ConventionProperties(
             name=name.strip(),
             description=description.strip(),
-            location="",  # Location is not available from parsed content
             content=body.strip(),
             metadata=metadata.get("metadata"),
         )
