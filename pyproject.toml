@@ -141,7 +141,7 @@ line-ending = "lf"
 combine-as-imports = true
 
 [build-system]
-requires = ["uv_build>=0.8.10,<0.10.0"]
+requires = ["uv_build>=0.8.10,<0.11.0"]
 build-backend = "uv_build"
 
 [tool.semantic_release]
