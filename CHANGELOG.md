@@ -1,6 +1,157 @@
 # CHANGELOG
 
 
+## v1.4.0 (2026-02-12)
+
+### Bug Fixes
+
+- Make parse blocks node method async
+  ([`b6b2c93`](https://github.com/UseTheFork/byte/commit/b6b2c93a61eb1b34cfdab66a2973dabe54563d1c))
+
+### Build System
+
+- Add skills-ref dependency to project
+  ([`d041ac9`](https://github.com/UseTheFork/byte/commit/d041ac95236198dd2e9b29f4af78437c639d1764))
+
+### Chores
+
+- Remove old convention markdown files
+  ([`8a35a5a`](https://github.com/UseTheFork/byte/commit/8a35a5a8a82539bce889189e5b9c86ac0db17ea6))
+
+- Update config to support new skill and convention domains
+  ([`d4b1c3b`](https://github.com/UseTheFork/byte/commit/d4b1c3b048212f4b5fac0dd1968aa16b4b05817b))
+
+- Update documentation and configuration
+  ([`a1ab876`](https://github.com/UseTheFork/byte/commit/a1ab876f7630e07f6d0a25cb59ae6bca5ebc0e01))
+
+### Documentation
+
+- Add domain documentation for config, files, git, and lint domains
+  ([`1cacadc`](https://github.com/UseTheFork/byte/commit/1cacadc4c59725e46d030905b52d71f1cbd6d905))
+
+- Add domain documentation for git and parsing domains
+  ([`988a9c2`](https://github.com/UseTheFork/byte/commit/988a9c2536184ef573f15176a57006b64eb6c289))
+
+- Add knowledge domain documentation
+  ([`2948064`](https://github.com/UseTheFork/byte/commit/2948064f0eacfc564094f69e9950eed495db781a))
+
+- Add project conventions for comment standards and architecture
+  ([`ac055d7`](https://github.com/UseTheFork/byte/commit/ac055d7e3b8f07c57c5b789a2373d93f023d8d48))
+
+Introduce comprehensive documentation for: - Comment standards for Python docstrings, inline
+  comments, and documentation - Project architecture guidelines covering directory structure,
+  dependency injection, and service patterns
+
+These conventions provide clear guidance for code documentation and architectural design across the
+  project, promoting consistency and maintainability.
+
+- Update conventions with new markdown files
+  ([`bcfadef`](https://github.com/UseTheFork/byte/commit/bcfadef66d3cd03c681e8e0b2b290eec606a4aaf))
+
+- Update project conventions and documentation standards
+  ([`54947a4`](https://github.com/UseTheFork/byte/commit/54947a4997a4a814d341fb674e09c4801cfddad6))
+
+### Features
+
+- Add context add command for smart context management
+  ([`af29edb`](https://github.com/UseTheFork/byte/commit/af29edbd2ab5555ad2bee405923ef5a34004c089))
+
+- Add convention parsing and validation services
+  ([`aba8067`](https://github.com/UseTheFork/byte/commit/aba8067da93590dfcc0fa30c361e2b6271874b3b))
+
+- Add skill formatting method to parsing service
+  ([`09d7afe`](https://github.com/UseTheFork/byte/commit/09d7afeaead5eb155c8a204b2e236de45723a2cd))
+
+- Add slugify method to string utility
+  ([`a8849ef`](https://github.com/UseTheFork/byte/commit/a8849efa037e0b2fd6ca9e7227337f2de19a8af5))
+
+### Refactoring
+
+- Enhance prompt assembly with convention context gathering
+  ([`be84152`](https://github.com/UseTheFork/byte/commit/be841521bcbfae269f3bf5f9e4ed0deae24f16ae))
+
+- Migrate convention-related imports and services
+  ([`5e5658e`](https://github.com/UseTheFork/byte/commit/5e5658eca8aa9c7ea2472bb437e0905f8b52cd13))
+
+- Modify extract node to use parsing services
+  ([`da30488`](https://github.com/UseTheFork/byte/commit/da30488e4343c1514ab4436d3ffda79004ea1847))
+
+- Move boundary and boundary type to support module
+  ([`65c1c61`](https://github.com/UseTheFork/byte/commit/65c1c61c01f5ae076eafb8f11fe11ee654a5baf2))
+
+- Move convention command and constants to conventions module
+  ([`957140f`](https://github.com/UseTheFork/byte/commit/957140f526bee7fa26c4c259c61b1dd1e24f96bf))
+
+- Remove unused conventions module
+  ([`a5afb22`](https://github.com/UseTheFork/byte/commit/a5afb22dc79d0ae4fa7c3b7306d36856520f0138))
+
+- Remove unused imports and simplify prompt assembler
+  ([`2de8cb5`](https://github.com/UseTheFork/byte/commit/2de8cb5d4ebb1c8adbef2cf1c2a8744536e19494))
+
+- Rename convention files to use consistent hyphen naming
+  ([`0e2e91b`](https://github.com/UseTheFork/byte/commit/0e2e91b1dfadab2c712583201f467d8f51931ecb))
+
+- Rename prompt_format module to code_operations
+  ([`ca65c72`](https://github.com/UseTheFork/byte/commit/ca65c72611a7dc3deac4be1a28b1f54da896735c))
+
+Restructure the project by renaming the `prompt_format` module to `code_operations` to better
+  reflect its broader functionality. This involves:
+
+- Renaming the entire module directory - Updating import statements across multiple files -
+  Maintaining the existing functionality while improving module naming
+
+- Replace skill parsing service with conventions parsing service
+  ([`2227f08`](https://github.com/UseTheFork/byte/commit/2227f0871a4332c905044e72f0e0c299ad4091c3))
+
+- Restructure code operations module
+  ([`b63dc44`](https://github.com/UseTheFork/byte/commit/b63dc447eb617bfa45971b966d75f360750f66fb))
+
+- Restructure convention management with new context service
+  ([`8421deb`](https://github.com/UseTheFork/byte/commit/8421deb25031e78e5469015de487d2fa97714370))
+
+- Restructure knowledge domain into conventions and parsing domains
+  ([`70d1406`](https://github.com/UseTheFork/byte/commit/70d140694411b73ba8ee609d510e601ddde2eb1c))
+
+- Restructure parsing services with base abstract class
+  ([`928cabc`](https://github.com/UseTheFork/byte/commit/928cabc9acc952f0ace759447b4e424228a9a64e))
+
+- Simplify ai comment watcher service output
+  ([`342ee31`](https://github.com/UseTheFork/byte/commit/342ee31221901236bb991c789257c43179104138))
+
+- Update agent implementations to use new conventions and parsing domains
+  ([`84f753a`](https://github.com/UseTheFork/byte/commit/84f753a24fb24521d6179029e6d745828ccc2eac))
+
+- Update agent nodes to improve message handling
+  ([`8587caa`](https://github.com/UseTheFork/byte/commit/8587caa4396ebc1be317ad97dafbf904c37d5451))
+
+- Update boundary extraction with new extractor class
+  ([`b6fc600`](https://github.com/UseTheFork/byte/commit/b6fc600b657e9d40a16154282182108df78f7b34))
+
+- Update context display and convention type selection
+  ([`d866ca9`](https://github.com/UseTheFork/byte/commit/d866ca9e88290c6a057ecb2f1ce2f9b9708d663e))
+
+- Update convention tools and parsing to support new naming convention
+  ([`8005895`](https://github.com/UseTheFork/byte/commit/8005895d0faa09e26f373e5149c2f8f2721fab50))
+
+- Update edit block service and remove edit format service
+  ([`e29468f`](https://github.com/UseTheFork/byte/commit/e29468f86d8d414cb2ddba7b9879478712e4be73))
+
+- Update event bus and console utilities
+  ([`b0bb801`](https://github.com/UseTheFork/byte/commit/b0bb8017fd125bf0c3e71104844ee2211967c49e))
+
+- Update import paths for boundary and boundary type
+  ([`67cc88c`](https://github.com/UseTheFork/byte/commit/67cc88cf930ec138f100b94685c2a648e69a7c7c))
+
+- Update prompt format and boundary utilities
+  ([`b4c4c16`](https://github.com/UseTheFork/byte/commit/b4c4c161e928572951ea1641c79285285382964d))
+
+- Update prompt format and response structure
+  ([`2503c64`](https://github.com/UseTheFork/byte/commit/2503c64fb18498cb6161958205299b2da59caa65))
+
+- Update user interactive mixin return type hint
+  ([`756239d`](https://github.com/UseTheFork/byte/commit/756239da58ce587171d97748b94a4337853307cc))
+
+
 ## v1.3.0 (2026-02-02)
 
 ### Bug Fixes
