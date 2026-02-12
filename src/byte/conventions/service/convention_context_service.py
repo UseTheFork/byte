@@ -102,8 +102,6 @@ class ConventionContextService(Service):
             )
 
             for convention_props in self.conventions.all().values():
-                convention_location = self.app.conventions_path(convention_props.filename())
-
                 lines.append(
                     list_to_multiline_text(
                         [
@@ -114,9 +112,6 @@ class ConventionContextService(Service):
                             Boundary.open(BoundaryType.DESCRIPTION),
                             html.escape(convention_props.description),
                             Boundary.close(BoundaryType.DESCRIPTION),
-                            Boundary.open(BoundaryType.LOCATION),
-                            html.escape(str(convention_location)),
-                            Boundary.close(BoundaryType.LOCATION),
                             Boundary.close(BoundaryType.CONVENTION),
                         ]
                     )

@@ -89,4 +89,4 @@ class ConventionProperties(Properties):
 
         Usage: `filename = convention_props.generate_filename()`
         """
-        return f"{Str.slugify(self.name, '_')}.md"
+        return f"{Str.slugify(self.name, '-')}.md"
