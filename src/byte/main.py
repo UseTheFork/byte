@@ -8,6 +8,8 @@ from byte.agent import AgentServiceProvider
 from byte.analytics import AnalyticsProvider
 from byte.cli import CLIServiceProvider
 from byte.clipboard import ClipboardServiceProvider
+from byte.code_operations import PromptFormatProvider
+from byte.conventions.service_provider import ConventionsServiceProvider
 from byte.development import DevelopmentServiceProvider
 from byte.files import FileServiceProvider
 from byte.foundation import Application
@@ -18,7 +20,6 @@ from byte.llm import LLMServiceProvider
 from byte.lsp import LSPServiceProvider
 from byte.memory import MemoryServiceProvider
 from byte.presets import PresetsProvider
-from byte.prompt_format import PromptFormatProvider
 from byte.system import SystemServiceProvider
 from byte.web import WebServiceProvider
 
@@ -27,6 +28,7 @@ PROVIDERS = [
     MemoryServiceProvider,
     KnowledgeServiceProvider,
     FileServiceProvider,
+    ConventionsServiceProvider,
     # ToolsServiceProvider,
     LLMServiceProvider,
     GitServiceProvider,

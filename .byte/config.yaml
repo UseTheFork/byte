@@ -186,4 +186,47 @@ presets:
   - src/tests/base_test.py
   - src/byte/prompt_format/**
   - src/tests/prompt_format/**
+- id: skill
+  read_only_files:
+  - src/byte/agent/implementations/coder/prompt.py
+  - src/byte/cli/__init__.py
+  - src/byte/cli/argparse/base.py
+  - src/byte/cli/config.py
+  - src/byte/cli/exceptions.py
+  - src/byte/cli/rich/code_block_navigator.py
+  - src/byte/cli/rich/heading.py
+  - src/byte/cli/rich/markdown.py
+  - src/byte/cli/rich/menu.py
+  - src/byte/cli/rich/panel_rule.py
+  - src/byte/cli/rich/rune_spinner.py
+  - src/byte/cli/schemas.py
+  - src/byte/cli/service/command_registry.py
+  - src/byte/cli/service/interactions_service.py
+  - src/byte/cli/service/prompt_toolkit_service.py
+  - src/byte/cli/service/stream_rendering_service.py
+  - src/byte/cli/service/subprocess_service.py
+  - src/byte/cli/service_provider.py
+  - src/byte/cli/utils/formatters.py
+  - src/byte/prompt_format/schemas.py
+  - src/byte/prompt_format/service/parser_service_prompt.py
+  - src/byte/prompt_format/utils/boundary.py
+  editable_files:
+  - src/byte/agent/utils/prompt_assembler.py
+  - src/byte/parsing/__init__.py
+  - src/byte/parsing/exceptions.py
+  - src/byte/parsing/schemas.py
+  - src/byte/parsing/service/__init__.py
+  - src/byte/parsing/service/skill_parsing_service.py
+  - src/byte/parsing/service_provider.py
+  - src/byte/skills/__init__.py
+  - src/byte/skills/base_skill.py
+  - src/byte/skills/service_provider.py
+  conventions:
+  - CODE_PATTERNS.md
+  - COMMENT_STYLEGUIDE.md
+  - MKDOCS_STYLEGUIDE.md
+  - PROJECT_ARCHITECTURE.md
+  - PROJECT_TOOLING.md
+  prompt: None
+  load_on_boot: false
 version: 1.0.0

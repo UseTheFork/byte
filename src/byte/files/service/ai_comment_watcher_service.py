@@ -5,8 +5,8 @@ from typing import List, Optional
 from byte import Payload, Service
 from byte.agent import AskAgent, CoderAgent
 from byte.cli import PromptToolkitService
+from byte.code_operations.schemas import AICommentType
 from byte.files import FileMode, FileService
-from byte.prompt_format.schemas import AICommentType
 from byte.support.utils import list_to_multiline_text
 
 
@@ -213,14 +213,14 @@ class AICommentWatcherService(Service):
             if action_type == comment_action_type:
                 file_path = single_comment.get("file_path")
 
-                ai_instruction.append(f"## File: {file_path}")
-                ai_instruction.append("### Comments")
+                ai_instruction.append(f" - {file_path}")
+                # ai_instruction.append("### Comments")
 
-                # Extract instruction from the comment text
-                for comment in single_comment.get("comments", []):
-                    # Remove comment markers and extract instruction
-                    clean_comment = comment.strip().lstrip("/#-;").strip()
-                    ai_instruction.append(f"{clean_comment.strip()}\n")
+                # # Extract instruction from the comment text
+                # for comment in single_comment.get("comments", []):
+                #     # Remove comment markers and extract instruction
+                #     clean_comment = comment.strip().lstrip("/#-;").strip()
+                #     ai_instruction.append(f"{clean_comment.strip()}\n")
 
         ai_instruction = "\n".join(ai_instruction)
 
@@ -231,9 +231,7 @@ class AICommentWatcherService(Service):
             return {
                 "prompt": list_to_multiline_text(
                     [
-                        f'I\'ve written task instructions in code comments marked with "{AICommentType.AI}:" or "{AICommentType.AI}!" and extracted them below.',
-                        "",
-                        "# Extracted instructions:",
+                        f'I\'ve written task instructions in code comments marked with "{AICommentType.AI.value}:" or "{AICommentType.AI.value}!" in the following files:',
                         f"{ai_instruction}",
                         "",
                     ]
@@ -245,9 +243,7 @@ class AICommentWatcherService(Service):
             return {
                 "prompt": list_to_multiline_text(
                     [
-                        f'I\'ve written questions in code comments marked with "{AICommentType.AI}:" or "{AICommentType.AI}?" and extracted them below.',
-                        "",
-                        "Extracted questions:",
+                        f'I\'ve written questions in code comments marked with "{AICommentType.AI.value}:" or "{AICommentType.AI.value}?" in the following files:',
                         f"{ai_instruction}",
                     ]
                 ),

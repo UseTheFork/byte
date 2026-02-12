@@ -1,23 +1,43 @@
-from byte.prompt_format import EDIT_BLOCK_NAME, Boundary, BoundaryType
-from byte.prompt_format.schemas import AICommentType
+from byte.code_operations import EDIT_BLOCK_NAME
+from byte.code_operations.schemas import AICommentType
+from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 
-edit_format_system = list_to_multiline_text(
+edit_block_system = list_to_multiline_text(
     [
-        f"# *{EDIT_BLOCK_NAME}* Block Rules:",
+        Boundary.open(BoundaryType.RESPONSE_FORMAT),
+        f"# *{EDIT_BLOCK_NAME}* Rules:",
         "",
-        f"Use *{EDIT_BLOCK_NAME}* Block to make precise edits to files. Each block specifies:",
-        "- **What file** to modify (with full path)",
+        f"Use *{EDIT_BLOCK_NAME}* to make precise edits to the repo. Each {EDIT_BLOCK_NAME} specifies:",
+        "- **What repo file** to modify (with full path)",
         "- **What operation** to perform (edit, create, delete, replace)",
         "- **What content** to find (search section)",
         "- **What to replace** it with (replace section)",
         "",
-        "## Block Format:",
+        "## Response Structure:",
         "",
-        f"Every *{EDIT_BLOCK_NAME}* Block must use this exact format:",
+        f"**REQUIRED**: All responses containing *{EDIT_BLOCK_NAME}* MUST start with a PLAN section:",
+        "",
+        f"- Wrap your plan in `{Boundary.open(BoundaryType.PLAN)}...{Boundary.close(BoundaryType.PLAN)}` boundaries",
+        "- Explain what files will be modified and why",
+        "- List the specific changes in numbered steps",
+        "- Keep it concise but complete",
+        "",
+        "Example:",
+        Boundary.open(BoundaryType.PLAN) + Boundary.notice("new line here"),
+        "To make this change we need to modify `mathweb/flask/app.py` to:",
+        "",
+        "1. Import the math package.",
+        "2. Remove the existing factorial() function.",
+        "3. Update get_factorial() to call math.factorial instead.",
+        Boundary.close(BoundaryType.PLAN) + Boundary.notice("new line here"),
+        "",
+        f"## *{EDIT_BLOCK_NAME}* Format:",
+        "",
+        f"Every *{EDIT_BLOCK_NAME}* must use this exact format:",
         "```language",
         Boundary.open(
-            BoundaryType.FILE, meta={"path": "full/file/path", "operation": "operation_type", "block_id": "1"}
+            BoundaryType.EDIT_BLOCK, meta={"path": "full/file/path", "operation": "operation_type", "block_id": "1"}
         ),
         Boundary.open(BoundaryType.SEARCH) + Boundary.notice("new line here"),
         "[exact charector for charector content to find"
@@ -26,7 +46,7 @@ edit_format_system = list_to_multiline_text(
         Boundary.open(BoundaryType.REPLACE) + Boundary.notice("new line here"),
         "[content to replace with]" + Boundary.notice("(can be empty)"),
         Boundary.close(BoundaryType.REPLACE),
-        Boundary.close(BoundaryType.FILE),
+        Boundary.close(BoundaryType.EDIT_BLOCK),
         "```",
         "**IMPORTANT**: Never put content on the same line as the opening tag.",
         "",
@@ -40,19 +60,23 @@ edit_format_system = list_to_multiline_text(
         "",
         "**Create a new file:**",
         "```python",
-        Boundary.open(BoundaryType.FILE, meta={"path": "mathweb/flask/app.py", "operation": "create", "block_id": "1"}),
+        Boundary.open(
+            BoundaryType.EDIT_BLOCK, meta={"path": "mathweb/flask/app.py", "operation": "create", "block_id": "1"}
+        ),
         Boundary.open(BoundaryType.SEARCH),
         Boundary.close(BoundaryType.SEARCH),
         Boundary.open(BoundaryType.REPLACE),
         "import math",
         "from flask import Flask",
         Boundary.close(BoundaryType.REPLACE),
-        Boundary.close(BoundaryType.FILE),
+        Boundary.close(BoundaryType.EDIT_BLOCK),
         "```",
         "",
         "**Edit existing file content:**",
         "```python",
-        Boundary.open(BoundaryType.FILE, meta={"path": "mathweb/flask/app.py", "operation": "edit", "block_id": "1"}),
+        Boundary.open(
+            BoundaryType.EDIT_BLOCK, meta={"path": "mathweb/flask/app.py", "operation": "edit", "block_id": "1"}
+        ),
         Boundary.open(BoundaryType.SEARCH),
         "from flask import Flask",
         Boundary.close(BoundaryType.SEARCH),
@@ -60,22 +84,22 @@ edit_format_system = list_to_multiline_text(
         "import math",
         "from flask import Flask",
         Boundary.close(BoundaryType.REPLACE),
-        Boundary.close(BoundaryType.FILE),
+        Boundary.close(BoundaryType.EDIT_BLOCK),
         "```",
         "",
         "**Remove entire file:**",
         "```python",
-        Boundary.open(BoundaryType.FILE, meta={"path": "old_config.py", "operation": "delete", "block_id": "1"}),
+        Boundary.open(BoundaryType.EDIT_BLOCK, meta={"path": "old_config.py", "operation": "delete", "block_id": "1"}),
         Boundary.open(BoundaryType.SEARCH),
         Boundary.close(BoundaryType.SEARCH),
         Boundary.open(BoundaryType.REPLACE),
         Boundary.close(BoundaryType.REPLACE),
-        Boundary.close(BoundaryType.FILE),
+        Boundary.close(BoundaryType.EDIT_BLOCK),
         "```",
         "",
         "**Replace all file contents:**",
         "```python",
-        Boundary.open(BoundaryType.FILE, meta={"path": "config.py", "operation": "replace", "block_id": "1"}),
+        Boundary.open(BoundaryType.EDIT_BLOCK, meta={"path": "config.py", "operation": "replace", "block_id": "1"}),
         Boundary.open(BoundaryType.SEARCH),
         Boundary.close(BoundaryType.SEARCH),
         Boundary.open(BoundaryType.REPLACE),
@@ -88,7 +112,7 @@ edit_format_system = list_to_multiline_text(
         "    port: int = 8000",
         '    database_url: str = os.getenv("DATABASE_URL", "sqlite:///app.db")',
         Boundary.close(BoundaryType.REPLACE),
-        Boundary.close(BoundaryType.FILE),
+        Boundary.close(BoundaryType.EDIT_BLOCK),
         "```",
         "",
         "## **CRITICAL RULES:**",
@@ -109,22 +133,29 @@ edit_format_system = list_to_multiline_text(
         "File Operations:",
         f"- Only edit files that the user has added to the chat. Refer to `{Boundary.open(BoundaryType.CONTEXT, meta={'type': 'editable files'})}`",
         '- For new files: use operation="create" with empty search, content in replace',
-        "- To move code: use 2 blocks (1 to delete, 1 to insert)",
+        f"- To move code: use 2 {EDIT_BLOCK_NAME} (1 to delete, 1 to insert)",
         "",
         "User Intent:",
-        f'- If user says "ok", "go ahead", or "do that" → provide {EDIT_BLOCK_NAME} blocks',
+        f'- If user says "ok", "go ahead", or "do that" → provide {EDIT_BLOCK_NAME}',
         "- Wait for user confirmation before assuming edits are applied",
-        f"- ONLY EVER RETURN CODE IN A {EDIT_BLOCK_NAME} Blocks!",
+        f"- ONLY EVER RETURN CODE IN A {EDIT_BLOCK_NAME}!",
+        "",
+        Boundary.close(BoundaryType.RESPONSE_FORMAT),
+        Boundary.open(BoundaryType.USER_INPUT),
+        f"Before we start lets first practice the *{EDIT_BLOCK_NAME}* Block format.",
+        "",
+        "Change get_factorial() to use math.factorial",
+        Boundary.close(BoundaryType.USER_INPUT),
     ]
 )
 
-edit_format_enforcement = [
+edit_block_enforcement = [
     Boundary.open(BoundaryType.SEARCH) + " Tag Rules:",
     "- Never put content on the same line as the opening tag.",
     f"- Must EXACTLY MATCH existing file content, character for character including comments and {AICommentType.AI} comments.",
 ]
 
-edit_format_recovery_steps = list_to_multiline_text(
+edit_block_recovery_steps = list_to_multiline_text(
     [
         Boundary.close(BoundaryType.RECOVERY_STEPS),
         'If you get "search string not found in file":',
@@ -188,32 +219,23 @@ shell_command_system = list_to_multiline_text(
     ]
 )
 
-practice_messages = [
-    (
-        "user",
-        list_to_multiline_text(
-            [
-                f"Before we start lets first practice the *{EDIT_BLOCK_NAME}* Block format.",
-                "",
-                "Change get_factorial() to use math.factorial",
-            ]
-        ),
-    ),
+edit_block_messages = [
+    ("user", edit_block_system),
     (
         "assistant",
         list_to_multiline_text(
             [
+                Boundary.open(BoundaryType.PLAN),
                 "To make this change we need to modify `mathweb/flask/app.py` to:",
                 "",
                 "1. Import the math package.",
                 "2. Remove the existing factorial() function.",
                 "3. Update get_factorial() to call math.factorial instead.",
-                "",
-                f"Here are the *{EDIT_BLOCK_NAME}* blocks:",
+                Boundary.close(BoundaryType.PLAN),
                 "",
                 "```python",
                 Boundary.open(
-                    BoundaryType.FILE, meta={"path": "mathweb/flask/app.py", "operation": "edit", "block_id": "1"}
+                    BoundaryType.EDIT_BLOCK, meta={"path": "mathweb/flask/app.py", "operation": "edit", "block_id": "1"}
                 ),
                 Boundary.open(BoundaryType.SEARCH),
                 "from flask import Flask",
@@ -222,12 +244,12 @@ practice_messages = [
                 "import math",
                 "from flask import Flask",
                 Boundary.close(BoundaryType.REPLACE),
-                Boundary.close(BoundaryType.FILE),
+                Boundary.close(BoundaryType.EDIT_BLOCK),
                 "```",
                 "",
                 "```python",
                 Boundary.open(
-                    BoundaryType.FILE, meta={"path": "mathweb/flask/app.py", "operation": "edit", "block_id": "2"}
+                    BoundaryType.EDIT_BLOCK, meta={"path": "mathweb/flask/app.py", "operation": "edit", "block_id": "2"}
                 ),
                 Boundary.open(BoundaryType.SEARCH),
                 "def factorial(n):",
@@ -240,12 +262,12 @@ practice_messages = [
                 Boundary.close(BoundaryType.SEARCH),
                 Boundary.open(BoundaryType.REPLACE),
                 Boundary.close(BoundaryType.REPLACE),
-                Boundary.close(BoundaryType.FILE),
+                Boundary.close(BoundaryType.EDIT_BLOCK),
                 "```",
                 "",
                 "```python",
                 Boundary.open(
-                    BoundaryType.FILE, meta={"path": "mathweb/flask/app.py", "operation": "edit", "block_id": "3"}
+                    BoundaryType.EDIT_BLOCK, meta={"path": "mathweb/flask/app.py", "operation": "edit", "block_id": "3"}
                 ),
                 Boundary.open(BoundaryType.SEARCH),
                 "    return str(factorial(n))",
@@ -253,7 +275,7 @@ practice_messages = [
                 Boundary.open(BoundaryType.REPLACE),
                 "    return str(math.factorial(n))",
                 Boundary.close(BoundaryType.REPLACE),
-                Boundary.close(BoundaryType.FILE),
+                Boundary.close(BoundaryType.EDIT_BLOCK),
                 "```",
             ]
         ),
@@ -266,15 +288,17 @@ practice_messages = [
         "assistant",
         list_to_multiline_text(
             [
+                Boundary.open(BoundaryType.PLAN),
                 "To make this change we need to modify `main.py` and make a new file `hello.py`:",
                 "",
                 "1. Make a new hello.py file with hello() in it.",
                 "2. Remove hello() from main.py and replace it with an import.",
-                "",
-                f"Here are the *{EDIT_BLOCK_NAME}* blocks:",
+                Boundary.close(BoundaryType.PLAN),
                 "",
                 "```python",
-                Boundary.open(BoundaryType.FILE, meta={"path": "hello.py", "operation": "create", "block_id": "1"}),
+                Boundary.open(
+                    BoundaryType.EDIT_BLOCK, meta={"path": "hello.py", "operation": "create", "block_id": "1"}
+                ),
                 Boundary.open(BoundaryType.SEARCH),
                 Boundary.close(BoundaryType.SEARCH),
                 Boundary.open(BoundaryType.REPLACE),
@@ -283,11 +307,11 @@ practice_messages = [
                 "",
                 '    print("hello")',
                 Boundary.close(BoundaryType.REPLACE),
-                Boundary.close(BoundaryType.FILE),
+                Boundary.close(BoundaryType.EDIT_BLOCK),
                 "```",
                 "",
                 "```python",
-                Boundary.open(BoundaryType.FILE, meta={"path": "main.py", "operation": "edit", "block_id": "2"}),
+                Boundary.open(BoundaryType.EDIT_BLOCK, meta={"path": "main.py", "operation": "edit", "block_id": "2"}),
                 Boundary.open(BoundaryType.SEARCH),
                 "def hello():",
                 '    "print a greeting"',
@@ -297,7 +321,7 @@ practice_messages = [
                 Boundary.open(BoundaryType.REPLACE),
                 "from hello import hello",
                 Boundary.close(BoundaryType.REPLACE),
-                Boundary.close(BoundaryType.FILE),
+                Boundary.close(BoundaryType.EDIT_BLOCK),
                 "```",
             ]
         ),
@@ -307,21 +331,21 @@ practice_messages = [
         "assistant",
         list_to_multiline_text(
             [
+                Boundary.open(BoundaryType.PLAN),
                 "To remove this file we need to delete `old_config.py`:",
                 "",
                 "1. Remove the old_config.py file completely from the project.",
-                "",
-                f"Here is the *{EDIT_BLOCK_NAME}* blocks:",
+                Boundary.close(BoundaryType.PLAN),
                 "",
                 "```python",
                 Boundary.open(
-                    BoundaryType.FILE, meta={"path": "old_config.py", "operation": "delete", "block_id": "1"}
+                    BoundaryType.EDIT_BLOCK, meta={"path": "old_config.py", "operation": "delete", "block_id": "1"}
                 ),
                 Boundary.open(BoundaryType.SEARCH),
                 Boundary.close(BoundaryType.SEARCH),
                 Boundary.open(BoundaryType.REPLACE),
                 Boundary.close(BoundaryType.REPLACE),
-                Boundary.close(BoundaryType.FILE),
+                Boundary.close(BoundaryType.EDIT_BLOCK),
                 "```",
             ]
         ),
@@ -334,14 +358,16 @@ practice_messages = [
         "assistant",
         list_to_multiline_text(
             [
+                Boundary.open(BoundaryType.PLAN),
                 "To replace all the contents we need to completely rewrite `config.py`:",
                 "",
                 "1. Replace the entire contents of config.py with the new configuration structure.",
-                "",
-                f"Here is the *{EDIT_BLOCK_NAME}* block:",
+                Boundary.close(BoundaryType.PLAN),
                 "",
                 "```python",
-                Boundary.open(BoundaryType.FILE, meta={"path": "config.py", "operation": "replace", "block_id": "1"}),
+                Boundary.open(
+                    BoundaryType.EDIT_BLOCK, meta={"path": "config.py", "operation": "replace", "block_id": "1"}
+                ),
                 Boundary.open(BoundaryType.SEARCH),
                 Boundary.close(BoundaryType.SEARCH),
                 Boundary.open(BoundaryType.REPLACE),
@@ -354,7 +380,7 @@ practice_messages = [
                 "    port: int = 8000",
                 '    database_url: str = os.getenv("DATABASE_URL", "sqlite:///app.db")',
                 Boundary.close(BoundaryType.REPLACE),
-                Boundary.close(BoundaryType.FILE),
+                Boundary.close(BoundaryType.EDIT_BLOCK),
                 "```",
             ]
         ),
@@ -367,15 +393,17 @@ practice_messages = [
         "assistant",
         list_to_multiline_text(
             [
+                Boundary.open(BoundaryType.PLAN),
                 "To add error handling we need to modify `calculator.py` in two places:",
                 "",
                 "1. Update the docstring to mention error handling.",
                 "2. Add try-catch block around the calculation.",
-                "",
-                f"Here are the *{EDIT_BLOCK_NAME}* blocks:",
+                Boundary.close(BoundaryType.PLAN),
                 "",
                 "```python",
-                Boundary.open(BoundaryType.FILE, meta={"path": "calculator.py", "operation": "edit", "block_id": "1"}),
+                Boundary.open(
+                    BoundaryType.EDIT_BLOCK, meta={"path": "calculator.py", "operation": "edit", "block_id": "1"}
+                ),
                 Boundary.open(BoundaryType.SEARCH),
                 "def calculate(a, b):",
                 '    "Simple calculator function"',
@@ -384,11 +412,13 @@ practice_messages = [
                 "def calculate(a, b):",
                 '    "Simple calculator function with error handling"',
                 Boundary.close(BoundaryType.REPLACE),
-                Boundary.close(BoundaryType.FILE),
+                Boundary.close(BoundaryType.EDIT_BLOCK),
                 "```",
                 "",
                 "```python",
-                Boundary.open(BoundaryType.FILE, meta={"path": "calculator.py", "operation": "edit", "block_id": "2"}),
+                Boundary.open(
+                    BoundaryType.EDIT_BLOCK, meta={"path": "calculator.py", "operation": "edit", "block_id": "2"}
+                ),
                 Boundary.open(BoundaryType.SEARCH),
                 "    return a / b",
                 Boundary.close(BoundaryType.SEARCH),
@@ -398,16 +428,9 @@ practice_messages = [
                 "    except ZeroDivisionError:",
                 '        return "Error: Cannot divide by zero"',
                 Boundary.close(BoundaryType.REPLACE),
-                Boundary.close(BoundaryType.FILE),
+                Boundary.close(BoundaryType.EDIT_BLOCK),
                 "```",
             ]
         ),
     ),
 ]
-
-# pseudo_xml_prompts = EditFormatPrompts(
-#     system=edit_format_system,
-#     examples=practice_messages,
-#     shell_system=shell_command_system,
-#     shell_examples=[],
-# )

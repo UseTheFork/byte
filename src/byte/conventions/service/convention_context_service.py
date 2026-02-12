@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-from byte import Payload, Service
-from byte.prompt_format import Boundary, BoundaryType
-from byte.support import ArrayStore
+import html
+
+from byte import Service
+from byte.agent import BaseState
+from byte.parsing import ConventionParsingService
+from byte.support import ArrayStore, Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 
 
@@ -35,53 +38,30 @@ class ConventionContextService(Service):
         if not conventions_dir.exists() or not conventions_dir.is_dir():
             return
 
-        # Iterate over all .md files in the conventions directory
-        for md_file in sorted(conventions_dir.glob(pattern="*.md", case_sensitive=False)):
-            try:
-                content = md_file.read_text(encoding="utf-8")
-                # Format as a document with filename header and separator
-                formatted_doc = list_to_multiline_text(
-                    [
-                        Boundary.open(
-                            BoundaryType.CONVENTION,
-                            meta={"title": md_file.name.title(), "source": str(md_file)},
-                        ),
-                        "```markdown",
-                        content,
-                        "```",
-                        Boundary.close(BoundaryType.CONVENTION),
-                    ]
-                )
-                self.conventions.add(md_file.name, formatted_doc)
-            except Exception:
-                pass
+        # Iterate over conventions directory and subdirectories
+        convention_parsing_service = self.app.make(ConventionParsingService)
+
+        for md_file in sorted(conventions_dir.rglob("*.md")):
+            # Parse the convention properties from the markdown file
+            properties = convention_parsing_service.read_properties(md_file)
+
+            # Store ConventionProperties keyed by name
+            self.conventions.add(properties.name, properties)
 
     def add_convention(self, filename: str) -> ConventionContextService:
         """Add a convention document to the store by loading it from the conventions directory.
 
         Usage: `service.add_convention("style_guide.md")`
         """
-
         md_file = self.app.conventions_path(filename)
 
         if not md_file.exists() or not md_file.is_file():
             return self
 
         try:
-            content = md_file.read_text(encoding="utf-8")
-            formatted_doc = list_to_multiline_text(
-                [
-                    Boundary.open(
-                        BoundaryType.CONVENTION,
-                        meta={"title": md_file.name.title(), "source": str(md_file)},
-                    ),
-                    "```markdown",
-                    content,
-                    "```",
-                    Boundary.close(BoundaryType.CONVENTION),
-                ]
-            )
-            self.conventions.add(md_file.name, formatted_doc)
+            convention_parsing_service = self.app.make(ConventionParsingService)
+            properties = convention_parsing_service.read_properties(md_file)
+            self.conventions.add(properties.name, properties)
         except Exception:
             pass
 
@@ -111,13 +91,33 @@ class ConventionContextService(Service):
         """
         return self.conventions.all()
 
-    async def add_project_context_hook(self, payload: Payload) -> Payload:
+    async def get_available_conventions(self, state: BaseState) -> str:
+        lines = []
         if self.conventions.is_not_empty():
-            conventions = "\n\n".join(self.conventions.all().values())
+            lines = [Boundary.open(BoundaryType.AVAILABLE_CONVENTIONS)]
+            lines.append(
+                Boundary.notice(
+                    f"Use the **load_conventions** tool and the **{Boundary.open(BoundaryType.LOCATION)}** to load a {BoundaryType.CONVENTION}."
+                )
+            )
 
-            # Get existing list and append
-            conventions_list = payload.get("conventions", [])
-            conventions_list.append(conventions)
-            payload.set("conventions", conventions_list)
+            for convention_props in self.conventions.all().values():
+                lines.append(
+                    list_to_multiline_text(
+                        [
+                            Boundary.open(BoundaryType.CONVENTION),
+                            Boundary.open(BoundaryType.NAME),
+                            html.escape(convention_props.name),
+                            Boundary.close(BoundaryType.NAME),
+                            Boundary.open(BoundaryType.DESCRIPTION),
+                            html.escape(convention_props.description),
+                            Boundary.close(BoundaryType.DESCRIPTION),
+                            Boundary.close(BoundaryType.CONVENTION),
+                        ]
+                    )
+                )
+            lines.append(Boundary.close(BoundaryType.AVAILABLE_CONVENTIONS))
 
-        return payload
+        formatted_conventions = list_to_multiline_text(lines)
+
+        return formatted_conventions

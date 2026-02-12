@@ -1,6 +1,6 @@
 from typing import Literal
 
-from langchain.messages import HumanMessage
+from langchain.messages import AIMessage, HumanMessage
 from langgraph.graph import END
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
@@ -9,7 +9,8 @@ from langgraph.types import Command
 from byte import EventType, Payload
 from byte.agent import AssistantContextSchema, BaseState, Node
 from byte.clipboard import ClipboardService
-from byte.support.utils import get_last_ai_message
+from byte.support import Boundary, BoundaryType
+from byte.support.utils import get_last_ai_message, list_to_multiline_text
 
 
 class EndNode(Node):
@@ -62,8 +63,26 @@ class EndNode(Node):
             if runtime.context.agent == "SubprocessAgent":
                 update_dict["history_messages"] = [last_message]
             else:
+                # Wrap the message in XML for parsing later.
+                last_message = list_to_multiline_text(
+                    [
+                        Boundary.open(BoundaryType.AGENT_MESSAGE, {"agent_type": runtime.context.agent}),
+                        str(last_message.content),
+                        Boundary.close(BoundaryType.AGENT_MESSAGE),
+                    ]
+                )
+                last_message = AIMessage(content=last_message)
+
                 # Create a HumanMessage from the user_request
-                user_message = HumanMessage(content=state["user_request"])
+                user_message = list_to_multiline_text(
+                    [
+                        Boundary.open(BoundaryType.USER_MESSAGE),
+                        str(state["user_request"]),
+                        Boundary.close(BoundaryType.USER_MESSAGE),
+                    ]
+                )
+                user_message = HumanMessage(content=user_message)
+
                 update_dict["history_messages"] = [user_message, last_message]
 
         return Command(

@@ -1,48 +1,15 @@
-from typing import Literal, Type, cast
+from typing import Literal, Type
 
-from langchain_core.messages import AIMessage
-from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 from pydantic import BaseModel, Field
 
 from byte.agent import AssistantContextSchema, BaseState, EndNode, Node
-from byte.prompt_format import Boundary, BoundaryType
+from byte.parsing import ParsingService, ValidationError
 from byte.support import Str
 from byte.support.mixins import UserInteractive
 from byte.support.utils import extract_content_from_message, get_last_message, list_to_multiline_text
-
-# TODO: This dosent feel like the right place for this.
-
-extract_prompt = ChatPromptTemplate.from_messages(
-    [
-        (
-            "system",
-            list_to_multiline_text(
-                [
-                    Boundary.open(BoundaryType.ROLE),
-                    "Act as a content formatter that structures research findings into a standardized format.",
-                    Boundary.close(BoundaryType.ROLE),
-                    "",
-                    Boundary.open(BoundaryType.RULES),
-                    "- Extract the research findings from the assistant's response",
-                    "- Format the content according to the provided schema",
-                    "- Preserve all important details, file references, and code examples",
-                    "- Ensure the name is descriptive and follows snake_case convention",
-                    "- Keep the content well-structured and readable",
-                    Boundary.close(BoundaryType.RULES),
-                    "",
-                    Boundary.open(BoundaryType.GOAL),
-                    "Transform the research agent's response into a structured document that can be",
-                    "saved to the session context with a clear name and organized content.",
-                    Boundary.close(BoundaryType.GOAL),
-                ]
-            ),
-        ),
-        ("placeholder", "{messages}"),
-    ]
-)
 
 
 class SessionContextFormatter(BaseModel):
@@ -68,19 +35,19 @@ class ExtractNode(Node, UserInteractive):
 
     def boot(
         self,
+        parsing_service: ParsingService | None = None,
         goto: Type[Node] = EndNode,
-        schema: Literal["text", "session_context"] = "text",
         **kwargs,
     ):
-        """Initialize the extract node with schema and routing configuration.
+        """Initialize the extract node with parsing_service and routing configuration.
 
         Args:
                 goto: Next node to route to after extraction (default: "end_node")
-                schema: Output format - "text" for plain extraction or "session_context" for structured formatting
+                parsing_service: Output format - "text" for plain extraction or "session_context" for structured formatting
 
-        Usage: `await node.boot(goto=EndNode, schema="session_context")`
+        Usage: `await node.boot(parsing_service=ConventionParsingService, goto=EndNode)`
         """
-        self.schema = schema
+        self.parsing_service = parsing_service
         self.goto = Str.class_to_snake_case(goto)
 
     async def __call__(
@@ -105,18 +72,25 @@ class ExtractNode(Node, UserInteractive):
 
         last_message = get_last_message(state["scratch_messages"])
 
-        if self.schema == "text":
+        if self.parsing_service is None:
             output = extract_content_from_message(last_message)
             return Command(goto=str(self.goto), update={"extracted_content": output})
 
-        if self.schema == "session_context":
-            weak_model = runtime.context.weak
-            # Bind schema to model
-            model_with_structure = weak_model.with_structured_output(SessionContextFormatter, include_raw=True)
-            runnable = extract_prompt | model_with_structure
-            output = await runnable.ainvoke(state, config=config)
+        try:
+            content = extract_content_from_message(last_message)
+            parsed_content = self.parsing_service.parse(content)
+            self.app["log"].info(parsed_content)
+            return Command(goto=str(self.goto), update={"extracted_content": parsed_content})
+        except ValidationError as e:
+            error_message = list_to_multiline_text(
+                [
+                    "Your response is malformed:",
+                    "```text",
+                    str(e),
+                    "```",
+                    "Reply with the corrected blocks.",
+                    "",
+                ]
+            )
 
-            result = cast(AIMessage, output.get("raw"))
-            await self._track_token_usage(result, "weak")
-
-        return Command(goto=str(self.goto), update={"extracted_content": output.get("parsed")})
+            return Command(goto="assistant_node", update={"errors": error_message})

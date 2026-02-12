@@ -7,11 +7,13 @@ from byte.agent import (
     AssistantNode,
     LintNode,
     ParseBlocksNode,
+    ToolNode,
 )
 from byte.agent.implementations.coder.prompt import coder_prompt, coder_user_template
 from byte.agent.utils.graph_builder import GraphBuilder
+from byte.code_operations import edit_block_enforcement
+from byte.conventions import load_conventions
 from byte.llm import LLMService
-from byte.prompt_format import EditFormatService
 
 
 class CoderAgent(Agent):
@@ -23,18 +25,16 @@ class CoderAgent(Agent):
     """
 
     def get_enforcement(self):
-        edit_format_service = self.app.make(EditFormatService)
-        return edit_format_service.prompts.enforcement
-
-    def get_recovery_steps(self):
-        edit_format_service = self.app.make(EditFormatService)
-        return edit_format_service.prompts.recovery_steps
+        return edit_block_enforcement
 
     def get_user_template(self):
         return coder_user_template
 
     def get_prompt(self):
         return coder_prompt
+
+    def get_tools(self):
+        return [load_conventions]
 
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""
@@ -45,6 +45,7 @@ class CoderAgent(Agent):
         graph.add_node(AssistantNode, goto="parse_blocks_node")
         graph.add_node(ParseBlocksNode)
         graph.add_node(LintNode)
+        graph.add_node(ToolNode)
 
         checkpointer = await self.get_checkpointer()
         return graph.build().compile(checkpointer=checkpointer)
@@ -61,6 +62,6 @@ class CoderAgent(Agent):
             main=main,
             weak=weak,
             enforcement=self.get_enforcement(),
-            recovery_steps=self.get_recovery_steps(),
             agent=self.__class__.__name__,
+            tools=self.get_tools(),
         )

@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from byte.agent.implementations.coder.agent import CoderAgent
     from byte.agent.implementations.commit.agent import CommitAgent, CommitPlanAgent
     from byte.agent.implementations.conventions.agent import ConventionAgent
-    from byte.agent.implementations.conventions.command import ConventionCommand
     from byte.agent.implementations.research.agent import ResearchAgent
     from byte.agent.implementations.research.command import ResearchCommand
     from byte.agent.implementations.subprocess.agent import SubprocessAgent
@@ -67,7 +66,6 @@ __all__ = (
     "ConfigAgentCommand",
     "ConstraintSchema",
     "ConventionAgent",
-    "ConventionCommand",
     "DummyNode",
     "DummyNodeReachedException",
     "EndNode",
@@ -118,7 +116,6 @@ _dynamic_imports = {
     "ConfigAgentCommand": "command.config_agent_command",
     "ConstraintSchema": "schemas",
     "ConventionAgent": "implementations.conventions.agent",
-    "ConventionCommand": "implementations.conventions.command",
     "DummyNode": "nodes.dummy_node",
     "DummyNodeReachedException": "exceptions",
     "EndNode": "nodes.end_node",

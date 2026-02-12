@@ -1,6 +1,6 @@
 from byte import Service
 from byte.git import CommitGroup, CommitMessage, CommitPlan, GitService
-from byte.prompt_format import Boundary, BoundaryType
+from byte.support import Boundary, BoundaryType
 from byte.support.mixins import UserInteractive
 from byte.support.utils import list_to_multiline_text
 

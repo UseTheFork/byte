@@ -5,22 +5,22 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.knowledge.command.context_add_command import ContextAddCommand
     from byte.knowledge.command.context_add_file_command import ContextAddFileCommand
     from byte.knowledge.command.context_drop_command import ContextDropCommand
     from byte.knowledge.command.context_list_command import ContextListCommand
     from byte.knowledge.command.web_command import WebCommand
     from byte.knowledge.models import SessionContextModel
     from byte.knowledge.service.cli_context_display_service import CLIContextDisplayService
-    from byte.knowledge.service.convention_context_service import ConventionContextService
     from byte.knowledge.service.session_context_service import SessionContextService
     from byte.knowledge.service_provider import KnowledgeServiceProvider
 
 __all__ = (
     "CLIContextDisplayService",
+    "ContextAddCommand",
     "ContextAddFileCommand",
     "ContextDropCommand",
     "ContextListCommand",
-    "ConventionContextService",
     "KnowledgeServiceProvider",
     "SessionContextModel",
     "SessionContextService",
@@ -30,10 +30,10 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "CLIContextDisplayService": "service.cli_context_display_service",
+    "ContextAddCommand": "command.context_add_command",
     "ContextAddFileCommand": "command.context_add_file_command",
     "ContextDropCommand": "command.context_drop_command",
     "ContextListCommand": "command.context_list_command",
-    "ConventionContextService": "service.convention_context_service",
     "KnowledgeServiceProvider": "service_provider",
     "SessionContextModel": "models",
     "SessionContextService": "service.session_context_service",

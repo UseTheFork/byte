@@ -1,8 +1,8 @@
 from argparse import Namespace
 
 from byte.cli import ByteArgumentParser, Command
+from byte.conventions import ConventionContextService
 from byte.files import FileMode, FileService
-from byte.knowledge import ConventionContextService
 from byte.presets import PresetsConfig
 from byte.support.utils.slugify import slugify
 from byte.system import ConfigWriterService

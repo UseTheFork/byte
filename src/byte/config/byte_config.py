@@ -3,13 +3,13 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 from byte.cli.config import CLIConfig
+from byte.code_operations.config import EditFormatConfig
 from byte.files.config import FilesConfig
 from byte.git.config import GitConfig
 from byte.lint.config import LintConfig
 from byte.llm.config import LLMConfig
 from byte.lsp.config import LSPConfig
 from byte.presets.config import PresetsConfig
-from byte.prompt_format.config import EditFormatConfig
 from byte.system.config import SystemConfig
 from byte.web.config import WebConfig
 

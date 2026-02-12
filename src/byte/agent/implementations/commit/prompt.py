@@ -1,6 +1,6 @@
 from langchain_core.prompts.chat import ChatPromptTemplate
 
-from byte.prompt_format import Boundary, BoundaryType
+from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 
 # Conventional commit message generation prompt

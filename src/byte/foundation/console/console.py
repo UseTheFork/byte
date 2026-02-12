@@ -259,6 +259,11 @@ class Console:
         kwargs.setdefault("border_style", "success")
         self.console.print(self.panel(*args, **kwargs))
 
+    def print_info_panel(self, *args, **kwargs):
+        """ """
+        kwargs.setdefault("border_style", "info")
+        self.console.print(self.panel(*args, **kwargs))
+
     def print_panel(self, *args, **kwargs):
         """Print a themed panel to the console with default styling.
 
