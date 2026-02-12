@@ -24,16 +24,6 @@ positional arguments:
 
 ```
 
-### `/convention`
-
-```
-usage: convention
-
-Generate convention documents by analyzing codebase patterns and saving them
-to the conventions directory
-
-```
-
 ### `/research`
 
 ```
@@ -88,6 +78,19 @@ Configure agent-specific settings
 
 positional arguments:
   agent  Name of the agent to configure
+
+```
+
+
+## Conventions
+
+### `/convention`
+
+```
+usage: convention
+
+Generate convention documents by analyzing codebase patterns and saving them
+to the conventions directory
 
 ```
 
@@ -263,6 +266,19 @@ all subsequent agent responses from the current thread
 
 
 ## Session Context
+
+### `/context`
+
+```
+usage: context target
+
+Add a file or URL to session context. Automatically detects the type and
+handles appropriately.
+
+positional arguments:
+  target  Path to file or URL to add
+
+```
 
 ### `/ctx:drop`
 

@@ -7,7 +7,7 @@ from rich.columns import Columns
 
 from byte import EventType, Payload, Service
 from byte.files import FileContext, FileDiscoveryService, FileMode
-from byte.prompt_format import Boundary, BoundaryType
+from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 
 

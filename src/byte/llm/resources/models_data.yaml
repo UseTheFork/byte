@@ -53,6 +53,17 @@ claude-3-5-sonnet-20240620:
   limit:
     context: 200000
     output: 8192
+claude-opus-4-6:
+  id: claude-opus-4-6
+  name: Claude Opus 4.6
+  provider: anthropic
+  cost:
+    input: 5
+    output: 25
+    cache_read: 0.5
+  limit:
+    context: 200000
+    output: 128000
 claude-3-5-haiku-latest:
   id: claude-3-5-haiku-latest
   name: Claude Haiku 3.5 (latest)
@@ -471,6 +482,17 @@ o1:
   limit:
     context: 200000
     output: 100000
+gpt-5.3-codex:
+  id: gpt-5.3-codex
+  name: GPT-5.3 Codex
+  provider: openai
+  cost:
+    input: 1.75
+    output: 14
+    cache_read: 0.175
+  limit:
+    context: 400000
+    output: 128000
 gpt-5-mini:
   id: gpt-5-mini
   name: GPT-5 Mini

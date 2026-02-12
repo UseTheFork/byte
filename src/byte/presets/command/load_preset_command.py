@@ -3,8 +3,8 @@ from typing import List
 
 from byte.analytics import AgentAnalyticsService
 from byte.cli import ByteArgumentParser, Command, PromptToolkitService
+from byte.conventions import ConventionContextService
 from byte.files import FileMode, FileService
-from byte.knowledge import ConventionContextService
 from byte.memory import MemoryService
 
 

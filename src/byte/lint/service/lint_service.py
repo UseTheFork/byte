@@ -11,7 +11,7 @@ from byte import Service
 from byte.cli import Markdown
 from byte.git import GitService
 from byte.lint import LintConfigException, LintFile
-from byte.prompt_format import Boundary, BoundaryType
+from byte.support import Boundary, BoundaryType
 from byte.support.mixins import UserInteractive
 from byte.support.utils import get_language_from_filename, list_to_multiline_text
 

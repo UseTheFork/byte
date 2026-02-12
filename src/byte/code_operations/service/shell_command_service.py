@@ -4,12 +4,12 @@ from pathlib import Path
 from typing import List
 
 from byte import Service
-from byte.prompt_format import (
+from byte.code_operations import (
     BlockStatus,
     EditFormatPrompts,
     ShellCommandBlock,
 )
-from byte.prompt_format.service.shell_command_prompt import (
+from byte.code_operations.service.shell_command_prompt import (
     shell_command_system,
     shell_practice_messages,
 )

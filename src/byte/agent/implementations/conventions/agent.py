@@ -5,7 +5,6 @@ from byte.agent import (
     AssistantContextSchema,
     AssistantNode,
     ExtractNode,
-    MaxLinesValidator,
     PromptSettingsSchema,
     ToolNode,
     ValidationNode,
@@ -14,6 +13,7 @@ from byte.agent.implementations.conventions.prompt import conventions_prompt, co
 from byte.agent.utils.graph_builder import GraphBuilder
 from byte.files.tools.read_files import read_files
 from byte.llm import LLMService
+from byte.parsing import ConventionValidator
 
 
 class ConventionAgent(Agent):
@@ -40,7 +40,7 @@ class ConventionAgent(Agent):
 
     def get_validators(self):
         return [
-            self.app.make(MaxLinesValidator, max_lines=75),
+            self.app.make(ConventionValidator),
         ]
 
     async def build(self):

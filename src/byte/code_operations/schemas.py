@@ -3,65 +3,20 @@ from typing import List
 
 from pydantic.dataclasses import dataclass
 
+from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 
 
-class BoundaryType(str, Enum):
-    """Type of boundary marker for content sections."""
-
-    ROLE = "role"
-    TASK = "task"
-    USER_INPUT = "user_input"
-
-    GOAL = "goal"
-    RESPONSE_FORMAT = "response_format"
-
-    RULES = "rules"
-
-    ERROR = "error"
-
-    CONVENTION = "convention"
-    SESSION_CONTEXT = "session_context"
-    SHELL_COMMAND = "shell_command"
-    FILE = "file"
-    SEARCH = "search"
-    REPLACE = "replace"
-    EXAMPLE = "example"
-    REINFORCEMENT = "reinforcement"
-    PROJECT_HIERARCHY = "project_hierarchy"
-    CONSTRAINTS = "constraints"
-
-    # Operating Constraints
-    OPERATING_CONSTRAINTS = "operating_constraints"
-    OPERATING_PRINCIPLES = "operating_principles"
-
-    CRITICAL_REQUIREMENTS = "response_requirements"
-    RECOVERY_STEPS = "recovery_steps"
-
-    CONTEXT = "context"
-
-    # Specific to command execution
-    STDOUT = "stdout"
-    STDERR = "stderr"
-
-    SYSTEM_CONTEXT = "system_context"
-
-    NOTE = "note"
-
-    HEADING = "heading"
-
-    CONVERSATION_HISTORY = "conversation_history"
-    AGENT_MESSAGE = "agent_message"
-    USER_MESSAGE = "user_message"
-
-
-class AICommentType(Enum):
+class AICommentType(str, Enum):
     """Type of ai comment operation."""
 
     AI = "AI"
 
+    def __str__(self):
+        return self.value
 
-class BlockType(Enum):
+
+class BlockType(str, Enum):
     """Type of edit block operation."""
 
     EDIT = "edit"  # Modify existing file content
@@ -69,14 +24,21 @@ class BlockType(Enum):
     REMOVE = "remove"  # Remove existing file
     REPLACE = "replace"
 
+    def __str__(self):
+        return self.value
 
-class BlockStatus(Enum):
+
+class BlockStatus(str, Enum):
     """Status of edit block validation."""
 
     VALID = "valid"
     READ_ONLY_ERROR = "read_only_error"
     SEARCH_NOT_FOUND_ERROR = "search_not_found_error"
     FILE_OUTSIDE_PROJECT_ERROR = "file_outside_project_error"
+    PARSE_ERROR = "parse_error"
+
+    def __str__(self):
+        return self.value
 
 
 @dataclass
@@ -143,7 +105,6 @@ class SearchReplaceBlock:
 
         Usage: `error_msg = block.to_error_format()` -> formatted error block
         """
-        from byte.prompt_format.utils.boundary import Boundary
 
         sections = [
             Boundary.open(BoundaryType.ERROR, meta={"operation": self.block_type.value, "block_id": self.block_id}),
@@ -151,13 +112,13 @@ class SearchReplaceBlock:
             f"**Block ID:** {self.block_id}",
             f"**Status:** {self.block_status.value}",
             f"**Issue:** {self.status_message}",
-            "",
-            Boundary.open(BoundaryType.SEARCH),
-            self.search_content,
-            Boundary.close(BoundaryType.SEARCH),
-            Boundary.open(BoundaryType.REPLACE),
-            self.replace_content,
-            Boundary.close(BoundaryType.REPLACE),
+            # "",
+            # Boundary.open(BoundaryType.SEARCH),
+            # self.search_content,
+            # Boundary.close(BoundaryType.SEARCH),
+            # Boundary.open(BoundaryType.REPLACE),
+            # self.replace_content,
+            # Boundary.close(BoundaryType.REPLACE),
             Boundary.close(BoundaryType.ERROR),
         ]
 
@@ -174,7 +135,6 @@ class SearchReplaceBlock:
 
         Usage: `formatted = block.to_search_replace_format()` -> formatted block string
         """
-        from byte.prompt_format.utils.boundary import Boundary
 
         sections = [
             Boundary.open(

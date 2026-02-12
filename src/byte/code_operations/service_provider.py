@@ -1,7 +1,7 @@
 from typing import List, Type
 
 from byte import Service, ServiceProvider
-from byte.prompt_format import EditFormatService, ParserService, ShellCommandService
+from byte.code_operations import EditBlockService, ShellCommandService
 
 
 class PromptFormatProvider(ServiceProvider):
@@ -15,7 +15,6 @@ class PromptFormatProvider(ServiceProvider):
 
     def services(self) -> List[Type[Service]]:
         return [
-            EditFormatService,
-            ParserService,
+            EditBlockService,
             ShellCommandService,
         ]
