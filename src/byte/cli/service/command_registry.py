@@ -133,25 +133,30 @@ class CommandRegistry(Service):
         """Retrieve a registered @ command by name."""
         return self._at_commands.get(name)
 
-    async def get_slash_completions(self, text: str) -> List[str]:
+    async def get_slash_completions(self, text: str) -> List[tuple[str, str]]:
         """Generate tab completions for slash commands and their arguments.
 
         Handles both command name completion and argument completion by
         delegating to individual command completion handlers.
+
+        Returns:
+            List of tuples containing (completion_text, description)
         """
         if not text.startswith("/"):
             return []
 
         text = text[1:]  # Remove /
         if " " not in text:
-            # Complete command names when no space present
-            return [f"{cmd}" for cmd in self._slash_commands.keys() if cmd.startswith(text)]
+            # Complete command names when no space present - return (name, description) tuples
+            return [(cmd, command.description) for cmd, command in self._slash_commands.items() if cmd.startswith(text)]
         else:
             # Delegate argument completion to specific command
             cmd_name, args = text.split(" ", 1)
             command = self._slash_commands.get(cmd_name)
             if command:
-                return await command.get_completions(args)
+                completions = await command.get_completions(args)
+                # Return as tuples with empty descriptions for args
+                return [(comp, "") for comp in completions]
         return []
 
     async def get_at_completions(self, text: str) -> List[str]:

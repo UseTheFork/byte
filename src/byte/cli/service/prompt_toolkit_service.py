@@ -54,13 +54,15 @@ class CommandCompleter(Completer):
             if " " in text:
                 _, args_part = text.split(" ", 1)
                 # Replace only the args part
-                for completion in completions:
-                    yield Completion(completion, start_position=-len(args_part))
+                for completion, description in completions:
+                    display = f"{completion} - {description}" if description else completion
+                    yield Completion(completion, display=display, start_position=-len(args_part))
             else:
                 # Replace the command part (minus the /)
                 cmd_prefix = text[1:]
-                for completion in completions:
-                    yield Completion(completion, start_position=-len(cmd_prefix))
+                for completion, description in completions:
+                    display = f"{completion} - {description}" if description else completion
+                    yield Completion(completion, display=display, start_position=-len(cmd_prefix))
 
 
 key_bindings = KeyBindings()
@@ -159,7 +161,7 @@ class PromptToolkitService(Service):
         self.placeholder = None
         self.interrupted = False
 
-        message = "> "
+        message = "❯ "  # noqa: RUF001
 
         # Create payload with event type
         payload = Payload(
