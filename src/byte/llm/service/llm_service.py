@@ -20,11 +20,11 @@ from byte.support import Yaml
 
 class LLMService(Service):
     """Base LLM service that all providers extend.
-
-    Provides a unified interface for different LLM providers (OpenAI, Anthropic, etc.)
-    with model caching and configuration management. Enables provider-agnostic
-    AI functionality throughout the application.
-    Usage: `service = LLMService(app)` -> provider-specific implementation
+    z
+        Provides a unified interface for different LLM providers (OpenAI, Anthropic, etc.)
+        with model caching and configuration management. Enables provider-agnostic
+        AI functionality throughout the application.
+        Usage: `service = LLMService(app)` -> provider-specific implementation
     """
 
     def _get_default_model_for_provider(self, provider: str, model_type: str = "main") -> str:
@@ -41,7 +41,7 @@ class LLMService(Service):
             ByteConfigException: If provider is not recognized
         """
         defaults = {
-            "anthropic": ("claude-sonnet-4-5", "claude-3-5-haiku-latest"),
+            "anthropic": ("claude-sonnet-4-5", "claude-haiku-4-5"),
             "openai": ("gpt-5", "gpt-5-mini"),
             "google": ("gemini-2.5-pro", "gemini-2.5-flash-lite"),
         }
@@ -61,7 +61,7 @@ class LLMService(Service):
             ByteConfigException: If no providers are enabled
         """
         if self.app["config"].llm.providers.anthropic.enable:
-            return ("claude-sonnet-4-5", "claude-3-5-haiku-latest")
+            return ("claude-sonnet-4-5", "claude-haiku-4-5")
         elif self.app["config"].llm.providers.gemini.enable:
             return ("gemini-2.5-pro", "gemini-2.5-flash-lite")
         elif self.app["config"].llm.providers.openai.enable:
