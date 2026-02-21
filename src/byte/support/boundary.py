@@ -9,6 +9,8 @@ class BoundaryType(str, Enum):
     TASK = "task"
     USER_INPUT = "user_input"
 
+    CORE_MANDATES = "core_mandates"
+
     GOAL = "goal"
     RESPONSE_FORMAT = "response_format"
 
@@ -40,6 +42,7 @@ class BoundaryType(str, Enum):
     PLAN = "agent_plan"
 
     # Operating Constraints
+    GUIDELINES = "guidelines"
     OPERATING_CONSTRAINTS = "operating_constraints"
     OPERATING_PRINCIPLES = "operating_principles"
 

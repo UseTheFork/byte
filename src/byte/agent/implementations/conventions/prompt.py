@@ -1,5 +1,6 @@
 from langchain_core.prompts.chat import ChatPromptTemplate
 
+from byte.agent.prompt_leaves import preamble
 from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 
@@ -20,12 +21,13 @@ conventions_user_template = [
     "- Important design decisions and rationale",
     "- Specific examples from the provided code",
     "",
+    "- **Concise is key**: The context window is a public good. Conventions are always loaded by AI agents, so every token counts.",
     "Conventions are single Markdown files (not multi-file packages). They do not include scripts, assets, or separate reference files.",
     Boundary.close(BoundaryType.TASK),
     "",
     Boundary.open(BoundaryType.OPERATING_CONSTRAINTS),
-    "- **Concise is key**: The context window is a public good. Conventions are always loaded by AI agents, so every token counts.",
-    "- **Default assumption: Byte is already very smart.** Only add context Byte doesn't already have.",
+    "- Combine turns whenever possible by utilizing parallel searching and reading and by requesting enough context, to enable you to skip using an extra turn reading the file.",
+    "- Byte is already very smart. Only add context Byte doesn't already have.",
     "- Challenge each piece of information: 'Does Byte really need this explanation?' and 'Does this paragraph justify its token cost?'",
     "- Prefer concise examples over verbose explanations",
     "- Use concrete examples from the provided code",
@@ -34,7 +36,6 @@ conventions_user_template = [
     '- Include "why" behind conventions when it\'s not obvious',
     "- Avoid generic advice - be specific to this codebase",
     "- Format code examples with proper syntax highlighting",
-    "- Never use XML-style tags in your responses (e.g., <file>, <search>, <replace>). These are for internal parsing only.",
     Boundary.close(BoundaryType.OPERATING_CONSTRAINTS),
     "",
     Boundary.open(BoundaryType.CRITICAL_REQUIREMENTS),
@@ -70,7 +71,7 @@ conventions_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
             list_to_multiline_text(
                 [
                     Boundary.open(BoundaryType.ROLE),
-                    "You are Byte, a human-in-the-loop AI coding agent.",
+                    preamble(),
                     "Act as an expert technical writer specializing in creating concise, actionable coding conventions.",
                     Boundary.close(BoundaryType.ROLE),
                 ]

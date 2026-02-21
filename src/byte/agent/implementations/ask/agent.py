@@ -3,7 +3,8 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from byte.agent import Agent, AgentConfigBoolSchema, AssistantContextSchema, AssistantNode, ToolNode
 from byte.agent.implementations.ask.prompt import ask_enforcement, ask_prompt, ask_user_template
 from byte.agent.utils.graph_builder import GraphBuilder
-from byte.conventions import load_conventions
+from byte.conventions import load_convention
+from byte.git import git_grep
 from byte.llm import LLMService
 
 
@@ -38,7 +39,7 @@ class AskAgent(Agent):
         return ask_prompt
 
     def get_tools(self):
-        return [load_conventions]
+        return [load_convention, git_grep]
 
     async def build(self):
         """Build and compile the ask agent graph with memory and MCP tools.

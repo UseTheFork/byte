@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from byte.conventions.command.convention import ConventionCommand
     from byte.conventions.constants import FOCUS_MESSAGES
     from byte.conventions.service.convention_context_service import ConventionContextService
-    from byte.conventions.tools import load_conventions
+    from byte.conventions.tools import load_convention
 
 
 __all__ = (
@@ -16,7 +16,7 @@ __all__ = (
     "ConventionCommand",
     "ConventionContextService",
     "ConventionsServiceProvider",
-    "load_conventions",
+    "load_convention",
 )
 
 _dynamic_imports = {
@@ -25,7 +25,7 @@ _dynamic_imports = {
     "ConventionContextService": "service.convention_context_service",
     "ConventionsServiceProvider": "service_provider",
     "FOCUS_MESSAGES": "constants",
-    "load_conventions": "tools",
+    "load_convention": "tools",
     # keep-sorted end
 }
 

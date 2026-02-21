@@ -5,7 +5,6 @@ from langchain_core.messages import ToolMessage
 from langchain_core.runnables import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
-from rich.pretty import Pretty
 
 from byte.agent import AssistantContextSchema, AssistantNode, BaseState, Node
 from byte.support import Str
@@ -33,8 +32,16 @@ class ToolNode(Node, UserInteractive):
         for tool_call in message.tool_calls:
             console = self.app["console"]
 
-            pretty = Pretty(tool_call)
-            console.print_info_panel(pretty, title=f"Using Tool: {tool_call['name']}")
+            # tool_call
+            # ╰-
+            # ●
+
+            # pretty = Pretty(tool_call)
+            # console.print_info_panel(pretty, title=f"Using Tool: {tool_call['name']}")
+
+            console.print(f"[success] ●[/success] {tool_call['name']}()")
+            for key, value in tool_call["args"].items():
+                console.print(f"  [dim]╰-[/dim] {key}: {value}")
 
             tool_result = await tools_by_name[tool_call["name"]].ainvoke(tool_call["args"])
 

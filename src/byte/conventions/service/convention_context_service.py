@@ -97,7 +97,7 @@ class ConventionContextService(Service):
             lines = [Boundary.open(BoundaryType.AVAILABLE_CONVENTIONS)]
             lines.append(
                 Boundary.notice(
-                    f"Use the **load_conventions** tool and the **{Boundary.open(BoundaryType.LOCATION)}** to load a {BoundaryType.CONVENTION}."
+                    f"Use the **load_convention** tool and the **{Boundary.open(BoundaryType.NAME)}** to load a {BoundaryType.CONVENTION}."
                 )
             )
 

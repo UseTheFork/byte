@@ -6,7 +6,7 @@ from byte.parsing import ConventionParsingService
 
 
 @tool(parse_docstring=True)
-async def load_conventions(convention_name: str) -> str:
+async def load_convention(convention_name: str) -> str:
     """Load a convention file by its name.
 
     This tool reads convention files using the name from convention metadata.

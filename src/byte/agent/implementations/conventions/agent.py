@@ -12,6 +12,7 @@ from byte.agent import (
 from byte.agent.implementations.conventions.prompt import conventions_prompt, conventions_user_template
 from byte.agent.utils.graph_builder import GraphBuilder
 from byte.files.tools.read_files import read_files
+from byte.git import git_grep
 from byte.llm import LLMService
 from byte.parsing import ConventionValidator
 
@@ -36,7 +37,7 @@ class ConventionAgent(Agent):
         return conventions_prompt
 
     def get_tools(self):
-        return [read_files]
+        return [read_files, git_grep]
 
     def get_validators(self):
         return [
@@ -81,4 +82,7 @@ class ConventionAgent(Agent):
             weak=weak,
             agent=self.__class__.__name__,
             tools=self.get_tools(),
+            enforcement=[
+                "Execute multiple independent tool calls in parallel when feasible (i.e. searching the codebase)."
+            ],
         )

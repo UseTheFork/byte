@@ -1,5 +1,6 @@
 from langchain_core.prompts import ChatPromptTemplate
 
+from byte.agent.prompt_leaves import preamble
 from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 
@@ -42,7 +43,7 @@ ask_prompt = ChatPromptTemplate.from_messages(
             list_to_multiline_text(
                 [
                     Boundary.open(BoundaryType.ROLE),
-                    "You are Byte, a human-in-the-loop AI coding agent.",
+                    preamble(),
                     "Act as an expert software developer.",
                     Boundary.close(BoundaryType.ROLE),
                 ]

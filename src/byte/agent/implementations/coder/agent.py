@@ -12,7 +12,7 @@ from byte.agent import (
 from byte.agent.implementations.coder.prompt import coder_prompt, coder_user_template
 from byte.agent.utils.graph_builder import GraphBuilder
 from byte.code_operations import edit_block_enforcement
-from byte.conventions import load_conventions
+from byte.conventions import load_convention
 from byte.llm import LLMService
 
 
@@ -34,7 +34,7 @@ class CoderAgent(Agent):
         return coder_prompt
 
     def get_tools(self):
-        return [load_conventions]
+        return [load_convention]
 
     async def build(self) -> CompiledStateGraph:
         """Build and compile the coder agent graph with memory and tools."""

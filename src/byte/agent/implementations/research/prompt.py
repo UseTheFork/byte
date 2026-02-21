@@ -1,5 +1,6 @@
 from langchain_core.prompts import ChatPromptTemplate
 
+from byte.agent.prompt_leaves import preamble
 from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 
@@ -47,6 +48,7 @@ research_prompt = ChatPromptTemplate.from_messages(
             list_to_multiline_text(
                 [
                     Boundary.open(BoundaryType.ROLE),
+                    preamble(),
                     "Act as an expert research assistant for codebase analysis.",
                     "You research and provide insights - you DO NOT make code changes.",
                     Boundary.close(BoundaryType.ROLE),

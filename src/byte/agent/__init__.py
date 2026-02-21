@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from byte.agent.implementations.conventions.agent import ConventionAgent
     from byte.agent.implementations.research.agent import ResearchAgent
     from byte.agent.implementations.research.command import ResearchCommand
-    from byte.agent.implementations.subprocess.agent import SubprocessAgent
     from byte.agent.nodes.assistant_node import AssistantNode
     from byte.agent.nodes.base_node import Node
     from byte.agent.nodes.dummy_node import DummyNode
@@ -26,7 +25,6 @@ if TYPE_CHECKING:
     from byte.agent.nodes.parse_blocks_node import ParseBlocksNode
     from byte.agent.nodes.show_node import ShowNode
     from byte.agent.nodes.start_node import StartNode
-    from byte.agent.nodes.subprocess_node import SubprocessNode
     from byte.agent.nodes.tool_node import ToolNode
     from byte.agent.nodes.validation_node import ValidationNode
     from byte.agent.reducers import add_constraints, replace_list, replace_str, update_metadata
@@ -81,8 +79,6 @@ __all__ = (
     "SessionContextFormatter",
     "ShowNode",
     "StartNode",
-    "SubprocessAgent",
-    "SubprocessNode",
     "TokenUsageSchema",
     "ToolNode",
     "UserConfirmValidator",
@@ -131,8 +127,6 @@ _dynamic_imports = {
     "SessionContextFormatter": "nodes.extract_node",
     "ShowNode": "nodes.show_node",
     "StartNode": "nodes.start_node",
-    "SubprocessAgent": "implementations.subprocess.agent",
-    "SubprocessNode": "nodes.subprocess_node",
     "TokenUsageSchema": "schemas",
     "ToolNode": "nodes.tool_node",
     "UserConfirmValidator": "validators.user_confirm_validator",

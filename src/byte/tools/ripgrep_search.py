@@ -59,7 +59,7 @@ async def ripgrep_search(
 
         # ripgrep returns exit code 1 when no matches found (not an error)
         if result.returncode == 0:
-            return result.stdout if result.stdout else f"No matches found for pattern: {pattern}"
+            return result.stdout or f"No matches found for pattern: {pattern}"
         elif result.returncode == 1:
             return f"No matches found for pattern: {pattern}"
         else:

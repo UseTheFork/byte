@@ -49,7 +49,8 @@ class AssistantNode(Node):
 
         # Bind tools if provided
         if context.tools is not None and len(context.tools) > 0:
-            model = model.bind_tools(context.tools, parallel_tool_calls=False)  # ty:ignore[unresolved-attribute]
+            model = model.bind_tools(context.tools)  # ty:ignore[unresolved-attribute]
+            #  parallel_tool_calls=True
 
         # Assemble the chain
         runnable = context.prompt | model  # ty:ignore[unsupported-operator]
