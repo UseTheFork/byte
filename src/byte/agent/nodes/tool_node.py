@@ -32,13 +32,6 @@ class ToolNode(Node, UserInteractive):
         for tool_call in message.tool_calls:
             console = self.app["console"]
 
-            # tool_call
-            # ╰-
-            # ●
-
-            # pretty = Pretty(tool_call)
-            # console.print_info_panel(pretty, title=f"Using Tool: {tool_call['name']}")
-
             console.print(f"[success] ●[/success] {tool_call['name']}()")
             for key, value in tool_call["args"].items():
                 console.print(f"  [dim]╰-[/dim] {key}: {value}")
