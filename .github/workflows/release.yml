@@ -43,7 +43,7 @@ jobs:
 
       - name: Upload | Distribution Artifacts
         if: ${{ steps.version.outputs.released == 'true' }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.dist_artifacts_name }}
           path: ${{ format('{0}/**', env.dist_artifacts_dir) }}
@@ -52,7 +52,7 @@ jobs:
 
       - name: Upload | Lock File Artifact
         if: ${{ steps.version.outputs.released == 'true' }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.lock_file_artifact }}
           path: ${{ env.lock_file_artifact }}
