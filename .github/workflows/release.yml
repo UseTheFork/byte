@@ -136,14 +136,14 @@ jobs:
         run: uv sync --all-groups
 
       - name: Setup | Download Build Artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         id: artifact-download
         with:
           name: ${{ needs.build.outputs.distribution-artifacts }}
           path: dist
 
       - name: Setup | Download Lock File Artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: ${{ needs.build.outputs.lock-file-artifact }}
 
@@ -189,7 +189,7 @@ jobs:
 
     steps:
       - name: Setup | Download Build Artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         id: artifact-download
         with:
           name: ${{ needs.build.outputs.distribution-artifacts }}
