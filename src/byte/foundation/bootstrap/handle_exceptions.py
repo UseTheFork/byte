@@ -29,6 +29,7 @@ class HandleExceptions(Bootstrapper):
             type(exception),
             exception,
             exception.__traceback__,
+            max_frames=5,
             show_locals=True,
         )
         console.print(traceback)
