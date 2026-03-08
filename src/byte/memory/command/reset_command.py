@@ -1,8 +1,9 @@
 from argparse import Namespace
 
 from byte.analytics import AgentAnalyticsService
-from byte.cli import ByteArgumentParser, Command
+from byte.cli import ByteArgumentParser, Command, InputCancelledError
 from byte.files import FileService
+from byte.knowledge import SessionContextService
 from byte.memory import MemoryService
 
 
@@ -47,5 +48,29 @@ class ResetCommand(Command):
 
         console = self.app["console"]
 
-        # Display success confirmation to user
-        console.print(console.panel("[success]Conversation and file context completely reset[/success]"))
+        # Check if user wants to drop SessionContext as well
+        session_context_service = self.app.make(SessionContextService)
+        context_items = session_context_service.get_all_context()
+
+        if context_items:
+            try:
+                drop_session_context = console.confirm(
+                    "Also clear session context (conventions, documentation, etc.)?",
+                    default=False,
+                )
+
+                if drop_session_context:
+                    session_context_service.clear_context()
+                    console.print(
+                        console.panel(
+                            "[success]Conversation, file context, and session context completely reset[/success]"
+                        )
+                    )
+                else:
+                    console.print(console.panel("[success]Conversation and file context completely reset[/success]"))
+
+            except (KeyboardInterrupt, InputCancelledError):
+                console.print(console.panel("[success]Conversation and file context completely reset[/success]"))
+        else:
+            # Display success confirmation to user
+            console.print(console.panel("[success]Conversation and file context completely reset[/success]"))

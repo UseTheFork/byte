@@ -105,7 +105,7 @@ class InteractionService(Service):
             result = Prompt.ask(
                 message,
                 console=console.console,
-                default=default if default else None,
+                default=default or None,
             )
             return str(result)
 
