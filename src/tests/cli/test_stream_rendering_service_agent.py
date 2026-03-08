@@ -10,8 +10,8 @@ from rich.console import Console as RichConsole
 from rich.theme import Theme
 
 from byte.agent import AskAgent
-from byte.agent.implementations.conventions.constants import FOCUS_MESSAGES
 from byte.cli import ByteTheme, CLIServiceProvider, ThemeRegistry
+from byte.conventions import FOCUS_MESSAGES
 from byte.foundation import Console
 from byte.support.mixins import UserInteractive
 from tests.utils import create_test_file

@@ -6,7 +6,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from byte.prompt_format import Boundary, BoundaryType
+from byte.clipboard.schemas import BlockType
+from byte.code_operations import EditBlockService, NoBlocksFoundError
+from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 from tests.utils import create_test_file
 
@@ -17,8 +19,8 @@ if TYPE_CHECKING:
 @pytest.fixture
 def providers():
     """Provide PromptFormatProvider for parser service tests."""
+    from byte.code_operations import PromptFormatProvider
     from byte.files import FileServiceProvider
-    from byte.prompt_format import PromptFormatProvider
 
     return [FileServiceProvider, PromptFormatProvider]
 
@@ -26,9 +28,9 @@ def providers():
 @pytest.mark.asyncio
 async def test_parser_service_boots_successfully(application: Application):
     """Test that parser service initializes without errors."""
-    from byte.prompt_format import ParserService
+    from byte.code_operations import EditBlockService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     # Service should be booted and have required attributes
     assert parser_service is not None
@@ -39,9 +41,9 @@ async def test_parser_service_boots_successfully(application: Application):
 @pytest.mark.asyncio
 async def test_parses_simple_edit_block(application: Application):
     """Test that parser can extract a simple edit block from content."""
-    from byte.prompt_format import ParserService
+    from byte.code_operations import EditBlockService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -67,9 +69,9 @@ async def test_parses_simple_edit_block(application: Application):
 @pytest.mark.asyncio
 async def test_parses_multiple_edit_blocks(application: Application):
     """Test that parser can extract multiple edit blocks from content."""
-    from byte.prompt_format import ParserService
+    from byte.code_operations import EditBlockService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -106,9 +108,8 @@ async def test_parses_multiple_edit_blocks(application: Application):
 @pytest.mark.asyncio
 async def test_raises_error_when_no_blocks_found(application: Application):
     """Test that parser raises NoBlocksFoundError when content has no file blocks."""
-    from byte.prompt_format import NoBlocksFoundError, ParserService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     content = "This is just plain text with no edit blocks."
 
@@ -119,9 +120,9 @@ async def test_raises_error_when_no_blocks_found(application: Application):
 @pytest.mark.asyncio
 async def test_raises_error_on_unbalanced_file_tags(application: Application):
     """Test that parser raises PreFlightUnparsableError when file tags are unbalanced."""
-    from byte.prompt_format import ParserService, PreFlightUnparsableError
+    from byte.code_operations import EditBlockService, PreFlightUnparsableError
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -145,9 +146,9 @@ async def test_raises_error_on_unbalanced_file_tags(application: Application):
 @pytest.mark.asyncio
 async def test_raises_error_on_missing_block_ids(application: Application):
     """Test that parser raises PreFlightUnparsableError when file blocks lack block_id."""
-    from byte.prompt_format import ParserService, PreFlightUnparsableError
+    from byte.code_operations import EditBlockService, PreFlightUnparsableError
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -170,9 +171,8 @@ async def test_raises_error_on_missing_block_ids(application: Application):
 @pytest.mark.asyncio
 async def test_parses_create_operation_block(application: Application):
     """Test that parser correctly identifies create operation blocks."""
-    from byte.prompt_format import BlockType, ParserService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -195,9 +195,8 @@ async def test_parses_create_operation_block(application: Application):
 @pytest.mark.asyncio
 async def test_parses_delete_operation_block(application: Application):
     """Test that parser correctly identifies delete operation blocks."""
-    from byte.prompt_format import BlockType, ParserService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -219,9 +218,8 @@ async def test_parses_delete_operation_block(application: Application):
 @pytest.mark.asyncio
 async def test_parses_replace_operation_block(application: Application):
     """Test that parser correctly identifies replace operation blocks."""
-    from byte.prompt_format import BlockType, ParserService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -244,9 +242,8 @@ async def test_parses_replace_operation_block(application: Application):
 @pytest.mark.asyncio
 async def test_defaults_to_edit_for_unknown_operation(application: Application):
     """Test that parser defaults to EDIT block type for unknown operations."""
-    from byte.prompt_format import BlockType, ParserService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -270,9 +267,9 @@ async def test_defaults_to_edit_for_unknown_operation(application: Application):
 @pytest.mark.asyncio
 async def test_parses_block_with_empty_search_content(application: Application):
     """Test that parser handles blocks with empty search content (append operation)."""
-    from byte.prompt_format import ParserService
+    from byte.code_operations import EditBlockService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -296,9 +293,9 @@ async def test_parses_block_with_empty_search_content(application: Application):
 @pytest.mark.asyncio
 async def test_parses_block_with_empty_replace_content(application: Application):
     """Test that parser handles blocks with empty replace content (deletion operation)."""
-    from byte.prompt_format import ParserService
+    from byte.code_operations import EditBlockService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -322,9 +319,9 @@ async def test_parses_block_with_empty_replace_content(application: Application)
 @pytest.mark.asyncio
 async def test_parses_block_with_special_characters_in_path(application: Application):
     """Test that parser handles file paths with special characters."""
-    from byte.prompt_format import ParserService
+    from byte.code_operations import EditBlockService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -351,9 +348,9 @@ async def test_parses_block_with_special_characters_in_path(application: Applica
 @pytest.mark.asyncio
 async def test_parses_block_with_multiline_search_replace(application: Application):
     """Test that parser handles multiline search and replace content."""
-    from byte.prompt_format import ParserService
+    from byte.code_operations import EditBlockService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -385,9 +382,9 @@ async def test_parses_block_with_multiline_search_replace(application: Applicati
 @pytest.mark.asyncio
 async def test_parses_block_with_nested_xml_like_content(application: Application):
     """Test that parser handles content that looks like XML tags."""
-    from byte.prompt_format import ParserService
+    from byte.code_operations import EditBlockService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -417,11 +414,11 @@ async def test_parses_block_with_nested_xml_like_content(application: Applicatio
 @pytest.mark.asyncio
 async def test_mid_flight_check_validates_read_only_file(application: Application, git_repo):
     """Test that mid_flight_check marks read-only files with error status."""
+    from byte.code_operations import BlockStatus, BlockType, SearchReplaceBlock
     from byte.files import FileMode, FileService
-    from byte.prompt_format import BlockStatus, BlockType, ParserService, SearchReplaceBlock
 
     file_service = application.make(FileService)
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     # Create a test file and add it as read-only
     test_file = await create_test_file(application, "readonly.py", "original content")
@@ -448,9 +445,9 @@ async def test_mid_flight_check_validates_read_only_file(application: Applicatio
 @pytest.mark.asyncio
 async def test_mid_flight_check_validates_search_content_exists(application: Application, git_repo):
     """Test that mid_flight_check validates search content can be found in file."""
-    from byte.prompt_format import BlockStatus, BlockType, ParserService, SearchReplaceBlock
+    from byte.code_operations import BlockStatus, BlockType, SearchReplaceBlock
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     # Create a test file with known content
     test_file = git_repo / "test.py"
@@ -476,9 +473,9 @@ async def test_mid_flight_check_validates_search_content_exists(application: App
 @pytest.mark.asyncio
 async def test_mid_flight_check_validates_file_within_project(application: Application, git_repo):
     """Test that mid_flight_check rejects files outside project root."""
-    from byte.prompt_format import BlockStatus, BlockType, ParserService, SearchReplaceBlock
+    from byte.code_operations import BlockStatus, BlockType, SearchReplaceBlock
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     # Use a path outside the git repo
     outside_file = "/tmp/outside_project.py"
@@ -503,9 +500,9 @@ async def test_mid_flight_check_validates_file_within_project(application: Appli
 @pytest.mark.asyncio
 async def test_mid_flight_check_strips_whitespace_for_search_match(application: Application, git_repo):
     """Test that mid_flight_check strips whitespace to find search content match."""
-    from byte.prompt_format import BlockStatus, BlockType, ParserService, SearchReplaceBlock
+    from byte.code_operations import BlockStatus, BlockType, SearchReplaceBlock
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     # Create a test file with content
     test_file = git_repo / "test.py"
@@ -532,9 +529,9 @@ async def test_mid_flight_check_strips_whitespace_for_search_match(application: 
 @pytest.mark.asyncio
 async def test_mid_flight_check_handles_nonexistent_file_for_create(application: Application, git_repo):
     """Test that mid_flight_check allows creating files that don't exist within project."""
-    from byte.prompt_format import BlockStatus, BlockType, ParserService, SearchReplaceBlock
+    from byte.code_operations import BlockStatus, BlockType, SearchReplaceBlock
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     # Use a path that doesn't exist but is within the project
     new_file = git_repo / "new_module" / "new_file.py"
@@ -558,9 +555,9 @@ async def test_mid_flight_check_handles_nonexistent_file_for_create(application:
 @pytest.mark.asyncio
 async def test_remove_blocks_from_content_single_block(application: Application):
     """Test that remove_blocks_from_content removes a single block and replaces with summary."""
-    from byte.prompt_format import ParserService
+    from byte.code_operations import EditBlockService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -594,9 +591,9 @@ async def test_remove_blocks_from_content_single_block(application: Application)
 @pytest.mark.asyncio
 async def test_remove_blocks_from_content_multiple_blocks(application: Application):
     """Test that remove_blocks_from_content removes multiple blocks."""
-    from byte.prompt_format import ParserService
+    from byte.code_operations import EditBlockService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -636,9 +633,9 @@ async def test_remove_blocks_from_content_multiple_blocks(application: Applicati
 @pytest.mark.asyncio
 async def test_remove_blocks_from_content_preserves_surrounding_text(application: Application):
     """Test that remove_blocks_from_content preserves text before, between, and after blocks."""
-    from byte.prompt_format import ParserService
+    from byte.code_operations import EditBlockService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -682,9 +679,9 @@ async def test_remove_blocks_from_content_preserves_surrounding_text(application
 @pytest.mark.asyncio
 async def test_apply_blocks_creates_new_file(application: Application, git_repo, mocker):
     """Test that apply_blocks creates a new file with correct content."""
-    from byte.prompt_format import BlockType, ParserService, SearchReplaceBlock
+    from byte.code_operations import BlockType, SearchReplaceBlock
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     # Mock prompt_for_confirmation to return True
     mocker.patch.object(parser_service, "prompt_for_confirmation", return_value=True)
@@ -711,9 +708,9 @@ async def test_apply_blocks_creates_new_file(application: Application, git_repo,
 @pytest.mark.asyncio
 async def test_apply_blocks_edits_existing_file(application: Application, git_repo):
     """Test that apply_blocks modifies existing file content correctly."""
-    from byte.prompt_format import BlockType, ParserService, SearchReplaceBlock
+    from byte.code_operations import BlockType, SearchReplaceBlock
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     test_file = git_repo / "test.py"
     test_file.write_text("def old_function():\n    pass\n")
@@ -736,9 +733,9 @@ async def test_apply_blocks_edits_existing_file(application: Application, git_re
 @pytest.mark.asyncio
 async def test_apply_blocks_deletes_file(application: Application, git_repo, mocker):
     """Test that apply_blocks removes files with REMOVE block type."""
-    from byte.prompt_format import BlockType, ParserService, SearchReplaceBlock
+    from byte.code_operations import BlockType, SearchReplaceBlock
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     # Mock prompt_for_confirmation to return True
     mocker.patch.object(parser_service, "prompt_for_confirmation", return_value=True)
@@ -765,9 +762,9 @@ async def test_apply_blocks_deletes_file(application: Application, git_repo, moc
 @pytest.mark.asyncio
 async def test_apply_blocks_replaces_entire_file(application: Application, git_repo, mocker):
     """Test that apply_blocks replaces entire file content with REPLACE block type."""
-    from byte.prompt_format import BlockType, ParserService, SearchReplaceBlock
+    from byte.code_operations import BlockType, SearchReplaceBlock
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     # Mock prompt_for_confirmation to return True
     mocker.patch.object(parser_service, "prompt_for_confirmation", return_value=True)
@@ -793,9 +790,9 @@ async def test_apply_blocks_replaces_entire_file(application: Application, git_r
 @pytest.mark.asyncio
 async def test_apply_blocks_handles_search_not_found(application: Application, git_repo):
     """Test that apply_blocks handles case where search content doesn't exist."""
-    from byte.prompt_format import BlockType, ParserService, SearchReplaceBlock
+    from byte.code_operations import BlockType, SearchReplaceBlock
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     test_file = git_repo / "test.py"
     original_content = "def hello():\n    pass\n"
@@ -820,9 +817,9 @@ async def test_apply_blocks_handles_search_not_found(application: Application, g
 @pytest.mark.asyncio
 async def test_apply_blocks_creates_parent_directories(application: Application, git_repo, mocker):
     """Test that apply_blocks creates parent directories when creating new files."""
-    from byte.prompt_format import BlockType, ParserService, SearchReplaceBlock
+    from byte.code_operations import BlockType, SearchReplaceBlock
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     # Mock prompt_for_confirmation to return True
     mocker.patch.object(parser_service, "prompt_for_confirmation", return_value=True)
@@ -850,9 +847,9 @@ async def test_apply_blocks_creates_parent_directories(application: Application,
 @pytest.mark.asyncio
 async def test_handles_unicode_decode_error_gracefully(application: Application, git_repo):
     """Test that mid_flight_check handles files with invalid UTF-8 encoding gracefully."""
-    from byte.prompt_format import BlockStatus, BlockType, ParserService, SearchReplaceBlock
+    from byte.code_operations import BlockStatus, BlockType, SearchReplaceBlock
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     # Create a file with invalid UTF-8 bytes
     test_file = git_repo / "binary.dat"
@@ -878,9 +875,9 @@ async def test_handles_unicode_decode_error_gracefully(application: Application,
 @pytest.mark.asyncio
 async def test_handles_permission_error_gracefully(application: Application, git_repo):
     """Test that mid_flight_check handles permission errors gracefully."""
-    from byte.prompt_format import BlockStatus, BlockType, ParserService, SearchReplaceBlock
+    from byte.code_operations import BlockStatus, BlockType, SearchReplaceBlock
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     # Create a file and make it unreadable
     test_file = git_repo / "protected.py"
@@ -911,9 +908,9 @@ async def test_handles_permission_error_gracefully(application: Application, git
 @pytest.mark.asyncio
 async def test_full_workflow_parse_validate_apply(application: Application, git_repo):
     """Test complete workflow from parsing through validation to application."""
-    from byte.prompt_format import ParserService
+    from byte.code_operations import EditBlockService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     # Create initial file
     test_file = git_repo / "workflow_test.py"
@@ -948,9 +945,9 @@ async def test_full_workflow_parse_validate_apply(application: Application, git_
 @pytest.mark.asyncio
 async def test_multiple_edits_to_same_file(application: Application, git_repo):
     """Test applying multiple edit blocks to the same file sequentially."""
-    from byte.prompt_format import ParserService
+    from byte.code_operations import EditBlockService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     test_file = git_repo / "multi_edit.py"
     test_file.write_text("line1\nline2\nline3\n")
@@ -992,9 +989,9 @@ async def test_multiple_edits_to_same_file(application: Application, git_repo):
 @pytest.mark.asyncio
 async def test_blocks_with_mixed_operations(application: Application, git_repo, mocker):
     """Test applying blocks with different operation types in sequence."""
-    from byte.prompt_format import ParserService
+    from byte.code_operations import EditBlockService
 
-    parser_service = application.make(ParserService)
+    parser_service = application.make(EditBlockService)
 
     # Mock prompt_for_confirmation to return True
     mocker.patch.object(parser_service, "prompt_for_confirmation", return_value=True)

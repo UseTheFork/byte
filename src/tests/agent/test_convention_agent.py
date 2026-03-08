@@ -8,7 +8,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from byte.agent import ConventionAgent
-from byte.agent.implementations.conventions.constants import FOCUS_MESSAGES
+from byte.conventions import FOCUS_MESSAGES
 from byte.support.mixins import UserInteractive
 from tests.utils import create_test_file
 
