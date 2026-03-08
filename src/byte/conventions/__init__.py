@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from byte.conventions.command.convention import ConventionCommand
     from byte.conventions.constants import FOCUS_MESSAGES
     from byte.conventions.service.convention_context_service import ConventionContextService
+    from byte.conventions.service_provider import ConventionsServiceProvider
     from byte.conventions.tools import load_convention
 
 

@@ -20,6 +20,20 @@ class EndNode(Node):
     Handles message promotion, clipboard extraction, and state cleanup.
     """
 
+    def _extract_text_from_content(self, content) -> str:
+        """Extract text content from message content that may be a list or string.
+
+        Usage: `text = self._extract_text_from_content(message.content)`
+        """
+        if isinstance(content, list):
+            # Extract text from list format: [{'text': '...', 'type': 'text', 'index': 0}]
+            text_parts = []
+            for item in content:
+                if isinstance(item, dict) and "text" in item:
+                    text_parts.append(item["text"])
+            return "".join(text_parts)
+        return str(content)
+
     async def __call__(
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
     ) -> Command[Literal["__end__"]]:
@@ -63,11 +77,14 @@ class EndNode(Node):
             if runtime.context.agent == "SubprocessAgent":
                 update_dict["history_messages"] = [last_message]
             else:
+                # Extract text content from message (handles both list and string formats)
+                content_text = self._extract_text_from_content(last_message.content)
+
                 # Wrap the message in XML for parsing later.
                 last_message = list_to_multiline_text(
                     [
                         Boundary.open(BoundaryType.AGENT_MESSAGE, {"agent_type": runtime.context.agent}),
-                        str(last_message.content),
+                        str(content_text),
                         Boundary.close(BoundaryType.AGENT_MESSAGE),
                     ]
                 )
