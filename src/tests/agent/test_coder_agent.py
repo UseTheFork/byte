@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 import pytest
 from pytest_mock import MockerFixture
 
+from byte.code_operations import PromptFormatProvider
 from byte.files import FileMode, FileService
 from byte.support.mixins import UserInteractive
 from tests.utils import create_test_file
@@ -23,6 +24,7 @@ def providers():
 
     return [
         AgentServiceProvider,
+        PromptFormatProvider,
         FileServiceProvider,
     ]
 
@@ -207,7 +209,7 @@ pass
 
     await agent.execute(request, display_mode="silent")
 
-    # Verify new file was created
+    # # Verify new file was created
     main_file = application.root_path("main.py")
     assert main_file.exists()
     main_content = main_file.read_text()

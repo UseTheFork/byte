@@ -108,10 +108,6 @@ class EditBlockService(Service, UserInteractive, ABC):
             file_path = attrs.get("path", "").strip()
             operation = attrs.get("operation", "").strip()
 
-            # Strip leading/trailing whitespace but preserve internal structure
-            # search_content = search_content.strip()
-            # replace_content = replace_content.strip()
-
             # Determine block type based on operation and file existence
             file_path_obj = Path(file_path.strip())
             if not file_path_obj.is_absolute():
@@ -121,16 +117,16 @@ class EditBlockService(Service, UserInteractive, ABC):
 
             # Map operation string to BlockType
             if operation == "delete":
-                block_type = BlockType.REMOVE
+                block_type = BlockType.DELETE
             elif operation == "replace":
                 block_type = BlockType.REPLACE
             elif operation == "create":
-                block_type = BlockType.ADD
+                block_type = BlockType.CREATE
             elif operation == "edit":
                 block_type = BlockType.EDIT
             else:
-                # Default to EDIT for unknown operations
-                block_type = BlockType.EDIT
+                # Default to UNKNOWN for unknown operations so we can fail
+                block_type = BlockType.UNKNOWN
 
             blocks.append(
                 SearchReplaceBlock(
@@ -217,6 +213,53 @@ class EditBlockService(Service, UserInteractive, ABC):
 
         return True, ""
 
+    async def _find_search_content_in_file(
+        self, search_content: str, replace_content: str, file_content: str
+    ) -> tuple[bool, str, str]:
+        """Try to find search content in file with progressive fallback strategies.
+
+                Attempts to locate the search content in the file using multiple strategies:
+                1. Exact match (no modifications)
+                2. Match after stripping leading/trailing newlines
+                3. Match after stripping all leading/trailing whitespace
+
+                Args:
+                    search_content: The content to search for in the file
+                    replace_content: The replacement content (will be stripped if search is stripped)
+                    file_content: The full content of the file to search in
+
+                Returns:
+                    Tuple of (found, matched_search_content, matched_replace_content)
+                    - found: True if content was found, False otherwise
+                    - matched_search_content: The search content that matched (potentially stripped)
+                    - matched_replace_content: The replace content (stripped if search was stripped)
+
+                Usage: `found, search, replace = await service._find_search_content_in_file(search, replace,
+        content)`
+        """
+
+        # First try exact match without any stripping
+        if search_content and search_content in file_content:
+            self.app["log"].debug("Found exact match (no stripping)")
+            return True, search_content, replace_content
+
+        # Try stripping newlines as a fallback
+        newline_stripped_search = search_content.strip("\n")
+        if newline_stripped_search and newline_stripped_search in file_content:
+            self.app["log"].debug("Found match after stripping newlines")
+            return True, newline_stripped_search, replace_content.strip("\n")
+
+        # Try stripping all whitespace as a fallback
+        stripped_search = search_content.strip()
+        if stripped_search and stripped_search in file_content:
+            self.app["log"].debug("Found match after stripping all whitespace")
+            return True, stripped_search, replace_content.strip()
+
+        # No match found with any strategy
+        self.app["log"].debug("No match found with any strategy")
+        self.app["log"].debug(f"Search content attempted:\n{search_content}")
+        return False, search_content, replace_content
+
     async def mid_flight_check(self, blocks: List[SearchReplaceBlock]) -> List[SearchReplaceBlock]:
         """Validate parsed edit blocks against file system and context constraints.
 
@@ -242,12 +285,15 @@ class EditBlockService(Service, UserInteractive, ABC):
             else:
                 file_path = file_path.resolve()
 
-            self.app["log"].info(file_path)
+            # Check if block has a valid operation type
+            if block.block_type == BlockType.UNKNOWN:
+                block.block_status = BlockStatus.INVALID_OPERATION_ERROR
+                block.status_message = "Invalid operation type. Valid operations are: edit, add, delete, replace"
+                continue
 
             # Check if file is in read-only context
             file_context = file_service.get_file_context(file_path)
-            self.app["log"].info(file_context)
-            self.app["log"].info(file_context)
+
             if file_context and file_context.mode == FileMode.READ_ONLY:
                 block.block_status = BlockStatus.READ_ONLY_ERROR
                 block.status_message = f"Cannot edit read-only file: {block.file_path}"
@@ -262,20 +308,23 @@ class EditBlockService(Service, UserInteractive, ABC):
                     try:
                         content = file_path.read_text(encoding="utf-8")
 
-                        if block.search_content and block.search_content not in content:
-                            # Try stripping whitespace as a fallback
-                            stripped_search = block.search_content.strip()
+                        found, matched_search, matched_replace = await self._find_search_content_in_file(
+                            block.search_content,
+                            block.replace_content,
+                            content,
+                        )
 
-                            if stripped_search and stripped_search in content:
-                                # Match found after stripping - update the block's search content
-                                block.search_content = stripped_search
-                                block.replace_content = block.replace_content.strip()
-                                # Continue to next validation (block remains VALID)
-                            else:
-                                # Still no match even after stripping
-                                block.block_status = BlockStatus.SEARCH_NOT_FOUND_ERROR
-                                block.status_message = f"Search content not found in {block.file_path}"
-                                continue
+                        if not found:
+                            block.block_status = BlockStatus.SEARCH_NOT_FOUND_ERROR
+                            block.status_message = (
+                                f"Search content not found in `{block.file_path}`.\n\n"
+                                f"Current File Content:\n```\n{content}\n```"
+                            )
+                            continue
+
+                        # Update block with matched content (potentially stripped)
+                        block.search_content = matched_search
+                        block.replace_content = matched_replace
 
                     except (FileNotFoundError, PermissionError, UnicodeDecodeError):
                         block.block_status = BlockStatus.SEARCH_NOT_FOUND_ERROR
@@ -351,7 +400,7 @@ class EditBlockService(Service, UserInteractive, ABC):
                 self.app["log"].debug(file_path.exists())
 
                 # Handle operations based on block type first, not operation string
-                if block.block_type == BlockType.REMOVE:
+                if block.block_type == BlockType.DELETE:
                     # Remove file completely
                     if file_path.exists():
                         if await self.prompt_for_confirmation(
@@ -364,7 +413,7 @@ class EditBlockService(Service, UserInteractive, ABC):
                             await file_discovery_service.remove_file(file_path)
                             await file_service.remove_file(file_path)
 
-                elif block.block_type == BlockType.ADD:
+                elif block.block_type == BlockType.CREATE:
                     # Create new file (can be from + or - operation)
                     if await self.prompt_for_confirmation(
                         f"Create new file '{file_path}'?",
@@ -391,7 +440,6 @@ class EditBlockService(Service, UserInteractive, ABC):
                     # Edit existing file (can be from + or - operation)
                     content = file_path.read_text(encoding="utf-8")
 
-                    # For + operation, do search/replace
                     # Handle empty search content (append to file)
                     if not block.search_content:
                         new_content = content + block.replace_content

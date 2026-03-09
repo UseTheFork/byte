@@ -183,7 +183,7 @@ class Boundary:
             raise ValueError(f"format_style must be 'xml' or 'markdown', got {format_style!r}")
 
         if format_style == "xml":
-            return f"<notice>{content}</notice>"
+            return f"<!-- NOTICE: {content} -->"
         elif format_style == "markdown":
             return f"{content}"
         else:
@@ -209,7 +209,7 @@ class Boundary:
             raise ValueError(f"format_style must be 'xml' or 'markdown', got {format_style!r}")
 
         if format_style == "xml":
-            return f"<critical>**{content}**</critical>"
+            return f"<!-- **CRITICAL: {content}** -->"
         elif format_style == "markdown":
             return f"**{content}**"
         else:
@@ -235,7 +235,7 @@ class Boundary:
             raise ValueError(f"format_style must be 'xml' or 'markdown', got {format_style!r}")
 
         if format_style == "xml":
-            return f"<important>**{content}**</important>"
+            return f"<!-- **IMPORTANT: {content}** -->"
         elif format_style == "markdown":
             return f"**{content}**"
         else:
@@ -261,8 +261,12 @@ class Boundary:
             raise ValueError(f"format_style must be 'xml' or 'markdown', got {format_style!r}")
 
         if format_style == "xml":
-            return f"<warning>**{content}**</warning>"
+            return f"<!-- **WARNING:{content}** -->"
         elif format_style == "markdown":
             return f"**{content}**"
         else:
             raise ValueError(f"Unsupported format_style: {format_style}")
+
+    @staticmethod
+    def comment(content: str) -> str:
+        return f"<!-- {content} -->"

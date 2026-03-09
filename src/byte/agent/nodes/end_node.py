@@ -63,8 +63,6 @@ class EndNode(Node):
 
         # Only update messages if there are scratch messages to process
         if state["scratch_messages"] and not metadata.erase_history:
-            self.app["log"].info(state["scratch_messages"])
-
             last_message = get_last_ai_message(state["scratch_messages"])
 
             # we only need to copy from Ask and Coder agents.

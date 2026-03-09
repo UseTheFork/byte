@@ -1,98 +1,44 @@
 interactions:
 - request:
-    body: "{\"max_tokens\":64000,\"messages\":[{\"role\":\"user\",\"content\":\"Before\
-      \ we start lets first practice the *Pseudo-XML Edit* Block format.\\n\\nChange\
-      \ get_factorial() to use math.factorial\"},{\"role\":\"assistant\",\"content\"\
-      :\"To make this change we need to modify `mathweb/flask/app.py` to:\\n\\n1.\
-      \ Import the math package.\\n2. Remove the existing factorial() function.\\\
-      n3. Update get_factorial() to call math.factorial instead.\\n\\nHere are the\
-      \ *Pseudo-XML Edit* blocks:\\n\\n```python\\n<file path=\\\"mathweb/flask/app.py\\\
-      \" operation=\\\"edit\\\" block_id=\\\"1\\\">\\n<search>\\nfrom flask import\
-      \ Flask\\n</search>\\n<replace>\\nimport math\\nfrom flask import Flask\\n</replace>\\\
-      n</file>\\n```\\n\\n```python\\n<file path=\\\"mathweb/flask/app.py\\\" operation=\\\
-      \"edit\\\" block_id=\\\"2\\\">\\n<search>\\ndef factorial(n):\\n    \\\"compute\
-      \ factorial\\\"\\n\\n    if n == 0:\\n        return 1\\n    else:\\n      \
-      \  return n * factorial(n-1)\\n</search>\\n<replace>\\n</replace>\\n</file>\\\
-      n```\\n\\n```python\\n<file path=\\\"mathweb/flask/app.py\\\" operation=\\\"\
-      edit\\\" block_id=\\\"3\\\">\\n<search>\\n    return str(factorial(n))\\n</search>\\\
-      n<replace>\\n    return str(math.factorial(n))\\n</replace>\\n</file>\\n```\"\
-      },{\"role\":\"user\",\"content\":\"Refactor hello() into its own file.\"},{\"\
-      role\":\"assistant\",\"content\":\"To make this change we need to modify `main.py`\
-      \ and make a new file `hello.py`:\\n\\n1. Make a new hello.py file with hello()\
-      \ in it.\\n2. Remove hello() from main.py and replace it with an import.\\n\\\
-      nHere are the *Pseudo-XML Edit* blocks:\\n\\n```python\\n<file path=\\\"hello.py\\\
-      \" operation=\\\"create\\\" block_id=\\\"1\\\">\\n<search>\\n</search>\\n<replace>\\\
-      ndef hello():\\n    \\\"print a greeting\\\"\\n\\n    print(\\\"hello\\\")\\\
-      n</replace>\\n</file>\\n```\\n\\n```python\\n<file path=\\\"main.py\\\" operation=\\\
-      \"edit\\\" block_id=\\\"2\\\">\\n<search>\\ndef hello():\\n    \\\"print a greeting\\\
-      \"\\n\\n    print(\\\"hello\\\")\\n</search>\\n<replace>\\nfrom hello import\
-      \ hello\\n</replace>\\n</file>\\n```\"},{\"role\":\"user\",\"content\":\"Remove\
-      \ the old_config.py file that's no longer needed.\"},{\"role\":\"assistant\"\
-      ,\"content\":\"To remove this file we need to delete `old_config.py`:\\n\\n1.\
-      \ Remove the old_config.py file completely from the project.\\n\\nHere is the\
-      \ *Pseudo-XML Edit* blocks:\\n\\n```python\\n<file path=\\\"old_config.py\\\"\
-      \ operation=\\\"delete\\\" block_id=\\\"1\\\">\\n<search>\\n</search>\\n<replace>\\\
-      n</replace>\\n</file>\\n```\"},{\"role\":\"user\",\"content\":\"Replace all\
-      \ the contents of config.py with a new configuration structure.\"},{\"role\"\
-      :\"assistant\",\"content\":\"To replace all the contents we need to completely\
-      \ rewrite `config.py`:\\n\\n1. Replace the entire contents of config.py with\
-      \ the new configuration structure.\\n\\nHere is the *Pseudo-XML Edit* block:\\\
-      n\\n```python\\n<file path=\\\"config.py\\\" operation=\\\"replace\\\" block_id=\\\
-      \"1\\\">\\n<search>\\n</search>\\n<replace>\\nimport os\\nfrom dataclasses import\
-      \ dataclass\\n\\n@dataclass\\nclass AppConfig:\\n    debug: bool = False\\n\
-      \    port: int = 8000\\n    database_url: str = os.getenv(\\\"DATABASE_URL\\\
-      \", \\\"sqlite:///app.db\\\")\\n</replace>\\n</file>\\n```\"},{\"role\":\"user\"\
-      ,\"content\":\"Add error handling to the calculator function and update the\
-      \ docstring.\"},{\"role\":\"assistant\",\"content\":\"To add error handling\
-      \ we need to modify `calculator.py` in two places:\\n\\n1. Update the docstring\
-      \ to mention error handling.\\n2. Add try-catch block around the calculation.\\\
-      n\\nHere are the *Pseudo-XML Edit* blocks:\\n\\n```python\\n<file path=\\\"\
-      calculator.py\\\" operation=\\\"edit\\\" block_id=\\\"1\\\">\\n<search>\\ndef\
-      \ calculate(a, b):\\n    \\\"Simple calculator function\\\"\\n</search>\\n<replace>\\\
-      ndef calculate(a, b):\\n    \\\"Simple calculator function with error handling\\\
-      \"\\n</replace>\\n</file>\\n```\\n\\n```python\\n<file path=\\\"calculator.py\\\
-      \" operation=\\\"edit\\\" block_id=\\\"2\\\">\\n<search>\\n    return a / b\\\
-      n</search>\\n<replace>\\n    try:\\n        return a / b\\n    except ZeroDivisionError:\\\
-      n        return \\\"Error: Cannot divide by zero\\\"\\n</replace>\\n</file>\\\
-      n```\"},{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"> NOTICE:\
-      \ Everything below this message is the actual project.\\n\"},{\"type\":\"text\"\
-      ,\"text\":\"Create two files: utils.py with a helper function and config.py\
-      \ with a settings dictionary\\n# Reminders\\n> Don't forget to follow these\
-      \ rules\\n\\n\\nSearch Content:\\n- Never put content on the same line as the\
-      \ opening tag.\\n- Must EXACTLY MATCH existing file content, character for character\"\
-      }]}],\"model\":\"claude-sonnet-4-5\",\"stream\":true,\"system\":\"<role>\\nAct\
-      \ as an expert software developer.\\n</role>\\n\\n<rules>\\n- Always use best\
-      \ practices when coding\\n- Respect and use existing conventions, libraries,\
-      \ etc that are already present in the code base\\n- Take requests for changes\
-      \ to the supplied code\\n- If the request is ambiguous, ask clarifying questions\
-      \ before proceeding\\n- Keep changes simple don't build more then what is asked\
-      \ for\\n</rules>\\n\\n<response_format>\\n# *Pseudo-XML Edit* Block Rules:\\\
-      n\\nUse *Pseudo-XML Edit* Block to make precise edits to files. Each block specifies:\\\
-      n- **What file** to modify (with full path)\\n- **What operation** to perform\
+    body: "{\"max_tokens\":64000,\"messages\":[{\"role\":\"user\",\"content\":\"<response_format>\\\
+      n# *XML `edit_block` Response* Rules:\\n\\nUse *XML `edit_block` Response* to\
+      \ make precise edits to the repo. Each XML `edit_block` Response specifies:\\\
+      n- **What repo file** to modify (with full path)\\n- **What operation** to perform\
       \ (edit, create, delete, replace)\\n- **What content** to find (search section)\\\
-      n- **What to replace** it with (replace section)\\n\\n## Block Format:\\n\\\
-      nEvery *Pseudo-XML Edit* Block must use this exact format:\\n```language\\n<file\
-      \ path=\\\"full/file/path\\\" operation=\\\"operation_type\\\" block_id=\\\"\
-      1\\\">\\n<search>\\ncontent to find (can be empty)\\n</search>\\n<replace>\\\
-      ncontent to replace with (can be empty)\\n</replace>\\n</file>\\n```\\n**IMPORTANT**:\
-      \ Never put content on the same line as the opening tag.\\n\\n## Operation Types:\\\
-      n- `edit` for **editing** existing file content\\n- `create` for **creating**\
-      \ new files\\n- `delete` for **removing** files completely\\n- `replace` for\
-      \ **replacing entire file contents**\\n\\n## Examples:\\n\\n**Create a new file:**\\\
-      n```python\\n<file path=\\\"mathweb/flask/app.py\\\" operation=\\\"create\\\"\
-      \ block_id=\\\"1\\\">\\n<search>\\n</search>\\n<replace>\\nimport math\\nfrom\
-      \ flask import Flask\\n</replace>\\n</file>\\n```\\n\\n**Edit existing file\
-      \ content:**\\n```python\\n<file path=\\\"mathweb/flask/app.py\\\" operation=\\\
-      \"edit\\\" block_id=\\\"1\\\">\\n<search>\\nfrom flask import Flask\\n</search>\\\
-      n<replace>\\nimport math\\nfrom flask import Flask\\n</replace>\\n</file>\\\
-      n```\\n\\n**Remove entire file:**\\n```python\\n<file path=\\\"old_config.py\\\
-      \" operation=\\\"delete\\\" block_id=\\\"1\\\">\\n<search>\\n</search>\\n<replace>\\\
-      n</replace>\\n</file>\\n```\\n\\n**Replace all file contents:**\\n```python\\\
-      n<file path=\\\"config.py\\\" operation=\\\"replace\\\" block_id=\\\"1\\\">\\\
-      n<search>\\n</search>\\n<replace>\\nimport os\\nfrom dataclasses import dataclass\\\
-      n\\n@dataclass\\nclass AppConfig:\\n    debug: bool = False\\n    port: int\
-      \ = 8000\\n    database_url: str = os.getenv(\\\"DATABASE_URL\\\", \\\"sqlite:///app.db\\\
-      \")\\n</replace>\\n</file>\\n```\\n\\n## **CRITICAL RULES:**\\nFile Paths:\\\
+      n- **What to replace** it with (replace section)\\n\\n## Response Structure:\\\
+      n\\n**REQUIRED**: All responses containing *XML `edit_block` Response* MUST\
+      \ start with a PLAN section:\\n\\n- Wrap your plan in `<agent_plan>...</agent_plan>`\
+      \ boundaries\\n- Explain what files will be modified and why\\n- List the specific\
+      \ changes in numbered steps\\n- Keep it concise but complete\\n\\nExample:\\\
+      n<agent_plan><notice>new line here</notice>\\nTo make this change we need to\
+      \ modify `mathweb/flask/app.py` to:\\n\\n1. Import the math package.\\n2. Remove\
+      \ the existing factorial() function.\\n3. Update get_factorial() to call math.factorial\
+      \ instead.\\n</agent_plan><notice>new line here</notice>\\n\\n## *XML `edit_block`\
+      \ Response* Format:\\n\\nEvery *XML `edit_block` Response* must use this exact\
+      \ format:\\n```language\\n<edit_block path=\\\"full/file/path\\\" operation=\\\
+      \"operation_type\\\" block_id=\\\"1\\\">\\n<search><notice>new line here</notice>\\\
+      n[exact charector for charector content to find<notice>(including comments and\
+      \ ai messages, can be empty)</notice>\\n</search>\\n<replace><notice>new line\
+      \ here</notice>\\n[content to replace with]<notice>(can be empty)</notice>\\\
+      n</replace>\\n</edit_block>\\n```\\n**IMPORTANT**: Never put content on the\
+      \ same line as the opening tag.\\n\\n## Operation Types:\\n- `edit` for **editing**\
+      \ existing file content\\n- `create` for **creating** new files\\n- `delete`\
+      \ for **removing** files completely\\n- `replace` for **replacing entire file\
+      \ contents**\\n\\n## Examples:\\n\\n**Create a new file:**\\n```python\\n<edit_block\
+      \ path=\\\"mathweb/flask/app.py\\\" operation=\\\"create\\\" block_id=\\\"1\\\
+      \">\\n<search>\\n</search>\\n<replace>\\nimport math\\nfrom flask import Flask\\\
+      n</replace>\\n</edit_block>\\n```\\n\\n**Edit existing file content:**\\n```python\\\
+      n<edit_block path=\\\"mathweb/flask/app.py\\\" operation=\\\"edit\\\" block_id=\\\
+      \"1\\\">\\n<search>\\nfrom flask import Flask\\n</search>\\n<replace>\\nimport\
+      \ math\\nfrom flask import Flask\\n</replace>\\n</edit_block>\\n```\\n\\n**Remove\
+      \ entire file:**\\n```python\\n<edit_block path=\\\"old_config.py\\\" operation=\\\
+      \"delete\\\" block_id=\\\"1\\\">\\n<search>\\n</search>\\n<replace>\\n</replace>\\\
+      n</edit_block>\\n```\\n\\n**Replace all file contents:**\\n```python\\n<edit_block\
+      \ path=\\\"config.py\\\" operation=\\\"replace\\\" block_id=\\\"1\\\">\\n<search>\\\
+      n</search>\\n<replace>\\nimport os\\nfrom dataclasses import dataclass\\n\\\
+      n@dataclass\\nclass AppConfig:\\n    debug: bool = False\\n    port: int = 8000\\\
+      n    database_url: str = os.getenv(\\\"DATABASE_URL\\\", \\\"sqlite:///app.db\\\
+      \")\\n</replace>\\n</edit_block>\\n```\\n\\n## **CRITICAL RULES:**\\nFile Paths:\\\
       n- Use the FULL file path exactly as shown by the user\\n- No bold asterisks,\
       \ quotes, or escaping around the path\\n\\nSearch Content:\\n- Must EXACTLY\
       \ MATCH existing file content, character for character\\n- Include all comments,\
@@ -102,12 +48,88 @@ interactions:
       \ make each search unique\\n- Only replace the first occurrence found\\n\\nFile\
       \ Operations:\\n- Only edit files that the user has added to the chat. Refer\
       \ to `<context type=\\\"editable files\\\">`\\n- For new files: use operation=\\\
-      \"create\\\" with empty search, content in replace\\n- To move code: use 2 blocks\
-      \ (1 to delete, 1 to insert)\\n\\nUser Intent:\\n- If user says \\\"ok\\\",\
-      \ \\\"go ahead\\\", or \\\"do that\\\" \u2192 provide Pseudo-XML Edit blocks\\\
-      n- Wait for user confirmation before assuming edits are applied\\n- ONLY EVER\
-      \ RETURN CODE IN A Pseudo-XML Edit Blocks!\\n</response_format>\",\"temperature\"\
-      :0.1}"
+      \"create\\\" with empty search, content in replace\\n- To move code: use 2 XML\
+      \ `edit_block` Response (1 to delete, 1 to insert)\\n\\nUser Intent:\\n- If\
+      \ user says \\\"ok\\\", \\\"go ahead\\\", or \\\"do that\\\" \u2192 provide\
+      \ XML `edit_block` Response\\n- Wait for user confirmation before assuming edits\
+      \ are applied\\n- ONLY EVER RETURN CODE IN A XML `edit_block` Response!\\n\\\
+      n</response_format>\\n<user_input>\\nBefore we start lets first practice the\
+      \ *XML `edit_block` Response* Block format.\\n\\nChange get_factorial() to use\
+      \ math.factorial\\n</user_input>\"},{\"role\":\"assistant\",\"content\":\"<agent_plan>\\\
+      nTo make this change we need to modify `mathweb/flask/app.py` to:\\n\\n1. Import\
+      \ the math package.\\n2. Remove the existing factorial() function.\\n3. Update\
+      \ get_factorial() to call math.factorial instead.\\n</agent_plan>\\n\\n```python\\\
+      n<edit_block path=\\\"mathweb/flask/app.py\\\" operation=\\\"edit\\\" block_id=\\\
+      \"1\\\">\\n<search>\\nfrom flask import Flask\\n</search>\\n<replace>\\nimport\
+      \ math\\nfrom flask import Flask\\n</replace>\\n</edit_block>\\n```\\n\\n```python\\\
+      n<edit_block path=\\\"mathweb/flask/app.py\\\" operation=\\\"edit\\\" block_id=\\\
+      \"2\\\">\\n<search>\\ndef factorial(n):\\n    \\\"compute factorial\\\"\\n\\\
+      n    if n == 0:\\n        return 1\\n    else:\\n        return n * factorial(n-1)\\\
+      n</search>\\n<replace>\\n</replace>\\n</edit_block>\\n```\\n\\n```python\\n<edit_block\
+      \ path=\\\"mathweb/flask/app.py\\\" operation=\\\"edit\\\" block_id=\\\"3\\\"\
+      >\\n<search>\\n    return str(factorial(n))\\n</search>\\n<replace>\\n    return\
+      \ str(math.factorial(n))\\n</replace>\\n</edit_block>\\n```\"},{\"role\":\"\
+      user\",\"content\":\"Refactor hello() into its own file.\"},{\"role\":\"assistant\"\
+      ,\"content\":\"<agent_plan>\\nTo make this change we need to modify `main.py`\
+      \ and make a new file `hello.py`:\\n\\n1. Make a new hello.py file with hello()\
+      \ in it.\\n2. Remove hello() from main.py and replace it with an import.\\n</agent_plan>\\\
+      n\\n```python\\n<edit_block path=\\\"hello.py\\\" operation=\\\"create\\\" block_id=\\\
+      \"1\\\">\\n<search>\\n</search>\\n<replace>\\ndef hello():\\n    \\\"print a\
+      \ greeting\\\"\\n\\n    print(\\\"hello\\\")\\n</replace>\\n</edit_block>\\\
+      n```\\n\\n```python\\n<edit_block path=\\\"main.py\\\" operation=\\\"edit\\\"\
+      \ block_id=\\\"2\\\">\\n<search>\\ndef hello():\\n    \\\"print a greeting\\\
+      \"\\n\\n    print(\\\"hello\\\")\\n</search>\\n<replace>\\nfrom hello import\
+      \ hello\\n</replace>\\n</edit_block>\\n```\"},{\"role\":\"user\",\"content\"\
+      :\"Remove the old_config.py file that's no longer needed.\"},{\"role\":\"assistant\"\
+      ,\"content\":\"<agent_plan>\\nTo remove this file we need to delete `old_config.py`:\\\
+      n\\n1. Remove the old_config.py file completely from the project.\\n</agent_plan>\\\
+      n\\n```python\\n<edit_block path=\\\"old_config.py\\\" operation=\\\"delete\\\
+      \" block_id=\\\"1\\\">\\n<search>\\n</search>\\n<replace>\\n</replace>\\n</edit_block>\\\
+      n```\"},{\"role\":\"user\",\"content\":\"Replace all the contents of config.py\
+      \ with a new configuration structure.\"},{\"role\":\"assistant\",\"content\"\
+      :\"<agent_plan>\\nTo replace all the contents we need to completely rewrite\
+      \ `config.py`:\\n\\n1. Replace the entire contents of config.py with the new\
+      \ configuration structure.\\n</agent_plan>\\n\\n```python\\n<edit_block path=\\\
+      \"config.py\\\" operation=\\\"replace\\\" block_id=\\\"1\\\">\\n<search>\\n</search>\\\
+      n<replace>\\nimport os\\nfrom dataclasses import dataclass\\n\\n@dataclass\\\
+      nclass AppConfig:\\n    debug: bool = False\\n    port: int = 8000\\n    database_url:\
+      \ str = os.getenv(\\\"DATABASE_URL\\\", \\\"sqlite:///app.db\\\")\\n</replace>\\\
+      n</edit_block>\\n```\"},{\"role\":\"user\",\"content\":\"Add error handling\
+      \ to the calculator function and update the docstring.\"},{\"role\":\"assistant\"\
+      ,\"content\":\"<agent_plan>\\nTo add error handling we need to modify `calculator.py`\
+      \ in two places:\\n\\n1. Update the docstring to mention error handling.\\n2.\
+      \ Add try-catch block around the calculation.\\n</agent_plan>\\n\\n```python\\\
+      n<edit_block path=\\\"calculator.py\\\" operation=\\\"edit\\\" block_id=\\\"\
+      1\\\">\\n<search>\\ndef calculate(a, b):\\n    \\\"Simple calculator function\\\
+      \"\\n</search>\\n<replace>\\ndef calculate(a, b):\\n    \\\"Simple calculator\
+      \ function with error handling\\\"\\n</replace>\\n</edit_block>\\n```\\n\\n```python\\\
+      n<edit_block path=\\\"calculator.py\\\" operation=\\\"edit\\\" block_id=\\\"\
+      2\\\">\\n<search>\\n    return a / b\\n</search>\\n<replace>\\n    try:\\n \
+      \       return a / b\\n    except ZeroDivisionError:\\n        return \\\"Error:\
+      \ Cannot divide by zero\\\"\\n</replace>\\n</edit_block>\\n```\"},{\"role\"\
+      :\"user\",\"content\":\"<conversation_history>\\n<heading>\\nBelow is the conversation\
+      \ history between Byte agents and the user.\\n<heading>\\nThe conversation history\
+      \ is empty.\\n</conversation_history>\\n<user_input>\\n```text\\nCreate two\
+      \ files: utils.py with a helper function and config.py with a settings dictionary\\\
+      n```\\n\\nYou **MUST** consider the user input before proceeding (if not empty).\\\
+      n</user_input>\\n<operating_constraints>\\n- Always use best practices when\
+      \ coding\\n- Respect and use existing conventions, libraries, etc that are already\
+      \ present in the code base\\n- Take requests for changes to the supplied code\\\
+      n- If the request is ambiguous, ask clarifying questions before proceeding\\\
+      n- Keep changes simple don't build more then what is asked for\\n</operating_constraints>\\\
+      n\\n\\n\\n\\n<operating_principles>\\n<notice>You **MUST** follow these Operating\
+      \ Principles</notice>\\n<search> Tag Rules:\\n- Never put content on the same\
+      \ line as the opening tag.\\n- Must EXACTLY MATCH existing file content, character\
+      \ for character including comments and AI comments.\\n</operating_principles>\"\
+      }],\"model\":\"claude-sonnet-4-5\",\"stream\":true,\"system\":\"<role>\\nYou\
+      \ are Byte, a CLI agent specializing in software engineering tasks. Your primary\
+      \ goal is to help users safely and effectively.\\nAct as an expert software\
+      \ developer.\\n</role>\",\"temperature\":0.1,\"tools\":[{\"name\":\"load_convention\"\
+      ,\"input_schema\":{\"properties\":{\"convention_name\":{\"description\":\"The\
+      \ name of the convention (from <name>)\",\"type\":\"string\"}},\"required\"\
+      :[\"convention_name\"],\"type\":\"object\"},\"description\":\"Load a convention\
+      \ file by its name. This tool reads convention files using the name from convention\
+      \ metadata.\"}]}"
     headers:
       Accept:
       - application/json
@@ -116,13 +138,13 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '7732'
+      - '9527'
       Content-Type:
       - application/json
       Host:
       - api.anthropic.com
       User-Agent:
-      - AsyncAnthropic/Python 0.75.0
+      - AsyncAnthropic/Python 0.77.0
       X-Stainless-Arch:
       - x64
       X-Stainless-Async:
@@ -132,7 +154,7 @@ interactions:
       X-Stainless-OS:
       - Linux
       X-Stainless-Package-Version:
-      - 0.75.0
+      - 0.77.0
       X-Stainless-Runtime:
       - CPython
       X-Stainless-Runtime-Version:
@@ -149,271 +171,50 @@ interactions:
     uri: https://api.anthropic.com/v1/messages
   response:
     body:
-      string: 'event: message_start
-
-        data: {"type":"message_start","message":{"model":"claude-sonnet-4-5-20250929","id":"msg_01P4rU8Bhb3ZV3Q3LeacjFNs","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":2044,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1,"service_tier":"standard"}}            }
-
-
-        event: content_block_start
-
-        data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}     }
-
-
-        event: ping
-
-        data: {"type": "ping"}
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"I"}            }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"''ll
-        create both"}         }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"
-        files for you."}  }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n\nHere"}           }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"
-        are the *Pseudo-XML Edit"}              }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"*
-        blocks:\n\n```python"}             }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n<file
-        path=\"utils.py\" operation"}      }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"=\"create\"
-        block_id=\"1"} }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\">\n<search>"}            }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n</search>\n<replace>\ndef"}          }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"
-        helper"}            }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"_function("}      }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"value"}       }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"):\n    \"\"\""}   }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n    A"}            }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"
-        simple"}    }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"
-        helper function that processes"}     }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"
-        a value."}    }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n    \n    Args:\n        "}
-        }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"value:
-        The value"}      }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"
-        to process\n        \n    Returns:"}      }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n        The
-        processed value\n    \"\"\""}      }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n    return"}}
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"
-        value"}     }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n</replace>\n</file>"}            }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n```\n\n```python\n<file
-        path"}           }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"=\"config.py\"
-        operation=\"create"}            }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\"
-        block_id=\"2\">"}}
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n<search>\n</search>"}      }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n<replace>\nsettings"}           }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"
-        = {\n    \"app"}               }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"_"}             }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"name\":
-        \"My"}        }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"App\",\n    \"version"}             }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\":
-        \"1.0.0\","}             }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n    \"debug\":
-        False,"}      }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n    \"max"}    }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"_connections\":
-        100"}          }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n}\n</replace>\n</file"}  }
-
-
-        event: content_block_delta
-
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":">\n```"}          }
-
-
-        event: content_block_stop
-
-        data: {"type":"content_block_stop","index":0        }
-
-
-        event: message_delta
-
-        data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"input_tokens":2044,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":211}             }
-
-
-        event: message_stop
-
-        data: {"type":"message_stop"              }
-
-
-        '
+      string: !!binary |
+        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
+        8EKWU0IpNAEAAAD//wMACxhRNkAcAAA=
     headers:
       CF-RAY:
-      - 9c09d7075f38d961-BOS
+      - 9d949bf38ae693b5-BOS
       Cache-Control:
       - no-cache
       Connection:
       - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - default-src 'none'; frame-ancestors 'none'
       Content-Type:
       - text/event-stream; charset=utf-8
       Date:
-      - Mon, 19 Jan 2026 22:41:31 GMT
+      - Sun, 08 Mar 2026 20:32:27 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -425,35 +226,37 @@ interactions:
       anthropic-ratelimit-input-tokens-limit:
       - '2000000'
       anthropic-ratelimit-input-tokens-remaining:
-      - '1999000'
+      - '1998000'
       anthropic-ratelimit-input-tokens-reset:
-      - '2026-01-19T22:41:30Z'
+      - '2026-03-08T20:32:26Z'
       anthropic-ratelimit-output-tokens-limit:
       - '400000'
       anthropic-ratelimit-output-tokens-remaining:
       - '400000'
       anthropic-ratelimit-output-tokens-reset:
-      - '2026-01-19T22:41:30Z'
+      - '2026-03-08T20:32:26Z'
       anthropic-ratelimit-requests-limit:
       - '4000'
       anthropic-ratelimit-requests-remaining:
       - '3999'
       anthropic-ratelimit-requests-reset:
-      - '2026-01-19T22:41:30Z'
+      - '2026-03-08T20:32:26Z'
       anthropic-ratelimit-tokens-limit:
       - '2400000'
       anthropic-ratelimit-tokens-remaining:
-      - '2399000'
+      - '2398000'
       anthropic-ratelimit-tokens-reset:
-      - '2026-01-19T22:41:30Z'
+      - '2026-03-08T20:32:26Z'
       cf-cache-status:
       - DYNAMIC
       request-id:
-      - req_011CXHYSQfmPjiadEsWGRDSk
+      - req_011CYrFRUKsSVq42D7GT7dqa
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
+      vary:
+      - Accept-Encoding
       x-envoy-upstream-service-time:
-      - '577'
+      - '1359'
     status:
       code: 200
       message: OK

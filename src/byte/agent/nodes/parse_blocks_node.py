@@ -151,6 +151,8 @@ class ParseBlocksNode(Node, UserInteractive):
             # Replace matching blocks in base_components by block_id
             base_components = self._merge_components_by_block_id(base_components, new_blocks)
 
+        self.app["log"].info(base_components)
+
         return base_components
 
     async def _parse_to_raw_blocks(
@@ -342,9 +344,9 @@ class ParseBlocksNode(Node, UserInteractive):
 
         # Determine block type
         block_type_map = {
-            "delete": BlockType.REMOVE,
+            "delete": BlockType.DELETE,
             "replace": BlockType.REPLACE,
-            "create": BlockType.ADD,
+            "create": BlockType.CREATE,
             "edit": BlockType.EDIT,
         }
         block_type = block_type_map.get(operation, BlockType.EDIT)
@@ -489,10 +491,12 @@ class ParseBlocksNode(Node, UserInteractive):
         # Check to make sure the raw blocks can be parsed in general even if some have errors
         # to be parasable a raw block must have an id and a start / end tag.
         result = await self._validate_raw_blocks(state)
+
         if isinstance(result, Command):
             return result
 
         result = await self._parse_to_raw_blocks(state)
+
         if isinstance(result, Command):
             return result
 

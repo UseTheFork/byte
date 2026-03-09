@@ -20,9 +20,10 @@ class BlockType(str, Enum):
     """Type of edit block operation."""
 
     EDIT = "edit"  # Modify existing file content
-    ADD = "add"  # Create new file
-    REMOVE = "remove"  # Remove existing file
+    CREATE = "create"  # Create new file
+    DELETE = "delete"  # Remove existing file
     REPLACE = "replace"
+    UNKNOWN = "unknown"
 
     def __str__(self):
         return self.value
@@ -31,11 +32,13 @@ class BlockType(str, Enum):
 class BlockStatus(str, Enum):
     """Status of edit block validation."""
 
+    UNKNOWN = "unknown"
     VALID = "valid"
     READ_ONLY_ERROR = "read_only_error"
     SEARCH_NOT_FOUND_ERROR = "search_not_found_error"
     FILE_OUTSIDE_PROJECT_ERROR = "file_outside_project_error"
     PARSE_ERROR = "parse_error"
+    INVALID_OPERATION_ERROR = "invalid_operation_error"
 
     def __str__(self):
         return self.value
@@ -63,7 +66,7 @@ class ShellCommandBlock:
 
     command: str
     working_dir: str = ""
-    block_status: BlockStatus = BlockStatus.VALID
+    block_status: BlockStatus = BlockStatus.UNKNOWN
     status_message: str = ""
 
 
@@ -77,7 +80,7 @@ class RawSearchReplaceBlock:
 
     block_id: str
     raw_content: str
-    block_status: BlockStatus = BlockStatus.VALID
+    block_status: BlockStatus = BlockStatus.UNKNOWN
     status_message: str = ""
 
 
@@ -89,8 +92,8 @@ class SearchReplaceBlock:
     file_path: str
     search_content: str
     replace_content: str
-    block_type: BlockType = BlockType.EDIT
-    block_status: BlockStatus = BlockStatus.VALID
+    block_type: BlockType = BlockType.UNKNOWN
+    block_status: BlockStatus = BlockStatus.UNKNOWN
     status_message: str = ""
 
     def to_error_format(self) -> str:
@@ -111,14 +114,7 @@ class SearchReplaceBlock:
             f"**File:** `{self.file_path}`",
             f"**Block ID:** {self.block_id}",
             f"**Status:** {self.block_status.value}",
-            f"**Issue:** {self.status_message}",
-            # "",
-            # Boundary.open(BoundaryType.SEARCH),
-            # self.search_content,
-            # Boundary.close(BoundaryType.SEARCH),
-            # Boundary.open(BoundaryType.REPLACE),
-            # self.replace_content,
-            # Boundary.close(BoundaryType.REPLACE),
+            f"**Issue:**\n{self.status_message}",
             Boundary.close(BoundaryType.ERROR),
         ]
 
@@ -138,7 +134,7 @@ class SearchReplaceBlock:
 
         sections = [
             Boundary.open(
-                BoundaryType.FILE,
+                BoundaryType.EDIT_BLOCK,
                 meta={"path": self.file_path, "operation": self.block_type.value, "block_id": self.block_id},
             ),
             Boundary.open(BoundaryType.SEARCH),
@@ -147,7 +143,7 @@ class SearchReplaceBlock:
             Boundary.open(BoundaryType.REPLACE),
             self.replace_content,
             Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
         ]
 
         return list_to_multiline_text(sections)

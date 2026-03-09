@@ -189,7 +189,7 @@ async def test_parses_create_operation_block(application: Application):
     blocks = await parser_service.parse_content_to_blocks(content)
 
     assert len(blocks) == 1
-    assert blocks[0].block_type == BlockType.ADD
+    assert blocks[0].block_type == BlockType.CREATE
 
 
 @pytest.mark.asyncio
@@ -486,7 +486,7 @@ async def test_mid_flight_check_validates_file_within_project(application: Appli
             file_path=outside_file,
             search_content="",
             replace_content="new file content",
-            block_type=BlockType.ADD,
+            block_type=BlockType.CREATE,
         )
     ]
 
@@ -542,7 +542,7 @@ async def test_mid_flight_check_handles_nonexistent_file_for_create(application:
             file_path=str(new_file),
             search_content="",
             replace_content="# New file content",
-            block_type=BlockType.ADD,
+            block_type=BlockType.CREATE,
         )
     ]
 
@@ -695,7 +695,7 @@ async def test_apply_blocks_creates_new_file(application: Application, git_repo,
             file_path=str(new_file),
             search_content="",
             replace_content="def hello():\n    print('hello')\n",
-            block_type=BlockType.ADD,
+            block_type=BlockType.CREATE,
         )
     ]
 
@@ -750,7 +750,7 @@ async def test_apply_blocks_deletes_file(application: Application, git_repo, moc
             file_path=str(test_file),
             search_content="",
             replace_content="",
-            block_type=BlockType.REMOVE,
+            block_type=BlockType.DELETE,
         )
     ]
 
@@ -833,7 +833,7 @@ async def test_apply_blocks_creates_parent_directories(application: Application,
             file_path=str(new_file),
             search_content="",
             replace_content="# New module\n",
-            block_type=BlockType.ADD,
+            block_type=BlockType.CREATE,
         )
     ]
 
