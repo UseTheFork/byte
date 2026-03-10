@@ -1,5 +1,4 @@
 import re
-from abc import ABC
 from pathlib import Path
 from typing import List
 
@@ -7,12 +6,11 @@ from langchain_core.messages import AIMessage, BaseMessage
 
 from byte import Service
 from byte.code_operations import (
-    EDIT_BLOCK_NAME,
     BlockStatus,
     BlockType,
     EditFormatPrompts,
-    NoBlocksFoundError,
-    PreFlightUnparsableError,
+    RawBlockService,
+    RawSearchReplaceBlock,
     SearchReplaceBlock,
 )
 from byte.files import FileDiscoveryService, FileMode, FileService
@@ -21,11 +19,11 @@ from byte.support.mixins import UserInteractive
 from byte.support.utils import list_to_multiline_text
 
 
-class EditBlockService(Service, UserInteractive, ABC):
+class EditBlockService(Service, UserInteractive):
     prompts: EditFormatPrompts
     edit_blocks: List[SearchReplaceBlock]
 
-    match_pattern = rf"<{BoundaryType.EDIT_BLOCK}\s+([^>]+)>\s*<{BoundaryType.SEARCH}>(.*?)</{BoundaryType.SEARCH}>\s*<{BoundaryType.REPLACE}>(.*?)</{BoundaryType.REPLACE}>\s*</{BoundaryType.EDIT_BLOCK}>"
+    match_pattern = rf"<{BoundaryType.EDIT_BLOCK}\s+[^>]*>(.*?)</{BoundaryType.EDIT_BLOCK}>"
 
     def boot(self):
         self.edit_blocks = []
@@ -56,20 +54,46 @@ class EditBlockService(Service, UserInteractive, ABC):
 
         return cleaned_content
 
-    def _parse_attributes(self, attr_string: str) -> dict[str, str]:
-        """Parse XML-style attributes from a string.
+    async def extract_search_replace_content(self, raw_content: str) -> tuple[str, str]:
+        """Extract search and replace content from raw edit block content.
 
         Args:
-            attr_string: String containing attributes like 'key="value" key2="value2"'
+            raw_content: Raw content string containing search/replace pseudo-XML tags
 
         Returns:
-            Dictionary mapping attribute names to values
+            Tuple of (search_content, replace_content)
+
+        Usage: `search, replace = await service.extract_search_replace_content(raw_content)`
         """
-        attrs = {}
-        attr_pattern = r'(\w+)="([^"]*)"'
-        for match in re.finditer(attr_pattern, attr_string):
-            attrs[match.group(1)] = match.group(2)
-        return attrs
+        # Extract search content
+        search_pattern = rf"<{BoundaryType.SEARCH}>(.*?)</{BoundaryType.SEARCH}>"
+        search_match = re.search(search_pattern, raw_content, re.DOTALL)
+        search_content = search_match.group(1) if search_match else ""
+
+        # Extract replace content
+        replace_pattern = rf"<{BoundaryType.REPLACE}>(.*?)</{BoundaryType.REPLACE}>"
+        replace_match = re.search(replace_pattern, raw_content, re.DOTALL)
+        replace_content = replace_match.group(1) if replace_match else ""
+
+        return search_content, replace_content
+
+    async def extract_edit_block_content(self, raw_content: str) -> str:
+        """Extract raw content directly from edit block (not search/replace).
+
+        Args:
+            raw_content: Raw content string containing edit_block pseudo-XML tags
+
+        Returns:
+            Content between edit_block tags
+
+        Usage: `content = await service.extract_edit_block_content(raw_content)`
+        """
+        # Extract content between edit_block tags
+        pattern = rf"<{BoundaryType.EDIT_BLOCK}\s+[^>]*>(.*?)</{BoundaryType.EDIT_BLOCK}>"
+        match = re.search(pattern, raw_content, re.DOTALL)
+        content = match.group(1) if match else ""
+
+        return content
 
     async def parse_content_to_blocks(self, content: str) -> List[SearchReplaceBlock]:
         """Extract SEARCH/REPLACE blocks from AI response content.
@@ -86,27 +110,16 @@ class EditBlockService(Service, UserInteractive, ABC):
         Usage: `blocks = service.parse_content_to_blocks(ai_response)`
         """
 
+        raw_block_service = self.app.make(RawBlockService)
+        raw_blocks = await raw_block_service.parse_content_to_raw_blocks(content)
+
         blocks = []
 
-        # Pattern to match pseudo-XML file blocks with search/replace content
-        # <edit_block path="..." operation="...">
-        #   <search>...</search>
-        #   <replace>...</replace>
-        # </edit_block>
-        pattern = self.match_pattern
-
-        matches = re.findall(pattern, content, re.DOTALL)
-
-        for match in matches:
-            attr_string, search_content, replace_content = match
-
-            # Parse attributes from the tag
-            attrs = self._parse_attributes(attr_string)
-
+        for raw_block in raw_blocks:
             # Extract required attributes
-            block_id = attrs.get("block_id", "").strip()
-            file_path = attrs.get("path", "").strip()
-            operation = attrs.get("operation", "").strip()
+            block_id = raw_block.block_id.strip()
+            file_path = raw_block.file_path.strip()
+            operation = raw_block.operation.strip()
 
             # Determine block type based on operation and file existence
             file_path_obj = Path(file_path.strip())
@@ -115,23 +128,27 @@ class EditBlockService(Service, UserInteractive, ABC):
             else:
                 file_path_obj = file_path_obj.resolve()
 
+            search_content = ""
+            replace_content = ""
+            block_type = BlockType.UNKNOWN
+
             # Map operation string to BlockType
             if operation == "delete":
                 block_type = BlockType.DELETE
             elif operation == "replace":
                 block_type = BlockType.REPLACE
+                replace_content = await self.extract_edit_block_content(raw_block.raw_content)
             elif operation == "create":
                 block_type = BlockType.CREATE
+                replace_content = await self.extract_edit_block_content(raw_block.raw_content)
             elif operation == "edit":
                 block_type = BlockType.EDIT
-            else:
-                # Default to UNKNOWN for unknown operations so we can fail
-                block_type = BlockType.UNKNOWN
+                search_content, replace_content = await self.extract_search_replace_content(raw_block.raw_content)
 
             blocks.append(
                 SearchReplaceBlock(
-                    block_id=block_id.strip(),
-                    file_path=file_path.strip(),
+                    block_id=block_id,
+                    file_path=file_path,
                     search_content=search_content,
                     replace_content=replace_content,
                     block_type=block_type,
@@ -139,79 +156,126 @@ class EditBlockService(Service, UserInteractive, ABC):
             )
         return blocks
 
-    async def check_block_ids(self, content: str) -> None:
-        """Validate that all file blocks have a block_id attribute.
-
-        Checks that every <file> tag includes a block_id attribute and raises
-        an exception if any blocks are missing this required identifier.
-        """
-
-        file_blocks_with_id = re.findall(rf'<{BoundaryType.EDIT_BLOCK}\s+[^>]*block_id="[^"]+', content)
-        file_blocks_total = re.findall(rf"<{BoundaryType.EDIT_BLOCK}\s+", content)
-
-        blocks_with_id_count = len(file_blocks_with_id)
-        total_blocks_count = len(file_blocks_total)
-
-        if blocks_with_id_count < total_blocks_count:
-            raise PreFlightUnparsableError(
-                f"Malformed {EDIT_BLOCK_NAME} blocks: "
-                f"{total_blocks_count - blocks_with_id_count} block(s) missing block_id attribute. "
-                f"All file blocks must include a block_id."
-            )
-
-    async def check_blocks_exist(self, content: str) -> None:
-        """Check if any edit blocks exist in the content.
-
-        Raises NoBlocksFoundError if no file blocks are found.
-        """
-        file_open_count = len(re.findall(rf"<{BoundaryType.EDIT_BLOCK}\s+[^>]*>", content))
-
-        if file_open_count == 0:
-            raise NoBlocksFoundError(f"No {EDIT_BLOCK_NAME} blocks found in content.")
-
-    async def check_file_tags_balanced(self, content: str) -> None:
-        """Validate that edit_block opening and closing tags are properly balanced.
-
-        Counts occurrences of opening and closing edit_block tags and raises an exception
-        if they don't match, indicating malformed blocks.
+    def _parse_attributes(self, attr_string: str) -> dict[str, str]:
+        """Parse attribute string into dictionary.
 
         Args:
-            content: Content string to validate
-
-        Raises:
-            PreFlightUnparsableError: If opening and closing tags don't match
-        """
-        file_open_count = len(re.findall(rf"<{BoundaryType.EDIT_BLOCK}\s+[^>]*>", content))
-        file_close_count = content.count(f"</{BoundaryType.EDIT_BLOCK}>")
-
-        if file_open_count != file_close_count:
-            raise PreFlightUnparsableError(
-                f"Malformed {EDIT_BLOCK_NAME} blocks:"
-                f"<file> tags={file_open_count}, </file> tags={file_close_count}."
-                f"Opening and closing tags must match."
-            )
-
-    async def check_single_block_tags_balanced(self, raw_content: str) -> tuple[bool, str]:
-        """Validate that search/replace tags are balanced in a single block.
+            attr_string: Attribute string from edit_block opening tag
 
         Returns:
-            Tuple of (is_valid, error_message)
+            Dictionary of attribute key-value pairs
+
+        Usage: `attrs = service._parse_attributes(attr_string)`
         """
-        search_count = raw_content.count("<search>")
-        search_close_count = raw_content.count("</search>")
-        replace_count = raw_content.count("<replace>")
-        replace_close_count = raw_content.count("</replace>")
+        attrs = {}
+        # Match key="value" pairs
+        for match in re.finditer(r'(\w+)="([^"]*)"', attr_string):
+            key, value = match.groups()
+            attrs[key] = value
+        return attrs
 
-        if search_count != search_close_count:
-            return False, f"<search> tags={search_count}, </search> tags={search_close_count}"
+    async def parse_raw_block_to_search_replace(self, raw_block: RawSearchReplaceBlock) -> SearchReplaceBlock:
+        """Parse a single RawSearchReplaceBlock into a SearchReplaceBlock.
 
-        if replace_count != replace_close_count:
-            return False, f"<replace> tags={replace_count}, </replace> tags={replace_close_count}"
+        Args:
+            raw_block: Raw block to parse
 
-        if search_count != replace_count:
-            return False, f"<search> tags={search_count}, <replace> tags={replace_count}"
+        Returns:
+            Parsed SearchReplaceBlock object
 
-        return True, ""
+        Usage: `block = await service.parse_raw_block_to_search_replace(raw_block)`
+        """
+        raw_block_service = self.app.make(RawBlockService)
+
+        # Check tag balance first
+        is_valid, error_msg = await raw_block_service.check_single_block_tags_balanced(raw_block.raw_content)
+
+        if not is_valid:
+            # Mark block as invalid and return early
+            raw_block.block_status = BlockStatus.PARSE_ERROR
+            raw_block.status_message = f"Unbalanced tags: {error_msg}"
+
+            # Return a minimal SearchReplaceBlock with error status
+            return SearchReplaceBlock(
+                block_id=raw_block.block_id,
+                file_path="",
+                search_content="",
+                replace_content="",
+                block_type=BlockType.EDIT,
+                block_status=raw_block.block_status,
+                status_message=raw_block.status_message,
+            )
+
+        # Extract attributes from opening tag
+        attr_pattern = rf"<{BoundaryType.EDIT_BLOCK}\s+([^>]*?)>"
+        attr_match = re.search(attr_pattern, raw_block.raw_content)
+
+        if not attr_match:
+            raise ValueError(f"Failed to parse raw block {raw_block.block_id}")
+
+        attr_string = attr_match.group(1)
+
+        # Parse attributes
+        attrs = self._parse_attributes(attr_string)
+
+        file_path = attrs.get("path", "").strip()
+        operation = attrs.get("operation", "").strip()
+
+        # Determine block type
+        block_type_map = {
+            "delete": BlockType.DELETE,
+            "replace": BlockType.REPLACE,
+            "create": BlockType.CREATE,
+            "edit": BlockType.EDIT,
+        }
+        block_type = block_type_map.get(operation, BlockType.EDIT)
+
+        # Extract content based on operation type
+        search_content = ""
+        replace_content = ""
+
+        if block_type == BlockType.EDIT:
+            # For edit operations, extract search and replace content
+            search_content, replace_content = await self.extract_search_replace_content(raw_block.raw_content)
+        elif block_type in (BlockType.CREATE, BlockType.REPLACE):
+            # For create/replace operations, extract content directly
+            replace_content = await self.extract_edit_block_content(raw_block.raw_content)
+
+        return SearchReplaceBlock(
+            block_id=raw_block.block_id,
+            file_path=file_path,
+            search_content=search_content,
+            replace_content=replace_content,
+            block_type=block_type,
+            block_status=raw_block.block_status,
+            status_message=raw_block.status_message,
+        )
+
+    async def convert_raw_blocks_to_search_replace(
+        self, components: list[str | RawSearchReplaceBlock]
+    ) -> list[str | SearchReplaceBlock]:
+        """Convert raw blocks in components to SearchReplaceBlock objects.
+
+        Args:
+            components: List of text strings and RawSearchReplaceBlock objects
+
+        Returns:
+            List of text strings and SearchReplaceBlock objects
+
+        Usage: `converted = await service.convert_raw_blocks_to_search_replace(components)`
+        """
+        result = []
+
+        for component in components:
+            if isinstance(component, str):
+                # Keep text strings unchanged
+                result.append(component)
+            elif isinstance(component, RawSearchReplaceBlock):
+                # Parse the raw content into a SearchReplaceBlock
+                parsed_block = await self.parse_raw_block_to_search_replace(component)
+                result.append(parsed_block)
+
+        return result
 
     async def _find_search_content_in_file(
         self, search_content: str, replace_content: str, file_content: str
@@ -260,7 +324,7 @@ class EditBlockService(Service, UserInteractive, ABC):
         self.app["log"].debug(f"Search content attempted:\n{search_content}")
         return False, search_content, replace_content
 
-    async def mid_flight_check(self, blocks: List[SearchReplaceBlock]) -> List[SearchReplaceBlock]:
+    async def validate_semantics(self, blocks: List[SearchReplaceBlock]) -> List[SearchReplaceBlock]:
         """Validate parsed edit blocks against file system and context constraints.
 
         Performs validation checks on parsed blocks and sets their status instead
@@ -272,6 +336,8 @@ class EditBlockService(Service, UserInteractive, ABC):
 
         Returns:
                 List of SearchReplaceBlock objects with updated status information
+
+        Usage: `validated = await service.validate_semantics(blocks)`
         """
 
         file_service: FileService = self.app.make(FileService)
@@ -343,30 +409,6 @@ class EditBlockService(Service, UserInteractive, ABC):
 
             # If we reach here, the block is valid
             block.block_status = BlockStatus.VALID
-
-        return blocks
-
-    async def handle(self, content: str) -> List[SearchReplaceBlock]:
-        """Process content by validating and parsing it into SearchReplaceBlock objects.
-
-        Performs pre-flight validation checks before parsing to ensure content
-        contains properly formatted edit blocks. Returns a list of parsed blocks
-        ready for application.
-
-        Args:
-                content: Raw content string containing edit instructions
-
-        Returns:
-                List of SearchReplaceBlock objects representing individual edit operations
-
-        Raises:
-                PreFlightCheckError: If content contains malformed edit blocks
-        """
-
-        blocks = await self.parse_content_to_blocks(content)
-        blocks = await self.mid_flight_check(blocks)
-
-        # log.info(blocks)
 
         return blocks
 
