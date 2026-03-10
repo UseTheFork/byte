@@ -241,15 +241,15 @@ async def test_coder_agent_edits_only_editable_file_with_readonly_present(
 
     # Create a read-only file
     readonly_content = """def readonly_function():
-'''This function should not be modified'''
-return "readonly"
+    '''This function should not be modified'''
+    return "readonly"
 """
     readonly_file = await create_test_file(application, "readonly.py", readonly_content)
 
     # Create an editable file
     editable_content = """def editable_function():
-'''This function can be modified'''
-return "original"
+    '''This function can be modified'''
+    return "original"
 """
     editable_file = await create_test_file(application, "editable.py", editable_content)
 
