@@ -17,6 +17,7 @@ if TYPE_CHECKING:
         ShellCommandBlock,
     )
     from byte.code_operations.service.edit_block_service import EditBlockService
+    from byte.code_operations.service.raw_block_service import RawBlockService
     from byte.code_operations.service.shell_command_service import ShellCommandService
     from byte.code_operations.service_provider import PromptFormatProvider
 
@@ -34,6 +35,7 @@ __all__ = (
     "PreFlightCheckError",
     "PreFlightUnparsableError",
     "PromptFormatProvider",
+    "RawBlockService",
     "RawSearchReplaceBlock",
     "ReadOnlyFileError",
     "SearchContentNotFoundError",
@@ -59,6 +61,7 @@ _dynamic_imports = {
     "PreFlightCheckError": "exceptions",
     "PreFlightUnparsableError": "exceptions",
     "PromptFormatProvider": "service_provider",
+    "RawBlockService": "service.raw_block_service",
     "RawSearchReplaceBlock": "schemas",
     "ReadOnlyFileError": "exceptions",
     "SearchContentNotFoundError": "exceptions",
