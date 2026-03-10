@@ -79,6 +79,8 @@ class RawSearchReplaceBlock:
     """
 
     block_id: str
+    file_path: str
+    operation: str
     raw_content: str
     block_status: BlockStatus = BlockStatus.UNKNOWN
     status_message: str = ""
@@ -90,8 +92,8 @@ class SearchReplaceBlock:
 
     block_id: str
     file_path: str
-    search_content: str
-    replace_content: str
+    search_content: str = ""
+    replace_content: str = ""
     block_type: BlockType = BlockType.UNKNOWN
     block_status: BlockStatus = BlockStatus.UNKNOWN
     status_message: str = ""
