@@ -32,43 +32,52 @@ edit_block_system = list_to_multiline_text(
         "3. Update get_factorial() to call math.factorial instead.",
         Boundary.close(BoundaryType.PLAN) + Boundary.notice("new line here"),
         "",
-        f"## *{EDIT_BLOCK_NAME}* Format:",
-        "",
-        f"Every *{EDIT_BLOCK_NAME}* must use this exact format:",
-        "```language",
-        Boundary.open(
-            BoundaryType.EDIT_BLOCK, meta={"path": "full/file/path", "operation": "operation_type", "block_id": "1"}
-        ),
-        Boundary.open(BoundaryType.SEARCH),
-        Boundary.comment(
-            list_to_multiline_text(
-                [
-                    "- Exact charector for charector content to find including comments and ai messages",
-                    "- **Whitespace matters**: Indentation, spaces, tabs, and newlines must match EXACTLY",
-                    "- Copy the content directly from the file - do not reformat or adjust spacing",
-                    "- MUST be empty for `create`, `delete`, and `replace` operations",
-                ]
-            )
-        ),
-        Boundary.close(BoundaryType.SEARCH),
-        Boundary.open(BoundaryType.REPLACE),
-        Boundary.comment(
-            list_to_multiline_text(
-                [
-                    "- Content to replace with goes here",
-                    "- MUST be empty for `delete` operations",
-                ]
-            )
-        ),
-        Boundary.close(BoundaryType.REPLACE),
-        Boundary.close(BoundaryType.EDIT_BLOCK),
-        "```",
-        "",
         "## Operation Types:",
         f"- `{BlockType.EDIT}` for **editing** existing file content",
         f"- `{BlockType.CREATE}` for **creating** new files",
         f"- `{BlockType.DELETE}` for **deleting** files completely",
         f"- `{BlockType.REPLACE}` for **replacing ALL the contents of the file**",
+        "",
+        f"## *{EDIT_BLOCK_NAME}* Format:",
+        "",
+        f"**For `{BlockType.EDIT}` operations** (modifying existing content):",
+        "```language",
+        Boundary.open(
+            BoundaryType.EDIT_BLOCK, meta={"path": "full/file/path", "operation": BlockType.EDIT, "block_id": "1"}
+        ),
+        Boundary.open(BoundaryType.SEARCH),
+        Boundary.comment(
+            list_to_multiline_text(
+                [
+                    "- Exact character for character content to find",
+                    "- **Whitespace matters**: Indentation, spaces, tabs, and newlines must match EXACTLY",
+                    "- Copy the content directly from the file - do not reformat or adjust spacing",
+                    "- Include all comments, docstrings, whitespace, etc.",
+                    "- If file contains wrapped/escaped content, match the literal file contents",
+                    "- REMEMBER: Must EXACTLY MATCH existing file content, character for character",
+                ]
+            )
+        ),
+        Boundary.close(BoundaryType.SEARCH),
+        Boundary.open(BoundaryType.REPLACE),
+        Boundary.comment("- New content to replace the search content with"),
+        Boundary.close(BoundaryType.REPLACE),
+        Boundary.close(BoundaryType.EDIT_BLOCK),
+        "```",
+        "",
+        f"**For `{BlockType.CREATE}`, `{BlockType.DELETE}`, and `{BlockType.REPLACE}` operations:**",
+        "```language",
+        Boundary.open(
+            BoundaryType.EDIT_BLOCK,
+            meta={
+                "path": "full/file/path",
+                "operation": f"`{BlockType.CREATE}`, `{BlockType.DELETE}`, or `{BlockType.REPLACE}`",
+                "block_id": "1",
+            },
+        ),
+        Boundary.comment(f"- File content (empty for `{BlockType.DELETE}`)"),
+        Boundary.close(BoundaryType.EDIT_BLOCK),
+        "```",
         "",
         "## Examples:",
         "",
@@ -78,12 +87,8 @@ edit_block_system = list_to_multiline_text(
             BoundaryType.EDIT_BLOCK,
             meta={"path": "mathweb/flask/app.py", "operation": f"{BlockType.CREATE}", "block_id": "1"},
         ),
-        Boundary.open(BoundaryType.SEARCH),
-        Boundary.close(BoundaryType.SEARCH),
-        Boundary.open(BoundaryType.REPLACE),
         "import math",
         "from flask import Flask",
-        Boundary.close(BoundaryType.REPLACE),
         Boundary.close(BoundaryType.EDIT_BLOCK),
         "```",
         "",
@@ -108,10 +113,6 @@ edit_block_system = list_to_multiline_text(
         Boundary.open(
             BoundaryType.EDIT_BLOCK, meta={"path": "old_config.py", "operation": f"{BlockType.DELETE}", "block_id": "1"}
         ),
-        Boundary.open(BoundaryType.SEARCH),
-        Boundary.close(BoundaryType.SEARCH),
-        Boundary.open(BoundaryType.REPLACE),
-        Boundary.close(BoundaryType.REPLACE),
         Boundary.close(BoundaryType.EDIT_BLOCK),
         "```",
         "",
@@ -120,9 +121,6 @@ edit_block_system = list_to_multiline_text(
         Boundary.open(
             BoundaryType.EDIT_BLOCK, meta={"path": "config.py", "operation": f"{BlockType.REPLACE}", "block_id": "1"}
         ),
-        Boundary.open(BoundaryType.SEARCH),
-        Boundary.close(BoundaryType.SEARCH),
-        Boundary.open(BoundaryType.REPLACE),
         "import os",
         "from dataclasses import dataclass",
         "",
@@ -131,7 +129,6 @@ edit_block_system = list_to_multiline_text(
         "    debug: bool = False",
         "    port: int = 8000",
         '    database_url: str = os.getenv("DATABASE_URL", "sqlite:///app.db")',
-        Boundary.close(BoundaryType.REPLACE),
         Boundary.close(BoundaryType.EDIT_BLOCK),
         "```",
         "",
@@ -139,11 +136,6 @@ edit_block_system = list_to_multiline_text(
         "File Paths:",
         "- Use the FULL file path exactly as shown by the user",
         "- No bold asterisks, quotes, or escaping around the path",
-        "",
-        "Search Content:",
-        "- Must EXACTLY MATCH existing file content, character for character",
-        "- Include all comments, docstrings, whitespace, etc.",
-        "- If file contains wrapped/escaped content, match the literal file contents",
         "",
         "Block Strategy:",
         "- Use multiple blocks for multiple changes to the same file",
@@ -323,14 +315,10 @@ edit_block_messages = [
                     BoundaryType.EDIT_BLOCK,
                     meta={"path": "hello.py", "operation": f"{BlockType.CREATE}", "block_id": "1"},
                 ),
-                Boundary.open(BoundaryType.SEARCH),
-                Boundary.close(BoundaryType.SEARCH),
-                Boundary.open(BoundaryType.REPLACE),
                 "def hello():",
                 '    "print a greeting"',
                 "",
                 '    print("hello")',
-                Boundary.close(BoundaryType.REPLACE),
                 Boundary.close(BoundaryType.EDIT_BLOCK),
                 "```",
                 "",
@@ -368,10 +356,6 @@ edit_block_messages = [
                     BoundaryType.EDIT_BLOCK,
                     meta={"path": "old_config.py", "operation": f"{BlockType.DELETE}", "block_id": "1"},
                 ),
-                Boundary.open(BoundaryType.SEARCH),
-                Boundary.close(BoundaryType.SEARCH),
-                Boundary.open(BoundaryType.REPLACE),
-                Boundary.close(BoundaryType.REPLACE),
                 Boundary.close(BoundaryType.EDIT_BLOCK),
                 "```",
             ]
@@ -396,9 +380,6 @@ edit_block_messages = [
                     BoundaryType.EDIT_BLOCK,
                     meta={"path": "config.py", "operation": f"{BlockType.REPLACE}", "block_id": "1"},
                 ),
-                Boundary.open(BoundaryType.SEARCH),
-                Boundary.close(BoundaryType.SEARCH),
-                Boundary.open(BoundaryType.REPLACE),
                 "import os",
                 "from dataclasses import dataclass",
                 "",
@@ -407,7 +388,6 @@ edit_block_messages = [
                 "    debug: bool = False",
                 "    port: int = 8000",
                 '    database_url: str = os.getenv("DATABASE_URL", "sqlite:///app.db")',
-                Boundary.close(BoundaryType.REPLACE),
                 Boundary.close(BoundaryType.EDIT_BLOCK),
                 "```",
             ]
