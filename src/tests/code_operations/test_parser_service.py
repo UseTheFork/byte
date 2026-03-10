@@ -6,8 +6,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from byte.clipboard.schemas import BlockType
-from byte.code_operations import EditBlockService, NoBlocksFoundError
+from byte.code_operations import BlockType, EditBlockService, NoBlocksFoundError
 from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 from tests.utils import create_test_file
@@ -26,19 +25,6 @@ def providers():
 
 
 @pytest.mark.asyncio
-async def test_parser_service_boots_successfully(application: Application):
-    """Test that parser service initializes without errors."""
-    from byte.code_operations import EditBlockService
-
-    parser_service = application.make(EditBlockService)
-
-    # Service should be booted and have required attributes
-    assert parser_service is not None
-    assert hasattr(parser_service, "prompts")
-    assert hasattr(parser_service, "edit_blocks")
-
-
-@pytest.mark.asyncio
 async def test_parses_simple_edit_block(application: Application):
     """Test that parser can extract a simple edit block from content."""
     from byte.code_operations import EditBlockService
@@ -47,14 +33,16 @@ async def test_parses_simple_edit_block(application: Application):
 
     content = list_to_multiline_text(
         [
-            Boundary.open(BoundaryType.FILE, meta={"path": "test.py", "operation": "edit", "block_id": "1"}),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": "test.py", "operation": BlockType.EDIT, "block_id": "1"}
+            ),
             Boundary.open(BoundaryType.SEARCH),
             "old content",
             Boundary.close(BoundaryType.SEARCH),
             Boundary.open(BoundaryType.REPLACE),
             "new content",
             Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
         ]
     )
 
@@ -75,22 +63,26 @@ async def test_parses_multiple_edit_blocks(application: Application):
 
     content = list_to_multiline_text(
         [
-            Boundary.open(BoundaryType.FILE, meta={"path": "file1.py", "operation": "edit", "block_id": "1"}),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": "file1.py", "operation": BlockType.EDIT, "block_id": "1"}
+            ),
             Boundary.open(BoundaryType.SEARCH),
             "first search",
             Boundary.close(BoundaryType.SEARCH),
             Boundary.open(BoundaryType.REPLACE),
             "first replace",
             Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
             "",
-            Boundary.open(BoundaryType.FILE, meta={"path": "file2.py", "operation": "edit", "block_id": "2"}),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": "file2.py", "operation": BlockType.EDIT, "block_id": "2"}
+            ),
             Boundary.open(BoundaryType.SEARCH),
             Boundary.close(BoundaryType.SEARCH),
             Boundary.open(BoundaryType.REPLACE),
             "new file content",
             Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
         ]
     )
 
@@ -114,7 +106,7 @@ async def test_raises_error_when_no_blocks_found(application: Application):
     content = "This is just plain text with no edit blocks."
 
     with pytest.raises(NoBlocksFoundError):
-        await parser_service.check_blocks_exist(content)
+        await parser_service.parse_content_to_blocks(content)
 
 
 @pytest.mark.asyncio
@@ -126,7 +118,9 @@ async def test_raises_error_on_unbalanced_file_tags(application: Application):
 
     content = list_to_multiline_text(
         [
-            Boundary.open(BoundaryType.FILE, meta={"path": "test.py", "operation": "edit", "block_id": "1"}),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": "test.py", "operation": BlockType.EDIT, "block_id": "1"}
+            ),
             Boundary.open(BoundaryType.SEARCH),
             "content",
             Boundary.close(BoundaryType.SEARCH),
@@ -138,34 +132,9 @@ async def test_raises_error_on_unbalanced_file_tags(application: Application):
 
     with pytest.raises(
         PreFlightUnparsableError,
-        match=f"{Boundary.open(BoundaryType.FILE)} tags=1, {Boundary.close(BoundaryType.FILE)} tags=0",
+        match=f"{Boundary.open(BoundaryType.EDIT_BLOCK)} tags=1, {Boundary.close(BoundaryType.EDIT_BLOCK)} tags=0",
     ):
-        await parser_service.check_file_tags_balanced(content)
-
-
-@pytest.mark.asyncio
-async def test_raises_error_on_missing_block_ids(application: Application):
-    """Test that parser raises PreFlightUnparsableError when file blocks lack block_id."""
-    from byte.code_operations import EditBlockService, PreFlightUnparsableError
-
-    parser_service = application.make(EditBlockService)
-
-    content = list_to_multiline_text(
-        [
-            Boundary.open(BoundaryType.FILE, meta={"path": "test.py", "operation": "edit"}),
-            Boundary.open(BoundaryType.SEARCH),
-            "content",
-            Boundary.close(BoundaryType.SEARCH),
-            Boundary.open(BoundaryType.REPLACE),
-            "new content",
-            Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
-            Boundary.close(BoundaryType.FILE),
-        ]
-    )
-
-    with pytest.raises(PreFlightUnparsableError, match="missing block_id attribute"):
-        await parser_service.check_block_ids(content)
+        await parser_service.parse_content_to_blocks(content)
 
 
 @pytest.mark.asyncio
@@ -176,13 +145,11 @@ async def test_parses_create_operation_block(application: Application):
 
     content = list_to_multiline_text(
         [
-            Boundary.open(BoundaryType.FILE, meta={"path": "new_file.py", "operation": "create", "block_id": "1"}),
-            Boundary.open(BoundaryType.SEARCH),
-            Boundary.close(BoundaryType.SEARCH),
-            Boundary.open(BoundaryType.REPLACE),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": "new_file.py", "operation": BlockType.CREATE, "block_id": "1"}
+            ),
             "new file content",
-            Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
         ]
     )
 
@@ -200,19 +167,17 @@ async def test_parses_delete_operation_block(application: Application):
 
     content = list_to_multiline_text(
         [
-            Boundary.open(BoundaryType.FILE, meta={"path": "old_file.py", "operation": "delete", "block_id": "1"}),
-            Boundary.open(BoundaryType.SEARCH),
-            Boundary.close(BoundaryType.SEARCH),
-            Boundary.open(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": "old_file.py", "operation": BlockType.DELETE, "block_id": "1"}
+            ),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
         ]
     )
 
     blocks = await parser_service.parse_content_to_blocks(content)
 
     assert len(blocks) == 1
-    assert blocks[0].block_type == BlockType.REMOVE
+    assert blocks[0].block_type == BlockType.DELETE
 
 
 @pytest.mark.asyncio
@@ -223,13 +188,11 @@ async def test_parses_replace_operation_block(application: Application):
 
     content = list_to_multiline_text(
         [
-            Boundary.open(BoundaryType.FILE, meta={"path": "config.py", "operation": "replace", "block_id": "1"}),
-            Boundary.open(BoundaryType.SEARCH),
-            Boundary.close(BoundaryType.SEARCH),
-            Boundary.open(BoundaryType.REPLACE),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": "config.py", "operation": BlockType.REPLACE, "block_id": "1"}
+            ),
             "entire new content",
-            Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
         ]
     )
 
@@ -237,31 +200,6 @@ async def test_parses_replace_operation_block(application: Application):
 
     assert len(blocks) == 1
     assert blocks[0].block_type == BlockType.REPLACE
-
-
-@pytest.mark.asyncio
-async def test_defaults_to_edit_for_unknown_operation(application: Application):
-    """Test that parser defaults to EDIT block type for unknown operations."""
-
-    parser_service = application.make(EditBlockService)
-
-    content = list_to_multiline_text(
-        [
-            Boundary.open(BoundaryType.FILE, meta={"path": "test.py", "operation": "unknown", "block_id": "1"}),
-            Boundary.open(BoundaryType.SEARCH),
-            "old content",
-            Boundary.close(BoundaryType.SEARCH),
-            Boundary.open(BoundaryType.REPLACE),
-            "new content",
-            Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
-        ]
-    )
-
-    blocks = await parser_service.parse_content_to_blocks(content)
-
-    assert len(blocks) == 1
-    assert blocks[0].block_type == BlockType.EDIT
 
 
 @pytest.mark.asyncio
@@ -273,13 +211,15 @@ async def test_parses_block_with_empty_search_content(application: Application):
 
     content = list_to_multiline_text(
         [
-            Boundary.open(BoundaryType.FILE, meta={"path": "test.py", "operation": "edit", "block_id": "1"}),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": "test.py", "operation": BlockType.EDIT, "block_id": "1"}
+            ),
             Boundary.open(BoundaryType.SEARCH),
             Boundary.close(BoundaryType.SEARCH),
             Boundary.open(BoundaryType.REPLACE),
             "appended content",
             Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
         ]
     )
 
@@ -299,13 +239,15 @@ async def test_parses_block_with_empty_replace_content(application: Application)
 
     content = list_to_multiline_text(
         [
-            Boundary.open(BoundaryType.FILE, meta={"path": "test.py", "operation": "edit", "block_id": "1"}),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": "test.py", "operation": BlockType.EDIT, "block_id": "1"}
+            ),
             Boundary.open(BoundaryType.SEARCH),
             "content to remove",
             Boundary.close(BoundaryType.SEARCH),
             Boundary.open(BoundaryType.REPLACE),
             Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
         ]
     )
 
@@ -326,8 +268,8 @@ async def test_parses_block_with_special_characters_in_path(application: Applica
     content = list_to_multiline_text(
         [
             Boundary.open(
-                BoundaryType.FILE,
-                meta={"path": "src/my-module/file_v2.0.py", "operation": "edit", "block_id": "1"},
+                BoundaryType.EDIT_BLOCK,
+                meta={"path": "src/my-module/file_v2.0.py", "operation": BlockType.EDIT, "block_id": "1"},
             ),
             Boundary.open(BoundaryType.SEARCH),
             "old",
@@ -335,7 +277,7 @@ async def test_parses_block_with_special_characters_in_path(application: Applica
             Boundary.open(BoundaryType.REPLACE),
             "new",
             Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
         ]
     )
 
@@ -354,7 +296,9 @@ async def test_parses_block_with_multiline_search_replace(application: Applicati
 
     content = list_to_multiline_text(
         [
-            Boundary.open(BoundaryType.FILE, meta={"path": "test.py", "operation": "edit", "block_id": "1"}),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": "test.py", "operation": BlockType.EDIT, "block_id": "1"}
+            ),
             Boundary.open(BoundaryType.SEARCH),
             "def old_function():",
             "    pass",
@@ -365,7 +309,7 @@ async def test_parses_block_with_multiline_search_replace(application: Applicati
             "    result = calculate()",
             "    return result",
             Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
         ]
     )
 
@@ -388,7 +332,9 @@ async def test_parses_block_with_nested_xml_like_content(application: Applicatio
 
     content = list_to_multiline_text(
         [
-            Boundary.open(BoundaryType.FILE, meta={"path": "template.html", "operation": "edit", "block_id": "1"}),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": "template.html", "operation": BlockType.EDIT, "block_id": "1"}
+            ),
             Boundary.open(BoundaryType.SEARCH),
             "<div>",
             "    <span>old</span>",
@@ -399,7 +345,7 @@ async def test_parses_block_with_nested_xml_like_content(application: Applicatio
             "    <span>new</span>",
             "</div>",
             Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
         ]
     )
 
@@ -413,7 +359,7 @@ async def test_parses_block_with_nested_xml_like_content(application: Applicatio
 
 @pytest.mark.asyncio
 async def test_mid_flight_check_validates_read_only_file(application: Application, git_repo):
-    """Test that mid_flight_check marks read-only files with error status."""
+    """Test that validate_semantics marks read-only files with error status."""
     from byte.code_operations import BlockStatus, BlockType, SearchReplaceBlock
     from byte.files import FileMode, FileService
 
@@ -435,7 +381,7 @@ async def test_mid_flight_check_validates_read_only_file(application: Applicatio
         )
     ]
 
-    validated_blocks = await parser_service.mid_flight_check(blocks)
+    validated_blocks = await parser_service.validate_semantics(blocks)
 
     assert len(validated_blocks) == 1
     assert validated_blocks[0].block_status == BlockStatus.READ_ONLY_ERROR
@@ -444,7 +390,7 @@ async def test_mid_flight_check_validates_read_only_file(application: Applicatio
 
 @pytest.mark.asyncio
 async def test_mid_flight_check_validates_search_content_exists(application: Application, git_repo):
-    """Test that mid_flight_check validates search content can be found in file."""
+    """Test that validate_semantics validates search content can be found in file."""
     from byte.code_operations import BlockStatus, BlockType, SearchReplaceBlock
 
     parser_service = application.make(EditBlockService)
@@ -463,7 +409,7 @@ async def test_mid_flight_check_validates_search_content_exists(application: App
         )
     ]
 
-    validated_blocks = await parser_service.mid_flight_check(blocks)
+    validated_blocks = await parser_service.validate_semantics(blocks)
 
     assert len(validated_blocks) == 1
     assert validated_blocks[0].block_status == BlockStatus.SEARCH_NOT_FOUND_ERROR
@@ -472,7 +418,7 @@ async def test_mid_flight_check_validates_search_content_exists(application: App
 
 @pytest.mark.asyncio
 async def test_mid_flight_check_validates_file_within_project(application: Application, git_repo):
-    """Test that mid_flight_check rejects files outside project root."""
+    """Test that validate_semantics rejects files outside project root."""
     from byte.code_operations import BlockStatus, BlockType, SearchReplaceBlock
 
     parser_service = application.make(EditBlockService)
@@ -490,7 +436,7 @@ async def test_mid_flight_check_validates_file_within_project(application: Appli
         )
     ]
 
-    validated_blocks = await parser_service.mid_flight_check(blocks)
+    validated_blocks = await parser_service.validate_semantics(blocks)
 
     assert len(validated_blocks) == 1
     assert validated_blocks[0].block_status == BlockStatus.FILE_OUTSIDE_PROJECT_ERROR
@@ -499,7 +445,7 @@ async def test_mid_flight_check_validates_file_within_project(application: Appli
 
 @pytest.mark.asyncio
 async def test_mid_flight_check_strips_whitespace_for_search_match(application: Application, git_repo):
-    """Test that mid_flight_check strips whitespace to find search content match."""
+    """Test that validate_semantics strips whitespace to find search content match."""
     from byte.code_operations import BlockStatus, BlockType, SearchReplaceBlock
 
     parser_service = application.make(EditBlockService)
@@ -518,7 +464,7 @@ async def test_mid_flight_check_strips_whitespace_for_search_match(application: 
         )
     ]
 
-    validated_blocks = await parser_service.mid_flight_check(blocks)
+    validated_blocks = await parser_service.validate_semantics(blocks)
 
     assert len(validated_blocks) == 1
     assert validated_blocks[0].block_status == BlockStatus.VALID
@@ -528,7 +474,7 @@ async def test_mid_flight_check_strips_whitespace_for_search_match(application: 
 
 @pytest.mark.asyncio
 async def test_mid_flight_check_handles_nonexistent_file_for_create(application: Application, git_repo):
-    """Test that mid_flight_check allows creating files that don't exist within project."""
+    """Test that validate_semantics allows creating files that don't exist within project."""
     from byte.code_operations import BlockStatus, BlockType, SearchReplaceBlock
 
     parser_service = application.make(EditBlockService)
@@ -546,7 +492,7 @@ async def test_mid_flight_check_handles_nonexistent_file_for_create(application:
         )
     ]
 
-    validated_blocks = await parser_service.mid_flight_check(blocks)
+    validated_blocks = await parser_service.validate_semantics(blocks)
 
     assert len(validated_blocks) == 1
     assert validated_blocks[0].block_status == BlockStatus.VALID
@@ -563,14 +509,16 @@ async def test_remove_blocks_from_content_single_block(application: Application)
         [
             "Here's the change:",
             "",
-            Boundary.open(BoundaryType.FILE, meta={"path": "test.py", "operation": "edit", "block_id": "1"}),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": "test.py", "operation": BlockType.EDIT, "block_id": "1"}
+            ),
             Boundary.open(BoundaryType.SEARCH),
             "old content",
             Boundary.close(BoundaryType.SEARCH),
             Boundary.open(BoundaryType.REPLACE),
             "new content",
             Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
             "",
             "That should fix it.",
         ]
@@ -578,7 +526,7 @@ async def test_remove_blocks_from_content_single_block(application: Application)
 
     cleaned = await parser_service.remove_blocks_from_content(content)
 
-    assert Boundary.open(BoundaryType.FILE) not in cleaned
+    assert Boundary.open(BoundaryType.EDIT_BLOCK) not in cleaned
     assert Boundary.open(BoundaryType.SEARCH) not in cleaned
     assert Boundary.open(BoundaryType.REPLACE) not in cleaned
     assert "old content" not in cleaned
@@ -599,23 +547,27 @@ async def test_remove_blocks_from_content_multiple_blocks(application: Applicati
         [
             "Making two changes:",
             "",
-            Boundary.open(BoundaryType.FILE, meta={"path": "file1.py", "operation": "edit", "block_id": "1"}),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": "file1.py", "operation": BlockType.EDIT, "block_id": "1"}
+            ),
             Boundary.open(BoundaryType.SEARCH),
             "first search",
             Boundary.close(BoundaryType.SEARCH),
             Boundary.open(BoundaryType.REPLACE),
             "first replace",
             Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
             "",
-            Boundary.open(BoundaryType.FILE, meta={"path": "file2.py", "operation": "edit", "block_id": "2"}),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": "file2.py", "operation": BlockType.EDIT, "block_id": "2"}
+            ),
             Boundary.open(BoundaryType.SEARCH),
             "second search",
             Boundary.close(BoundaryType.SEARCH),
             Boundary.open(BoundaryType.REPLACE),
             "second replace",
             Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
             "",
             "Done!",
         ]
@@ -641,25 +593,29 @@ async def test_remove_blocks_from_content_preserves_surrounding_text(application
         [
             "Introduction text here.",
             "",
-            Boundary.open(BoundaryType.FILE, meta={"path": "test.py", "operation": "edit", "block_id": "1"}),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": "test.py", "operation": BlockType.EDIT, "block_id": "1"}
+            ),
             Boundary.open(BoundaryType.SEARCH),
             "content",
             Boundary.close(BoundaryType.SEARCH),
             Boundary.open(BoundaryType.REPLACE),
             "new content",
             Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
             "",
             "Middle text between blocks.",
             "",
-            Boundary.open(BoundaryType.FILE, meta={"path": "other.py", "operation": "edit", "block_id": "2"}),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": "other.py", "operation": BlockType.EDIT, "block_id": "2"}
+            ),
             Boundary.open(BoundaryType.SEARCH),
             "more",
             Boundary.close(BoundaryType.SEARCH),
             Boundary.open(BoundaryType.REPLACE),
             "different",
             Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
             "",
             "Conclusion text here.",
         ]
@@ -846,7 +802,7 @@ async def test_apply_blocks_creates_parent_directories(application: Application,
 
 @pytest.mark.asyncio
 async def test_handles_unicode_decode_error_gracefully(application: Application, git_repo):
-    """Test that mid_flight_check handles files with invalid UTF-8 encoding gracefully."""
+    """Test that validate_semantics handles files with invalid UTF-8 encoding gracefully."""
     from byte.code_operations import BlockStatus, BlockType, SearchReplaceBlock
 
     parser_service = application.make(EditBlockService)
@@ -865,7 +821,7 @@ async def test_handles_unicode_decode_error_gracefully(application: Application,
         )
     ]
 
-    validated_blocks = await parser_service.mid_flight_check(blocks)
+    validated_blocks = await parser_service.validate_semantics(blocks)
 
     assert len(validated_blocks) == 1
     assert validated_blocks[0].block_status == BlockStatus.SEARCH_NOT_FOUND_ERROR
@@ -874,7 +830,7 @@ async def test_handles_unicode_decode_error_gracefully(application: Application,
 
 @pytest.mark.asyncio
 async def test_handles_permission_error_gracefully(application: Application, git_repo):
-    """Test that mid_flight_check handles permission errors gracefully."""
+    """Test that validate_semantics handles permission errors gracefully."""
     from byte.code_operations import BlockStatus, BlockType, SearchReplaceBlock
 
     parser_service = application.make(EditBlockService)
@@ -895,7 +851,7 @@ async def test_handles_permission_error_gracefully(application: Application, git
     ]
 
     try:
-        validated_blocks = await parser_service.mid_flight_check(blocks)
+        validated_blocks = await parser_service.validate_semantics(blocks)
 
         assert len(validated_blocks) == 1
         assert validated_blocks[0].block_status == BlockStatus.SEARCH_NOT_FOUND_ERROR
@@ -918,14 +874,16 @@ async def test_full_workflow_parse_validate_apply(application: Application, git_
 
     content = list_to_multiline_text(
         [
-            Boundary.open(BoundaryType.FILE, meta={"path": str(test_file), "operation": "edit", "block_id": "1"}),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": str(test_file), "operation": BlockType.EDIT, "block_id": "1"}
+            ),
             Boundary.open(BoundaryType.SEARCH),
             "def old_function():\n    pass\n",
             Boundary.close(BoundaryType.SEARCH),
             Boundary.open(BoundaryType.REPLACE),
             "def new_function():\n    return True\n",
             Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
         ]
     )
 
@@ -934,7 +892,7 @@ async def test_full_workflow_parse_validate_apply(application: Application, git_
     assert len(blocks) == 1
 
     # Validate
-    validated_blocks = await parser_service.mid_flight_check(blocks)
+    validated_blocks = await parser_service.validate_semantics(blocks)
     assert validated_blocks[0].block_status.value == "valid"
 
     # Apply
@@ -954,30 +912,34 @@ async def test_multiple_edits_to_same_file(application: Application, git_repo):
 
     content = list_to_multiline_text(
         [
-            Boundary.open(BoundaryType.FILE, meta={"path": str(test_file), "operation": "edit", "block_id": "1"}),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": str(test_file), "operation": BlockType.EDIT, "block_id": "1"}
+            ),
             Boundary.open(BoundaryType.SEARCH),
             "line1\n",
             Boundary.close(BoundaryType.SEARCH),
             Boundary.open(BoundaryType.REPLACE),
             "modified_line1\n",
             Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
             "",
-            Boundary.open(BoundaryType.FILE, meta={"path": str(test_file), "operation": "edit", "block_id": "2"}),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": str(test_file), "operation": BlockType.EDIT, "block_id": "2"}
+            ),
             Boundary.open(BoundaryType.SEARCH),
             "line3\n",
             Boundary.close(BoundaryType.SEARCH),
             Boundary.open(BoundaryType.REPLACE),
             "modified_line3\n",
             Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
         ]
     )
 
     blocks = await parser_service.parse_content_to_blocks(content)
     assert len(blocks) == 2
 
-    validated_blocks = await parser_service.mid_flight_check(blocks)
+    validated_blocks = await parser_service.validate_semantics(blocks)
     await parser_service.apply_blocks(validated_blocks)
 
     final_content = test_file.read_text()
@@ -1007,39 +969,155 @@ async def test_blocks_with_mixed_operations(application: Application, git_repo, 
 
     content = list_to_multiline_text(
         [
-            Boundary.open(BoundaryType.FILE, meta={"path": str(edit_file), "operation": "edit", "block_id": "1"}),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": str(edit_file), "operation": BlockType.EDIT, "block_id": "1"}
+            ),
             Boundary.open(BoundaryType.SEARCH),
             "original content\n",
             Boundary.close(BoundaryType.SEARCH),
             Boundary.open(BoundaryType.REPLACE),
             "edited content\n",
             Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
             "",
-            Boundary.open(BoundaryType.FILE, meta={"path": str(delete_file), "operation": "delete", "block_id": "2"}),
-            Boundary.open(BoundaryType.SEARCH),
-            Boundary.close(BoundaryType.SEARCH),
-            Boundary.open(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": str(delete_file), "operation": BlockType.DELETE, "block_id": "2"}
+            ),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
             "",
-            Boundary.open(BoundaryType.FILE, meta={"path": str(create_file), "operation": "create", "block_id": "3"}),
-            Boundary.open(BoundaryType.SEARCH),
-            Boundary.close(BoundaryType.SEARCH),
-            Boundary.open(BoundaryType.REPLACE),
+            Boundary.open(
+                BoundaryType.EDIT_BLOCK, meta={"path": str(create_file), "operation": BlockType.CREATE, "block_id": "3"}
+            ),
             "new file content\n",
-            Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.FILE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
         ]
     )
 
     blocks = await parser_service.parse_content_to_blocks(content)
     assert len(blocks) == 3
 
-    validated_blocks = await parser_service.mid_flight_check(blocks)
+    validated_blocks = await parser_service.validate_semantics(blocks)
     await parser_service.apply_blocks(validated_blocks)
 
     assert edit_file.read_text() == "edited content\n"
     assert not delete_file.exists()
     assert create_file.exists()
     assert create_file.read_text() == "new file content"
+
+
+@pytest.mark.asyncio
+async def test_convert_raw_blocks_preserves_text_components(application: Application):
+    """Test that convert_raw_blocks_to_search_replace preserves text strings."""
+    from byte.code_operations import RawSearchReplaceBlock
+
+    parser_service = application.make(EditBlockService)
+
+    raw_block = RawSearchReplaceBlock(
+        block_id="1",
+        file_path="test.py",
+        operation="edit",
+        raw_content=list_to_multiline_text(
+            [
+                Boundary.open(BoundaryType.EDIT_BLOCK, meta={"path": "test.py", "operation": "edit", "block_id": "1"}),
+                Boundary.open(BoundaryType.SEARCH),
+                "search",
+                Boundary.close(BoundaryType.SEARCH),
+                Boundary.open(BoundaryType.REPLACE),
+                "replace",
+                Boundary.close(BoundaryType.REPLACE),
+                Boundary.close(BoundaryType.EDIT_BLOCK),
+            ]
+        ),
+    )
+
+    components = ["Some text before", raw_block, "Some text after"]
+
+    result = await parser_service.convert_raw_blocks_to_search_replace(components)
+
+    assert len(result) == 3
+    assert result[0] == "Some text before"
+    from byte.code_operations import SearchReplaceBlock
+
+    assert isinstance(result[1], SearchReplaceBlock)
+    assert result[2] == "Some text after"
+
+
+@pytest.mark.asyncio
+async def test_validate_semantics_with_relative_path_resolution(application: Application, git_repo):
+    """Test that validate_semantics correctly resolves relative paths."""
+    from byte.code_operations import BlockStatus, BlockType, SearchReplaceBlock
+
+    parser_service = application.make(EditBlockService)
+
+    # Create a file in a subdirectory
+    subdir = git_repo / "src"
+    subdir.mkdir()
+    test_file = subdir / "test.py"
+    test_file.write_text("content")
+
+    # Use relative path
+    blocks = [
+        SearchReplaceBlock(
+            block_id="1",
+            file_path="src/test.py",  # Relative path
+            search_content="content",
+            replace_content="new content",
+            block_type=BlockType.EDIT,
+        )
+    ]
+
+    validated_blocks = await parser_service.validate_semantics(blocks)
+
+    assert len(validated_blocks) == 1
+    assert validated_blocks[0].block_status == BlockStatus.VALID
+
+
+@pytest.mark.asyncio
+async def test_apply_blocks_with_empty_search_appends_content(application: Application, git_repo):
+    """Test that apply_blocks with empty search content appends to file."""
+    from byte.code_operations import BlockType, SearchReplaceBlock
+
+    parser_service = application.make(EditBlockService)
+
+    test_file = git_repo / "test.py"
+    test_file.write_text("existing content\n")
+
+    blocks = [
+        SearchReplaceBlock(
+            block_id="1",
+            file_path=str(test_file),
+            search_content="",
+            replace_content="appended content\n",
+            block_type=BlockType.EDIT,
+        )
+    ]
+
+    await parser_service.apply_blocks(blocks)
+
+    content = test_file.read_text()
+    assert "existing content\n" in content
+    assert "appended content\n" in content
+
+
+@pytest.mark.asyncio
+async def test_search_replace_block_to_error_format(application: Application):
+    """Test that SearchReplaceBlock.to_error_format generates correct error message."""
+    from byte.code_operations import BlockStatus, BlockType, SearchReplaceBlock
+
+    block = SearchReplaceBlock(
+        block_id="1",
+        file_path="test.py",
+        search_content="search",
+        replace_content="replace",
+        block_type=BlockType.EDIT,
+        block_status=BlockStatus.SEARCH_NOT_FOUND_ERROR,
+        status_message="Search content not found in file",
+    )
+
+    error_format = block.to_error_format()
+
+    assert "test.py" in error_format
+    assert "1" in error_format
+    assert "Search content not found" in error_format
+    assert "<error" in error_format
+    assert "</error>" in error_format
