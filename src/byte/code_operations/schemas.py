@@ -79,11 +79,7 @@ class RawSearchReplaceBlock:
     """
 
     block_id: str
-    file_path: str
-    operation: str
     raw_content: str
-    block_status: BlockStatus = BlockStatus.UNKNOWN
-    status_message: str = ""
 
 
 @dataclass

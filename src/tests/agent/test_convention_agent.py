@@ -78,6 +78,6 @@ return `Hello, ${name}`;
     assert "extracted_content" in result
     assert result["extracted_content"] is not None
     assert len(result["extracted_content"]) > 0
-    assert "Comment Standards Convention" in result["extracted_content"]
-    assert "JavaScript" in result["extracted_content"]
-    assert "Python" in result["extracted_content"]
+    assert "comment-documentation-standards" in result["extracted_content"]
+    assert "javascript" in result["extracted_content"]
+    assert "python" in result["extracted_content"]

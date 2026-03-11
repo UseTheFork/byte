@@ -56,17 +56,9 @@ class RawBlockService(Service):
             # Extract and validate block_id from attributes
             block_id = await self.extract_and_validate_block_id(attributes)
 
-            # Extract operation from attributes (defaults to "unknown" if not found)
-            operation = await self.extract_operation(attributes)
-
-            # Extract file_path from attributes (defaults to "unknown" if not found)
-            file_path = await self.extract_file_path(attributes)
-
             raw_blocks.append(
                 RawSearchReplaceBlock(
                     block_id=block_id,
-                    file_path=file_path,
-                    operation=operation,
                     raw_content=raw_content,
                 )
             )
@@ -109,44 +101,6 @@ class RawBlockService(Service):
 
         return block_id
 
-    async def extract_operation(self, attributes: str) -> str:
-        """Extract operation from edit_block attributes.
-
-        Args:
-            attributes: Attribute string from edit_block opening tag
-
-        Returns:
-            Operation string, or "unknown" if not found
-
-        Usage: `operation = await service.extract_operation(attributes)`
-        """
-        # Extract operation from attributes
-        operation_match = re.search(r'operation="([^"]+)"', attributes)
-
-        if not operation_match:
-            return "unknown"
-
-        return operation_match.group(1)
-
-    async def extract_file_path(self, attributes: str) -> str:
-        """Extract file path from edit_block attributes.
-
-        Args:
-            attributes: Attribute string from edit_block opening tag
-
-        Returns:
-            File path string, or "unknown" if not found
-
-        Usage: `file_path = await service.extract_file_path(attributes)`
-        """
-        # Extract path from attributes
-        path_match = re.search(r'path="([^"]+)"', attributes)
-
-        if not path_match:
-            return "unknown"
-
-        return path_match.group(1)
-
     async def check_edit_block_tags_balanced(self, content: str) -> None:
         """Validate that edit_block tags are balanced in the content.
 
@@ -163,7 +117,9 @@ class RawBlockService(Service):
 
         if edit_block_open != edit_block_close:
             raise PreFlightUnparsableError(
-                f"<{BoundaryType.EDIT_BLOCK}> tags={edit_block_open}, </{BoundaryType.EDIT_BLOCK}> tags={edit_block_close}"
+                f"Opening and closing edit blocks need to match: "
+                f"found {edit_block_open} opening <{BoundaryType.EDIT_BLOCK}> tag(s) "
+                f"but {edit_block_close} closing </{BoundaryType.EDIT_BLOCK}> tag(s)"
             )
 
     async def validate_block_ids_exist(self, content: str) -> None:
@@ -299,6 +255,8 @@ class RawBlockService(Service):
         first_message = ai_messages[0]
         base_components = await self.parse_message_to_components(first_message)
 
+        self.app["log"].info(base_components)
+
         # Process remaining messages
         for message in ai_messages[1:]:
             new_components = await self.parse_message_to_components(message)
@@ -344,27 +302,3 @@ class RawBlockService(Service):
             return False, error_message, failed_blocks
 
         return True, "", []
-
-    async def check_single_block_tags_balanced(self, raw_content: str) -> tuple[bool, str]:
-        """Validate that search/replace tags are balanced in a single block.
-
-        Returns:
-            Tuple of (is_valid, error_message)
-
-        Usage: `valid, error = await service.check_single_block_tags_balanced(content)`
-        """
-        search_count = raw_content.count("<search>")
-        search_close_count = raw_content.count("</search>")
-        replace_count = raw_content.count("<replace>")
-        replace_close_count = raw_content.count("</replace>")
-
-        if search_count != search_close_count:
-            return False, f"<search> tags={search_count}, </search> tags={search_close_count}"
-
-        if replace_count != replace_close_count:
-            return False, f"<replace> tags={replace_count}, </replace> tags={replace_close_count}"
-
-        if search_count != replace_count:
-            return False, f"<search> tags={search_count}, <replace> tags={replace_count}"
-
-        return True, ""

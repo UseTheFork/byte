@@ -13,49 +13,48 @@ interactions:
       n<agent_plan><!-- NOTICE: new line here -->\\nTo make this change we need to\
       \ modify `mathweb/flask/app.py` to:\\n\\n1. Import the math package.\\n2. Remove\
       \ the existing factorial() function.\\n3. Update get_factorial() to call math.factorial\
-      \ instead.\\n</agent_plan><!-- NOTICE: new line here -->\\n\\n## *XML `edit_block`\
-      \ Response* Format:\\n\\nEvery *XML `edit_block` Response* must use this exact\
-      \ format:\\n```language\\n<edit_block path=\\\"full/file/path\\\" operation=\\\
-      \"operation_type\\\" block_id=\\\"1\\\">\\n<search>\\n<!-- - Exact charector\
-      \ for charector content to find including comments and ai messages\\n- **Whitespace\
-      \ matters**: Indentation, spaces, tabs, and newlines must match EXACTLY\\n-\
-      \ Copy the content directly from the file - do not reformat or adjust spacing\\\
-      n- MUST be empty for `create`, `delete`, and `replace` operations -->\\n</search>\\\
-      n<replace>\\n<!-- - Content to replace with goes here\\n- MUST be empty for\
-      \ `delete` operations -->\\n</replace>\\n</edit_block>\\n```\\n\\n## Operation\
-      \ Types:\\n- `edit` for **editing** existing file content\\n- `create` for **creating**\
+      \ instead.\\n</agent_plan><!-- NOTICE: new line here -->\\n\\n## Operation Types:\\\
+      n- `edit` for **editing** existing file content\\n- `create` for **creating**\
       \ new files\\n- `delete` for **deleting** files completely\\n- `replace` for\
-      \ **replacing ALL the contents of the file**\\n\\n## Examples:\\n\\n**Create\
-      \ a new file:**\\n```python\\n<edit_block path=\\\"mathweb/flask/app.py\\\"\
-      \ operation=\\\"create\\\" block_id=\\\"1\\\">\\n<search>\\n</search>\\n<replace>\\\
-      nimport math\\nfrom flask import Flask\\n</replace>\\n</edit_block>\\n```\\\
-      n\\n**Edit existing file content:**\\n```python\\n<edit_block path=\\\"mathweb/flask/app.py\\\
-      \" operation=\\\"edit\\\" block_id=\\\"1\\\">\\n<search>\\nfrom flask import\
-      \ Flask\\n</search>\\n<replace>\\nimport math\\nfrom flask import Flask\\n</replace>\\\
-      n</edit_block>\\n```\\n\\n**Delete file:**\\n```python\\n<edit_block path=\\\
-      \"old_config.py\\\" operation=\\\"delete\\\" block_id=\\\"1\\\">\\n<search>\\\
-      n</search>\\n<replace>\\n</replace>\\n</edit_block>\\n```\\n\\n**Replace all\
-      \ file contents:**\\n```python\\n<edit_block path=\\\"config.py\\\" operation=\\\
-      \"replace\\\" block_id=\\\"1\\\">\\n<search>\\n</search>\\n<replace>\\nimport\
-      \ os\\nfrom dataclasses import dataclass\\n\\n@dataclass\\nclass AppConfig:\\\
-      n    debug: bool = False\\n    port: int = 8000\\n    database_url: str = os.getenv(\\\
-      \"DATABASE_URL\\\", \\\"sqlite:///app.db\\\")\\n</replace>\\n</edit_block>\\\
+      \ **replacing ALL the contents of the file**\\n\\n## *XML `edit_block` Response*\
+      \ Format:\\n\\n**For `edit` operations** (modifying existing content):\\n```language\\\
+      n<edit_block path=\\\"full/file/path\\\" operation=\\\"edit\\\" block_id=\\\"\
+      1\\\">\\n<search>\\n<!-- - Exact character for character content to find\\n-\
+      \ **Whitespace matters**: Indentation, spaces, tabs, and newlines must match\
+      \ EXACTLY\\n- Copy the content directly from the file - do not reformat or adjust\
+      \ spacing\\n- Include all comments, docstrings, whitespace, etc.\\n- If file\
+      \ contains wrapped/escaped content, match the literal file contents\\n- REMEMBER:\
+      \ Must EXACTLY MATCH existing file content, character for character -->\\n</search>\\\
+      n<replace>\\n<!-- - New content to replace the search content with -->\\n</replace>\\\
+      n</edit_block>\\n```\\n\\n**For `create`, `delete`, and `replace` operations:**\\\
+      n```language\\n<edit_block path=\\\"full/file/path\\\" operation=\\\"`create`,\
+      \ `delete`, or `replace`\\\" block_id=\\\"1\\\">\\n<!-- - File content (empty\
+      \ for `delete`) -->\\n</edit_block>\\n```\\n\\n## Examples:\\n\\n**Create a\
+      \ new file:**\\n```python\\n<edit_block path=\\\"mathweb/flask/app.py\\\" operation=\\\
+      \"create\\\" block_id=\\\"1\\\">\\nimport math\\nfrom flask import Flask\\n</edit_block>\\\
+      n```\\n\\n**Edit existing file content:**\\n```python\\n<edit_block path=\\\"\
+      mathweb/flask/app.py\\\" operation=\\\"edit\\\" block_id=\\\"1\\\">\\n<search>\\\
+      nfrom flask import Flask\\n</search>\\n<replace>\\nimport math\\nfrom flask\
+      \ import Flask\\n</replace>\\n</edit_block>\\n```\\n\\n**Delete file:**\\n```python\\\
+      n<edit_block path=\\\"old_config.py\\\" operation=\\\"delete\\\" block_id=\\\
+      \"1\\\">\\n</edit_block>\\n```\\n\\n**Replace all file contents:**\\n```python\\\
+      n<edit_block path=\\\"config.py\\\" operation=\\\"replace\\\" block_id=\\\"\
+      1\\\">\\nimport os\\nfrom dataclasses import dataclass\\n\\n@dataclass\\nclass\
+      \ AppConfig:\\n    debug: bool = False\\n    port: int = 8000\\n    database_url:\
+      \ str = os.getenv(\\\"DATABASE_URL\\\", \\\"sqlite:///app.db\\\")\\n</edit_block>\\\
       n```\\n\\n## **CRITICAL RULES:**\\nFile Paths:\\n- Use the FULL file path exactly\
       \ as shown by the user\\n- No bold asterisks, quotes, or escaping around the\
-      \ path\\n\\nSearch Content:\\n- Must EXACTLY MATCH existing file content, character\
-      \ for character\\n- Include all comments, docstrings, whitespace, etc.\\n- If\
-      \ file contains wrapped/escaped content, match the literal file contents\\n\\\
-      nBlock Strategy:\\n- Use multiple blocks for multiple changes to the same file\\\
-      n- Include enough context lines to make each search unique\\n- Only replace\
-      \ the first occurrence found\\n\\nFile Operations:\\n- Only edit files that\
-      \ the user has added to the chat. Refer to `<context type=\\\"editable files\\\
-      \">`\\n- For new files: use operation=\\\"create\\\" with empty search, content\
-      \ in replace\\n- To move code: use 2 XML `edit_block` Response (1 to delete,\
-      \ 1 to insert)\\n\\nUser Intent:\\n- If user says \\\"ok\\\", \\\"go ahead\\\
-      \", or \\\"do that\\\" \u2192 provide XML `edit_block` Response\\n- Wait for\
-      \ user confirmation before assuming edits are applied\\n- ONLY EVER RETURN CODE\
-      \ IN A XML `edit_block` Response!\\n\\n</response_format>\\n<user_input>\\nBefore\
-      \ we start lets first practice the *XML `edit_block` Response* Block format.\\\
+      \ path\\n\\nBlock Strategy:\\n- Use multiple blocks for multiple changes to\
+      \ the same file\\n- Include enough context lines to make each search unique\\\
+      n- Only replace the first occurrence found\\n\\nFile Operations:\\n- Only edit\
+      \ files that the user has added to the chat. Refer to `<context type=\\\"editable\
+      \ files\\\">`\\n- For new files: use operation=\\\"create\\\" with empty search,\
+      \ content in replace\\n- To move code: use 2 XML `edit_block` Response (1 to\
+      \ delete, 1 to insert)\\n\\nUser Intent:\\n- If user says \\\"ok\\\", \\\"go\
+      \ ahead\\\", or \\\"do that\\\" \u2192 provide XML `edit_block` Response\\n-\
+      \ Wait for user confirmation before assuming edits are applied\\n- ONLY EVER\
+      \ RETURN CODE IN A XML `edit_block` Response!\\n\\n</response_format>\\n<user_input>\\\
+      nBefore we start lets first practice the *XML `edit_block` Response* Block format.\\\
       n\\nChange get_factorial() to use math.factorial\\n</user_input>\"},{\"role\"\
       :\"assistant\",\"content\":\"<agent_plan>\\nTo make this change we need to modify\
       \ `mathweb/flask/app.py` to:\\n\\n1. Import the math package.\\n2. Remove the\
@@ -75,38 +74,36 @@ interactions:
       \ need to modify `main.py` and make a new file `hello.py`:\\n\\n1. Make a new\
       \ hello.py file with hello() in it.\\n2. Remove hello() from main.py and replace\
       \ it with an import.\\n</agent_plan>\\n\\n```python\\n<edit_block path=\\\"\
-      hello.py\\\" operation=\\\"create\\\" block_id=\\\"1\\\">\\n<search>\\n</search>\\\
-      n<replace>\\ndef hello():\\n    \\\"print a greeting\\\"\\n\\n    print(\\\"\
-      hello\\\")\\n</replace>\\n</edit_block>\\n```\\n\\n```python\\n<edit_block path=\\\
-      \"main.py\\\" operation=\\\"edit\\\" block_id=\\\"2\\\">\\n<search>\\ndef hello():\\\
-      n    \\\"print a greeting\\\"\\n\\n    print(\\\"hello\\\")\\n</search>\\n<replace>\\\
-      nfrom hello import hello\\n</replace>\\n</edit_block>\\n```\"},{\"role\":\"\
-      user\",\"content\":\"Remove the old_config.py file that's no longer needed.\"\
-      },{\"role\":\"assistant\",\"content\":\"<agent_plan>\\nTo remove this file we\
-      \ need to delete `old_config.py`:\\n\\n1. Remove the old_config.py file completely\
-      \ from the project.\\n</agent_plan>\\n\\n```python\\n<edit_block path=\\\"old_config.py\\\
-      \" operation=\\\"delete\\\" block_id=\\\"1\\\">\\n<search>\\n</search>\\n<replace>\\\
-      n</replace>\\n</edit_block>\\n```\"},{\"role\":\"user\",\"content\":\"Replace\
-      \ all the contents of config.py with a new configuration structure.\"},{\"role\"\
-      :\"assistant\",\"content\":\"<agent_plan>\\nTo replace all the contents we need\
-      \ to completely rewrite `config.py`:\\n\\n1. Replace the entire contents of\
-      \ config.py with the new configuration structure.\\n</agent_plan>\\n\\n```python\\\
+      hello.py\\\" operation=\\\"create\\\" block_id=\\\"1\\\">\\ndef hello():\\n\
+      \    \\\"print a greeting\\\"\\n\\n    print(\\\"hello\\\")\\n</edit_block>\\\
+      n```\\n\\n```python\\n<edit_block path=\\\"main.py\\\" operation=\\\"edit\\\"\
+      \ block_id=\\\"2\\\">\\n<search>\\ndef hello():\\n    \\\"print a greeting\\\
+      \"\\n\\n    print(\\\"hello\\\")\\n</search>\\n<replace>\\nfrom hello import\
+      \ hello\\n</replace>\\n</edit_block>\\n```\"},{\"role\":\"user\",\"content\"\
+      :\"Remove the old_config.py file that's no longer needed.\"},{\"role\":\"assistant\"\
+      ,\"content\":\"<agent_plan>\\nTo remove this file we need to delete `old_config.py`:\\\
+      n\\n1. Remove the old_config.py file completely from the project.\\n</agent_plan>\\\
+      n\\n```python\\n<edit_block path=\\\"old_config.py\\\" operation=\\\"delete\\\
+      \" block_id=\\\"1\\\">\\n</edit_block>\\n```\"},{\"role\":\"user\",\"content\"\
+      :\"Replace all the contents of config.py with a new configuration structure.\"\
+      },{\"role\":\"assistant\",\"content\":\"<agent_plan>\\nTo replace all the contents\
+      \ we need to completely rewrite `config.py`:\\n\\n1. Replace the entire contents\
+      \ of config.py with the new configuration structure.\\n</agent_plan>\\n\\n```python\\\
       n<edit_block path=\\\"config.py\\\" operation=\\\"replace\\\" block_id=\\\"\
-      1\\\">\\n<search>\\n</search>\\n<replace>\\nimport os\\nfrom dataclasses import\
-      \ dataclass\\n\\n@dataclass\\nclass AppConfig:\\n    debug: bool = False\\n\
-      \    port: int = 8000\\n    database_url: str = os.getenv(\\\"DATABASE_URL\\\
-      \", \\\"sqlite:///app.db\\\")\\n</replace>\\n</edit_block>\\n```\"},{\"role\"\
-      :\"user\",\"content\":\"Add error handling to the calculator function and update\
-      \ the docstring.\"},{\"role\":\"assistant\",\"content\":\"<agent_plan>\\nTo\
-      \ add error handling we need to modify `calculator.py` in two places:\\n\\n1.\
-      \ Update the docstring to mention error handling.\\n2. Add try-catch block around\
-      \ the calculation.\\n</agent_plan>\\n\\n```python\\n<edit_block path=\\\"calculator.py\\\
-      \" operation=\\\"edit\\\" block_id=\\\"1\\\">\\n<search>\\ndef calculate(a,\
-      \ b):\\n    \\\"Simple calculator function\\\"\\n</search>\\n<replace>\\ndef\
-      \ calculate(a, b):\\n    \\\"Simple calculator function with error handling\\\
-      \"\\n</replace>\\n</edit_block>\\n```\\n\\n```python\\n<edit_block path=\\\"\
-      calculator.py\\\" operation=\\\"edit\\\" block_id=\\\"2\\\">\\n<search>\\n \
-      \   return a / b\\n</search>\\n<replace>\\n    try:\\n        return a / b\\\
+      1\\\">\\nimport os\\nfrom dataclasses import dataclass\\n\\n@dataclass\\nclass\
+      \ AppConfig:\\n    debug: bool = False\\n    port: int = 8000\\n    database_url:\
+      \ str = os.getenv(\\\"DATABASE_URL\\\", \\\"sqlite:///app.db\\\")\\n</edit_block>\\\
+      n```\"},{\"role\":\"user\",\"content\":\"Add error handling to the calculator\
+      \ function and update the docstring.\"},{\"role\":\"assistant\",\"content\"\
+      :\"<agent_plan>\\nTo add error handling we need to modify `calculator.py` in\
+      \ two places:\\n\\n1. Update the docstring to mention error handling.\\n2. Add\
+      \ try-catch block around the calculation.\\n</agent_plan>\\n\\n```python\\n<edit_block\
+      \ path=\\\"calculator.py\\\" operation=\\\"edit\\\" block_id=\\\"1\\\">\\n<search>\\\
+      ndef calculate(a, b):\\n    \\\"Simple calculator function\\\"\\n</search>\\\
+      n<replace>\\ndef calculate(a, b):\\n    \\\"Simple calculator function with\
+      \ error handling\\\"\\n</replace>\\n</edit_block>\\n```\\n\\n```python\\n<edit_block\
+      \ path=\\\"calculator.py\\\" operation=\\\"edit\\\" block_id=\\\"2\\\">\\n<search>\\\
+      n    return a / b\\n</search>\\n<replace>\\n    try:\\n        return a / b\\\
       n    except ZeroDivisionError:\\n        return \\\"Error: Cannot divide by\
       \ zero\\\"\\n</replace>\\n</edit_block>\\n```\"},{\"role\":\"user\",\"content\"\
       :\"<conversation_history>\\n<heading>\\nBelow is the conversation history between\
@@ -148,7 +145,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '10266'
+      - '10084'
       Content-Type:
       - application/json
       Host:
@@ -182,39 +179,37 @@ interactions:
   response:
     body:
       string: !!binary |
-        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
+        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
     headers:
       CF-RAY:
-      - 9d960aedb89aae09-BOS
+      - 9da619d008f351cb-BOS
       Cache-Control:
       - no-cache
       Connection:
@@ -226,7 +221,7 @@ interactions:
       Content-Type:
       - text/event-stream; charset=utf-8
       Date:
-      - Mon, 09 Mar 2026 00:42:58 GMT
+      - Tue, 10 Mar 2026 23:29:22 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -240,35 +235,35 @@ interactions:
       anthropic-ratelimit-input-tokens-remaining:
       - '1998000'
       anthropic-ratelimit-input-tokens-reset:
-      - '2026-03-09T00:42:57Z'
+      - '2026-03-10T23:29:19Z'
       anthropic-ratelimit-output-tokens-limit:
       - '400000'
       anthropic-ratelimit-output-tokens-remaining:
       - '400000'
       anthropic-ratelimit-output-tokens-reset:
-      - '2026-03-09T00:42:57Z'
+      - '2026-03-10T23:29:19Z'
       anthropic-ratelimit-requests-limit:
       - '4000'
       anthropic-ratelimit-requests-remaining:
       - '3999'
       anthropic-ratelimit-requests-reset:
-      - '2026-03-09T00:42:57Z'
+      - '2026-03-10T23:29:19Z'
       anthropic-ratelimit-tokens-limit:
       - '2400000'
       anthropic-ratelimit-tokens-remaining:
       - '2398000'
       anthropic-ratelimit-tokens-reset:
-      - '2026-03-09T00:42:57Z'
+      - '2026-03-10T23:29:19Z'
       cf-cache-status:
       - DYNAMIC
       request-id:
-      - req_011CYraXVxETVYRvi5fQZDhu
+      - req_011CYvGXeb4dFGSKEk1BnA4c
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       vary:
       - Accept-Encoding
       x-envoy-upstream-service-time:
-      - '719'
+      - '2986'
     status:
       code: 200
       message: OK
@@ -286,49 +281,48 @@ interactions:
       n<agent_plan><!-- NOTICE: new line here -->\\nTo make this change we need to\
       \ modify `mathweb/flask/app.py` to:\\n\\n1. Import the math package.\\n2. Remove\
       \ the existing factorial() function.\\n3. Update get_factorial() to call math.factorial\
-      \ instead.\\n</agent_plan><!-- NOTICE: new line here -->\\n\\n## *XML `edit_block`\
-      \ Response* Format:\\n\\nEvery *XML `edit_block` Response* must use this exact\
-      \ format:\\n```language\\n<edit_block path=\\\"full/file/path\\\" operation=\\\
-      \"operation_type\\\" block_id=\\\"1\\\">\\n<search>\\n<!-- - Exact charector\
-      \ for charector content to find including comments and ai messages\\n- **Whitespace\
-      \ matters**: Indentation, spaces, tabs, and newlines must match EXACTLY\\n-\
-      \ Copy the content directly from the file - do not reformat or adjust spacing\\\
-      n- MUST be empty for `create`, `delete`, and `replace` operations -->\\n</search>\\\
-      n<replace>\\n<!-- - Content to replace with goes here\\n- MUST be empty for\
-      \ `delete` operations -->\\n</replace>\\n</edit_block>\\n```\\n\\n## Operation\
-      \ Types:\\n- `edit` for **editing** existing file content\\n- `create` for **creating**\
+      \ instead.\\n</agent_plan><!-- NOTICE: new line here -->\\n\\n## Operation Types:\\\
+      n- `edit` for **editing** existing file content\\n- `create` for **creating**\
       \ new files\\n- `delete` for **deleting** files completely\\n- `replace` for\
-      \ **replacing ALL the contents of the file**\\n\\n## Examples:\\n\\n**Create\
-      \ a new file:**\\n```python\\n<edit_block path=\\\"mathweb/flask/app.py\\\"\
-      \ operation=\\\"create\\\" block_id=\\\"1\\\">\\n<search>\\n</search>\\n<replace>\\\
-      nimport math\\nfrom flask import Flask\\n</replace>\\n</edit_block>\\n```\\\
-      n\\n**Edit existing file content:**\\n```python\\n<edit_block path=\\\"mathweb/flask/app.py\\\
-      \" operation=\\\"edit\\\" block_id=\\\"1\\\">\\n<search>\\nfrom flask import\
-      \ Flask\\n</search>\\n<replace>\\nimport math\\nfrom flask import Flask\\n</replace>\\\
-      n</edit_block>\\n```\\n\\n**Delete file:**\\n```python\\n<edit_block path=\\\
-      \"old_config.py\\\" operation=\\\"delete\\\" block_id=\\\"1\\\">\\n<search>\\\
-      n</search>\\n<replace>\\n</replace>\\n</edit_block>\\n```\\n\\n**Replace all\
-      \ file contents:**\\n```python\\n<edit_block path=\\\"config.py\\\" operation=\\\
-      \"replace\\\" block_id=\\\"1\\\">\\n<search>\\n</search>\\n<replace>\\nimport\
-      \ os\\nfrom dataclasses import dataclass\\n\\n@dataclass\\nclass AppConfig:\\\
-      n    debug: bool = False\\n    port: int = 8000\\n    database_url: str = os.getenv(\\\
-      \"DATABASE_URL\\\", \\\"sqlite:///app.db\\\")\\n</replace>\\n</edit_block>\\\
+      \ **replacing ALL the contents of the file**\\n\\n## *XML `edit_block` Response*\
+      \ Format:\\n\\n**For `edit` operations** (modifying existing content):\\n```language\\\
+      n<edit_block path=\\\"full/file/path\\\" operation=\\\"edit\\\" block_id=\\\"\
+      1\\\">\\n<search>\\n<!-- - Exact character for character content to find\\n-\
+      \ **Whitespace matters**: Indentation, spaces, tabs, and newlines must match\
+      \ EXACTLY\\n- Copy the content directly from the file - do not reformat or adjust\
+      \ spacing\\n- Include all comments, docstrings, whitespace, etc.\\n- If file\
+      \ contains wrapped/escaped content, match the literal file contents\\n- REMEMBER:\
+      \ Must EXACTLY MATCH existing file content, character for character -->\\n</search>\\\
+      n<replace>\\n<!-- - New content to replace the search content with -->\\n</replace>\\\
+      n</edit_block>\\n```\\n\\n**For `create`, `delete`, and `replace` operations:**\\\
+      n```language\\n<edit_block path=\\\"full/file/path\\\" operation=\\\"`create`,\
+      \ `delete`, or `replace`\\\" block_id=\\\"1\\\">\\n<!-- - File content (empty\
+      \ for `delete`) -->\\n</edit_block>\\n```\\n\\n## Examples:\\n\\n**Create a\
+      \ new file:**\\n```python\\n<edit_block path=\\\"mathweb/flask/app.py\\\" operation=\\\
+      \"create\\\" block_id=\\\"1\\\">\\nimport math\\nfrom flask import Flask\\n</edit_block>\\\
+      n```\\n\\n**Edit existing file content:**\\n```python\\n<edit_block path=\\\"\
+      mathweb/flask/app.py\\\" operation=\\\"edit\\\" block_id=\\\"1\\\">\\n<search>\\\
+      nfrom flask import Flask\\n</search>\\n<replace>\\nimport math\\nfrom flask\
+      \ import Flask\\n</replace>\\n</edit_block>\\n```\\n\\n**Delete file:**\\n```python\\\
+      n<edit_block path=\\\"old_config.py\\\" operation=\\\"delete\\\" block_id=\\\
+      \"1\\\">\\n</edit_block>\\n```\\n\\n**Replace all file contents:**\\n```python\\\
+      n<edit_block path=\\\"config.py\\\" operation=\\\"replace\\\" block_id=\\\"\
+      1\\\">\\nimport os\\nfrom dataclasses import dataclass\\n\\n@dataclass\\nclass\
+      \ AppConfig:\\n    debug: bool = False\\n    port: int = 8000\\n    database_url:\
+      \ str = os.getenv(\\\"DATABASE_URL\\\", \\\"sqlite:///app.db\\\")\\n</edit_block>\\\
       n```\\n\\n## **CRITICAL RULES:**\\nFile Paths:\\n- Use the FULL file path exactly\
       \ as shown by the user\\n- No bold asterisks, quotes, or escaping around the\
-      \ path\\n\\nSearch Content:\\n- Must EXACTLY MATCH existing file content, character\
-      \ for character\\n- Include all comments, docstrings, whitespace, etc.\\n- If\
-      \ file contains wrapped/escaped content, match the literal file contents\\n\\\
-      nBlock Strategy:\\n- Use multiple blocks for multiple changes to the same file\\\
-      n- Include enough context lines to make each search unique\\n- Only replace\
-      \ the first occurrence found\\n\\nFile Operations:\\n- Only edit files that\
-      \ the user has added to the chat. Refer to `<context type=\\\"editable files\\\
-      \">`\\n- For new files: use operation=\\\"create\\\" with empty search, content\
-      \ in replace\\n- To move code: use 2 XML `edit_block` Response (1 to delete,\
-      \ 1 to insert)\\n\\nUser Intent:\\n- If user says \\\"ok\\\", \\\"go ahead\\\
-      \", or \\\"do that\\\" \u2192 provide XML `edit_block` Response\\n- Wait for\
-      \ user confirmation before assuming edits are applied\\n- ONLY EVER RETURN CODE\
-      \ IN A XML `edit_block` Response!\\n\\n</response_format>\\n<user_input>\\nBefore\
-      \ we start lets first practice the *XML `edit_block` Response* Block format.\\\
+      \ path\\n\\nBlock Strategy:\\n- Use multiple blocks for multiple changes to\
+      \ the same file\\n- Include enough context lines to make each search unique\\\
+      n- Only replace the first occurrence found\\n\\nFile Operations:\\n- Only edit\
+      \ files that the user has added to the chat. Refer to `<context type=\\\"editable\
+      \ files\\\">`\\n- For new files: use operation=\\\"create\\\" with empty search,\
+      \ content in replace\\n- To move code: use 2 XML `edit_block` Response (1 to\
+      \ delete, 1 to insert)\\n\\nUser Intent:\\n- If user says \\\"ok\\\", \\\"go\
+      \ ahead\\\", or \\\"do that\\\" \u2192 provide XML `edit_block` Response\\n-\
+      \ Wait for user confirmation before assuming edits are applied\\n- ONLY EVER\
+      \ RETURN CODE IN A XML `edit_block` Response!\\n\\n</response_format>\\n<user_input>\\\
+      nBefore we start lets first practice the *XML `edit_block` Response* Block format.\\\
       n\\nChange get_factorial() to use math.factorial\\n</user_input>\"},{\"role\"\
       :\"assistant\",\"content\":\"<agent_plan>\\nTo make this change we need to modify\
       \ `mathweb/flask/app.py` to:\\n\\n1. Import the math package.\\n2. Remove the\
@@ -348,38 +342,36 @@ interactions:
       \ need to modify `main.py` and make a new file `hello.py`:\\n\\n1. Make a new\
       \ hello.py file with hello() in it.\\n2. Remove hello() from main.py and replace\
       \ it with an import.\\n</agent_plan>\\n\\n```python\\n<edit_block path=\\\"\
-      hello.py\\\" operation=\\\"create\\\" block_id=\\\"1\\\">\\n<search>\\n</search>\\\
-      n<replace>\\ndef hello():\\n    \\\"print a greeting\\\"\\n\\n    print(\\\"\
-      hello\\\")\\n</replace>\\n</edit_block>\\n```\\n\\n```python\\n<edit_block path=\\\
-      \"main.py\\\" operation=\\\"edit\\\" block_id=\\\"2\\\">\\n<search>\\ndef hello():\\\
-      n    \\\"print a greeting\\\"\\n\\n    print(\\\"hello\\\")\\n</search>\\n<replace>\\\
-      nfrom hello import hello\\n</replace>\\n</edit_block>\\n```\"},{\"role\":\"\
-      user\",\"content\":\"Remove the old_config.py file that's no longer needed.\"\
-      },{\"role\":\"assistant\",\"content\":\"<agent_plan>\\nTo remove this file we\
-      \ need to delete `old_config.py`:\\n\\n1. Remove the old_config.py file completely\
-      \ from the project.\\n</agent_plan>\\n\\n```python\\n<edit_block path=\\\"old_config.py\\\
-      \" operation=\\\"delete\\\" block_id=\\\"1\\\">\\n<search>\\n</search>\\n<replace>\\\
-      n</replace>\\n</edit_block>\\n```\"},{\"role\":\"user\",\"content\":\"Replace\
-      \ all the contents of config.py with a new configuration structure.\"},{\"role\"\
-      :\"assistant\",\"content\":\"<agent_plan>\\nTo replace all the contents we need\
-      \ to completely rewrite `config.py`:\\n\\n1. Replace the entire contents of\
-      \ config.py with the new configuration structure.\\n</agent_plan>\\n\\n```python\\\
+      hello.py\\\" operation=\\\"create\\\" block_id=\\\"1\\\">\\ndef hello():\\n\
+      \    \\\"print a greeting\\\"\\n\\n    print(\\\"hello\\\")\\n</edit_block>\\\
+      n```\\n\\n```python\\n<edit_block path=\\\"main.py\\\" operation=\\\"edit\\\"\
+      \ block_id=\\\"2\\\">\\n<search>\\ndef hello():\\n    \\\"print a greeting\\\
+      \"\\n\\n    print(\\\"hello\\\")\\n</search>\\n<replace>\\nfrom hello import\
+      \ hello\\n</replace>\\n</edit_block>\\n```\"},{\"role\":\"user\",\"content\"\
+      :\"Remove the old_config.py file that's no longer needed.\"},{\"role\":\"assistant\"\
+      ,\"content\":\"<agent_plan>\\nTo remove this file we need to delete `old_config.py`:\\\
+      n\\n1. Remove the old_config.py file completely from the project.\\n</agent_plan>\\\
+      n\\n```python\\n<edit_block path=\\\"old_config.py\\\" operation=\\\"delete\\\
+      \" block_id=\\\"1\\\">\\n</edit_block>\\n```\"},{\"role\":\"user\",\"content\"\
+      :\"Replace all the contents of config.py with a new configuration structure.\"\
+      },{\"role\":\"assistant\",\"content\":\"<agent_plan>\\nTo replace all the contents\
+      \ we need to completely rewrite `config.py`:\\n\\n1. Replace the entire contents\
+      \ of config.py with the new configuration structure.\\n</agent_plan>\\n\\n```python\\\
       n<edit_block path=\\\"config.py\\\" operation=\\\"replace\\\" block_id=\\\"\
-      1\\\">\\n<search>\\n</search>\\n<replace>\\nimport os\\nfrom dataclasses import\
-      \ dataclass\\n\\n@dataclass\\nclass AppConfig:\\n    debug: bool = False\\n\
-      \    port: int = 8000\\n    database_url: str = os.getenv(\\\"DATABASE_URL\\\
-      \", \\\"sqlite:///app.db\\\")\\n</replace>\\n</edit_block>\\n```\"},{\"role\"\
-      :\"user\",\"content\":\"Add error handling to the calculator function and update\
-      \ the docstring.\"},{\"role\":\"assistant\",\"content\":\"<agent_plan>\\nTo\
-      \ add error handling we need to modify `calculator.py` in two places:\\n\\n1.\
-      \ Update the docstring to mention error handling.\\n2. Add try-catch block around\
-      \ the calculation.\\n</agent_plan>\\n\\n```python\\n<edit_block path=\\\"calculator.py\\\
-      \" operation=\\\"edit\\\" block_id=\\\"1\\\">\\n<search>\\ndef calculate(a,\
-      \ b):\\n    \\\"Simple calculator function\\\"\\n</search>\\n<replace>\\ndef\
-      \ calculate(a, b):\\n    \\\"Simple calculator function with error handling\\\
-      \"\\n</replace>\\n</edit_block>\\n```\\n\\n```python\\n<edit_block path=\\\"\
-      calculator.py\\\" operation=\\\"edit\\\" block_id=\\\"2\\\">\\n<search>\\n \
-      \   return a / b\\n</search>\\n<replace>\\n    try:\\n        return a / b\\\
+      1\\\">\\nimport os\\nfrom dataclasses import dataclass\\n\\n@dataclass\\nclass\
+      \ AppConfig:\\n    debug: bool = False\\n    port: int = 8000\\n    database_url:\
+      \ str = os.getenv(\\\"DATABASE_URL\\\", \\\"sqlite:///app.db\\\")\\n</edit_block>\\\
+      n```\"},{\"role\":\"user\",\"content\":\"Add error handling to the calculator\
+      \ function and update the docstring.\"},{\"role\":\"assistant\",\"content\"\
+      :\"<agent_plan>\\nTo add error handling we need to modify `calculator.py` in\
+      \ two places:\\n\\n1. Update the docstring to mention error handling.\\n2. Add\
+      \ try-catch block around the calculation.\\n</agent_plan>\\n\\n```python\\n<edit_block\
+      \ path=\\\"calculator.py\\\" operation=\\\"edit\\\" block_id=\\\"1\\\">\\n<search>\\\
+      ndef calculate(a, b):\\n    \\\"Simple calculator function\\\"\\n</search>\\\
+      n<replace>\\ndef calculate(a, b):\\n    \\\"Simple calculator function with\
+      \ error handling\\\"\\n</replace>\\n</edit_block>\\n```\\n\\n```python\\n<edit_block\
+      \ path=\\\"calculator.py\\\" operation=\\\"edit\\\" block_id=\\\"2\\\">\\n<search>\\\
+      n    return a / b\\n</search>\\n<replace>\\n    try:\\n        return a / b\\\
       n    except ZeroDivisionError:\\n        return \\\"Error: Cannot divide by\
       \ zero\\\"\\n</replace>\\n</edit_block>\\n```\"},{\"role\":\"user\",\"content\"\
       :\"<conversation_history>\\n<heading>\\nBelow is the conversation history between\
@@ -407,26 +399,26 @@ interactions:
       \ comments and AI comments.\\n</operating_principles>\"},{\"role\":\"assistant\"\
       ,\"content\":\"<agent_plan>\\nTo complete this request I need to:\\n\\n1. Create\
       \ a new file `main.py` with a main function that calls calculate.\\n2. Edit\
-      \ `calculator.py` to change the function from addition to multiplication.\\\
-      n3. Delete the `old_code.py` file.\\n</agent_plan>\\n\\n```python\\n<edit_block\
-      \ path=\\\"main.py\\\" operation=\\\"create\\\" block_id=\\\"1\\\">\\n<search>\\\
-      n\\n\\n</search>\\n<replace>\\n\\nfrom calculator import calculate\\n\\ndef\
-      \ main():\\n    result = calculate(5, 3)\\n    print(f\\\"Result: {result}\\\
-      \")\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\\n\\n</replace>\\n</edit_block>\\\
-      n```\\n\\n```python\\n<edit_block path=\\\"calculator.py\\\" operation=\\\"\
-      edit\\\" block_id=\\\"2\\\">\\n<search>\\n\\ndef calculate(a, b):\\n    return\
-      \ a + b\\n\\n</search>\\n<replace>\\n\\ndef calculate(a, b):\\n    return a\
-      \ * b\\n\\n</replace>\\n</edit_block>\\n```\\n\\n```python\\n<edit_block path=\\\
-      \"old_code.py\\\" operation=\\\"delete\\\" block_id=\\\"3\\\">\\n<search>\\\
-      n\\n\\n</search>\\n<replace>\\n\\n\\n</replace>\\n</edit_block>\\n```\"},{\"\
-      role\":\"user\",\"content\":\"The following 1 *XML `edit_block` Response* failed\
-      \ validation:\\n\\n\\n<error operation=\\\"edit\\\" block_id=\\\"2\\\">\\n**File:**\
-      \ `calculator.py`\\n**Block ID:** 2\\n**Status:** search_not_found_error\\n**Issue:**\\\
-      nSearch content not found in `calculator.py`.\\n\\nCurrent File Content:\\n```\\\
-      ndef calculate(a, b):\\nreturn a + b\\n\\n```\\n</error>\\n\\n\\nNo changes\
-      \ were applied.\\nReply with ONLY the corrected *XML `edit_block` Response*.\"\
-      }],\"model\":\"claude-sonnet-4-5\",\"stream\":true,\"system\":\"<role>\\nYou\
-      \ are Byte, a CLI agent specializing in software engineering tasks. Your primary\
+      \ `calculator.py` to change the addition operation to multiplication.\\n3. Delete\
+      \ the `old_code.py` file.\\n</agent_plan>\\n\\n```python\\n<edit_block path=\\\
+      \"main.py\\\" operation=\\\"create\\\" block_id=\\\"1\\\">\\n<search>\\n\\n</search>\\\
+      n<replace>\\n\\nfrom calculator import calculate\\n\\ndef main():\\n    result\
+      \ = calculate(5, 3)\\n    print(f\\\"Result: {result}\\\")\\n\\nif __name__\
+      \ == \\\"__main__\\\":\\n    main()\\n\\n</replace>\\n</edit_block>\\n```\\\
+      n\\n```python\\n<edit_block path=\\\"calculator.py\\\" operation=\\\"edit\\\"\
+      \ block_id=\\\"2\\\">\\n<search>\\n\\ndef calculate(a, b):\\n    return a +\
+      \ b\\n\\n</search>\\n<replace>\\n\\ndef calculate(a, b):\\n    return a * b\\\
+      n\\n</replace>\\n</edit_block>\\n```\\n\\n```python\\n<edit_block path=\\\"\
+      old_code.py\\\" operation=\\\"delete\\\" block_id=\\\"3\\\">\\n<search>\\n\\\
+      n</search>\\n<replace>\\n\\n</replace>\\n</edit_block>\\n```\"},{\"role\":\"\
+      user\",\"content\":\"The following 1 *XML `edit_block` Response* failed validation:\\\
+      n\\n\\n<error operation=\\\"edit\\\" block_id=\\\"2\\\">\\n**File:** `calculator.py`\\\
+      n**Block ID:** 2\\n**Status:** search_not_found_error\\n**Issue:**\\nSearch\
+      \ content not found in `calculator.py`.\\n\\nCurrent File Content:\\n```\\ndef\
+      \ calculate(a, b):\\nreturn a + b\\n\\n```\\n</error>\\n\\n\\nNo changes were\
+      \ applied.\\nReply with ONLY the corrected *XML `edit_block` Response*.\"}],\"\
+      model\":\"claude-sonnet-4-5\",\"stream\":true,\"system\":\"<role>\\nYou are\
+      \ Byte, a CLI agent specializing in software engineering tasks. Your primary\
       \ goal is to help users safely and effectively.\\nAct as an expert software\
       \ developer.\\n</role>\",\"temperature\":0.1,\"tools\":[{\"name\":\"load_convention\"\
       ,\"input_schema\":{\"properties\":{\"convention_name\":{\"description\":\"The\
@@ -442,7 +434,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '11707'
+      - '11515'
       Content-Type:
       - application/json
       Host:
@@ -476,23 +468,23 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAA3SQwU7DMAyG73uKyedU6roVWB4ATRO3HRGKTGLWQOqUxJ0EU98dRaKCDeGb/8/2
-        b5tOxKKXPeWMRzJZMMnCoaBenkE+BgINFxDUnIM+Qx8dBdBgA46OqhyZSapN1VZN3bT1ttmCAu/K
-        kHw09epwf3h9oN3d7TrtOrsbPofNfh9BXVmBghRDETBnnwW5+NrIQiygH58UZImDSYQ5MmgeQ/iW
-        Mr2PxJZmcZxX9TyMYiS+EWfQ65u2UWDRdmRsIhQf2VyW1DNPhO4/NvcWBxo66ilhMG3/t/6Hrrpr
-        OimIo/yWVgoypZO3ZMRTAg3lCw6TKw/lF0rlSHOkCBo4isET+oDPgWCaliWmxeILAAD//0qFRC40
-        3OKTcvKTs7FHMRYlYHtSUisgnkWWB/kVqq8ktQKkEExZKSlBbIbaDgAAAP//gtpekJmXjmadghJI
-        UKmWiwsAAAD//8LqwpTUnJJE/C4EK0FxIUQE1WVwZVD3JSQkIDlRQUGhlosLAAAA//+irwsKKksy
-        8vNQHFHLxQUAAAD//6KvG2LybFJTMqFmKBQklmTYxiglJ+Ykl+YkluQXgRxXy8UFAAAA//+ir5v0
-        CipjlBTyC1KLwLnJNkYJ5MQYJQVIgoNFWi0XFwAAAP//oq+74jNTbGOUjGKU7GLybIpTE4uSM5Rq
-        a7m4AAAAAP//oq8r7GLyUlLTFGBxlKqRqKOQhBwoAAAAAP//oq9zNK1i8kC5pyi1pLQoTyFRQRvZ
-        LQAAAAD//6KvWxSSYvJs9CExA4qjotSCnMTkVGgiBgAAAP//GkzRhFTmAAAAAP//GuDo0kJ3VS0X
-        FwAAAP//onsRpA+NKVCk6SPKI7TgquXiAgAAAP//onscgmuJWi4uAAAAAP//wlF75hcQqjzzC5Cs
-        hdUzAAAAAP//gpoGa0th9QCKpBKSg1EaO0qpeSnxoKhUwtrkqaVhmwetkWJugVQwAwAAAP//QvMg
-        toBClgPV/gAAAAD//wMAE/ZGkH0KAAA=
+        H4sIAAAAAAAAA3SQQU/DMAyF7/sVlc+p1BYqsRw5jDNoN4Qik5guInW6xK2Epv53FIkKBuLo9z37
+        2aaFWHQ1Us44kMmCSXYOBXV1AfmYCDRcQVBbDfoCY3QUQIMNODuqc2QmqW/rvu6arm/23R4UeFeG
+        5ME07dO9bY+2Pw7t8njulsN5dA/zAdSvKFCQYigC5uyzIJdcG1mIBfTzi4IscTKJMEcGzXMIX1Km
+        80xsaRPnbVXP0yxG4jtxBn3T3/UKLNoTGZsIxUc215Zm44nQ/ce23pJA04lGShhMP/71f9P29Juu
+        CuIsP6VWQaa0eEtGPCXQUL7gMLnyUH6jVI40A0XQwFEMLugDvgaCda2qqlp3u08AAAD//0qFxC00
+        2OKTcvKTs7HHMBYlYGtSUisgfkWWB3kVqq8ktQKkEExZKSmBLQZbDQAAAP//glpdkJmXjmaXghJI
+        UKmWiwsAAAD//8LqvJTUnJJE/M4DK0FxHkQE1VlwZVDHJSQkwNwHcSIAAAD//6Kv9QWVJRn5eQgX
+        1HJxAQAAAP//oq8DYvJsUlMyoWYoFCSWZNjGKCUn5iSX5iSW5BchhQ08hAAAAAD//6KvA/UKKmOU
+        FPILUovAGco2Rgnk3hglBUiiQ3NfLRcXAAAA//+ir/PiM1NsY5SMYpTsYvJsilMTi5IzIG6q5eIC
+        AAAA//+ir0vsYvJSUtMUYHGXqpGoo5CEHD61XFwAAAAA//+ir4s0rWLyilJLSosQCbyWiwsAAAD/
+        /6KvGxQSFbQVkmLybPQhkWOHFiIAAAAA//+ie24rSi3ISUxOhcQW2DG1XFwAAAAA//+ic5igphG0
+        aKrl4gIAAAD//6J7FGlBoggWNvA4quXiAgAAAP//onsE6SPKQ7uYPET9UMvFBQAAAP//wlFz5hcQ
+        qjjzC5BcAq1oAAAAAP//ghoGa0Vh9RKKpBKSF1CaOUqpeSnx4GyGtbFTS8PWDlrzxNwMuTyu5eIC
+        AAAA//9C8yS2sEKWU0KragAAAAD//wMAfIxomocKAAA=
     headers:
       CF-RAY:
-      - 9d960b07291d50b5-BOS
+      - 9da619fc1a1fda66-BOS
       Cache-Control:
       - no-cache
       Connection:
@@ -504,7 +496,7 @@ interactions:
       Content-Type:
       - text/event-stream; charset=utf-8
       Date:
-      - Mon, 09 Mar 2026 00:43:02 GMT
+      - Tue, 10 Mar 2026 23:29:29 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
@@ -518,313 +510,35 @@ interactions:
       anthropic-ratelimit-input-tokens-remaining:
       - '1998000'
       anthropic-ratelimit-input-tokens-reset:
-      - '2026-03-09T00:43:01Z'
+      - '2026-03-10T23:29:26Z'
       anthropic-ratelimit-output-tokens-limit:
       - '400000'
       anthropic-ratelimit-output-tokens-remaining:
       - '400000'
       anthropic-ratelimit-output-tokens-reset:
-      - '2026-03-09T00:43:01Z'
+      - '2026-03-10T23:29:26Z'
       anthropic-ratelimit-requests-limit:
       - '4000'
       anthropic-ratelimit-requests-remaining:
       - '3999'
       anthropic-ratelimit-requests-reset:
-      - '2026-03-09T00:43:01Z'
+      - '2026-03-10T23:29:26Z'
       anthropic-ratelimit-tokens-limit:
       - '2400000'
       anthropic-ratelimit-tokens-remaining:
       - '2398000'
       anthropic-ratelimit-tokens-reset:
-      - '2026-03-09T00:43:01Z'
+      - '2026-03-10T23:29:26Z'
       cf-cache-status:
       - DYNAMIC
       request-id:
-      - req_011CYraXoRxPnehdeRqoniu6
+      - req_011CYvGYAho3WSS9TMU777iz
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       vary:
       - Accept-Encoding
       x-envoy-upstream-service-time:
-      - '639'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: "{\"max_tokens\":64000,\"messages\":[{\"role\":\"user\",\"content\":\"<response_format>\\\
-      n# *XML `edit_block` Response* Rules:\\n\\nUse *XML `edit_block` Response* to\
-      \ make precise edits to the repo. Each XML `edit_block` Response specifies:\\\
-      n- **What repo file** to modify (with full path)\\n- **What operation** to perform\
-      \ (edit, create, delete, replace)\\n- **What content** to find (search section)\\\
-      n- **What to replace** it with (replace section)\\n\\n## Response Structure:\\\
-      n\\n**REQUIRED**: All responses containing *XML `edit_block` Response* MUST\
-      \ start with a PLAN section:\\n\\n- Wrap your plan in `<agent_plan>...</agent_plan>`\
-      \ boundaries\\n- Explain what files will be modified and why\\n- List the specific\
-      \ changes in numbered steps\\n- Keep it concise but complete\\n\\nExample:\\\
-      n<agent_plan><!-- NOTICE: new line here -->\\nTo make this change we need to\
-      \ modify `mathweb/flask/app.py` to:\\n\\n1. Import the math package.\\n2. Remove\
-      \ the existing factorial() function.\\n3. Update get_factorial() to call math.factorial\
-      \ instead.\\n</agent_plan><!-- NOTICE: new line here -->\\n\\n## *XML `edit_block`\
-      \ Response* Format:\\n\\nEvery *XML `edit_block` Response* must use this exact\
-      \ format:\\n```language\\n<edit_block path=\\\"full/file/path\\\" operation=\\\
-      \"operation_type\\\" block_id=\\\"1\\\">\\n<search>\\n<!-- - Exact charector\
-      \ for charector content to find including comments and ai messages\\n- **Whitespace\
-      \ matters**: Indentation, spaces, tabs, and newlines must match EXACTLY\\n-\
-      \ Copy the content directly from the file - do not reformat or adjust spacing\\\
-      n- MUST be empty for `create`, `delete`, and `replace` operations -->\\n</search>\\\
-      n<replace>\\n<!-- - Content to replace with goes here\\n- MUST be empty for\
-      \ `delete` operations -->\\n</replace>\\n</edit_block>\\n```\\n\\n## Operation\
-      \ Types:\\n- `edit` for **editing** existing file content\\n- `create` for **creating**\
-      \ new files\\n- `delete` for **deleting** files completely\\n- `replace` for\
-      \ **replacing ALL the contents of the file**\\n\\n## Examples:\\n\\n**Create\
-      \ a new file:**\\n```python\\n<edit_block path=\\\"mathweb/flask/app.py\\\"\
-      \ operation=\\\"create\\\" block_id=\\\"1\\\">\\n<search>\\n</search>\\n<replace>\\\
-      nimport math\\nfrom flask import Flask\\n</replace>\\n</edit_block>\\n```\\\
-      n\\n**Edit existing file content:**\\n```python\\n<edit_block path=\\\"mathweb/flask/app.py\\\
-      \" operation=\\\"edit\\\" block_id=\\\"1\\\">\\n<search>\\nfrom flask import\
-      \ Flask\\n</search>\\n<replace>\\nimport math\\nfrom flask import Flask\\n</replace>\\\
-      n</edit_block>\\n```\\n\\n**Delete file:**\\n```python\\n<edit_block path=\\\
-      \"old_config.py\\\" operation=\\\"delete\\\" block_id=\\\"1\\\">\\n<search>\\\
-      n</search>\\n<replace>\\n</replace>\\n</edit_block>\\n```\\n\\n**Replace all\
-      \ file contents:**\\n```python\\n<edit_block path=\\\"config.py\\\" operation=\\\
-      \"replace\\\" block_id=\\\"1\\\">\\n<search>\\n</search>\\n<replace>\\nimport\
-      \ os\\nfrom dataclasses import dataclass\\n\\n@dataclass\\nclass AppConfig:\\\
-      n    debug: bool = False\\n    port: int = 8000\\n    database_url: str = os.getenv(\\\
-      \"DATABASE_URL\\\", \\\"sqlite:///app.db\\\")\\n</replace>\\n</edit_block>\\\
-      n```\\n\\n## **CRITICAL RULES:**\\nFile Paths:\\n- Use the FULL file path exactly\
-      \ as shown by the user\\n- No bold asterisks, quotes, or escaping around the\
-      \ path\\n\\nSearch Content:\\n- Must EXACTLY MATCH existing file content, character\
-      \ for character\\n- Include all comments, docstrings, whitespace, etc.\\n- If\
-      \ file contains wrapped/escaped content, match the literal file contents\\n\\\
-      nBlock Strategy:\\n- Use multiple blocks for multiple changes to the same file\\\
-      n- Include enough context lines to make each search unique\\n- Only replace\
-      \ the first occurrence found\\n\\nFile Operations:\\n- Only edit files that\
-      \ the user has added to the chat. Refer to `<context type=\\\"editable files\\\
-      \">`\\n- For new files: use operation=\\\"create\\\" with empty search, content\
-      \ in replace\\n- To move code: use 2 XML `edit_block` Response (1 to delete,\
-      \ 1 to insert)\\n\\nUser Intent:\\n- If user says \\\"ok\\\", \\\"go ahead\\\
-      \", or \\\"do that\\\" \u2192 provide XML `edit_block` Response\\n- Wait for\
-      \ user confirmation before assuming edits are applied\\n- ONLY EVER RETURN CODE\
-      \ IN A XML `edit_block` Response!\\n\\n</response_format>\\n<user_input>\\nBefore\
-      \ we start lets first practice the *XML `edit_block` Response* Block format.\\\
-      n\\nChange get_factorial() to use math.factorial\\n</user_input>\"},{\"role\"\
-      :\"assistant\",\"content\":\"<agent_plan>\\nTo make this change we need to modify\
-      \ `mathweb/flask/app.py` to:\\n\\n1. Import the math package.\\n2. Remove the\
-      \ existing factorial() function.\\n3. Update get_factorial() to call math.factorial\
-      \ instead.\\n</agent_plan>\\n\\n```python\\n<edit_block path=\\\"mathweb/flask/app.py\\\
-      \" operation=\\\"edit\\\" block_id=\\\"1\\\">\\n<search>\\nfrom flask import\
-      \ Flask\\n</search>\\n<replace>\\nimport math\\nfrom flask import Flask\\n</replace>\\\
-      n</edit_block>\\n```\\n\\n```python\\n<edit_block path=\\\"mathweb/flask/app.py\\\
-      \" operation=\\\"edit\\\" block_id=\\\"2\\\">\\n<search>\\ndef factorial(n):\\\
-      n    \\\"compute factorial\\\"\\n\\n    if n == 0:\\n        return 1\\n   \
-      \ else:\\n        return n * factorial(n-1)\\n</search>\\n<replace>\\n</replace>\\\
-      n</edit_block>\\n```\\n\\n```python\\n<edit_block path=\\\"mathweb/flask/app.py\\\
-      \" operation=\\\"edit\\\" block_id=\\\"3\\\">\\n<search>\\n    return str(factorial(n))\\\
-      n</search>\\n<replace>\\n    return str(math.factorial(n))\\n</replace>\\n</edit_block>\\\
-      n```\"},{\"role\":\"user\",\"content\":\"Refactor hello() into its own file.\"\
-      },{\"role\":\"assistant\",\"content\":\"<agent_plan>\\nTo make this change we\
-      \ need to modify `main.py` and make a new file `hello.py`:\\n\\n1. Make a new\
-      \ hello.py file with hello() in it.\\n2. Remove hello() from main.py and replace\
-      \ it with an import.\\n</agent_plan>\\n\\n```python\\n<edit_block path=\\\"\
-      hello.py\\\" operation=\\\"create\\\" block_id=\\\"1\\\">\\n<search>\\n</search>\\\
-      n<replace>\\ndef hello():\\n    \\\"print a greeting\\\"\\n\\n    print(\\\"\
-      hello\\\")\\n</replace>\\n</edit_block>\\n```\\n\\n```python\\n<edit_block path=\\\
-      \"main.py\\\" operation=\\\"edit\\\" block_id=\\\"2\\\">\\n<search>\\ndef hello():\\\
-      n    \\\"print a greeting\\\"\\n\\n    print(\\\"hello\\\")\\n</search>\\n<replace>\\\
-      nfrom hello import hello\\n</replace>\\n</edit_block>\\n```\"},{\"role\":\"\
-      user\",\"content\":\"Remove the old_config.py file that's no longer needed.\"\
-      },{\"role\":\"assistant\",\"content\":\"<agent_plan>\\nTo remove this file we\
-      \ need to delete `old_config.py`:\\n\\n1. Remove the old_config.py file completely\
-      \ from the project.\\n</agent_plan>\\n\\n```python\\n<edit_block path=\\\"old_config.py\\\
-      \" operation=\\\"delete\\\" block_id=\\\"1\\\">\\n<search>\\n</search>\\n<replace>\\\
-      n</replace>\\n</edit_block>\\n```\"},{\"role\":\"user\",\"content\":\"Replace\
-      \ all the contents of config.py with a new configuration structure.\"},{\"role\"\
-      :\"assistant\",\"content\":\"<agent_plan>\\nTo replace all the contents we need\
-      \ to completely rewrite `config.py`:\\n\\n1. Replace the entire contents of\
-      \ config.py with the new configuration structure.\\n</agent_plan>\\n\\n```python\\\
-      n<edit_block path=\\\"config.py\\\" operation=\\\"replace\\\" block_id=\\\"\
-      1\\\">\\n<search>\\n</search>\\n<replace>\\nimport os\\nfrom dataclasses import\
-      \ dataclass\\n\\n@dataclass\\nclass AppConfig:\\n    debug: bool = False\\n\
-      \    port: int = 8000\\n    database_url: str = os.getenv(\\\"DATABASE_URL\\\
-      \", \\\"sqlite:///app.db\\\")\\n</replace>\\n</edit_block>\\n```\"},{\"role\"\
-      :\"user\",\"content\":\"Add error handling to the calculator function and update\
-      \ the docstring.\"},{\"role\":\"assistant\",\"content\":\"<agent_plan>\\nTo\
-      \ add error handling we need to modify `calculator.py` in two places:\\n\\n1.\
-      \ Update the docstring to mention error handling.\\n2. Add try-catch block around\
-      \ the calculation.\\n</agent_plan>\\n\\n```python\\n<edit_block path=\\\"calculator.py\\\
-      \" operation=\\\"edit\\\" block_id=\\\"1\\\">\\n<search>\\ndef calculate(a,\
-      \ b):\\n    \\\"Simple calculator function\\\"\\n</search>\\n<replace>\\ndef\
-      \ calculate(a, b):\\n    \\\"Simple calculator function with error handling\\\
-      \"\\n</replace>\\n</edit_block>\\n```\\n\\n```python\\n<edit_block path=\\\"\
-      calculator.py\\\" operation=\\\"edit\\\" block_id=\\\"2\\\">\\n<search>\\n \
-      \   return a / b\\n</search>\\n<replace>\\n    try:\\n        return a / b\\\
-      n    except ZeroDivisionError:\\n        return \\\"Error: Cannot divide by\
-      \ zero\\\"\\n</replace>\\n</edit_block>\\n```\"},{\"role\":\"user\",\"content\"\
-      :\"<conversation_history>\\n<heading>\\nBelow is the conversation history between\
-      \ Byte agents and the user.\\n<heading>\\nThe conversation history is empty.\\\
-      n</conversation_history>\\n<user_input>\\n```text\\nDo three things:\\n1. Create\
-      \ a new file called main.py with a main function that calls calculate\\n2. Edit\
-      \ calculator.py to change the function to multiply instead of add\\n3. Delete\
-      \ the old_code.py file as it's no longer needed\\n```\\n\\nYou **MUST** consider\
-      \ the user input before proceeding (if not empty).\\n</user_input>\\n<operating_constraints>\\\
-      n- Always use best practices when coding\\n- Respect and use existing conventions,\
-      \ libraries, etc that are already present in the code base\\n- Take requests\
-      \ for changes to the supplied code\\n- If the request is ambiguous, ask clarifying\
-      \ questions before proceeding\\n- Keep changes simple don't build more then\
-      \ what is asked for\\n</operating_constraints>\\n\\n\\n# Here are the files\
-      \ in the current context:\\n\\n<!-- NOTICE: Trust the bellow as the true contents\
-      \ of these files! -->\\nAny other messages may contain outdated versions of\
-      \ the files' contents.\\n<context type=\\\"editable files\\\">\\n<file source=\\\
-      \"calculator.py\\\" language=\\\"python\\\" mode=\\\"editable\\\">\\n```python\\\
-      ndef calculate(a, b):\\nreturn a + b\\n\\n```\\n</file>\\n<file source=\\\"\
-      old_code.py\\\" language=\\\"python\\\" mode=\\\"editable\\\">\\n```python\\\
-      ndef old_function():\\npass\\n\\n```\\n</file>\\n</context>\\n\\n<operating_principles>\\\
-      n<!-- NOTICE: You **MUST** follow these Operating Principles -->\\n<search>\
-      \ Tag Rules:\\n- Never put content on the same line as the opening tag.\\n-\
-      \ Must EXACTLY MATCH existing file content, character for character including\
-      \ comments and AI comments.\\n</operating_principles>\"},{\"role\":\"assistant\"\
-      ,\"content\":\"<agent_plan>\\nTo complete this request I need to:\\n\\n1. Create\
-      \ a new file `main.py` with a main function that calls calculate.\\n2. Edit\
-      \ `calculator.py` to change the function from addition to multiplication.\\\
-      n3. Delete the `old_code.py` file.\\n</agent_plan>\\n\\n```python\\n<edit_block\
-      \ path=\\\"main.py\\\" operation=\\\"create\\\" block_id=\\\"1\\\">\\n<search>\\\
-      n\\n\\n\\n\\n</search>\\n<replace>\\n\\n\\nfrom calculator import calculate\\\
-      n\\ndef main():\\n    result = calculate(5, 3)\\n    print(f\\\"Result: {result}\\\
-      \")\\n\\nif __name__ == \\\"__main__\\\":\\n    main()\\n\\n\\n</replace>\\\
-      n</edit_block>\\n```\\n\\n```python\\n<edit_block path=\\\"calculator.py\\\"\
-      \ operation=\\\"edit\\\" block_id=\\\"2\\\">\\n<search>\\n\\ndef calculate(a,\
-      \ b):\\n    return a + b\\n\\n</search>\\n<replace>\\n\\ndef calculate(a, b):\\\
-      n    return a * b\\n\\n</replace>\\n</edit_block>\\n```\\n\\n```python\\n<edit_block\
-      \ path=\\\"old_code.py\\\" operation=\\\"delete\\\" block_id=\\\"3\\\">\\n<search>\\\
-      n\\n\\n\\n\\n</search>\\n<replace>\\n\\n\\n\\n\\n</replace>\\n</edit_block>\\\
-      n```\"},{\"role\":\"user\",\"content\":\"The following 1 *XML `edit_block` Response*\
-      \ failed validation:\\n\\n\\n<error operation=\\\"edit\\\" block_id=\\\"2\\\"\
-      >\\n**File:** `calculator.py`\\n**Block ID:** 2\\n**Status:** search_not_found_error\\\
-      n**Issue:**\\nSearch content not found in `calculator.py`.\\n\\nCurrent File\
-      \ Content:\\n```\\ndef calculate(a, b):\\nreturn a + b\\n\\n```\\n</error>\\\
-      n\\n\\nNo changes were applied.\\nReply with ONLY the corrected *XML `edit_block`\
-      \ Response*.\"}],\"model\":\"claude-sonnet-4-5\",\"stream\":true,\"system\"\
-      :\"<role>\\nYou are Byte, a CLI agent specializing in software engineering tasks.\
-      \ Your primary goal is to help users safely and effectively.\\nAct as an expert\
-      \ software developer.\\n</role>\",\"temperature\":0.1,\"tools\":[{\"name\":\"\
-      load_convention\",\"input_schema\":{\"properties\":{\"convention_name\":{\"\
-      description\":\"The name of the convention (from <name>)\",\"type\":\"string\"\
-      }},\"required\":[\"convention_name\"],\"type\":\"object\"},\"description\":\"\
-      Load a convention file by its name. This tool reads convention files using the\
-      \ name from convention metadata.\"}]}"
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate, zstd
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '11723'
-      Content-Type:
-      - application/json
-      Host:
-      - api.anthropic.com
-      User-Agent:
-      - AsyncAnthropic/Python 0.77.0
-      X-Stainless-Arch:
-      - x64
-      X-Stainless-Async:
-      - async:asyncio
-      X-Stainless-Lang:
-      - python
-      X-Stainless-OS:
-      - Linux
-      X-Stainless-Package-Version:
-      - 0.77.0
-      X-Stainless-Runtime:
-      - CPython
-      X-Stainless-Runtime-Version:
-      - 3.12.11
-      anthropic-version:
-      - '2023-06-01'
-      x-api-key:
-      - XXXX
-      x-stainless-retry-count:
-      - '0'
-      x-stainless-timeout:
-      - NOT_GIVEN
-    method: POST
-    uri: https://api.anthropic.com/v1/messages
-  response:
-    body:
-      string: !!binary |
-        H4sIAAAAAAAAA3SQwU7DMAyG73uKyudU6gplLA8wOHCAM0KRl5otI3W6xK00pr47ikQFG+Lo//vt
-        3zaNxKKLjlLCHZkkGGXRoqAuziCnnkDDBQQ116DP0IWWPGiwHoeWyhSYScrbsinrqm6qdb0GBa7N
-        Q9LOVMsXetgcN8f1aXtfPzWHcbWKj5/PoK6iQEEMPguYkkuCnHNtYCEW0K9vCpKE3kTCFBg0D95/
-        S4mOA7GlWRzmVR33gxgJH8QJ9M1dUyuwaPdkbCQUF9hcWqqZR8L2Pzb35gTq99RRRG+a7q//hy73
-        13RSEAb5LS0VJIqjs2TEUQQN+QstxjY/lN8p5iPNjgJo4CAGR3Qet55gmoqiKKbF4gsAAP//SoXE
-        LTTY4pNy8pOzsccwFiVga1JSKyB+RZYHeRWqryS1AqQQTFkpKYEtRgK1XFwAAAAA//+CuqEgMy8d
-        zVIFJZCgUi0XFwAAAP//wurOlNSckkT87gQrQXEnRATVfXBlUFcmJCRgcygAAAD//6KvIwoqSzLy
-        81DdUcvFBQAAAP//oq8jYvJsUlMyoWYoFCSWZNjGKCUn5iSX5iSW5BchXFfLxQUAAAD//6Kvy/QK
-        KmOUFPILUovAmcs2Rgnk0BglBUgCrAUnbwAAAAD//6Kvk+IzU2xjlIxilOxi8myKUxOLkjPQk1Et
-        FxcAAAD//6Kvm+xi8lJS0xRgUZaqkaijkAQNHQAAAAD//6KvSzStYvKKUktKi9DSNKQgAgAAAP//
-        oq9bFBIVtBWSYvJs9CHRZAdxUi0XFwAAAP//onv2KkotyElMTsWMJ7RQquXiAgAAAP//oq/bdBSS
-        EFGmkKigBUk3SHEGAAAA//+ie1jpIwLLRh9cLsFdVMvFBQAAAP//oq9zwHrtYvJgdUUtFxcAAAD/
-        /8JRmeYXEKpL8wuQrK/l4gIAAAD//4IaBGtUYfUDiqQSkptRWj1KqXkp8eA8h7XtU0vDxg9aa8Xc
-        rLaWiwsAAAD//0LzGbbAQZZTQi0kAAAAAP//AwAHuY3UigoAAA==
-    headers:
-      CF-RAY:
-      - 9d960b10e923a5ce-BOS
-      Cache-Control:
-      - no-cache
-      Connection:
-      - keep-alive
-      Content-Encoding:
-      - gzip
-      Content-Security-Policy:
-      - default-src 'none'; frame-ancestors 'none'
-      Content-Type:
-      - text/event-stream; charset=utf-8
-      Date:
-      - Mon, 09 Mar 2026 00:43:04 GMT
-      Server:
-      - cloudflare
-      Transfer-Encoding:
-      - chunked
-      X-Robots-Tag:
-      - none
-      anthropic-organization-id:
-      - cda99ffa-1f58-4491-997b-b46793c65453
-      anthropic-ratelimit-input-tokens-limit:
-      - '2000000'
-      anthropic-ratelimit-input-tokens-remaining:
-      - '1998000'
-      anthropic-ratelimit-input-tokens-reset:
-      - '2026-03-09T00:43:03Z'
-      anthropic-ratelimit-output-tokens-limit:
-      - '400000'
-      anthropic-ratelimit-output-tokens-remaining:
-      - '400000'
-      anthropic-ratelimit-output-tokens-reset:
-      - '2026-03-09T00:43:03Z'
-      anthropic-ratelimit-requests-limit:
-      - '4000'
-      anthropic-ratelimit-requests-remaining:
-      - '3999'
-      anthropic-ratelimit-requests-reset:
-      - '2026-03-09T00:43:03Z'
-      anthropic-ratelimit-tokens-limit:
-      - '2400000'
-      anthropic-ratelimit-tokens-remaining:
-      - '2398000'
-      anthropic-ratelimit-tokens-reset:
-      - '2026-03-09T00:43:03Z'
-      cf-cache-status:
-      - DYNAMIC
-      request-id:
-      - req_011CYraXv7Y82K8v63sXWPkC
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains; preload
-      vary:
-      - Accept-Encoding
-      x-envoy-upstream-service-time:
-      - '1388'
+      - '3293'
     status:
       code: 200
       message: OK

@@ -46,6 +46,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "debugpy>=1.8.20",
     "grandalf>=0.8",
     "pytest>=8.4.2",
     "pytest-asyncio>=1.2.0",

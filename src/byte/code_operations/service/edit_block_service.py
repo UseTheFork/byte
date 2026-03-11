@@ -9,7 +9,6 @@ from byte.code_operations import (
     BlockStatus,
     BlockType,
     EditFormatPrompts,
-    RawBlockService,
     RawSearchReplaceBlock,
     SearchReplaceBlock,
 )
@@ -95,67 +94,6 @@ class EditBlockService(Service, UserInteractive):
 
         return content
 
-    async def parse_content_to_blocks(self, content: str) -> List[SearchReplaceBlock]:
-        """Extract SEARCH/REPLACE blocks from AI response content.
-
-        Parses pseudo-XML blocks containing file operations with search/replace content.
-        Handles empty search/replace sections gracefully.
-
-        Args:
-                content: Raw content string containing pseudo-XML blocks
-
-        Returns:
-                List of SearchReplaceBlock objects parsed from the content
-
-        Usage: `blocks = service.parse_content_to_blocks(ai_response)`
-        """
-
-        raw_block_service = self.app.make(RawBlockService)
-        raw_blocks = await raw_block_service.parse_content_to_raw_blocks(content)
-
-        blocks = []
-
-        for raw_block in raw_blocks:
-            # Extract required attributes
-            block_id = raw_block.block_id.strip()
-            file_path = raw_block.file_path.strip()
-            operation = raw_block.operation.strip()
-
-            # Determine block type based on operation and file existence
-            file_path_obj = Path(file_path.strip())
-            if not file_path_obj.is_absolute():
-                file_path_obj = self.app.path(str(file_path_obj)).resolve()
-            else:
-                file_path_obj = file_path_obj.resolve()
-
-            search_content = ""
-            replace_content = ""
-            block_type = BlockType.UNKNOWN
-
-            # Map operation string to BlockType
-            if operation == "delete":
-                block_type = BlockType.DELETE
-            elif operation == "replace":
-                block_type = BlockType.REPLACE
-                replace_content = await self.extract_edit_block_content(raw_block.raw_content)
-            elif operation == "create":
-                block_type = BlockType.CREATE
-                replace_content = await self.extract_edit_block_content(raw_block.raw_content)
-            elif operation == "edit":
-                block_type = BlockType.EDIT
-                search_content, replace_content = await self.extract_search_replace_content(raw_block.raw_content)
-
-            blocks.append(
-                SearchReplaceBlock(
-                    block_id=block_id,
-                    file_path=file_path,
-                    search_content=search_content,
-                    replace_content=replace_content,
-                    block_type=block_type,
-                )
-            )
-        return blocks
-
     def _parse_attributes(self, attr_string: str) -> dict[str, str]:
         """Parse attribute string into dictionary.
 
@@ -174,6 +112,30 @@ class EditBlockService(Service, UserInteractive):
             attrs[key] = value
         return attrs
 
+    async def check_single_block_tags_balanced(self, raw_content: str) -> tuple[bool, str]:
+        """Validate that search/replace tags are balanced in a single block.
+
+        Returns:
+            Tuple of (is_valid, error_message)
+
+        Usage: `valid, error = await service.check_single_block_tags_balanced(content)`
+        """
+        search_count = raw_content.count("<search>")
+        search_close_count = raw_content.count("</search>")
+        replace_count = raw_content.count("<replace>")
+        replace_close_count = raw_content.count("</replace>")
+
+        if search_count != search_close_count:
+            return False, f"<search> tags={search_count}, </search> tags={search_close_count}"
+
+        if replace_count != replace_close_count:
+            return False, f"<replace> tags={replace_count}, </replace> tags={replace_close_count}"
+
+        if search_count != replace_count:
+            return False, f"<search> tags={search_count}, <replace> tags={replace_count}"
+
+        return True, ""
+
     async def parse_raw_block_to_search_replace(self, raw_block: RawSearchReplaceBlock) -> SearchReplaceBlock:
         """Parse a single RawSearchReplaceBlock into a SearchReplaceBlock.
 
@@ -185,41 +147,40 @@ class EditBlockService(Service, UserInteractive):
 
         Usage: `block = await service.parse_raw_block_to_search_replace(raw_block)`
         """
-        raw_block_service = self.app.make(RawBlockService)
-
-        # Check tag balance first
-        is_valid, error_msg = await raw_block_service.check_single_block_tags_balanced(raw_block.raw_content)
-
-        if not is_valid:
-            # Mark block as invalid and return early
-            raw_block.block_status = BlockStatus.PARSE_ERROR
-            raw_block.status_message = f"Unbalanced tags: {error_msg}"
-
-            # Return a minimal SearchReplaceBlock with error status
-            return SearchReplaceBlock(
-                block_id=raw_block.block_id,
-                file_path="",
-                search_content="",
-                replace_content="",
-                block_type=BlockType.EDIT,
-                block_status=raw_block.block_status,
-                status_message=raw_block.status_message,
-            )
 
         # Extract attributes from opening tag
         attr_pattern = rf"<{BoundaryType.EDIT_BLOCK}\s+([^>]*?)>"
         attr_match = re.search(attr_pattern, raw_block.raw_content)
-
-        if not attr_match:
-            raise ValueError(f"Failed to parse raw block {raw_block.block_id}")
-
-        attr_string = attr_match.group(1)
+        attr_string = attr_match.group(1)  # ty:ignore[possibly-missing-attribute]
 
         # Parse attributes
         attrs = self._parse_attributes(attr_string)
 
         file_path = attrs.get("path", "").strip()
         operation = attrs.get("operation", "").strip()
+
+        # Validate required attributes
+        if not file_path:
+            return SearchReplaceBlock(
+                block_id=raw_block.block_id,
+                file_path="",
+                search_content="",
+                replace_content="",
+                block_type=BlockType.UNKNOWN,
+                block_status=BlockStatus.PARSE_ERROR,
+                status_message="Missing required attribute 'path' in edit block",
+            )
+
+        if not operation:
+            return SearchReplaceBlock(
+                block_id=raw_block.block_id,
+                file_path=file_path,
+                search_content="",
+                replace_content="",
+                block_type=BlockType.UNKNOWN,
+                block_status=BlockStatus.PARSE_ERROR,
+                status_message="Missing required attribute 'operation' in edit block",
+            )
 
         # Determine block type
         block_type_map = {
@@ -228,7 +189,19 @@ class EditBlockService(Service, UserInteractive):
             "create": BlockType.CREATE,
             "edit": BlockType.EDIT,
         }
-        block_type = block_type_map.get(operation, BlockType.EDIT)
+        block_type = block_type_map.get(operation)
+
+        # Validate operation is recognized
+        if block_type is None:
+            return SearchReplaceBlock(
+                block_id=raw_block.block_id,
+                file_path=file_path,
+                search_content="",
+                replace_content="",
+                block_type=BlockType.UNKNOWN,
+                block_status=BlockStatus.INVALID_OPERATION_ERROR,
+                status_message=f"Invalid operation '{operation}'. Valid operations are: edit, create, delete, replace",
+            )
 
         # Extract content based on operation type
         search_content = ""
@@ -236,7 +209,22 @@ class EditBlockService(Service, UserInteractive):
 
         if block_type == BlockType.EDIT:
             # For edit operations, extract search and replace content
+
+            # Validate tag balance before extracting content
+            is_valid, error_msg = await self.check_single_block_tags_balanced(raw_block.raw_content)
+            if not is_valid:
+                return SearchReplaceBlock(
+                    block_id=raw_block.block_id,
+                    file_path=file_path,
+                    search_content="",
+                    replace_content="",
+                    block_type=block_type,
+                    block_status=BlockStatus.PARSE_ERROR,
+                    status_message=f"Unbalanced tags: {error_msg}",
+                )
+
             search_content, replace_content = await self.extract_search_replace_content(raw_block.raw_content)
+
         elif block_type in (BlockType.CREATE, BlockType.REPLACE):
             # For create/replace operations, extract content directly
             replace_content = await self.extract_edit_block_content(raw_block.raw_content)
@@ -247,8 +235,8 @@ class EditBlockService(Service, UserInteractive):
             search_content=search_content,
             replace_content=replace_content,
             block_type=block_type,
-            block_status=raw_block.block_status,
-            status_message=raw_block.status_message,
+            block_status=BlockStatus.VALID,
+            status_message="",
         )
 
     async def convert_raw_blocks_to_search_replace(
@@ -343,6 +331,10 @@ class EditBlockService(Service, UserInteractive):
         file_service: FileService = self.app.make(FileService)
 
         for block in blocks:
+            # Skip validation if block is already invalid
+            if block.block_status != BlockStatus.VALID:
+                continue
+
             file_path = Path(block.file_path)
 
             # If the path is relative, resolve it against the project root
@@ -351,15 +343,10 @@ class EditBlockService(Service, UserInteractive):
             else:
                 file_path = file_path.resolve()
 
-            # Check if block has a valid operation type
-            if block.block_type == BlockType.UNKNOWN:
-                block.block_status = BlockStatus.INVALID_OPERATION_ERROR
-                block.status_message = "Invalid operation type. Valid operations are: edit, add, delete, replace"
-                continue
-
             # Check if file is in read-only context
             file_context = file_service.get_file_context(file_path)
 
+            # AI: Why is the below triggering when `file_context` is None ai?
             if file_context and file_context.mode == FileMode.READ_ONLY:
                 block.block_status = BlockStatus.READ_ONLY_ERROR
                 block.status_message = f"Cannot edit read-only file: {block.file_path}"

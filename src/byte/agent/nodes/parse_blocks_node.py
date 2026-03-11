@@ -14,7 +14,6 @@ from byte.code_operations import (
     NoBlocksFoundError,
     PreFlightUnparsableError,
     RawBlockService,
-    RawSearchReplaceBlock,
     SearchReplaceBlock,
 )
 from byte.support.mixins import UserInteractive
@@ -89,6 +88,8 @@ class ParseBlocksNode(Node, UserInteractive):
         # Parse and merge iterations using RawBlockService
         try:
             final_components = await self.raw_block_service.merge_iterations(state["scratch_messages"])
+            self.app["log"].info(final_components)
+
         except NoBlocksFoundError:
             return Command(goto="end_node")
         except PreFlightUnparsableError as e:
@@ -100,55 +101,11 @@ class ParseBlocksNode(Node, UserInteractive):
                     "```",
                     str(e),
                     "```",
-                    "No changes were applied. Add block_id to all blocks and retry.",
-                    f"Reply with ONLY the corrected *{EDIT_BLOCK_NAME}*.",
                     "",
                 ]
             )
 
             return Command(goto="assistant_node", update={"errors": error_message, "metadata": self.metadata})
-
-        # Validate syntax using RawBlockService
-        is_valid, error_msg, failed_blocks = await self.raw_block_service.validate_syntax(final_components)
-
-        if not is_valid:
-            # Combine all components into a single string for the new AIMessage
-            combined_content_parts = []
-            for component in final_components:
-                if isinstance(component, str):
-                    combined_content_parts.append(component)
-                elif isinstance(component, RawSearchReplaceBlock):
-                    combined_content_parts.append(component.raw_content)
-
-            combined_content = "\n".join(combined_content_parts)
-
-            # Create RemoveMessage for all existing scratch_messages
-            remove_messages = self._create_remove_messages(state["scratch_messages"])
-
-            # Create new AIMessage with combined content
-            new_ai_message = AIMessage(content=combined_content)
-
-            error_message = list_to_multiline_text(
-                [
-                    f"The following {len(failed_blocks)} *{EDIT_BLOCK_NAME}* failed validation:",
-                    "",
-                    error_msg,
-                    "",
-                    "No changes were applied.",
-                    f"Reply with ONLY the corrected *{EDIT_BLOCK_NAME}* that failed validation.",
-                ]
-            )
-
-            self.console.print_warning_panel(error_message, title="Validation Error")
-
-            return Command(
-                goto="assistant_node",
-                update={
-                    "scratch_messages": remove_messages + [new_ai_message],
-                    "errors": error_message,
-                    "metadata": self.metadata,
-                },
-            )
 
         # Convert raw blocks to SearchReplaceBlocks using EditBlockService
         components = await self.edit_block_service.convert_raw_blocks_to_search_replace(final_components)

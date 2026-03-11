@@ -1,4 +1,7 @@
 {
   "editor.insertSpaces": true,
-  "ty.path": [".venv/bin/ty"]
+  "ty.path": [".venv/bin/ty"],
+  "python.testing.pytestArgs": ["src"],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
 }

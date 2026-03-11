@@ -32,11 +32,6 @@ async def test_ask_agent_responds_to_query(application: Application, mocker):
 
     result = await agent.execute("What is Python?", display_mode="silent")
 
-    print("----")
-    print("----")
-    print("----")
-    print(result["history_messages"])
-
     # Verify the agent responded with a message
     assert "history_messages" in result
     assert len(result["history_messages"]) == 2  # User message + AI response
