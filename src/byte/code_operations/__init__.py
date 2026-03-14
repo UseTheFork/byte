@@ -5,6 +5,10 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.code_operations.blocks.base import BaseBlock
+    from byte.code_operations.blocks.base_operation_block import BaseOperationBlock
+    from byte.code_operations.blocks.file.base_file_operation_block import BaseFileOperationBlock
+    from byte.code_operations.blocks.raw import RawBlock
     from byte.code_operations.constants import EDIT_BLOCK_NAME
     from byte.code_operations.exceptions import NoBlocksFoundError, PreFlightCheckError, PreFlightUnparsableError
     from byte.code_operations.prompts import edit_block_enforcement, edit_block_messages
@@ -12,8 +16,6 @@ if TYPE_CHECKING:
         BlockStatus,
         BlockType,
         EditFormatPrompts,
-        RawSearchReplaceBlock,
-        SearchReplaceBlock,
         ShellCommandBlock,
     )
     from byte.code_operations.service.edit_block_service import EditBlockService
@@ -23,6 +25,9 @@ if TYPE_CHECKING:
 
 __all__ = (
     "EDIT_BLOCK_NAME",
+    "BaseBlock",
+    "BaseFileOperationBlock",
+    "BaseOperationBlock",
     "BlockStatus",
     "BlockType",
     "EditBlockService",
@@ -35,19 +40,22 @@ __all__ = (
     "PreFlightCheckError",
     "PreFlightUnparsableError",
     "PromptFormatProvider",
+    "RawBlock",
     "RawBlockService",
-    "RawSearchReplaceBlock",
     "ReadOnlyFileError",
     "SearchContentNotFoundError",
-    "SearchReplaceBlock",
     "ShellCommandBlock",
     "ShellCommandService",
     "edit_block_enforcement",
     "edit_block_messages",
 )
 
+
 _dynamic_imports = {
     # keep-sorted start
+    "BaseBlock": "blocks.base",
+    "BaseFileOperationBlock": "blocks.file.base_file_operation_block",
+    "BaseOperationBlock": "blocks.base_operation_block",
     "BlockStatus": "schemas",
     "BlockType": "schemas",
     "EDIT_BLOCK_NAME": "constants",
@@ -61,11 +69,10 @@ _dynamic_imports = {
     "PreFlightCheckError": "exceptions",
     "PreFlightUnparsableError": "exceptions",
     "PromptFormatProvider": "service_provider",
+    "RawBlock": "blocks.raw",
     "RawBlockService": "service.raw_block_service",
-    "RawSearchReplaceBlock": "schemas",
     "ReadOnlyFileError": "exceptions",
     "SearchContentNotFoundError": "exceptions",
-    "SearchReplaceBlock": "schemas",
     "ShellCommandBlock": "schemas",
     "ShellCommandService": "service.shell_command_service",
     "edit_block_enforcement": "prompts",

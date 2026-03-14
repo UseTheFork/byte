@@ -1,1 +1,1 @@
-EDIT_BLOCK_NAME = "XML `edit_block` Response"
+EDIT_BLOCK_NAME = "XML `operation_block` Response"

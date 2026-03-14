@@ -9,12 +9,13 @@ from byte.agent import AssistantContextSchema, BaseState, Node
 from byte.cli import InputCancelledError
 from byte.code_operations import (
     EDIT_BLOCK_NAME,
+    BaseBlock,
+    BaseOperationBlock,
     BlockStatus,
     EditBlockService,
     NoBlocksFoundError,
     PreFlightUnparsableError,
     RawBlockService,
-    SearchReplaceBlock,
 )
 from byte.support.mixins import UserInteractive
 from byte.support.utils import list_to_multiline_text
@@ -43,14 +44,14 @@ class ParseBlocksNode(Node, UserInteractive):
         """
         return [RemoveMessage(id=msg.id) for msg in messages if msg.id is not None]
 
-    def _components_to_content(self, components: list[str | SearchReplaceBlock]) -> str:
+    def _components_to_content(self, components: list[str | BaseBlock]) -> str:
         """Convert components list back to combined content string."""
         parts = []
         for component in components:
             if isinstance(component, str):
                 parts.append(component)
-            elif isinstance(component, SearchReplaceBlock):
-                parts.append(component.to_search_replace_format())
+            elif isinstance(component, BaseBlock):
+                parts.append(component.to_block_format())
         return "\n".join(parts)
 
     async def __call__(
@@ -107,17 +108,14 @@ class ParseBlocksNode(Node, UserInteractive):
 
             return Command(goto="assistant_node", update={"errors": error_message, "metadata": self.metadata})
 
-        # Convert raw blocks to SearchReplaceBlocks using EditBlockService
-        components = await self.edit_block_service.convert_raw_blocks_to_search_replace(final_components)
+        # Convert raw blocks to BaseOperationBlock using EditBlockService
+        components = await self.edit_block_service.convert_raw_blocks_to_parsed(final_components)
 
         # Extract blocks for validation
-        blocks = [c for c in components if isinstance(c, SearchReplaceBlock)]
-
-        # Validate semantics using EditBlockService
-        validated_blocks = await self.edit_block_service.validate_semantics(blocks)
+        blocks = [c for c in components if isinstance(c, BaseOperationBlock)]
 
         # Check for failed blocks
-        failed_blocks = [block for block in validated_blocks if block.block_status != BlockStatus.VALID]
+        failed_blocks = [block for block in blocks if block.status != BlockStatus.VALID]
 
         if failed_blocks:
             # Build error message
@@ -140,11 +138,11 @@ class ParseBlocksNode(Node, UserInteractive):
 
             # Rebuild components with validated blocks
             updated_components = []
-            block_map = {b.block_id: b for b in validated_blocks}
+            block_map = {b.block_id: b for b in blocks}
             for component in components:
                 if isinstance(component, str):
                     updated_components.append(component)
-                elif isinstance(component, SearchReplaceBlock):
+                elif isinstance(component, BaseOperationBlock):
                     updated_components.append(block_map[component.block_id])
 
             # Convert back to combined content for AIMessage
@@ -161,7 +159,9 @@ class ParseBlocksNode(Node, UserInteractive):
             )
 
         # All blocks valid, apply them
-        parsed_blocks = await self.edit_block_service.apply_blocks(validated_blocks)
+        parsed_blocks = await self.edit_block_service.apply_blocks(blocks)
+
+        self.app["log"].info(f"Successfully applied {len(parsed_blocks)} blocks")
 
         # Assemble final scratch message combining all content and correct blocks
         final_components = []
@@ -171,7 +171,7 @@ class ParseBlocksNode(Node, UserInteractive):
         for component in components:
             if isinstance(component, str):
                 final_components.append(component)
-            elif isinstance(component, SearchReplaceBlock):
+            elif isinstance(component, BaseBlock):
                 final_components.append(block_map[component.block_id])
 
         # Convert to combined content for final AIMessage
@@ -187,7 +187,7 @@ class ParseBlocksNode(Node, UserInteractive):
             goto="lint_node",
             update={
                 "scratch_messages": remove_messages + [final_ai_message],
-                "parsed_blocks": parsed_blocks,
+                "parsed_blocks": [block.to_dict() for block in parsed_blocks],
                 "metadata": self.metadata,
             },
         )

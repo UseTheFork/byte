@@ -112,7 +112,7 @@ async def test_parses_invalid_raw_block(application: Application):
     with pytest.raises(PreFlightUnparsableError) as exc_info:
         await raw_block_service.parse_content_to_raw_blocks(content)
 
-    assert "Unbalanced tags" in str(exc_info.value) or "<edit_block>" in str(exc_info.value)
+    assert "Opening and closing edit blocks need to match: " in str(exc_info.value)
 
 
 @pytest.mark.asyncio
@@ -205,9 +205,9 @@ async def test_merge_iterations_replaces_blocks_by_id(application: Application):
     final_components = await raw_block_service.merge_iterations(messages)
 
     # Should have only one block (replaced)
-    from byte.code_operations import RawSearchReplaceBlock
+    from byte.code_operations import RawBlock
 
-    blocks = [c for c in final_components if isinstance(c, RawSearchReplaceBlock)]
+    blocks = [c for c in final_components if isinstance(c, RawBlock)]
     assert len(blocks) == 1
     assert "new search" in blocks[0].raw_content
     assert "new replace" in blocks[0].raw_content
@@ -244,9 +244,9 @@ async def test_merge_iterations_preserves_text_between_blocks(application: Appli
     assert len(final_components) == 3
     assert isinstance(final_components[0], str)
     assert "Here's my first change:" in final_components[0]
-    from byte.code_operations import RawSearchReplaceBlock
+    from byte.code_operations import RawBlock
 
-    assert isinstance(final_components[1], RawSearchReplaceBlock)
+    assert isinstance(final_components[1], RawBlock)
     assert isinstance(final_components[2], str)
     assert "That should work." in final_components[2]
 
@@ -288,9 +288,9 @@ async def test_merge_iterations_adds_new_blocks(application: Application):
 
     final_components = await raw_block_service.merge_iterations(messages)
 
-    from byte.code_operations import RawSearchReplaceBlock
+    from byte.code_operations import RawBlock
 
-    blocks = [c for c in final_components if isinstance(c, RawSearchReplaceBlock)]
+    blocks = [c for c in final_components if isinstance(c, RawBlock)]
     assert len(blocks) == 2
     assert blocks[0].block_id == "1"
     assert blocks[1].block_id == "2"

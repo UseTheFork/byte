@@ -3,7 +3,6 @@ from typing import Annotated, TypedDict
 from langgraph.graph.message import AnyMessage, add_messages
 
 from byte.agent import ConstraintSchema, MetadataSchema, add_constraints, replace_str, update_metadata
-from byte.code_operations import SearchReplaceBlock
 
 
 class BaseState(TypedDict):
@@ -33,7 +32,7 @@ class BaseState(TypedDict):
     extracted_content: str | dict | None
 
     # These are specific to Coder
-    parsed_blocks: list[SearchReplaceBlock]
+    parsed_blocks: list[dict]
 
     # This is specific to subprocess
     command: str

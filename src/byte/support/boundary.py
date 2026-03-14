@@ -32,7 +32,7 @@ class BoundaryType(str, Enum):
 
     FILE = "file"
 
-    EDIT_BLOCK = "edit_block"
+    EDIT_BLOCK = "operation_block"
     SEARCH = "search"
     REPLACE = "replace"
     EXAMPLE = "example"

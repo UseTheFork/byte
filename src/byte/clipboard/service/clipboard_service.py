@@ -5,7 +5,6 @@ from langchain_core.messages import BaseMessage
 
 from byte import Service
 from byte.clipboard.schemas import BlockType, CodeBlock
-from byte.code_operations import SearchReplaceBlock
 from byte.support.utils import extract_content_from_message, get_language_from_filename
 
 
@@ -42,7 +41,7 @@ class ClipboardService(Service):
         blocks = []
         for language, code_content in matches:
             # Use "text" as default language if not specified
-            lang = language if language else "text"
+            lang = language or "text"
             blocks.append(CodeBlock(language=lang, content=code_content.strip(), type="message"))
 
         return blocks
@@ -59,8 +58,8 @@ class ClipboardService(Service):
         code_blocks = self._extract_code_blocks(content)
         self.code_blocks.extend(code_blocks)
 
-    async def extract_from_blocks(self, parsed_blocks: list[SearchReplaceBlock]):
-        """Extract code blocks from parsed SearchReplaceBlock instances and store them.
+    async def extract_from_blocks(self, parsed_blocks: list[dict]):
+        """Extract code blocks from parsed BaseFileOperationBlock instances and store them.
 
         Converts each block's replace_content into a CodeBlock with language detection
         based on the file path extension.
@@ -69,13 +68,19 @@ class ClipboardService(Service):
         """
 
         for block in parsed_blocks:
-            language = get_language_from_filename(block.file_path)
+            file_path = block.get("file_path")
+            content = block.get("content")
+
+            if not file_path or not content:
+                continue
+
+            language = get_language_from_filename(file_path)
             if language is None:
                 language = "text"
 
             code_block = CodeBlock(
                 language=language,
-                content=block.replace_content,
+                content=content,
                 type="block",
             )
             self.code_blocks.append(code_block)

@@ -4,22 +4,16 @@ from typing import List
 from langchain.messages import AIMessage
 
 from byte import Service
-from byte.code_operations import (
-    EDIT_BLOCK_NAME,
-    BlockStatus,
-    NoBlocksFoundError,
-    PreFlightUnparsableError,
-    RawSearchReplaceBlock,
-)
+from byte.code_operations import EDIT_BLOCK_NAME, BlockStatus, NoBlocksFoundError, PreFlightUnparsableError, RawBlock
 from byte.support import BoundaryType
 from byte.support.utils import extract_content_from_message
 
 
 class RawBlockService(Service):
-    """Service for parsing and validating RawSearchReplaceBlock objects.
+    """Service for parsing and validating RawBlock objects.
 
     This service handles the initial parsing of raw edit block content into
-    RawSearchReplaceBlock objects and performs syntax validation including:
+    RawBlock objects and performs syntax validation including:
     - Extracting block_id from edit blocks
     - Validating tag balance (search/replace tags)
     - Checking for required attributes
@@ -27,10 +21,10 @@ class RawBlockService(Service):
     Usage: Used by ParseBlocksNode to convert raw content into structured blocks
     """
 
-    async def parse_content_to_raw_blocks(self, content: str) -> List[RawSearchReplaceBlock]:
-        """Parse content into RawSearchReplaceBlock objects.
+    async def parse_content_to_raw_blocks(self, content: str) -> List[RawBlock]:
+        """Parse content into RawBlock objects.
 
-        Extracts edit blocks from content and creates RawSearchReplaceBlock objects
+        Extracts edit blocks from content and creates RawBlock objects
         with initial validation status. Blocks with missing block_id or unbalanced
         tags will be marked with appropriate error status.
 
@@ -38,7 +32,7 @@ class RawBlockService(Service):
             content: Raw content string containing edit blocks
 
         Returns:
-            List of RawSearchReplaceBlock objects with validation status
+            List of RawBlock objects with validation status
 
         Usage: `raw_blocks = await service.parse_content_to_raw_blocks(content)`
         """
@@ -57,7 +51,8 @@ class RawBlockService(Service):
             block_id = await self.extract_and_validate_block_id(attributes)
 
             raw_blocks.append(
-                RawSearchReplaceBlock(
+                RawBlock(
+                    app=self.app,
                     block_id=block_id,
                     raw_content=raw_content,
                 )
@@ -149,11 +144,11 @@ class RawBlockService(Service):
                 f"All file blocks must include a block_id."
             )
 
-    async def parse_message_to_components(self, message: AIMessage) -> list[str | RawSearchReplaceBlock]:
+    async def parse_message_to_components(self, message: AIMessage) -> list[str | RawBlock]:
         """Parse a single AIMessage into interleaved text and raw blocks.
 
         Returns:
-            List containing text strings and RawSearchReplaceBlock objects in order
+            List containing text strings and RawBlock objects in order
 
         Usage: `components = await service.parse_message_to_components(message)`
         """
@@ -172,7 +167,7 @@ class RawBlockService(Service):
 
         for block in raw_blocks:
             # Find the position of this block in the content
-            block_start = content.find(block.raw_content, last_end)
+            block_start = content.find(str(block.raw_content), last_end)
 
             if block_start == -1:
                 # This shouldn't happen, but handle gracefully
@@ -186,7 +181,7 @@ class RawBlockService(Service):
             # Add the block
             result.append(block)
 
-            last_end = block_start + len(block.raw_content)
+            last_end = block_start + len(str(block.raw_content))
 
         # Capture any remaining text after last block
         text_after = content[last_end:].strip()
@@ -196,8 +191,8 @@ class RawBlockService(Service):
         return result
 
     async def merge_components_by_block_id(
-        self, base_components: list[str | RawSearchReplaceBlock], new_blocks: list[RawSearchReplaceBlock]
-    ) -> list[str | RawSearchReplaceBlock]:
+        self, base_components: list[str | RawBlock], new_blocks: list[RawBlock]
+    ) -> list[str | RawBlock]:
         """Merge new blocks into base components, replacing by block_id.
 
         Args:
@@ -220,7 +215,7 @@ class RawBlockService(Service):
             if isinstance(component, str):
                 # Keep text strings unchanged
                 result.append(component)
-            elif isinstance(component, RawSearchReplaceBlock):
+            elif isinstance(component, RawBlock):
                 # Replace block if we have a new version, otherwise keep original
                 if component.block_id in block_map:
                     result.append(block_map[component.block_id])
@@ -236,14 +231,14 @@ class RawBlockService(Service):
 
         return result
 
-    async def merge_iterations(self, messages: list[AIMessage]) -> list[str | RawSearchReplaceBlock]:
+    async def merge_iterations(self, messages: list[AIMessage]) -> list[str | RawBlock]:
         """Build final message content by merging blocks across multiple iterations.
 
         Args:
             messages: List of AIMessage objects to merge
 
         Returns:
-            List containing interleaved text strings and RawSearchReplaceBlock objects
+            List containing interleaved text strings and RawBlock objects
 
         Usage: `final = await service.merge_iterations(messages)`
         """
@@ -262,20 +257,18 @@ class RawBlockService(Service):
             new_components = await self.parse_message_to_components(message)
 
             # Extract just the blocks from new_components
-            new_blocks = [c for c in new_components if isinstance(c, RawSearchReplaceBlock)]
+            new_blocks = [c for c in new_components if isinstance(c, RawBlock)]
 
             # Replace matching blocks in base_components by block_id
             base_components = await self.merge_components_by_block_id(base_components, new_blocks)
 
         return base_components
 
-    async def validate_syntax(
-        self, components: list[str | RawSearchReplaceBlock]
-    ) -> tuple[bool, str, list[RawSearchReplaceBlock]]:
+    async def validate_syntax(self, components: list[str | RawBlock]) -> tuple[bool, str, list[RawBlock]]:
         """Validate syntax of raw blocks in components.
 
         Args:
-            components: List of text strings and RawSearchReplaceBlock objects
+            components: List of text strings and RawBlock objects
 
         Returns:
             Tuple of (is_valid, error_message, failed_blocks)
@@ -286,7 +279,7 @@ class RawBlockService(Service):
         failed_blocks = [
             component
             for component in components
-            if isinstance(component, RawSearchReplaceBlock) and component.block_status != BlockStatus.VALID
+            if isinstance(component, RawBlock) and component.status != BlockStatus.VALID
         ]
 
         if failed_blocks:
@@ -294,7 +287,7 @@ class RawBlockService(Service):
             error_parts = []
             for block in failed_blocks:
                 error_parts.append(f"Block ID: {block.block_id}")
-                error_parts.append(f"Status: {block.block_status}")
+                error_parts.append(f"Status: {block.status}")
                 error_parts.append(f"Issue: {block.status_message}")
                 error_parts.append(f"\n{block.raw_content}\n")
 

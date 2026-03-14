@@ -6,13 +6,42 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from byte.code_operations import BlockType, EditBlockService, NoBlocksFoundError
+from byte.code_operations import BaseOperationBlock, BlockType, EditBlockService, NoBlocksFoundError, RawBlockService
+from byte.files import FileMode, FileService
 from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 from tests.utils import create_test_file
 
 if TYPE_CHECKING:
     from byte import Application
+
+
+async def parse_and_prepare_test_blocks(application: Application, content: str):
+    """ """
+    from byte.code_operations import EditBlockService
+
+    test_file = await create_test_file(application, "file1.py", "\nold content\n")
+    file_service = application.make(FileService)
+    await file_service.add_file(test_file, FileMode.EDITABLE)
+
+    test_file = await create_test_file(application, "file2.py", "\nold content\n")
+    file_service = application.make(FileService)
+    await file_service.add_file(test_file, FileMode.EDITABLE)
+
+    edit_block_service = application.make(EditBlockService)
+    raw_block_service = application.make(RawBlockService)
+
+    blocks = await raw_block_service.parse_content_to_raw_blocks(content)
+    blocks = await edit_block_service.convert_raw_blocks_to_parsed(blocks)  # ty:ignore[invalid-argument-type]
+
+    result = []
+    for block in blocks:
+        if isinstance(block, BaseOperationBlock):
+            result.append(block.to_dict())
+        else:
+            result.append(block)
+
+    return result
 
 
 @pytest.fixture
@@ -27,14 +56,11 @@ def providers():
 @pytest.mark.asyncio
 async def test_parses_simple_edit_block(application: Application):
     """Test that parser can extract a simple edit block from content."""
-    from byte.code_operations import EditBlockService
-
-    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
             Boundary.open(
-                BoundaryType.EDIT_BLOCK, meta={"path": "test.py", "operation": BlockType.EDIT, "block_id": "1"}
+                BoundaryType.EDIT_BLOCK, meta={"path": "file1.py", "operation": BlockType.EDIT, "block_id": "1"}
             ),
             Boundary.open(BoundaryType.SEARCH),
             "old content",
@@ -46,20 +72,17 @@ async def test_parses_simple_edit_block(application: Application):
         ]
     )
 
-    blocks = await parser_service.parse_content_to_blocks(content)
+    blocks = await parse_and_prepare_test_blocks(application, content)
 
     assert len(blocks) == 1
-    assert blocks[0].file_path == "test.py"
-    assert blocks[0].search_content == "\nold content\n"
-    assert blocks[0].replace_content == "\nnew content\n"
+    assert blocks[0].get("file_path") == "file1.py"
+    assert blocks[0].get("search_content") == "\nold content\n"
+    assert blocks[0].get("content") == "\nnew content\n"
 
 
 @pytest.mark.asyncio
 async def test_parses_multiple_edit_blocks(application: Application):
     """Test that parser can extract multiple edit blocks from content."""
-    from byte.code_operations import EditBlockService
-
-    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -67,7 +90,7 @@ async def test_parses_multiple_edit_blocks(application: Application):
                 BoundaryType.EDIT_BLOCK, meta={"path": "file1.py", "operation": BlockType.EDIT, "block_id": "1"}
             ),
             Boundary.open(BoundaryType.SEARCH),
-            "first search",
+            "old content",
             Boundary.close(BoundaryType.SEARCH),
             Boundary.open(BoundaryType.REPLACE),
             "first replace",
@@ -75,46 +98,37 @@ async def test_parses_multiple_edit_blocks(application: Application):
             Boundary.close(BoundaryType.EDIT_BLOCK),
             "",
             Boundary.open(
-                BoundaryType.EDIT_BLOCK, meta={"path": "file2.py", "operation": BlockType.EDIT, "block_id": "2"}
+                BoundaryType.EDIT_BLOCK, meta={"path": "file2.py", "operation": BlockType.REPLACE, "block_id": "2"}
             ),
-            Boundary.open(BoundaryType.SEARCH),
-            Boundary.close(BoundaryType.SEARCH),
-            Boundary.open(BoundaryType.REPLACE),
             "new file content",
-            Boundary.close(BoundaryType.REPLACE),
             Boundary.close(BoundaryType.EDIT_BLOCK),
         ]
     )
 
-    blocks = await parser_service.parse_content_to_blocks(content)
+    blocks = await parse_and_prepare_test_blocks(application, content)
 
     assert len(blocks) == 2
-    assert blocks[0].file_path == "file1.py"
-    assert blocks[0].search_content == "\nfirst search\n"
-    assert blocks[0].replace_content == "\nfirst replace\n"
-    assert blocks[1].file_path == "file2.py"
-    assert blocks[1].search_content == "\n"
-    assert blocks[1].replace_content == "\nnew file content\n"
+    assert blocks[0].get("file_path") == "file1.py"
+    assert blocks[0].get("search_content") == "\nold content\n"
+    assert blocks[0].get("content") == "\nfirst replace\n"
+
+    assert blocks[1].get("file_path") == "file2.py"
+    assert blocks[1].get("content") == "new file content"
 
 
 @pytest.mark.asyncio
 async def test_raises_error_when_no_blocks_found(application: Application):
     """Test that parser raises NoBlocksFoundError when content has no file blocks."""
 
-    parser_service = application.make(EditBlockService)
-
     content = "This is just plain text with no edit blocks."
 
     with pytest.raises(NoBlocksFoundError):
-        await parser_service.parse_content_to_blocks(content)
+        await parse_and_prepare_test_blocks(application, content)
 
 
 @pytest.mark.asyncio
 async def test_raises_error_on_unbalanced_file_tags(application: Application):
     """Test that parser raises PreFlightUnparsableError when file tags are unbalanced."""
-    from byte.code_operations import EditBlockService, PreFlightUnparsableError
-
-    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -126,22 +140,20 @@ async def test_raises_error_on_unbalanced_file_tags(application: Application):
             Boundary.close(BoundaryType.SEARCH),
             Boundary.open(BoundaryType.REPLACE),
             "new content",
-            Boundary.close(BoundaryType.REPLACE),
+            Boundary.close(BoundaryType.EDIT_BLOCK),
         ]
     )
 
-    with pytest.raises(
-        PreFlightUnparsableError,
-        match=f"{Boundary.open(BoundaryType.EDIT_BLOCK)} tags=1, {Boundary.close(BoundaryType.EDIT_BLOCK)} tags=0",
-    ):
-        await parser_service.parse_content_to_blocks(content)
+    blocks = await parse_and_prepare_test_blocks(application, content)
+
+    assert len(blocks) == 1
+    assert blocks[0].get("status") == "invalid"
+    assert "Unbalanced tags" in blocks[0].get("status_message")
 
 
 @pytest.mark.asyncio
 async def test_parses_create_operation_block(application: Application):
     """Test that parser correctly identifies create operation blocks."""
-
-    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -153,17 +165,15 @@ async def test_parses_create_operation_block(application: Application):
         ]
     )
 
-    blocks = await parser_service.parse_content_to_blocks(content)
+    blocks = await parse_and_prepare_test_blocks(application, content)
 
     assert len(blocks) == 1
-    assert blocks[0].block_type == BlockType.CREATE
+    assert blocks[0].get("block_type") == "CreateFileOperationBlock"
 
 
 @pytest.mark.asyncio
 async def test_parses_delete_operation_block(application: Application):
     """Test that parser correctly identifies delete operation blocks."""
-
-    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -174,17 +184,15 @@ async def test_parses_delete_operation_block(application: Application):
         ]
     )
 
-    blocks = await parser_service.parse_content_to_blocks(content)
+    blocks = await parse_and_prepare_test_blocks(application, content)
 
     assert len(blocks) == 1
-    assert blocks[0].block_type == BlockType.DELETE
+    assert blocks[0].get("block_type") == "DeleteFileOperationBlock"
 
 
 @pytest.mark.asyncio
 async def test_parses_replace_operation_block(application: Application):
     """Test that parser correctly identifies replace operation blocks."""
-
-    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
@@ -196,54 +204,23 @@ async def test_parses_replace_operation_block(application: Application):
         ]
     )
 
-    blocks = await parser_service.parse_content_to_blocks(content)
+    blocks = await parse_and_prepare_test_blocks(application, content)
 
     assert len(blocks) == 1
-    assert blocks[0].block_type == BlockType.REPLACE
-
-
-@pytest.mark.asyncio
-async def test_parses_block_with_empty_search_content(application: Application):
-    """Test that parser handles blocks with empty search content (append operation)."""
-    from byte.code_operations import EditBlockService
-
-    parser_service = application.make(EditBlockService)
-
-    content = list_to_multiline_text(
-        [
-            Boundary.open(
-                BoundaryType.EDIT_BLOCK, meta={"path": "test.py", "operation": BlockType.EDIT, "block_id": "1"}
-            ),
-            Boundary.open(BoundaryType.SEARCH),
-            Boundary.close(BoundaryType.SEARCH),
-            Boundary.open(BoundaryType.REPLACE),
-            "appended content",
-            Boundary.close(BoundaryType.REPLACE),
-            Boundary.close(BoundaryType.EDIT_BLOCK),
-        ]
-    )
-
-    blocks = await parser_service.parse_content_to_blocks(content)
-
-    assert len(blocks) == 1
-    assert blocks[0].search_content == "\n"
-    assert blocks[0].replace_content == "\nappended content\n"
+    assert blocks[0].get("block_type") == "ReplaceFileOperationBlock"
 
 
 @pytest.mark.asyncio
 async def test_parses_block_with_empty_replace_content(application: Application):
     """Test that parser handles blocks with empty replace content (deletion operation)."""
-    from byte.code_operations import EditBlockService
-
-    parser_service = application.make(EditBlockService)
 
     content = list_to_multiline_text(
         [
             Boundary.open(
-                BoundaryType.EDIT_BLOCK, meta={"path": "test.py", "operation": BlockType.EDIT, "block_id": "1"}
+                BoundaryType.EDIT_BLOCK, meta={"path": "file1.py", "operation": BlockType.EDIT, "block_id": "1"}
             ),
             Boundary.open(BoundaryType.SEARCH),
-            "content to remove",
+            "old content",
             Boundary.close(BoundaryType.SEARCH),
             Boundary.open(BoundaryType.REPLACE),
             Boundary.close(BoundaryType.REPLACE),
@@ -251,11 +228,11 @@ async def test_parses_block_with_empty_replace_content(application: Application)
         ]
     )
 
-    blocks = await parser_service.parse_content_to_blocks(content)
+    blocks = await parse_and_prepare_test_blocks(application, content)
 
     assert len(blocks) == 1
-    assert blocks[0].search_content == "\ncontent to remove\n"
-    assert blocks[0].replace_content == "\n"
+    assert blocks[0].get("search_content") == "\nold content\n"
+    assert blocks[0].get("content") == "\n"
 
 
 @pytest.mark.asyncio

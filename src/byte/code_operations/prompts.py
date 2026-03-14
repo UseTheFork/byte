@@ -144,7 +144,6 @@ edit_block_system = list_to_multiline_text(
         "",
         "File Operations:",
         f"- Only edit files that the user has added to the chat. Refer to `{Boundary.open(BoundaryType.CONTEXT, meta={'type': 'editable files'})}`",
-        '- For new files: use operation="create" with empty search, content in replace',
         f"- To move code: use 2 {EDIT_BLOCK_NAME} (1 to delete, 1 to insert)",
         "",
         "User Intent:",
