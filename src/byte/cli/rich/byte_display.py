@@ -59,11 +59,9 @@ class ByteDisplay:
         # Render syntax to get highlighted lines
         rendered_lines = console.render_lines(syntax, options)
 
-        yield Text.from_markup("[primary]▌[/primary][secondary]▌[/secondary]")
-
         # Add border to each rendered line
         for segments in rendered_lines:
-            line_text = Text.from_markup("[primary]▌ [/primary]")
+            line_text = Text.from_markup("[primary]▌[/primary][secondary]▌[/secondary]")
             for segment in segments:
                 line_text.append(segment.text, segment.style)
             yield line_text
