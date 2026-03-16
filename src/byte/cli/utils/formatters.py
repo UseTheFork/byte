@@ -53,7 +53,7 @@ class MarkdownStream:
         """Convert <agent_plan> tags to markdown with visual separators."""
 
         # Replace opening tag with a visual header
-        text = re.sub(rf"<{BoundaryType.PLAN}>", "```byte\nAgent Plan\n```", text)
+        text = re.sub(rf"<{BoundaryType.PLAN}>", "```byte\n Agent Plan\n```", text)
         text = re.sub(rf"</{BoundaryType.PLAN}>", "", text)
 
         # Replace operation_block opening tags with code fences using file extension as lexer
@@ -68,12 +68,12 @@ class MarkdownStream:
 
             # Build metadata header
             metadata_parts = ["```byte"]
-            if operation_match:
-                metadata_parts.append(f"Operation: {operation_match.group(1)}")
-            if path_match:
-                metadata_parts.append(f"Path: {path_match.group(1)}`\n")
             if block_id_match:
-                metadata_parts.append(f"Block ID: {block_id_match.group(1)}")
+                metadata_parts.append(f" Block ID: {block_id_match.group(1)}")
+            if operation_match:
+                metadata_parts.append(f" Operation: `{operation_match.group(1)}`")
+            if path_match:
+                metadata_parts.append(f" Path: `{path_match.group(1)}`")
             metadata_parts.append("```")
 
             # Determine lexer from file extension
@@ -92,6 +92,12 @@ class MarkdownStream:
 
         # Replace opening tags
         text = re.sub(rf"<{BoundaryType.EDIT_BLOCK}\s+[^>]*>", replace_operation_block_open, text)
+
+        # <<<<<<<, =======, >>>>>>>
+        text = re.sub(rf"<{BoundaryType.SEARCH}>", "<<<<<<< SEARCH", text)
+        text = re.sub(rf"</{BoundaryType.SEARCH}>", "=======", text)
+        text = re.sub(rf"<{BoundaryType.REPLACE}>", "", text)
+        text = re.sub(rf"</{BoundaryType.REPLACE}>", ">>>>>>> REPLACE", text)
 
         # Replace closing tags
         text = re.sub(rf"</{BoundaryType.EDIT_BLOCK}>", "```", text)
