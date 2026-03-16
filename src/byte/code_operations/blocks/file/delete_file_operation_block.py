@@ -32,7 +32,7 @@ class DeleteFileOperationBlock(BaseFileOperationBlock):
         sections = [
             Boundary.open(
                 BoundaryType.EDIT_BLOCK,
-                meta={"path": self.file_path, "operation": BlockType.DELETE, "block_id": self.block_id},  # type:ignore[invalid-argument-type]
+                meta={"path": self.file_path, "operation": BlockType.DELETE, "block_id": self.block_id},
             ),
             Boundary.close(BoundaryType.EDIT_BLOCK),
         ]
@@ -75,13 +75,19 @@ class DeleteFileOperationBlock(BaseFileOperationBlock):
             file_discovery_service: FileDiscoveryService = self.app.make(FileDiscoveryService)
             file_service: FileService = self.app.make(FileService)
 
-            self.resolved_file_path.unlink()
+            if await self.prompt_for_confirmation(
+                f"Delete '{self.file_path}'?",
+                True,
+            ):
+                self.resolved_file_path.unlink()
 
-            # Remove the deleted file from context
-            await file_discovery_service.remove_file(self.resolved_file_path)
-            await file_service.remove_file(str(self.resolved_file_path))
+                # Remove the deleted file from context
+                await file_discovery_service.remove_file(self.resolved_file_path)
+                await file_service.remove_file(str(self.resolved_file_path))
 
-            return BlockStatus.APPLIED, ""
+                return BlockStatus.APPLIED, ""
+
+            return BlockStatus.VALID, ""
 
         except (OSError, UnicodeEncodeError) as e:
             return BlockStatus.INVALID, f"Failed to delete file: {e!s}"

@@ -32,7 +32,7 @@ class ReplaceFileOperationBlock(BaseFileOperationBlock):
         sections = [
             Boundary.open(
                 BoundaryType.EDIT_BLOCK,
-                meta={"path": self.file_path, "operation": BlockType.REPLACE, "block_id": self.block_id},  # type:ignore[invalid-argument-type]
+                meta={"path": self.file_path, "operation": BlockType.REPLACE, "block_id": self.block_id},
             ),
             self.content,
             Boundary.close(BoundaryType.EDIT_BLOCK),
@@ -63,14 +63,20 @@ class ReplaceFileOperationBlock(BaseFileOperationBlock):
     async def apply(self) -> tuple[BlockStatus, str]:
         """ """
         try:
-            # Create parent directories if they don't exist
-            self.resolved_file_path.parent.mkdir(parents=True, exist_ok=True)
+            if await self.prompt_for_confirmation(
+                f"Replace all contents of '{self.file_path}'?",
+                True,
+            ):
+                # Create parent directories if they don't exist
+                self.resolved_file_path.parent.mkdir(parents=True, exist_ok=True)
 
-            # Write content to file
-            content = self.content.strip("\n")
-            self.resolved_file_path.write_text(content, encoding="utf-8")
+                # Write content to file
+                content = self.content.strip("\n")
+                self.resolved_file_path.write_text(content, encoding="utf-8")
 
-            return BlockStatus.APPLIED, ""
+                return BlockStatus.APPLIED, ""
+
+            return BlockStatus.VALID, ""
 
         except (OSError, UnicodeEncodeError) as e:
             return BlockStatus.INVALID, f"Failed to create file: {e!s}"
