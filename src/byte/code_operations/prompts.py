@@ -41,7 +41,6 @@ edit_block_system = list_to_multiline_text(
         f"## *{EDIT_BLOCK_NAME}* Format:",
         "",
         f"**For `{BlockType.EDIT}` operations** (modifying existing content):",
-        "```language",
         Boundary.open(
             BoundaryType.EDIT_BLOCK, meta={"path": "full/file/path", "operation": BlockType.EDIT, "block_id": "1"}
         ),
@@ -63,10 +62,8 @@ edit_block_system = list_to_multiline_text(
         Boundary.comment("- New content to replace the search content with"),
         Boundary.close(BoundaryType.REPLACE),
         Boundary.close(BoundaryType.EDIT_BLOCK),
-        "```",
         "",
         f"**For `{BlockType.CREATE}`, `{BlockType.DELETE}`, and `{BlockType.REPLACE}` operations:**",
-        "```language",
         Boundary.open(
             BoundaryType.EDIT_BLOCK,
             meta={
@@ -77,12 +74,10 @@ edit_block_system = list_to_multiline_text(
         ),
         Boundary.comment(f"- File content (empty for `{BlockType.DELETE}`)"),
         Boundary.close(BoundaryType.EDIT_BLOCK),
-        "```",
         "",
         "## Examples:",
         "",
         "**Create a new file:**",
-        "```python",
         Boundary.open(
             BoundaryType.EDIT_BLOCK,
             meta={"path": "mathweb/flask/app.py", "operation": f"{BlockType.CREATE}", "block_id": "1"},
@@ -90,10 +85,8 @@ edit_block_system = list_to_multiline_text(
         "import math",
         "from flask import Flask",
         Boundary.close(BoundaryType.EDIT_BLOCK),
-        "```",
         "",
         "**Edit existing file content:**",
-        "```python",
         Boundary.open(
             BoundaryType.EDIT_BLOCK,
             meta={"path": "mathweb/flask/app.py", "operation": f"{BlockType.EDIT}", "block_id": "1"},
@@ -106,18 +99,14 @@ edit_block_system = list_to_multiline_text(
         "from flask import Flask",
         Boundary.close(BoundaryType.REPLACE),
         Boundary.close(BoundaryType.EDIT_BLOCK),
-        "```",
         "",
         "**Delete file:**",
-        "```python",
         Boundary.open(
             BoundaryType.EDIT_BLOCK, meta={"path": "old_config.py", "operation": f"{BlockType.DELETE}", "block_id": "1"}
         ),
         Boundary.close(BoundaryType.EDIT_BLOCK),
-        "```",
         "",
         "**Replace all file contents:**",
-        "```python",
         Boundary.open(
             BoundaryType.EDIT_BLOCK, meta={"path": "config.py", "operation": f"{BlockType.REPLACE}", "block_id": "1"}
         ),
@@ -130,7 +119,6 @@ edit_block_system = list_to_multiline_text(
         "    port: int = 8000",
         '    database_url: str = os.getenv("DATABASE_URL", "sqlite:///app.db")',
         Boundary.close(BoundaryType.EDIT_BLOCK),
-        "```",
         "",
         "## **CRITICAL RULES:**",
         "File Paths:",
@@ -244,7 +232,6 @@ edit_block_messages = [
                 "3. Update get_factorial() to call math.factorial instead.",
                 Boundary.close(BoundaryType.PLAN),
                 "",
-                "```python",
                 Boundary.open(
                     BoundaryType.EDIT_BLOCK,
                     meta={"path": "mathweb/flask/app.py", "operation": f"{BlockType.EDIT}", "block_id": "1"},
@@ -257,9 +244,7 @@ edit_block_messages = [
                 "from flask import Flask",
                 Boundary.close(BoundaryType.REPLACE),
                 Boundary.close(BoundaryType.EDIT_BLOCK),
-                "```",
                 "",
-                "```python",
                 Boundary.open(
                     BoundaryType.EDIT_BLOCK,
                     meta={"path": "mathweb/flask/app.py", "operation": f"{BlockType.EDIT}", "block_id": "2"},
@@ -276,9 +261,7 @@ edit_block_messages = [
                 Boundary.open(BoundaryType.REPLACE),
                 Boundary.close(BoundaryType.REPLACE),
                 Boundary.close(BoundaryType.EDIT_BLOCK),
-                "```",
                 "",
-                "```python",
                 Boundary.open(
                     BoundaryType.EDIT_BLOCK,
                     meta={"path": "mathweb/flask/app.py", "operation": f"{BlockType.EDIT}", "block_id": "3"},
@@ -290,7 +273,6 @@ edit_block_messages = [
                 "    return str(math.factorial(n))",
                 Boundary.close(BoundaryType.REPLACE),
                 Boundary.close(BoundaryType.EDIT_BLOCK),
-                "```",
             ]
         ),
     ),
@@ -309,7 +291,6 @@ edit_block_messages = [
                 "2. Remove hello() from main.py and replace it with an import.",
                 Boundary.close(BoundaryType.PLAN),
                 "",
-                "```python",
                 Boundary.open(
                     BoundaryType.EDIT_BLOCK,
                     meta={"path": "hello.py", "operation": f"{BlockType.CREATE}", "block_id": "1"},
@@ -319,9 +300,7 @@ edit_block_messages = [
                 "",
                 '    print("hello")',
                 Boundary.close(BoundaryType.EDIT_BLOCK),
-                "```",
                 "",
-                "```python",
                 Boundary.open(
                     BoundaryType.EDIT_BLOCK, meta={"path": "main.py", "operation": f"{BlockType.EDIT}", "block_id": "2"}
                 ),
@@ -335,7 +314,6 @@ edit_block_messages = [
                 "from hello import hello",
                 Boundary.close(BoundaryType.REPLACE),
                 Boundary.close(BoundaryType.EDIT_BLOCK),
-                "```",
             ]
         ),
     ),
@@ -350,13 +328,11 @@ edit_block_messages = [
                 "1. Remove the old_config.py file completely from the project.",
                 Boundary.close(BoundaryType.PLAN),
                 "",
-                "```python",
                 Boundary.open(
                     BoundaryType.EDIT_BLOCK,
                     meta={"path": "old_config.py", "operation": f"{BlockType.DELETE}", "block_id": "1"},
                 ),
                 Boundary.close(BoundaryType.EDIT_BLOCK),
-                "```",
             ]
         ),
     ),
@@ -374,7 +350,6 @@ edit_block_messages = [
                 "1. Replace the entire contents of config.py with the new configuration structure.",
                 Boundary.close(BoundaryType.PLAN),
                 "",
-                "```python",
                 Boundary.open(
                     BoundaryType.EDIT_BLOCK,
                     meta={"path": "config.py", "operation": f"{BlockType.REPLACE}", "block_id": "1"},
@@ -388,7 +363,6 @@ edit_block_messages = [
                 "    port: int = 8000",
                 '    database_url: str = os.getenv("DATABASE_URL", "sqlite:///app.db")',
                 Boundary.close(BoundaryType.EDIT_BLOCK),
-                "```",
             ]
         ),
     ),
@@ -407,7 +381,6 @@ edit_block_messages = [
                 "2. Add try-catch block around the calculation.",
                 Boundary.close(BoundaryType.PLAN),
                 "",
-                "```python",
                 Boundary.open(
                     BoundaryType.EDIT_BLOCK,
                     meta={"path": "calculator.py", "operation": f"{BlockType.EDIT}", "block_id": "1"},
@@ -421,9 +394,7 @@ edit_block_messages = [
                 '    "Simple calculator function with error handling"',
                 Boundary.close(BoundaryType.REPLACE),
                 Boundary.close(BoundaryType.EDIT_BLOCK),
-                "```",
                 "",
-                "```python",
                 Boundary.open(
                     BoundaryType.EDIT_BLOCK,
                     meta={"path": "calculator.py", "operation": f"{BlockType.EDIT}", "block_id": "2"},
@@ -438,7 +409,6 @@ edit_block_messages = [
                 '        return "Error: Cannot divide by zero"',
                 Boundary.close(BoundaryType.REPLACE),
                 Boundary.close(BoundaryType.EDIT_BLOCK),
-                "```",
             ]
         ),
     ),

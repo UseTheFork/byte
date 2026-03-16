@@ -4,6 +4,8 @@ from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.text import Text
 
+from byte.cli.rich.code_display import CodeDisplay
+
 
 # Credits to aider: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/mdstream.py
 class Heading(BaseHeading):
@@ -32,8 +34,16 @@ class CodeBlock(BaseCodeBlock):
 
     def __rich_console__(self, console, options):
         code = str(self.text).rstrip()
-        syntax = Syntax(code, self.lexer_name, theme=self.theme, word_wrap=True, padding=(1, 0))
-        yield syntax
+
+        # Check if this is an agent_plan block
+        if self.lexer_name == "byte":
+            # Render with special styling - display each line with left border
+            yield CodeDisplay(code)
+
+        else:
+            # Fall back to normal code block rendering
+            syntax = Syntax(code, self.lexer_name, theme=self.theme, word_wrap=True, padding=(1, 0))
+            yield syntax
 
 
 # Credits to aider: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/mdstream.py

@@ -32,9 +32,9 @@ class ToolNode(Node, UserInteractive):
         for tool_call in message.tool_calls:
             console = self.app["console"]
 
-            console.print(f"[success] ●[/success] {tool_call['name']}()")
+            console.print(f"[secondary]▌ [/secondary] {tool_call['name']}()")
             for key, value in tool_call["args"].items():
-                console.print(f"  [dim]╰-[/dim] {key}: {value}")
+                console.print(f"[secondary]▌ [/secondary][dim]╰-[/dim] {key}: {value}")
 
             tool_result = await tools_by_name[tool_call["name"]].ainvoke(tool_call["args"])
 

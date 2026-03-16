@@ -269,4 +269,4 @@ class Boundary:
 
     @staticmethod
     def comment(content: str) -> str:
-        return f"<!-- {content} -->"
+        return f"<!-- \n{content}\n -->"

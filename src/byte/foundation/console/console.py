@@ -76,7 +76,8 @@ class Console:
                 "inactive_border": selected_theme.base03,  # Comments, Invisibles
             }
         )
-        self._console = RichConsole(theme=byte_theme)
+        self.rich_theme = byte_theme
+        self._console = RichConsole(theme=self.rich_theme)
 
     @property
     def console(self) -> RichConsole:

@@ -36,6 +36,7 @@ class StreamRenderingService(Service):
         self.tool_spinner_started = False
         self.active_stream = MarkdownStream(
             console=self.console.console,
+            rich_theme=self.console.rich_theme,
             mdargs={"code_theme": self.app["config"].cli.syntax_theme},
         )
 
@@ -196,6 +197,7 @@ class StreamRenderingService(Service):
         if self.display_mode == "verbose":
             self.active_stream = MarkdownStream(
                 console=self.console.console,
+                rich_theme=self.console.rich_theme,
                 mdargs={
                     "code_theme": self.app["config"].cli.syntax_theme,
                     "inline_code_lexer": "text",
