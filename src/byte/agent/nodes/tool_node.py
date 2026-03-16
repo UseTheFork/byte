@@ -7,6 +7,7 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.agent import AssistantContextSchema, AssistantNode, BaseState, Node
+from byte.cli.rich.byte_display import ByteDisplay
 from byte.support import Str
 from byte.support.mixins import UserInteractive
 from byte.support.utils import get_last_message
@@ -32,9 +33,13 @@ class ToolNode(Node, UserInteractive):
         for tool_call in message.tool_calls:
             console = self.app["console"]
 
-            console.print(f"[secondary]▌ [/secondary] {tool_call['name']}()")
+            # Format tool call information
+            tool_info_lines = [f"{tool_call['name']}()"]
             for key, value in tool_call["args"].items():
-                console.print(f"[secondary]▌ [/secondary][dim]╰-[/dim] {key}: {value}")
+                tool_info_lines.append(f"[dim]╰-[/dim] {key}: {value}")
+
+            tool_display = ByteDisplay("\n".join(tool_info_lines))
+            console.print(tool_display)
 
             tool_result = await tools_by_name[tool_call["name"]].ainvoke(tool_call["args"])
 
