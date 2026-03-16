@@ -29,16 +29,26 @@ class ToolNode(Node, UserInteractive):
 
         # Build a mapping of tool names to tool instances
         tools_by_name = {tool.name: tool for tool in tools}
+        console = self.app["console"]
 
         for tool_call in message.tool_calls:
-            console = self.app["console"]
+            # Check if the tool exists
+            if tool_call["name"] not in tools_by_name:
+                outputs.append(
+                    ToolMessage(
+                        content=f"Error: Tool '{tool_call['name']}' is not available or does not exist.",
+                        name=tool_call["name"],
+                        tool_call_id=tool_call["id"],
+                    )
+                )
+                continue
 
             # Format tool call information
-            tool_info_lines = [f"{tool_call['name']}()"]
+            tool_info_lines = [f" {tool_call['name']}()"]
             for key, value in tool_call["args"].items():
-                tool_info_lines.append(f"[dim]╰-[/dim] {key}: {value}")
+                tool_info_lines.append(f" ╰- {key}: `{value}`")
 
-            tool_display = ByteDisplay("\n".join(tool_info_lines))
+            tool_display = ByteDisplay("\n".join(tool_info_lines), theme=console.syntax_theme)
             console.print(tool_display)
 
             tool_result = await tools_by_name[tool_call["name"]].ainvoke(tool_call["args"])

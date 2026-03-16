@@ -180,7 +180,7 @@ class PromptToolkitService(Service):
         message = payload.get("message", message)
 
         console.print()
-        console.rule("[primary]/[/primary][secondary]/[/secondary] Byte")
+        console.rule("[primary]▌[/primary][secondary]▌[/secondary] Byte")
         # Output info panel if it contains content
         if info_panel:
             console.print(Group(*info_panel))

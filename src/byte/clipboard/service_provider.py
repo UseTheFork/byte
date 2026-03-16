@@ -12,21 +12,11 @@ class ClipboardServiceProvider(ServiceProvider):
     """
 
     def services(self) -> List[Type[Service]]:
-        """Register clipboard-related services.
-
-        Returns:
-            List containing ClipboardService for managing copy operations.
-        """
         return [
             ClipboardService,
         ]
 
     def commands(self) -> List[Type[Command]]:
-        """Register clipboard-related commands.
-
-        Returns:
-            List of commands for copying files and managing clipboard context.
-        """
         return [
             # keep-sorted start
             CopyCommand,

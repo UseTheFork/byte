@@ -206,6 +206,7 @@ class StreamRenderingService(Service):
 
             formatted_name = self._format_agent_name(self.agent_name)
             if self.display_mode in ["verbose"]:
+                self.console.print("")
                 self.console.rule(f"[primary]{formatted_name}[/primary]", style="primary")
 
     async def end_stream(self):

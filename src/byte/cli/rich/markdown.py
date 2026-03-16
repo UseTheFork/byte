@@ -40,7 +40,7 @@ class CodeBlock(BaseCodeBlock):
             yield ByteDisplay(code, theme=self.theme)
         else:
             # Fall back to normal code block rendering
-            syntax = Syntax(code, self.lexer_name, theme=self.theme, word_wrap=True, padding=(1, 0))
+            syntax = Syntax(code, self.lexer_name, theme=self.theme, word_wrap=True)
             yield syntax
 
 
