@@ -4,7 +4,7 @@ from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.text import Text
 
-from byte.cli.rich.code_display import CodeDisplay
+from byte.cli.rich.byte_display import ByteDisplay
 
 
 # Credits to aider: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/mdstream.py
@@ -37,9 +37,7 @@ class CodeBlock(BaseCodeBlock):
 
         # Check if this is an agent_plan block
         if self.lexer_name == "byte":
-            # Render with special styling - display each line with left border
-            yield CodeDisplay(code)
-
+            yield ByteDisplay(code, theme=self.theme)
         else:
             # Fall back to normal code block rendering
             syntax = Syntax(code, self.lexer_name, theme=self.theme, word_wrap=True, padding=(1, 0))
