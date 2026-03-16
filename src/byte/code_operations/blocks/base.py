@@ -6,12 +6,13 @@ from typing import TYPE_CHECKING
 
 from byte.code_operations.schemas import BlockStatus
 from byte.support import BoundaryType
+from byte.support.mixins import UserInteractive
 
 if TYPE_CHECKING:
     from byte.foundation import Application
 
 
-class BaseBlock(ABC):
+class BaseBlock(ABC, UserInteractive):
     """Base class for all block types in the code operations domain.
 
     Provides abstract interface for formatting blocks as errors and as
