@@ -6,7 +6,7 @@ from rich.text import Text
 class ByteDisplay:
     """A Rich renderable that displays code with a left border character on each line.
 
-    Displays code with `▌ ` prefix on each line, providing a visual left border.
+    Displays code with `▌▌` prefix on each line, providing a visual left border.
 
     Usage: `display = ByteDisplay(code)`
     """
