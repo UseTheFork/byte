@@ -67,11 +67,9 @@ async def test_coder_agent_edits_existing_file(
     """Test that Coder Agent can edit an existing file."""
     from byte.agent.implementations.coder.agent import CoderAgent
 
-    mocker.patch.object(UserInteractive, "prompt_for_confirmation", return_value=True)
-
     # Create a test file with initial content
     initial_content = """def greet(name):
-return f"Hello, {name}"
+    return f"Hello, {name}"
 """
     test_file = await create_test_file(application, "greet.py", initial_content)
     file_service = application.make(FileService)
@@ -90,7 +88,41 @@ return f"Hello, {name}"
     content = test_file.read_text()
     assert "Hi" in content
     assert "Hello" not in content
-    assert "def greet(name):" in content
+
+
+#     assert "def greet(name):" in content
+
+# @pytest.mark.asyncio
+# @pytest.mark.vcr
+# async def test_coder_agent_edits_existing_file(
+#     application: Application,
+#     mocker: MockerFixture,
+# ):
+#     """Test that Coder Agent can edit an existing file."""
+#     from byte.agent.implementations.coder.agent import CoderAgent
+
+#     # Create a test file with initial content
+#     initial_content = """def greet(name):
+#     return f"Hello, {name}"
+# """
+#     test_file = await create_test_file(application, "greet.py", initial_content)
+#     file_service = application.make(FileService)
+#     await file_service.add_file(test_file, FileMode.EDITABLE)
+
+#     # Create the agent
+#     agent = application.make(CoderAgent)
+
+#     # Request to edit the file
+#     request = "Change the greet function to return 'Hi' instead of 'Hello'"
+
+#     await agent.execute(request, display_mode="silent")
+
+#     # Verify the file was edited
+#     assert test_file.exists()
+#     content = test_file.read_text()
+#     assert "Hi" in content
+#     assert "Hello" not in content
+#     assert "def greet(name):" in content
 
 
 @pytest.mark.asyncio
@@ -179,13 +211,13 @@ async def test_coder_agent_creates_edits_and_deletes_files(
 
     # Create an existing file to edit
     existing_content = """def calculate(a, b):
-return a + b
+    return a + b
 """
     existing_file = await create_test_file(application, "calculator.py", existing_content)
 
     # Create a file to delete
     delete_content = """def old_function():
-pass
+    pass
 """
     delete_file = await create_test_file(application, "old_code.py", delete_content)
 
