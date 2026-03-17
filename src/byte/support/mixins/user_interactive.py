@@ -47,6 +47,9 @@ class UserInteractive:
         if not self.app:
             raise RuntimeError("No container available - ensure service is properly initialized")
 
+        if self.app.running_unit_tests():
+            return default
+
         interaction_service = self.app.make(InteractionService)
         return await interaction_service.confirm(message, default)
 
