@@ -39,7 +39,7 @@ async def test_ask_agent_responds_to_query(application: Application, mocker):
     assert "<user_message>" in result["history_messages"][0].content
     assert "What is Python?" in result["history_messages"][0].content
 
-    assert "'d be happy to explain what Python is!" in result["history_messages"][1].content
+    assert "Python is a high-level" in result["history_messages"][1].content
     assert '<agent_message agent_type="AskAgent">' in result["history_messages"][1].content
     assert "[{'text': " not in result["history_messages"][1].content
 
