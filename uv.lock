@@ -275,6 +275,7 @@ dev = [
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
+    { name = "pytest-env" },
     { name = "pytest-mock" },
     { name = "pytest-recording" },
     { name = "python-semantic-release" },
@@ -326,6 +327,7 @@ dev = [
     { name = "pytest", specifier = ">=8.4.2" },
     { name = "pytest-asyncio", specifier = ">=1.2.0" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
+    { name = "pytest-env", specifier = ">=1.5.1" },
     { name = "pytest-mock", specifier = ">=3.15.1" },
     { name = "pytest-recording", specifier = ">=0.13.4" },
     { name = "python-semantic-release", specifier = ">=9.21.1" },
@@ -2038,6 +2040,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/5e/f7/c933acc76f5208b3b00089573cf6a2bc26dc80a8aece8f52bb7d6b1855ca/pytest_cov-7.0.0.tar.gz", hash = "sha256:33c97eda2e049a0c5298e91f519302a1334c26ac65c1a483d6206fd458361af1", size = 54328, upload-time = "2025-09-09T10:57:02.113Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ee/49/1377b49de7d0c1ce41292161ea0f721913fa8722c19fb9c1e3aa0367eecb/pytest_cov-7.0.0-py3-none-any.whl", hash = "sha256:3b8e9558b16cc1479da72058bdecf8073661c7f57f7d3c5f22a1c23507f2d861", size = 22424, upload-time = "2025-09-09T10:57:00.695Z" },
+]
+
+[[package]]
+name = "pytest-env"
+version = "1.5.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+    { name = "python-dotenv" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/7b/95/84ce040c3a57088e54f8eccef3b849d79a65e3cda681c641ae809761727b/pytest_env-1.5.1.tar.gz", hash = "sha256:712866d23819096711f249e2befc1e665fc8137446a8f42945f569abda528586", size = 15782, upload-time = "2026-03-12T21:22:45.461Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ea/7d/95e656c676bcb22213dcc2eb56d4f06250a9eb484a8441bede4e0c6ca685/pytest_env-1.5.1-py3-none-any.whl", hash = "sha256:295bdffa5494261888df3a3f38b38d1e7ebfe2917ced4a16e1913382792b3446", size = 10132, upload-time = "2026-03-12T21:22:44.347Z" },
 ]
 
 [[package]]
