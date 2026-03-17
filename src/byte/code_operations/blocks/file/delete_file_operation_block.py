@@ -59,7 +59,7 @@ class DeleteFileOperationBlock(BaseFileOperationBlock):
 
         return list_to_multiline_text(sections)
 
-    async def apply(self) -> tuple[BlockStatus, str]:
+    async def apply(self):
         """Apply the delete operation to the file system.
 
         Deletes the file and removes it from both the file discovery service
@@ -85,9 +85,8 @@ class DeleteFileOperationBlock(BaseFileOperationBlock):
                 await file_discovery_service.remove_file(self.resolved_file_path)
                 await file_service.remove_file(str(self.resolved_file_path))
 
-                return BlockStatus.APPLIED, ""
-
-            return BlockStatus.VALID, ""
+                self.status = BlockStatus.APPLIED
 
         except (OSError, UnicodeEncodeError) as e:
-            return BlockStatus.INVALID, f"Failed to delete file: {e!s}"
+            self.status = BlockStatus.INVALID
+            self.status_message = f"Operation Failed: {e!s}"

@@ -4,7 +4,6 @@ import re
 from abc import abstractmethod
 from typing import TYPE_CHECKING
 
-from byte.code_operations import BlockStatus
 from byte.code_operations.blocks.base import BaseBlock
 from byte.support import BoundaryType
 
@@ -49,13 +48,10 @@ class BaseOperationBlock(BaseBlock):
         pass
 
     @abstractmethod
-    async def apply(self) -> tuple[BlockStatus, str]:
+    async def apply(self):
         """Apply the block operation to the file system.
 
-        Returns:
-            Tuple of (success, error_message). Empty error_message if successful.
-
-        Usage: `success, error = block.apply()` -> (BlockStatus.APPLIED, "") or (BlockStatus.INVALID, "error message")
+        Usage: `success, error = block.apply()`
         """
         pass
 

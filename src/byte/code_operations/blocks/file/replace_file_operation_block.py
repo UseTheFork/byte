@@ -60,7 +60,7 @@ class ReplaceFileOperationBlock(BaseFileOperationBlock):
 
         return list_to_multiline_text(sections)
 
-    async def apply(self) -> tuple[BlockStatus, str]:
+    async def apply(self):
         """ """
         try:
             if await self.prompt_for_confirmation(
@@ -74,9 +74,8 @@ class ReplaceFileOperationBlock(BaseFileOperationBlock):
                 content = self.content.strip("\n")
                 self.resolved_file_path.write_text(content, encoding="utf-8")
 
-                return BlockStatus.APPLIED, ""
-
-            return BlockStatus.VALID, ""
+                self.status = BlockStatus.APPLIED
 
         except (OSError, UnicodeEncodeError) as e:
-            return BlockStatus.INVALID, f"Failed to create file: {e!s}"
+            self.status = BlockStatus.INVALID
+            self.status_message = f"Operation Failed: {e!s}"

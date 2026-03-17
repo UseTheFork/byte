@@ -60,7 +60,7 @@ class CreateFileOperationBlock(BaseFileOperationBlock):
 
         return list_to_multiline_text(sections)
 
-    async def apply(self) -> tuple[BlockStatus, str]:
+    async def apply(self):
         """Apply the create operation to the file system.
 
         Creates a new file with the block's content. Creates parent directories
@@ -84,12 +84,11 @@ class CreateFileOperationBlock(BaseFileOperationBlock):
                 content = self.content.strip("\n")
                 self.resolved_file_path.write_text(content, encoding="utf-8")
 
-                return BlockStatus.APPLIED, ""
-
-            return BlockStatus.VALID, ""
+                self.status = BlockStatus.APPLIED
 
         except (OSError, UnicodeEncodeError) as e:
-            return BlockStatus.INVALID, f"Failed to create file: {e!s}"
+            self.status = BlockStatus.INVALID
+            self.status_message = f"Failed to create file: {e!s}"
 
     def to_dict(self) -> dict:
         """Serialize edit block to dictionary."""

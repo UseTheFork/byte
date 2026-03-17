@@ -218,7 +218,7 @@ class EditFileOperationBlock(BaseFileOperationBlock):
 
         return list_to_multiline_text(sections)
 
-    async def apply(self) -> tuple[BlockStatus, str]:
+    async def apply(self):
         """Apply the edit operation to the file system.
 
         Replaces the first occurrence of search content with replace content in the file.
@@ -246,10 +246,11 @@ class EditFileOperationBlock(BaseFileOperationBlock):
 
             self.resolved_file_path.write_text(new_content, encoding="utf-8")
 
-            return BlockStatus.APPLIED, ""
+            self.status = BlockStatus.APPLIED
 
-        except (OSError, UnicodeDecodeError, UnicodeEncodeError) as e:
-            return BlockStatus.INVALID, f"Failed to create file: {e!s}"
+        except (PermissionError, OSError, UnicodeDecodeError, UnicodeEncodeError) as e:
+            self.status = BlockStatus.INVALID
+            self.status_message = f"Operation Failed: {e!s}"
 
     def to_dict(self) -> dict:
         """Serialize edit block to dictionary."""
