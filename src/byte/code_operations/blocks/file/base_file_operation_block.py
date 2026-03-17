@@ -121,7 +121,7 @@ class BaseFileOperationBlock(BaseOperationBlock):
     def to_dict(self) -> dict:
         """Serialize file operation block to dictionary."""
         data = super().to_dict()
-        data["file_path"] = self.file_path
-        data["resolved_file_path"] = str(self.resolved_file_path)
+        data["file_path"] = str(self.file_path) if hasattr(self, "file_path") else None
+        data["resolved_file_path"] = str(self.resolved_file_path) if hasattr(self, "resolved_file_path") else None
         data["content"] = str(self.content)
         return data
