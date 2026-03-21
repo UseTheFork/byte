@@ -8,8 +8,6 @@ if TYPE_CHECKING:
     from byte.llm.schemas import (
         ModelBehavior,
         ModelConstraints,
-        ModelParams,
-        ModelProvider,
         ModelSchema,
         ReinforcementMode,
     )
@@ -21,8 +19,6 @@ __all__ = (
     "LLMServiceProvider",
     "ModelBehavior",
     "ModelConstraints",
-    "ModelParams",
-    "ModelProvider",
     "ModelSchema",
     "ReinforcementMode",
 )
@@ -32,8 +28,6 @@ _dynamic_imports = {
     "LLMServiceProvider": "service_provider",
     "ModelBehavior": "schemas",
     "ModelConstraints": "schemas",
-    "ModelProvider": "schemas",
-    "ModelParams": "schemas",
     "ModelSchema": "schemas",
     "ReinforcementMode": "schemas",
 }

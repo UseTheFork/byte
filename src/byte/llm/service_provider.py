@@ -37,8 +37,8 @@ class LLMServiceProvider(ServiceProvider):
     async def boot_messages(self, payload: Payload) -> Payload:
         llm_service = self.app.make(LLMService)
         # Display active model configuration for user awareness
-        main_model = llm_service._main_schema.params.model
-        weak_model = llm_service._weak_schema.params.model
+        main_model = f"{llm_service._main_schema.provider}:{llm_service._main_schema.model}"
+        weak_model = f"{llm_service._weak_schema.provider}:{llm_service._weak_schema.model}"
 
         messages = payload.get("messages", [])
         messages.append(f"[muted]Main model:[/muted] [primary]{main_model}[/primary]")

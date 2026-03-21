@@ -1,17 +1,12 @@
-from typing import Any, Type
+from typing import Any
 
-from langchain.chat_models import BaseChatModel
-from langchain_anthropic import ChatAnthropic
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_openai import ChatOpenAI
+from langchain.chat_models import BaseChatModel, init_chat_model
 
 from byte import Payload, Service
 from byte.foundation.exceptions import ByteConfigException
 from byte.llm import (
     ModelBehavior,
     ModelConstraints,
-    ModelParams,
-    ModelProvider,
     ModelSchema,
     ReinforcementMode,
 )
@@ -20,85 +15,12 @@ from byte.support import Yaml
 
 class LLMService(Service):
     """Base LLM service that all providers extend.
-    z
-        Provides a unified interface for different LLM providers (OpenAI, Anthropic, etc.)
-        with model caching and configuration management. Enables provider-agnostic
-        AI functionality throughout the application.
-        Usage: `service = LLMService(app)` -> provider-specific implementation
+
+    Provides a unified interface for different LLM providers (OpenAI, Anthropic, etc.)
+    with model caching and configuration management. Enables provider-agnostic
+    AI functionality throughout the application.
+    Usage: `service = LLMService(app)` -> provider-specific implementation
     """
-
-    def _get_default_model_for_provider(self, provider: str, model_type: str = "main") -> str:
-        """Get default model ID for a specific provider.
-
-        Args:
-            provider: Provider name ("anthropic", "openai", "google")
-            model_type: Either "main" or "weak"
-
-        Returns:
-            Default model ID for the provider
-
-        Raises:
-            ByteConfigException: If provider is not recognized
-        """
-        defaults = {
-            "anthropic": ("claude-sonnet-4-5", "claude-haiku-4-5"),
-            "openai": ("gpt-5", "gpt-5-mini"),
-            "google": ("gemini-2.5-pro", "gemini-2.5-flash-lite"),
-        }
-
-        if provider not in defaults:
-            raise ByteConfigException(f"Unknown provider: {provider}")
-
-        return defaults[provider][0] if model_type == "main" else defaults[provider][1]
-
-    def _get_default_models(self) -> tuple[str, str]:
-        """Get default main and weak model IDs based on enabled providers.
-
-        Returns:
-            Tuple of (main_model_id, weak_model_id)
-
-        Raises:
-            ByteConfigException: If no providers are enabled
-        """
-        if self.app["config"].llm.providers.anthropic.enable:
-            return ("claude-sonnet-4-5", "claude-haiku-4-5")
-        elif self.app["config"].llm.providers.gemini.enable:
-            return ("gemini-2.5-pro", "gemini-2.5-flash-lite")
-        elif self.app["config"].llm.providers.openai.enable:
-            return ("gpt-5", "gpt-5-mini")
-        else:
-            raise ByteConfigException("No LLM providers are enabled. Please enable at least one provider.")
-
-    def _get_extra_params(self, provider: str, model_type: str) -> dict[str, Any]:
-        """Get combined extra_params from model config and provider config.
-
-        Args:
-            provider: Provider name ("anthropic", "openai", "google")
-            model_type: Either "main" or "weak"
-
-        Returns:
-            Combined dictionary of extra parameters
-        """
-        # Get model-specific extra_params
-        model_config = self.app["config"].llm.main_model if model_type == "main" else self.app["config"].llm.weak_model
-        model_extra_params = model_config.extra_params or {}
-
-        # Get provider-specific extra_params
-        provider_config_map = {
-            "anthropic": self.app["config"].llm.providers.anthropic,
-            "openai": self.app["config"].llm.providers.openai,
-            "google": self.app["config"].llm.providers.gemini,
-        }
-        provider_config = provider_config_map.get(provider)
-        provider_extra_params = provider_config.extra_params if provider_config else {}
-
-        # Combine both dictionaries (provider params take precedence)
-        combined_params = {
-            **provider_extra_params,
-            **model_extra_params,
-        }
-
-        return combined_params
 
     def _configure_model_schema(self, model_id: str, model_type: str) -> ModelSchema:
         """Configure a ModelSchema from models_data.yaml.
@@ -119,23 +41,18 @@ class LLMService(Service):
         model_data = self.models_data[model_id]
         provider = model_data["provider"]
 
-        # Map provider to model class
-        provider_class_map: dict[str, Type[BaseChatModel]] = {
-            "anthropic": ChatAnthropic,
-            "openai": ChatOpenAI,
-            "google": ChatGoogleGenerativeAI,
-        }
-        model_class = provider_class_map.get(provider)
+        extra_params = {"temperature": 0.1}
 
-        # Build ModelParams
-        params = ModelParams(
-            model=model_id,
-            temperature=0.1,
-        )
+        if model_type == "weak":
+            config_params = self.app["config"].llm.main_model.extra_params
+        else:
+            config_params = self.app["config"].llm.weak_model.extra_params
+
+        combined_params = {**extra_params, **config_params}
 
         # Add provider-specific params
         if provider == "openai":
-            params.stream_usage = True
+            combined_params["stream_usage"] = True
 
         # Build ModelConstraints from YAML data
         constraints = ModelConstraints(
@@ -153,28 +70,12 @@ class LLMService(Service):
 
         behavior = ModelBehavior(reinforcement_mode=reinforcement_mode)
 
-        # Get provider config from app config
-        provider_config_map = {
-            "anthropic": self.app["config"].llm.providers.anthropic,
-            "openai": self.app["config"].llm.providers.openai,
-            "google": self.app["config"].llm.providers.gemini,
-        }
-        app_provider_config = provider_config_map.get(provider)
-
-        model_provider = ModelProvider(
-            api_key=app_provider_config.api_key,
-        )
-
-        # Get combined extra_params
-        extra_params = self._get_extra_params(provider, model_type)
-
         return ModelSchema(
-            model_class=model_class,
-            params=params,
+            provider=provider,
+            model=model_id,
             constraints=constraints,
             behavior=behavior,
-            provider=model_provider,
-            extra_params=extra_params,
+            extra_params=combined_params,
         )
 
     def boot(self) -> None:
@@ -188,21 +89,6 @@ class LLMService(Service):
         main_model_id = self.app["config"].llm.main_model.model
         weak_model_id = self.app["config"].llm.weak_model.model
 
-        # Use provider-specific defaults if models are not set or if they match provider names
-        if not main_model_id or main_model_id in ("anthropic", "openai", "google"):
-            if main_model_id in ("anthropic", "openai", "google"):
-                main_model_id = self._get_default_model_for_provider(main_model_id, "main")
-            else:
-                default_main, _ = self._get_default_models()
-                main_model_id = default_main
-
-        if not weak_model_id or weak_model_id in ("anthropic", "openai", "google"):
-            if weak_model_id in ("anthropic", "openai", "google"):
-                weak_model_id = self._get_default_model_for_provider(weak_model_id, "weak")
-            else:
-                _, default_weak = self._get_default_models()
-                weak_model_id = default_weak
-
         # Verify main_model exists in models_data
         if main_model_id not in self.models_data:
             raise ByteConfigException(f"Main model '{main_model_id}' not found in models_data.yaml")
@@ -210,34 +96,6 @@ class LLMService(Service):
         # Verify weak_model exists in models_data
         if weak_model_id not in self.models_data:
             raise ByteConfigException(f"Weak model '{weak_model_id}' not found in models_data.yaml")
-
-        # Get provider for main_model
-        main_model_provider = self.models_data[main_model_id]["provider"]
-
-        # Get provider for weak_model
-        weak_model_provider = self.models_data[weak_model_id]["provider"]
-
-        # Check if main_model provider is enabled
-        if main_model_provider == "anthropic":
-            if not self.app["config"].llm.providers.anthropic.enable:
-                raise ByteConfigException(f"Main model '{main_model_id}' requires Anthropic provider to be enabled")
-        elif main_model_provider == "openai":
-            if not self.app["config"].llm.providers.openai.enable:
-                raise ByteConfigException(f"Main model '{main_model_id}' requires OpenAI provider to be enabled")
-        elif main_model_provider == "google":
-            if not self.app["config"].llm.providers.gemini.enable:
-                raise ByteConfigException(f"Main model '{main_model_id}' requires Gemini provider to be enabled")
-
-        # Check if weak_model provider is enabled
-        if weak_model_provider == "anthropic":
-            if not self.app["config"].llm.providers.anthropic.enable:
-                raise ByteConfigException(f"Weak model '{weak_model_id}' requires Anthropic provider to be enabled")
-        elif weak_model_provider == "openai":
-            if not self.app["config"].llm.providers.openai.enable:
-                raise ByteConfigException(f"Weak model '{weak_model_id}' requires OpenAI provider to be enabled")
-        elif weak_model_provider == "google":
-            if not self.app["config"].llm.providers.gemini.enable:
-                raise ByteConfigException(f"Weak model '{weak_model_id}' requires Gemini provider to be enabled")
 
         # Configure model schemas
         self._main_schema = self._configure_model_schema(main_model_id, "main")
@@ -248,25 +106,16 @@ class LLMService(Service):
 
         # Select model schema
         model_schema = self._main_schema if model_type == "main" else self._weak_schema
-
-        schema_params = model_schema.params.model_dump(exclude_none=True)
-        provider_params_dict = model_schema.provider.params
         params_dict = model_schema.extra_params
 
         # Merge all parameters, with later dictionaries taking precedence
         merged_params = {
-            **schema_params,
-            **provider_params_dict,
             **params_dict,
             **kwargs,
         }
 
-        # Instantiate using the stored class reference
-        return model_schema.model_class(
-            max_tokens=model_schema.constraints.max_output_tokens,
-            api_key=model_schema.provider.api_key,
-            **merged_params,
-        )  # ty:ignore[call-non-callable]
+        compiled_agent = init_chat_model(f"{model_schema.provider}:{model_schema.model}", **merged_params)
+        return compiled_agent
 
     def get_main_model(self) -> BaseChatModel:
         """Convenience method for accessing the primary model.

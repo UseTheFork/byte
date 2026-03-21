@@ -1,7 +1,6 @@
 from enum import Enum
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict
 
-from langchain.chat_models import BaseChatModel
 from pydantic import BaseModel, Field
 
 
@@ -35,19 +34,6 @@ class ModelConstraints(BaseModel):
     cache_read_input_token_cost: float = 0
 
 
-class ModelParams(BaseModel):
-    """Configuration parameters for LLM model initialization.
-
-    Defines the runtime parameters used to configure and authenticate with
-    an LLM model, including model selection and behavioral settings.
-    Usage: `params = ModelParams(model="claude-sonnet-4-5", api_key="...", temperature=0.1)`
-    """
-
-    model: str = ""
-    temperature: float = 0.1
-    stream_usage: bool | None = None
-
-
 class ModelBehavior(BaseModel):
     """Behavioral configuration for model prompt engineering and output handling.
 
@@ -59,19 +45,11 @@ class ModelBehavior(BaseModel):
     reinforcement_mode: ReinforcementMode = ReinforcementMode.NONE
 
 
-class ModelProvider(BaseModel):
-    """Configuration for an LLM provider with API credentials and parameters."""
-
-    api_key: str = ""
-    params: Dict[str, Any] = Field(default_factory=dict)
-
-
 class ModelSchema(BaseModel):
     """Configuration for the main LLM model used for primary tasks."""
 
-    model_class: Optional[Type[BaseChatModel]] = None
-    params: ModelParams = Field(default_factory=ModelParams)
+    model: str = ""
+    provider: str = ""
     constraints: ModelConstraints = Field(default_factory=ModelConstraints)
     behavior: ModelBehavior = Field(default_factory=ModelBehavior)
-    provider: ModelProvider = Field(default_factory=ModelProvider)
     extra_params: Dict[str, Any] = Field(default_factory=dict, description="Additional parameters to pass to the model")

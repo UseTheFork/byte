@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from importlib import metadata
 from typing import TYPE_CHECKING
 
@@ -27,30 +26,6 @@ class LoadConfiguration(Bootstrapper):
 
         config_file_path = app.config_path("config.yaml")
         return Yaml.load_as_dict(config_file_path)
-
-    def _load_llm_providers(self, app: Application, config: ByteConfig):
-        """Load and configure LLM API keys from environment variables.
-
-        Detects available API keys and enables corresponding LLM providers.
-        Usage: `config = self._load_llm_api_keys(config)`
-        """
-        # Auto-detect and configure Anthropic
-        anthropic_key = os.getenv("ANTHROPIC_API_KEY", "")
-        if anthropic_key:
-            config.llm.providers.anthropic.enable = True
-            config.llm.providers.anthropic.api_key = anthropic_key
-
-        # Auto-detect and configure Anthropic
-        gemini_key = os.getenv("GEMINI_API_KEY", "")
-        if gemini_key:
-            config.llm.providers.gemini.enable = True
-            config.llm.providers.gemini.api_key = gemini_key
-
-        # Auto-detect and configure OpenAI
-        openai_key = os.getenv("OPENAI_API_KEY", "")
-        if openai_key:
-            config.llm.providers.openai.enable = True
-            config.llm.providers.openai.api_key = openai_key
 
     def _load_boot_config(self, app: Application, config: ByteConfig):
         """Load boot configuration from CLI arguments.
@@ -114,7 +89,6 @@ class LoadConfiguration(Bootstrapper):
 
         config = app.instance("config", ByteConfig(**migrated_config))
         self._setup_console(app, config)
-        self._load_llm_providers(app, config)
         self._load_boot_config(app, config)
 
         app.detect_environment(lambda: config.app.env)
