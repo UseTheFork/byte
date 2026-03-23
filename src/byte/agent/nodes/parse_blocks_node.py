@@ -54,9 +54,14 @@ class ParseBlocksNode(Node, UserInteractive):
                 parts.append(component.to_block_format())
         return "\n".join(parts)
 
+    def _prepare_for_error(self):
+        self.metadata.prompt_settings.has_project_information_and_context = False
+        self.metadata.prompt_settings.has_file_context = False
+        self.metadata.prompt_settings.has_masked_messages = False
+
     async def __call__(
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
-    ) -> Command[Literal["end_node", "lint_node"]]:
+    ) -> Command[Literal["end_node", "assistant_node", "lint_node"]]:
         """Parse commands from the last assistant message."""
         self.console = self.app["console"]
         self.edit_block_service = self.app.make(EditBlockService)
@@ -148,6 +153,8 @@ class ParseBlocksNode(Node, UserInteractive):
             # Convert back to combined content for AIMessage
             combined_content = self._components_to_content(updated_components)
             remove_messages = self._create_remove_messages(state["scratch_messages"])
+
+            # self.metadata
 
             return Command(
                 goto="assistant_node",

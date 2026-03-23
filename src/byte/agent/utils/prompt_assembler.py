@@ -73,7 +73,7 @@ class PromptAssembler(Bootable, Eventable):
                 Boundary.open(BoundaryType.OPERATING_PRINCIPLES),
                 Boundary.notice("You **MUST** follow these Operating Principles"),
                 *reinforcement_messages,
-                *(context.enforcement if context.enforcement else []),
+                *(context.enforcement or []),
             ]
 
             reinforcement_parts.append(Boundary.close(BoundaryType.OPERATING_PRINCIPLES))
@@ -320,28 +320,28 @@ class PromptAssembler(Bootable, Eventable):
     async def generate_state(self, state: BaseState, config, context: AssistantContextSchema) -> dict:
         user_prompt_state = {**state}
 
-        prompt_settings = context.prompt_settings
-
         user_prompt_state["examples"] = edit_block_messages
 
-        user_prompt_state["project_information_and_context"] = await self._gather_project_context()
+        if state.get("metadata", {}).prompt_settings.has_project_information_and_context:
+            user_prompt_state["project_information_and_context"] = await self._gather_project_context()
 
-        if prompt_settings.has_project_hierarchy:
+        if state.get("metadata", {}).prompt_settings.has_project_hierarchy:
             user_prompt_state["project_hierarchy"] = await self._gather_project_hierarchy()
 
         user_prompt_state["commit_guidelines"] = await self._gather_commit_guidelines()
 
-        user_prompt_state["file_context"] = await self._gather_file_context()
+        if state.get("metadata", {}).prompt_settings.has_file_context:
+            user_prompt_state["file_context"] = await self._gather_file_context()
 
-        user_prompt_state["file_context_with_line_numbers"] = await self._gather_file_context(True)
+        if state.get("metadata", {}).prompt_settings.has_file_context:
+            user_prompt_state["file_context_with_line_numbers"] = await self._gather_file_context(True)
 
         user_prompt_state["constraints_context"] = await self._gather_constraints(state)
 
-        user_prompt_state["masked_messages"] = await self._gather_masked_messages(state)
+        if state.get("metadata", {}).prompt_settings.has_masked_messages:
+            user_prompt_state["masked_messages"] = await self._gather_masked_messages(state)
 
         user_prompt_state["available_conventions"] = await self.gather_available_conventions(state)
-
-        self.app["log"].info(user_prompt_state["available_conventions"])
 
         # Reinforcement is appended to the user message.
         user_prompt_state["operating_principles"] = await self._gather_reinforcement(

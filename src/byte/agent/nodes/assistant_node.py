@@ -26,7 +26,7 @@ class AssistantNode(Node):
         self.structured_output = structured_output
         self.goto = Str.class_to_snake_case(goto)
 
-    def _create_runnable(self, context: AssistantContextSchema) -> Runnable:
+    def _create_runnable(self, state: BaseState, context: AssistantContextSchema) -> Runnable:
         """Create the runnable chain from context configuration.
 
         Assembles the prompt and model based on the mode (main or weak AI).
@@ -38,10 +38,10 @@ class AssistantNode(Node):
         Returns:
                 Runnable chain ready for invocation
 
-        Usage: `runnable = self._create_runnable(runtime.context)`
+        Usage: `runnable = self._create_runnable(state, runtime.context)`
         """
         # Select model based on mode
-        model = context.main if context.mode == "main" else context.weak
+        model = context.main if state.get("metadata", {}).mode == "main" else context.weak
 
         # Bind Structred output if provided.
         if self.structured_output is not None:
@@ -50,7 +50,6 @@ class AssistantNode(Node):
         # Bind tools if provided
         if context.tools is not None and len(context.tools) > 0:
             model = model.bind_tools(context.tools)  # ty:ignore[unresolved-attribute]
-            #  parallel_tool_calls=True
 
         # Assemble the chain
         runnable = context.prompt | model  # ty:ignore[unsupported-operator]
@@ -134,7 +133,7 @@ class AssistantNode(Node):
         while True:
             agent_state, config = await self._generate_agent_state(state, config, runtime.context)
 
-            runnable = self._create_runnable(runtime.context)
+            runnable = self._create_runnable(state, runtime.context)
 
             with get_usage_metadata_callback() as usage_metadata_callback:
                 result = await runnable.ainvoke(agent_state, config=config)

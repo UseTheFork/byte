@@ -26,6 +26,8 @@ class StartNode(Node):
         runtime: Runtime[AssistantContextSchema],
         config: RunnableConfig,
     ) -> Command[str]:
+        prompt_settings = runtime.context.prompt_settings
+
         result = {
             "agent": runtime.context.agent,
             # We always remove scratch no matter what.
@@ -38,6 +40,8 @@ class StartNode(Node):
             "metadata": MetadataSchema(
                 iteration=0,
                 erase_history=False,
+                mode=runtime.context.mode,
+                prompt_settings=prompt_settings,
             ),
         }
 

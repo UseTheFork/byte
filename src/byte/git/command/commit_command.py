@@ -82,12 +82,12 @@ class CommitCommand(Command):
             if commit_type == "Commit Plan":
                 commit_agent = self.app.make(CommitPlanAgent)
                 commit_result = await commit_agent.execute(request=prompt, display_mode="thinking")
-                await self.commit_service.process_commit_plan(commit_result["extracted_content"])
+                await self.commit_service.process_commit_plan(commit_result["data"]["result"]["extracted_content"])
             elif commit_type == "Single Commit":
                 commit_agent = self.app.make(CommitAgent)
                 commit_result = await commit_agent.execute(request=prompt, display_mode="thinking")
                 formatted_message = await self.commit_service.format_conventional_commit(
-                    commit_result["extracted_content"]
+                    commit_result["data"]["result"]["extracted_content"]
                 )
                 await self.git_service.commit(formatted_message)
 

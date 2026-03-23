@@ -57,7 +57,7 @@ class Agent(ABC, Bootable, Eventable, Configurable):
         """
         pass
 
-    async def _handle_stream_event(self, mode: str, chunk: Any):
+    async def _handle_stream_event(self, chunk: dict[str, Any] | Any):
         """Handle individual stream events for display and final message extraction.
 
         Args:
@@ -70,27 +70,15 @@ class Agent(ABC, Bootable, Eventable, Configurable):
         # self.app["log"].debug(chunk)
 
         # Filter and process based on mode
-        if mode == "messages":
+        if chunk["type"] == "messages":
             # Handle LLM token streaming
-            await stream_rendering_service.handle_message(chunk, self.__class__.__name__)
+            await stream_rendering_service.handle_message(chunk["data"], self.__class__.__name__)
 
-        elif mode == "tasks":
-            await stream_rendering_service.handle_task(chunk, self.__class__.__name__)
+        elif chunk["type"] == "tasks":
+            await stream_rendering_service.handle_task(chunk["data"], self.__class__.__name__)
             # self.app["log"].debug(chunk)
             # self.app["log"].debug(chunk.get("id"))
             # self.app["log"].debug(chunk.get("name"))
-
-            pass
-        elif mode == "updates":
-            # Handle state updates after each step
-            # await stream_rendering_service.handle_update(chunk)
-            pass
-        elif mode == "values":
-            # Handle full state after each step - could be used for progress tracking
-            pass
-        elif mode == "custom":
-            # Handle custom data from get_stream_writer()
-            pass
 
         return chunk
 
@@ -116,13 +104,15 @@ class Agent(ABC, Bootable, Eventable, Configurable):
         """
         try:
             processed_event = None
-            async for mode, chunk in graph.astream(
+            async for chunk in graph.astream(
                 input=initial_state,
                 config=config,
-                stream_mode=["values", "updates", "messages", "custom", "tasks"],
+                stream_mode=["messages", "tasks"],
                 context=await self.get_assistant_runnable(),
+                version="v2",
+                subgraphs=True,
             ):
-                processed_event = await self._handle_stream_event(mode, chunk)
+                processed_event = await self._handle_stream_event(chunk)
 
             return processed_event
         except asyncio.CancelledError:

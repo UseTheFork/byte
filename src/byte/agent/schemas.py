@@ -11,6 +11,21 @@ if TYPE_CHECKING:
 
 
 @dataclass
+class PromptSettingsSchema:
+    """Settings for controlling prompt behavior and content.
+
+    Boolean flags to enable or disable specific prompt features.
+
+    Usage: `settings = PromptSettingsSchema(has_project_hierarchy=True)`
+    """
+
+    has_project_hierarchy: bool = Field(default=True)
+    has_project_information_and_context: bool = Field(default=True)
+    has_file_context: bool = Field(default=True)
+    has_masked_messages: bool = Field(default=True)
+
+
+@dataclass
 class MetadataSchema:
     """Metadata tracking for agent execution state.
 
@@ -21,6 +36,8 @@ class MetadataSchema:
 
     iteration: int = Field(default=0)
     erase_history: bool = Field(default=False)
+    mode: Literal["main", "weak", "none"] = Field(default="main")
+    prompt_settings: PromptSettingsSchema = Field(default_factory=PromptSettingsSchema)
 
 
 @dataclass
@@ -59,18 +76,6 @@ class AgentConfigStringSchema(AgentConfigSchema):
     """String configuration setting for agents."""
 
     value: str = Field(default="")
-
-
-@dataclass
-class PromptSettingsSchema:
-    """Settings for controlling prompt behavior and content.
-
-    Boolean flags to enable or disable specific prompt features.
-
-    Usage: `settings = PromptSettingsSchema(has_project_hierarchy=True)`
-    """
-
-    has_project_hierarchy: bool = Field(default=False)
 
 
 @dataclass

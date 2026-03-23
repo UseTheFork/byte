@@ -33,15 +33,15 @@ dependencies = [
     "watchfiles>=1.1.0",
     "loguru>=0.7.3",
     "pygments>=2.19.2",
-    "langchain>=1.0.3",
-    "langchain-openai>=1.0.1",
-    "langchain-anthropic>=1.0.1",
-    "langchain-google-genai>=3.0.0",
-    "langgraph>=1.0.2",
-    "langchain-core>=1.0.2",
+    "langchain>=1.2",
+    "langchain-openai>=1.1",
+    "langchain-anthropic>=1.1",
+    "langchain-google-genai>=4.0.0",
+    "langgraph>=1.1",
+    "langchain-core>=1.1",
     "lsp-client>=0.3.1",
     "ty>=0.0.14",
-    "skills-ref>=0.1.1",
+    "strictyaml>=1.7.3",
 ]
 
 [dependency-groups]
