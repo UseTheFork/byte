@@ -5,10 +5,11 @@ from byte.agent import (
     Agent,
     AgentService,
     AskAgent,
-    AskCommand,
+    AskAgentNode,
     AssistantNode,
     CleanerAgent,
     CoderAgent,
+    CodeReviewerAgentNode,
     CommitAgent,
     CommitPlanAgent,
     ConfigAgentCommand,
@@ -20,6 +21,7 @@ from byte.agent import (
     ParseBlocksNode,
     ResearchAgent,
     ResearchCommand,
+    RoutingNode,
     StartNode,
     ToolNode,
     ValidationNode,
@@ -55,7 +57,6 @@ class AgentServiceProvider(ServiceProvider):
     def commands(self) -> List[Type[Command]]:
         return [
             # keep-sorted start
-            AskCommand,
             ConfigAgentCommand,
             ResearchCommand,
             # keep-sorted end
@@ -64,11 +65,14 @@ class AgentServiceProvider(ServiceProvider):
     def nodes(self) -> List[Type[Node]]:
         return [
             # keep-sorted start
+            AskAgentNode,
             AssistantNode,
+            CodeReviewerAgentNode,
             EndNode,
             ExtractNode,
             LintNode,
             ParseBlocksNode,
+            RoutingNode,
             StartNode,
             ToolNode,
             ValidationNode,

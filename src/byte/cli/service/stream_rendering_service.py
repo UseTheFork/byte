@@ -129,9 +129,8 @@ class StreamRenderingService(Service):
                 if self.display_mode == "verbose":
                     await self._update_active_stream()
 
-    async def handle_task(self, chunk, agent_name: str):
+    async def handle_task(self, chunk):
         self.current_stream_id = f"{chunk.get('name')}:{chunk.get('id')}"
-        self.agent_name = agent_name
         is_start = chunk.get("input") is not None
 
         if chunk.get("name") == "assistant_node":
@@ -151,7 +150,7 @@ class StreamRenderingService(Service):
         and content accumulation for smooth rendering.
         Usage: `await service.handle_message((message, metadata), "CoderAgent")` -> processes chunk
         """
-
+        self.agent_name = agent_name
         message_chunk, metadata = chunk
 
         if isinstance(message_chunk, AIMessageChunk):

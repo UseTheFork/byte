@@ -45,6 +45,8 @@ class LLMService(Service):
 
         if model_type == "weak":
             config_params = self.app["config"].llm.main_model.extra_params
+        elif model_type == "reasoning":
+            config_params = self.app["config"].llm.reasoning_model.extra_params
         else:
             config_params = self.app["config"].llm.weak_model.extra_params
 
@@ -86,8 +88,13 @@ class LLMService(Service):
         self.models_data = Yaml.load_as_dict(models_data_path)
 
         # Get configured models
+        reasoning_model_id = self.app["config"].llm.reasoning_model.model
         main_model_id = self.app["config"].llm.main_model.model
         weak_model_id = self.app["config"].llm.weak_model.model
+
+        # Verify main_model exists in models_data
+        if reasoning_model_id not in self.models_data:
+            raise ByteConfigException(f"Reasoning model '{reasoning_model_id}' not found in models_data.yaml")
 
         # Verify main_model exists in models_data
         if main_model_id not in self.models_data:
@@ -98,14 +105,24 @@ class LLMService(Service):
             raise ByteConfigException(f"Weak model '{weak_model_id}' not found in models_data.yaml")
 
         # Configure model schemas
+        self._reasoning_schema = self._configure_model_schema(reasoning_model_id, "reasoning")
         self._main_schema = self._configure_model_schema(main_model_id, "main")
         self._weak_schema = self._configure_model_schema(weak_model_id, "weak")
 
     def get_model(self, model_type: str = "main", **kwargs) -> Any:
         """Get a model instance with lazy initialization and caching."""
 
-        # Select model schema
-        model_schema = self._main_schema if model_type == "main" else self._weak_schema
+        # Select model schema based on type
+        match model_type:
+            case "reasoning":
+                model_schema = self._reasoning_schema
+            case "main":
+                model_schema = self._main_schema
+            case "weak":
+                model_schema = self._weak_schema
+            case _:
+                model_schema = self._main_schema
+
         params_dict = model_schema.extra_params
 
         # Merge all parameters, with later dictionaries taking precedence
@@ -116,6 +133,13 @@ class LLMService(Service):
 
         compiled_agent = init_chat_model(f"{model_schema.provider}:{model_schema.model}", **merged_params)
         return compiled_agent
+
+    def get_reasoning_model(self) -> BaseChatModel:
+        """Convenience method for accessing the reasoning model.
+
+        Usage: `reasoning_model = service.get_reasoning_model()` -> deep reasoning model
+        """
+        return self.get_model("reasoning")
 
     def get_main_model(self) -> BaseChatModel:
         """Convenience method for accessing the primary model.

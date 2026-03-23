@@ -16,5 +16,6 @@ class LLMModelConfig(BaseModel):
 class LLMConfig(BaseModel):
     """LLM domain configuration with provider-specific settings."""
 
+    reasoning_model: LLMModelConfig = LLMModelConfig()
     main_model: LLMModelConfig = LLMModelConfig()
     weak_model: LLMModelConfig = LLMModelConfig()

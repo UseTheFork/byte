@@ -61,18 +61,21 @@ class EndNode(Node):
 
         metadata = state["metadata"]
 
+        agent = state.get("agent", "")
+
         # Only update messages if there are scratch messages to process
         if state["scratch_messages"] and not metadata.erase_history:
             last_message = get_last_ai_message(state["scratch_messages"])
+            update_dict["final_message"] = last_message
 
             # we only need to copy from Ask and Coder agents.
-            if runtime.context.agent == "AskAgent":
+            if agent == "AskAgent":
                 clipboard_service = self.app.make(ClipboardService)
                 self.app.dispatch_task(clipboard_service.extract_from_message(last_message))
 
             # For SubprocessAgent, skip adding user_message since the command is already in context
             # TODO: this is gross we need a better way of doing this. maybe a hook that is part of the runtime?
-            if runtime.context.agent == "SubprocessAgent":
+            if agent == "SubprocessAgent":
                 update_dict["history_messages"] = [last_message]
             else:
                 # Extract text content from message (handles both list and string formats)
@@ -81,7 +84,7 @@ class EndNode(Node):
                 # Wrap the message in XML for parsing later.
                 last_message = list_to_multiline_text(
                     [
-                        Boundary.open(BoundaryType.AGENT_MESSAGE, {"agent_type": runtime.context.agent}),
+                        Boundary.open(BoundaryType.AGENT_MESSAGE, {"agent_type": agent}),
                         str(content_text),
                         Boundary.close(BoundaryType.AGENT_MESSAGE),
                     ]

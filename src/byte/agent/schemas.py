@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING, List, Literal, Optional
 
-from langchain.chat_models import BaseChatModel
 from langchain.tools import BaseTool
 from langchain_core.prompts import BasePromptTemplate
 from pydantic import Field
@@ -94,10 +93,8 @@ class AssistantContextSchema:
     Usage: `ToolNode(tools=config.tools) if config.tools else None`
     """
 
-    mode: Literal["main", "weak", "none"]  # Which model the runnable uses
+    mode: Literal["main", "weak", "reasoning", "none"]  # Which model the runnable uses
     prompt: BasePromptTemplate | None  # The prompt | llm chain to execute
-    main: BaseChatModel | None  # Reference to the main LLM for complex reasoning
-    weak: BaseChatModel | None  # Reference to the weak LLM for simple operations
     agent: str  # Agent class name for identification
     user_template: List[str]
     prompt_settings: PromptSettingsSchema = Field(default_factory=PromptSettingsSchema)  # Settings for prompt behavior

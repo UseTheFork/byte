@@ -17,6 +17,8 @@ class BaseState(TypedDict):
     # Ephemeral messages for current execution only (validation, errors, etc.)
     scratch_messages: Annotated[list[AnyMessage], add_messages]
 
+    final_message: AnyMessage | None
+
     # Current user request being processed by the agent
     user_request: str
 
@@ -36,5 +38,8 @@ class BaseState(TypedDict):
 
     # This is specific to subprocess
     command: str
+
+    node_to: str
+    node_from: str
 
     metadata: Annotated[MetadataSchema, update_metadata]

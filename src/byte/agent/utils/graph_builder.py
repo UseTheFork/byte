@@ -12,6 +12,7 @@ from byte.agent import (
     DummyNode,
     EndNode,
     Node,
+    RoutingNode,
     StartNode,
 )
 from byte.support import Str
@@ -33,6 +34,7 @@ class GraphBuilder:
         self._dummy_nodes = GraphBuilder.discover_node_classes()
 
         self.add_node(StartNode, goto=start_node)
+        self.add_node(RoutingNode)
         self.add_node(EndNode)
 
     @staticmethod

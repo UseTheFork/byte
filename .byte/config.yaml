@@ -1,4 +1,6 @@
 llm:
+  reasoning_model:
+    model: claude-opus-4-6
   main_model:
     model: claude-sonnet-4-5
   weak_model:

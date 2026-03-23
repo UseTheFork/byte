@@ -1,21 +1,17 @@
-from typing import Literal, Type
+from typing import Type
 
-from langchain_core.messages import HumanMessage
+from langchain.chat_models import BaseChatModel
+from langchain.messages import HumanMessage
 from langchain_core.runnables import Runnable
-from langgraph.graph.state import RunnableConfig
-from langgraph.runtime import Runtime
-from langgraph.types import Command
 from pydantic import BaseModel
 
 from byte import EventType, Payload
 from byte.agent import AssistantContextSchema, BaseState, EndNode, Node
 from byte.agent.utils.prompt_assembler import PromptAssembler
-from byte.development import RecordResponseService
 from byte.support import Str
-from byte.support.utils import dd
 
 
-class AssistantNode(Node):
+class BaseModelNode(Node):
     def boot(
         self,
         goto: Type[Node] = EndNode,
@@ -25,7 +21,7 @@ class AssistantNode(Node):
         self.structured_output = structured_output
         self.goto = Str.class_to_snake_case(goto)
 
-    def _create_runnable(self, state: BaseState, context: AssistantContextSchema) -> Runnable:
+    def _create_runnable(self, model: BaseChatModel, context: AssistantContextSchema) -> Runnable:
         """Create the runnable chain from context configuration.
 
         Assembles the prompt and model based on the mode (main or weak AI).
@@ -37,14 +33,11 @@ class AssistantNode(Node):
         Returns:
                 Runnable chain ready for invocation
 
-        Usage: `runnable = self._create_runnable(state, runtime.context)`
+        Usage: `runnable = self._create_runnable(model, runtime.context)`
         """
-        # Select model based on mode
-        model = context.main if state.get("metadata", {}).mode == "main" else context.weak
-
         # Bind Structred output if provided.
         if self.structured_output is not None:
-            model = model.with_structured_output(self.structured_output)  # ty:ignore[invalid-argument-type, possibly-missing-attribute]
+            model = model.with_structured_output(self.structured_output)  # ty:ignore[invalid-argument-type]
 
         # Bind tools if provided
         if context.tools is not None and len(context.tools) > 0:
@@ -55,6 +48,8 @@ class AssistantNode(Node):
 
         return runnable
 
+    # TODO: Is this the right place for this?
+    # This should prob go in to the prompt
     async def _gather_errors(self, state) -> list[HumanMessage]:
         """Gather error messages from state for re-prompting the assistant.
 
@@ -120,67 +115,3 @@ class AssistantNode(Node):
         config = payload.get("config", config)
 
         return (agent_state, config)
-
-    async def __call__(
-        self,
-        state: BaseState,
-        *,
-        runtime: Runtime[AssistantContextSchema],
-        config: RunnableConfig,
-    ) -> Command[Literal["end_node", "parse_blocks_node", "tool_node", "validation_node"]]:
-        record_response_service = self.app.make(RecordResponseService)
-        while True:
-            agent_state, config = await self._generate_agent_state(state, config, runtime.context)
-
-            runnable = self._create_runnable(state, runtime.context)
-
-            result = await runnable.ainvoke(agent_state, config=config)
-            await record_response_service.record_response(agent_state, runnable, runtime, config)
-
-            # If we are requesting Structured output we can end with extracted being our structured output.
-            if self.structured_output is not None:
-                return Command(
-                    goto="validation_node",
-                    update={
-                        "extracted_content": result,
-                        "errors": None,
-                    },
-                )
-
-            # Ensure we get a real response
-            if not result.tool_calls and (
-                not result.content
-                or (
-                    isinstance(result.content, list)
-                    and len(result.content) > 0
-                    and isinstance(result.content[0], dict)
-                    and not result.content[0].get("text")
-                )
-            ):
-                dd(result)
-                # Re-prompt for actual response
-                messages = agent_state["scratch_messages"] + [("user", "Respond with a real output.")]
-                agent_state = {**agent_state, "scratch_messages": messages}
-                console = self.app["console"]
-                console.print_warning_panel(
-                    "AI did not provide proper output. Requesting a valid response.", title="Warning"
-                )
-
-            elif result.tool_calls and len(result.tool_calls) > 0:
-                return Command(
-                    goto="tool_node",
-                    update={
-                        "scratch_messages": [result],
-                        "errors": None,
-                    },
-                )
-            else:
-                break
-
-        return Command(
-            goto=str(self.goto),
-            update={
-                "scratch_messages": [result],
-                "errors": None,
-            },
-        )

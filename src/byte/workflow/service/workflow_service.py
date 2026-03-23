@@ -1,63 +1,18 @@
 import asyncio
-from abc import ABC, abstractmethod
-from typing import Any, List, Literal, Optional
+from typing import Any, Literal, Optional
 
 from langchain_core.callbacks import get_usage_metadata_callback
 from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 
-from byte import EventType, Payload
-from byte.agent import AssistantContextSchema, BaseState, TokenUsageSchema
+from byte import EventType, Payload, Service
+from byte.agent import BaseState, TokenUsageSchema
 from byte.analytics import AgentAnalyticsService
-from byte.cli import (
-    StreamRenderingService,
-)
-from byte.memory import MemoryService
-from byte.support.mixins import Bootable, Configurable, Eventable
+from byte.cli import StreamRenderingService
+from byte.workflow import BaseWorkflow
 
 
-class Agent(ABC, Bootable, Eventable, Configurable):
-    """Base class for all agent services providing common graph management functionality.
-
-    Defines the interface for agent services with lazy-loaded graph compilation,
-    tool management, and memory integration. Subclasses must implement the build
-    method to define their specific agent behavior and routing logic.
-    Usage: `class MyAgent(BaseAgent): async def build(self): ...`
-    """
-
-    _graph: Optional[CompiledStateGraph] = None
-
-    def get_enforcement(self) -> List[str]:
-        return []
-
-    @abstractmethod
-    def get_user_template(self) -> List[str]:
-        """Get the user message template for this agent.
-
-        Must be implemented by subclasses to return their specific user message
-        template, which defines how user requests are formatted in prompts.
-        Usage: Override in subclass to provide domain-specific user message formatting
-        """
-        pass
-
-    @abstractmethod
-    def get_prompt(self):
-        """Get the ChatPromptTemplate for this agent.
-
-        Must be implemented by subclasses to return their specific ChatPromptTemplate,
-        which defines the overall prompt structure including system and user messages.
-        Usage: Override in subclass to provide domain-specific prompt templates
-        """
-        pass
-
-    @abstractmethod
-    async def build(self) -> CompiledStateGraph:
-        """Build and compile the agent graph with memory and tools.
-
-        Must be implemented by subclasses to define their specific agent
-        behavior, routing logic, and tool integration patterns.
-        Usage: Override in subclass to create domain-specific agent graphs
-        """
-        pass
+class WorkflowService(Service):
+    """Service for executing workflows with compiled graphs."""
 
     async def _track_token_usage(self, usage_metadata: dict, mode: str) -> None:
         """Track token usage from callback metadata and update analytics.
@@ -96,15 +51,24 @@ class Agent(ABC, Bootable, Eventable, Configurable):
         stream_rendering_service = self.app.make(StreamRenderingService)
 
         # self.app["log"].debug(mode)
-        # self.app["log"].debug(chunk)
+        self.app["log"].debug(chunk)
 
         # Filter and process based on mode
         if chunk["type"] == "messages":
+            self.app["log"].debug(chunk["ns"])
+
+            # Extract agent node name from namespace if present
+            agent_name = ""
+            if chunk["ns"] and len(chunk["ns"]) > 0:
+                ns_str = chunk["ns"][0]
+                if ":" in ns_str:
+                    agent_name = ns_str.split(":")[0]
+
             # Handle LLM token streaming
-            await stream_rendering_service.handle_message(chunk["data"], self.__class__.__name__)
+            await stream_rendering_service.handle_message(chunk["data"], agent_name)
 
         elif chunk["type"] == "tasks":
-            await stream_rendering_service.handle_task(chunk["data"], self.__class__.__name__)
+            await stream_rendering_service.handle_task(chunk["data"])
             # self.app["log"].debug(chunk)
             # self.app["log"].debug(chunk.get("id"))
             # self.app["log"].debug(chunk.get("name"))
@@ -138,7 +102,6 @@ class Agent(ABC, Bootable, Eventable, Configurable):
                     input=initial_state,
                     config=config,
                     stream_mode=["messages", "tasks"],
-                    context=await self.get_assistant_runnable(),
                     version="v2",
                     subgraphs=True,
                 ):
@@ -153,35 +116,21 @@ class Agent(ABC, Bootable, Eventable, Configurable):
 
     async def execute(
         self,
+        workflow: BaseWorkflow,
         request: str,
         thread_id: Optional[str] = None,
         display_mode: Literal["verbose", "thinking", "silent"] = "verbose",
     ):
-        """Stream agent responses using astream_events for comprehensive event handling.
-
-        Yields events from the agent graph processing, enabling fine-grained
-        control over streaming display and tool execution visualization.
+        """Execute a workflow with the provided request.
 
         Args:
-                request: The request data to process
-                thread_id: Optional thread ID for conversation context
-                display_mode: Display mode - "verbose", "thinking", or "silent" (default: "verbose")
+            workflow: The workflow to execute
+            request: The user request to process
+            thread_id: Optional thread ID for conversation context
 
-        Usage: `async for event in agent.stream(request): ...`
+        Usage: `await workflow_service.execute(ask_workflow, "How do I...?")`
         """
-        # Get or create thread ID
-        if thread_id is None:
-            memory_service = self.app.make(MemoryService)
-            thread_id = await memory_service.get_or_create_thread()
-
-        # Create configuration with thread ID
-        config = RunnableConfig(configurable={"thread_id": thread_id})
-
-        # Create initial state using the agent's state class
-        initial_state = BaseState({"user_request": request})
-
-        # Get the graph and stream events
-        graph = await self.get_graph()
+        graph, initial_state, config = await workflow.compile(request, thread_id)
 
         stream_rendering_service = self.app.make(StreamRenderingService)
         stream_rendering_service.set_display_mode(display_mode)
@@ -214,33 +163,3 @@ class Agent(ABC, Bootable, Eventable, Configurable):
         await self.emit(payload)
 
         return processed_event
-
-    async def get_checkpointer(self):
-        # Get memory for persistence
-        memory_service = self.app.make(MemoryService)
-        checkpointer = await memory_service.get_saver()
-        return checkpointer
-
-    def get_tools(self):
-        return []
-
-    async def get_graph(self) -> CompiledStateGraph:
-        """Get or create the agent graph with current tools.
-
-        Lazy-loads the graph with all registered tools and memory integration.
-        The graph is cached until tools are modified to avoid rebuilding.
-        Usage: `graph = await agent_service.get_graph()` -> ready for agent tasks
-        """
-        if self._graph is None:
-            self._graph = await self.build()
-        return self._graph
-
-    @abstractmethod
-    async def get_assistant_runnable(self) -> AssistantContextSchema:
-        """Get the assistant runnable for this agent.
-
-        Must be implemented by subclasses to return their specific assistant
-        implementation, which defines the core LLM interaction pattern.
-        Usage: Override in subclass to provide domain-specific assistant logic
-        """
-        pass

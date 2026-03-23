@@ -22,6 +22,7 @@ from byte.memory import MemoryServiceProvider
 from byte.presets import PresetsProvider
 from byte.system import SystemServiceProvider
 from byte.web import WebServiceProvider
+from byte.workflow import WorkflowServiceProvider
 
 PROVIDERS = [
     CLIServiceProvider,
@@ -34,6 +35,7 @@ PROVIDERS = [
     GitServiceProvider,
     LintServiceProvider,
     AgentServiceProvider,
+    WorkflowServiceProvider,
     LSPServiceProvider,
     AnalyticsProvider,
     PromptFormatProvider,
