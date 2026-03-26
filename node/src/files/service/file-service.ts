@@ -36,6 +36,7 @@ export class FileService extends Service {
         if (!this._contextFiles.has(abs) && discoveredSet.has(abs)) {
           this._contextFiles.set(abs, new FileContext(abs, mode, this._rootPath))
           added = true
+          await this.emit(new Payload(EventType.FILE_ADDED, { file_path: abs }))
         }
       }
       return added
@@ -169,7 +170,7 @@ export class FileService extends Service {
 
     const render = (node: DirNode, indent: string, isRoot: boolean): string => {
       const lines: string[] = []
-      const sorted = node.files.sort()
+      const sorted = [...node.files].sort()
       const visible = isRoot ? sorted : sorted.slice(0, maxFilesPerDir)
       const remaining = sorted.length - visible.length
       for (const f of visible) lines.push(`${indent}${f}`)

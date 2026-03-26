@@ -149,4 +149,26 @@ describe('FileService', () => {
     expect(hierarchy).toContain('<project_hierarchy>')
     expect(hierarchy).toContain('</project_hierarchy>')
   })
+
+  it('generateContextPromptWithLineNumbers() prefixes lines with line numbers', async () => {
+    await service.addFile(mainTs, FileMode.READ_ONLY)
+    const [readOnly] = await service.generateContextPromptWithLineNumbers()
+    expect(readOnly).toHaveLength(1)
+    expect(readOnly[0]).toContain('<file')
+    expect(readOnly[0]).toContain('   1 | const x = 1')
+    expect(readOnly[0]).toContain('</file>')
+  })
+
+  it('listInContextFilesHook() appends file lists to info_panel', async () => {
+    await service.addFile(mainTs, FileMode.READ_ONLY)
+    await service.addFile(utilsTs, FileMode.EDITABLE)
+    const { Payload } = await import('../../src/support/concerns/eventable.ts')
+    const payload = new Payload('test', { info_panel: 'existing\n' })
+    const result = await service.listInContextFilesHook(payload)
+    const panel = result.get('info_panel') as string
+    expect(panel).toContain('Read-only files:')
+    expect(panel).toContain('src/main.ts')
+    expect(panel).toContain('Editable files:')
+    expect(panel).toContain('src/utils.ts')
+  })
 })
