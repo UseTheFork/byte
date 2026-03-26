@@ -36,7 +36,7 @@ function makeApp(gitConfig: Partial<GitConfig> = {}, diffEntries: DiffEntry[] = 
     make: (key: unknown) => {
       if (key === GitService) return mockGitService
       if (key === 'config') return { git: config } as ByteConfig
-      return undefined
+      else throw new Error(`Unexpected make() key: ${String(key)}`)
     },
     singleton: () => {},
     bind: () => {},
@@ -206,8 +206,7 @@ describe('CommitService.processCommitPlan', () => {
     })
 
     expect(tracking.resetCalled).toBe(true)
-    expect(tracking.addedFiles).toContain('src/foo.ts')
-    expect(tracking.addedFiles).toContain('src/bar.ts')
+    expect(tracking.addedFiles).toEqual(['src/foo.ts', 'src/bar.ts'])
     expect(tracking.commits).toHaveLength(2)
     expect(tracking.commits[0]).toBe('feat: add foo')
     expect(tracking.commits[1]).toBe('fix: fix bar')

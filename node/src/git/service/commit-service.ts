@@ -70,7 +70,7 @@ export class CommitService extends Service {
       lines.push('<CONTEXT>')
       lines.push(`change_type: ${entry.changeType}`)
       lines.push(`file: ${entry.file}`)
-      if (entry.changeType !== 'D' && entry.diff) {
+      if ((entry.changeType === 'M' || entry.changeType === 'A' || entry.changeType === 'R') && entry.diff) {
         lines.push('<diff>')
         lines.push(entry.diff)
         lines.push('</diff>')
@@ -102,11 +102,9 @@ export class CommitService extends Service {
     parts.push(descGuidelines.join('\n'))
     parts.push(Boundary.close(BoundaryType.RULES))
 
-    if (this.config.enable_scopes) {
+    if (this.config.enable_scopes && this.config.scopes.length > 0) {
       parts.push(Boundary.open(BoundaryType.RULES, { type: 'Allowed Commit Scopes' }))
-      if (this.config.scopes.length > 0) {
-        parts.push(this.config.scopes.map(s => `- ${s}`).join('\n'))
-      }
+      parts.push(this.config.scopes.map(s => `- ${s}`).join('\n'))
       parts.push(Boundary.close(BoundaryType.RULES))
     }
 
@@ -123,8 +121,10 @@ export class CommitService extends Service {
   }
 
   async processCommitPlan(plan: CommitPlan): Promise<void> {
+    if (plan.commits.length === 0) return
     await this.gitService.reset()
     for (const group of plan.commits) {
+      if (group.files.length === 0) continue
       for (const filePath of group.files) {
         await this.gitService.add(filePath)
       }
