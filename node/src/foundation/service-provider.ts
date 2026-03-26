@@ -10,6 +10,8 @@ export class FoundationServiceProvider extends ServiceProvider {
   }
 
   override register(): void {
+    ;(this.app as import('./application.ts').Application).bindPathsInContainer()
+
     this.app.singleton(EventBus as never, () => new EventBus(this.app))
     this.app.instance('event-bus', this.app.make(EventBus as never))
 

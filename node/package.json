@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "bin": { "byte": "./src/main.ts" },
   "scripts": {
-    "start": "bun run src/index.ts",
+    "start": "bun run src/main.ts",
+    "dev": "bun run src/main.ts",
     "test": "bun test"
   },
   "dependencies": {

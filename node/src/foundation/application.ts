@@ -112,8 +112,7 @@ export class Application extends Container {
   }
 
   register(ProviderClass: Newable<ServiceProvider>): ServiceProvider {
-    this.singleton(ProviderClass as never, () => new ProviderClass(this))
-    const provider = this.make(ProviderClass as never) as ServiceProvider
+    const provider = new ProviderClass(this)
     provider.register()
     provider.registerServices()
     this.addProvider(provider)
