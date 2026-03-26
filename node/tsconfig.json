@@ -11,7 +11,9 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "skipLibCheck": true,
-    "types": ["bun-types"]
+    "types": ["bun-types"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
   },
   "include": ["src", "tests"]
 }
