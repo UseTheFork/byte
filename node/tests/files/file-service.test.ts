@@ -10,6 +10,7 @@ import { FileMode } from '../../src/files/models.ts'
 function makeApp(rootPath: string, discoveredFiles: string[]): IApplication {
   const mockDiscovery = {
     getFiles: (_ext?: string) => discoveredFiles,
+    hasFile: (filePath: string) => discoveredFiles.includes(filePath),
     findFiles: (pattern: string) => discoveredFiles.filter(f => f.includes(pattern)),
     getRelativePaths: () => [],
     addFile: () => false,

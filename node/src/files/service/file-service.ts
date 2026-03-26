@@ -44,7 +44,7 @@ export class FileService extends Service {
 
     const abs = this._resolve(path)
     if (this._contextFiles.has(abs)) return false
-    if (!discovery.getFiles().includes(abs)) return false
+    if (!discovery.hasFile(abs)) return false
     this._contextFiles.set(abs, new FileContext(abs, mode, this._rootPath))
     await this.emit(new Payload(EventType.FILE_ADDED, { file_path: abs }))
     return true
@@ -55,12 +55,9 @@ export class FileService extends Service {
 
     if (isGlob) {
       const glob = new Bun.Glob(path)
-      const matches = new Set(
-        [...glob.scanSync({ cwd: this._rootPath })].map(f => join(this._rootPath, f))
-      )
       let removed = false
-      for (const key of this._contextFiles.keys()) {
-        if (matches.has(key)) {
+      for (const [key, ctx] of this._contextFiles) {
+        if (glob.match(ctx.relativePath)) {
           this._contextFiles.delete(key)
           removed = true
         }

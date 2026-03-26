@@ -72,6 +72,10 @@ export class FileDiscoveryService extends Service {
     ]
   }
 
+  hasFile(filePath: string): boolean {
+    return this._allFiles.has(filePath)
+  }
+
   addFile(filePath: string): boolean {
     if (this._allFiles.has(filePath)) return false
     this._allFiles.add(filePath)
