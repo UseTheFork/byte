@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'bun:test'
 import { Application } from '../../src/foundation/application.ts'
 import { FoundationServiceProvider } from '../../src/foundation/service-provider.ts'
+import { ServiceProvider } from '../../src/support/service-provider.ts'
 import { EventBus } from '../../src/foundation/event-bus.ts'
 import { TaskManager } from '../../src/foundation/task-manager.ts'
 import { Payload } from '../../src/support/concerns/eventable.ts'
@@ -41,5 +42,24 @@ describe('Application + FoundationServiceProvider integration', () => {
     bus.on('test', (p: Payload) => { p.set('touched', true); return p })
     const result = await bus.emit(new Payload('test'))
     expect(result.get('touched')).toBe(true)
+  })
+
+  it('app.boot() calls boot() on registered providers', async () => {
+    let booted = false
+
+    class TrackingProvider extends ServiceProvider {
+      override register(): void {}
+      override async boot(): Promise<void> {
+        booted = true
+      }
+    }
+
+    const app = Application.configure(testBasePath)
+      .withProviders([TrackingProvider as never])
+      .create()
+
+    expect(booted).toBe(false)
+    await app.boot()
+    expect(booted).toBe(true)
   })
 })

@@ -116,6 +116,7 @@ export class Application extends Container {
     const provider = this.make(ProviderClass as never) as ServiceProvider
     provider.register()
     provider.registerServices()
+    this.addProvider(provider)
     return provider
   }
 
