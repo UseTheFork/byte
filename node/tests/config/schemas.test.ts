@@ -67,8 +67,10 @@ describe('ByteConfigSchema', () => {
   })
 
   it('unknown top-level keys are stripped silently', () => {
-    const config = ByteConfigSchema.parse({ lsp: { enable: true }, web: { enable: true } })
+    const config = ByteConfigSchema.parse({ lsp: { enable: true }, mcp: { enable: true }, web: { enable: true }, system: { enable: true } })
     expect((config as Record<string, unknown>)['lsp']).toBeUndefined()
+    expect((config as Record<string, unknown>)['mcp']).toBeUndefined()
     expect((config as Record<string, unknown>)['web']).toBeUndefined()
+    expect((config as Record<string, unknown>)['system']).toBeUndefined()
   })
 })

@@ -104,7 +104,7 @@ export const ByteConfigSchema = z
       git: GitConfigSchema.parse(clean.git || {}),
       lint: LintConfigSchema.parse(clean.lint || {}),
       llm: LLMConfigSchema.parse(clean.llm || {}),
-      presets: (clean.presets as unknown[]) ?? [],
+      presets: z.array(PresetsConfigSchema).parse((clean.presets as unknown[]) ?? []),
     }
   })
 
