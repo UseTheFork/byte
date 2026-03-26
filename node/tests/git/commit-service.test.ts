@@ -159,6 +159,7 @@ describe('CommitService.generateCommitGuidelines', () => {
     const { svc } = makeService({ enable_scopes: false })
     const result = svc.generateCommitGuidelines()
     expect(result).toContain('DO NOT include `scope`')
+    expect(result).not.toContain('Allowed Commit Scopes')
   })
 })
 
@@ -171,11 +172,13 @@ describe('CommitService.buildCommitPrompt', () => {
     }]
     const { svc } = makeService({}, entries)
     const result = await svc.buildCommitPrompt()
-    expect(result).toContain('<context')
-    expect(result).toContain('change_type="M"')
-    expect(result).toContain('file="src/foo.ts"')
+    expect(result).toContain('<CONTEXT>')
+    expect(result).toContain('change_type: M')
+    expect(result).toContain('file: src/foo.ts')
+    expect(result).toContain('<diff>')
     expect(result).toContain('- old')
-    expect(result).toContain('</context>')
+    expect(result).toContain('</diff>')
+    expect(result).toContain('</CONTEXT>')
   })
 
   it('excludes diff content for deleted files', async () => {
@@ -186,7 +189,8 @@ describe('CommitService.buildCommitPrompt', () => {
     }]
     const { svc } = makeService({}, entries)
     const result = await svc.buildCommitPrompt()
-    expect(result).toContain('change_type="D"')
+    expect(result).toContain('change_type: D')
+    expect(result).not.toContain('<diff>')
     expect(result).not.toContain('+ ')
   })
 })

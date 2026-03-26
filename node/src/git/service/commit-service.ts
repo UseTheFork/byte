@@ -64,23 +64,22 @@ export class CommitService extends Service {
   async buildCommitPrompt(): Promise<string> {
     const staged = await this.gitService.getDiff()
     const diffParts: string[] = []
-    const fileParts: string[] = [Boundary.open(BoundaryType.CONTEXT, { type: 'Files' })]
 
     for (const entry of staged) {
-      diffParts.push(Boundary.open(BoundaryType.CONTEXT, {
-        type: 'Diff',
-        change_type: entry.changeType,
-        file: entry.file,
-      }))
-      fileParts.push(entry.message)
+      const lines: string[] = []
+      lines.push('<CONTEXT>')
+      lines.push(`change_type: ${entry.changeType}`)
+      lines.push(`file: ${entry.file}`)
       if (entry.changeType !== 'D' && entry.diff) {
-        diffParts.push(entry.diff)
+        lines.push('<diff>')
+        lines.push(entry.diff)
+        lines.push('</diff>')
       }
-      diffParts.push(Boundary.close(BoundaryType.CONTEXT))
+      lines.push('</CONTEXT>')
+      diffParts.push(lines.join('\n'))
     }
 
-    fileParts.push(Boundary.close(BoundaryType.CONTEXT))
-    return [...diffParts, ...fileParts].join('\n')
+    return diffParts.join('\n')
   }
 
   generateCommitGuidelines(): string {
@@ -98,16 +97,18 @@ export class CommitService extends Service {
       `- Keep under ${this.config.max_description_length} characters`,
       '- Be concise and descriptive',
       '- Focus on what the change does, not how it does it',
-      ...this.config.description_guidelines.map(g => `- ${g}`),
+      ...this.config.description_guidelines,
     ]
     parts.push(descGuidelines.join('\n'))
     parts.push(Boundary.close(BoundaryType.RULES))
 
-    parts.push(Boundary.open(BoundaryType.RULES, { type: 'Allowed Commit Scopes' }))
-    if (this.config.enable_scopes && this.config.scopes.length > 0) {
-      parts.push(this.config.scopes.map(s => `- ${s}`).join('\n'))
+    if (this.config.enable_scopes) {
+      parts.push(Boundary.open(BoundaryType.RULES, { type: 'Allowed Commit Scopes' }))
+      if (this.config.scopes.length > 0) {
+        parts.push(this.config.scopes.map(s => `- ${s}`).join('\n'))
+      }
+      parts.push(Boundary.close(BoundaryType.RULES))
     }
-    parts.push(Boundary.close(BoundaryType.RULES))
 
     parts.push(Boundary.open(BoundaryType.RULES, { type: 'Field Inclusion Rules' }))
     const fieldRules: string[] = []
