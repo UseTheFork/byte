@@ -73,4 +73,8 @@ describe('ByteConfigSchema', () => {
     expect((config as Record<string, unknown>)['web']).toBeUndefined()
     expect((config as Record<string, unknown>)['system']).toBeUndefined()
   })
+
+  it('throws when a preset is missing required id field', () => {
+    expect(() => ByteConfigSchema.parse({ presets: [{ load_on_boot: true }] })).toThrow()
+  })
 })

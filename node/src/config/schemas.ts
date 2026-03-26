@@ -93,7 +93,7 @@ export const ByteConfigSchema = z
   })
   .passthrough()
   .transform((data) => {
-    const { lsp, web, ...clean } = data as Record<string, unknown> & { lsp?: unknown; web?: unknown }
+    const { lsp: _lsp, mcp: _mcp, web: _web, system: _system, ...clean } = data as Record<string, unknown> & { lsp?: unknown; mcp?: unknown; web?: unknown; system?: unknown }
     return {
       version: (clean.version as string | undefined) ?? '0.0.0',
       app: AppConfigSchema.parse(clean.app || {}),
