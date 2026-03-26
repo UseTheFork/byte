@@ -29,12 +29,6 @@ class MainModelNode(BaseModelNode):
         # await record_response_service.record_response(agent_state, runnable, runtime, config)
 
         if result.tool_calls and len(result.tool_calls) > 0:
-            return Command(
-                goto="routing_node",
-                update={"scratch_messages": [result], "errors": None, "node_to": "tool_node"},
-            )
+            return self.route_to("tool_node", {"scratch_messages": [result], "errors": None})
 
-        return Command(
-            goto="routing_node",
-            update={"scratch_messages": [result], "errors": None, "node_to": str(self.goto)},
-        )
+        return self.route_to(str(self.goto), {"scratch_messages": [result], "errors": None})

@@ -133,7 +133,7 @@ class StreamRenderingService(Service):
         self.current_stream_id = f"{chunk.get('name')}:{chunk.get('id')}"
         is_start = chunk.get("input") is not None
 
-        if chunk.get("name") == "assistant_node":
+        if chunk.get("name") == "main_model_node":
             if is_start:
                 await self.start_spinner("Thinking...")
                 self.stream_started = False

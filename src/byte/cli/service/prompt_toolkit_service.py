@@ -10,10 +10,10 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.shortcuts import PromptSession
 from rich.console import Group
 
-from byte.agent import AgentService
 from byte.cli import CommandRegistry, SubprocessService
 from byte.foundation import EventType, Payload
 from byte.support import Service
+from byte.workflow import CoderWorkflow, WorkflowService
 
 if TYPE_CHECKING:
     from byte.foundation import Application
@@ -202,22 +202,19 @@ class PromptToolkitService(Service):
         console.print()
         # TODO: should we make `user_input` a [("user", user_input)], in this situation.
 
-        agent_service = self.app.make(AgentService)
-        active_agent = agent_service.get_active_agent()
-
         payload = Payload(
             event_type=EventType.POST_PROMPT_TOOLKIT,
             data={
                 "user_input": user_input,
                 "interrupted": self.interrupted,
-                "active_agent": active_agent,
             },
         )
         payload = await self.emit(payload)
 
         interrupted = payload.get("interrupted", self.interrupted)
         user_input = payload.get("user_input", user_input)
-        active_agent = payload.get("active_agent", active_agent)
+
+        workflow_service = self.app.make(WorkflowService)
 
         if not interrupted:
             if user_input.startswith("/"):
@@ -227,11 +224,13 @@ class PromptToolkitService(Service):
                 user_input = await self._handle_subcommand_input(user_input)
 
                 if user_input:
-                    await agent_service.execute_agent(user_input, active_agent)
+                    coder_workflow = self.app.make(CoderWorkflow)
+                    await workflow_service.execute(coder_workflow, user_input)
             else:
                 # Only execute agent if user provided non-empty input
                 if user_input.strip():
-                    await agent_service.execute_agent(user_input, active_agent)
+                    coder_workflow = self.app.make(CoderWorkflow)
+                    await workflow_service.execute(coder_workflow, user_input)
         # TODO: Should we execute somthing after this?
 
     async def interrupt(self):

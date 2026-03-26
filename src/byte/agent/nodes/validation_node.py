@@ -14,7 +14,7 @@ class ValidationNode(Node, UserInteractive):
     """Node for validating assistant responses against configured constraints.
 
     Performs validation checks on the last message content, such as line count limits.
-    If validation fails, returns to assistant_node with error messages for correction.
+    If validation fails, returns to main_model_node with error messages for correction.
 
     Usage: `node = await container.make(ValidationNode, max_lines=50)`
     """
@@ -38,11 +38,11 @@ class ValidationNode(Node, UserInteractive):
 
     async def __call__(
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
-    ) -> Command[Literal["end_node", "extract_node", "assistant_node"]]:
+    ) -> Command[Literal["end_node", "extract_node", "main_model_node"]]:
         """Execute validation checks on the last assistant message.
 
         Runs configured validation checks (e.g., max_lines) on the message content.
-        If any validation fails, returns to assistant_node with error messages.
+        If any validation fails, returns to main_model_node with error messages.
         Otherwise, proceeds to the configured goto node.
 
         Args:
@@ -51,7 +51,7 @@ class ValidationNode(Node, UserInteractive):
                 runtime: Runtime context with assistant configuration
 
         Returns:
-                Command to route to assistant_node (on error) or goto node (on success)
+                Command to route to main_model_node (on error) or goto node (on success)
 
         Usage: Called automatically by LangGraph during graph execution
         """
@@ -74,6 +74,6 @@ class ValidationNode(Node, UserInteractive):
                 title="Validation Failed",
             )
 
-            return Command(goto="assistant_node", update={"scratch_messages": HumanMessage(error_message)})
+            return Command(goto="main_model_node", update={"scratch_messages": HumanMessage(error_message)})
 
         return Command(goto=str(self.goto))

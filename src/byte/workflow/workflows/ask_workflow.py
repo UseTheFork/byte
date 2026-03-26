@@ -1,4 +1,4 @@
-from byte.agent import AskAgentNode
+from byte.agent import AskAgent
 from byte.agent.utils.graph_builder import GraphBuilder
 from byte.workflow import BaseWorkflow
 
@@ -23,10 +23,10 @@ class AskWorkflow(BaseWorkflow):
         Usage: `graph = await agent.build()`
         """
 
-        graph = GraphBuilder(self.app, start_node=AskAgentNode)
+        graph = GraphBuilder(self.app, start_node=AskAgent)
 
         # Add nodes
-        graph.add_node(AskAgentNode)
+        graph.add_node(AskAgent)
 
         # Compile graph with memory and configuration
         checkpointer = await self.get_checkpointer()

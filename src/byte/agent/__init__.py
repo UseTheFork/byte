@@ -5,21 +5,14 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.agent.agents.ask_agent import AskAgent
+    from byte.agent.agents.base_agent import BaseAgent
+    from byte.agent.agents.coder_agent import CoderAgent
+    from byte.agent.agents.commit_agent import CommitAgent
+    from byte.agent.base_node import Node
     from byte.agent.command.config_agent_command import ConfigAgentCommand
     from byte.agent.exceptions import DummyNodeReachedException
-    from byte.agent.implementations.ask.agent import AskAgent
-    from byte.agent.implementations.base import Agent
-    from byte.agent.implementations.cleaner.agent import CleanerAgent
-    from byte.agent.implementations.coder.agent import CoderAgent
-    from byte.agent.implementations.commit.agent import CommitAgent, CommitPlanAgent
-    from byte.agent.implementations.conventions.agent import ConventionAgent
-    from byte.agent.implementations.research.agent import ResearchAgent
-    from byte.agent.implementations.research.command import ResearchCommand
-    from byte.agent.nodes.agents.ask.ask_agent_node import AskAgentNode
-    from byte.agent.nodes.agents.base_agent_node import BaseAgentNode
-    from byte.agent.nodes.agents.code_reviewer.code_reviewer_agent_node import CodeReviewerAgentNode
     from byte.agent.nodes.assistant_node import AssistantNode
-    from byte.agent.nodes.base_node import Node
     from byte.agent.nodes.dummy_node import DummyNode
     from byte.agent.nodes.end_node import EndNode
     from byte.agent.nodes.extract_node import ExtractNode, SessionContextFormatter
@@ -43,7 +36,6 @@ if TYPE_CHECKING:
         PromptSettingsSchema,
         TokenUsageSchema,
     )
-    from byte.agent.service.agent_service import AgentService
     from byte.agent.service.agent_settings_service import AgentSettingsService
     from byte.agent.service_provider import AgentServiceProvider
     from byte.agent.state import BaseState
@@ -55,17 +47,16 @@ __all__ = (
     "Agent",
     "AgentConfigBoolSchema",
     "AgentConfigStringSchema",
-    "AgentService",
     "AgentServiceProvider",
     "AgentSettingsService",
     "AskAgent",
-    "AskAgentNode",
     "AssistantContextSchema",
     "AssistantNode",
-    "BaseAgentNode",
+    "BaseAgent",
     "BaseState",
     "CleanerAgent",
-    "CodeReviewerAgentNode",
+    # "CodeReviewerAgentNode",
+    "CoderAgent",
     "CoderAgent",
     "CommitAgent",
     "CommitPlanAgent",
@@ -106,26 +97,20 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
-    "Agent": "implementations.base",
     "AgentConfigBoolSchema": "schemas",
     "AgentConfigStringSchema": "schemas",
-    "AgentService": "service.agent_service",
     "AgentServiceProvider": "service_provider",
     "AgentSettingsService": "service.agent_settings_service",
-    "AskAgent": "implementations.ask.agent",
-    "AskAgentNode": "nodes.agents.ask.ask_agent_node",
+    "AskAgent": "agents.ask_agent",
     "AssistantContextSchema": "schemas",
     "AssistantNode": "nodes.assistant_node",
-    "BaseAgentNode": "nodes.agents.base_agent_node",
+    "BaseAgent": "agents.base_agent",
     "BaseState": "state",
-    "CleanerAgent": "implementations.cleaner.agent",
-    "CodeReviewerAgentNode": "nodes.agents.code_reviewer.code_reviewer_agent_node",
-    "CoderAgent": "implementations.coder.agent",
-    "CommitAgent": "implementations.commit.agent",
-    "CommitPlanAgent": "implementations.commit.agent",
+    "CoderAgent": "agents.coder_agent",
+    "CommitAgent": "agents.commit_agent",
+    # "CodeReviewerAgentNode": "nodes.agents.code_reviewer.code_reviewer_agent_node",
     "ConfigAgentCommand": "command.config_agent_command",
     "ConstraintSchema": "schemas",
-    "ConventionAgent": "implementations.conventions.agent",
     "DummyNode": "nodes.dummy_node",
     "DummyNodeReachedException": "exceptions",
     "EndNode": "nodes.end_node",
@@ -134,12 +119,10 @@ _dynamic_imports = {
     "MainModelNode": "nodes.model.main_model_node",
     "MaxLinesValidator": "validators.max_lines",
     "MetadataSchema": "schemas",
-    "Node": "nodes.base_node",
+    "Node": "base_node",
     "ParseBlocksNode": "nodes.parse_blocks_node",
     "PromptSettingsSchema": "schemas",
     "ReasoningModelNode": "nodes.model.reasoning_model_node",
-    "ResearchAgent": "implementations.research.agent",
-    "ResearchCommand": "implementations.research.command",
     "RoutingNode": "nodes.routing_node",
     "SessionContextFormatter": "nodes.extract_node",
     "ShowNode": "nodes.show_node",

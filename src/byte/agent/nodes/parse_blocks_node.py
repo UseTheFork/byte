@@ -61,7 +61,7 @@ class ParseBlocksNode(Node, UserInteractive):
 
     async def __call__(
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
-    ) -> Command[Literal["end_node", "assistant_node", "lint_node"]]:
+    ) -> Command[Literal["end_node", "main_model_node", "lint_node"]]:
         """Parse commands from the last assistant message."""
         self.console = self.app["console"]
         self.edit_block_service = self.app.make(EditBlockService)
@@ -111,7 +111,7 @@ class ParseBlocksNode(Node, UserInteractive):
                 ]
             )
 
-            return Command(goto="assistant_node", update={"errors": error_message, "metadata": self.metadata})
+            return Command(goto="main_model_node", update={"errors": error_message, "metadata": self.metadata})
 
         # Convert raw blocks to BaseOperationBlock using EditBlockService
         components = await self.edit_block_service.convert_raw_blocks_to_parsed(final_components)
@@ -157,8 +157,9 @@ class ParseBlocksNode(Node, UserInteractive):
             # self.metadata
 
             return Command(
-                goto="assistant_node",
+                goto="router_node",
                 update={
+                    "routing": {"node_to": "main_model_node", "node_from": "parse_blocks_node"},
                     "scratch_messages": remove_messages + [AIMessage(content=combined_content)],
                     "errors": error_message,
                     "metadata": self.metadata,
@@ -191,8 +192,9 @@ class ParseBlocksNode(Node, UserInteractive):
         final_ai_message = AIMessage(content=final_content)
 
         return Command(
-            goto="lint_node",
+            goto="router_node",
             update={
+                "routing": {"node_to": "lint_node", "node_from": "parse_blocks_node"},
                 "scratch_messages": remove_messages + [final_ai_message],
                 "parsed_blocks": [block.to_dict() for block in parsed_blocks],
                 "metadata": self.metadata,

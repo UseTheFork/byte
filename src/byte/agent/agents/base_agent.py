@@ -1,8 +1,8 @@
 from abc import abstractmethod
-from typing import List, Literal, Optional
+from typing import List, Optional
 
 from langchain_core.runnables import RunnableConfig
-from langgraph.graph.state import CompiledStateGraph, RunnableConfig
+from langgraph.graph.state import CompiledStateGraph
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
@@ -10,7 +10,7 @@ from byte.agent import AssistantContextSchema, BaseState, DummyNodeReachedExcept
 from byte.memory import MemoryService
 
 
-class BaseAgentNode(Node):
+class BaseAgent(Node):
     _graph: Optional[CompiledStateGraph] = None
 
     def get_enforcement(self) -> List[str]:
@@ -78,7 +78,7 @@ class BaseAgentNode(Node):
 
     async def __call__(
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
-    ) -> Command[Literal["assistant_node"]]:
+    ) -> Command[str]:
         raise DummyNodeReachedException(
             "Reached dummy node during execution. This indicates a routing error in the agent graph."
         )

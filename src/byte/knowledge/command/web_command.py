@@ -1,6 +1,5 @@
 from argparse import Namespace
 
-from byte.agent import CleanerAgent
 from byte.cli import ByteArgumentParser, Command, InputCancelledError, Markdown
 from byte.config import ByteConfigException
 from byte.knowledge import SessionContextModel, SessionContextService
@@ -85,13 +84,14 @@ class WebCommand(Command, UserInteractive):
         elif choice == "Clean with LLM":
             console.print_info("Cleaning content with LLM...")
 
-            cleaner_agent = self.app.make(CleanerAgent)
-            result = await cleaner_agent.execute(
-                f"# Extract only the relevant information from this web content:\n\n{markdown_content}",
-                display_mode="thinking",
-            )
+            # cleaner_agent = self.app.make(CleanerAgent)
+            # result = await cleaner_agent.execute(
+            #     f"# Extract only the relevant information from this web content:\n\n{markdown_content}",
+            #     display_mode="thinking",
+            # )
 
-            cleaned_content = result.get("cleaned_content", "")
+            # cleaned_content = result.get("cleaned_content", "")
+            cleaned_content = None
 
             if cleaned_content:
                 console.print_success("Content cleaned and added to context")

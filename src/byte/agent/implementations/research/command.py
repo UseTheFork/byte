@@ -4,7 +4,7 @@ from typing import cast
 
 from langgraph.graph.state import RunnableConfig
 
-from byte.agent import AgentService, CoderAgent, ResearchAgent, SessionContextFormatter
+from byte.agent import CoderAgent, SessionContextFormatter
 from byte.cli import ByteArgumentParser, Command
 from byte.knowledge import SessionContextModel, SessionContextService
 from byte.memory import MemoryService

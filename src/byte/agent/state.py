@@ -5,6 +5,16 @@ from langgraph.graph.message import AnyMessage, add_messages
 from byte.agent import ConstraintSchema, MetadataSchema, add_constraints, replace_str, update_metadata
 
 
+class RoutingState(TypedDict):
+    """Routing information for graph node transitions.
+
+    Usage: Tracks the current and target nodes during graph execution.
+    """
+
+    target: str
+    source: str
+
+
 class BaseState(TypedDict):
     """Base state that all agents inherit with messaging and status tracking.
 
@@ -39,7 +49,6 @@ class BaseState(TypedDict):
     # This is specific to subprocess
     command: str
 
-    node_to: str
-    node_from: str
+    routing: RoutingState
 
     metadata: Annotated[MetadataSchema, update_metadata]

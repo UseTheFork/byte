@@ -1,10 +1,9 @@
 from argparse import Namespace
 
-from byte.agent import AgentService, CoderAgent, CommitAgent, CommitPlanAgent
 from byte.cli import ByteArgumentParser, Command, InputCancelledError
 from byte.git import GitService
 from byte.git.service.commit_service import CommitService
-from byte.lint import LintConfigException, LintService
+from byte.workflow import CommitWorkflow, WorkflowService
 
 
 class CommitCommand(Command):
@@ -56,40 +55,16 @@ class CommitCommand(Command):
                 console.print_warning("No staged changes to commit.")
                 return
 
-            try:
-                lint_service = self.app.make(LintService)
-                lint_commands = await lint_service()
+            commit_workflow = self.app.make(CommitWorkflow)
 
-                do_fix, failed_commands = await lint_service.display_results_summary(lint_commands)
-                if do_fix:
-                    joined_lint_errors = lint_service.format_lint_errors(failed_commands)
-                    agent_service = self.app.make(AgentService)
-                    await agent_service.execute_agent(joined_lint_errors, CoderAgent)
-            except LintConfigException:
-                pass
+            workflow_service = self.app.make(WorkflowService)
+            commit_result = await workflow_service.execute(commit_workflow, raw_args)
 
-            # Stage the changes again if anything changed via the lint.
-            await self.git_service.stage_changes()
-
-            prompt = await self.commit_service.build_commit_prompt()
-
-            commit_type = await self.prompt_for_select(
-                "What type of commit would you like to generate?",
-                choices=["Commit Plan", "Single Commit", "Cancel"],
-                default="Commit Plan",
+            formatted_message = await self.commit_service.format_conventional_commit(
+                commit_result["data"]["result"]["extracted_content"]
             )
 
-            if commit_type == "Commit Plan":
-                commit_agent = self.app.make(CommitPlanAgent)
-                commit_result = await commit_agent.execute(request=prompt, display_mode="thinking")
-                await self.commit_service.process_commit_plan(commit_result["data"]["result"]["extracted_content"])
-            elif commit_type == "Single Commit":
-                commit_agent = self.app.make(CommitAgent)
-                commit_result = await commit_agent.execute(request=prompt, display_mode="thinking")
-                formatted_message = await self.commit_service.format_conventional_commit(
-                    commit_result["data"]["result"]["extracted_content"]
-                )
-                await self.git_service.commit(formatted_message)
+            await self.git_service.commit(formatted_message)
 
         except InputCancelledError:
             return

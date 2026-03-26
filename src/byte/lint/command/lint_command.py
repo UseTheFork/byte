@@ -1,10 +1,10 @@
 from argparse import Namespace
 
-from byte.agent import AgentService, CoderAgent
 from byte.cli import ByteArgumentParser, Command
 from byte.config import ByteConfigException
 from byte.git import GitService
 from byte.lint import LintService
+from byte.workflow import CoderWorkflow, WorkflowService
 
 
 class LintCommand(Command):
@@ -40,8 +40,10 @@ class LintCommand(Command):
             do_fix, failed_commands = await lint_service.display_results_summary(lint_commands)
             if do_fix:
                 joined_lint_errors = lint_service.format_lint_errors(failed_commands)
-                agent_service = self.app.make(AgentService)
-                await agent_service.execute_agent({"errors": joined_lint_errors}, CoderAgent)
+
+                coder_workflow = self.app.make(CoderWorkflow)
+                workflow_service = self.app.make(WorkflowService)
+                await workflow_service.execute(coder_workflow, joined_lint_errors)
 
         except ByteConfigException as e:
             # log.exception(e)

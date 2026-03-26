@@ -2,7 +2,7 @@ from typing import List, Type
 
 from byte import Service, ServiceProvider
 from byte.cli import Command
-from byte.workflow import AskCommand, AskWorkflow, BaseWorkflow, WorkflowService
+from byte.workflow import AskCommand, AskWorkflow, BaseWorkflow, CoderWorkflow, WorkflowService
 
 
 class WorkflowServiceProvider(ServiceProvider):
@@ -17,6 +17,7 @@ class WorkflowServiceProvider(ServiceProvider):
         return [
             # keep-sorted start
             AskWorkflow,
+            CoderWorkflow,
             # keep-sorted end
         ]
 

@@ -49,7 +49,6 @@ class GraphBuilder:
 
         Usage: Called internally during GraphBuilder initialization
         """
-        from byte.agent.nodes.base_node import Node
 
         node_classes = {}
 

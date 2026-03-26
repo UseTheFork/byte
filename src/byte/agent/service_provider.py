@@ -2,29 +2,23 @@ from typing import List, Type
 
 from byte import Service, ServiceProvider
 from byte.agent import (
-    Agent,
-    AgentService,
     AskAgent,
-    AskAgentNode,
     AssistantNode,
-    CleanerAgent,
+    BaseAgent,
     CoderAgent,
-    CodeReviewerAgentNode,
-    CommitAgent,
-    CommitPlanAgent,
     ConfigAgentCommand,
-    ConventionAgent,
     EndNode,
     ExtractNode,
     LintNode,
+    MainModelNode,
     Node,
     ParseBlocksNode,
-    ResearchAgent,
-    ResearchCommand,
+    ReasoningModelNode,
     RoutingNode,
     StartNode,
     ToolNode,
     ValidationNode,
+    WeakModelNode,
 )
 from byte.cli import Command
 
@@ -39,18 +33,18 @@ class AgentServiceProvider(ServiceProvider):
     """
 
     def services(self) -> List[Type[Service]]:
-        return [AgentService]
+        return []
 
-    def agents(self) -> List[Type[Agent]]:
+    def agents(self) -> List[Type[BaseAgent]]:
         return [
             # keep-sorted start
             AskAgent,
-            CleanerAgent,
+            # CleanerAgent,
             CoderAgent,
-            CommitAgent,
-            CommitPlanAgent,
-            ConventionAgent,
-            ResearchAgent,
+            # CommitAgent,
+            # CommitPlanAgent,
+            # ConventionAgent,
+            # ResearchAgent,
             # keep-sorted end
         ]
 
@@ -58,24 +52,25 @@ class AgentServiceProvider(ServiceProvider):
         return [
             # keep-sorted start
             ConfigAgentCommand,
-            ResearchCommand,
+            # ResearchCommand,
             # keep-sorted end
         ]
 
     def nodes(self) -> List[Type[Node]]:
         return [
             # keep-sorted start
-            AskAgentNode,
             AssistantNode,
-            CodeReviewerAgentNode,
             EndNode,
             ExtractNode,
             LintNode,
+            MainModelNode,
             ParseBlocksNode,
+            ReasoningModelNode,
             RoutingNode,
             StartNode,
             ToolNode,
             ValidationNode,
+            WeakModelNode,
             # keep-sorted end
         ]
 
