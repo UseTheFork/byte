@@ -12,7 +12,11 @@
     "test": "bun test"
   },
   "dependencies": {
+    "@langchain/core": "^1.1.36",
+    "@langchain/langgraph": "^1.2.6",
     "chalk": "^5.6.2",
+    "chokidar": "^4.0.3",
+    "ignore": "^7.0.5",
     "ink": "^6.8.0",
     "js-yaml": "^4.1.0",
     "marked": "^17.0.5",
