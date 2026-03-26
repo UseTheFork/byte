@@ -8,12 +8,13 @@ export class SwitchModeCommand extends Command {
 
   async execute(args: string): Promise<void> {
     const path = args.trim()
-    const console = this.app.make<{ print(t: string): void; printError(t: string): void }>('console')
     if (!path) {
+      const console = this.app.make<{ print(t: string): void; printError(t: string): void }>('console')
       console.printError('Usage: /switch <path>')
       return
     }
     const fileService = this.app.make<FileService>(FileService as never)
+    const console = this.app.make<{ print(t: string): void; printError(t: string): void }>('console')
     const ctx = fileService.getFileContext(path)
     if (!ctx) {
       console.printError(`File not in context: ${path}`)
