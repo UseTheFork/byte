@@ -17,7 +17,7 @@ const app = Application.configure(process.cwd(), [
   FilesServiceProvider as never,
 ]).create()
 
-new LoadConfiguration().bootstrap(app)
+app.bootstrapWith([LoadConfiguration])
 
 await app.boot()
 

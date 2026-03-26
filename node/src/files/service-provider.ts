@@ -56,7 +56,9 @@ export class FilesServiceProvider extends ServiceProvider {
     const fileService = this.app.make<FileService>(FileService as never)
     const fileWatcher = this.app.make<FileWatcherService>(FileWatcherService as never)
 
-    void fileWatcher.startWatching()
+    void fileWatcher.startWatching().catch(e =>
+      console.error('[FilesServiceProvider] fileWatcher.startWatching failed:', e)
+    )
 
     eventBus.on(EventType.PRE_PROMPT_TOOLKIT, (payload) =>
       fileService.listInContextFilesHook(payload)
