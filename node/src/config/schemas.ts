@@ -57,7 +57,7 @@ const FilesConfigSchema = z.object({
 const LintCommandSchema = z.object({
   command:   z.array(z.string()),
   languages: z.array(z.string()),
-})
+}).strict()
 
 const LintConfigSchema = z.object({
   enable:   z.boolean().default(false),
@@ -95,7 +95,7 @@ export const ByteConfigSchema = z
   .transform((data) => {
     const { lsp: _lsp, mcp: _mcp, web: _web, system: _system, ...clean } = data as Record<string, unknown> & { lsp?: unknown; mcp?: unknown; web?: unknown; system?: unknown }
     return {
-      version: (clean.version as string | undefined) ?? '0.0.0',
+      version: data.version ?? '0.0.0',
       app: AppConfigSchema.parse(clean.app || {}),
       boot: BootConfigSchema.parse(clean.boot || {}),
       cli: CLIConfigSchema.parse(clean.cli || {}),
@@ -115,6 +115,7 @@ export type CLIConfig        = z.infer<typeof CLIConfigSchema>
 export type LLMConfig        = z.infer<typeof LLMConfigSchema>
 export type LLMModelConfig   = z.infer<typeof LLMModelConfigSchema>
 export type GitConfig        = z.infer<typeof GitConfigSchema>
+export type WatchConfig      = z.infer<typeof WatchConfigSchema>
 export type FilesConfig      = z.infer<typeof FilesConfigSchema>
 export type LintConfig       = z.infer<typeof LintConfigSchema>
 export type LintCommand      = z.infer<typeof LintCommandSchema>
