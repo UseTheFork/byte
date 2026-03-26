@@ -44,7 +44,7 @@ export class ConsoleStore extends EventEmitter {
     width: process.stdout.columns ?? 80,
   }
 
-  get state(): ConsoleState {
+  get state(): Readonly<ConsoleState> {
     return this._state
   }
 
