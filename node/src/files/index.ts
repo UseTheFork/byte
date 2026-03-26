@@ -1,0 +1,7 @@
+export { FileMode, FileContext } from './models.ts'
+export { FileIgnoreService } from './service/file-ignore-service.ts'
+export { FileDiscoveryService } from './service/file-discovery-service.ts'
+export { FileService } from './service/file-service.ts'
+export { FileWatcherService } from './service/file-watcher-service.ts'
+export { AICommentWatcherService } from './service/ai-comment-watcher-service.ts'
+export { FilesServiceProvider } from './service-provider.ts'
