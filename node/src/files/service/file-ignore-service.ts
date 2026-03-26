@@ -1,5 +1,5 @@
 import { readFileSync, existsSync } from 'fs'
-import { relative, isAbsolute } from 'path'
+import { relative, isAbsolute, join } from 'path'
 import ignore, { type Ignore } from 'ignore'
 import { Service } from '../../support/service.ts'
 import type { ByteConfig } from '../../config/schemas.ts'
@@ -16,7 +16,7 @@ export class FileIgnoreService extends Service {
 
   private _loadIgnorePatterns(): void {
     const ig = ignore()
-    const gitignorePath = `${this._rootPath}/.gitignore`
+    const gitignorePath = join(this._rootPath, '.gitignore')
     if (existsSync(gitignorePath)) {
       ig.add(readFileSync(gitignorePath, 'utf-8'))
     }

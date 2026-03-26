@@ -62,4 +62,12 @@ describe('FileIgnoreService', () => {
     svc.refresh()
     expect(svc.isIgnored(join(tmpDir, 'dist/bundle.js'))).toBe(true)
   })
+
+  it('isIgnored() handles relative path input', () => {
+    writeFileSync(join(tmpDir, '.gitignore'), 'node_modules\n')
+    const svc = new FileIgnoreService(makeApp(tmpDir))
+    svc.ensureBooted()
+    expect(svc.isIgnored('node_modules/foo.ts')).toBe(true)
+    expect(svc.isIgnored('src/main.ts')).toBe(false)
+  })
 })
