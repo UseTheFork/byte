@@ -14,6 +14,7 @@ export class FileWatcherService extends Service {
   override boot(): void {}
 
   async startWatching(): Promise<void> {
+    if (this._watcher) return
     const rootPath = this.app.make<string>('path.root')
     const ignoreService = this.app.make<FileIgnoreService>(FileIgnoreService as never)
     const fileDiscovery = this.app.make<FileDiscoveryService>(FileDiscoveryService as never)
@@ -27,11 +28,13 @@ export class FileWatcherService extends Service {
 
     this._watcher.on('add', (filePath: string) => {
       fileDiscovery.addFile(filePath)
-      void this.emit(new Payload(EventType.FILE_CHANGED, { file_path: filePath, change_type: 'add' }))
+      this.emit(new Payload(EventType.FILE_CHANGED, { file_path: filePath, change_type: 'add' }))
+        .catch(e => console.error('[FileWatcherService] emit error (add):', e))
     })
 
     this._watcher.on('change', (filePath: string) => {
-      void this.emit(new Payload(EventType.FILE_CHANGED, { file_path: filePath, change_type: 'change' }))
+      this.emit(new Payload(EventType.FILE_CHANGED, { file_path: filePath, change_type: 'change' }))
+        .catch(e => console.error('[FileWatcherService] emit error (change):', e))
     })
 
     this._watcher.on('unlink', async (filePath: string) => {
@@ -39,7 +42,8 @@ export class FileWatcherService extends Service {
       if (fileService.isFileInContext(filePath)) {
         await fileService.removeFile(filePath)
       }
-      void this.emit(new Payload(EventType.FILE_CHANGED, { file_path: filePath, change_type: 'unlink' }))
+      this.emit(new Payload(EventType.FILE_CHANGED, { file_path: filePath, change_type: 'unlink' }))
+        .catch(e => console.error('[FileWatcherService] emit error (unlink):', e))
     })
   }
 
