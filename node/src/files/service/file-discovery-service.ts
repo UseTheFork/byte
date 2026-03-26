@@ -62,10 +62,14 @@ export class FileDiscoveryService extends Service {
       else if (rel.includes(pattern)) tier3.push(f)
     }
 
-    return [...tier1, ...tier2, ...tier3]
-      .sort((a, b) =>
-        relative(this._rootPath, a).localeCompare(relative(this._rootPath, b))
-      )
+    const sortByRel = (a: string, b: string) =>
+      relative(this._rootPath, a).localeCompare(relative(this._rootPath, b))
+
+    return [
+      ...tier1.sort(sortByRel),
+      ...tier2.sort(sortByRel),
+      ...tier3.sort(sortByRel),
+    ]
   }
 
   addFile(filePath: string): boolean {

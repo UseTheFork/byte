@@ -118,4 +118,18 @@ describe('FileDiscoveryService', () => {
     service.refresh()
     expect(service.getFiles().includes(newFile)).toBe(true)
   })
+
+  it('findFiles() returns tier-1 prefix matches before tier-2 filename matches', () => {
+    // 'src/utils' is in 'src/utils.ts' (tier 1, relative path starts with 'src/utils')
+    // Also create a file where 'utils' appears in path but not as prefix
+    const deepFile = join(tmpDir, 'lib/utils-helper.ts')
+    mkdirSync(join(tmpDir, 'lib'), { recursive: true })
+    writeFileSync(deepFile, '')
+    service.refresh()
+
+    const results = service.findFiles('src/utils')
+    // 'src/utils.ts' matches tier 1 (relative path starts with 'src/utils')
+    // 'lib/utils-helper.ts' matches tier 2 or tier 3 (filename or path contains 'utils')
+    expect(results[0]).toBe(join(tmpDir, 'src/utils.ts'))
+  })
 })
