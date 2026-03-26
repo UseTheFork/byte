@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "bin": { "byte": "./src/main.ts" },
+  "bin": {
+    "byte": "./src/main.ts"
+  },
   "scripts": {
     "start": "bun run src/main.ts",
     "dev": "bun run src/main.ts",
@@ -16,7 +18,8 @@
     "marked": "^17.0.5",
     "marked-terminal": "^7.3.0",
     "react": "^19.2.4",
-    "simple-git": "^3.27.0"
+    "simple-git": "^3.27.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
