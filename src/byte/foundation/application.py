@@ -403,24 +403,35 @@ class Application(Container):
 
         Usage: `await app.run()` -> starts interactive session until KeyboardInterrupt
         """
-        from byte.cli import PromptToolkitService
 
-        input_service = self.make(PromptToolkitService)
-        while True:
-            try:
-                await input_service.execute()
-            except KeyboardInterrupt:
-                break
-            # except Exception as e:
-            # TODO: I think this can be moved to the general Exception handler.
-            # log.exception(e)
-            # console = self.app["console"]
-            # console.print_error_panel(
-            #     str(e),
-            #     title="Exception",
-            # )
-            # return 2
+        from byte.cli.textual_app import ByteTextualApp
+
+        try:
+            textual_app = ByteTextualApp(container=self)
+            await textual_app.run_async()
+        except Exception:
+            return 2
+
         return 1
+
+        # from byte.cli import PromptToolkitService
+
+        # input_service = self.make(PromptToolkitService)
+        # while True:
+        #     try:
+        #         await input_service.execute()
+        #     except KeyboardInterrupt:
+        #         break
+        #     # except Exception as e:
+        #     # TODO: I think this can be moved to the general Exception handler.
+        #     # log.exception(e)
+        #     # console = self.app["console"]
+        #     # console.print_error_panel(
+        #     #     str(e),
+        #     #     title="Exception",
+        #     # )
+        #     # return 2
+        # return 1
 
     def terminate(self) -> None:
         """Terminate the application."""
