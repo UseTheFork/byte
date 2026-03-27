@@ -92,6 +92,7 @@
 
                   pkgs.vhs
 
+                  pkgs.bun
                   pkgs.uv
                   pkgs.nodejs
                   pkgs.prettier
