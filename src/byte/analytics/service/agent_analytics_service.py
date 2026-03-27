@@ -3,9 +3,9 @@ from rich.progress_bar import ProgressBar
 from rich.table import Table
 
 from byte import Payload, Service
-from byte.agent import TokenUsageSchema
 from byte.analytics import UsageAnalytics
 from byte.llm import LLMService
+from byte.orchestration import TokenUsageSchema
 
 
 class AgentAnalyticsService(Service):

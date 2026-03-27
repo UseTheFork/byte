@@ -1,8 +1,6 @@
-from byte.agent import CoderAgent
-from byte.agent.utils.graph_builder import GraphBuilder
+from byte.orchestration import GraphBuilder
+from byte.subgraph import CoderAgent
 from byte.workflow import BaseWorkflow
-
-# AI: add doc blocks here ai!
 
 
 class CoderWorkflow(BaseWorkflow):

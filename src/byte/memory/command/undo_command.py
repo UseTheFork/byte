@@ -4,9 +4,9 @@ from langchain_core.messages import HumanMessage
 from langgraph.graph.message import RemoveMessage
 from langgraph.graph.state import RunnableConfig
 
-from byte.agent import CoderAgent
 from byte.cli import ByteArgumentParser, Command
 from byte.memory import MemoryService
+from byte.subgraph import CoderAgent
 
 
 class UndoCommand(Command):

@@ -4,7 +4,7 @@ from langchain_core.runnables import Runnable
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 
-from byte.agent import AssistantContextSchema
+from byte.orchestration import AssistantContextSchema
 from byte.support import Service
 
 

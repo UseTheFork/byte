@@ -3,8 +3,8 @@ from typing import Optional
 
 from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 
-from byte.agent import BaseState
 from byte.memory import MemoryService
+from byte.orchestration import BaseState
 from byte.support.mixins import Bootable, Configurable, Eventable
 
 

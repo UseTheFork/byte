@@ -3,10 +3,10 @@ from pathlib import Path
 from typing import List, Optional
 
 from byte import Payload, Service
-from byte.agent import AskAgent, CoderAgent
 from byte.cli import PromptToolkitService
 from byte.code_operations.schemas import AICommentType
 from byte.files import FileMode, FileService
+from byte.subgraph import AskAgent, CoderAgent
 from byte.support.utils import list_to_multiline_text
 
 

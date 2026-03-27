@@ -14,9 +14,9 @@ class RoutingNode(Node):
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
     ) -> Command[
         Literal[
-            "weak_model_node",
-            "reasoning_model_node",
-            "main_model_node",
+            "model_weak_node",
+            "model_reasoning_node",
+            "model_main_node",
             "lint_node",
             "ask_agent",
             "end_node",

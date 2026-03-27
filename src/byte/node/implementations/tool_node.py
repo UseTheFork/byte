@@ -6,7 +6,7 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.cli.rich.byte_display import ByteDisplay
-from byte.node import AssistantNode, Node
+from byte.node import ModelMainNode, Node
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.support import Str
 from byte.support.mixins import UserInteractive
@@ -25,7 +25,7 @@ class ToolNode(Node, UserInteractive):
 
         # Check if tools are available
         if not tools:
-            return Command(goto=Str.class_to_snake_case(AssistantNode), update={"scratch_messages": []})
+            return Command(goto=Str.class_to_snake_case(ModelMainNode), update={"scratch_messages": []})
 
         # Build a mapping of tool names to tool instances
         tools_by_name = {tool.name: tool for tool in tools}
@@ -61,4 +61,4 @@ class ToolNode(Node, UserInteractive):
                 )
             )
 
-        return Command(goto=Str.class_to_snake_case(AssistantNode), update={"scratch_messages": outputs})
+        return Command(goto=Str.class_to_snake_case(ModelMainNode), update={"scratch_messages": outputs})

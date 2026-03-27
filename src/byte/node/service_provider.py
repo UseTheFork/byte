@@ -2,19 +2,18 @@ from typing import List, Type
 
 from byte import ServiceProvider
 from byte.node import (
-    AssistantNode,
     EndNode,
     ExtractNode,
     LintNode,
-    MainModelNode,
+    ModelMainNode,
+    ModelReasoningNode,
+    ModelWeakNode,
     Node,
     ParseBlocksNode,
-    ReasoningModelNode,
     RoutingNode,
     StartNode,
     ToolNode,
     ValidationNode,
-    WeakModelNode,
 )
 
 
@@ -24,18 +23,17 @@ class NodeServiceProvider(ServiceProvider):
     def nodes(self) -> List[Type[Node]]:
         return [
             # keep-sorted start
-            AssistantNode,
             EndNode,
             ExtractNode,
             LintNode,
-            MainModelNode,
+            ModelMainNode,
+            ModelReasoningNode,
+            ModelWeakNode,
             ParseBlocksNode,
-            ReasoningModelNode,
             RoutingNode,
             StartNode,
             ToolNode,
             ValidationNode,
-            WeakModelNode,
             # keep-sorted end
         ]
 

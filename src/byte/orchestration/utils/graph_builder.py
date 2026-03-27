@@ -54,7 +54,17 @@ class GraphBuilder:
         node_classes = {}
 
         # Import the agent module to scan for Node subclasses
-        import byte.agent as agent_module
+        import byte.node as agent_module
+
+        # Get all members of the agent module
+        for name, obj in inspect.getmembers(agent_module):
+            # Check if it's a class and subclass of Node (but not Node itself or DummyNode)
+            if inspect.isclass(obj) and issubclass(obj, Node) and obj is not Node and obj.__name__ != "DummyNode":
+                node_string = Str.class_to_snake_case(obj.__name__)
+                node_classes[node_string] = obj
+
+        # Import the agent module to scan for Node subclasses
+        import byte.subgraph as agent_module
 
         # Get all members of the agent module
         for name, obj in inspect.getmembers(agent_module):

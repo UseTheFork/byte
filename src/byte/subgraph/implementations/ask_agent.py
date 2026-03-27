@@ -133,11 +133,9 @@ class AskAgent(BaseAgent):
             context=await self.get_assistant_runnable(),  # ty:ignore[invalid-argument-type]
         )
 
-        return Command(
-            goto="routing_node",
-            update={
-                "node_to": "end_node",
-                "node_from": self.get_node_name(),
+        return self.route_to(
+            "end_node",
+            {
                 "scratch_messages": [subgraph_output["final_message"]],
             },
         )

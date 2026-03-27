@@ -6,7 +6,6 @@ from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
     from byte.node.base_node import Node, Node as BaseNode
-    from byte.node.implementations.assistant_node import AssistantNode
     from byte.node.implementations.dummy_node import DummyNode
     from byte.node.implementations.end_node import EndNode
     from byte.node.implementations.extract_node import ExtractNode
@@ -17,14 +16,12 @@ if TYPE_CHECKING:
     from byte.node.implementations.model_weak_node import ModelWeakNode
     from byte.node.implementations.parse_blocks_node import ParseBlocksNode
     from byte.node.implementations.routing_node import RoutingNode
-    from byte.node.implementations.show_node import ShowNode
     from byte.node.implementations.start_node import StartNode
     from byte.node.implementations.tool_node import ToolNode
     from byte.node.implementations.validation_node import ValidationNode
     from byte.node.service_provider import NodeServiceProvider
 
 __all__ = (
-    "AssistantNode",
     "BaseNode",
     "DummyNode",
     "EndNode",
@@ -38,7 +35,6 @@ __all__ = (
     "NodeServiceProvider",
     "ParseBlocksNode",
     "RoutingNode",
-    "ShowNode",
     "StartNode",
     "ToolNode",
     "ValidationNode",
@@ -46,7 +42,6 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
-    "AssistantNode": "implementations.assistant_node",
     "BaseNode": "base_node",
     "DummyNode": "implementations.dummy_node",
     "EndNode": "implementations.end_node",
@@ -60,7 +55,6 @@ _dynamic_imports = {
     "NodeServiceProvider": "service_provider",
     "ParseBlocksNode": "implementations.parse_blocks_node",
     "RoutingNode": "implementations.routing_node",
-    "ShowNode": "implementations.show_node",
     "StartNode": "implementations.start_node",
     "ToolNode": "implementations.tool_node",
     "ValidationNode": "implementations.validation_node",

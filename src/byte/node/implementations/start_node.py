@@ -7,7 +7,7 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.code_operations import edit_block_messages
-from byte.node import AssistantNode, Node
+from byte.node import ModelMainNode, Node
 from byte.orchestration import AssistantContextSchema, BaseState, MetadataSchema, PromptSettingsSchema
 from byte.support import Str
 
@@ -15,7 +15,7 @@ from byte.support import Str
 class StartNode(Node):
     def boot(
         self,
-        goto: Type[Node] = AssistantNode,
+        goto: Type[Node] = ModelMainNode,
         **kwargs,
     ):
         self.goto = Str.class_to_snake_case(goto)
@@ -39,7 +39,6 @@ class StartNode(Node):
             "parsed_blocks": [],
             "extracted_content": None,
             "errors": None,
-            "node_to": self.goto,
             "metadata": MetadataSchema(
                 iteration=0,
                 erase_history=False,
@@ -47,7 +46,7 @@ class StartNode(Node):
             ),
         }
 
-        return Command(
-            goto="routing_node",
-            update=result,
+        return self.route_to(
+            self.goto,
+            result,
         )
