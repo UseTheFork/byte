@@ -3,9 +3,9 @@ from __future__ import annotations
 import bisect
 from dataclasses import dataclass
 
+from langchain.messages import HumanMessage
 from rich.console import RenderableType
 from rich.markdown import Markdown
-from rich.syntax import Syntax
 from textual import on
 from textual.binding import Binding
 from textual.css.query import NoMatches
@@ -15,6 +15,8 @@ from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import TextArea
 from textual.widgets.text_area import Selection
+
+from byte.cli.schemas import ChatMessage
 
 
 class SelectionTextArea(TextArea):
@@ -228,7 +230,7 @@ class Chatbox(Widget, can_focus=True):
 
     def __init__(
         self,
-        message,
+        message: ChatMessage,
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
@@ -243,14 +245,12 @@ class Chatbox(Widget, can_focus=True):
         self.message = message
 
     def on_mount(self) -> None:
-        litellm_message = self.message.message
-        role = litellm_message["role"]
-        if role == "assistant":
-            self.add_class("assistant-message")
-            self.border_title = "Agent"
-        else:
+        if isinstance(self.message.message, HumanMessage):
             self.add_class("human-message")
             self.border_title = "You"
+        else:
+            self.add_class("assistant-message")
+            self.border_title = "Agent"
 
     def action_up(self) -> None:
         self.screen.focus_previous(Chatbox)
@@ -267,7 +267,7 @@ class Chatbox(Widget, can_focus=True):
 
     def action_copy_to_clipboard(self) -> None:
         if not self.selection_mode:
-            text_to_copy = self.message.message.get("content")
+            text_to_copy = self.message.message.content
             if isinstance(text_to_copy, str):
                 try:
                     import pyperclip
@@ -291,7 +291,7 @@ class Chatbox(Widget, can_focus=True):
         if value:
             async with self.batch():
                 self.border_subtitle = "SELECT"
-                content = self.message.message.get("content")
+                content = self.message.message.content
                 text_area = SelectionTextArea(
                     content if isinstance(content, str) else "",
                     read_only=True,
@@ -307,7 +307,7 @@ class Chatbox(Widget, can_focus=True):
                 self.query_one(SelectionTextArea)
             except NoMatches:
                 # Shouldn't happen, but let's be defensive.
-                self.log.warning("In selection mode, but no text area found.")
+                self.app.byte["log"].warning("In selection mode, but no text area found.")
                 pass
             else:
                 await self.remove_children()
@@ -332,11 +332,13 @@ class Chatbox(Widget, can_focus=True):
     @property
     def markdown(self) -> Markdown:
         """Return the content as a Rich Markdown object."""
-        content = self.message.message.get("content")
+        content = self.message.message.content
+        self.app.byte["log"].info(content)
         if not isinstance(content, str):
             content = ""
 
-        return Markdown(content, code_theme=self.app.launch_config.message_code_theme)
+        return Markdown(content)
+        # return Markdown(content, code_theme=self.app.launch_config.message_code_theme)
 
     def render(self) -> RenderableType:
         if self.selection_mode:
@@ -345,29 +347,29 @@ class Chatbox(Widget, can_focus=True):
             return ""
 
         message = self.message.message
-        theme = self.app.theme_object
-        if theme:
-            background_color = theme.background
-        else:
-            background_color = "#121212"
+        # theme = self.app.theme_object
+        # if theme:
+        #     background_color = theme.background
+        # else:
+        background_color = "#121212"
 
-        if message["role"] == "user":
-            content = message["content"] or ""
-            if isinstance(content, str):
-                return Syntax(
-                    content,
-                    lexer="markdown",
-                    word_wrap=True,
-                    background_color=background_color,
-                )
-            else:
-                return ""
+        # if isinstance(message, HumanMessage):
+        #     content = message.content or ""
+        #     if isinstance(content, str):
+        #         return Syntax(
+        #             content,
+        #             lexer="markdown",
+        #             word_wrap=True,
+        #             background_color=background_color,
+        #         )
+        #     else:
+        #         return ""
         return self.markdown
 
     def append_chunk(self, chunk: str) -> None:
         """Append a chunk of text to the end of the message."""
-        content = self.message.message.get("content")
+        content = self.message.message.content
         if isinstance(content, str):
             content += chunk
-            self.message.message["content"] = content
+            self.message.message.content = content
             self.refresh(layout=True)

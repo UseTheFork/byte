@@ -403,7 +403,6 @@ class Application(Container):
 
         Usage: `await app.run()` -> starts interactive session until KeyboardInterrupt
         """
-
         from byte.cli.textual_app import ByteTextualApp
 
         try:

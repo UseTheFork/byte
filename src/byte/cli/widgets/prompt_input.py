@@ -49,13 +49,13 @@ class PromptInput(TextArea):
         self.set_class(not submit_ready, "-submit-blocked")
 
     def on_mount(self):
-        self.border_title = "Enter your [u]m[/]essage..."
+        self.border_title = "Enter your message..."
 
     @on(TextArea.Changed)
     async def prompt_changed(self, event: TextArea.Changed) -> None:
         text_area = event.text_area
         if text_area.text.strip() != "":
-            text_area.border_subtitle = "[[white]^j[/]] Send message"
+            text_area.border_subtitle = "(^j) Send message"
         else:
             text_area.border_subtitle = None
 

@@ -1,5 +1,7 @@
+import datetime
 from typing import Literal, Optional
 
+from langchain_core.messages import BaseMessage
 from pydantic.dataclasses import dataclass
 
 
@@ -170,3 +172,9 @@ class SubprocessResult:
     stderr: str
     command: str
     cwd: Optional[str] = None
+
+
+@dataclass
+class ChatMessage:
+    message: BaseMessage
+    timestamp: datetime.datetime | None

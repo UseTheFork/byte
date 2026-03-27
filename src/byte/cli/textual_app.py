@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 from textual.app import App
 from textual.binding import Binding
 
+from byte.cli.screens.chat_screen import ChatScreen
+
 if TYPE_CHECKING:
     from byte import Application
 
@@ -19,7 +21,7 @@ class ByteTextualApp(App):
     ]
 
     def __init__(self, container: Application):
-        self.container = container
+        self.byte = container
 
         super().__init__()
 
@@ -30,7 +32,7 @@ class ByteTextualApp(App):
 
     async def on_mount(self):
         # Boot the application if not already booted
-        if not self.container.is_booted():
-            await self.container.boot()
+        if not self.byte.is_booted():
+            await self.byte.boot()
 
-        await self.push_screen(ChatScreen(chat))
+        await self.push_screen(ChatScreen())

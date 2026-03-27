@@ -1,10 +1,11 @@
-from elia_chat.widgets.agent_is_typing import ResponseStatus
-from elia_chat.widgets.chat import Chat
-from textual import log, on
+from textual import on
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.screen import Screen
 from textual.widgets import Footer
+
+from byte.cli.widgets.agent_is_typing import ResponseStatus
+from byte.cli.widgets.chat import Chat
 
 
 class ChatScreen(Screen[None]):
@@ -27,7 +28,8 @@ class ChatScreen(Screen[None]):
         # self.chat_data = chat_data
 
     def compose(self) -> ComposeResult:
-        yield Chat(self.chat_data)
+        yield Chat()
+        # yield Chat(self.chat_data)
         yield Footer()
 
     @on(Chat.NewUserMessage)
@@ -50,7 +52,7 @@ class ChatScreen(Screen[None]):
         """Allow the user to send messages again."""
         self.query_one(ResponseStatus).display = False
         self.query_one(Chat).allow_input_submit = True
-        log.debug(f"Agent response complete. Adding message to chat_id {event.chat_id!r}: {event.message}")
+        # log.debug(f"Agent response complete. Adding message to chat_id {event.chat_id!r}: {event.message}")
         # if self.chat_data.id is None:
         # raise RuntimeError("Chat has no ID. This is likely a bug in Elia.")
 
