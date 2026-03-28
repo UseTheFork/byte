@@ -4,8 +4,8 @@ from textual.binding import Binding
 from textual.screen import Screen
 from textual.widgets import Footer
 
-from byte.cli.widgets.agent_is_typing import ResponseStatus
-from byte.cli.widgets.chat import Chat
+from byte.tui.widgets.agent_is_typing import ResponseStatus
+from byte.tui.widgets.chat import Chat
 
 
 class ChatScreen(Screen[None]):

@@ -21,11 +21,13 @@ from byte.memory import MemoryServiceProvider
 from byte.node import NodeServiceProvider
 from byte.presets import PresetsProvider
 from byte.system import SystemServiceProvider
+from byte.tui import TUIServiceProvider
 from byte.web import WebServiceProvider
 from byte.workflow import WorkflowServiceProvider
 
 PROVIDERS = [
     CLIServiceProvider,
+    TUIServiceProvider,
     MemoryServiceProvider,
     KnowledgeServiceProvider,
     FileServiceProvider,

@@ -16,7 +16,7 @@ from textual.widget import Widget
 from textual.widgets import TextArea
 from textual.widgets.text_area import Selection
 
-from byte.cli.schemas import ChatMessage
+from byte.tui.schemas import ChatMessage
 
 
 class SelectionTextArea(TextArea):
@@ -307,7 +307,7 @@ class Chatbox(Widget, can_focus=True):
                 self.query_one(SelectionTextArea)
             except NoMatches:
                 # Shouldn't happen, but let's be defensive.
-                self.app.byte["log"].warning("In selection mode, but no text area found.")
+                self.app.byte_app["log"].warning("In selection mode, but no text area found.")
                 pass
             else:
                 await self.remove_children()
@@ -333,7 +333,7 @@ class Chatbox(Widget, can_focus=True):
     def markdown(self) -> Markdown:
         """Return the content as a Rich Markdown object."""
         content = self.message.message.content
-        self.app.byte["log"].info(content)
+        self.app.byte_app["log"].info(content)
         if not isinstance(content, str):
             content = ""
 

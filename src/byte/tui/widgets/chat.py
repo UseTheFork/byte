@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import cast
 
 from langchain.messages import HumanMessage
+from langchain_core.messages import AIMessage
 from textual import events, on, work
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -16,16 +17,16 @@ from textual.widget import Widget
 from textual.widgets import Label
 
 from byte import Application
-from byte.cli.schemas import ChatMessage
-from byte.cli.widgets.agent_is_typing import ResponseStatus
-from byte.cli.widgets.chat_header import ChatHeader, TitleStatic
-from byte.cli.widgets.chatbox import Chatbox
-from byte.cli.widgets.prompt_input import PromptInput
+from byte.tui.schemas import ChatMessage
+from byte.tui.widgets.agent_is_typing import ResponseStatus
+from byte.tui.widgets.chat_header import ChatHeader, TitleStatic
+from byte.tui.widgets.chatbox import Chatbox
+from byte.tui.widgets.prompt import Prompt
 
 # if TYPE_CHECKING:
 
 
-class ChatPromptInput(PromptInput):
+class ChatPromptInput(Prompt):
     BINDINGS = [Binding("escape", "app.pop_screen", "Close chat", key_display="esc")]
 
 
@@ -37,7 +38,7 @@ class Chat(Widget):
     @dataclass
     class AgentResponseComplete(Message):
         chat_id: int | None
-        # message: ChatMessage
+        message: ChatMessage
         chatbox: Chatbox
 
     @dataclass
@@ -79,7 +80,7 @@ class Chat(Widget):
     ) -> None:
         super().__init__()
         self.chat_data = []
-        self.byte = cast(Application, self.app.byte)
+        self.byte_app = cast(Application, self.app.byte_app)
 
     """Used to lock the chat input while the agent is responding."""
 
@@ -96,6 +97,12 @@ class Chat(Widget):
         """
         When the component is mounted, we need to check if there is a new chat to start
         """
+        # Register container with chatbox manager
+        from byte.tui import TUIManagerService
+
+        chatbox_manager = self.byte_app.make(TUIManagerService)
+        chatbox_manager.register_container(self.chat_container)
+
         await self.load_chat(self.chat_data)
 
     @property
@@ -105,7 +112,7 @@ class Chat(Widget):
     @property
     def is_empty(self) -> bool:
         """True if the conversation is empty, False otherwise."""
-        return len(self.chat_data.messages) == 1  # Contains system message at first.
+        return len(self.chat_data.messages) == 0  # Contains system message at first.
 
     def scroll_to_latest_message(self):
         container = self.chat_container
@@ -139,53 +146,25 @@ class Chat(Widget):
 
         prompt = self.query_one(ChatPromptInput)
         prompt.submit_ready = False
-        # self.stream_agent_response()
+        self.stream_agent_response()
 
     @work(thread=True, group="agent_response")
     async def stream_agent_response(self) -> None:
-        pass
-        # model = self.chat_data.model
-        # log.debug(f"Creating streaming response with model {model.name!r}")
-
-        # raw_messages = [message.message for message in self.chat_data.messages]
-
-        # messages: list[ChatCompletionUserMessageParam] = trim_messages(raw_messages, model.name)  # type: ignore
-
-        # litellm.organization = model.organization
-        # try:
-        #     response = await acompletion(
-        #         messages=messages,
-        #         stream=True,
-        #         model=model.name,
-        #         temperature=model.temperature,
-        #         max_retries=model.max_retries,
-        #         api_key=model.api_key.get_secret_value() if model.api_key else None,
-        #         api_base=model.api_base.unicode_string() if model.api_base else None,
-        #     )
-        # except Exception as exception:
-        #     self.app.notify(
-        #         f"{exception}",
-        #         title="Error",
-        #         severity="error",
-        #         timeout=30,
-        #     )
-        #     self.post_message(self.AgentResponseFailed(self.chat_data.messages[-1]))
-        #     return
+        # make call here.
 
         # ai_message: ChatCompletionAssistantMessageParam = {
         #     "content": "",
         #     "role": "assistant",
         # }
-        # now = datetime.datetime.now(datetime.UTC)
+        now = datetime.datetime.now(datetime.UTC)
 
-        # message = ChatMessage(message=ai_message, model=model, timestamp=now)
-        # response_chatbox = Chatbox(
-        #     message=message,
-        #     model=self.chat_data.model,
-        #     classes="response-in-progress",
-        # )
+        message = ChatMessage(message=AIMessage("test"), timestamp=now)
+        response_chatbox = Chatbox(
+            message=message,
+            classes="response-in-progress",
+        )
         # self.post_message(self.AgentResponseStarted())
-        # self.app.call_from_thread(self.chat_container.mount, response_chatbox)
+        self.app.call_from_thread(self.chat_container.mount, response_chatbox)
 
         # assert self.chat_container is not None, "Textual has mounted container at this point in the lifecycle."
 
@@ -216,13 +195,13 @@ class Chat(Widget):
         #     )
         #     self.post_message(self.AgentResponseFailed(self.chat_data.messages[-1]))
         # else:
-        #     self.post_message(
-        #         self.AgentResponseComplete(
-        #             chat_id=self.chat_data.id,
-        #             message=response_chatbox.message,
-        #             chatbox=response_chatbox,
-        #         )
-        #     )
+        self.post_message(
+            self.AgentResponseComplete(
+                chat_id=123,
+                message=response_chatbox.message,
+                chatbox=response_chatbox,
+            )
+        )
 
     @on(AgentResponseFailed)
     @on(AgentResponseStarted)
@@ -238,7 +217,7 @@ class Chat(Widget):
     @on(AgentResponseComplete)
     def agent_finished_responding(self, event: AgentResponseComplete) -> None:
         # Ensure the thread is updated with the message from the agent
-        self.chat_data.messages.append(event.message)
+        # self.chat_data.messages.append(event.message)
         event.chatbox.border_title = "Agent"
         event.chatbox.remove_class("response-in-progress")
         prompt = self.query_one(ChatPromptInput)
@@ -252,7 +231,7 @@ class Chat(Widget):
         command_name = parts[0]
         args = parts[1] if len(parts) > 1 else ""
 
-        command_registry = self.byte.make(CommandRegistry)
+        command_registry = self.byte_app.make(CommandRegistry)
         command = command_registry.get_slash_command(command_name)
 
         if command:
@@ -265,11 +244,11 @@ class Chat(Widget):
         from byte.cli import SubprocessService
 
         user_input = user_input[1:]
-        subprocess_service = self.byte.make(SubprocessService)
+        subprocess_service = self.byte_app.make(SubprocessService)
         return await subprocess_service.run_and_confirm(user_input)
 
-    @on(PromptInput.PromptSubmitted)
-    async def user_chat_message_submitted(self, event: PromptInput.PromptSubmitted) -> None:
+    @on(Prompt.PromptSubmitted)
+    async def user_chat_message_submitted(self, event: Prompt.PromptSubmitted) -> None:
         if not self.allow_input_submit:
             return
 
@@ -291,8 +270,8 @@ class Chat(Widget):
         # Regular message - send to agent
         await self.new_user_message(user_input)
 
-    @on(PromptInput.CursorEscapingTop)
-    async def on_cursor_up_from_prompt(self, event: PromptInput.CursorEscapingTop) -> None:
+    @on(Prompt.CursorEscapingTop)
+    async def on_cursor_up_from_prompt(self, event: Prompt.CursorEscapingTop) -> None:
         self.focus_latest_message()
 
     @on(Chatbox.CursorEscapingBottom)

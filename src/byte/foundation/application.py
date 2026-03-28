@@ -403,10 +403,10 @@ class Application(Container):
 
         Usage: `await app.run()` -> starts interactive session until KeyboardInterrupt
         """
-        from byte.cli.textual_app import ByteTextualApp
+        from byte.tui.byte_tui import ByteTUI
 
         try:
-            textual_app = ByteTextualApp(container=self)
+            textual_app = ByteTUI(container=self)
             await textual_app.run_async()
         except Exception:
             return 2

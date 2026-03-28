@@ -6,13 +6,56 @@ from textual.message import Message
 from textual.reactive import reactive
 from textual.widgets import TextArea
 
+# class PromptTextArea(HighlightedTextArea):
+#     BINDING_GROUP_TITLE = "Prompt"
+
+#     # app = getters.app(ToadApp)
+#     auto_completes: var[list[Option]] = var(list)
+#     multi_line = var(False, bindings=True)
+#     shell_mode = var(False, bindings=True)
+#     agent_ready: var[bool] = var(False)
+
+#     class Submitted(Message):
+#         def __init__(self, markdown: str) -> None:
+#             self.markdown = markdown
+#             super().__init__()
+
+#     def on_mount(self) -> None:
+#         self.highlight_cursor_line = False
+#         self.hide_suggestion_on_blur = False
+
+#     def on_key(self, event: events.Key) -> None:
+#         if not self.shell_mode and self.cursor_location == (0, 0) and event.character in {"!", "$"}:
+#             # self.post_message(self.RequestShellMode())
+#             event.prevent_default()
+#         elif self.shell_mode and event.key == "tab":
+#             event.prevent_default()
+#         elif event.key != "escape":
+#             self.suggestions = None
+#             self.suggestion = ""
+
+
+# class Prompt(containers.VerticalGroup):
+#     BINDINGS = [
+#         Binding("escape", "dismiss", "Dismiss", show=False),
+#     ]
+
+#     prompt_container = getters.query_one("#prompt-container", Widget)
+#     prompt_text_area = getters.query_one(PromptTextArea)
+#     prompt_label = getters.query_one("#prompt", Label)
+#     # current_directory = getters.query_one(CondensedPath)
+#     # path_search = getters.query_one(PathSearch)
+#     # slash_complete = getters.query_one(SlashComplete)
+#     # question = getters.query_one(Question)
+#     # mode_switcher = getters.query_one(ModeSwitcher)
+
 
 # Credits to https://github.com/darrenburns/elia/blob/main/elia_chat/widgets/prompt_input.py
-class PromptInput(TextArea):
+class Prompt(TextArea):
     @dataclass
     class PromptSubmitted(Message):
         text: str
-        prompt_input: "PromptInput"
+        prompt_input: "Prompt"
 
     @dataclass
     class CursorEscapingTop(Message):
@@ -22,7 +65,9 @@ class PromptInput(TextArea):
     class CursorEscapingBottom(Message):
         pass
 
-    BINDINGS = [Binding("ctrl+j,alt+enter", "submit_prompt", "Send message", key_display="^j")]
+    BINDINGS = [
+        Binding("ctrl+j,alt+enter", "submit_prompt", "Send message", key_display="^j"),
+    ]
 
     submit_ready = reactive(True)
 

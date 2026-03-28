@@ -135,6 +135,14 @@ class WorkflowService(Service):
         stream_rendering_service = self.app.make(StreamRenderingService)
         stream_rendering_service.set_display_mode(display_mode)
 
+        # Emit workflow start event
+        await self.emit(
+            Payload(
+                event_type=EventType.WORKFLOW_STARTED,
+                data={"workflow": workflow.__class__.__name__, "thread_id": thread_id},
+            )
+        )
+
         await stream_rendering_service.start_spinner()
         try:
             # Create a task so we can cancel it properly
@@ -153,6 +161,14 @@ class WorkflowService(Service):
             processed_event = None
         finally:
             await stream_rendering_service.end_stream()
+
+        # Emit workflow complete event
+        await self.emit(
+            Payload(
+                event_type=EventType.WORKFLOW_COMPLETED,
+                data={"workflow": workflow.__class__.__name__, "result": processed_event},
+            )
+        )
 
         # Create payload with event type
         payload = Payload(
