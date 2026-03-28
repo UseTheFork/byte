@@ -27,7 +27,6 @@ from byte.workflow import WorkflowServiceProvider
 
 PROVIDERS = [
     CLIServiceProvider,
-    TUIServiceProvider,
     MemoryServiceProvider,
     KnowledgeServiceProvider,
     FileServiceProvider,
@@ -46,6 +45,7 @@ PROVIDERS = [
     ClipboardServiceProvider,
     DevelopmentServiceProvider,
     SystemServiceProvider,
+    TUIServiceProvider,
 ]
 
 

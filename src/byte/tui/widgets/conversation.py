@@ -84,11 +84,6 @@ class Conversation(Widget):
     def chat_container(self) -> VerticalScroll:
         return self.query_one("#chat-container", VerticalScroll)
 
-    @property
-    def is_empty(self) -> bool:
-        """True if the conversation is empty, False otherwise."""
-        return len(self.chat_data.messages) == 0  # Contains system message at first.
-
     @on(Messages.Flash)
     def on_flash(self, event: Messages.Flash) -> None:
         event.stop()

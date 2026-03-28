@@ -6,10 +6,12 @@ from typing import TYPE_CHECKING, ClassVar
 from textual import on
 from textual.app import App, ComposeResult
 from textual.binding import Binding, BindingType
+from textual.containers import VerticalScroll
 from textual.widgets import Footer
 
 from byte.tui import Messages
 from byte.tui.widgets.agent_is_typing import ResponseStatus
+from byte.tui.widgets.bootbox import Bootbox
 from byte.tui.widgets.conversation import Conversation
 
 if TYPE_CHECKING:
@@ -39,6 +41,7 @@ class ByteTUI(App, inherit_bindings=False):
             tooltip="Settings screen",
         ),
     ]
+
     ALLOW_IN_MAXIMIZED_VIEW = ""
 
     HORIZONTAL_BREAKPOINTS = [(0, "-narrow"), (100, "-wide")]
@@ -50,15 +53,23 @@ class ByteTUI(App, inherit_bindings=False):
 
         super().__init__()
 
+    @property
+    def chat_container(self) -> VerticalScroll:
+        return self.query_one("#chat-container", VerticalScroll)
+
     def compose(self) -> ComposeResult:
         yield Conversation()
-        # yield Chat(self.chat_data)
         yield Footer()
 
     async def on_mount(self):
         # Boot the application if not already booted
         if not self.byte_app.is_booted():
             await self.byte_app.boot()
+
+        response_chatbox = Bootbox(
+            message="test",
+        )
+        self.chat_container.mount(response_chatbox)
 
     @on(Messages.UserInputSubmitted)
     def new_user_message(self, event: Messages.UserInputSubmitted) -> None:
