@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from dataclasses import dataclass
-from typing import cast
+from typing import Literal, cast
 
 from langchain.messages import HumanMessage
 from langchain_core.messages import AIMessage
@@ -10,47 +9,25 @@ from textual import events, on, work
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import VerticalScroll
+from textual.content import Content
 from textual.css.query import NoMatches
-from textual.message import Message
 from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Label
 
 from byte import Application
+from byte.tui import Messages
 from byte.tui.schemas import ChatMessage
 from byte.tui.widgets.agent_is_typing import ResponseStatus
-from byte.tui.widgets.chat_header import ChatHeader, TitleStatic
 from byte.tui.widgets.chatbox import Chatbox
+from byte.tui.widgets.flash import Flash
 from byte.tui.widgets.prompt import Prompt
 
 # if TYPE_CHECKING:
 
 
-class ChatPromptInput(Prompt):
-    BINDINGS = [Binding("escape", "app.pop_screen", "Close chat", key_display="esc")]
-
-
-class Chat(Widget):
-    @dataclass
-    class AgentResponseStarted(Message):
-        pass
-
-    @dataclass
-    class AgentResponseComplete(Message):
-        chat_id: int | None
-        message: ChatMessage
-        chatbox: Chatbox
-
-    @dataclass
-    class AgentResponseFailed(Message):
-        """Sent when the agent fails to respond e.g. cant connect.
-        Can be used to reset UI state."""
-
-        last_message: ChatMessage
-
-    @dataclass
-    class NewUserMessage(Message):
-        content: str
+class Conversation(Widget):
+    BINDING_GROUP_TITLE = "Conversation"
 
     BINDINGS = [
         Binding("ctrl+r", "rename", "Rename", key_display="^r"),
@@ -86,12 +63,12 @@ class Chat(Widget):
 
     def compose(self) -> ComposeResult:
         yield ResponseStatus()
-        yield ChatHeader("123", "test")
+        # yield ChatHeader("123", "test")
 
         with VerticalScroll(id="chat-container") as vertical_scroll:
             vertical_scroll.can_focus = False
 
-        yield ChatPromptInput(id="prompt")
+        yield Prompt(id="prompt")
 
     async def on_mount(self, _: events.Mount) -> None:
         """
@@ -103,8 +80,6 @@ class Chat(Widget):
         chatbox_manager = self.byte_app.make(TUIManagerService)
         chatbox_manager.register_container(self.chat_container)
 
-        await self.load_chat(self.chat_data)
-
     @property
     def chat_container(self) -> VerticalScroll:
         return self.query_one("#chat-container", VerticalScroll)
@@ -114,16 +89,37 @@ class Chat(Widget):
         """True if the conversation is empty, False otherwise."""
         return len(self.chat_data.messages) == 0  # Contains system message at first.
 
+    @on(Messages.Flash)
+    def on_flash(self, event: Messages.Flash) -> None:
+        event.stop()
+        self.flash(event.content, duration=event.duration, style=event.style)
+
+    def flash(
+        self,
+        content: str | Content,
+        *,
+        duration: float | None = None,
+        style: Literal["default", "warning", "error", "success"] = "default",
+    ) -> None:
+        """Flash a single-line message to the user.
+
+        Args:
+            content: Content to flash.
+            style: A semantic style.
+            duration: Duration in seconds of the flash, or `None` to use default in settings.
+        """
+        self.query_one(Flash).flash(content, duration=duration, style=style)
+
     def scroll_to_latest_message(self):
         container = self.chat_container
         container.refresh()
         container.scroll_end(animate=False, force=True)
 
-    @on(AgentResponseFailed)
-    def restore_state_on_agent_failure(self, event: Chat.AgentResponseFailed) -> None:
+    @on(Messages.AgentResponseFailed)
+    def restore_state_on_agent_failure(self, event: Messages.AgentResponseFailed) -> None:
         original_prompt = event.last_message.message.content
         if isinstance(original_prompt, str):
-            self.query_one(ChatPromptInput).text = original_prompt
+            self.query_one(Prompt).text = original_prompt
 
     async def new_user_message(self, content: str) -> None:
         now_utc = datetime.datetime.now(datetime.UTC)
@@ -138,14 +134,14 @@ class Chat(Widget):
         await self.chat_container.mount(user_message_chatbox)
 
         self.scroll_to_latest_message()
-        self.post_message(self.NewUserMessage(content))
+        self.post_message(Messages.NewUserMessage(content))
 
         # await ChatsManager.add_message_to_chat(chat_id=self.chat_data.id, message=user_chat_message)
 
-        self.post_message(self.AgentResponseStarted())
+        self.post_message(Messages.AgentResponseStarted())
 
-        prompt = self.query_one(ChatPromptInput)
-        prompt.submit_ready = False
+        prompt = self.query_one(Prompt)
+        # prompt.submit_ready = False
         self.stream_agent_response()
 
     @work(thread=True, group="agent_response")
@@ -196,16 +192,18 @@ class Chat(Widget):
         #     self.post_message(self.AgentResponseFailed(self.chat_data.messages[-1]))
         # else:
         self.post_message(
-            self.AgentResponseComplete(
+            Messages.AgentResponseComplete(
                 chat_id=123,
                 message=response_chatbox.message,
                 chatbox=response_chatbox,
             )
         )
 
-    @on(AgentResponseFailed)
-    @on(AgentResponseStarted)
-    async def agent_started_responding(self, event: AgentResponseFailed | AgentResponseStarted) -> None:
+    @on(Messages.AgentResponseFailed)
+    @on(Messages.AgentResponseStarted)
+    async def agent_started_responding(
+        self, event: Messages.AgentResponseFailed | Messages.AgentResponseStarted
+    ) -> None:
         try:
             awaiting_reply = self.chat_container.query_one("#awaiting-reply", Label)
         except NoMatches:
@@ -214,61 +212,14 @@ class Chat(Widget):
             if awaiting_reply:
                 await awaiting_reply.remove()
 
-    @on(AgentResponseComplete)
-    def agent_finished_responding(self, event: AgentResponseComplete) -> None:
+    @on(Messages.AgentResponseComplete)
+    def agent_finished_responding(self, event: Messages.AgentResponseComplete) -> None:
         # Ensure the thread is updated with the message from the agent
         # self.chat_data.messages.append(event.message)
         event.chatbox.border_title = "Agent"
         event.chatbox.remove_class("response-in-progress")
-        prompt = self.query_one(ChatPromptInput)
-        prompt.submit_ready = True
-
-    async def _handle_command_input(self, user_input: str):
-        """Parse and execute slash commands."""
-        from byte.cli import CommandRegistry
-
-        parts = user_input[1:].split(" ", 1)
-        command_name = parts[0]
-        args = parts[1] if len(parts) > 1 else ""
-
-        command_registry = self.byte_app.make(CommandRegistry)
-        command = command_registry.get_slash_command(command_name)
-
-        if command:
-            await command.handle(args)
-        else:
-            self.notify(f"Unknown command: /{command_name}", severity="error")
-
-    async def _handle_subcommand_input(self, user_input: str) -> str | None:
-        """Parse and execute subcommands starting with !."""
-        from byte.cli import SubprocessService
-
-        user_input = user_input[1:]
-        subprocess_service = self.byte_app.make(SubprocessService)
-        return await subprocess_service.run_and_confirm(user_input)
-
-    @on(Prompt.PromptSubmitted)
-    async def user_chat_message_submitted(self, event: Prompt.PromptSubmitted) -> None:
-        if not self.allow_input_submit:
-            return
-
-        user_input = event.text
-
-        # Handle slash commands
-        if user_input.startswith("/"):
-            await self._handle_command_input(user_input)
-            return
-
-        # Handle subcommands
-        if user_input.startswith("!"):
-            result = await self._handle_subcommand_input(user_input)
-            if result:
-                user_input = result
-            else:
-                return
-
-        # Regular message - send to agent
-        await self.new_user_message(user_input)
+        prompt = self.query_one(Prompt)
+        # prompt.submit_ready = True
 
     @on(Prompt.CursorEscapingTop)
     async def on_cursor_up_from_prompt(self, event: Prompt.CursorEscapingTop) -> None:
@@ -276,16 +227,7 @@ class Chat(Widget):
 
     @on(Chatbox.CursorEscapingBottom)
     def move_focus_to_prompt(self) -> None:
-        self.query_one(ChatPromptInput).focus()
-
-    @on(TitleStatic.ChatRenamed)
-    async def handle_chat_rename(self, event: TitleStatic.ChatRenamed) -> None:
-        pass
-        # if event.chat_id == self.chat_data.id and event.new_title:
-        #     self.chat_data.title = event.new_title
-        #     header = self.query_one(ChatHeader)
-        #     header.update_header(self.chat_data, self.model)
-        #     await ChatsManager.rename_chat(event.chat_id, event.new_title)
+        self.query_one(Prompt).focus()
 
     def get_latest_chatbox(self) -> Chatbox:
         return self.query(Chatbox).last()
@@ -295,10 +237,6 @@ class Chat(Widget):
             self.get_latest_chatbox().focus()
         except NoMatches:
             pass
-
-    def action_rename(self) -> None:
-        title_static = self.query_one(TitleStatic)
-        title_static.begin_rename()
 
     def action_focus_latest_message(self) -> None:
         self.focus_latest_message()
@@ -316,28 +254,6 @@ class Chat(Widget):
     def action_scroll_container_down(self) -> None:
         if self.chat_container:
             self.chat_container.scroll_down()
-
-    async def action_details(self) -> None:
-        pass
-        # await self.app.push_screen(ChatDetails(self.chat_data))
-
-    async def load_chat(self, chat_data) -> None:
-        pass
-        # chatboxes = [Chatbox(chat_message, chat_data.model) for chat_message in chat_data.non_system_messages]
-        # await self.chat_container.mount_all(chatboxes)
-        # self.chat_container.scroll_end(animate=False, force=True)
-        # chat_header = self.query_one(ChatHeader)
-        # chat_header.update_header(
-        #     chat=chat_data,
-        #     model=chat_data.model,
-        # )
-
-        # # If the last message didn't receive a response, try again.
-        # messages = chat_data.messages
-        # if messages and messages[-1].message["role"] == "user":
-        #     prompt = self.query_one(ChatPromptInput)
-        #     prompt.submit_ready = False
-        #     self.stream_agent_response()
 
     def action_close(self) -> None:
         self.app.clear_notifications()

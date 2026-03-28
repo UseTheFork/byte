@@ -18,6 +18,7 @@ RE_MATCH_FILE_PROMPT = re.compile(r"(@\S+)|@\"(.*)\"")
 RE_SLASH_COMMAND = re.compile(r"(\/\S*)(\W.*)?$")
 
 
+# Credits to https://github.com/batrachianai/toad/blob/main/src/toad/widgets/highlighted_textarea.py
 class TextualHighlightTheme(HighlightTheme):
     """Contains the style definition for user with the highlight method."""
 
