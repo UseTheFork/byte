@@ -184,8 +184,6 @@ class PromptTextArea(HighlightedTextArea):
                 self.suggestion = ""
             return
 
-        self.app.byte_app["log"].info(5)
-
         self.post_message(Messages.UserInputSubmitted(self.text))
         self.clear()
 

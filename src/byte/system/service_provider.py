@@ -1,6 +1,6 @@
 from typing import List, Type
 
-from byte import Command, EventBus, EventType, Payload, Service, ServiceProvider
+from byte import Command, Service, ServiceProvider
 from byte.memory import UndoCommand
 from byte.system import ExitCommand, SystemContextService
 
@@ -31,29 +31,29 @@ class SystemServiceProvider(ServiceProvider):
         Usage: `provider.boot(container)` -> commands become available as /exit, /help
         """
 
-        event_bus = self.app.make(EventBus)
-        system_context_service = self.app.make(SystemContextService)
+        # event_bus = self.app.make(EventBus)
+        # system_context_service = self.app.make(SystemContextService)
 
-        event_bus.on(
-            EventType.GATHER_PROJECT_CONTEXT.value,
-            system_context_service.add_system_context,
-        )
+        # event_bus.on(
+        #     EventType.GATHER_PROJECT_CONTEXT.value,
+        #     system_context_service.add_system_context,
+        # )
 
-        # Emit our post boot message to gather all needed info.
-        payload = await event_bus.emit(
-            payload=Payload(
-                event_type=EventType.POST_BOOT,
-                data={
-                    "messages": [],
-                },
-            )
-        )
+        # # Emit our post boot message to gather all needed info.
+        # payload = await event_bus.emit(
+        #     payload=Payload(
+        #         event_type=EventType.POST_BOOT,
+        #         data={
+        #             "messages": [],
+        #         },
+        #     )
+        # )
 
-        console = self.app["console"]
-        messages = payload.get("messages", [])
+        # console = self.app["console"]
+        # messages = payload.get("messages", [])
 
-        # Join all message strings into a single string with newlines
-        panel_content = "\n".join(messages)
+        # # Join all message strings into a single string with newlines
+        # panel_content = "\n".join(messages)
 
-        # Display the assembled messages inside a panel
-        console.print_panel(panel_content, border_style="primary")
+        # # Display the assembled messages inside a panel
+        # console.print_panel(panel_content, border_style="primary")

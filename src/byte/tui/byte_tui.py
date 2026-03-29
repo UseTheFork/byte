@@ -9,9 +9,12 @@ from textual.binding import Binding, BindingType
 from textual.containers import VerticalScroll
 from textual.widgets import Footer
 
+from byte import EventBus, EventType, Payload
 from byte.tui import Messages
+from byte.tui.themes import ThemeRegistry
 from byte.tui.widgets.agent_is_typing import ResponseStatus
 from byte.tui.widgets.bootbox import Bootbox
+from byte.tui.widgets.box.human_message_box import HumanMessageBox
 from byte.tui.widgets.conversation import Conversation
 
 if TYPE_CHECKING:
@@ -49,7 +52,7 @@ class ByteTUI(App, inherit_bindings=False):
     PAUSE_GC_ON_SCROLL = True
 
     def __init__(self, container: Application):
-        self.byte_app = container
+        self.container = container
 
         super().__init__()
 
@@ -57,28 +60,99 @@ class ByteTUI(App, inherit_bindings=False):
     def chat_container(self) -> VerticalScroll:
         return self.query_one("#chat-container", VerticalScroll)
 
+    @property
+    def byte(self) -> Application:
+        if self.app.container is None:  # ty:ignore[possibly-missing-attribute]
+            raise RuntimeError("Byte application is not initialized")
+        return self.app.container  # ty:ignore[possibly-missing-attribute]
+
     def compose(self) -> ComposeResult:
         yield Conversation()
         yield Footer()
 
+    def _setup_themes(self):
+        theme_registry = ThemeRegistry()
+        theme_registry.register_themes(self)
+
+        # TODO: This should come from config
+        self.theme = "byte-catppuccin-mocha"
+
     async def on_mount(self):
         # Boot the application if not already booted
-        if not self.byte_app.is_booted():
-            await self.byte_app.boot()
+        if not self.byte.is_booted():
+            await self.byte.boot()
 
-        response_chatbox = Bootbox(
-            message="test",
+        self._setup_themes()
+
+        event_bus = self.byte.make(EventBus)
+
+        # Emit our post boot message to gather all needed info.
+        payload = await event_bus.emit(
+            payload=Payload(
+                event_type=EventType.POST_BOOT,
+                data={
+                    "messages": [],
+                },
+            )
         )
+
+        messages = payload.get("messages", [])
+
+        styled_logo = []
+        logo_lines = [
+            "░       ░░░  ░░░░  ░░        ░░        ░",
+            "▒  ▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒▒▒",
+            "▓       ▓▓▓▓▓    ▓▓▓▓▓▓▓  ▓▓▓▓▓      ▓▓▓",
+            "█  ████  █████  ████████  █████  ███████",
+            "█       ██████  ████████  █████        █",
+        ]
+
+        for row_idx, line in enumerate(logo_lines):
+            styled_line = ""
+            for col_idx, char in enumerate(line):
+                # Calculate diagonal position (0.0 = top-left, 1.0 = bottom-right)
+                diagonal_progress = (row_idx + col_idx) / (len(logo_lines) + len(line) - 2)
+
+                # Use primary for first half, secondary for second half of diagonal
+                if diagonal_progress < 0.5:
+                    styled_line += f"[$primary]{char}[/$primary]"
+                else:
+                    styled_line += f"[$secondary]{char}[/$secondary]"
+
+            # Fill remaining width with the last character
+            logo_width = len(line)
+            remaining_width = self.size.width - logo_width - 20
+
+            if remaining_width > 0:
+                last_char = line[-1] if line else " "
+                last_diagonal_progress = (row_idx + len(line) - 1) / (len(logo_lines) + len(line) - 2)
+                style = "$primary" if last_diagonal_progress < 0.5 else "$secondary"
+                styled_line += f"[{style}]{last_char * remaining_width}[/{style}]"
+
+            styled_logo.append(styled_line)
+
+        response_chatbox = Bootbox("\n".join(styled_logo) + "\n\n" + "\n".join(messages))
         self.chat_container.mount(response_chatbox)
 
     @on(Messages.UserInputSubmitted)
-    def new_user_message(self, event: Messages.UserInputSubmitted) -> None:
+    async def new_user_message(self, event: Messages.UserInputSubmitted) -> None:
         """Handle a new user message."""
         self.query_one(Conversation).allow_input_submit = False
 
-        response_status = self.query_one(ResponseStatus)
-        response_status.set_awaiting_response()
-        response_status.display = True
+        user_message_chatbox = HumanMessageBox(event.body)
+        self.chat_container.mount(user_message_chatbox)
+
+        event_bus = self.byte.make(EventBus)
+
+        # Emit our post boot message to gather all needed info.
+        payload = await event_bus.emit(
+            payload=Payload(
+                event_type=EventType.USER_INPUT_SUBMITTED,
+                data={
+                    "messages": event.body,
+                },
+            )
+        )
 
     @on(Messages.AgentResponseStarted)
     def start_awaiting_response(self) -> None:

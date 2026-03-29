@@ -1,11 +1,22 @@
 from __future__ import annotations
 
-from rich.console import RenderableType
-from rich.markdown import Markdown
+from textual.app import RenderResult
 from textual.widget import Widget
 
 
 class Bootbox(Widget, can_focus=False):
+    DEFAULT_CSS = """
+    Bootbox {
+        height: auto;
+        width: 100%;
+        min-width: 12;
+        max-width: 1fr;
+        margin: 0 1;
+        padding: 0 2;
+        border: round $primary;
+    }
+    """
+
     def __init__(
         self,
         message: str,
@@ -22,12 +33,5 @@ class Bootbox(Widget, can_focus=False):
         )
         self.message = message
 
-    @property
-    def markdown(self) -> Markdown:
-        """Return the content as a Rich Markdown object."""
-
-        return Markdown("this is a test")
-        # return Markdown(content, code_theme=self.app.launch_config.message_code_theme)
-
-    def render(self) -> RenderableType:
-        return self.markdown
+    def render(self) -> RenderResult:
+        return self.message

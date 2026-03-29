@@ -433,3 +433,6 @@ class Console:
         Usage: `service.set_window_title("Byte")` -> calls `service._console.set_window_title("Byte")`
         """
         return getattr(self.console, name)
+
+
+# TODO: This should be removed and replaced with TUI

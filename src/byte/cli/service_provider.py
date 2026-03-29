@@ -5,7 +5,7 @@ from byte.cli import (
     StreamRenderingService,
     SubprocessService,
 )
-from byte.foundation import EventBus, EventType, Payload
+from byte.foundation import Payload
 from byte.support import ServiceProvider
 
 
@@ -20,15 +20,6 @@ class CLIServiceProvider(ServiceProvider):
             SubprocessService,
             CommandRegistry,
         ]
-
-    async def boot(self):
-        """Boot UI services."""
-        event_bus = self.app.make(EventBus)
-
-        event_bus.on(
-            EventType.POST_BOOT.value,
-            self.boot_messages,
-        )
 
     async def boot_messages(self, payload: Payload) -> Payload:
         console = self.app["console"]

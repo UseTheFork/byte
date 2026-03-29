@@ -17,6 +17,8 @@ T = TypeVar("T")
 class EventType(str, Enum):
     POST_BOOT = "post_boot"
 
+    USER_INPUT_SUBMITTED = "user_input_submitted"
+
     PRE_PROMPT_TOOLKIT = "pre_prompt_toolkit"
     POST_PROMPT_TOOLKIT = "post_prompt_toolkit"
 

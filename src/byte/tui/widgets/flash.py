@@ -16,9 +16,7 @@ class Flash(Static):
         text-align: center;
         visibility: hidden;
         text-wrap: nowrap;
-        text-overflow: ellipsis;     
-        # overlay: screen;
-        # offset-y: -1;           
+        text-overflow: ellipsis;
         &.-default {
             background: $primary 10%;
             color: $text-primary;

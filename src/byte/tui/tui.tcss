@@ -1,31 +1,6 @@
-$main-lighten-2: $primary-lighten-2;
-$main-lighten-1: $primary-lighten-1;
-$main: $primary;
-$main-darken-1: $primary-darken-1;
-$main-darken-2: $primary-darken-2;
-$main-border-text-color: $accent;
-$main-border-color: $main-lighten-1 50%;
-$main-border-color-focus: $main-lighten-1 100%;
-
-$left-border-trim: vkey $main-lighten-2 15%;
-
-* {
-  scrollbar-color: $accent 30%;
-  scrollbar-color-hover: $accent 50%;
-  scrollbar-color-active: $accent 80%;
-  scrollbar-background: $surface-darken-1;
-  scrollbar-background-hover: $surface-darken-1;
-  scrollbar-background-active: $surface-darken-1;
-  scrollbar-size-vertical: 1;
-  link-style: none;
-  link-color-hover: $accent;
-  link-background-hover: $main 0%;
-  link-style-hover: u not dim bold;
-}
-
 Tabs .underline--bar {
-  color: $main-lighten-2 50%;
-  background: $main 75%;
+  color: $primary-lighten-2 50%;
+  background: $primary 75%;
 }
 
 Screen {
@@ -49,23 +24,23 @@ Toast {
   background: $background-darken-1;
   border-right: none;
   &.-information {
-    border-left: outer $main-lighten-1;
+    border-left: outer $primary-lighten-1;
     & .toast--title {
-      color: $main-lighten-2;
+      color: $primary-lighten-2;
     }
   }
 
   &.-error {
-    border-left: outer $main-lighten-1;
+    border-left: outer $primary-lighten-1;
     & .toast--title {
-      color: $main-lighten-2;
+      color: $primary-lighten-2;
     }
   }
 }
 
 Tooltip {
   background: $background-darken-1;
-  border: wide $main-border-color;
+  border: wide $primary-lighten-1 50%;
 }
 
 AppHeader #cl-header-container {
@@ -95,7 +70,7 @@ AppHeader {
 
   & #model-label {
     border: none;
-    background: $main-darken-2 0%;
+    background: $primary-darken-2 0%;
     text-style: dim;
   }
 }
@@ -218,12 +193,12 @@ Conversation {
       background: $background;
       height: auto;
       margin: 0 0 1 0;
-      border: round $main-border-color;
+      border: round $primary-lighten-1 50%;
       border-subtitle-align: left;
       border-subtitle-style: reverse;
 
       &:focus-within {
-        border: round $main-border-color-focus;
+        border: round $primary-lighten-1;
         #prompt {
           text-opacity: 100%;
         }
@@ -284,6 +259,21 @@ PromptInput.multiline .text-area--cursor-line {
   background: white 3%;
 }
 
+HumanMessageBox {
+  height: auto;
+  width: auto;
+  min-width: 12;
+  max-width: 1fr;
+  margin: 0 1;
+
+  background: $background 20%;
+
+  & .message {
+    padding-left: 2;
+  }
+
+}
+
 Chatbox {
   height: auto;
   width: auto;
@@ -320,14 +310,14 @@ Chatbox {
   }
 
   &.human-message {
-    border: round $main-border-color;
+    border: round $primary-lighten-1 50%;
     &:focus-within {
-      border: round $main-border-color-focus;
-      border-left: thick $main-border-color-focus;
+      border: round $primary-lighten-1 50%;
+      border-left: thick $primary-lighten-1 50%;
     }
     & SelectionTextArea.visual-mode {
       & .text-area--cursor {
-        background: $main-lighten-2;
+        background: $primary-lighten-2;
       }
     }
     & TextArea {
@@ -341,13 +331,13 @@ OptionList {
 }
 
 OptionList > .option-list--option-highlighted {
-  background: $main 15%;
+  background: $primary 15%;
   color: $text;
   text-style: none;
 }
 
 OptionList:focus > .option-list--option-highlighted {
-  background: $main-darken-2 80%;
+  background: $primary-darken-2 80%;
   text-style: none;
 }
 
@@ -365,27 +355,27 @@ OptionList > .option-list--option-hover-disabled {
 }
 
 OptionList > .option-list--option-hover-highlighted {
-  background: $main-lighten-1 40%;
+  background: $primary-lighten-1 40%;
   color: $text;
   text-style: bold;
 }
 
 OptionList:focus > .option-list--option-hover-highlighted {
-  background: $main-lighten-1 50%;
+  background: $primary-lighten-1 50%;
   color: $text;
   text-style: bold;
 }
 
 OptionList > .option-list--option-hover-highlighted-disabled {
   color: $text-disabled;
-  background: $main 60%;
+  background: $primary 60%;
 }
 
 MessageInfo #message-info-header {
   dock: top;
   width: 1fr;
   height: auto;
-  background: $main-darken-2 70%;
+  background: $primary-darken-2 70%;
   color: $text;
 }
 
@@ -397,7 +387,7 @@ MessageInfo #message-info-footer {
   dock: bottom;
   height: 3;
   padding: 1 2;
-  background: $main-darken-1;
+  background: $primary-darken-1;
   color: $text;
   width: 1fr;
 }

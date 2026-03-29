@@ -18,7 +18,6 @@ from textual.widgets import Label
 from byte import Application
 from byte.tui import Messages
 from byte.tui.schemas import ChatMessage
-from byte.tui.widgets.agent_is_typing import ResponseStatus
 from byte.tui.widgets.chatbox import Chatbox
 from byte.tui.widgets.flash import Flash
 from byte.tui.widgets.prompt import Prompt
@@ -57,12 +56,12 @@ class Conversation(Widget):
     ) -> None:
         super().__init__()
         self.chat_data = []
-        self.byte_app = cast(Application, self.app.byte_app)
+        self.byte_app = cast(Application, self.app.byte)  # ty:ignore[possibly-missing-attribute]
 
     """Used to lock the chat input while the agent is responding."""
 
     def compose(self) -> ComposeResult:
-        yield ResponseStatus()
+        # yield ResponseStatus()
         # yield ChatHeader("123", "test")
 
         with VerticalScroll(id="chat-container") as vertical_scroll:
