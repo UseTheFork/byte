@@ -1,8 +1,10 @@
 import datetime
+from dataclasses import dataclass
 from typing import Literal, NamedTuple
 
 from langchain_core.messages import BaseMessage
-from pydantic.dataclasses import dataclass
+
+from byte import Command
 
 """
 allow_once - Allow this operation only this time
@@ -34,3 +36,4 @@ class AutocompleteOption:
     name: str
     description: str | None = None
     type: Literal["command"] | None = None
+    command: Command | None = None  # Store the actual command instance for argument completion

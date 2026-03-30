@@ -139,6 +139,16 @@ class CommandRegistry(Service):
         all_commands = list(self._slash_commands.values())
         return all_commands
 
+    def get_all_slash_command_names(self) -> List[str]:
+        """Retrieve all registered slash command names prefixed with /.
+
+        Returns:
+            List of command names with / prefix (e.g., ["/add", "/drop"])
+
+        Usage: `command_names = registry.get_all_slash_command_names()`
+        """
+        return [f"/{name}" for name in self._slash_commands.keys()]
+
     async def get_slash_completions(self, text: str) -> List[tuple[str, str]]:
         """Generate tab completions for slash commands and their arguments.
 
