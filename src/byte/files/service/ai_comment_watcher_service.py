@@ -2,8 +2,7 @@ import re
 from pathlib import Path
 from typing import List, Optional
 
-from byte import Payload, Service
-from byte.cli import PromptToolkitService
+from byte import Events, Service
 from byte.code_operations.schemas import AICommentType
 from byte.files import FileMode, FileService
 from byte.subgraph import AskAgent, CoderAgent
@@ -160,20 +159,21 @@ class AICommentWatcherService(Service):
         except (FileNotFoundError, PermissionError, UnicodeDecodeError):
             return False
 
-    async def handle_file_change(self, payload: Payload) -> Payload:
+    async def handle_file_change(self, payload: Events.FileChanged) -> Events.FileChanged:
         """Handle file change events by scanning for AI comments."""
-        file_path = payload.get("file_path")
-        change_type = payload.get("change_type")
+        file_path = payload.file_path
+        change_type = payload.change_type
 
         if not file_path or change_type == "deleted":
             return payload
 
         file_path = Path(file_path)
-        result = await self._handle_file_modified(file_path)
+        # result = await self._handle_file_modified(file_path)
 
-        if result:
-            prompt_toolkit_service = self.app.make(PromptToolkitService)
-            await prompt_toolkit_service.interrupt()
+        # TODO: This is going to need to come out.
+        # if result:
+        # prompt_toolkit_service = self.app.make(PromptToolkitService)
+        # await prompt_toolkit_service.interrupt()
 
         return payload
 
@@ -252,27 +252,29 @@ class AICommentWatcherService(Service):
         else:
             return None
 
-    async def modify_user_request_hook(self, payload: Payload) -> Payload:
-        interrupted = payload.get("interrupted", False)
-        user_input = payload.get("user_input", "")
-        if interrupted and user_input is None:
-            # Scan context files for AI comments
-            ai_result = await self.scan_context_files_for_ai_comments()
+    # async def modify_user_request_hook(self, payload: Events.GatherReinforcement) -> Events.GatherReinforcement:
 
-            if ai_result:
-                payload.set("user_input", ai_result["prompt"])
-                payload.set("interrupted", False)
-                payload.set("active_agent", ai_result["agent_type"])
+    #     interrupted = payload.interrupted
+    #     user_input = payload.user_input
+    #     if interrupted and user_input is None:
+    #         # Scan context files for AI comments
+    #         ai_result = await self.scan_context_files_for_ai_comments()
 
-        return payload
+    #         if ai_result:
+    #             payload.user_input = str(ai_result["prompt"])
+    #             payload.interrupted = False
+    #             # TODO: should we use our string helper here and convert the agent type to a normilzied string instead of housing a class?
+    #             payload.active_agent = ai_result["agent_type"]
 
-    async def add_reinforcement_hook(self, payload: Payload) -> Payload:
+    #     return payload
+
+    async def add_reinforcement_hook(self, payload: Events.GatherReinforcement) -> Events.GatherReinforcement:
         prompt_toolkit_service = self.app.make(PromptToolkitService)
         if prompt_toolkit_service.is_interrupted():
-            active_agent = payload.get("agent", None)
-            reinforcement_list = payload.get("reinforcement", [])
+            active_agent = payload.agent
+            reinforcement_list = payload.reinforcement
 
-            if active_agent == "AskAgent":
+            if active_agent == "ask_agent":
                 reinforcement_list.extend(
                     [
                         "",
@@ -283,7 +285,7 @@ class AICommentWatcherService(Service):
                     ]
                 )
 
-            if active_agent == "CoderAgent":
+            if active_agent == "coder_agent":
                 reinforcement_list.extend(
                     [
                         "",
@@ -293,7 +295,5 @@ class AICommentWatcherService(Service):
                         'After successfully implementing all changes, remove the "AI:" comment markers from the code.',
                     ]
                 )
-
-            payload.set("reinforcement", reinforcement_list)
 
         return payload

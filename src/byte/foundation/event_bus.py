@@ -1,124 +1,167 @@
 from __future__ import annotations
 
 import asyncio
-import time
-from enum import Enum
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, TypeVar
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Awaitable, Callable, Dict, List, TypeVar, Union
 
-from byte.support import ArrayStore
+from langchain_core.runnables import RunnableConfig
+
+from byte.orchestration import BaseState
 
 if TYPE_CHECKING:
     from byte.foundation import Application
 
 
-T = TypeVar("T")
+# class EventType(str, Enum):
+#     POST_BOOT = "post_boot"
+
+#     USER_INPUT_SUBMITTED = "user_input_submitted"
+
+#     PRE_PROMPT_TOOLKIT = "pre_prompt_toolkit"
+#     POST_PROMPT_TOOLKIT = "post_prompt_toolkit"
+
+#     GENERATE_FILE_CONTEXT = "generate_file_context"
+
+#     FILE_ADDED = "file_added"
+#     FILE_CHANGED = "file_changed"
+
+#     PRE_AGENT_EXECUTION = "pre_agent_execution"
+#     POST_AGENT_EXECUTION = "post_agent_execution"
+
+#     END_NODE = "end_node"
+
+#     PRE_ASSISTANT_NODE = "pre_assistant_node"
+#     POST_ASSISTANT_NODE = "post_assistant_node"
+
+#     GATHER_AVAILABLE_CONVENTIONS = "gather_available_conventions"
+
+#     GATHER_PROJECT_CONTEXT = "gather_project_context"
+#     GATHER_REINFORCEMENT = "gather_reinforcement"
+
+#     TEST = "test"
 
 
-class EventType(str, Enum):
-    POST_BOOT = "post_boot"
+@dataclass
+class Event:
+    """Base class for all events with optional metadata."""
 
-    USER_INPUT_SUBMITTED = "user_input_submitted"
-
-    PRE_PROMPT_TOOLKIT = "pre_prompt_toolkit"
-    POST_PROMPT_TOOLKIT = "post_prompt_toolkit"
-
-    GENERATE_FILE_CONTEXT = "generate_file_context"
-
-    FILE_ADDED = "file_added"
-    FILE_CHANGED = "file_changed"
-
-    PRE_AGENT_EXECUTION = "pre_agent_execution"
-    POST_AGENT_EXECUTION = "post_agent_execution"
-
-    END_NODE = "end_node"
-
-    PRE_ASSISTANT_NODE = "pre_assistant_node"
-    POST_ASSISTANT_NODE = "post_assistant_node"
-
-    GATHER_AVAILABLE_CONVENTIONS = "gather_available_conventions"
-
-    GATHER_PROJECT_CONTEXT = "gather_project_context"
-    GATHER_REINFORCEMENT = "gather_reinforcement"
-
-    TEST = "test"
+    # timestamp: float = field(default_factory=lambda: time.time())
+    # _metadata: dict[str, Any] = field(default_factory=dict)
 
 
-class Payload:
-    """Generic event payload that can carry any data using ArrayStore."""
+T = TypeVar("T", bound=Event)
 
-    def __init__(
-        self,
-        event_type: EventType,
-        data: ArrayStore | dict[str, Any] | None = None,
-        timestamp: float | None = None,
-    ):
-        """Initialize a Payload with event type and optional data.
+# Add near the top with other type definitions
+EventCallback = Union[Callable[[T], T | None], Callable[[T], Awaitable[T | None]]]
 
-        Usage: `payload = Payload(EventType.FILE_ADDED, {"path": "file.py"})`
-        """
-        self.event_type = event_type
-        self.timestamp = timestamp if timestamp is not None else time.time()
 
-        # Ensure data is an ArrayStore instance
-        if data is None:
-            self.data = ArrayStore()
-        elif isinstance(data, ArrayStore):
-            self.data = data
-        elif isinstance(data, dict):
-            self.data = ArrayStore(data)
-        else:
-            self.data = ArrayStore()
+class Events:
+    """Namespace for all event types."""
 
-    def get(self, key: str, default: Any = None) -> Any:
-        """Get data value with optional default."""
-        return self.data.get(key, default)
+    @dataclass
+    class FileAdded(Event):
+        """Event emitted when a file is added to context."""
 
-    def set(self, key: str, value: Any) -> Payload:
-        """Update the data store with a key-value pair and return self."""
-        self.data.add(key, value)
-        return self
+        file_path: str
+        mode: str
+        action: str = "context_added"
 
-    def update(self, updates: Dict[str, Any]) -> Payload:
-        """Merge multiple updates into the data store and return self."""
-        self.data.merge(updates)
-        return self
+    @dataclass
+    class FileChanged(Event):
+        # TODO: Doc String here.
+        """"""
+
+        file_path: str
+        change_type: str
+
+    @dataclass
+    class UserInputSubmitted(Event):
+        """Event emitted when user submits input."""
+
+        messages: str
+
+    @dataclass
+    class PostBoot(Event):
+        """Event emitted after application boot to gather initialization info."""
+
+        messages: list[str] = field(default_factory=list)
+
+    @dataclass
+    class PreAssistantNode(Event):
+        """"""
+
+        state: dict
+        config: RunnableConfig
+
+    @dataclass
+    class EndNode(Event):
+        """"""
+
+        state: BaseState
+        agent: str
+
+    # @dataclass
+    # class GatherReinforcement(Event):
+    #     # TODO: Doc String here.
+    #     """"""
+
+    #     user_input: str | None = None
+    #     interrupted: bool = False
+    #     active_agent: BaseAgent | None = None
+
+    @dataclass
+    class GatherReinforcement(Event):
+        # TODO: Doc String here.
+        """"""
+
+        agent: str
+        mode: str = "main"
+        reinforcement: list[str] = field(default_factory=list)
+        session_docs: list[str] = field(default_factory=list)
+        system_context: list[str] = field(default_factory=list)
 
 
 class EventBus:
-    """Simple event system with typed Pydantic payloads."""
+    """Simple event system with typed dataclass events."""
 
     def __init__(self, app: Application):
         self.app = app
-        self._listeners: Dict[str, List[Callable]] = {}
+        self._listeners: Dict[type[Event], List[Callable]] = {}
 
-    def on(self, event_name: str, callback: Callable):
-        """Register a listener for an event."""
-        if event_name not in self._listeners:
-            self._listeners[event_name] = []
-        self._listeners[event_name].append(callback)
+    def on(self, event_type: type[T], callback: EventCallback[T]) -> None:
+        """Register a listener for an event type.
 
-    async def emit(self, payload: Payload) -> Payload:
-        """Emit an event using the payload's event_type."""
-        event_name = payload.event_type.value
+        Usage: event_bus.on(FileAddedEvent, my_handler)
+        """
+        if event_type not in self._listeners:
+            self._listeners[event_type] = []
+        self._listeners[event_type].append(callback)
 
-        if event_name not in self._listeners:
-            return payload
+    async def emit(self, event: T) -> T:
+        """Emit an event and return the potentially modified event.
 
-        current_payload = payload
+        Usage: result = await event_bus.emit(FileAddedEvent(file_path="test.py", mode="editable"))
+        """
+        event_type = type(event)
 
-        for listener in self._listeners[event_name]:
+        if event_type not in self._listeners:
+            return event
+
+        current_event = event
+
+        for listener in self._listeners[event_type]:
             try:
                 if asyncio.iscoroutinefunction(listener):
-                    result = await listener(current_payload)
+                    result = await listener(current_event)
                 else:
-                    result = listener(current_payload)
+                    result = listener(current_event)
 
+                # Auto-chain: if listener returns an event, use it; otherwise keep current
                 if result is not None:
-                    current_payload = result
+                    current_event = result
 
             except Exception as e:
-                # TODO: This should get logging from the app and use that.
                 self.app["log"].exception(e)
-                print(f"Error in event listener for '{event_name}': {e}")
+                print(f"Error in event listener for '{event_type.__name__}': {e}")
 
-        return current_payload
+        return current_event

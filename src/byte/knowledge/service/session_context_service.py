@@ -1,6 +1,6 @@
 from typing import Optional
 
-from byte import Payload, Service
+from byte import Events, Service
 from byte.knowledge import SessionContextModel
 from byte.support import ArrayStore, Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
@@ -65,7 +65,7 @@ class SessionContextService(Service):
         """
         return self.session_context.all()
 
-    async def add_session_context_hook(self, payload: Payload) -> Payload:
+    async def add_session_context_hook(self, payload: Events.GatherReinforcement) -> Events.GatherReinforcement:
         """Inject session context into the prompt state.
 
         Aggregates all stored context items and adds them to the
@@ -90,8 +90,6 @@ class SessionContextService(Service):
                 )
 
             # Get existing list and extend with formatted contexts
-            session_docs_list = payload.get("session_docs", [])
-            session_docs_list.extend(formatted_contexts)
-            payload.set("session_docs", session_docs_list)
+            payload.session_docs.extend(formatted_contexts)
 
         return payload

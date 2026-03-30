@@ -2,7 +2,7 @@ from pathlib import Path
 
 from watchfiles import Change, awatch
 
-from byte import EventType, Payload, Service, TaskManager
+from byte import Events, Service, TaskManager
 from byte.files import FileDiscoveryService, FileIgnoreService, FileService
 
 
@@ -59,12 +59,9 @@ class FileWatcherService(Service):
             await self.file_discovery.add_file(file_path)
 
         await self.emit(
-            Payload(
-                event_type=EventType.FILE_CHANGED,
-                data={
-                    "file_path": str(file_path),
-                    "change_type": change_type.name.lower(),
-                },
+            Events.FileChanged(
+                file_path=str(file_path),
+                change_type=change_type.name.lower(),
             )
         )
 
@@ -84,6 +81,8 @@ class FileWatcherService(Service):
                     await self._handle_file_change(file_path, change_type)
         except Exception as e:
             # log.exception(e)
+
+            # TODO: I dont think this is right.
             print(f"File watcher error: {e}")
 
     async def _start_watching(self, app) -> None:

@@ -27,3 +27,10 @@ class Answer(NamedTuple):
 class ChatMessage:
     message: BaseMessage
     timestamp: datetime.datetime | None
+
+
+@dataclass
+class AutocompleteOption:
+    name: str
+    description: str | None = None
+    type: Literal["command"] | None = None

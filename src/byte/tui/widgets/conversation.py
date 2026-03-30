@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import Literal, cast
+from typing import TYPE_CHECKING, Literal
 
 from langchain.messages import HumanMessage
 from langchain_core.messages import AIMessage
@@ -15,14 +15,14 @@ from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Label
 
-from byte import Application
 from byte.tui import Messages
 from byte.tui.schemas import ChatMessage
 from byte.tui.widgets.chatbox import Chatbox
 from byte.tui.widgets.flash import Flash
 from byte.tui.widgets.prompt import Prompt
 
-# if TYPE_CHECKING:
+if TYPE_CHECKING:
+    from byte.tui import ByteTUI
 
 
 class Conversation(Widget):
@@ -50,13 +50,15 @@ class Conversation(Widget):
 
     allow_input_submit = reactive(True)
 
+    app: ByteTUI
+
     def __init__(
         self,
         # chat_data: ChatData,
     ) -> None:
         super().__init__()
         self.chat_data = []
-        self.byte_app = cast(Application, self.app.byte)  # ty:ignore[possibly-missing-attribute]
+        self.byte_app = self.app.byte
 
     """Used to lock the chat input while the agent is responding."""
 

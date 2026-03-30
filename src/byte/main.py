@@ -19,7 +19,6 @@ from byte.llm import LLMServiceProvider
 from byte.lsp import LSPServiceProvider
 from byte.memory import MemoryServiceProvider
 from byte.node import NodeServiceProvider
-from byte.presets import PresetsProvider
 from byte.system import SystemServiceProvider
 from byte.tui import TUIServiceProvider
 from byte.web import WebServiceProvider
@@ -41,7 +40,7 @@ PROVIDERS = [
     AnalyticsProvider,
     PromptFormatProvider,
     WebServiceProvider,
-    PresetsProvider,
+    # PresetsProvider,
     ClipboardServiceProvider,
     DevelopmentServiceProvider,
     SystemServiceProvider,

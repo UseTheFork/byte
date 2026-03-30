@@ -4,7 +4,7 @@ from typing import Any, Literal, Optional
 from langchain_core.callbacks import get_usage_metadata_callback
 from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 
-from byte import EventType, Payload, Service
+from byte import Service
 from byte.analytics import AgentAnalyticsService
 from byte.cli import StreamRenderingService
 from byte.orchestration import BaseState, TokenUsageSchema
@@ -135,13 +135,14 @@ class WorkflowService(Service):
         stream_rendering_service = self.app.make(StreamRenderingService)
         stream_rendering_service.set_display_mode(display_mode)
 
+        # TODO: Do we need this?
         # Emit workflow start event
-        await self.emit(
-            Payload(
-                event_type=EventType.WORKFLOW_STARTED,
-                data={"workflow": workflow.__class__.__name__, "thread_id": thread_id},
-            )
-        )
+        # await self.emit(
+        #     Payload(
+        #         event_type=EventType.WORKFLOW_STARTED,
+        #         data={"workflow": workflow.__class__.__name__, "thread_id": thread_id},
+        #     )
+        # )
 
         await stream_rendering_service.start_spinner()
         try:
@@ -163,19 +164,19 @@ class WorkflowService(Service):
             await stream_rendering_service.end_stream()
 
         # Emit workflow complete event
-        await self.emit(
-            Payload(
-                event_type=EventType.WORKFLOW_COMPLETED,
-                data={"workflow": workflow.__class__.__name__, "result": processed_event},
-            )
-        )
+        # await self.emit(
+        #     Payload(
+        #         event_type=EventType.WORKFLOW_COMPLETED,
+        #         data={"workflow": workflow.__class__.__name__, "result": processed_event},
+        #     )
+        # )
 
-        # Create payload with event type
-        payload = Payload(
-            event_type=EventType.POST_AGENT_EXECUTION,
-            data={"processed_event": processed_event},
-        )
+        # # Create payload with event type
+        # payload = Payload(
+        #     event_type=EventType.POST_AGENT_EXECUTION,
+        #     data={"processed_event": processed_event},
+        # )
 
-        await self.emit(payload)
+        # await self.emit(payload)
 
         return processed_event

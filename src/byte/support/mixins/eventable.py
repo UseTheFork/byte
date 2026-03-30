@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypeVar
 
-from byte.foundation.event_bus import EventBus, Payload
+from byte.foundation.event_bus import Event, EventBus
 
 if TYPE_CHECKING:
     from byte.foundation import Application
 
-T = TypeVar("T")
+T = TypeVar("T", bound=Event)
 
 
 class Eventable:
@@ -21,13 +21,12 @@ class Eventable:
 
     app: Application
 
-    async def emit(self, payload: Payload) -> Payload:
+    async def emit(self, payload: T) -> T:
         """Emit an event payload through the event bus system.
 
         Resolves the EventBus from the app and emits the payload,
         allowing registered listeners to process and potentially transform
-        the event data before returning the final result.
-        Usage: `result = await self.emit(Payload("user_action", {"key": "value"}))`
+        the event data before returning the final result.s
         """
         if not self.app:
             raise RuntimeError("No app available - ensure service is properly initialized")

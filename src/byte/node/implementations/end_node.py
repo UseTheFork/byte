@@ -6,7 +6,7 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte import EventType, Payload
+from byte import Events
 from byte.clipboard import ClipboardService
 from byte.node import Node
 from byte.orchestration import AssistantContextSchema, BaseState
@@ -39,14 +39,12 @@ class EndNode(Node):
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
     ) -> Command[Literal["__end__"]]:
         if runtime is not None and runtime.context is not None:
-            payload = Payload(
-                event_type=EventType.END_NODE,
-                data={
-                    "state": state,
-                    "agent": runtime.context.agent,
-                },
+            await self.emit(
+                Events.EndNode(
+                    state=state,
+                    agent=runtime.context.agent,
+                )
             )
-            await self.emit(payload)
 
         if state["parsed_blocks"]:
             if runtime.context.agent == "CoderAgent":

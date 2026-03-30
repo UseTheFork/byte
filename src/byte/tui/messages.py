@@ -29,6 +29,10 @@ class Messages:
         auto_complete: bool = False
 
     @dataclass
+    class UserInputChanged(Message):
+        value: str
+
+    @dataclass
     class AgentResponseStarted(Message):
         pass
 

@@ -5,7 +5,7 @@ from langchain.messages import HumanMessage
 from langchain_core.runnables import Runnable
 from pydantic import BaseModel
 
-from byte import EventType, Payload
+from byte import Events
 from byte.node import EndNode, Node
 from byte.orchestration import AssistantContextSchema, BaseState, PromptAssembler
 from byte.support import Str
@@ -92,16 +92,13 @@ class ModelBaseNode(Node):
         prompt_assembler = self.app.make(PromptAssembler, template=context.user_template)
         user_prompt_state = await prompt_assembler.generate_state(state, config, context)
 
-        payload = Payload(
-            event_type=EventType.PRE_ASSISTANT_NODE,
-            data={
-                "state": user_prompt_state,
-                "config": config,
-            },
+        payload = await self.emit(
+            Events.PreAssistantNode(
+                state=user_prompt_state,
+                config=config,
+            )
         )
-
-        payload = await self.emit(payload)
-        user_prompt_state = payload.get("state", user_prompt_state)
+        user_prompt_state = payload.state
 
         agent_state = {**state}
 
@@ -112,6 +109,6 @@ class ModelBaseNode(Node):
         else:
             agent_state["errors"] = []
 
-        config = payload.get("config", config)
+        config = payload.config
 
         return (agent_state, config)

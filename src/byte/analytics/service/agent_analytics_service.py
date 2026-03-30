@@ -1,10 +1,5 @@
-from rich.console import Group
-from rich.progress_bar import ProgressBar
-from rich.table import Table
-
-from byte import Payload, Service
+from byte import Service
 from byte.analytics import UsageAnalytics
-from byte.llm import LLMService
 from byte.orchestration import TokenUsageSchema
 
 
@@ -41,92 +36,93 @@ class AgentAnalyticsService(Service):
     def get_cost_per_token(self, cost) -> float:
         return cost / 1000000
 
-    async def usage_panel_hook(self, payload: Payload) -> Payload:
-        """Display token usage analytics panel with progress bars.
+    # TODO: This may have to be an emiiter?
+    # async def usage_panel_hook(self, payload: Payload) -> Payload:
+    #     """Display token usage analytics panel with progress bars.
 
-        Shows current token consumption for both main and weak models
-        with visual progress indicators to help users track their usage.
-        """
-        console = self.app["console"]
-        llm_service = self.app.make(LLMService)
+    #     Shows current token consumption for both main and weak models
+    #     with visual progress indicators to help users track their usage.
+    #     """
+    #     console = self.app["console"]
+    #     llm_service = self.app.make(LLMService)
 
-        info_panel = payload.get("info_panel", [])
+    #     info_panel = payload.get("info_panel", [])
 
-        # Calculate usage percentages
-        main_percentage = min(
-            (self.usage.main.context / llm_service._main_schema.constraints.max_input_tokens) * 100,
-            100,
-        )
+    #     # Calculate usage percentages
+    #     main_percentage = min(
+    #         (self.usage.main.context / llm_service._main_schema.constraints.max_input_tokens) * 100,
+    #         100,
+    #     )
 
-        weak_cost = (
-            self.usage.weak.total.input
-            * self.get_cost_per_token(llm_service._weak_schema.constraints.input_cost_per_token)
-        ) + (
-            self.usage.weak.total.output
-            * self.get_cost_per_token(llm_service._weak_schema.constraints.output_cost_per_token)
-        )
+    #     weak_cost = (
+    #         self.usage.weak.total.input
+    #         * self.get_cost_per_token(llm_service._weak_schema.constraints.input_cost_per_token)
+    #     ) + (
+    #         self.usage.weak.total.output
+    #         * self.get_cost_per_token(llm_service._weak_schema.constraints.output_cost_per_token)
+    #     )
 
-        main_cost = (
-            self.usage.main.total.input
-            * self.get_cost_per_token(llm_service._main_schema.constraints.input_cost_per_token)
-        ) + (
-            self.usage.main.total.output
-            * self.get_cost_per_token(llm_service._main_schema.constraints.output_cost_per_token)
-        )
+    #     main_cost = (
+    #         self.usage.main.total.input
+    #         * self.get_cost_per_token(llm_service._main_schema.constraints.input_cost_per_token)
+    #     ) + (
+    #         self.usage.main.total.output
+    #         * self.get_cost_per_token(llm_service._main_schema.constraints.output_cost_per_token)
+    #     )
 
-        progress = ProgressBar(
-            total=llm_service._main_schema.constraints.max_input_tokens,
-            completed=self.usage.main.context,
-            complete_style="success",
-        )
+    #     progress = ProgressBar(
+    #         total=llm_service._main_schema.constraints.max_input_tokens,
+    #         completed=self.usage.main.context,
+    #         complete_style="success",
+    #     )
 
-        session_cost = main_cost + weak_cost
+    #     session_cost = main_cost + weak_cost
 
-        # Calculate last message cost based on which model type was used
-        last_message_type = self.usage.last.type
-        if last_message_type == "main":
-            last_message_cost = (
-                self.usage.last.input
-                * self.get_cost_per_token(llm_service._main_schema.constraints.input_cost_per_token)
-            ) + (
-                self.usage.last.output
-                * self.get_cost_per_token(llm_service._main_schema.constraints.output_cost_per_token)
-            )
-        elif last_message_type == "weak":
-            last_message_cost = (
-                self.usage.last.input
-                * self.get_cost_per_token(llm_service._weak_schema.constraints.input_cost_per_token)
-            ) + (
-                self.usage.last.output
-                * self.get_cost_per_token(llm_service._weak_schema.constraints.output_cost_per_token)
-            )
-        else:
-            last_message_cost = 0.0
+    #     # Calculate last message cost based on which model type was used
+    #     last_message_type = self.usage.last.type
+    #     if last_message_type == "main":
+    #         last_message_cost = (
+    #             self.usage.last.input
+    #             * self.get_cost_per_token(llm_service._main_schema.constraints.input_cost_per_token)
+    #         ) + (
+    #             self.usage.last.output
+    #             * self.get_cost_per_token(llm_service._main_schema.constraints.output_cost_per_token)
+    #         )
+    #     elif last_message_type == "weak":
+    #         last_message_cost = (
+    #             self.usage.last.input
+    #             * self.get_cost_per_token(llm_service._weak_schema.constraints.input_cost_per_token)
+    #         ) + (
+    #             self.usage.last.output
+    #             * self.get_cost_per_token(llm_service._weak_schema.constraints.output_cost_per_token)
+    #         )
+    #     else:
+    #         last_message_cost = 0.0
 
-        last_input = self.humanizer(self.usage.last.input)
-        last_output = self.humanizer(self.usage.last.output)
+    #     last_input = self.humanizer(self.usage.last.input)
+    #     last_output = self.humanizer(self.usage.last.output)
 
-        grid = Table.grid(expand=True)
-        grid.add_column()
-        grid.add_column(ratio=1)
-        grid.add_column()
-        grid.add_row("Memory Used ", progress, f" {main_percentage:.1f}%")
+    #     grid = Table.grid(expand=True)
+    #     grid.add_column()
+    #     grid.add_column(ratio=1)
+    #     grid.add_column()
+    #     grid.add_row("Memory Used ", progress, f" {main_percentage:.1f}%")
 
-        grid_cost = Table.grid(expand=True)
-        grid_cost.add_column()
-        grid_cost.add_column(justify="right")
-        grid_cost.add_row(
-            f"Tokens: {last_input} sent, {last_output} received",
-            f"Cost: ${last_message_cost:.2f} message, ${session_cost:.2f} session.",
-        )
+    #     grid_cost = Table.grid(expand=True)
+    #     grid_cost.add_column()
+    #     grid_cost.add_column(justify="right")
+    #     grid_cost.add_row(
+    #         f"Tokens: {last_input} sent, {last_output} received",
+    #         f"Cost: ${last_message_cost:.2f} message, ${session_cost:.2f} session.",
+    #     )
 
-        analytics_panel = console.panel(
-            Group(grid, grid_cost),
-            title="Analytics",
-        )
+    #     analytics_panel = console.panel(
+    #         Group(grid, grid_cost),
+    #         title="Analytics",
+    #     )
 
-        info_panel.append(analytics_panel)
-        return payload.set("info_panel", info_panel)
+    #     info_panel.append(analytics_panel)
+    #     return payload.set("info_panel", info_panel)
 
     def reset_usage(self):
         """Reset token usage counters to zero.

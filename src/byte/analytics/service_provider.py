@@ -1,6 +1,6 @@
 from typing import List, Type
 
-from byte import EventBus, EventType, Service, ServiceProvider
+from byte import EventBus, Service, ServiceProvider
 from byte.analytics import AgentAnalyticsService
 
 
@@ -29,7 +29,7 @@ class AnalyticsProvider(ServiceProvider):
         agent_analytics_service = self.app.make(AgentAnalyticsService)
 
         # Register listener to show analytics panel before each prompt
-        event_bus.on(
-            EventType.PRE_PROMPT_TOOLKIT.value,
-            agent_analytics_service.usage_panel_hook,
-        )
+        # event_bus.on(
+        #     EventType.PRE_PROMPT_TOOLKIT.value,
+        #     agent_analytics_service.usage_panel_hook,
+        # )

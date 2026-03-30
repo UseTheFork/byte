@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from operator import itemgetter
 from typing import TYPE_CHECKING, Iterable, Self, Sequence
 
-from textual import containers, getters, on, widgets
+from textual import containers, getters, widgets
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.content import Content, Span
@@ -10,29 +10,15 @@ from textual.message import Message
 from textual.reactive import var
 from textual.widgets.option_list import Option
 
-from byte import Command
 from byte.support import FuzzySearch
-from byte.tui import Messages
+from byte.tui import AutocompleteOption, Messages
 from byte.tui.widgets.columns import Columns
 
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
 
 
-class SlashCompleteInput(widgets.Input):
-    BINDING_GROUP_TITLE = "Fuzzy search slash commands"
-    HELP = """\
-## Slash command fuzzy search
-
-Search for slash commands by typing a few characters from the command.
-
-- **cursor keys** Navigate list
-- **enter** Add command to prompt
-- **escape** Dismiss fuzzy search
-"""
-
-
-class SlashComplete(containers.VerticalGroup):
+class Autocompleter(containers.VerticalGroup, can_focus=False):
     """A widget to auto-complete slash commands."""
 
     @dataclass
@@ -72,58 +58,50 @@ class SlashComplete(containers.VerticalGroup):
     input = getters.query_one(widgets.Input)
     option_list = getters.query_one(widgets.OptionList)
 
-    slash_commands: var[list[Command]] = var(list[Command]())
+    autocomplete_options: var[list[AutocompleteOption]] = var(list[AutocompleteOption]())
+    # type: str
 
     def __init__(
         self,
-        slash_commands: Iterable[Command] | None = None,
+        autocomplete_options: Iterable[AutocompleteOption] | None = None,
         id: str | None = None,
         classes: str | None = None,
     ) -> None:
         super().__init__(id=id, classes=classes)
-        self.slash_commands = list(slash_commands) if slash_commands else []
+        self.autocomplete_options = list(autocomplete_options) if autocomplete_options else []
+
         self.hints = {
-            slash_command.name: slash_command.description
-            for slash_command in self.slash_commands
-            if slash_command.description
+            autocomplete_option.name: autocomplete_option.description
+            for autocomplete_option in self.autocomplete_options
+            if autocomplete_option.description
         }
 
         self.fuzzy_search = FuzzySearch(case_sensitive=False)
 
     def compose(self) -> ComposeResult:
-        yield SlashCompleteInput(compact=True, placeholder="fuzzy search")
         yield widgets.OptionList()
 
     def focus(self, scroll_visible: bool = False) -> Self:
-        self.filter_slash_commands("")
+        self.filter_options("")
         self.input.focus(scroll_visible)
         return self
 
     def on_mount(self) -> None:
-        self.filter_slash_commands("")
+        self.filter_options("")
 
     def on_descendant_blur(self) -> None:
         self.post_message(Messages.Dismiss(self))
 
-    @on(widgets.Input.Changed)
-    def on_input_changed(self, event: widgets.Input.Changed) -> None:
-        event.stop()
-        self.app.byte["log"].info("on_input_changed")
-        self.app.byte["log"].info(event)
-        self.filter_slash_commands(event.value)
-
-    async def watch_slash_commands(self, slash_commands: list[Command]) -> None:
+    async def watch_autocomplete_option(self, autocomplete_options: list[AutocompleteOption]) -> None:
         self.hints = {
             slash_command.name: slash_command.description
-            for slash_command in slash_commands
+            for slash_command in autocomplete_options
             if slash_command.description
         }
 
-        self.app.byte["log"].info("watch_slash_commands")
-        self.app.byte["log"].info(self.input)
-        self.filter_slash_commands(self.input.value)
+        self.filter_options(self.input.value)
 
-    def filter_slash_commands(self, prompt: str) -> None:
+    def filter_options(self, prompt: str) -> None:
         """Filter slash commands by the given prompt.
 
         Args:
@@ -135,21 +113,23 @@ class SlashComplete(containers.VerticalGroup):
 
         columns = self.columns = Columns("auto", "flex")
 
-        slash_commands = sorted(
-            self.slash_commands,
-            key=lambda slash_command: slash_command.name.casefold(),
+        autocomplete_options = sorted(
+            self.autocomplete_options,
+            key=lambda autocomplete_option: autocomplete_option.name.casefold(),
         )
-        deduplicated_slash_commands = {slash_command.name: slash_command for slash_command in slash_commands}
+        deduplicated_slash_commands = {
+            autocomplete_option.name: autocomplete_options for autocomplete_option in autocomplete_options
+        }
         self.fuzzy_search.cache.grow(len(deduplicated_slash_commands))
 
         if prompt:
-            slash_prompt = f"/{prompt}"
-            scores: list[tuple[float, Sequence[int], Command]] = [
+            slash_prompt = f"{prompt}"
+            scores: list[tuple[float, Sequence[int], AutocompleteOption]] = [
                 (
-                    *self.fuzzy_search.match(prompt, slash_command.name),
-                    slash_command,
+                    *self.fuzzy_search.match(prompt, autocomplete_option.name),
+                    autocomplete_option,
                 )
-                for slash_command in slash_commands
+                for autocomplete_option in autocomplete_options
             ]
 
             scores = sorted(
@@ -166,9 +146,9 @@ class SlashComplete(containers.VerticalGroup):
                 reverse=True,
             )
         else:
-            scores = [(1.0, [], slash_command) for slash_command in slash_commands]
+            scores = [(1.0, [], autocomplete_option) for autocomplete_option in autocomplete_options]
 
-        def make_row(slash_command: Command, indices: Iterable[int]) -> tuple[Content, ...]:
+        def make_row(autocomplete_option: AutocompleteOption, indices: Iterable[int]) -> tuple[Content, ...]:
             """Make a row for the Columns display.
 
             Args:
@@ -178,9 +158,9 @@ class SlashComplete(containers.VerticalGroup):
             Returns:
                 A tuple of `Content` instances for use as a column row.
             """
-            command = Content.styled(slash_command.name, "$text-success")
+            command = Content.styled(autocomplete_option.name, "$text-success")
             command = command.add_spans([Span(index + 1, index + 2, "underline not dim") for index in indices])
-            return (command, Content.styled(slash_command.description, "dim"))
+            return (command, Content.styled(autocomplete_option.description, "dim"))
 
         rows = [
             (
@@ -210,6 +190,4 @@ class SlashComplete(containers.VerticalGroup):
     def action_submit(self) -> None:
         option_list = self.option_list
         if (option := option_list.highlighted_option) is not None:
-            with self.input.prevent(widgets.Input.Changed):
-                self.input.clear()
             self.post_message(self.Completed(option.id or ""))

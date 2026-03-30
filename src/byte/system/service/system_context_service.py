@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from byte import Payload, Service
+from byte import Events, Service
 
 
 class SystemContextService(Service):
@@ -12,7 +12,7 @@ class SystemContextService(Service):
     Usage: `await system_context_service.add_system_context(payload)`
     """
 
-    async def add_system_context(self, payload: Payload) -> Payload:
+    async def add_system_context(self, payload: Events.GatherReinforcement) -> Events.GatherReinforcement:
         """Add system context information to the project context.
 
         Injects current date and other system-level metadata into the prompt
@@ -36,8 +36,6 @@ class SystemContextService(Service):
                 exts = ", ".join(lint_cmd.languages)
                 system_context.append(f"  - `{lint_cmd_string}` (for {exts} files)")
 
-        system_context_list = payload.get("system_context", [])
-        system_context_list.extend(system_context)
-        payload.set("system_context", system_context_list)
+        payload.system_context.extend(system_context)
 
         return payload

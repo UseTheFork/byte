@@ -1,6 +1,6 @@
 from typing import List, Type
 
-from byte import EventBus, EventType, Payload, Service, ServiceProvider
+from byte import EventBus, Events, Service, ServiceProvider
 from byte.cli import Command
 from byte.files import (
     AddFileCommand,
@@ -42,25 +42,19 @@ class FileServiceProvider(ServiceProvider):
     async def boot(self):
         """Boot file services and register commands with registry."""
 
-        # Ensure ignore service is booted first for pattern loading
-        # self.app.make(FileIgnoreService)
-
-        # Then boot file discovery which depends on ignore service
-        # self.app.make(FileDiscoveryService)
-
         # Boots the filewatcher service in to the task manager
         file_watcher_service = self.app.make(FileWatcherService)
         self.app.booted(file_watcher_service._start_watching)
 
         # Set up event listener for PRE_PROMPT_TOOLKIT
         event_bus = self.app.make(EventBus)
-        file_service = self.app.make(FileService)
+        # file_service = self.app.make(FileService)
 
         # Register listener that calls list_in_context_files before each prompt
-        event_bus.on(
-            EventType.PRE_PROMPT_TOOLKIT.value,
-            file_service.list_in_context_files_hook,
-        )
+        # event_bus.on(
+        #     EventType.PRE_PROMPT_TOOLKIT.value,
+        #     file_service.list_in_context_files_hook,
+        # )
 
         # Boot AI comment watcher if enabled
         config = self.app["config"]
@@ -68,33 +62,31 @@ class FileServiceProvider(ServiceProvider):
             ai_comment_watcher = self.app.make(AICommentWatcherService)
 
             # Register AI comment watcher event hooks
-            event_bus.on(
-                EventType.POST_PROMPT_TOOLKIT.value,
-                ai_comment_watcher.modify_user_request_hook,
-            )
+            # event_bus.on(
+            #     EventType.POST_PROMPT_TOOLKIT.value,
+            #     ai_comment_watcher.modify_user_request_hook,
+            # )
 
             event_bus.on(
-                EventType.GATHER_REINFORCEMENT.value,
+                Events.GatherReinforcement,
                 ai_comment_watcher.add_reinforcement_hook,
             )
 
             # Subscribe to file change events
             event_bus.on(
-                EventType.FILE_CHANGED.value,
+                Events.FileChanged,
                 ai_comment_watcher.handle_file_change,
             )
 
         event_bus.on(
-            EventType.POST_BOOT.value,
+            Events.PostBoot,
             self.boot_messages,
         )
 
-    async def boot_messages(self, payload: Payload) -> Payload:
+    async def boot_messages(self, event: Events.PostBoot) -> Events.PostBoot:
         file_discovery = self.app.make(FileDiscoveryService)
-        messages = payload.get("messages", [])
+
         found_files = await file_discovery.get_files()
-        messages.append(f"[muted]Files Discovered:[/muted] [primary]{len(found_files)}[/primary]")
+        event.messages.append(f"[$text-muted]Files Discovered:[/$text-muted] [$primary]{len(found_files)}[/$primary]")
 
-        payload.set("messages", messages)
-
-        return payload
+        return event

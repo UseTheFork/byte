@@ -106,8 +106,7 @@ Conversation {
     height: auto;
     padding: 0 0 0 0;
 
-    PathSearch,
-    SlashComplete {
+    Autocompleter {
       display: none;
       overlay: screen;
       offset-y: -16;
@@ -142,6 +141,12 @@ Conversation {
         margin: 0 1;
         padding: 0 1;
       }
+    }
+
+    &.-show-auto-complete {
+        Autocompleter {
+            display: block;
+        }
     }
 
     Question {
@@ -222,6 +227,7 @@ Conversation {
       }
     }
   }
+
 
   ResponseStatus {
     dock: top;

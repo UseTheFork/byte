@@ -9,7 +9,7 @@ from textual.binding import Binding, BindingType
 from textual.containers import VerticalScroll
 from textual.widgets import Footer
 
-from byte import EventBus, EventType, Payload
+from byte import EventBus, Events
 from byte.tui import Messages
 from byte.tui.themes import ThemeRegistry
 from byte.tui.widgets.agent_is_typing import ResponseStatus
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 
 class ByteTUI(App, inherit_bindings=False):
-    AUTO_FOCUS = "Conversation Prompt HighlightedTextArea"
+    AUTO_FOCUS = "Conversation Prompt TextArea"
 
     CSS_PATH = Path(__file__).parent / "tui.tcss"
     BINDINGS: ClassVar[list[BindingType]] = [
@@ -84,19 +84,12 @@ class ByteTUI(App, inherit_bindings=False):
 
         self._setup_themes()
 
+        # TODO: This should not be here I think.
         event_bus = self.byte.make(EventBus)
 
         # Emit our post boot message to gather all needed info.
-        payload = await event_bus.emit(
-            payload=Payload(
-                event_type=EventType.POST_BOOT,
-                data={
-                    "messages": [],
-                },
-            )
-        )
-
-        messages = payload.get("messages", [])
+        payload = await event_bus.emit(Events.PostBoot(messages=[]))
+        messages = payload.messages
 
         styled_logo = []
         logo_lines = [
@@ -134,6 +127,12 @@ class ByteTUI(App, inherit_bindings=False):
         response_chatbox = Bootbox("\n".join(styled_logo) + "\n\n" + "\n".join(messages))
         self.chat_container.mount(response_chatbox)
 
+    @on(Messages.UserInputChanged)
+    async def on_user_input_changed(self, event: Messages.UserInputChanged) -> None:
+        """"""
+        self.app.byte["log"].info("UserInputChanged")
+        self.app.byte["log"].info(event)
+
     @on(Messages.UserInputSubmitted)
     async def new_user_message(self, event: Messages.UserInputSubmitted) -> None:
         """Handle a new user message."""
@@ -143,16 +142,8 @@ class ByteTUI(App, inherit_bindings=False):
         self.chat_container.mount(user_message_chatbox)
 
         event_bus = self.byte.make(EventBus)
-
         # Emit our post boot message to gather all needed info.
-        payload = await event_bus.emit(
-            payload=Payload(
-                event_type=EventType.USER_INPUT_SUBMITTED,
-                data={
-                    "messages": event.body,
-                },
-            )
-        )
+        payload = await event_bus.emit(Events.UserInputSubmitted(messages=event.body))
 
     @on(Messages.AgentResponseStarted)
     def start_awaiting_response(self) -> None:

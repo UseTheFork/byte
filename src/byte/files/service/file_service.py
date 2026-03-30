@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Union
 
 from rich.columns import Columns
 
-from byte import EventType, Payload, Service
+from byte import Events, Service
 from byte.files import FileContext, FileDiscoveryService, FileMode
 from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
@@ -27,16 +27,9 @@ class FileService(Service):
     async def _notify_file_added(self, file_path: str, mode: FileMode):
         """Notify system that a file was added to context"""
 
-        payload = Payload(
-            event_type=EventType.FILE_ADDED,
-            data={
-                "file_path": file_path,
-                "mode": mode.value,
-                "action": "context_added",
-            },
+        await self.emit(
+            Events.FileAdded(file_path=file_path, mode=mode.value),
         )
-
-        await self.emit(payload)
 
     async def add_file(self, path: Union[str, PathLike], mode: FileMode) -> bool:
         """Add a file to the active context for AI awareness.
@@ -203,21 +196,6 @@ class FileService(Service):
         path_obj = Path(path).resolve()
         return self._context_files.get(str(path_obj))
 
-    # TODO: Doc String
-    async def _emit_file_context_event(self, file: str, type, content: str) -> str:
-        """ """
-        payload = Payload(
-            event_type=EventType.GENERATE_FILE_CONTEXT,
-            data={
-                "file": file,
-                "type": type,
-                "content": content,
-            },
-        )
-
-        payload = await self.emit(payload)
-        return payload.get("content", content)
-
     async def generate_context_prompt(self) -> tuple[list[str], list[str]]:
         """Generate structured file lists for read-only and editable files.
 
@@ -244,7 +222,6 @@ class FileService(Service):
             for file_ctx in sorted(read_only, key=lambda f: f.relative_path):
                 content = file_ctx.get_content()
                 if content is not None:
-                    content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.READ_ONLY, content)
                     language = file_ctx.language
                     opening = Boundary.open(
                         BoundaryType.FILE,
@@ -266,7 +243,6 @@ class FileService(Service):
             for file_ctx in sorted(editable, key=lambda f: f.relative_path):
                 content = file_ctx.get_content()
                 if content is not None:
-                    content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.EDITABLE, content)
                     language = file_ctx.language
                     opening = Boundary.open(
                         BoundaryType.FILE,
@@ -493,7 +469,6 @@ class FileService(Service):
             for file_ctx in sorted(read_only, key=lambda f: f.relative_path):
                 content = file_ctx.get_content()
                 if content is not None:
-                    content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.READ_ONLY, content)
                     # Add line numbers to content
                     lines = content.splitlines()
                     numbered_lines = [f"{i:4d} | {line}" for i, line in enumerate(lines)]
@@ -510,7 +485,6 @@ class FileService(Service):
             for file_ctx in sorted(editable, key=lambda f: f.relative_path):
                 content = file_ctx.get_content()
                 if content is not None:
-                    content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.EDITABLE, content)
                     # Add line numbers to content
                     lines = content.splitlines()
                     numbered_lines = [f"{i + 1:4d} | {line}" for i, line in enumerate(lines)]

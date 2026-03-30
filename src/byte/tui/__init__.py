@@ -5,14 +5,16 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.tui.byte_tui import ByteTUI
     from byte.tui.messages import Messages
+    from byte.tui.schemas import AutocompleteOption
     from byte.tui.service.tui_manager_service import TUIManagerService
     from byte.tui.service_provider import TUIServiceProvider
 
 
-__all__ = ("ByteTUI", "Messages", "TUIManagerService", "TUIServiceProvider")
+__all__ = ("AutocompleteOption", "ByteTUI", "Messages", "TUIManagerService", "TUIServiceProvider")
 
 _dynamic_imports = {
     # keep-sorted start
+    "AutocompleteOption": "schemas",
     "ByteTUI": "byte_tui",
     "Messages": "messages",
     "TUIManagerService": "service.tui_manager_service",

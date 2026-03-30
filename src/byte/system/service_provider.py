@@ -1,6 +1,6 @@
 from typing import List, Type
 
-from byte import Command, Service, ServiceProvider
+from byte import Command, EventBus, Events, Service, ServiceProvider
 from byte.memory import UndoCommand
 from byte.system import ExitCommand, SystemContextService
 
@@ -31,13 +31,13 @@ class SystemServiceProvider(ServiceProvider):
         Usage: `provider.boot(container)` -> commands become available as /exit, /help
         """
 
-        # event_bus = self.app.make(EventBus)
-        # system_context_service = self.app.make(SystemContextService)
+        event_bus = self.app.make(EventBus)
+        system_context_service = self.app.make(SystemContextService)
 
-        # event_bus.on(
-        #     EventType.GATHER_PROJECT_CONTEXT.value,
-        #     system_context_service.add_system_context,
-        # )
+        event_bus.on(
+            Events.GatherReinforcement,
+            system_context_service.add_system_context,
+        )
 
         # # Emit our post boot message to gather all needed info.
         # payload = await event_bus.emit(

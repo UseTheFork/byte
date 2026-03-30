@@ -1,7 +1,6 @@
-import shlex
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Self
+from typing import TYPE_CHECKING, Callable, Self
 
 from textual import containers, events, getters, on
 from textual.actions import SkipAction
@@ -15,11 +14,16 @@ from textual.widgets import Label, TextArea
 from textual.widgets.text_area import Selection
 
 from byte import Command
+from byte.cli import CommandRegistry
 from byte.tui import Messages
+from byte.tui.schemas import AutocompleteOption
+from byte.tui.widgets.autocompleter import Autocompleter
 from byte.tui.widgets.flash import Flash
 from byte.tui.widgets.highlighted_textarea import HighlightedTextArea
 from byte.tui.widgets.question import Ask, Question
-from byte.tui.widgets.slash_complete import SlashComplete
+
+if TYPE_CHECKING:
+    from byte.tui import ByteTUI
 
 
 class InvokeFileSearch(Message):
@@ -38,7 +42,12 @@ class ModeInfo(Label):
     pass
 
 
-class PromptTextArea(HighlightedTextArea):
+class PromptTextArea(TextArea):
+    class Submitted(Message):
+        def __init__(self, markdown: str) -> None:
+            self.markdown = markdown
+            super().__init__()
+
     BINDING_GROUP_TITLE = "Prompt"
 
     BINDINGS = [
@@ -74,8 +83,9 @@ class PromptTextArea(HighlightedTextArea):
         ),
     ]
 
-    # app = getters.app(ToadApp)
-    auto_completes: var[list[Option]] = var(list)
+    app: ByteTUI
+
+    # auto_completes: var[list[Option]] = var(list)
     multi_line = var(False, bindings=True)
     agent_ready: var[bool] = var(False)
 
@@ -84,31 +94,30 @@ class PromptTextArea(HighlightedTextArea):
 
     project_path = var(Path())
 
-    slash_commands: var[list[Command]] = var([])
+    autocomplete_options: var[list[Command]] = var([])
+
     slash_command_prefixes: var[tuple[str, ...]] = var(())
 
-    class Submitted(Message):
-        def __init__(self, markdown: str) -> None:
-            self.markdown = markdown
-            super().__init__()
+    # def watch_slash_commands(self, slash_commands: list[Command]) -> None:
+    #     """A tuple of slash commands for performance reasons (used with `str.startswith`)."""
+    #     self.slash_command_prefixes = tuple([f"/{slash_command.name}" for slash_command in slash_commands])
 
-    def watch_slash_commands(self, slash_commands: list[Command]) -> None:
-        """A tuple of slash commands for performance reasons (used with `str.startswith`)."""
-        self.slash_command_prefixes = tuple([slash_command.name for slash_command in slash_commands])
+    # def highlight_slash_command(self, text: str) -> Content:
+    #     """Override slash command highlighting."""
 
-    def highlight_slash_command(self, text: str) -> Content:
-        """Override slash command highlighting."""
-
-        if text.startswith(self.slash_command_prefixes):
-            content = Content(text)
-            for slash_command in self.slash_commands:
-                if text.startswith(slash_command.name + " "):
-                    content = content.stylize("$text-success", 0, len(slash_command.name))
-                    if slash_command.description and len(text) - (len(slash_command.name) + 1) == 0:
-                        content += Content.styled(slash_command.description, "$text-secondary 70%")
-                    break
-            return content
-        return Content(text)
+    #     if text.startswith(self.slash_command_prefixes):
+    #         content = Content(text)
+    #         for slash_command in self.slash_commands:
+    #             # Check with the / prefix
+    #             if text.startswith(f"/{slash_command.name} "):
+    #                 content = content.stylize("$text-success", 0, len(slash_command.name) + 1)  # +1 for the /
+    #                 if (
+    #                     slash_command.description and len(text) - (len(slash_command.name) + 2) == 0
+    #                 ):  #  +2 for / and space
+    #                     content += Content.styled(slash_command.description, "$text-secondary 70%")
+    #                 break
+    #         return content
+    #     return Content(text)
 
     def on_mount(self) -> None:
         self.highlight_cursor_line = False
@@ -124,9 +133,6 @@ class PromptTextArea(HighlightedTextArea):
 
     def update_suggestion(self) -> None:
         prompt = self.query_ancestor(Prompt)
-
-        if self.selection.start == self.selection.end and self.text.startswith("/"):
-            return
 
         # if self.shell_mode and self.cursor_at_end_of_text and "\n" not in self.text:
         #     if prompt.complete_callback is not None:
@@ -156,70 +162,12 @@ class PromptTextArea(HighlightedTextArea):
         self.post_message(Messages.UserInputSubmitted(self.text))
         self.clear()
 
-    def action_newline(self) -> None:
-        self.insert("\n")
-
     def action_submit(self) -> None:
-        # TODO: DO we need this does this belong here?
-        if not self.agent_ready:
-            self.app.bell()
-            self.post_message(
-                Messages.Flash(
-                    "Agent is not ready. Please wait while the agent connects…",
-                    "error",
-                )
-            )
-            return
-        if self.suggestion:
-            if " " not in self.text:
-                self.insert(self.suggestion + " ")
-            else:
-                prompt = self.query_ancestor(Prompt)
-                last_token = shlex.split(self.text + self.suggestion)[-1]
-                last_token_path = Path(prompt.working_directory) / last_token
-                if last_token_path.is_dir():
-                    self.insert(self.suggestion)
-                else:
-                    self.insert(self.suggestion + " ")
-                self.suggestion = ""
-            return
-
         self.post_message(Messages.UserInputSubmitted(self.text))
         self.clear()
 
-    def action_cursor_up(self, select: bool = False):
-        if self.selection.is_empty and not select:
-            row, _column = self.selection[0]
-            if row == 0:
-                self.post_message(Messages.HistoryMove(-1, self.text))
-                return
-        super().action_cursor_up(select)
-
-    def action_cursor_down(self, select: bool = False):
-        if self.selection.is_empty and not select:
-            row, _column = self.selection[0]
-            if row == (self.wrapped_document.height - 1):
-                self.post_message(Messages.HistoryMove(+1, self.text))
-                return
-        super().action_cursor_down(select)
-
-    def action_cursor_line_end(self, select: bool = False) -> None:
-        """Move the cursor to the end of the line."""
-        if not self._has_cursor:
-            self.scroll_end()
-            return
-        location = self.get_cursor_line_end_location()
-        if location == self.cursor_location:
-            pass
-            # TODO: THIS.
-
-            # If the cursor is already at the end, then we assume the user wants to
-            # scroll the conversation to the end
-            # from byte.tui.widgets.chatbox import Chatbox
-
-            # self.query_ancestor(Chatbox).window.anchor()
-        else:
-            self.move_cursor(location, select=select)
+    def action_newline(self) -> None:
+        self.insert("\n")
 
     # async def action_tab_complete(self) -> None:
     #     if not self.shell_mode:
@@ -303,10 +251,10 @@ class PromptTextArea(HighlightedTextArea):
             #         self.selection = Selection((y, start), (y, end))
             #         break
 
-            # if x > 0 and x <= len(line) and line[x - 1] == "@":
-            #     remaining_line = line[x + 1 :]
-            #     if not remaining_line or remaining_line[0].isspace():
-            #         self.post_message(InvokeFileSearch())
+            if x > 0 and x <= len(line) and line[x - 1] == "@":
+                remaining_line = line[x + 1 :]
+                if not remaining_line or remaining_line[0].isspace():
+                    self.post_message(InvokeFileSearch())
 
 
 class PromptContainer(containers.HorizontalGroup):
@@ -330,11 +278,6 @@ class StatusLine(Label):
 
 class Prompt(containers.VerticalGroup):
     @dataclass
-    class PromptSubmitted(Message):
-        text: str
-        prompt_input: "Prompt"
-
-    @dataclass
     class CursorEscapingTop(Message):
         pass
 
@@ -356,16 +299,18 @@ class Prompt(containers.VerticalGroup):
     prompt_label = getters.query_one("#prompt", Label)
     question = getters.query_one(Question)
 
+    auto_completer = getters.query_one(Autocompleter)
+
     # current_directory = getters.query_one(CondensedPath)
     # path_search = getters.query_one(PathSearch)
-    slash_complete = getters.query_one(SlashComplete)
     # question = getters.query_one(Question)
     # mode_switcher = getters.query_one(ModeSwitcher)
 
-    slash_commands: var[list[Command]] = var(list)
+    autocomplete_options: var[list[AutocompleteOption]] = var(list[AutocompleteOption]())
+    show_auto_completer = var(False, toggle_class="-show-auto-complete", bindings=True)
+
     multi_line = var(False)
-    show_path_search = var(False, toggle_class="-show-path-search", bindings=True)
-    show_slash_complete = var(False, toggle_class="-show-slash-complete", bindings=True)
+
     project_path = var(Path, init=False)
     working_directory = var("")
     agent_info = var(Content(""))
@@ -375,6 +320,8 @@ class Prompt(containers.VerticalGroup):
     # current_mode: var[Mode | None] = var(None)
     # modes: var[dict[str, Mode] | None] = var(None)
     status: var[str] = var("")
+
+    app: ByteTUI
 
     def __init__(
         self,
@@ -428,7 +375,6 @@ class Prompt(containers.VerticalGroup):
             ("▌@▐", "r"),
             " files",
         )
-        self.prompt_text_area.highlight_language = "markdown"
 
     def focus(self, scroll_visible: bool = True) -> Self:
         if self._ask is not None:
@@ -443,37 +389,49 @@ class Prompt(containers.VerticalGroup):
     @on(TextArea.Changed)
     def on_text_area_changed(self, event: TextArea.Changed) -> None:
         text = event.text_area.text
+        self.post_message(Messages.UserInputChanged(text))
+
+        if self.show_auto_completer:
+            self.auto_completer.filter_options(text)
 
         self.multi_line = "\n" in text or "```" in text
-
-        # TODO: This.
-        # if not self.multi_line and self.likely_shell:
-        #     self.shell_mode = True
 
         self.update_prompt()
 
     @on(InvokeSlashComplete)
-    def on_invoke_slash_complete(self, event: InvokeSlashComplete) -> None:
+    def on_invoke_auto_completer_complete(self, event: InvokeSlashComplete) -> None:
         event.stop()
-        self.show_slash_complete = True
+
+        command_registry = self.app.byte.make(CommandRegistry)
+        all_commands = command_registry.get_all_commands()
+        self.autocomplete_options = [
+            AutocompleteOption(name=f"/{command.name}", description=command.description, type="command")
+            for command in all_commands
+        ]
+
+        self.show_auto_completer = True
 
     @on(Messages.PromptSuggestion)
     def on_prompt_suggestion(self, event: Messages.PromptSuggestion) -> None:
         event.stop()
         self.prompt_text_area.suggestion = event.suggestion
 
-    @on(SlashComplete.Completed)
-    def on_slash_complete_completed(self, event: SlashComplete.Completed) -> None:
+    @on(Autocompleter.Completed)
+    def on_auto_completer_complete_completed(self, event: Autocompleter.Completed) -> None:
+        self.app.byte["log"].info("on_auto_completer_complete_completed")
+        self.app.byte["log"].info(event)
         self.prompt_text_area.clear()
         self.prompt_text_area.insert(f"{event.command} ")
         self.prompt_text_area.suggestion = ""
+        # TODO: This should check the type of completion that happend if it's a command completion we need to switch the autocompleter to use that commands options.
+
         self.focus()
 
     @on(Messages.Dismiss)
     def on_dismiss(self, event: Messages.Dismiss) -> None:
         event.stop()
-        if event.widget is self.slash_complete and self.show_slash_complete:
-            self.show_slash_complete = False
+        if event.widget is self.auto_completer and self.show_auto_completer:
+            self.show_auto_completer = False
             self.prompt_text_area.suggestion = ""
             self.focus()
             # TODO: This
@@ -504,10 +462,27 @@ class Prompt(containers.VerticalGroup):
         if suggestion.startswith(self.text) and self.text != suggestion:
             self.prompt_text_area.suggestion = suggestion[len(self.text) :]
 
+    def on_key(self, event: events.Key) -> None:
+        self.app.byte["log"].info("prompt on_key")
+        self.app.byte["log"].info(event)
+
+        if event.key == "up" and self.show_auto_completer:
+            event.prevent_default()
+            self.auto_completer.action_cursor_up()
+            event.stop()
+        elif event.key == "down" and self.show_auto_completer:
+            event.prevent_default()
+            self.auto_completer.action_cursor_down()
+            event.stop()
+        elif event.key == "tab" and self.show_auto_completer:
+            event.prevent_default()
+            self.auto_completer.action_submit()
+            event.stop()
+
     def compose(self) -> ComposeResult:
         # yield PathSearch(self.project_path).data_bind(root=Prompt.project_path)
         yield Flash()
-        yield SlashComplete().data_bind(slash_commands=Prompt.slash_commands)
+        yield Autocompleter().data_bind(autocomplete_options=Prompt.autocomplete_options)
         with PromptContainer(id="prompt-container"):
             yield Question()
             with containers.HorizontalGroup(id="text-prompt"):
@@ -516,7 +491,7 @@ class Prompt(containers.VerticalGroup):
                     multi_line=Prompt.multi_line,
                     agent_ready=Prompt.agent_ready,
                     project_path=Prompt.project_path,
-                    slash_commands=Prompt.slash_commands,
+                    autocomplete_options=Prompt.autocomplete_options,
                 )
         with containers.HorizontalGroup(id="info-container"):
             yield AgentInfo()
@@ -532,86 +507,7 @@ class Prompt(containers.VerticalGroup):
         if self.prompt_text_area.suggestion:
             self.prompt_text_area.suggestion = ""
             return
-        elif self.show_slash_complete:
-            self.show_slash_complete = False
+        elif self.show_auto_completer:
+            self.show_auto_completer = False
         else:
             raise SkipAction
-
-
-# /////////////////////////////////////
-
-
-# # Credits to https://github.com/darrenburns/elia/blob/main/elia_chat/widgets/prompt_input.py
-# class Prompt(TextArea):
-#     @dataclass
-#     class PromptSubmitted(Message):
-#         text: str
-#         prompt_input: "Prompt"
-
-#     @dataclass
-#     class CursorEscapingTop(Message):
-#         pass
-
-#     @dataclass
-#     class CursorEscapingBottom(Message):
-#         pass
-
-#     BINDINGS = [
-#         Binding("ctrl+j,alt+enter", "submit_prompt", "Send message", key_display="^j"),
-#     ]
-
-#     submit_ready = reactive(True)
-
-#     def __init__(
-#         self,
-#         name: str | None = None,
-#         id: str | None = None,
-#         classes: str | None = None,
-#         disabled: bool = False,
-#     ) -> None:
-#         super().__init__(name=name, id=id, classes=classes, disabled=disabled, language="markdown")
-
-#     def on_key(self, event: events.Key) -> None:
-#         if self.cursor_location == (0, 0) and event.key == "up":
-#             event.prevent_default()
-#             self.post_message(self.CursorEscapingTop())
-#             event.stop()
-#         elif self.cursor_at_end_of_text and event.key == "down":
-#             event.prevent_default()
-#             self.post_message(self.CursorEscapingBottom())
-#             event.stop()
-
-#     def watch_submit_ready(self, submit_ready: bool) -> None:
-#         self.set_class(not submit_ready, "-submit-blocked")
-
-#     def on_mount(self):
-#         self.border_title = "Enter your message..."
-
-#     @on(TextArea.Changed)
-#     async def prompt_changed(self, event: TextArea.Changed) -> None:
-#         text_area = event.text_area
-#         if text_area.text.strip() != "":
-#             text_area.border_subtitle = "(^j) Send message"
-#         else:
-#             text_area.border_subtitle = None
-
-#         text_area.set_class(text_area.wrapped_document.height > 1, "multiline")
-
-#         # TODO - when the height of the textarea changes
-#         #  things don't appear to refresh correctly.
-#         #  I think this may be a Textual bug.
-#         #  The refresh below should not be required.
-#         # self.parent.refresh()
-
-#     def action_submit_prompt(self) -> None:
-#         if self.text.strip() == "":
-#             self.notify("Cannot send empty message!")
-#             return
-
-#         if self.submit_ready:
-#             message = self.PromptSubmitted(self.text, prompt_input=self)
-#             self.clear()
-#             self.post_message(message)
-#         else:
-#             self.app.bell()
-#             self.notify("Please wait for response to complete.")

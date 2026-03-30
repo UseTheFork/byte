@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, TypeVar
 
 from typing_extensions import List
 
-from byte import EventType, Payload
+from byte import Events
 from byte.code_operations import EditBlockService, edit_block_messages
 from byte.conventions import ConventionContextService
 from byte.files import FileService
@@ -53,16 +53,14 @@ class PromptAssembler(Bootable, Eventable):
 
         Usage: `reinforcement_messages = await self._gather_reinforcement("main")`
         """
-        reinforcement_payload = Payload(
-            event_type=EventType.GATHER_REINFORCEMENT,
-            data={
-                "reinforcement": [],
-                "mode": context.mode,
-                "agent": context.agent,
-            },
+        reinforcement_payload = await self.emit(
+            Events.GatherReinforcement(
+                reinforcement=[],
+                mode=context.mode,
+                agent=context.agent,
+            )
         )
-        reinforcement_payload = await self.emit(reinforcement_payload)
-        reinforcement_messages = reinforcement_payload.get("reinforcement", [])
+        reinforcement_messages = reinforcement_payload.reinforcement
 
         message_parts = []
 
