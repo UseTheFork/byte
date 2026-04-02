@@ -3,10 +3,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from langchain.messages import AIMessageChunk
-from textual import containers, on, work
+from textual import getters, on, work
 from textual.app import ComposeResult
+from textual.containers import VerticalGroup
 from textual.reactive import reactive
-from textual.widget import Widget
 from textual.widgets import Markdown
 
 from byte import Command
@@ -18,22 +18,25 @@ if TYPE_CHECKING:
     from byte.tui import ByteTUI
 
 
-class AgentResponsePanel(Widget):
+class AgentResponsePanel(VerticalGroup):
     BINDINGS = []
 
     DEFAULT_CSS = """\
     AgentResponsePanel {
         height: auto;
         width: 1fr;
+        min-height: 1;
         min-width: 12;
         max-width: 1fr;
         margin: 0 1;
-        padding: 0 1;
-        border: round $accent 60%;
+        border: round $secondary 60%;
     }
     """
 
     app: ByteTUI
+
+    rune_spinner = getters.query_one("#rune_spinner", RuneSpinner)
+    agent_response_widget = getters.query_one("#agent_response", Markdown)
 
     response = reactive("", init=False)
 
@@ -56,9 +59,8 @@ class AgentResponsePanel(Widget):
         self.command = command
         self.request = request
         self.args = args
-        self._content_widgets = []
 
-    @work()
+    @work(exclusive=True)
     async def _execute_command(self) -> None:
         """Execute the command and handle streaming."""
         # try:
@@ -71,7 +73,7 @@ class AgentResponsePanel(Widget):
     async def on_mount(self) -> None:
         """Start command execution when panel is mounted."""
         # Emit start event
-        self.post_message(Messages.CommandExecutionStarted(command_name=self.command.name))
+        # self.post_message(Messages.CommandExecutionStarted(command_name=self.command.name))
 
         # Execute command
         self._execute_command()
@@ -88,25 +90,23 @@ class AgentResponsePanel(Widget):
     async def handle_stream_chunk(self, event: Messages.CommandStreamChunk) -> None:
         """Handle streaming chunks for this panel."""
 
-        agent_response_widget = self.query_one("#agent_response", Markdown)
-
         # Update UI based on chunk type
         if event.chunk["type"] == "messages":
             message_chunk, metadata = event.chunk["data"]
 
             if isinstance(message_chunk, AIMessageChunk) and message_chunk.content:
+                self.rune_spinner.display = "none"
+
                 msg = extract_content_from_message(message_chunk)
                 self.app.byte["log"].info(msg)
                 self.response += msg
-                agent_response_widget.update(self.response)
+                self.agent_response_widget.update(self.response)
                 self.app.conversation.scroll_to_latest_message()
-                # self.refresh(layout=True)
 
         elif event.chunk["type"] == "tasks":
             # await self._update_task_status(event.data)
             self.app.byte["log"].info(event.chunk)
 
     def compose(self) -> ComposeResult:
-        yield RuneSpinner()
-        with containers.HorizontalGroup():
-            yield Markdown(id="agent_response")
+        yield RuneSpinner(id="rune_spinner")
+        yield Markdown(id="agent_response")

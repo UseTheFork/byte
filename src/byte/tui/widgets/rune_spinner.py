@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 # Credits To https://github.com/charmbracelet/crush/blob/main/internal/tui/components/anim/anim.go
 class RuneSpinner(Static):
     def _tick(self):
-        self.update(f"Thinking {self.frames[self.phase % len(self.frames)]}")
+        self.update(f"{self.frames[self.phase % len(self.frames)]} Thinking")
         self.phase += 1
 
     def on_mount(self):
@@ -19,9 +19,9 @@ class RuneSpinner(Static):
         self.phase = 0
 
         runes = list("0123456789abcdefABCDEF~!@#$%^&*()+=_")
-        colors = ["primary", "secondary", "dim"]
-        num_frames = 16  # Number of frames in the animation
-        spinner_size = 5  # Number of runes per frame
+        colors = ["primary", "secondary", "dim", "text-primary", "text-secondary"]
+        num_frames = 24  # Number of frames in the animation
+        spinner_size = 10  # Number of runes per frame
 
         self.frames = []
         for frame_no in range(num_frames):
