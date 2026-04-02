@@ -15,8 +15,6 @@ from textual.widgets import OptionList, TextArea
 from textual.widgets.option_list import Option
 from textual_autocomplete.fuzzy_search import FuzzySearch
 
-from byte.cli import CommandRegistry
-
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
 
@@ -142,8 +140,7 @@ class TextAreaAutoComplete(Widget):
         self._suppressed: bool = False  # Suppress until user types
         self._search_timer = None  # Timer for debounced file search
 
-        self._command_registry = self.app.byte.make(CommandRegistry)
-        self.slash_commands = self._command_registry.get_all_slash_command_names()
+        self.slash_commands = self.app.command_registry.get_all_slash_command_names()
 
     @property
     def file_index(self) -> list[str]:
@@ -194,13 +191,13 @@ class TextAreaAutoComplete(Widget):
 
     async def _do_slash_arg_search_async(self, state: TargetState) -> None:
         """Async slash argument search using command's get_completions."""
-        if not self._command_registry:
+        if not self.app.command_registry:
             return
 
         text = state.text[: state.cursor_position] if state.cursor_position > 0 else state.text
 
         # Get completions from registry (which delegates to command)
-        completions = await self._command_registry.get_slash_completions(text)
+        completions = await self.app.command_registry.get_slash_completions(text)
 
         # Convert to DropdownItems
         candidates = [DropdownItem(comp, prefix="") for comp, _desc in completions]

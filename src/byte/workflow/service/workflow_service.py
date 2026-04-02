@@ -1,13 +1,11 @@
-import asyncio
-from typing import Any, Literal, Optional
+from typing import Any, Callable, Literal, Optional
 
 from langchain_core.callbacks import get_usage_metadata_callback
-from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 
 from byte import Service
 from byte.analytics import AgentAnalyticsService
-from byte.cli import StreamRenderingService
-from byte.orchestration import BaseState, TokenUsageSchema
+from byte.orchestration import TokenUsageSchema
+from byte.tui import ByteTUI, Messages
 from byte.workflow import BaseWorkflow
 
 
@@ -48,76 +46,50 @@ class WorkflowService(Service):
                 mode: The stream mode ("values", "updates", "messages", or "custom")
                 chunk: The data chunk from that stream mode
         """
-        stream_rendering_service = self.app.make(StreamRenderingService)
+        # stream_rendering_service = self.app.make(StreamRenderingService)
+        tui = self.app.make(ByteTUI)
 
-        # self.app["log"].debug(mode)
-        self.app["log"].debug(chunk)
-
-        # Filter and process based on mode
         if chunk["type"] == "messages":
-            self.app["log"].debug(chunk["ns"])
-
-            # Extract agent node name from namespace if present
-            agent_name = ""
-            if chunk["ns"] and len(chunk["ns"]) > 0:
-                ns_str = chunk["ns"][0]
-                if ":" in ns_str:
-                    agent_name = ns_str.split(":")[0]
-
-            # Handle LLM token streaming
-            await stream_rendering_service.handle_message(chunk["data"], agent_name)
+            self.app["log"].info(chunk)
+            result = tui.post_message(
+                Messages.CommandStreamChunk(panel_id=self.panel_id, chunk_type="message", data=chunk["data"])
+            )
+            self.app["log"].info(result)
 
         elif chunk["type"] == "tasks":
-            await stream_rendering_service.handle_task(chunk["data"])
-            # self.app["log"].debug(chunk)
-            # self.app["log"].debug(chunk.get("id"))
-            # self.app["log"].debug(chunk.get("name"))
+            tui.post_message(Messages.CommandStreamChunk(panel_id=self.panel_id, chunk_type="task", data=chunk["data"]))
 
-        return chunk
+        # # self.app["log"].debug(mode)
+        # self.app["log"].debug(chunk)
 
-    async def _run_stream(
-        self,
-        graph: CompiledStateGraph,
-        initial_state: BaseState,
-        config: RunnableConfig,
-        stream_rendering_service: StreamRenderingService,
-    ):
-        """Helper method to run the stream in a cancellable task.
+        # # Filter and process based on mode
+        # if chunk["type"] == "messages":
+        #     self.app["log"].debug(chunk["ns"])
 
-        Args:
-                graph: The compiled state graph to execute
-                initial_state: The initial state for the graph
-                config: The runnable configuration with thread ID
-                stream_rendering_service: Service for rendering stream output
+        #     # Extract agent node name from namespace if present
+        #     agent_name = ""
+        #     if chunk["ns"] and len(chunk["ns"]) > 0:
+        #         ns_str = chunk["ns"][0]
+        #         if ":" in ns_str:
+        #             agent_name = ns_str.split(":")[0]
 
-        Returns:
-                The final processed event from the stream
+        # Handle LLM token streaming
 
-        Usage: Called internally by execute() to run the stream in a cancellable task
-        """
-        try:
-            processed_event = None
-            with get_usage_metadata_callback() as usage_metadata_callback:
-                async for chunk in graph.astream(
-                    input=initial_state,
-                    config=config,
-                    stream_mode=["messages", "tasks"],
-                    version="v2",
-                    subgraphs=True,
-                ):
-                    processed_event = await self._handle_stream_event(chunk)
+        #     await stream_rendering_service.handle_message(chunk["data"], agent_name)
 
-                # TODO: need to use `processed_event` to figure out what mode we are in.
-                await self._track_token_usage(usage_metadata_callback.usage_metadata, "main")
+        # elif chunk["type"] == "tasks":
+        #     await stream_rendering_service.handle_task(chunk["data"])
+        #     # self.app["log"].debug(chunk)
+        #     # self.app["log"].debug(chunk.get("id"))
+        #     # self.app["log"].debug(chunk.get("name"))
 
-            return processed_event
-        except asyncio.CancelledError:
-            return None
+        # return chunk
 
     async def execute(
         self,
         workflow: BaseWorkflow,
         request: str,
+        event_handler: Callable,
         thread_id: Optional[str] = None,
         display_mode: Literal["verbose", "thinking", "silent"] = "verbose",
     ):
@@ -132,8 +104,7 @@ class WorkflowService(Service):
         """
         graph, initial_state, config = await workflow.compile(request, thread_id)
 
-        stream_rendering_service = self.app.make(StreamRenderingService)
-        stream_rendering_service.set_display_mode(display_mode)
+        self.event_handler = event_handler
 
         # TODO: Do we need this?
         # Emit workflow start event
@@ -144,24 +115,40 @@ class WorkflowService(Service):
         #     )
         # )
 
-        await stream_rendering_service.start_spinner()
-        try:
-            # Create a task so we can cancel it properly
-            stream_task = asyncio.create_task(self._run_stream(graph, initial_state, config, stream_rendering_service))
+        processed_event = None
+        with get_usage_metadata_callback() as usage_metadata_callback:
+            async for chunk in graph.astream(
+                input=initial_state,
+                config=config,
+                stream_mode=["messages", "tasks"],
+                version="v2",
+                subgraphs=True,
+            ):
+                processed_event = await self.event_handler(Messages.CommandStreamChunk(chunk))
+                # processed_event = await self._handle_stream_event(chunk)
 
-            processed_event = await stream_task
-        except KeyboardInterrupt:
-            await asyncio.sleep(0.2)
-            # Cancel the stream task properly
-            self.app["log"].info("Agent execution cancelled by user")
+            # TODO: need to use `processed_event` to figure out what mode we are in.
+            await self._track_token_usage(usage_metadata_callback.usage_metadata, "main")
 
-            if not stream_task.done():
-                stream_task.cancel()
-            await asyncio.gather(stream_task, return_exceptions=False)
+        return processed_event
 
-            processed_event = None
-        finally:
-            await stream_rendering_service.end_stream()
+        # try:
+        #     # Create a task so we can cancel it properly
+        #     stream_task = asyncio.create_task(self._run_stream(graph, initial_state, config, stream_rendering_service))
+
+        #     processed_event = await stream_task
+        # except KeyboardInterrupt:
+        #     await asyncio.sleep(0.2)
+        #     # Cancel the stream task properly
+        #     self.app["log"].info("Agent execution cancelled by user")
+
+        #     if not stream_task.done():
+        #         stream_task.cancel()
+        #     await asyncio.gather(stream_task, return_exceptions=False)
+
+        #     processed_event = None
+        # finally:
+        #     await stream_rendering_service.end_stream()
 
         # Emit workflow complete event
         # await self.emit(
@@ -178,5 +165,3 @@ class WorkflowService(Service):
         # )
 
         # await self.emit(payload)
-
-        return processed_event

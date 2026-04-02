@@ -1,7 +1,6 @@
+from byte import CommandRegistry
 from byte.cli import (
-    CommandRegistry,
     InteractionService,
-    StreamRenderingService,
     SubprocessService,
 )
 from byte.support import ServiceProvider
@@ -12,10 +11,11 @@ class CLIServiceProvider(ServiceProvider):
 
     def services(self):
         return [
-            StreamRenderingService,
+            # StreamRenderingService,
             InteractionService,
             # PromptToolkitService,
             SubprocessService,
+            # TODO: this needs to move
             CommandRegistry,
         ]
 

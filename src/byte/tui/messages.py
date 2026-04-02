@@ -33,6 +33,14 @@ class Messages:
         value: str
 
     @dataclass
+    class CommandExecutionStarted(Message):
+        command_name: str
+
+    @dataclass
+    class CommandStreamChunk(Message):
+        chunk: dict
+
+    @dataclass
     class AgentResponseStarted(Message):
         pass
 

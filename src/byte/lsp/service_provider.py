@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Type
 
-from byte import EventBus, Events, Service, ServiceProvider, TaskManager
-from byte.cli import Command
+from byte import Command, EventBus, Events, Service, ServiceProvider, TaskManager
 from byte.lsp import LSPService
 
 if TYPE_CHECKING:

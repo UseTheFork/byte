@@ -1,7 +1,6 @@
 from typing import List, Type
 
-from byte import EventBus, Events, Service, ServiceProvider
-from byte.cli import Command
+from byte import Command, EventBus, Events, Service, ServiceProvider
 from byte.files import (
     AddFileCommand,
     AICommentWatcherService,

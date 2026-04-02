@@ -406,7 +406,9 @@ class Application(Container):
         from byte.tui.byte_tui import ByteTUI
 
         try:
-            textual_app = ByteTUI(container=self)
+            self.singleton(ByteTUI, lambda: ByteTUI(container=self))
+            textual_app = self.make(ByteTUI)
+
             await textual_app.run_async()
         except Exception:
             return 2

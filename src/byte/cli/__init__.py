@@ -11,9 +11,7 @@ if TYPE_CHECKING:
     from byte.cli.rich.markdown import CodeBlock, Heading, Markdown
     from byte.cli.rich.menu import Menu, MenuInputHandler, MenuRenderer, MenuState, MenuStyle
     from byte.cli.rich.panel_rule import PanelBottom, PanelTop
-    from byte.cli.rich.rune_spinner import RuneSpinner
     from byte.cli.schemas import ByteTheme, SubprocessResult, ThemeRegistry
-    from byte.cli.service.command_registry import Command, CommandRegistry
     from byte.cli.service.interactions_service import InteractionService
     from byte.cli.service.prompt_toolkit_service import PromptToolkitService
     from byte.cli.service.stream_rendering_service import StreamRenderingService
@@ -27,8 +25,6 @@ __all__ = (
     "CLIServiceProvider",
     "CodeBlock",
     "CodeBlockNavigator",
-    "Command",
-    "CommandRegistry",
     "Heading",
     "InputCancelledError",
     "InteractionService",
@@ -42,7 +38,6 @@ __all__ = (
     "PanelBottom",
     "PanelTop",
     "PromptToolkitService",
-    "RuneSpinner",
     "StreamRenderingService",
     "SubprocessResult",
     "SubprocessService",
@@ -56,8 +51,6 @@ _dynamic_imports = {
     "CLIServiceProvider": "service_provider",
     "CodeBlock": "rich.markdown",
     "CodeBlockNavigator": "rich.code_block_navigator",
-    "Command": "service.command_registry",
-    "CommandRegistry": "service.command_registry",
     "Heading": "rich.markdown",
     "InputCancelledError": "exceptions",
     "InteractionService": "service.interactions_service",
@@ -71,7 +64,6 @@ _dynamic_imports = {
     "PanelBottom": "rich.panel_rule",
     "PanelTop": "rich.panel_rule",
     "PromptToolkitService": "service.prompt_toolkit_service",
-    "RuneSpinner": "rich.rune_spinner",
     "StreamRenderingService": "service.stream_rendering_service",
     "SubprocessResult": "schemas",
     "SubprocessService": "service.subprocess_service",

@@ -1,7 +1,6 @@
 from typing import List, Type
 
-from byte import Service, ServiceProvider
-from byte.cli import Command
+from byte import Command, Service, ServiceProvider
 from byte.workflow import AskCommand, AskWorkflow, BaseWorkflow, CoderWorkflow, WorkflowService
 
 

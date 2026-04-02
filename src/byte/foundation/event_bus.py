@@ -120,6 +120,15 @@ class Events:
         session_docs: list[str] = field(default_factory=list)
         system_context: list[str] = field(default_factory=list)
 
+    @dataclass
+    class GatherProjectContext(Event):
+        # TODO: Doc String here.
+        """"""
+
+        conventions: list[str] = field(default_factory=list)
+        session_docs: list[str] = field(default_factory=list)
+        system_context: list[str] = field(default_factory=list)
+
 
 class EventBus:
     """Simple event system with typed dataclass events."""

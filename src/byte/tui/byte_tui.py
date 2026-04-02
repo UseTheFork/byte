@@ -9,9 +9,10 @@ from textual.binding import Binding, BindingType
 from textual.containers import VerticalScroll
 from textual.widgets import Footer
 
-from byte import EventBus, Events
+from byte import CommandRegistry, EventBus, Events
 from byte.tui import Messages
 from byte.tui.themes import ThemeRegistry
+from byte.tui.widgets.agent.agent_response_panel import AgentResponsePanel
 from byte.tui.widgets.agent_is_typing import ResponseStatus
 from byte.tui.widgets.bootbox import Bootbox
 from byte.tui.widgets.box.human_message_box import HumanMessageBox
@@ -53,12 +54,17 @@ class ByteTUI(App, inherit_bindings=False):
 
     def __init__(self, container: Application):
         self.container = container
+        self.command_registry = container.make(CommandRegistry)
 
         super().__init__()
 
     @property
     def chat_container(self) -> VerticalScroll:
         return self.query_one("#chat-container", VerticalScroll)
+
+    @property
+    def conversation(self) -> Conversation:
+        return self.query_one(Conversation)
 
     @property
     def byte(self) -> Application:
@@ -130,8 +136,8 @@ class ByteTUI(App, inherit_bindings=False):
     @on(Messages.UserInputChanged)
     async def on_user_input_changed(self, event: Messages.UserInputChanged) -> None:
         """"""
-        self.app.byte["log"].info("UserInputChanged")
-        self.app.byte["log"].info(event)
+        self.byte["log"].info("UserInputChanged")
+        self.byte["log"].info(event)
 
     @on(Messages.UserInputSubmitted)
     async def new_user_message(self, event: Messages.UserInputSubmitted) -> None:
@@ -141,9 +147,22 @@ class ByteTUI(App, inherit_bindings=False):
         user_message_chatbox = HumanMessageBox(event.body)
         self.chat_container.mount(user_message_chatbox)
 
-        event_bus = self.byte.make(EventBus)
-        # Emit our post boot message to gather all needed info.
-        payload = await event_bus.emit(Events.UserInputSubmitted(messages=event.body))
+        # Check if this is a slash command
+        if event.body.startswith("/"):
+            # Extract command without the slash
+            command_text = event.body[1:]
+            parts = command_text.split(" ", 1)
+            command_name = parts[0]
+            args = parts[1] if len(parts) > 1 else ""
+
+            # Get the command from the registry
+            command = self.command_registry.get_slash_command(command_name)
+
+            if not command:
+                pass
+
+            agent_message_chatbox = AgentResponsePanel(command, event.body, args)
+            self.chat_container.mount(agent_message_chatbox)
 
     @on(Messages.AgentResponseStarted)
     def start_awaiting_response(self) -> None:

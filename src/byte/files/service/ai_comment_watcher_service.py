@@ -269,31 +269,31 @@ class AICommentWatcherService(Service):
     #     return payload
 
     async def add_reinforcement_hook(self, payload: Events.GatherReinforcement) -> Events.GatherReinforcement:
-        prompt_toolkit_service = self.app.make(PromptToolkitService)
-        if prompt_toolkit_service.is_interrupted():
-            active_agent = payload.agent
-            reinforcement_list = payload.reinforcement
+        # prompt_toolkit_service = self.app.make(PromptToolkitService)
+        # if prompt_toolkit_service.is_interrupted():
+        #     active_agent = payload.agent
+        #     reinforcement_list = payload.reinforcement
 
-            if active_agent == "ask_agent":
-                reinforcement_list.extend(
-                    [
-                        "",
-                        "- Provide clear, well-structured answers based on the code context. Include:",
-                        "  - Direct answer to each question",
-                        "  - Relevant code examples or references when applicable",
-                        "  - Recommendations or best practices if appropriate",
-                    ]
-                )
+        #     if active_agent == "ask_agent":
+        #         reinforcement_list.extend(
+        #             [
+        #                 "",
+        #                 "- Provide clear, well-structured answers based on the code context. Include:",
+        #                 "  - Direct answer to each question",
+        #                 "  - Relevant code examples or references when applicable",
+        #                 "  - Recommendations or best practices if appropriate",
+        #             ]
+        #         )
 
-            if active_agent == "coder_agent":
-                reinforcement_list.extend(
-                    [
-                        "",
-                        '- After successfully implementing all changes, remove the "AI:" comment markers from the code.',
-                        "> **IMPORTANT**: Execute the users request following the project's coding standards and conventions.",
-                        "If multiple tasks are present, complete them in the order they appear.",
-                        'After successfully implementing all changes, remove the "AI:" comment markers from the code.',
-                    ]
-                )
+        #     if active_agent == "coder_agent":
+        #         reinforcement_list.extend(
+        #             [
+        #                 "",
+        #                 '- After successfully implementing all changes, remove the "AI:" comment markers from the code.',
+        #                 "> **IMPORTANT**: Execute the users request following the project's coding standards and conventions.",
+        #                 "If multiple tasks are present, complete them in the order they appear.",
+        #                 'After successfully implementing all changes, remove the "AI:" comment markers from the code.',
+        #             ]
+        #         )
 
         return payload

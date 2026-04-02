@@ -1,7 +1,8 @@
 from argparse import Namespace
 from pathlib import Path
 
-from byte.cli import ByteArgumentParser, Command
+from byte import Command
+from byte.cli import ByteArgumentParser
 from byte.knowledge import SessionContextModel, SessionContextService
 
 

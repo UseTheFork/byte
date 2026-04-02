@@ -1,6 +1,7 @@
 from argparse import Namespace
 
-from byte.cli import ByteArgumentParser, Command
+from byte import Command
+from byte.cli import ByteArgumentParser
 from byte.config import ByteConfigException
 from byte.git import GitService
 from byte.lint import LintService

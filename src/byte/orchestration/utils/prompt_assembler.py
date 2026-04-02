@@ -248,18 +248,11 @@ class PromptAssembler(Bootable, Eventable):
 
         Usage: `context_messages = await self._gather_project_context()`
         """
-        project_context = Payload(
-            event_type=EventType.GATHER_PROJECT_CONTEXT,
-            data={
-                "conventions": [],
-                "session_docs": [],
-                "system_context": [],
-            },
-        )
-        project_context = await self.emit(project_context)
+
+        project_context = await self.emit(Events.GatherProjectContext())
 
         project_information_and_context = []
-        conventions = project_context.get("conventions", [])
+        conventions = project_context.conventions
         if conventions:
             conventions = "\n\n".join(conventions)
             project_information_and_context.extend(
@@ -270,7 +263,7 @@ class PromptAssembler(Bootable, Eventable):
                 ]
             )
 
-        session_docs = project_context.get("session_docs", [])
+        session_docs = project_context.session_docs
         if session_docs:
             session_docs = "\n\n".join(session_docs)
             project_information_and_context.extend(
@@ -281,7 +274,7 @@ class PromptAssembler(Bootable, Eventable):
                 ]
             )
 
-        system_context = project_context.get("system_context", [])
+        system_context = project_context.system_context
         if system_context:
             system_info_content = "\n".join(system_context)
             project_information_and_context.extend(

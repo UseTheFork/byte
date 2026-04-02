@@ -4,9 +4,9 @@ from bs4 import BeautifulSoup
 from pydoll.browser.chromium import Chrome
 from pydoll.browser.options import ChromiumOptions
 from rich.live import Live
+from rich.spinner import Spinner
 
 from byte import Service
-from byte.cli.rich.rune_spinner import RuneSpinner
 from byte.web.exceptions import WebNotEnabledException
 from byte.web.parser.base import BaseWebParser
 from byte.web.parser.generic_parser import GenericParser
@@ -62,7 +62,7 @@ class ChromiumService(Service):
         options.binary_location = str(self.app["config"].web.chrome_binary_location)
         options.start_timeout = 20
 
-        spinner = RuneSpinner(text=f"Scraping {url}...", size=15)
+        spinner = Spinner()
 
         with Live(spinner, console=console.console, transient=True, refresh_per_second=20):
             async with Chrome(options=options) as browser:

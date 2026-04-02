@@ -1,7 +1,8 @@
 from argparse import Namespace
 from typing import List
 
-from byte.cli import ByteArgumentParser, Command
+from byte import Command
+from byte.cli import ByteArgumentParser
 from byte.files import FileService
 
 

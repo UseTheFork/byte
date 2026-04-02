@@ -1,6 +1,7 @@
 from argparse import Namespace
 
-from byte.cli import ByteArgumentParser, Command, InputCancelledError, Markdown
+from byte import Command
+from byte.cli import ByteArgumentParser, InputCancelledError, Markdown
 from byte.config import ByteConfigException
 from byte.knowledge import SessionContextModel, SessionContextService
 from byte.support.mixins import UserInteractive
