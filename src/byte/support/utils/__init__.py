@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from byte.support.utils.get_last_ai_message import get_last_ai_message
     from byte.support.utils.get_last_message import get_last_message
     from byte.support.utils.list_to_multiline_text import list_to_multiline_text
+    from byte.support.utils.merge_classes import merge_classes
     from byte.support.utils.parse_partial_json import parse_partial_json
     from byte.support.utils.slugify import slugify
     from byte.support.utils.value import value
@@ -25,6 +26,7 @@ __all__ = (
     "get_last_ai_message",
     "get_last_message",
     "list_to_multiline_text",
+    "merge_classes",
     "parse_partial_json",
     "slugify",
     "value",
@@ -40,6 +42,7 @@ _dynamic_imports = {
     "get_last_ai_message": "get_last_ai_message",
     "get_last_message": "get_last_message",
     "list_to_multiline_text": "list_to_multiline_text",
+    "merge_classes": "merge_classes",
     "parse_partial_json": "parse_partial_json",
     "slugify": "slugify",
     "value": "value",

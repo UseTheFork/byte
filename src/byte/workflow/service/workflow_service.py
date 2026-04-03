@@ -130,38 +130,5 @@ class WorkflowService(Service):
             # TODO: need to use `processed_event` to figure out what mode we are in.
             await self._track_token_usage(usage_metadata_callback.usage_metadata, "main")
 
+        await self.event_handler(Messages.AgentResponseComplete())
         return processed_event
-
-        # try:
-        #     # Create a task so we can cancel it properly
-        #     stream_task = asyncio.create_task(self._run_stream(graph, initial_state, config, stream_rendering_service))
-
-        #     processed_event = await stream_task
-        # except KeyboardInterrupt:
-        #     await asyncio.sleep(0.2)
-        #     # Cancel the stream task properly
-        #     self.app["log"].info("Agent execution cancelled by user")
-
-        #     if not stream_task.done():
-        #         stream_task.cancel()
-        #     await asyncio.gather(stream_task, return_exceptions=False)
-
-        #     processed_event = None
-        # finally:
-        #     await stream_rendering_service.end_stream()
-
-        # Emit workflow complete event
-        # await self.emit(
-        #     Payload(
-        #         event_type=EventType.WORKFLOW_COMPLETED,
-        #         data={"workflow": workflow.__class__.__name__, "result": processed_event},
-        #     )
-        # )
-
-        # # Create payload with event type
-        # payload = Payload(
-        #     event_type=EventType.POST_AGENT_EXECUTION,
-        #     data={"processed_event": processed_event},
-        # )
-
-        # await self.emit(payload)

@@ -3,20 +3,22 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
-from textual import on
+from langchain.messages import AIMessageChunk
+from textual import getters, on, work
 from textual.app import App, ComposeResult
 from textual.binding import Binding, BindingType
 from textual.containers import VerticalScroll
 from textual.widgets import Footer
 
-from byte import CommandRegistry, EventBus, Events
+from byte import Command, CommandRegistry, EventBus, Events
+from byte.support.utils import extract_content_from_message
 from byte.tui import Messages
 from byte.tui.themes import ThemeRegistry
 from byte.tui.widgets.agent.agent_response_panel import AgentResponsePanel
-from byte.tui.widgets.agent_is_typing import ResponseStatus
 from byte.tui.widgets.bootbox import Bootbox
 from byte.tui.widgets.box.human_message_box import HumanMessageBox
 from byte.tui.widgets.conversation import Conversation
+from byte.tui.widgets.prompt import Prompt
 
 if TYPE_CHECKING:
     from byte import Application
@@ -52,19 +54,15 @@ class ByteTUI(App, inherit_bindings=False):
 
     PAUSE_GC_ON_SCROLL = True
 
+    prompt = getters.query_one("#prompt", Prompt)
+    chat_container = getters.query_one("#chat-container", VerticalScroll)
+    conversation = getters.query_one(Conversation)
+
     def __init__(self, container: Application):
         self.container = container
         self.command_registry = container.make(CommandRegistry)
-
+        self.current_chatbox = None
         super().__init__()
-
-    @property
-    def chat_container(self) -> VerticalScroll:
-        return self.query_one("#chat-container", VerticalScroll)
-
-    @property
-    def conversation(self) -> Conversation:
-        return self.query_one(Conversation)
 
     @property
     def byte(self) -> Application:
@@ -145,7 +143,10 @@ class ByteTUI(App, inherit_bindings=False):
         self.query_one(Conversation).allow_input_submit = False
 
         user_message_chatbox = HumanMessageBox(event.body)
-        self.chat_container.mount(user_message_chatbox)
+        await self.chat_container.mount(user_message_chatbox)
+        self.conversation.scroll_to_latest_message()
+
+        self.post_message(Messages.AgentResponseStarted())
 
         # Check if this is a slash command
         if event.body.startswith("/"):
@@ -161,23 +162,62 @@ class ByteTUI(App, inherit_bindings=False):
             if not command:
                 pass
 
-            agent_message_chatbox = AgentResponsePanel(command, event.body, args)
-            self.chat_container.mount(agent_message_chatbox)
+        self.current_chatbox = AgentResponsePanel()
+        await self.chat_container.mount(self.current_chatbox)
+        self.prompt.toggle_class("hidden")
+
+        self.current_chatbox.heading.toggle_class("hidden")
+        self.current_chatbox.heading.text = "Ask Agent"
+
+        self.handle_command(command, args)
+
+    @work(thread=True, group="handle_command")
+    async def handle_command(self, command: Command, args: str) -> None:
+        await command.handle(args, self.event_handler)
+
+    async def event_handler(self, event) -> None:
+        """Handle and dispatch events for this panel."""
+        self.post_message(event)
 
     @on(Messages.AgentResponseStarted)
     def start_awaiting_response(self) -> None:
         """Prevent sending messages because the agent is typing."""
-        response_status = self.query_one(ResponseStatus)
-        response_status.set_agent_responding()
-        response_status.display = True
+        pass
+        # response_status = self.query_one(ResponseStatus)
+        # response_status.set_agent_responding()
+        # response_status.display = True
 
     @on(Messages.AgentResponseComplete)
     async def agent_response_complete(self, event: Messages.AgentResponseComplete) -> None:
         """Allow the user to send messages again."""
-        self.query_one(ResponseStatus).display = False
-        self.query_one(Conversation).allow_input_submit = True
-        # log.debug(f"Agent response complete. Adding message to chat_id {event.chat_id!r}: {event.message}")
-        # if self.chat_data.id is None:
-        # raise RuntimeError("Chat has no ID. This is likely a bug in Elia.")
+        self.prompt.toggle_class("hidden")
+        self.conversation.scroll_to_latest_message()
+        self.prompt.focus()
+        self.current_chatbox = None
 
-        # await self.chats_manager.add_message_to_chat(chat_id=self.chat_data.id, message=event.message)
+    @on(Messages.CommandStreamChunk)
+    async def handle_stream_chunk(self, event: Messages.CommandStreamChunk) -> None:
+        """Handle streaming chunks for this panel."""
+
+        # TODO: This should be more graceful.
+        assert self.current_chatbox
+
+        # Update UI based on chunk type
+        if event.chunk["type"] == "messages":
+            message_chunk, metadata = event.chunk["data"]
+
+            if isinstance(message_chunk, AIMessageChunk) and message_chunk.content:
+                self.current_chatbox.rune_spinner.display = "none"
+
+                msg = extract_content_from_message(message_chunk)
+                self.current_chatbox.response += msg
+                self.current_chatbox.agent_response_widget.update(self.current_chatbox.response)
+                self.conversation.scroll_to_latest_message()
+
+        elif event.chunk["type"] == "tasks":
+            # await self._update_task_status(event.data)
+            self.byte["log"].info(event.chunk)
+
+    # @on(Messages.AgentResponseFailed)
+    # @on(Messages.AgentResponseStarted)
+    # @on(Messages.AgentResponseComplete)

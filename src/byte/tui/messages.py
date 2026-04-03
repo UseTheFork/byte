@@ -7,7 +7,6 @@ from textual.widget import Widget
 
 if TYPE_CHECKING:
     from byte.tui.schemas import ChatMessage
-    from byte.tui.widgets.chatbox import Chatbox
 
 
 class Messages:
@@ -46,9 +45,7 @@ class Messages:
 
     @dataclass
     class AgentResponseComplete(Message):
-        chat_id: int | None
-        message: ChatMessage
-        chatbox: Chatbox
+        pass
 
     @dataclass
     class AgentResponseFailed(Message):

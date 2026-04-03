@@ -164,6 +164,7 @@ class Question(containers.VerticalGroup, can_focus=True):
 
     DEFAULT_CSS = """
     Question {
+        display: none;
         width: 1fr;
         height: auto;
         padding: 0 1; 
@@ -177,7 +178,6 @@ class Question(containers.VerticalGroup, can_focus=True):
         }        
 
         
-
         #option-container.-blink Option.-active #caret {
             opacity: 0.2;
         }

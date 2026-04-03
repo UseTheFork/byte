@@ -1,11 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from textual.widgets import Static
-
-if TYPE_CHECKING:
-    pass
 
 
 # Credits To https://github.com/charmbracelet/crush/blob/main/internal/tui/components/anim/anim.go
