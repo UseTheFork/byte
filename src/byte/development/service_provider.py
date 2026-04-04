@@ -1,7 +1,7 @@
 from typing import List, Type
 
+from byte import EventBus, Events
 from byte.development import RecordResponseService
-from byte.foundation import EventBus, Events
 from byte.support import Service, ServiceProvider
 
 

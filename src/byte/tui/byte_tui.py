@@ -59,6 +59,7 @@ class ByteTUI(App, inherit_bindings=False):
     def __init__(self, container: Application):
         self.container = container
         self.command_registry = container.make(CommandRegistryService)
+        self.event_bus = self.byte.make(EventBus)
         self.current_chatbox = None
         super().__init__()
 
@@ -129,12 +130,6 @@ class ByteTUI(App, inherit_bindings=False):
         response_chatbox = Bootbox("\n".join(styled_logo) + "\n\n" + "\n".join(messages))
         self.chat_container.mount(response_chatbox)
 
-    @on(Messages.UserInputChanged)
-    async def on_user_input_changed(self, event: Messages.UserInputChanged) -> None:
-        """"""
-        self.byte["log"].info("UserInputChanged")
-        self.byte["log"].info(event)
-
     @on(Messages.UserInputSubmitted)
     async def new_user_message(self, event: Messages.UserInputSubmitted) -> None:
         """Handle a new user message."""
@@ -144,21 +139,12 @@ class ByteTUI(App, inherit_bindings=False):
         await self.chat_container.mount(user_message_chatbox)
         self.conversation.scroll_to_latest_message()
 
-        event_bus = self.byte.make(EventBus)
-
         # TODO: should we make this none blocking?
-        await event_bus.emit(
+        await self.event_bus.emit(
             Events.UserInputSubmitted(
                 event.body,
-                user_message_chatbox,
             )
         )
-
-    # @work(thread=True, group="handle_command")
-    # async def handle_command(self, command: Command, args: str) -> None:
-    #     await command.handle(args, self.event_handler)
-
-    # agent_name: str
 
     async def mount_pending_response_panel(self) -> PendingResponsePanel:
         """Handle and dispatch events for this panel."""
@@ -166,15 +152,3 @@ class ByteTUI(App, inherit_bindings=False):
         await self.chat_container.mount(agent_response_panel)
 
         return agent_response_panel
-
-    async def event_handler(self, event) -> None:
-        """Handle and dispatch events for this panel."""
-        self.post_message(event)
-
-    @on(Messages.AgentResponseComplete)
-    async def agent_response_complete(self, event: Messages.AgentResponseComplete) -> None:
-        """Allow the user to send messages again."""
-        self.prompt.toggle_class("hidden")
-        self.conversation.scroll_to_latest_message()
-        self.prompt.focus()
-        self.current_chatbox = None

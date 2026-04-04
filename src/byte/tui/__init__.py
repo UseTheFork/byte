@@ -8,9 +8,10 @@ if TYPE_CHECKING:
     from byte.tui.schemas import AutocompleteOption
     from byte.tui.service.tui_manager_service import TUIManagerService
     from byte.tui.service_provider import TUIServiceProvider
+    from byte.tui.tui_events import TuiEvents
 
 
-__all__ = ("AutocompleteOption", "ByteTUI", "Messages", "TUIManagerService", "TUIServiceProvider")
+__all__ = ("AutocompleteOption", "ByteTUI", "Messages", "TUIManagerService", "TUIServiceProvider", "TuiEvents")
 
 _dynamic_imports = {
     # keep-sorted start
@@ -19,6 +20,7 @@ _dynamic_imports = {
     "Messages": "messages",
     "TUIManagerService": "service.tui_manager_service",
     "TUIServiceProvider": "service_provider",
+    "TuiEvents": "tui_events",
     # keep-sorted end
 }
 

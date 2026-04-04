@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from byte import ServiceProvider
-from byte.foundation import Console, EventBus, TaskManager
+from byte import EventBus, ServiceProvider
+from byte.foundation import Console, TaskManager
 
 
 class FoundationServiceProvider(ServiceProvider):

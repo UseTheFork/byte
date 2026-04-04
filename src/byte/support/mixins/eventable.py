@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypeVar
 
-from byte.foundation.event_bus import Event, EventBus
+from byte.event.event_bus import Event, EventBus
 
 if TYPE_CHECKING:
     from byte.foundation import Application

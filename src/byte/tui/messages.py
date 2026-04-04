@@ -6,7 +6,7 @@ from textual.message import Message
 from textual.widget import Widget
 
 if TYPE_CHECKING:
-    from byte.tui.schemas import ChatMessage
+    pass
 
 
 class Messages:
@@ -27,55 +27,10 @@ class Messages:
         body: str
         auto_complete: bool = False
 
+    # TODO: Do we need this?
     @dataclass
     class UserInputChanged(Message):
         value: str
-
-    @dataclass
-    class CommandExecutionStarted(Message):
-        command_name: str
-
-    @dataclass
-    class WorkflowStarted(Message):
-        pass
-
-    @dataclass
-    class AgentResponseStarted(Message):
-        agent: str
-
-    @dataclass
-    class AgentResponseStreamChunk(Message):
-        chunk: dict
-
-    @dataclass
-    class AgentResponseComplete(Message):
-        pass
-
-    @dataclass
-    class WorkflowComplete(Message):
-        pass
-
-    @dataclass
-    class AIMessageChunk(Message):
-        chunk: str
-
-    @dataclass
-    class AgentResponseFailed(Message):
-        """Sent when the agent fails to respond e.g. cant connect.
-        Can be used to reset UI state."""
-
-        last_message: ChatMessage
-
-    @dataclass
-    class NewUserMessage(Message):
-        content: str
-
-    @dataclass
-    class HistoryMove(Message):
-        """Getting a new item form history."""
-
-        direction: Literal[-1, +1]
-        body: str
 
     @dataclass
     class Flash(Message):

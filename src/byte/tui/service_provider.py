@@ -17,8 +17,8 @@ class TUIServiceProvider(ServiceProvider):
         tui_manager_service = self.app.make(TUIManagerService)
 
         event_bus.on(
-            Events.TuiMessage,
-            tui_manager_service.route_message,
+            Events.TuiEvent,
+            tui_manager_service.route_event,
         )
         event_bus.on(
             Events.UserInputSubmitted,

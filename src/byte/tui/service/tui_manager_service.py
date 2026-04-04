@@ -1,6 +1,6 @@
 from byte import CommandRegistryService, Events
 from byte.support import Service
-from byte.tui import ByteTUI, Messages
+from byte.tui import ByteTUI, TuiEvents
 
 
 class TUIManagerService(Service):
@@ -24,14 +24,14 @@ class TUIManagerService(Service):
         self.current_agent_panel = await self.tui.mount_pending_response_panel()
         self.tui.chat_container.refresh(layout=True)
 
-    async def _update_pending_response_header(self, event: Messages.AgentResponseStarted):
+    async def _update_pending_response_header(self, event: TuiEvents.AgentResponseStarted):
         assert self.current_agent_panel
 
         self.current_agent_panel.heading.toggle_class("hidden")
         self.current_agent_panel.heading.text = event.agent
         self.tui.chat_container.refresh(layout=True)
 
-    async def _handle_ai_message_chunk(self, event: Messages.AIMessageChunk):
+    async def _handle_ai_message_chunk(self, event: TuiEvents.AIMessageChunk):
         # TODO: need to assert here.
         assert self.current_agent_panel
 
@@ -40,13 +40,13 @@ class TUIManagerService(Service):
         self.tui.conversation.scroll_to_latest_message()
         # current_chatbox.agent_response_widget.update(self.current_chatbox.response)
 
-    async def route_message(self, event: Events.TuiMessage):
-        if isinstance(event.message, Messages.WorkflowStarted):
+    async def route_event(self, event: Events.TuiEvent):
+        if isinstance(event.event, TuiEvents.WorkflowStarted):
             await self._create_pending_response_panel()
-        elif isinstance(event.message, Messages.AgentResponseStarted):
-            await self._update_pending_response_header(event.message)
-        elif isinstance(event.message, Messages.AIMessageChunk):
-            await self._handle_ai_message_chunk(event.message)
+        elif isinstance(event.event, TuiEvents.AgentResponseStarted):
+            await self._update_pending_response_header(event.event)
+        elif isinstance(event.event, TuiEvents.AIMessageChunk):
+            await self._handle_ai_message_chunk(event.event)
 
         # # TODO: We need a fallback on to coder command here.
 
