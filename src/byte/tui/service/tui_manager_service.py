@@ -23,10 +23,6 @@ class TUIManagerService(Service):
     async def _create_pending_panel(self):
         self.pending_panel = await self.tui.mount_pending_response_panel()
 
-    async def _handle_ai_message_chunk(self, event: TuiEvents.ResponseChunk):
-        # TODO: need to assert here.
-        assert self.pending_panel
-
         # self.pending_panel.rune_spinner.display = "none"
         # self.pending_panel.agent_response_widget.update(event.chunk)
         # self.tui.conversation.scroll_to_latest_message()
@@ -35,19 +31,20 @@ class TUIManagerService(Service):
     async def route_event(self, event: Events.TuiEvent):
         tui_event = event.event
 
-        if self.pending_panel is None:
-            await self._create_pending_panel()
-
         if isinstance(tui_event, TuiEvents.CommandExecutionStarted):
             await self._create_pending_panel()
-        elif isinstance(tui_event, TuiEvents.AddHeading):
-            await self.pending_panel.add_heading(tui_event.heading)  # ty:ignore[possibly-missing-attribute]
+            return
+
+        assert self.pending_panel is not None, "TuiEvents.CommandExecutionStarted() must be emitted first."
+
+        if isinstance(tui_event, TuiEvents.AddHeading):
+            await self.pending_panel.add_heading(tui_event.heading)
         elif isinstance(tui_event, TuiEvents.ResponseStarted):
-            await self.pending_panel.start_markdown_stream()  # ty:ignore[possibly-missing-attribute]
+            await self.pending_panel.start_markdown_stream()
         elif isinstance(tui_event, TuiEvents.ResponseChunk):
-            await self.pending_panel.add_markdown_chunk(tui_event.chunk)  # ty:ignore[possibly-missing-attribute]
+            await self.pending_panel.add_markdown_chunk(tui_event.chunk)
         elif isinstance(tui_event, TuiEvents.ResponseComplete):
-            await self.pending_panel.end_markdown_stream()  # ty:ignore[possibly-missing-attribute]
+            await self.pending_panel.end_markdown_stream()
         # # TODO: We need a fallback on to coder command here.
 
     async def _handle_command_input(self, user_input: str):

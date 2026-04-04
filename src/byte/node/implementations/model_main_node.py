@@ -28,7 +28,7 @@ class ModelMainNode(ModelBaseNode):
         runnable = self._create_runnable(llm_service.get_main_model(), runtime.context)
 
         event_bus = self.app.make(EventBus)
-        await event_bus.emit(Events.TuiEvent(TuiEvents.AddHeading(runtime.context.agent)))
+        await event_bus.emit(Events.TuiEvent(TuiEvents.AddHeading(runtime.context.agent, "text-primary")))
         await event_bus.emit(Events.TuiEvent(TuiEvents.ResponseStarted()))
 
         result = await runnable.ainvoke(agent_state, config=config)

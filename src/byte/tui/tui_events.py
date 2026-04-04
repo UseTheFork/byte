@@ -20,6 +20,7 @@ class TuiEvents:
     @dataclass
     class AddHeading(Event):
         heading: str
+        classes: str = "text-muted"
 
     @dataclass
     class ResponseStarted(Event):

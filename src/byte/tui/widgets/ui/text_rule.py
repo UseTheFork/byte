@@ -16,7 +16,6 @@ class TextRule(Static, can_focus=False):
     TextRule {
         height: 1;
         width: 100%;
-        color: $text-muted;
     }
     """
 

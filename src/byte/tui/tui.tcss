@@ -272,6 +272,7 @@ HumanMessagePanel {
 .text-primary {color: $primary;}
 .text-secondary {color: $secondary;}
 .text-accent {color: $accent;}
+.text-muted {color: $text-muted;}
 
 
 # .text-primary {color: $text-primary;}
