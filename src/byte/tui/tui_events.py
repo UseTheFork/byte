@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from textual.widget import Widget
-
 from byte.event import Event
 
 if TYPE_CHECKING:
@@ -12,16 +10,32 @@ if TYPE_CHECKING:
 # Sub events that specifically have to do with the TUI
 class TuiEvents:
     @dataclass
-    class PromptSuggestion(Event):
-        suggestion: str
+    class CommandExecutionStarted(Event):
+        pass
 
     @dataclass
-    class Dismiss(Event):
-        widget: Widget
+    class CommandExecutionCompleted(Event):
+        pass
 
-        @property
-        def control(self) -> Widget:
-            return self.widget
+    @dataclass
+    class AddHeading(Event):
+        heading: str
+
+    @dataclass
+    class ResponseStarted(Event):
+        pass
+
+    @dataclass
+    class ResponseChunk(Event):
+        chunk: str
+
+    @dataclass
+    class ResponseComplete(Event):
+        pass
+
+    @dataclass
+    class PromptSuggestion(Event):
+        suggestion: str
 
     @dataclass
     class UserInputSubmitted(Event):
@@ -31,34 +45,6 @@ class TuiEvents:
     @dataclass
     class UserInputChanged(Event):
         value: str
-
-    @dataclass
-    class CommandExecutionStarted(Event):
-        command_name: str
-
-    @dataclass
-    class WorkflowStarted(Event):
-        pass
-
-    @dataclass
-    class AgentResponseStarted(Event):
-        agent: str
-
-    @dataclass
-    class AgentResponseStreamChunk(Event):
-        chunk: dict
-
-    @dataclass
-    class AgentResponseComplete(Event):
-        pass
-
-    @dataclass
-    class WorkflowComplete(Event):
-        pass
-
-    @dataclass
-    class AIMessageChunk(Event):
-        chunk: str
 
     @dataclass
     class AgentResponseFailed(Event):

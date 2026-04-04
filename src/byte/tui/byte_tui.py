@@ -15,7 +15,7 @@ from byte.tui.themes import ThemeRegistry
 from byte.tui.widgets.bootbox import Bootbox
 from byte.tui.widgets.conversation import Conversation
 from byte.tui.widgets.panels.human_message_panel import HumanMessagePanel
-from byte.tui.widgets.panels.pending_response_panel import PendingResponsePanel
+from byte.tui.widgets.panels.pending_panel import PendingPanel
 from byte.tui.widgets.prompt.prompt import Prompt
 
 if TYPE_CHECKING:
@@ -146,9 +146,11 @@ class ByteTUI(App, inherit_bindings=False):
             )
         )
 
-    async def mount_pending_response_panel(self) -> PendingResponsePanel:
+    async def mount_pending_response_panel(self) -> PendingPanel:
         """Handle and dispatch events for this panel."""
-        agent_response_panel = PendingResponsePanel()
+        agent_response_panel = PendingPanel()
         await self.chat_container.mount(agent_response_panel)
+
+        self.chat_container.refresh(layout=True)
 
         return agent_response_panel

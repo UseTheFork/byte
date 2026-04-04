@@ -2,7 +2,7 @@ import argparse
 from argparse import Namespace
 
 from byte import ByteArgumentParser, Command, EventBus, Events
-from byte.tui import Messages
+from byte.tui import TuiEvents
 from byte.workflow import AskWorkflow, WorkflowService
 
 
@@ -40,7 +40,9 @@ class AskCommand(Command):
 
         ask_workflow = self.app.make(AskWorkflow)
         event_bus = self.app.make(EventBus)
-        await event_bus.emit(Events.TuiMessage(Messages.WorkflowStarted()))
+        await event_bus.emit(Events.TuiEvent(TuiEvents.CommandExecutionStarted()))
 
         workflow_service = self.app.make(WorkflowService)
         await workflow_service.execute(ask_workflow, raw_args)
+
+        await event_bus.emit(Events.TuiEvent(TuiEvents.CommandExecutionCompleted()))

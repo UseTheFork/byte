@@ -8,7 +8,7 @@ from byte import EventBus, Events
 from byte.llm import LLMService
 from byte.node import ModelBaseNode
 from byte.orchestration import AssistantContextSchema, BaseState
-from byte.tui import Messages
+from byte.tui import TuiEvents
 
 
 class ModelMainNode(ModelBaseNode):
@@ -28,12 +28,13 @@ class ModelMainNode(ModelBaseNode):
         runnable = self._create_runnable(llm_service.get_main_model(), runtime.context)
 
         event_bus = self.app.make(EventBus)
-        await event_bus.emit(Events.TuiMessage(Messages.AgentResponseStarted(runtime.context.agent)))
+        await event_bus.emit(Events.TuiEvent(TuiEvents.AddHeading(runtime.context.agent)))
+        await event_bus.emit(Events.TuiEvent(TuiEvents.ResponseStarted()))
 
         result = await runnable.ainvoke(agent_state, config=config)
         # await record_response_service.record_response(agent_state, runnable, runtime, config)
 
-        await event_bus.emit(Events.TuiMessage(Messages.AgentResponseComplete()))
+        await event_bus.emit(Events.TuiEvent(TuiEvents.ResponseComplete()))
 
         if result.tool_calls and len(result.tool_calls) > 0:
             return self.route_to("tool_node", {"scratch_messages": [result], "errors": None})

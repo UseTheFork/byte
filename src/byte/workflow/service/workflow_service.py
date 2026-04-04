@@ -7,7 +7,7 @@ from byte import EventBus, Events, Service
 from byte.analytics import AgentAnalyticsService
 from byte.orchestration import TokenUsageSchema
 from byte.support.utils import extract_content_from_message
-from byte.tui import Messages
+from byte.tui import TuiEvents
 from byte.workflow import BaseWorkflow
 
 
@@ -58,8 +58,7 @@ class WorkflowService(Service):
 
             if isinstance(message_chunk, AIMessageChunk) and message_chunk.content:
                 msg = extract_content_from_message(message_chunk)
-                self.current_msg += msg
-                await self.event_bus.emit(Events.TuiMessage(Messages.AIMessageChunk(self.current_msg)))
+                await self.event_bus.emit(Events.TuiEvent(TuiEvents.ResponseChunk(msg)))
 
             # result = tui.post_message(
             #     Messages.CommandStreamChunk(panel_id=self.panel_id, chunk_type="message", data=chunk["data"])

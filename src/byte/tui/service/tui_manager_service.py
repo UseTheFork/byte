@@ -15,39 +15,39 @@ class TUIManagerService(Service):
         """
         self.tui = ByteTUI(container=self.app)
         self.command_registry = self.app.make(CommandRegistryService)
-        self.current_agent_panel = None
+        self.pending_panel = None
 
     async def run_async(self):
         await self.tui.run_async()
 
-    async def _create_pending_response_panel(self):
-        self.current_agent_panel = await self.tui.mount_pending_response_panel()
-        self.tui.chat_container.refresh(layout=True)
+    async def _create_pending_panel(self):
+        self.pending_panel = await self.tui.mount_pending_response_panel()
 
-    async def _update_pending_response_header(self, event: TuiEvents.AgentResponseStarted):
-        assert self.current_agent_panel
-
-        self.current_agent_panel.heading.toggle_class("hidden")
-        self.current_agent_panel.heading.text = event.agent
-        self.tui.chat_container.refresh(layout=True)
-
-    async def _handle_ai_message_chunk(self, event: TuiEvents.AIMessageChunk):
+    async def _handle_ai_message_chunk(self, event: TuiEvents.ResponseChunk):
         # TODO: need to assert here.
-        assert self.current_agent_panel
+        assert self.pending_panel
 
-        self.current_agent_panel.rune_spinner.display = "none"
-        self.current_agent_panel.agent_response_widget.update(event.chunk)
-        self.tui.conversation.scroll_to_latest_message()
+        # self.pending_panel.rune_spinner.display = "none"
+        # self.pending_panel.agent_response_widget.update(event.chunk)
+        # self.tui.conversation.scroll_to_latest_message()
         # current_chatbox.agent_response_widget.update(self.current_chatbox.response)
 
     async def route_event(self, event: Events.TuiEvent):
-        if isinstance(event.event, TuiEvents.WorkflowStarted):
-            await self._create_pending_response_panel()
-        elif isinstance(event.event, TuiEvents.AgentResponseStarted):
-            await self._update_pending_response_header(event.event)
-        elif isinstance(event.event, TuiEvents.AIMessageChunk):
-            await self._handle_ai_message_chunk(event.event)
+        tui_event = event.event
 
+        if self.pending_panel is None:
+            await self._create_pending_panel()
+
+        if isinstance(tui_event, TuiEvents.CommandExecutionStarted):
+            await self._create_pending_panel()
+        elif isinstance(tui_event, TuiEvents.AddHeading):
+            await self.pending_panel.add_heading(tui_event.heading)  # ty:ignore[possibly-missing-attribute]
+        elif isinstance(tui_event, TuiEvents.ResponseStarted):
+            await self.pending_panel.start_markdown_stream()  # ty:ignore[possibly-missing-attribute]
+        elif isinstance(tui_event, TuiEvents.ResponseChunk):
+            await self.pending_panel.add_markdown_chunk(tui_event.chunk)  # ty:ignore[possibly-missing-attribute]
+        elif isinstance(tui_event, TuiEvents.ResponseComplete):
+            await self.pending_panel.end_markdown_stream()  # ty:ignore[possibly-missing-attribute]
         # # TODO: We need a fallback on to coder command here.
 
     async def _handle_command_input(self, user_input: str):
@@ -78,5 +78,9 @@ class TUIManagerService(Service):
 
     async def handle_user_message(self, event: Events.UserInputSubmitted):
         user_input = event.message
+
+        # User Messages are always our primary entrypoint. As a result we always create a pending panel here and mount it empty.
+        #
+
         if user_input.startswith("/"):
             await self._handle_command_input(event.message)

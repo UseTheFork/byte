@@ -1,10 +1,25 @@
-from __future__ import annotations
-
-from textual.app import RenderResult
-from textual.widget import Widget
+from rich.console import RenderableType
+from textual.widgets import Static
 
 
-class Bootbox(Widget, can_focus=False):
+class Bootbox(Static):
+    #     MESSAGE = """
+    # To get started, type a message in the box at the top of the
+    # screen and press [b u]ctrl+j[/] or [b u]alt+enter[/] to send it.
+
+    # Change the model and system prompt by pressing [b u]ctrl+o[/].
+
+    # Make sure you've set any required API keys first (e.g. [b]OPENAI_API_KEY[/])!
+
+    # If you have any issues or feedback, please let me know [@click='open_issues'][b r]on GitHub[/][/]!
+
+    # Finally, please consider starring the repo and sharing it with your friends and colleagues!
+
+    # [@click='open_repo'][b r]https://github.com/darrenburns/elia[/][/]
+    # """
+
+    #     BORDER_TITLE = "Welcome to Byte!"
+
     DEFAULT_CSS = """
     Bootbox {
         height: auto;
@@ -33,5 +48,5 @@ class Bootbox(Widget, can_focus=False):
         )
         self.message = message
 
-    def render(self) -> RenderResult:
+    def render(self) -> RenderableType:
         return self.message

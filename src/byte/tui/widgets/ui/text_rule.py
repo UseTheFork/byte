@@ -2,11 +2,10 @@ from __future__ import annotations
 
 from rich.console import RenderableType
 from rich.text import Text
-from textual.reactive import reactive
-from textual.widget import Widget
+from textual.widgets import Static
 
 
-class TextRule(Widget, can_focus=False):
+class TextRule(Static, can_focus=False):
     """A horizontal rule with text on the left side.
 
     Example:
@@ -21,10 +20,9 @@ class TextRule(Widget, can_focus=False):
     }
     """
 
-    text = reactive("")
-
     def __init__(
         self,
+        text: str = "",
         rule_char: str = "─",
         *,
         name: str | None = None,
@@ -38,6 +36,7 @@ class TextRule(Widget, can_focus=False):
             classes=classes,
             disabled=disabled,
         )
+        self.text = text
         self.rule_char = rule_char
 
     def render(self) -> RenderableType:
