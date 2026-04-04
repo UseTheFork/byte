@@ -6,8 +6,8 @@ from textual.widget import Widget
 from textual.widgets import Label
 
 
-class HumanMessageBox(Widget, can_focus=False):
-    PROMPT_AI = Content.styled("❯", "$text-secondary")  # noqa: RUF001
+class HumanMessagePanel(Widget, can_focus=False):
+    PROMPT_AI = Content.styled("❯", "$secondary")  # noqa: RUF001
 
     def __init__(
         self,

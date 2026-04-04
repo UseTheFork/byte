@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
-from textual import on
+from textual import getters, on
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import VerticalScroll
@@ -13,8 +13,8 @@ from textual.widget import Widget
 
 from byte.tui import Messages
 from byte.tui.widgets.chatbox import Chatbox
-from byte.tui.widgets.flash import Flash
-from byte.tui.widgets.prompt import Prompt
+from byte.tui.widgets.prompt.flash import Flash
+from byte.tui.widgets.prompt.prompt import Prompt
 
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
@@ -48,6 +48,8 @@ class Conversation(Widget):
     # Used to lock the chat input while the agent is responding.
     allow_input_submit = reactive(True)
 
+    chat_container = getters.query_one("#chat-container", VerticalScroll)
+
     def __init__(
         self,
         # chat_data: ChatData,
@@ -60,10 +62,6 @@ class Conversation(Widget):
         with VerticalScroll(id="chat-container") as vertical_scroll:
             vertical_scroll.can_focus = False
         yield Prompt(id="prompt")
-
-    @property
-    def chat_container(self) -> VerticalScroll:
-        return self.query_one("#chat-container", VerticalScroll)
 
     @on(Messages.Flash)
     def on_flash(self, event: Messages.Flash) -> None:

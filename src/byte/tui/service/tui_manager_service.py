@@ -1,84 +1,82 @@
-import datetime
-
-from langchain.messages import AIMessage, HumanMessage
-
+from byte import CommandRegistry, Events
 from byte.support import Service
-from byte.tui.schemas import ChatMessage
-from byte.tui.widgets.chatbox import Chatbox
+from byte.tui import ByteTUI, Messages
 
 
 class TUIManagerService(Service):
-    """Manages chatbox creation and mounting for agent responses in a single conversation.
+    """ """
 
-    Provides a centralized service for creating and managing chatbox widgets during
-    workflow execution. Handles both user messages and agent responses, allowing
-    workflows to append content to the chat container without tight coupling to the UI.
-    Usage: `chatbox = await manager.create_agent_message("CoderAgent")`
-    """
+    # Manages the Textual TUI entrypoint etc.
 
     def boot(self) -> None:
         """Initialize the chatbox manager with empty state.
 
         Usage: Called automatically during service container boot process
         """
-        self.chat_container = None
+        self.tui = ByteTUI(container=self.app)
+        self.command_registry = self.app.make(CommandRegistry)
+        self.current_agent_panel = None
 
-    def register_container(self, container):
-        """Register the chat container for mounting chatboxes.
+    async def run_async(self):
+        await self.tui.run_async()
 
-        Args:
-            container: The VerticalScroll container from the Chat widget
+    async def _create_pending_response_panel(self):
+        self.current_agent_panel = await self.tui.mount_pending_response_panel()
+        self.tui.chat_container.refresh(layout=True)
 
-        Usage: Called by Chat widget on mount to register the container
-        """
-        self.chat_container = container
+    async def _update_pending_response_header(self, event: Messages.AgentResponseStarted):
+        assert self.current_agent_panel
 
-    async def create_user_message(self, content: str):
-        """Create and mount a user message chatbox.
+        self.current_agent_panel.heading.toggle_class("hidden")
+        self.current_agent_panel.heading.text = event.agent
+        self.tui.chat_container.refresh(layout=True)
 
-        Args:
-            content: The user's message text
+    async def _handle_ai_message_chunk(self, event: Messages.AIMessageChunk):
+        # TODO: need to assert here.
+        assert self.current_agent_panel
 
-        Returns:
-            The mounted Chatbox widget
+        self.current_agent_panel.rune_spinner.display = "none"
+        self.current_agent_panel.agent_response_widget.update(event.chunk)
+        self.tui.conversation.scroll_to_latest_message()
+        # current_chatbox.agent_response_widget.update(self.current_chatbox.response)
 
-        Usage: `chatbox = await manager.create_user_message("Hello")`
-        """
-        message = ChatMessage(HumanMessage(content), datetime.datetime.now(datetime.UTC))
-        chatbox = Chatbox(message)
+    async def route_message(self, event: Events.TuiMessage):
+        if isinstance(event.message, Messages.WorkflowStarted):
+            await self._create_pending_response_panel()
+        elif isinstance(event.message, Messages.AgentResponseStarted):
+            await self._update_pending_response_header(event.message)
+        elif isinstance(event.message, Messages.AIMessageChunk):
+            await self._handle_ai_message_chunk(event.message)
 
-        if self.chat_container:
-            await self.chat_container.mount(chatbox)
+        # # TODO: We need a fallback on to coder command here.
 
-        return chatbox
-
-    async def create_agent_message(self, agent_name: str):
-        """Create and mount an agent response chatbox with initially empty content.
-
-        Args:
-            agent_name: Name of the agent for the chatbox border title
-
-        Returns:
-            The mounted Chatbox widget
-
-        Usage: `chatbox = await manager.create_agent_message("CoderAgent")`
-        """
-        message = ChatMessage(AIMessage(content=""), datetime.datetime.now(datetime.UTC))
-        chatbox = Chatbox(message)
-        chatbox.border_title = agent_name
-
-        if self.chat_container:
-            await self.chat_container.mount(chatbox)
-
-        return chatbox
-
-    async def append_to_chatbox(self, chatbox: Chatbox, content: str):
-        """Append content to an existing chatbox.
+    async def _handle_command_input(self, user_input: str):
+        """Parse and execute slash commands.
 
         Args:
-            chatbox: The chatbox widget to update
-            content: The content to append
+                user_input: Raw user input starting with /
 
-        Usage: `await manager.append_to_chatbox(chatbox, "new text")`
+        Usage: Called internally when user input starts with /
         """
-        chatbox.append_chunk(content)
+        # Parse command name and args
+        parts = user_input[1:].split(" ", 1)  # Remove "/" and split
+        command_name = parts[0]
+        args = parts[1] if len(parts) > 1 else ""
+
+        # console = self.app["console"]
+
+        # Get command registry and execute
+        command_registry = self.app.make(CommandRegistry)
+        command = command_registry.get_slash_command(command_name)
+
+        if command:
+            await command.handle(args)
+        else:
+            pass
+            # TODO: This should flash an error
+            # console.print_error(f"Unknown command: /{command_name}")
+
+    async def handle_user_message(self, event: Events.UserInputSubmitted):
+        user_input = event.message
+        if user_input.startswith("/"):
+            await self._handle_command_input(event.message)

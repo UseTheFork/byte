@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 from textual import getters
 from textual.app import ComposeResult
 from textual.containers import VerticalGroup
-from textual.reactive import var
 from textual.widgets import Markdown
 
 from byte.tui.widgets.ui.rune_spinner import RuneSpinner
@@ -15,7 +14,7 @@ if TYPE_CHECKING:
     from byte.tui import ByteTUI
 
 
-class AgentResponsePanel(VerticalGroup):
+class PendingResponsePanel(VerticalGroup):
     BINDINGS = []
 
     app: ByteTUI
@@ -23,8 +22,6 @@ class AgentResponsePanel(VerticalGroup):
     rune_spinner = getters.query_one("#rune_spinner", RuneSpinner)
     heading = getters.query_one(TextRule)
     agent_response_widget = getters.query_one("#agent_response", Markdown)
-
-    response: var[str] = var("")
 
     def __init__(
         self,

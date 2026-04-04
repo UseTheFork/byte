@@ -1,16 +1,22 @@
-from typing import Any, Callable, Literal, Optional
+from typing import Any, Literal, Optional
 
+from langchain.messages import AIMessageChunk
 from langchain_core.callbacks import get_usage_metadata_callback
 
-from byte import Service
+from byte import EventBus, Events, Service
 from byte.analytics import AgentAnalyticsService
 from byte.orchestration import TokenUsageSchema
-from byte.tui import ByteTUI, Messages
+from byte.support.utils import extract_content_from_message
+from byte.tui import Messages
 from byte.workflow import BaseWorkflow
 
 
 class WorkflowService(Service):
     """Service for executing workflows with compiled graphs."""
+
+    def boot(self) -> None:
+        self.event_bus = self.app.make(EventBus)
+        self.current_msg = ""
 
     async def _track_token_usage(self, usage_metadata: dict, mode: str) -> None:
         """Track token usage from callback metadata and update analytics.
@@ -46,18 +52,23 @@ class WorkflowService(Service):
                 mode: The stream mode ("values", "updates", "messages", or "custom")
                 chunk: The data chunk from that stream mode
         """
-        # stream_rendering_service = self.app.make(StreamRenderingService)
-        tui = self.app.make(ByteTUI)
 
         if chunk["type"] == "messages":
-            self.app["log"].info(chunk)
-            result = tui.post_message(
-                Messages.CommandStreamChunk(panel_id=self.panel_id, chunk_type="message", data=chunk["data"])
-            )
-            self.app["log"].info(result)
+            message_chunk, metadata = chunk["data"]
+
+            if isinstance(message_chunk, AIMessageChunk) and message_chunk.content:
+                msg = extract_content_from_message(message_chunk)
+                self.current_msg += msg
+                await self.event_bus.emit(Events.TuiMessage(Messages.AIMessageChunk(self.current_msg)))
+
+            # result = tui.post_message(
+            #     Messages.CommandStreamChunk(panel_id=self.panel_id, chunk_type="message", data=chunk["data"])
+            # )
+            # self.app["log"].info(result)
 
         elif chunk["type"] == "tasks":
-            tui.post_message(Messages.CommandStreamChunk(panel_id=self.panel_id, chunk_type="task", data=chunk["data"]))
+            pass
+            # tui.post_message(Messages.CommandStreamChunk(panel_id=self.panel_id, chunk_type="task", data=chunk["data"]))
 
         # # self.app["log"].debug(mode)
         # self.app["log"].debug(chunk)
@@ -89,7 +100,6 @@ class WorkflowService(Service):
         self,
         workflow: BaseWorkflow,
         request: str,
-        event_handler: Callable,
         thread_id: Optional[str] = None,
         display_mode: Literal["verbose", "thinking", "silent"] = "verbose",
     ):
@@ -103,8 +113,7 @@ class WorkflowService(Service):
         Usage: `await workflow_service.execute(ask_workflow, "How do I...?")`
         """
         graph, initial_state, config = await workflow.compile(request, thread_id)
-
-        self.event_handler = event_handler
+        self.current_msg = ""
 
         # TODO: Do we need this?
         # Emit workflow start event
@@ -124,11 +133,12 @@ class WorkflowService(Service):
                 version="v2",
                 subgraphs=True,
             ):
-                processed_event = await self.event_handler(Messages.CommandStreamChunk(chunk))
-                # processed_event = await self._handle_stream_event(chunk)
+                processed_event = await self._handle_stream_event(chunk)
+
+            # await event_bus.emit(Events.TextualMessageReceived(Messages.AgentResponseComplete()))
 
             # TODO: need to use `processed_event` to figure out what mode we are in.
             await self._track_token_usage(usage_metadata_callback.usage_metadata, "main")
 
-        await self.event_handler(Messages.AgentResponseComplete())
+        # await self.event_handler(Messages.AgentResponseComplete())
         return processed_event

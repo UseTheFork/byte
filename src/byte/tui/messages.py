@@ -36,16 +36,28 @@ class Messages:
         command_name: str
 
     @dataclass
-    class CommandStreamChunk(Message):
-        chunk: dict
+    class WorkflowStarted(Message):
+        pass
 
     @dataclass
     class AgentResponseStarted(Message):
-        pass
+        agent: str
+
+    @dataclass
+    class AgentResponseStreamChunk(Message):
+        chunk: dict
 
     @dataclass
     class AgentResponseComplete(Message):
         pass
+
+    @dataclass
+    class WorkflowComplete(Message):
+        pass
+
+    @dataclass
+    class AIMessageChunk(Message):
+        chunk: str
 
     @dataclass
     class AgentResponseFailed(Message):

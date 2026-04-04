@@ -323,22 +323,3 @@ class Question(containers.VerticalGroup, can_focus=True):
         self._reset_blink()
         if not self.selected:
             self.selection = event.index
-
-
-if __name__ == "__main__":
-    from textual.app import App
-    from textual.widgets import Footer
-
-    OPTIONS = [
-        Answer("Yes, allow once", "proceed_always", kind="allow_once"),
-        Answer("Yes, allow always", "allow_always", kind="allow_always"),
-        Answer("Modify with external editor", "modify", kind="allow_once"),
-        Answer("No, suggest changes (esc)", "reject"),
-    ]
-
-    class QuestionApp(App):
-        def compose(self) -> ComposeResult:
-            yield Question("Apply this change?", OPTIONS)
-            yield Footer()
-
-    QuestionApp().run()

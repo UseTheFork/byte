@@ -1,9 +1,9 @@
 import argparse
 from argparse import Namespace
-from typing import Callable
 
-from byte import Command
+from byte import Command, EventBus, Events
 from byte.cli import ByteArgumentParser
+from byte.tui import Messages
 from byte.workflow import AskWorkflow, WorkflowService
 
 
@@ -32,7 +32,7 @@ class AskCommand(Command):
         parser.add_argument("ask_query", nargs=argparse.REMAINDER, help="The user's question or query text")
         return parser
 
-    async def execute(self, args: Namespace, raw_args: str, event_handler: Callable) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute the Ask agent with the provided user query.
 
         Processes the user's question through the agent service, which handles
@@ -40,6 +40,8 @@ class AskCommand(Command):
         """
 
         ask_workflow = self.app.make(AskWorkflow)
+        event_bus = self.app.make(EventBus)
+        await event_bus.emit(Events.TuiMessage(Messages.WorkflowStarted()))
 
         workflow_service = self.app.make(WorkflowService)
-        await workflow_service.execute(ask_workflow, raw_args, event_handler)
+        await workflow_service.execute(ask_workflow, raw_args)

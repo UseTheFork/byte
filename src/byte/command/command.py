@@ -1,7 +1,7 @@
 import argparse
 from abc import ABC, abstractmethod
 from argparse import Namespace
-from typing import TYPE_CHECKING, Callable, List
+from typing import TYPE_CHECKING, List
 
 from byte.cli import ByteArgumentParser
 from byte.support.mixins import Bootable, UserInteractive
@@ -58,7 +58,7 @@ class Command(ABC, Bootable, UserInteractive):
         """
         pass
 
-    async def handle(self, args: str, event_handler: Callable) -> None:
+    async def handle(self, args: str) -> None:
         """Parse and execute the command with the provided arguments.
 
         Parses the raw argument string using the command's parser, handles
@@ -79,10 +79,10 @@ class Command(ABC, Bootable, UserInteractive):
             console.print_error_panel(parser.format_help(), title="Invalid Command Arguments")
             return
 
-        return await self.execute(parsed_args, args, event_handler)
+        return await self.execute(parsed_args, args)
 
     @abstractmethod
-    async def execute(self, args: Namespace, raw_args: str, event_handler: Callable) -> None:
+    async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute the command with provided arguments.
 
         Args:

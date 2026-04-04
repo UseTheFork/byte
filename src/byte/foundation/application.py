@@ -403,13 +403,12 @@ class Application(Container):
 
         Usage: `await app.run()` -> starts interactive session until KeyboardInterrupt
         """
-        from byte.tui.byte_tui import ByteTUI
+        from byte.tui import TUIManagerService
 
         try:
-            self.singleton(ByteTUI, lambda: ByteTUI(container=self))
-            textual_app = self.make(ByteTUI)
+            tui = self.make(TUIManagerService)
 
-            await textual_app.run_async()
+            await tui.run_async()
         except Exception:
             return 2
 

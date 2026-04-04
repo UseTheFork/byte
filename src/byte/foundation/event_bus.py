@@ -5,11 +5,13 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Awaitable, Callable, Dict, List, TypeVar, Union
 
 from langchain_core.runnables import RunnableConfig
+from textual.message import Message
 
 from byte.orchestration import BaseState
 
 if TYPE_CHECKING:
     from byte.foundation import Application
+    from byte.tui.widgets.box.human_message_box import HumanMessageBox
 
 
 # class EventType(str, Enum):
@@ -78,7 +80,8 @@ class Events:
     class UserInputSubmitted(Event):
         """Event emitted when user submits input."""
 
-        messages: str
+        message: str
+        chatbox: HumanMessageBox
 
     @dataclass
     class PostBoot(Event):
@@ -128,6 +131,12 @@ class Events:
         conventions: list[str] = field(default_factory=list)
         session_docs: list[str] = field(default_factory=list)
         system_context: list[str] = field(default_factory=list)
+
+    @dataclass
+    class TuiMessage(Event):
+        """Event emitted when a Textual message needs to be displayed in the TUI."""
+
+        message: Message
 
 
 class EventBus:

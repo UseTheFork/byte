@@ -225,14 +225,16 @@ Conversation {
 }
 
 
-HumanMessageBox {
+HumanMessagePanel {
   height: auto;
   width: auto;
   min-width: 12;
   max-width: 1fr;
-  margin: 0 1;
+  padding: 1;
+  margin-bottom:1;
+  margin-right:1;
 
-  background: $background 20%;
+  background: $panel;
 
   & .message {
     padding-left: 2;

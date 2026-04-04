@@ -13,10 +13,9 @@ from textual.widgets import Label, TextArea
 from textual.widgets.text_area import Selection
 
 from byte.tui import Messages
-from byte.tui.widgets.flash import Flash
-from byte.tui.widgets.highlighted_textarea import HighlightedTextArea
-from byte.tui.widgets.question import Ask, Question
-from byte.tui.widgets.text_area_auto_complete import TextAreaAutoComplete
+from byte.tui.widgets.prompt.flash import Flash
+from byte.tui.widgets.prompt.question import Ask, Question
+from byte.tui.widgets.ui.text_area_auto_complete import TextAreaAutoComplete
 
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
@@ -238,11 +237,11 @@ class Prompt(containers.VerticalGroup):
         if self._ask is not None:
             self.question.focus()
         else:
-            self.query(HighlightedTextArea).focus()
+            self.query(PromptTextArea).focus()
         return self
 
     def append(self, text: str) -> None:
-        self.query_one(HighlightedTextArea).insert(text, maintain_selection_offset=False)
+        self.query_one(PromptTextArea).insert(text, maintain_selection_offset=False)
 
     @on(TextArea.Changed)
     async def on_text_area_changed(self, event: TextArea.Changed) -> None:

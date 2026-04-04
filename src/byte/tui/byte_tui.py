@@ -3,22 +3,20 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
-from langchain.messages import AIMessageChunk
-from textual import getters, on, work
+from textual import getters, on
 from textual.app import App, ComposeResult
 from textual.binding import Binding, BindingType
 from textual.containers import VerticalScroll
 from textual.widgets import Footer
 
-from byte import Command, CommandRegistry, EventBus, Events
-from byte.support.utils import extract_content_from_message
+from byte import CommandRegistry, EventBus, Events
 from byte.tui import Messages
 from byte.tui.themes import ThemeRegistry
-from byte.tui.widgets.agent.agent_response_panel import AgentResponsePanel
 from byte.tui.widgets.bootbox import Bootbox
-from byte.tui.widgets.box.human_message_box import HumanMessageBox
 from byte.tui.widgets.conversation import Conversation
-from byte.tui.widgets.prompt import Prompt
+from byte.tui.widgets.panels.human_message_panel import HumanMessagePanel
+from byte.tui.widgets.panels.pending_response_panel import PendingResponsePanel
+from byte.tui.widgets.prompt.prompt import Prompt
 
 if TYPE_CHECKING:
     from byte import Application
@@ -142,50 +140,36 @@ class ByteTUI(App, inherit_bindings=False):
         """Handle a new user message."""
         self.query_one(Conversation).allow_input_submit = False
 
-        user_message_chatbox = HumanMessageBox(event.body)
+        user_message_chatbox = HumanMessagePanel(event.body)
         await self.chat_container.mount(user_message_chatbox)
         self.conversation.scroll_to_latest_message()
 
-        self.post_message(Messages.AgentResponseStarted())
+        event_bus = self.byte.make(EventBus)
 
-        # Check if this is a slash command
-        if event.body.startswith("/"):
-            # Extract command without the slash
-            command_text = event.body[1:]
-            parts = command_text.split(" ", 1)
-            command_name = parts[0]
-            args = parts[1] if len(parts) > 1 else ""
+        # TODO: should we make this none blocking?
+        await event_bus.emit(
+            Events.UserInputSubmitted(
+                event.body,
+                user_message_chatbox,
+            )
+        )
 
-            # Get the command from the registry
-            command = self.command_registry.get_slash_command(command_name)
+    # @work(thread=True, group="handle_command")
+    # async def handle_command(self, command: Command, args: str) -> None:
+    #     await command.handle(args, self.event_handler)
 
-            if not command:
-                pass
+    # agent_name: str
 
-        self.current_chatbox = AgentResponsePanel()
-        await self.chat_container.mount(self.current_chatbox)
-        self.prompt.toggle_class("hidden")
+    async def mount_pending_response_panel(self) -> PendingResponsePanel:
+        """Handle and dispatch events for this panel."""
+        agent_response_panel = PendingResponsePanel()
+        await self.chat_container.mount(agent_response_panel)
 
-        self.current_chatbox.heading.toggle_class("hidden")
-        self.current_chatbox.heading.text = "Ask Agent"
-
-        self.handle_command(command, args)
-
-    @work(thread=True, group="handle_command")
-    async def handle_command(self, command: Command, args: str) -> None:
-        await command.handle(args, self.event_handler)
+        return agent_response_panel
 
     async def event_handler(self, event) -> None:
         """Handle and dispatch events for this panel."""
         self.post_message(event)
-
-    @on(Messages.AgentResponseStarted)
-    def start_awaiting_response(self) -> None:
-        """Prevent sending messages because the agent is typing."""
-        pass
-        # response_status = self.query_one(ResponseStatus)
-        # response_status.set_agent_responding()
-        # response_status.display = True
 
     @on(Messages.AgentResponseComplete)
     async def agent_response_complete(self, event: Messages.AgentResponseComplete) -> None:
@@ -194,30 +178,3 @@ class ByteTUI(App, inherit_bindings=False):
         self.conversation.scroll_to_latest_message()
         self.prompt.focus()
         self.current_chatbox = None
-
-    @on(Messages.CommandStreamChunk)
-    async def handle_stream_chunk(self, event: Messages.CommandStreamChunk) -> None:
-        """Handle streaming chunks for this panel."""
-
-        # TODO: This should be more graceful.
-        assert self.current_chatbox
-
-        # Update UI based on chunk type
-        if event.chunk["type"] == "messages":
-            message_chunk, metadata = event.chunk["data"]
-
-            if isinstance(message_chunk, AIMessageChunk) and message_chunk.content:
-                self.current_chatbox.rune_spinner.display = "none"
-
-                msg = extract_content_from_message(message_chunk)
-                self.current_chatbox.response += msg
-                self.current_chatbox.agent_response_widget.update(self.current_chatbox.response)
-                self.conversation.scroll_to_latest_message()
-
-        elif event.chunk["type"] == "tasks":
-            # await self._update_task_status(event.data)
-            self.byte["log"].info(event.chunk)
-
-    # @on(Messages.AgentResponseFailed)
-    # @on(Messages.AgentResponseStarted)
-    # @on(Messages.AgentResponseComplete)
