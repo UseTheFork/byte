@@ -1,8 +1,8 @@
 from argparse import Namespace
 
-from byte import Command
+from byte import ByteArgumentParser, Command
 from byte.analytics import AgentAnalyticsService
-from byte.cli import ByteArgumentParser, InputCancelledError
+from byte.cli import InputCancelledError
 from byte.files import FileService
 from byte.knowledge import SessionContextService
 from byte.memory import MemoryService

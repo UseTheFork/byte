@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC
 from typing import TYPE_CHECKING, List, Type
 
-from byte import CommandRegistry
+from byte import CommandRegistryService
 
 if TYPE_CHECKING:
     from byte import Command
@@ -57,7 +57,7 @@ class ServiceProvider(ABC):
         if not commands:
             return
 
-        command_registry = self.app.make(CommandRegistry)
+        command_registry = self.app.make(CommandRegistryService)
 
         for command_class in commands:
             self.app.bind(command_class)

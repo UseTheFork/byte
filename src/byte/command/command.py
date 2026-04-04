@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from argparse import Namespace
 from typing import TYPE_CHECKING, List
 
-from byte.cli import ByteArgumentParser
+from byte import ByteArgumentParser
 from byte.support.mixins import Bootable, UserInteractive
 
 if TYPE_CHECKING:
@@ -15,7 +15,7 @@ class Command(ABC, Bootable, UserInteractive):
 
     Provides a consistent interface for executable commands with support for
     tab completion, help text, and pre-prompt status display.
-    Usage: `class MyCommand(Command): ...` then register with CommandRegistry
+    Usage: `class MyCommand(Command): ...` then register with CommandRegistryService
     """
 
     @property
@@ -68,7 +68,7 @@ class Command(ABC, Bootable, UserInteractive):
         Args:
             args: Raw argument string from user input
 
-        Usage: Called by CommandRegistry when command is invoked
+        Usage: Called by CommandRegistryService when command is invoked
         """
         parser = self.parser
 

@@ -1,4 +1,3 @@
-from byte import CommandRegistry
 from byte.cli import (
     InteractionService,
     SubprocessService,
@@ -15,8 +14,6 @@ class CLIServiceProvider(ServiceProvider):
             InteractionService,
             # PromptToolkitService,
             SubprocessService,
-            # TODO: this needs to move
-            CommandRegistry,
         ]
 
     # async def boot_messages(self, payload: Payload) -> Payload:

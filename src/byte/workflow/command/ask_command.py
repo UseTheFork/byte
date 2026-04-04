@@ -1,8 +1,7 @@
 import argparse
 from argparse import Namespace
 
-from byte import Command, EventBus, Events
-from byte.cli import ByteArgumentParser
+from byte import ByteArgumentParser, Command, EventBus, Events
 from byte.tui import Messages
 from byte.workflow import AskWorkflow, WorkflowService
 

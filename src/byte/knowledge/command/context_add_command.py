@@ -1,8 +1,7 @@
 from argparse import Namespace
 from urllib.parse import urlparse
 
-from byte import Command
-from byte.cli import ByteArgumentParser
+from byte import ByteArgumentParser, Command
 
 
 class ContextAddCommand(Command):

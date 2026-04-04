@@ -1,8 +1,7 @@
 from argparse import Namespace
 from typing import List
 
-from byte import Command
-from byte.cli import ByteArgumentParser
+from byte import ByteArgumentParser, Command
 from byte.clipboard import ClipboardService
 
 
@@ -42,7 +41,7 @@ class CopyDropCommand(Command):
         console = self.app["console"]
 
         # Get block type filter if specified
-        block_type = args.type if args.type else None
+        block_type = args.type or None
 
         # Clear code blocks
         clipboard_service.clear_code_blocks(block_type=block_type)

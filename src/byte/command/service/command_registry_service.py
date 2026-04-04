@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     pass
 
 
-class CommandRegistry(Service):
+class CommandRegistryService(Service):
     """Central registry for command discovery and routing.
 
     Manages command registration and provides lookup services for both

@@ -9,7 +9,7 @@ from textual.binding import Binding, BindingType
 from textual.containers import VerticalScroll
 from textual.widgets import Footer
 
-from byte import CommandRegistry, EventBus, Events
+from byte import CommandRegistryService, EventBus, Events
 from byte.tui import Messages
 from byte.tui.themes import ThemeRegistry
 from byte.tui.widgets.bootbox import Bootbox
@@ -58,7 +58,7 @@ class ByteTUI(App, inherit_bindings=False):
 
     def __init__(self, container: Application):
         self.container = container
-        self.command_registry = container.make(CommandRegistry)
+        self.command_registry = container.make(CommandRegistryService)
         self.current_chatbox = None
         super().__init__()
 

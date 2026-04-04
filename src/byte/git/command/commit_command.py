@@ -1,7 +1,7 @@
 from argparse import Namespace
 
-from byte import Command
-from byte.cli import ByteArgumentParser, InputCancelledError
+from byte import ByteArgumentParser, Command
+from byte.cli import InputCancelledError
 from byte.git import GitService
 from byte.git.service.commit_service import CommitService
 from byte.workflow import CommitWorkflow, WorkflowService

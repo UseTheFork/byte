@@ -2,9 +2,8 @@ from argparse import Namespace
 
 from rich.panel import Panel
 
-from byte import Command
+from byte import ByteArgumentParser, Command
 from byte.analytics import AgentAnalyticsService
-from byte.cli import ByteArgumentParser
 from byte.memory import MemoryService
 
 

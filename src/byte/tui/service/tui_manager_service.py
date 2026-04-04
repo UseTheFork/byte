@@ -1,4 +1,4 @@
-from byte import CommandRegistry, Events
+from byte import CommandRegistryService, Events
 from byte.support import Service
 from byte.tui import ByteTUI, Messages
 
@@ -14,7 +14,7 @@ class TUIManagerService(Service):
         Usage: Called automatically during service container boot process
         """
         self.tui = ByteTUI(container=self.app)
-        self.command_registry = self.app.make(CommandRegistry)
+        self.command_registry = self.app.make(CommandRegistryService)
         self.current_agent_panel = None
 
     async def run_async(self):
@@ -66,7 +66,7 @@ class TUIManagerService(Service):
         # console = self.app["console"]
 
         # Get command registry and execute
-        command_registry = self.app.make(CommandRegistry)
+        command_registry = self.app.make(CommandRegistryService)
         command = command_registry.get_slash_command(command_name)
 
         if command:

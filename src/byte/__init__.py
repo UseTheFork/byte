@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
-    from byte.command import Command, CommandRegistry
+    from byte.command import ByteArgumentParser, Command, CommandRegistryService
     from byte.context import get_application, make
     from byte.foundation import Application, Console, EventBus, Events, TaskManager
     from byte.logging import LogService
@@ -14,8 +14,9 @@ if TYPE_CHECKING:
 
 __all__ = (
     "Application",
+    "ByteArgumentParser",
     "Command",
-    "CommandRegistry",
+    "CommandRegistryService",
     "Console",
     "EventBus",
     "Events",
@@ -33,8 +34,9 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "Application": "foundation",
+    "ByteArgumentParser": "command",
     "Command": "command",
-    "CommandRegistry": "command",
+    "CommandRegistryService": "command",
     "Console": "foundation",
     "EventBus": "foundation",
     "Events": "foundation",

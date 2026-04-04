@@ -5,18 +5,24 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.command.argparse.base import ByteArgumentParser
     from byte.command.command import Command
-    from byte.command.service.command_registry import CommandRegistry
+    from byte.command.service.command_registry_service import CommandRegistryService
+    from byte.command.service_provider import CommandServiceProvider
 
 __all__ = (
+    "ByteArgumentParser",
     "Command",
-    "CommandRegistry",
+    "CommandRegistryService",
+    "CommandServiceProvider",
 )
 
 _dynamic_imports = {
     # keep-sorted start
+    "ByteArgumentParser": "argparse.base",
     "Command": "command",
-    "CommandRegistry": "service.command_registry",
+    "CommandRegistryService": "service.command_registry_service",
+    "CommandServiceProvider": "service_provider",
     # keep-sorted end
 }
 

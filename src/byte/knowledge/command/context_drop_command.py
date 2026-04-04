@@ -1,8 +1,8 @@
 from argparse import Namespace
 from typing import List
 
-from byte import Command
-from byte.cli import ByteArgumentParser, InputCancelledError
+from byte import ByteArgumentParser, Command
+from byte.cli import InputCancelledError
 from byte.knowledge import SessionContextService
 
 

@@ -1,8 +1,8 @@
 from argparse import Namespace
 from typing import List
 
-from byte import Command
-from byte.cli import ByteArgumentParser, CodeBlockNavigator
+from byte import ByteArgumentParser, Command
+from byte.cli import CodeBlockNavigator
 from byte.clipboard import ClipboardService
 
 
@@ -45,7 +45,7 @@ class CopyCommand(Command):
         console = self.app["console"]
 
         # Get all stored code blocks, optionally filtered by type
-        block_type = args.type if args.type else None
+        block_type = args.type or None
         code_blocks = clipboard_service.get_code_blocks(block_type=block_type)
 
         if not code_blocks:

@@ -5,9 +5,9 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from byte.analytics import AnalyticsProvider
-from byte.cli import CLIServiceProvider
 from byte.clipboard import ClipboardServiceProvider
 from byte.code_operations import PromptFormatProvider
+from byte.command import CommandServiceProvider
 from byte.conventions.service_provider import ConventionsServiceProvider
 from byte.development import DevelopmentServiceProvider
 from byte.files import FileServiceProvider
@@ -25,7 +25,7 @@ from byte.web import WebServiceProvider
 from byte.workflow import WorkflowServiceProvider
 
 PROVIDERS = [
-    CLIServiceProvider,
+    CommandServiceProvider,
     MemoryServiceProvider,
     KnowledgeServiceProvider,
     FileServiceProvider,
