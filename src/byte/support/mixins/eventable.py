@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypeVar
 
-from byte.event.event_bus import Event, EventBus
+from byte import EventBus
+from byte.event import Event
 
 if TYPE_CHECKING:
     from byte.foundation import Application
@@ -28,8 +29,12 @@ class Eventable:
         allowing registered listeners to process and potentially transform
         the event data before returning the final result.s
         """
+
         if not self.app:
             raise RuntimeError("No app available - ensure service is properly initialized")
+
+        # TODO: Add if in debugging check here
+        # self.app["log"].info(payload)
 
         event_bus = self.app.make(EventBus)
         return await event_bus.emit(payload)

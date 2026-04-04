@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, Literal
 
 from textual import getters, on
 from textual.app import App, ComposeResult
@@ -16,6 +16,7 @@ from byte.tui.widgets.bootbox import Bootbox
 from byte.tui.widgets.conversation import Conversation
 from byte.tui.widgets.panels.human_message_panel import HumanMessagePanel
 from byte.tui.widgets.panels.pending_panel import PendingPanel
+from byte.tui.widgets.prompt.flash import Flash
 from byte.tui.widgets.prompt.prompt import Prompt
 
 if TYPE_CHECKING:
@@ -154,3 +155,19 @@ class ByteTUI(App, inherit_bindings=False):
         self.chat_container.refresh(layout=True)
 
         return agent_response_panel
+
+    def flash(
+        self,
+        content: str,
+        *,
+        duration: float | None = None,
+        style: Literal["default", "warning", "error", "success"] = "default",
+    ) -> None:
+        """Flash a single-line message to the user.
+
+        Args:
+            content: Content to flash.
+            style: A semantic style.
+            duration: Duration in seconds of the flash, or `None` to use default in settings.
+        """
+        self.query_one(Flash).flash(content, duration=duration, style=style)

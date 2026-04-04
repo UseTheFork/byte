@@ -32,7 +32,6 @@ class AddFileCommand(Command):
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Add specified file to context with editable permissions."""
-        console = self.app["console"]
 
         file_path = args.file_path
 
@@ -40,8 +39,8 @@ class AddFileCommand(Command):
         result = await file_service.add_file(file_path, FileMode.EDITABLE)
 
         if not result:
-            console.print(
-                f"[error]Failed to add {file_path} (file not found, not readable, or is already in context)[/error]"
+            await self.notify_error(
+                f"Failed to add {file_path} (file not found, not readable, or is already in context)"
             )
 
     async def get_completions(self, text: str) -> List[str]:

@@ -1,9 +1,12 @@
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from textual.content import Content
 from textual.reactive import var
 from textual.timer import Timer
 from textual.widgets import Static
+
+if TYPE_CHECKING:
+    from byte.tui import ByteTUI
 
 
 class Flash(Static):
@@ -11,34 +14,34 @@ class Flash(Static):
     Flash {
         height: 1;
         width: 1fr;
-        background: $success 10%;
-        color: $text-success;
         text-align: center;
         visibility: hidden;
         text-wrap: nowrap;
         text-overflow: ellipsis;
-        &.-default {
+        &.default {
             background: $primary 10%;
             color: $text-primary;
         }
         
-        &.-success {
+        &.success {
             background: $success 10%;
             color: $text-success;
         }
         
-        
-        &.-warning {
+        &.warning {
             background: $warning 10%;
             color: $text-warning;
         }
 
-        &.-error {
+        &.error {
             background: $error 10%;
             color: $text-error;
         }
     }
     """
+
+    app: ByteTUI
+
     flash_timer: var[Timer | None] = var(None)
 
     def flash(
@@ -55,6 +58,7 @@ class Flash(Static):
             duration: Duration in seconds to show content.
             style: A semantic style.
         """
+
         if self.flash_timer is not None:
             self.flash_timer.stop()
         self.visible = False
@@ -64,12 +68,11 @@ class Flash(Static):
             self.visible = False
 
         self.update(content)
-        self.remove_class("-default", "-success", "-warning", "-error", update=False)
-        self.add_class(f"-{style}")
+        self.remove_class("default", "success", "warning", "error", update=False)
+        self.add_class(f"{style}")
         self.visible = True
 
         if duration is None:
-            # duration = self.app.settings.get("ui.flash_duration", float)
             duration = 3
 
-        self.flash_timer = self.set_timer(duration or 3, hide)
+        self.flash_timer = self.set_timer(duration, hide)

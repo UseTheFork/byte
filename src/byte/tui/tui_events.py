@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from byte.event import Event
 
@@ -46,6 +46,12 @@ class TuiEvents:
     @dataclass
     class UserInputChanged(Event):
         value: str
+
+    @dataclass
+    class Notify(Event):
+        content: str
+        style: Literal["default", "warning", "success", "error"] = "default"
+        duration: float | None = None
 
     @dataclass
     class AgentResponseFailed(Event):

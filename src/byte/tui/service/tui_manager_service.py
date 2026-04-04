@@ -31,6 +31,14 @@ class TUIManagerService(Service):
     async def route_event(self, event: Events.TuiEvent):
         tui_event = event.event
 
+        if isinstance(tui_event, TuiEvents.Notify):
+            self.tui.flash(
+                tui_event.content,
+                style=tui_event.style,
+                duration=tui_event.duration,
+            )
+            return
+
         if isinstance(tui_event, TuiEvents.CommandExecutionStarted):
             await self._create_pending_panel()
             return
