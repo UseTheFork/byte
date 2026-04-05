@@ -1,20 +1,17 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 from textual import getters, on
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import VerticalScroll
-from textual.content import Content
 from textual.css.query import NoMatches
 from textual.reactive import reactive
 from textual.widget import Widget
 
-from byte.tui import Messages
 from byte.tui.widgets.chatbox import Chatbox
-from byte.tui.widgets.prompt.flash import Flash
-from byte.tui.widgets.prompt.prompt import Prompt
+from byte.tui.widgets.prompt.prompt_panel import PromptPanel
 
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
@@ -50,52 +47,23 @@ class Conversation(Widget):
 
     chat_container = getters.query_one("#chat-container", VerticalScroll)
 
-    def __init__(
-        self,
-        # chat_data: ChatData,
-    ) -> None:
-        super().__init__()
-        self.chat_data = []
-        self.byte_app = self.app.byte
-
     def compose(self) -> ComposeResult:
         with VerticalScroll(id="chat-container") as vertical_scroll:
             vertical_scroll.can_focus = False
-        yield Prompt(id="prompt")
-
-    @on(Messages.Flash)
-    def on_flash(self, event: Messages.Flash) -> None:
-        event.stop()
-        self.flash(event.content, duration=event.duration, style=event.style)
-
-    def flash(
-        self,
-        content: str | Content,
-        *,
-        duration: float | None = None,
-        style: Literal["default", "warning", "error", "success"] = "default",
-    ) -> None:
-        """Flash a single-line message to the user.
-
-        Args:
-            content: Content to flash.
-            style: A semantic style.
-            duration: Duration in seconds of the flash, or `None` to use default in settings.
-        """
-        self.query_one(Flash).flash(content, duration=duration, style=style)
+        yield PromptPanel(id="prompt")
 
     def scroll_to_latest_message(self):
         container = self.chat_container
         container.refresh()
         container.scroll_end(animate=False, force=True)
 
-    @on(Prompt.CursorEscapingTop)
-    async def on_cursor_up_from_prompt(self, event: Prompt.CursorEscapingTop) -> None:
-        self.focus_latest_message()
+    # @on(PromptPanel.CursorEscapingTop)
+    # async def on_cursor_up_from_prompt(self, event: PromptPanel.CursorEscapingTop) -> None:
+    #     self.focus_latest_message()
 
     @on(Chatbox.CursorEscapingBottom)
     def move_focus_to_prompt(self) -> None:
-        self.query_one(Prompt).focus()
+        self.query_one(PromptPanel).focus()
 
     def get_latest_chatbox(self) -> Chatbox:
         return self.query(Chatbox).last()

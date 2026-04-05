@@ -10,21 +10,22 @@ from textual.containers import VerticalScroll
 from textual.widgets import Footer
 
 from byte import CommandRegistryService, EventBus, Events
-from byte.tui import Messages
+from byte.tui.messages import Messages
 from byte.tui.themes import ThemeRegistry
 from byte.tui.widgets.bootbox import Bootbox
 from byte.tui.widgets.conversation import Conversation
 from byte.tui.widgets.panels.human_message_panel import HumanMessagePanel
 from byte.tui.widgets.panels.pending_panel import PendingPanel
+from byte.tui.widgets.prompt.analytics import Analytics
 from byte.tui.widgets.prompt.flash import Flash
-from byte.tui.widgets.prompt.prompt import Prompt
+from byte.tui.widgets.prompt.prompt_panel import PromptPanel
 
 if TYPE_CHECKING:
     from byte import Application
 
 
 class ByteTUI(App, inherit_bindings=False):
-    AUTO_FOCUS = "Conversation Prompt TextArea"
+    AUTO_FOCUS = "Conversation PromptPanel PromptTextArea"
 
     CSS_PATH = Path(__file__).parent / "tui.tcss"
     BINDINGS: ClassVar[list[BindingType]] = [
@@ -49,11 +50,9 @@ class ByteTUI(App, inherit_bindings=False):
 
     ALLOW_IN_MAXIMIZED_VIEW = ""
 
-    HORIZONTAL_BREAKPOINTS = [(0, "-narrow"), (100, "-wide")]
-
     PAUSE_GC_ON_SCROLL = True
 
-    prompt = getters.query_one("#prompt", Prompt)
+    prompt = getters.query_one("#prompt", PromptPanel)
     chat_container = getters.query_one("#chat-container", VerticalScroll)
     conversation = getters.query_one(Conversation)
 
@@ -171,3 +170,28 @@ class ByteTUI(App, inherit_bindings=False):
             duration: Duration in seconds of the flash, or `None` to use default in settings.
         """
         self.query_one(Flash).flash(content, duration=duration, style=style)
+
+    def analytics(
+        self,
+        tokens_sent: int,
+        tokens_received: int,
+        message_cost: float,
+        session_cost: float,
+        memory_percent: float,
+    ) -> None:
+        """Update analytics display with token usage and cost information.
+
+        Args:
+            tokens_sent: Number of tokens sent in the last message.
+            tokens_received: Number of tokens received in the last message.
+            message_cost: Cost of the last message in dollars.
+            session_cost: Total cost of the session in dollars.
+            memory_percent: Percentage of memory used (0-100).
+        """
+        self.query_one(Analytics).update_analytics(
+            tokens_sent=tokens_sent,
+            tokens_received=tokens_received,
+            message_cost=message_cost,
+            session_cost=session_cost,
+            memory_percent=memory_percent,
+        )

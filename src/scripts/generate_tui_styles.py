@@ -232,7 +232,7 @@ class TuiStyleGenerator:
         for font in ["bold", "italic", "reverse", "underline", "strike"]:
             self.add_style(f".{font}", f"text-style: {font}")
 
-    def generate_all(self, max_spacing: int = 8, max_dimensions: int = 10) -> str:
+    def generate_all(self, max_spacing: int = 5, max_dimensions: int = 5) -> str:
         """Generate all utility styles and return as a string.
 
         Args:

@@ -1,6 +1,6 @@
 from byte import CommandRegistryService, Events
 from byte.support import Service
-from byte.tui import ByteTUI, TuiEvents
+from byte.tui import TuiEvents
 
 
 class TUIManagerService(Service):
@@ -13,6 +13,8 @@ class TUIManagerService(Service):
 
         Usage: Called automatically during service container boot process
         """
+        from byte.tui.byte_tui import ByteTUI
+
         self.tui = ByteTUI(container=self.app)
         self.command_registry = self.app.make(CommandRegistryService)
         self.pending_panel = None
@@ -41,6 +43,16 @@ class TUIManagerService(Service):
 
         if isinstance(tui_event, TuiEvents.CommandExecutionStarted):
             await self._create_pending_panel()
+            return
+
+        if isinstance(tui_event, TuiEvents.UpdateAnalytics):
+            self.tui.analytics(
+                tokens_sent=tui_event.tokens_sent,
+                tokens_received=tui_event.tokens_received,
+                message_cost=tui_event.message_cost,
+                session_cost=tui_event.session_cost,
+                memory_percent=tui_event.memory_percent,
+            )
             return
 
         assert self.pending_panel is not None, "TuiEvents.CommandExecutionStarted() must be emitted first."

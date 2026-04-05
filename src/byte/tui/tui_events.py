@@ -48,6 +48,14 @@ class TuiEvents:
         value: str
 
     @dataclass
+    class UpdateAnalytics(Event):
+        tokens_sent: int
+        tokens_received: int
+        message_cost: float
+        session_cost: float
+        memory_percent: float
+
+    @dataclass
     class Notify(Event):
         content: str
         style: Literal["default", "warning", "success", "error"] = "default"
