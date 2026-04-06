@@ -32,7 +32,6 @@ class SwitchModeCommand(Command):
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Switch the mode of a file in context."""
-        console = self.app["console"]
 
         file_path = args.file_path
 
@@ -41,7 +40,7 @@ class SwitchModeCommand(Command):
         # Check if file is in context
         file_context = file_service.get_file_context(file_path)
         if not file_context:
-            console.print(f"[error]File {file_path} not found in context[/error]")
+            await self.notify_error(f"File {file_path} not found in context")
             return
 
         # Determine new mode (toggle)
@@ -50,11 +49,12 @@ class SwitchModeCommand(Command):
         # Switch the mode
         result = await file_service.set_file_mode(file_path, new_mode)
 
-        if result:
-            mode_str = "editable" if new_mode == FileMode.EDITABLE else "read-only"
-            console.print(f"[success]Switched {file_path} to {mode_str} mode[/success]")
+        if not result:
+            await self.notify_error(f"Failed to switch mode for {file_path}")
         else:
-            console.print(f"[error]Failed to switch mode for {file_path}[/error]")
+            mode_str = "editable" if new_mode == FileMode.EDITABLE else "read-only"
+            await self.notify_success(f"Switched {file_path} to {mode_str} mode")
+            await file_service.notify_file_stats()
 
     async def get_completions(self, text: str) -> List[str]:
         """Provide completions showing files currently in the context.

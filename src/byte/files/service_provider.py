@@ -52,12 +52,6 @@ class FileServiceProvider(ServiceProvider):
         event_bus = self.app.make(EventBus)
         # file_service = self.app.make(FileService)
 
-        # Register listener that calls list_in_context_files before each prompt
-        # event_bus.on(
-        #     EventType.PRE_PROMPT_TOOLKIT.value,
-        #     file_service.list_in_context_files_hook,
-        # )
-
         # Boot AI comment watcher if enabled
         config = self.app["config"]
         if config.files.watch.enable:

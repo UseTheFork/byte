@@ -18,20 +18,12 @@ class AICommentWatcherService(Service):
     Usage: Automatically started during boot if watch.enable is True
     """
 
-    def _subscribe_to_file_events(self) -> None:
-        """Subscribe to file change events to scan for AI comments."""
-        # This will be called by event bus when files change
-        pass
-
     def boot(self) -> None:
         """Initialize AI comment watcher."""
         if not self.app["config"].files.watch.enable:
             return
 
         self.file_service = self.app.make(FileService)
-
-        # Subscribe to file change events from FileWatcherService
-        self._subscribe_to_file_events()
 
     def _extract_comment_lines(self, content: str) -> List[str]:
         """Extract comment blocks from content.
@@ -140,7 +132,12 @@ class AICommentWatcherService(Service):
 
     async def _auto_add_file_to_context(self, file_path: Path, mode: FileMode = FileMode.EDITABLE) -> bool:
         """Automatically add file to context when AI comment is detected."""
-        return await self.file_service.add_file(file_path, mode)
+
+        result = await self.file_service.add_file(file_path, mode)
+        if result:
+            await self.file_service.notify_file_stats()
+
+        return result
 
     async def _handle_file_modified(self, file_path: Path) -> bool:
         """Handle file modification by scanning for AI comments."""
@@ -169,7 +166,7 @@ class AICommentWatcherService(Service):
             return payload
 
         file_path = Path(file_path)
-        # result = await self._handle_file_modified(file_path)
+        result = await self._handle_file_modified(file_path)
 
         # TODO: This is going to need to come out.
         # if result:

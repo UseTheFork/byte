@@ -25,16 +25,24 @@ class FileService(Service):
     async def _notify_file_added(self, file_path: str, mode: FileMode):
         """Notify system that a file was added to context"""
 
+        await self.emit(
+            FileEvents.FileAdded(
+                file_path=file_path,
+                mode=mode.value,
+            ),
+        )
+
+    async def notify_file_stats(self):
+        """Notify system that a file was added or removed from context"""
+
         # Count editable and read-only files in context
         editable_count = sum(1 for f in self._context_files.values() if f.mode == FileMode.EDITABLE)
         read_only_count = sum(1 for f in self._context_files.values() if f.mode == FileMode.READ_ONLY)
 
         await self.emit(
-            FileEvents.FileAdded(
-                file_path=file_path,
-                mode=mode.value,
-                meta_editable_files=editable_count,
-                meta_read_only_files=read_only_count,
+            FileEvents.FileStats(
+                editable=editable_count,
+                read_only=read_only_count,
             ),
         )
 

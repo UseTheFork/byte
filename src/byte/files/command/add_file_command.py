@@ -42,6 +42,9 @@ class AddFileCommand(Command):
             await self.notify_error(
                 f"Failed to add {file_path} (file not found, not readable, or is already in context)"
             )
+        else:
+            await self.notify_success(f"Added {file_path} to context")
+            await file_service.notify_file_stats()
 
     async def get_completions(self, text: str) -> List[str]:
         """Provide intelligent file path completions from project discovery.

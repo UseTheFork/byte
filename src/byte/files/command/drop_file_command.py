@@ -32,17 +32,17 @@ class DropFileCommand(Command):
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Remove specified file from active context."""
-        console = self.app["console"]
 
         file_path = args.file_path
 
         file_service: FileService = self.app.make(FileService)
-        if await file_service.remove_file(file_path):
-            console.print(f"[success]Removed {file_path} from context[/success]")
-            return
+        result = await file_service.remove_file(file_path)
+
+        if not result:
+            await self.notify_error(f"File {file_path} not found in context")
         else:
-            console.print(f"[error]File {file_path} not found in context[/error]")
-            return
+            await self.notify_success(f"Removed {file_path} from context")
+            await file_service.notify_file_stats()
 
     async def get_completions(self, text: str) -> List[str]:
         """Provide completions showing files currently in the context.

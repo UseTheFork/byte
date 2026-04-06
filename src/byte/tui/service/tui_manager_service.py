@@ -103,9 +103,9 @@ class TUIManagerService(Service):
         if user_input.startswith("/"):
             await self._handle_command_input(event.message)
 
-    async def on_file_events_file_added(self, event: FileEvents.FileAdded):
+    async def on_file_events_file_stats(self, event: FileEvents.FileStats):
         self.tui.update_files(
-            editable=event.meta_editable_files,
-            read_only=event.meta_read_only_files,
+            editable=event.editable,
+            read_only=event.read_only,
         )
         return

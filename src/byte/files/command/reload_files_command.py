@@ -31,9 +31,8 @@ class ReloadFilesCommand(Command):
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Refresh the file discovery cache by rescanning the project."""
-        console = self.app["console"]
 
         file_discovery = self.app.make(FileDiscoveryService)
         await file_discovery.refresh()
 
-        console.print("[success]File discovery cache reloaded successfully[/success]")
+        await self.notify_success("File discovery cache reloaded successfully")

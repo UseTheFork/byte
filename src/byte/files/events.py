@@ -13,8 +13,6 @@ class FileEvents:
         file_path: str
         mode: str
         action: str = "context_added"
-        meta_editable_files: int = 0
-        meta_read_only_files: int = 0
 
     @dataclass
     class FileChanged(Event):
@@ -23,3 +21,10 @@ class FileEvents:
 
         file_path: str
         change_type: str
+
+    @dataclass
+    class FileStats(Event):
+        """Event emitted when file statistics are updated."""
+
+        editable: int = 0
+        read_only: int = 0

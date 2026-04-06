@@ -18,8 +18,8 @@ class TUIServiceProvider(ServiceProvider):
         tui_manager_service = self.app.make(TUIManagerService)
 
         event_bus.on(
-            FileEvents.FileAdded,
-            tui_manager_service.on_file_events_file_added,
+            FileEvents.FileStats,
+            tui_manager_service.on_file_events_file_stats,
         )
         event_bus.on(
             TuiEvents.ComponentEvent,
