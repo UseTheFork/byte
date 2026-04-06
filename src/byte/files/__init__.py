@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from byte.files.command.list_files_command import ListFilesCommand
     from byte.files.command.reload_files_command import ReloadFilesCommand
     from byte.files.command.switch_mode_command import SwitchModeCommand
+    from byte.files.events import FileEvents
     from byte.files.models import FileContext, FileMode
     from byte.files.service.ai_comment_watcher_service import AICommentWatcherService
     from byte.files.service.discovery_service import FileDiscoveryService
@@ -25,6 +26,7 @@ __all__ = (
     "DropFileCommand",
     "FileContext",
     "FileDiscoveryService",
+    "FileEvents",
     "FileIgnoreService",
     "FileMode",
     "FileService",
@@ -43,6 +45,7 @@ _dynamic_imports = {
     "DropFileCommand": "command.drop_file_command",
     "FileContext": "models",
     "FileDiscoveryService": "service.discovery_service",
+    "FileEvents": "events",
     "FileIgnoreService": "service.ignore_service",
     "FileMode": "models",
     "FileService": "service.file_service",

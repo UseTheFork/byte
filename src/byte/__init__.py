@@ -7,7 +7,7 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.command import ByteArgumentParser, Command, CommandRegistryService
     from byte.context import get_application, make
-    from byte.event import EventBus, Events
+    from byte.event import Event, EventBus
     from byte.foundation import Application, Console, TaskManager
     from byte.logging import LogService
     from byte.support import Service, ServiceProvider
@@ -19,8 +19,8 @@ __all__ = (
     "Command",
     "CommandRegistryService",
     "Console",
+    "Event",
     "EventBus",
-    "Events",
     "Log",
     "LogService",
     "Service",
@@ -39,8 +39,8 @@ _dynamic_imports = {
     "Command": "command",
     "CommandRegistryService": "command",
     "Console": "foundation",
+    "Event": "event",
     "EventBus": "event",
-    "Events": "event",
     "LogService": "logging",
     "Service": "support",
     "ServiceProvider": "support",

@@ -5,8 +5,8 @@ from typing import Dict, List, Optional, Union
 
 from rich.columns import Columns
 
-from byte import Events, Service
-from byte.files import FileContext, FileDiscoveryService, FileMode
+from byte import Service
+from byte.files import FileContext, FileDiscoveryService, FileEvents, FileMode
 from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 
@@ -28,7 +28,7 @@ class FileService(Service):
         """Notify system that a file was added to context"""
 
         await self.emit(
-            Events.FileAdded(file_path=file_path, mode=mode.value),
+            FileEvents.FileAdded(file_path=file_path, mode=mode.value),
         )
 
     async def add_file(self, path: Union[str, PathLike], mode: FileMode) -> bool:

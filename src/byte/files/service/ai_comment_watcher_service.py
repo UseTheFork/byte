@@ -2,9 +2,10 @@ import re
 from pathlib import Path
 from typing import List, Optional
 
-from byte import Events, Service
+from byte import Service
 from byte.code_operations.schemas import AICommentType
-from byte.files import FileMode, FileService
+from byte.files import FileEvents, FileMode, FileService
+from byte.orchestration import OrchestrationEvents
 from byte.subgraph import AskAgent, CoderAgent
 from byte.support.utils import list_to_multiline_text
 
@@ -159,7 +160,7 @@ class AICommentWatcherService(Service):
         except (FileNotFoundError, PermissionError, UnicodeDecodeError):
             return False
 
-    async def handle_file_change(self, payload: Events.FileChanged) -> Events.FileChanged:
+    async def handle_file_change(self, payload: FileEvents.FileChanged) -> FileEvents.FileChanged:
         """Handle file change events by scanning for AI comments."""
         file_path = payload.file_path
         change_type = payload.change_type
@@ -268,7 +269,9 @@ class AICommentWatcherService(Service):
 
     #     return payload
 
-    async def add_reinforcement_hook(self, payload: Events.GatherReinforcement) -> Events.GatherReinforcement:
+    async def add_reinforcement_hook(
+        self, payload: OrchestrationEvents.GatherReinforcement
+    ) -> OrchestrationEvents.GatherReinforcement:
         # prompt_toolkit_service = self.app.make(PromptToolkitService)
         # if prompt_toolkit_service.is_interrupted():
         #     active_agent = payload.agent

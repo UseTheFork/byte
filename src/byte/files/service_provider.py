@@ -1,11 +1,12 @@
 from typing import List, Type
 
-from byte import Command, EventBus, Events, Service, ServiceProvider
+from byte import Command, EventBus, Service, ServiceProvider
 from byte.files import (
     AddFileCommand,
     AICommentWatcherService,
     DropFileCommand,
     FileDiscoveryService,
+    FileEvents,
     FileIgnoreService,
     FileService,
     FileWatcherService,
@@ -14,6 +15,8 @@ from byte.files import (
     ReloadFilesCommand,
     SwitchModeCommand,
 )
+from byte.orchestration import OrchestrationEvents
+from byte.system import SystemEvents
 
 
 class FileServiceProvider(ServiceProvider):
@@ -67,22 +70,22 @@ class FileServiceProvider(ServiceProvider):
             # )
 
             event_bus.on(
-                Events.GatherReinforcement,
+                OrchestrationEvents.GatherReinforcement,
                 ai_comment_watcher.add_reinforcement_hook,
             )
 
             # Subscribe to file change events
             event_bus.on(
-                Events.FileChanged,
+                FileEvents.FileChanged,
                 ai_comment_watcher.handle_file_change,
             )
 
         event_bus.on(
-            Events.PostBoot,
+            SystemEvents.PostBoot,
             self.boot_messages,
         )
 
-    async def boot_messages(self, event: Events.PostBoot) -> Events.PostBoot:
+    async def boot_messages(self, event: SystemEvents.PostBoot) -> SystemEvents.PostBoot:
         file_discovery = self.app.make(FileDiscoveryService)
 
         found_files = await file_discovery.get_files()

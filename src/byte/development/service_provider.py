@@ -1,8 +1,9 @@
 from typing import List, Type
 
-from byte import EventBus, Events
+from byte import EventBus
 from byte.development import RecordResponseService
 from byte.support import Service, ServiceProvider
+from byte.system import SystemEvents
 
 
 class DevelopmentServiceProvider(ServiceProvider):
@@ -16,11 +17,11 @@ class DevelopmentServiceProvider(ServiceProvider):
         event_bus = self.app.make(EventBus)
 
         event_bus.on(
-            Events.PostBoot,
+            SystemEvents.PostBoot,
             self.boot_messages,
         )
 
-    async def boot_messages(self, event: Events.PostBoot) -> Events.PostBoot:
+    async def boot_messages(self, event: SystemEvents.PostBoot) -> SystemEvents.PostBoot:
         if self.app.is_development():
             event.messages.append("")
             event.messages.append("[$primary]Debug Info:[/$primary]")

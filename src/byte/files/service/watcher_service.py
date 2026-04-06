@@ -2,8 +2,8 @@ from pathlib import Path
 
 from watchfiles import Change, awatch
 
-from byte import Events, Service, TaskManager
-from byte.files import FileDiscoveryService, FileIgnoreService, FileService
+from byte import Service, TaskManager
+from byte.files import FileDiscoveryService, FileEvents, FileIgnoreService, FileService
 
 
 class FileWatcherService(Service):
@@ -59,7 +59,7 @@ class FileWatcherService(Service):
             await self.file_discovery.add_file(file_path)
 
         await self.emit(
-            Events.FileChanged(
+            FileEvents.FileChanged(
                 file_path=str(file_path),
                 change_type=change_type.name.lower(),
             )

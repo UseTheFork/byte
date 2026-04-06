@@ -3,11 +3,11 @@ from typing import Any, Literal, Optional
 from langchain.messages import AIMessageChunk
 from langchain_core.callbacks import get_usage_metadata_callback
 
-from byte import EventBus, Events, Service
+from byte import Service
 from byte.analytics import AgentAnalyticsService
 from byte.orchestration import TokenUsageSchema
 from byte.support.utils import extract_content_from_message
-from byte.tui import TuiEvents
+from byte.tui import TuiComponentEvents
 from byte.workflow import BaseWorkflow
 
 
@@ -15,7 +15,6 @@ class WorkflowService(Service):
     """Service for executing workflows with compiled graphs."""
 
     def boot(self) -> None:
-        self.event_bus = self.app.make(EventBus)
         self.current_msg = ""
 
     async def _track_token_usage(self, usage_metadata: dict, mode: str) -> None:
@@ -58,7 +57,7 @@ class WorkflowService(Service):
 
             if isinstance(message_chunk, AIMessageChunk) and message_chunk.content:
                 msg = extract_content_from_message(message_chunk)
-                await self.event_bus.emit(Events.TuiEvent(TuiEvents.ResponseChunk(msg)))
+                await self.emit_tui(TuiComponentEvents.ResponseChunk(msg))
 
             # result = tui.post_message(
             #     Messages.CommandStreamChunk(panel_id=self.panel_id, chunk_type="message", data=chunk["data"])

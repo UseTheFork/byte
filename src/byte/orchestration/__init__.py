@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.orchestration.events import OrchestrationEvents
     from byte.orchestration.exceptions import ByteAgentException, DummyNodeReachedException
     from byte.orchestration.prompt_leaves import core_mandates, preamble
     from byte.orchestration.reducers import add_constraints, replace_list, replace_str, update_metadata
@@ -37,6 +38,7 @@ __all__ = (
     "GraphBuilder",
     "MaxLinesValidator",
     "MetadataSchema",
+    "OrchestrationEvents",
     "PromptAssembler",
     "PromptSettingsSchema",
     "RoutingState",
@@ -65,6 +67,7 @@ _dynamic_imports = {
     "GraphBuilder": "utils.graph_builder",
     "MaxLinesValidator": "validators.max_lines",
     "MetadataSchema": "schemas",
+    "OrchestrationEvents": "events",
     "PromptAssembler": "utils.prompt_assembler",
     "PromptSettingsSchema": "schemas",
     "RoutingState": "state",

@@ -4,14 +4,24 @@ from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
     from byte.tui.byte_tui import ByteTUI
+    from byte.tui.events import TuiEvents
     from byte.tui.messages import Messages
     from byte.tui.schemas import AutocompleteOption
     from byte.tui.service.tui_manager_service import TUIManagerService
     from byte.tui.service_provider import TUIServiceProvider
-    from byte.tui.tui_events import TuiEvents
+    from byte.tui.tui_component_events import TuiComponentEvent, TuiComponentEvents
 
 
-__all__ = ("AutocompleteOption", "ByteTUI", "Messages", "TUIManagerService", "TUIServiceProvider", "TuiEvents")
+__all__ = (
+    "AutocompleteOption",
+    "ByteTUI",
+    "Messages",
+    "TUIManagerService",
+    "TUIServiceProvider",
+    "TuiComponentEvent",
+    "TuiComponentEvents",
+    "TuiEvents",
+)
 
 _dynamic_imports = {
     # keep-sorted start
@@ -20,7 +30,9 @@ _dynamic_imports = {
     "Messages": "messages",
     "TUIManagerService": "service.tui_manager_service",
     "TUIServiceProvider": "service_provider",
-    "TuiEvents": "tui_events",
+    "TuiComponentEvent": "tui_component_events",
+    "TuiComponentEvents": "tui_component_events",
+    "TuiEvents": "events",
     # keep-sorted end
 }
 

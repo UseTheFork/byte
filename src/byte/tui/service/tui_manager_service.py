@@ -1,6 +1,6 @@
-from byte import CommandRegistryService, Events
+from byte import CommandRegistryService
 from byte.support import Service
-from byte.tui import TuiEvents
+from byte.tui import TuiComponentEvents, TuiEvents
 
 
 class TUIManagerService(Service):
@@ -29,10 +29,10 @@ class TUIManagerService(Service):
         # self.pending_panel.agent_response_widget.update(event.chunk)
         # current_chatbox.agent_response_widget.update(self.current_chatbox.response)
 
-    async def route_event(self, event: Events.TuiEvent):
+    async def route_event(self, event: TuiEvents.ComponentEvent):
         tui_event = event.event
 
-        if isinstance(tui_event, TuiEvents.Notify):
+        if isinstance(tui_event, TuiComponentEvents.Notify):
             self.tui.flash(
                 tui_event.content,
                 style=tui_event.style,
@@ -40,11 +40,11 @@ class TUIManagerService(Service):
             )
             return
 
-        if isinstance(tui_event, TuiEvents.CommandExecutionStarted):
+        if isinstance(tui_event, TuiComponentEvents.CommandExecutionStarted):
             await self._create_pending_panel()
             return
 
-        if isinstance(tui_event, TuiEvents.UpdateAnalytics):
+        if isinstance(tui_event, TuiComponentEvents.UpdateAnalytics):
             self.tui.analytics(
                 tokens_sent=tui_event.tokens_sent,
                 tokens_received=tui_event.tokens_received,
@@ -54,15 +54,15 @@ class TUIManagerService(Service):
             )
             return
 
-        assert self.pending_panel is not None, "TuiEvents.CommandExecutionStarted() must be emitted first."
+        assert self.pending_panel is not None, "TuiComponentEvents.CommandExecutionStarted() must be emitted first."
 
-        if isinstance(tui_event, TuiEvents.AddHeading):
+        if isinstance(tui_event, TuiComponentEvents.AddHeading):
             await self.pending_panel.add_heading(tui_event.heading)
-        elif isinstance(tui_event, TuiEvents.ResponseStarted):
+        elif isinstance(tui_event, TuiComponentEvents.ResponseStarted):
             await self.pending_panel.start_markdown_stream()
-        elif isinstance(tui_event, TuiEvents.ResponseChunk):
+        elif isinstance(tui_event, TuiComponentEvents.ResponseChunk):
             await self.pending_panel.add_markdown_chunk(tui_event.chunk)
-        elif isinstance(tui_event, TuiEvents.ResponseComplete):
+        elif isinstance(tui_event, TuiComponentEvents.ResponseComplete):
             await self.pending_panel.end_markdown_stream()
 
         self.tui.conversation.scroll_to_latest_message()
@@ -95,7 +95,7 @@ class TUIManagerService(Service):
             # TODO: This should flash an error
             # console.print_error(f"Unknown command: /{command_name}")
 
-    async def handle_user_message(self, event: Events.UserInputSubmitted):
+    async def handle_user_message(self, event: TuiEvents.UserInputSubmitted):
         user_input = event.message
 
         # User Messages are always our primary entrypoint. As a result we always create a pending panel here and mount it empty.

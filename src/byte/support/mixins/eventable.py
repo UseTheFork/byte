@@ -4,11 +4,13 @@ from typing import TYPE_CHECKING, TypeVar
 
 from byte import EventBus
 from byte.event import Event
+from byte.tui import TuiComponentEvent, TuiEvents
 
 if TYPE_CHECKING:
     from byte.foundation import Application
 
 T = TypeVar("T", bound=Event)
+TuiEvent = TypeVar("TuiEvent", bound=TuiComponentEvent)
 
 
 class Eventable:
@@ -38,3 +40,17 @@ class Eventable:
 
         event_bus = self.app.make(EventBus)
         return await event_bus.emit(payload)
+
+    async def emit_tui(self, payload: TuiComponentEvent) -> TuiEvents.ComponentEvent:
+        """Emit a TUI event through the event bus system.
+
+        Wraps the TuiEvents payload in Events.TuiEvent before emitting,
+        allowing TUI-specific events to be processed by registered listeners.
+        Usage: `await self.emit_tui(TuiEvents.ResponseStarted())`
+        """
+
+        if not self.app:
+            raise RuntimeError("No app available - ensure service is properly initialized")
+
+        event_bus = self.app.make(EventBus)
+        return await event_bus.emit(TuiEvents.ComponentEvent(payload))

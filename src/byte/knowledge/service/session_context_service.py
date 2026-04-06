@@ -1,7 +1,8 @@
 from typing import Optional
 
-from byte import Events, Service
+from byte import Service
 from byte.knowledge import SessionContextModel
+from byte.orchestration import OrchestrationEvents
 from byte.support import ArrayStore, Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 
@@ -65,7 +66,9 @@ class SessionContextService(Service):
         """
         return self.session_context.all()
 
-    async def add_session_context_hook(self, payload: Events.GatherReinforcement) -> Events.GatherReinforcement:
+    async def add_session_context_hook(
+        self, payload: OrchestrationEvents.GatherReinforcement
+    ) -> OrchestrationEvents.GatherReinforcement:
         """Inject session context into the prompt state.
 
         Aggregates all stored context items and adds them to the

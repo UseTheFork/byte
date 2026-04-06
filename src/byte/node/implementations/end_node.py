@@ -6,9 +6,8 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte import Events
 from byte.clipboard import ClipboardService
-from byte.node import Node
+from byte.node import Node, NodeEvents
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.support import Boundary, BoundaryType
 from byte.support.utils import get_last_ai_message, list_to_multiline_text
@@ -40,7 +39,7 @@ class EndNode(Node):
     ) -> Command[Literal["__end__"]]:
         if runtime is not None and runtime.context is not None:
             await self.emit(
-                Events.EndNode(
+                NodeEvents.EndNode(
                     state=state,
                     agent=runtime.context.agent,
                 )

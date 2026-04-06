@@ -2,7 +2,7 @@ from typing import Any
 
 from langchain.chat_models import BaseChatModel, init_chat_model
 
-from byte import Events, Service
+from byte import Service
 from byte.foundation.exceptions import ByteConfigException
 from byte.llm import (
     ModelBehavior,
@@ -10,6 +10,7 @@ from byte.llm import (
     ModelSchema,
     ReinforcementMode,
 )
+from byte.orchestration import OrchestrationEvents
 from byte.support import Yaml
 
 
@@ -155,7 +156,9 @@ class LLMService(Service):
         """
         return self.get_model("weak")
 
-    async def add_reinforcement_hook(self, payload: Events.GatherReinforcement) -> Events.GatherReinforcement:
+    async def add_reinforcement_hook(
+        self, payload: OrchestrationEvents.GatherReinforcement
+    ) -> OrchestrationEvents.GatherReinforcement:
         """Add reinforcement messages based on model's reinforcement mode.
 
         Checks the reinforcement mode of the model being used and adds

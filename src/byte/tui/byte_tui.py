@@ -9,7 +9,9 @@ from textual.binding import Binding, BindingType
 from textual.containers import VerticalScroll
 from textual.widgets import Footer
 
-from byte import CommandRegistryService, EventBus, Events
+from byte import CommandRegistryService, EventBus
+from byte.system import SystemEvents
+from byte.tui import TuiEvents
 from byte.tui.messages import Messages
 from byte.tui.themes import ThemeRegistry
 from byte.tui.widgets.bootbox import Bootbox
@@ -91,7 +93,7 @@ class ByteTUI(App, inherit_bindings=False):
         event_bus = self.byte.make(EventBus)
 
         # Emit our post boot message to gather all needed info.
-        payload = await event_bus.emit(Events.PostBoot(messages=[]))
+        payload = await event_bus.emit(SystemEvents.PostBoot(messages=[]))
         messages = payload.messages
 
         styled_logo = []
@@ -141,7 +143,7 @@ class ByteTUI(App, inherit_bindings=False):
 
         # TODO: should we make this none blocking?
         await self.event_bus.emit(
-            Events.UserInputSubmitted(
+            TuiEvents.UserInputSubmitted(
                 event.body,
             )
         )

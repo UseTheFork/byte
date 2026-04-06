@@ -1,6 +1,6 @@
-from byte import EventBus, Events
+from byte import EventBus
 from byte.support import ServiceProvider
-from byte.tui import TUIManagerService
+from byte.tui import TuiEvents, TUIManagerService
 
 
 class TUIServiceProvider(ServiceProvider):
@@ -17,10 +17,10 @@ class TUIServiceProvider(ServiceProvider):
         tui_manager_service = self.app.make(TUIManagerService)
 
         event_bus.on(
-            Events.TuiEvent,
+            TuiEvents.ComponentEvent,
             tui_manager_service.route_event,
         )
         event_bus.on(
-            Events.UserInputSubmitted,
+            TuiEvents.UserInputSubmitted,
             tui_manager_service.handle_user_message,
         )

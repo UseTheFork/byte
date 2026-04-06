@@ -5,12 +5,11 @@ from typing import TYPE_CHECKING, TypeVar
 
 from typing_extensions import List
 
-from byte import Events
 from byte.code_operations import EditBlockService, edit_block_messages
 from byte.conventions import ConventionContextService
 from byte.files import FileService
 from byte.git import CommitService
-from byte.orchestration import AssistantContextSchema, BaseState
+from byte.orchestration import AssistantContextSchema, BaseState, OrchestrationEvents
 from byte.support import Boundary, BoundaryType
 from byte.support.mixins import Bootable, Eventable
 from byte.support.utils import list_to_multiline_text
@@ -54,7 +53,7 @@ class PromptAssembler(Bootable, Eventable):
         Usage: `reinforcement_messages = await self._gather_reinforcement("main")`
         """
         reinforcement_payload = await self.emit(
-            Events.GatherReinforcement(
+            OrchestrationEvents.GatherReinforcement(
                 reinforcement=[],
                 mode=context.mode,
                 agent=context.agent,

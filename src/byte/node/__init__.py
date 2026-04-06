@@ -6,6 +6,7 @@ from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
     from byte.node.base_node import Node, Node as BaseNode
+    from byte.node.events import NodeEvents
     from byte.node.implementations.dummy_node import DummyNode
     from byte.node.implementations.end_node import EndNode
     from byte.node.implementations.extract_node import ExtractNode
@@ -32,6 +33,7 @@ __all__ = (
     "ModelReasoningNode",
     "ModelWeakNode",
     "Node",
+    "NodeEvents",
     "NodeServiceProvider",
     "ParseBlocksNode",
     "RoutingNode",
@@ -52,6 +54,7 @@ _dynamic_imports = {
     "ModelReasoningNode": "implementations.model_reasoning_node",
     "ModelWeakNode": "implementations.model_weak_node",
     "Node": "base_node",
+    "NodeEvents": "events",
     "NodeServiceProvider": "service_provider",
     "ParseBlocksNode": "implementations.parse_blocks_node",
     "RoutingNode": "implementations.routing_node",

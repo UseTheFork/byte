@@ -4,11 +4,10 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte import EventBus, Events
 from byte.llm import LLMService
 from byte.node import ModelBaseNode
 from byte.orchestration import AssistantContextSchema, BaseState
-from byte.tui import TuiEvents
+from byte.tui import TuiComponentEvents
 
 
 class ModelMainNode(ModelBaseNode):
@@ -27,14 +26,13 @@ class ModelMainNode(ModelBaseNode):
         llm_service = self.app.make(LLMService)
         runnable = self._create_runnable(llm_service.get_main_model(), runtime.context)
 
-        event_bus = self.app.make(EventBus)
-        await event_bus.emit(Events.TuiEvent(TuiEvents.AddHeading(runtime.context.agent, "text-primary")))
-        await event_bus.emit(Events.TuiEvent(TuiEvents.ResponseStarted()))
+        await self.emit_tui(TuiComponentEvents.AddHeading(runtime.context.agent, "text-primary"))
+        await self.emit_tui(TuiComponentEvents.ResponseStarted())
 
         result = await runnable.ainvoke(agent_state, config=config)
         # await record_response_service.record_response(agent_state, runnable, runtime, config)
 
-        await event_bus.emit(Events.TuiEvent(TuiEvents.ResponseComplete()))
+        await self.emit_tui(TuiComponentEvents.ResponseComplete())
 
         if result.tool_calls and len(result.tool_calls) > 0:
             return self.route_to("tool_node", {"scratch_messages": [result], "errors": None})

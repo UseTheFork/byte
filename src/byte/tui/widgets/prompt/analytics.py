@@ -68,14 +68,13 @@ class Analytics(containers.VerticalGroup):
 
     files_read_only: var[int] = var(0)
     files_editable: reactive[int] = reactive(0)
-    files_read_only_count: reactive[int] = reactive(0)
 
     def compose(self) -> ComposeResult:
         with HorizontalGroup():
             yield Label("Memory Used", classes="px-1 w-auto")
             yield ProgressBar(total=100, show_eta=False, classes="w-50", id="memory-progress")
             yield FileInfo(classes="px-1 w-auto text-right").data_bind(
-                editable=Analytics.files_editable, read_only=Analytics.files_read_only_count
+                editable=Analytics.files_editable, read_only=Analytics.files_read_only
             )
         with containers.HorizontalGroup(classes="w-full"):
             yield TokensInfo(self.tokens_used, classes="px-1 w-50 text-left").data_bind(
@@ -109,8 +108,15 @@ class Analytics(containers.VerticalGroup):
         progress_bar = self.query_one("#memory-progress", ProgressBar)
         progress_bar.update(progress=memory_percent)
 
-        # # Update the labels
-        # TokensInfo and CostInfo update automatically via data_bind
+    def update_files(self, editable: int, read_only: int) -> None:
+        """Update file counts display.
+
+        Args:
+            editable: Number of editable files in context.
+            read_only: Number of read-only files in context.
+        """
+        self.files_editable = editable
+        self.files_read_only = read_only
 
     def humanizer(self, number: int | float) -> str:
         divisor = 1

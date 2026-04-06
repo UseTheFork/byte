@@ -7,48 +7,52 @@ if TYPE_CHECKING:
     from byte.tui.schemas import ChatMessage
 
 
+class TuiComponentEvent(Event):
+    pass
+
+
 # Sub events that specifically have to do with the TUI
-class TuiEvents:
+class TuiComponentEvents:
     @dataclass
-    class CommandExecutionStarted(Event):
+    class CommandExecutionStarted(TuiComponentEvent):
         pass
 
     @dataclass
-    class CommandExecutionCompleted(Event):
+    class CommandExecutionCompleted(TuiComponentEvent):
         pass
 
     @dataclass
-    class AddHeading(Event):
+    class AddHeading(TuiComponentEvent):
         heading: str
         classes: str = "text-muted"
 
     @dataclass
-    class ResponseStarted(Event):
+    class ResponseStarted(TuiComponentEvent):
         pass
 
     @dataclass
-    class ResponseChunk(Event):
+    class ResponseChunk(TuiComponentEvent):
         chunk: str
 
     @dataclass
-    class ResponseComplete(Event):
+    class ResponseComplete(TuiComponentEvent):
         pass
 
     @dataclass
-    class PromptSuggestion(Event):
+    class PromptSuggestion(TuiComponentEvent):
         suggestion: str
 
     @dataclass
-    class UserInputSubmitted(Event):
+    class UserInputSubmitted(TuiComponentEvent):
         body: str
         auto_complete: bool = False
 
     @dataclass
-    class UserInputChanged(Event):
+    class UserInputChanged(TuiComponentEvent):
         value: str
 
     @dataclass
-    class UpdateAnalytics(Event):
+    class UpdateAnalytics(TuiComponentEvent):
         tokens_sent: int
         tokens_received: int
         message_cost: float
@@ -56,18 +60,23 @@ class TuiEvents:
         memory_percent: float
 
     @dataclass
-    class Notify(Event):
+    class UpdateFiles(TuiComponentEvent):
+        editable: int
+        read_only: int
+
+    @dataclass
+    class Notify(TuiComponentEvent):
         content: str
         style: Literal["default", "warning", "success", "error"] = "default"
         duration: float | None = None
 
     @dataclass
-    class AgentResponseFailed(Event):
+    class AgentResponseFailed(TuiComponentEvent):
         """Sent when the agent fails to respond e.g. cant connect.
         Can be used to reset UI state."""
 
         last_message: ChatMessage
 
     @dataclass
-    class NewUserMessage(Event):
+    class NewUserMessage(TuiComponentEvent):
         content: str

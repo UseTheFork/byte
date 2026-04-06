@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from byte import Events, Service
+from byte import Service
+from byte.orchestration import OrchestrationEvents
 
 
 class SystemContextService(Service):
@@ -12,7 +13,9 @@ class SystemContextService(Service):
     Usage: `await system_context_service.add_system_context(payload)`
     """
 
-    async def add_system_context(self, payload: Events.GatherReinforcement) -> Events.GatherReinforcement:
+    async def add_system_context(
+        self, payload: OrchestrationEvents.GatherReinforcement
+    ) -> OrchestrationEvents.GatherReinforcement:
         """Add system context information to the project context.
 
         Injects current date and other system-level metadata into the prompt

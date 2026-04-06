@@ -1,7 +1,8 @@
 from typing import List, Type
 
-from byte import Command, EventBus, Events, Service, ServiceProvider
+from byte import Command, EventBus, Service, ServiceProvider
 from byte.memory import UndoCommand
+from byte.orchestration import OrchestrationEvents
 from byte.system import ExitCommand, SystemContextService
 
 
@@ -35,7 +36,7 @@ class SystemServiceProvider(ServiceProvider):
         system_context_service = self.app.make(SystemContextService)
 
         event_bus.on(
-            Events.GatherReinforcement,
+            OrchestrationEvents.GatherReinforcement,
             system_context_service.add_system_context,
         )
 

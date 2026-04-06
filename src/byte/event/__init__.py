@@ -5,17 +5,17 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.event.event import Event, Events
     from byte.event.event_bus import EventBus
-    from byte.event.events import Event, Events
 
 
 __all__ = ("Event", "EventBus", "Events")
 
 _dynamic_imports = {
     # keep-sorted start
-    "Event": "events",
+    "Event": "event",
     "EventBus": "event_bus",
-    "Events": "events",
+    "Events": "event",
     # keep-sorted end
 }
 

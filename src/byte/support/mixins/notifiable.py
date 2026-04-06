@@ -1,8 +1,7 @@
 from typing import Literal
 
-from byte import Events
 from byte.support.mixins import Eventable
-from byte.tui import TuiEvents
+from byte.tui import TuiComponentEvents, TuiEvents
 
 
 class Notifiable(Eventable):
@@ -17,8 +16,8 @@ class Notifiable(Eventable):
         """Display a default notification."""
 
         await self.emit(
-            Events.TuiEvent(
-                TuiEvents.Notify(
+            TuiEvents.ComponentEvent(
+                TuiComponentEvents.Notify(
                     content=message,
                     style=style,
                     duration=duration,

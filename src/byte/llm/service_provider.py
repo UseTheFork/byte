@@ -1,7 +1,9 @@
 from __future__ import annotations
 
-from byte import EventBus, Events, ServiceProvider
+from byte import EventBus, ServiceProvider
 from byte.llm import LLMService
+from byte.orchestration import OrchestrationEvents
+from byte.system import SystemEvents
 
 
 class LLMServiceProvider(ServiceProvider):
@@ -25,16 +27,16 @@ class LLMServiceProvider(ServiceProvider):
 
         # Register listener that calls list_in_context_files before each prompt
         event_bus.on(
-            Events.GatherReinforcement,
+            OrchestrationEvents.GatherReinforcement,
             llm_service.add_reinforcement_hook,
         )
 
         event_bus.on(
-            Events.PostBoot,
+            SystemEvents.PostBoot,
             self.boot_messages,
         )
 
-    async def boot_messages(self, payload: Events.PostBoot) -> Events.PostBoot:
+    async def boot_messages(self, payload: SystemEvents.PostBoot) -> SystemEvents.PostBoot:
         llm_service = self.app.make(LLMService)
         # Display active model configuration for user awareness
         reasoning_model = f"{llm_service._reasoning_schema.provider}:{llm_service._reasoning_schema.model}"
