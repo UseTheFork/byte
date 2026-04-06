@@ -1,4 +1,5 @@
 from byte import CommandRegistryService
+from byte.files import FileEvents
 from byte.support import Service
 from byte.tui import TuiComponentEvents, TuiEvents
 
@@ -101,3 +102,10 @@ class TUIManagerService(Service):
         # User Messages are always our primary entrypoint. As a result we always create a pending panel here and mount it empty.
         if user_input.startswith("/"):
             await self._handle_command_input(event.message)
+
+    async def on_file_events_file_added(self, event: FileEvents.FileAdded):
+        self.tui.update_files(
+            editable=event.meta_editable_files,
+            read_only=event.meta_read_only_files,
+        )
+        return

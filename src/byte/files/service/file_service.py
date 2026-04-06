@@ -3,8 +3,6 @@ from os import PathLike
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-from rich.columns import Columns
-
 from byte import Service
 from byte.files import FileContext, FileDiscoveryService, FileEvents, FileMode
 from byte.support import Boundary, BoundaryType
@@ -27,8 +25,17 @@ class FileService(Service):
     async def _notify_file_added(self, file_path: str, mode: FileMode):
         """Notify system that a file was added to context"""
 
+        # Count editable and read-only files in context
+        editable_count = sum(1 for f in self._context_files.values() if f.mode == FileMode.EDITABLE)
+        read_only_count = sum(1 for f in self._context_files.values() if f.mode == FileMode.READ_ONLY)
+
         await self.emit(
-            FileEvents.FileAdded(file_path=file_path, mode=mode.value),
+            FileEvents.FileAdded(
+                file_path=file_path,
+                mode=mode.value,
+                meta_editable_files=editable_count,
+                meta_read_only_files=read_only_count,
+            ),
         )
 
     async def add_file(self, path: Union[str, PathLike], mode: FileMode) -> bool:
@@ -399,49 +406,49 @@ class FileService(Service):
         path_obj = Path(path).resolve()
         return str(path_obj) in self._context_files
 
-    async def list_in_context_files_hook(self, payload: Payload):
-        """Display current editable files before each prompt.
+    # async def list_in_context_files_hook(self, payload: Payload):
+    #     """Display current editable files before each prompt.
 
-        Provides visual feedback about which files the AI can modify,
-        helping users understand the current context state.
-        """
+    #     Provides visual feedback about which files the AI can modify,
+    #     helping users understand the current context state.
+    #     """
 
-        console = self.app["console"]
+    #     console = self.app["console"]
 
-        info_panel = payload.get("info_panel", [])
+    #     info_panel = payload.get("info_panel", [])
 
-        read_only_panel = None
+    #     read_only_panel = None
 
-        file_service = self.app.make(FileService)
-        readonly_files = file_service.list_files(FileMode.READ_ONLY)
-        if readonly_files:
-            file_names = [f"[text]{f.relative_path}[/text]" for f in readonly_files]
-            read_only_panel = console.panel(
-                Columns(file_names, equal=True, expand=True),
-                title=f"Read-only Files ({len(readonly_files)})",
-            )
+    #     file_service = self.app.make(FileService)
+    #     readonly_files = file_service.list_files(FileMode.READ_ONLY)
+    #     if readonly_files:
+    #         file_names = [f"[text]{f.relative_path}[/text]" for f in readonly_files]
+    #         read_only_panel = console.panel(
+    #             Columns(file_names, equal=True, expand=True),
+    #             title=f"Read-only Files ({len(readonly_files)})",
+    #         )
 
-        editable_panel = None
-        editable_files = file_service.list_files(FileMode.EDITABLE)
-        if editable_files:
-            file_names = [f"[text]{f.relative_path}[/text]" for f in editable_files]
-            editable_panel = console.panel(
-                Columns(file_names, equal=True, expand=True),
-                title=f"Editable Files ({len(editable_files)})",
-            )
+    #     editable_panel = None
+    #     editable_files = file_service.list_files(FileMode.EDITABLE)
+    #     if editable_files:
+    #         file_names = [f"[text]{f.relative_path}[/text]" for f in editable_files]
+    #         editable_panel = console.panel(
+    #             Columns(file_names, equal=True, expand=True),
+    #             title=f"Editable Files ({len(editable_files)})",
+    #         )
 
-        # Create columns layout with both panels if they exist
-        panels_to_show = []
-        if read_only_panel:
-            panels_to_show.append(read_only_panel)
-        if editable_panel:
-            panels_to_show.append(editable_panel)
+    #     # Create columns layout with both panels if they exist
+    #     panels_to_show = []
+    #     if read_only_panel:
+    #         panels_to_show.append(read_only_panel)
+    #     if editable_panel:
+    #         panels_to_show.append(editable_panel)
 
-        if panels_to_show:
-            columns_panel = Columns(panels_to_show, equal=True, expand=True)
-            info_panel.append(columns_panel)
+    #     if panels_to_show:
+    #         columns_panel = Columns(panels_to_show, equal=True, expand=True)
+    #         info_panel.append(columns_panel)
 
-        return payload.set("info_panel", info_panel)
+    #     return payload.set("info_panel", info_panel)
 
     async def generate_context_prompt_with_line_numbers(self) -> tuple[list[str], list[str]]:
         """Generate structured file lists with line numbers for read-only and editable files.

@@ -75,17 +75,13 @@ class PromptTextArea(TextArea):
         self.highlight_cursor_line = False
         self.hide_suggestion_on_blur = False
 
-    # async def _on_key(self, event) -> None:
-    #     # if event.key != "escape":
-    #     #     self.suggestions = None
-    #     #     self.suggestion = ""
+    async def _on_key(self, event) -> None:
+        if self._autocomplete and self._autocomplete.handle_key(event.key):
+            event.prevent_default()
+            event.stop()
+            return
 
-    #     if self._autocomplete and self._autocomplete.handle_key(event.key):
-    #         event.prevent_default()
-    #         event.stop()
-    #         return
-
-    #     await super()._on_key(event)
+        await super()._on_key(event)
 
     def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
         if action == "newline" and self.multi_line:

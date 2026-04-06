@@ -13,6 +13,8 @@ class FileEvents:
         file_path: str
         mode: str
         action: str = "context_added"
+        meta_editable_files: int = 0
+        meta_read_only_files: int = 0
 
     @dataclass
     class FileChanged(Event):

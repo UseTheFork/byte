@@ -197,3 +197,12 @@ class ByteTUI(App, inherit_bindings=False):
             session_cost=session_cost,
             memory_percent=memory_percent,
         )
+
+    def update_files(self, editable: int, read_only: int) -> None:
+        """Update file counts display with current context statistics.
+
+        Args:
+            editable: Number of editable files in context.
+            read_only: Number of read-only files in context.
+        """
+        self.query_one(Analytics).update_files(editable=editable, read_only=read_only)

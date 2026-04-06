@@ -1,4 +1,5 @@
 from byte import EventBus
+from byte.files import FileEvents
 from byte.support import ServiceProvider
 from byte.tui import TuiEvents, TUIManagerService
 
@@ -16,6 +17,10 @@ class TUIServiceProvider(ServiceProvider):
         event_bus = self.app.make(EventBus)
         tui_manager_service = self.app.make(TUIManagerService)
 
+        event_bus.on(
+            FileEvents.FileAdded,
+            tui_manager_service.on_file_events_file_added,
+        )
         event_bus.on(
             TuiEvents.ComponentEvent,
             tui_manager_service.route_event,
