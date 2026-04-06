@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import re
 from typing import TYPE_CHECKING, TypeVar
 
@@ -248,7 +246,7 @@ class PromptAssembler(Bootable, Eventable):
         Usage: `context_messages = await self._gather_project_context()`
         """
 
-        project_context = await self.emit(Events.GatherProjectContext())
+        project_context = await self.emit(OrchestrationEvents.GatherProjectContext())
 
         project_information_and_context = []
         conventions = project_context.conventions
