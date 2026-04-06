@@ -212,3 +212,10 @@ class ByteTUI(App, inherit_bindings=False):
             read_only: Number of read-only files in context.
         """
         self.query_one(Analytics).update_files(editable=editable, read_only=read_only)
+
+    @on(Messages.Answer)
+    async def on_question_answered(self, event: Messages.Answer):
+        # Just hide the question widget
+        # Future is already resolved by the widget itself
+        self.prompt.remove_class("-mode-ask")
+        self.prompt.prompt_text_area.focus()

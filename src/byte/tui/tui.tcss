@@ -85,50 +85,6 @@ Conversation {
         }
     }
 
-    Question {
-      display: none;
-      #title {
-        width: 1fr;
-      }
-      height: auto;
-
-      #contents {
-        margin-top: 0;
-        height: auto;
-        overflow: hidden auto;
-        max-height: 50vh;
-        margin-bottom: 1;
-
-        DiffView {
-          .diff-group {
-            margin-bottom: 0;
-          }
-        }
-        #title {
-          margin: 0;
-        }
-        & > * {
-          padding-right: 1;
-          margin: 1 0 0 0;
-        }
-
-        &:empty {
-          height: 1;
-        }
-      }
-      #option-container {
-        split: bottom;
-        height: auto;
-      }
-    }
-    &.-mode-ask {
-      Question {
-        display: block;
-      }
-      #text-prompt {
-        display: none;
-      }
-    }
 
     PromptContainer {
       background: $background;

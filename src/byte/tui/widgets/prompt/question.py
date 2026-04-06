@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Callable
 
 from textual import containers, events, getters, on, widgets
 from textual.app import ComposeResult
@@ -11,23 +12,13 @@ from textual.message import Message
 from textual.reactive import reactive, var
 from textual.widget import Widget
 
-from byte.tui.schemas import Answer
+from byte.tui import Messages
+from byte.tui.schemas import Answer, Ask
 
 type Options = list[Answer]
 
+
 # Credits: https://github.com/batrachianai/toad/blob/main/src/toad/widgets/question.py
-
-
-@dataclass
-class Ask:
-    """Data for Question."""
-
-    question: str
-    options: Options
-    get_content: Callable[[], Widget] | None = None
-    callback: Callable[[Answer], Any] | None = None
-
-
 class NonSelectableLabel(widgets.Label):
     ALLOW_SELECT = False
 
@@ -90,7 +81,7 @@ class Option(containers.HorizontalGroup):
 
     def compose(self) -> ComposeResult:
         key = self.key
-        yield NonSelectableLabel("❯", id="caret")
+        yield NonSelectableLabel("❯", id="caret")  # noqa: RUF001
         if key:
             yield NonSelectableLabel(Content.styled(f"{key}", "b"), id="index")
         else:
@@ -106,18 +97,11 @@ class Option(containers.HorizontalGroup):
 class Question(containers.VerticalGroup, can_focus=True):
     """A text question with a menu of responses."""
 
-    @dataclass
-    class Answer(Message):
-        """User selected a response."""
-
-        index: int
-        answer: Answer
+    _result_future: asyncio.Future[Answer] | None = None
 
     BINDING_GROUP_TITLE = "Question"
     ALLOW_SELECT = False
     CURSOR_GROUP = Binding.Group("Cursor", compact=True)
-    ALLOW_GROUP = Binding.Group("Allow once/always", compact=True)
-    REJECT_GROUP = Binding.Group("Reject once/always", compact=True)
     BINDINGS = [
         Binding(
             "up",
@@ -136,35 +120,10 @@ class Question(containers.VerticalGroup, can_focus=True):
             "select",
             "Select",
         ),
-        Binding(
-            "a",
-            "select_kind(('allow_once', 'allow'))",
-            "Allow once",
-            group=ALLOW_GROUP,
-        ),
-        Binding(
-            "A",
-            "select_kind('allow_always')",
-            "Allow always",
-            group=ALLOW_GROUP,
-        ),
-        Binding(
-            "r",
-            "select_kind(('reject_once', 'reject'))",
-            "Reject once",
-            group=REJECT_GROUP,
-        ),
-        Binding(
-            "R",
-            "select_kind('reject_always')",
-            "Reject always",
-            group=REJECT_GROUP,
-        ),
     ]
 
     DEFAULT_CSS = """
     Question {
-        display: none;
         width: 1fr;
         height: auto;
         padding: 0 1; 
@@ -194,20 +153,12 @@ class Question(containers.VerticalGroup, can_focus=True):
     """
 
     title: var[str] = var("")
-    options: var[Options] = var(list)
+    options: var[Options] = var([])
 
     selection: reactive[int] = reactive(0, init=False)
     selected: var[bool] = var(False, toggle_class="-selected")
-    blink: var[bool] = var(False)
 
     option_container = getters.query_one("#option-container", containers.VerticalGroup)
-
-    DEFAULT_KINDS = {
-        "allow_once": "a",
-        "allow_always": "A",
-        "reject_once": "r",
-        "reject_always": "R",
-    }
 
     def __init__(
         self,
@@ -221,26 +172,12 @@ class Question(containers.VerticalGroup, can_focus=True):
     ):
         super().__init__(name=name, id=id, classes=classes, disabled=disabled)
         self.set_reactive(Question.title, title)
-        self._get_content = get_content
         self.set_reactive(Question.options, options or [])
-
-    def on_mount(self) -> None:
-        def toggle_blink() -> None:
-            if self.has_focus:
-                self.blink = not self.blink
-            else:
-                self.blink = False
-
-        self._blink_timer = self.set_interval(0.5, toggle_blink)
-
-    def _reset_blink(self) -> None:
-        self.blink = False
-        self._blink_timer.reset()
 
     def update(self, ask: Ask) -> None:
         self.title = ask.question
-        self._get_content = ask.get_content
         self.options = ask.options
+        self._result_future = ask.result_future
         self.selection = 0
         self.selected = False
         self.refresh(recompose=True, layout=True)
@@ -249,22 +186,16 @@ class Question(containers.VerticalGroup, can_focus=True):
         with containers.VerticalGroup(id="contents"):
             if self.title:
                 yield widgets.Label(self.title, id="title", markup=False)
-            if self._get_content is not None:
-                yield self._get_content()
 
         with containers.VerticalGroup(id="option-container"):
-            kinds: set[str] = set()
             for index, answer in enumerate(self.options):
                 active = index == self.selection
-                key = self.DEFAULT_KINDS.get(answer.kind) if (answer.kind and answer.kind not in kinds) else None
                 yield Option(
                     index,
                     Content(answer.text),
-                    key,
+                    None,
                     classes="-active" if active else "",
                 ).data_bind(Question.selected)
-                if answer.kind is not None:
-                    kinds.add(answer.kind)
 
     def watch_selection(self, old_selection: int, new_selection: int) -> None:
         self.query("#option-container > .-active").remove_class("-active")
@@ -274,52 +205,27 @@ class Question(containers.VerticalGroup, can_focus=True):
     def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
         if self.selected and action in ("selection_up", "selection_down"):
             return False
-        if action == "select_kind":
-            kinds = {answer.kind for answer in self.options if answer.kind is not None}
-            check_kinds = set()
-            for parameter in parameters:
-                if isinstance(parameter, str):
-                    check_kinds.add(parameter)
-                elif isinstance(parameter, tuple):
-                    check_kinds.update(parameter)
-
-            return any(kind in kinds for kind in check_kinds)
-
         return True
 
-    def watch_blink(self, blink: bool) -> None:
-        self.option_container.set_class(blink, "-blink")
-
     def action_selection_up(self) -> None:
-        self._reset_blink()
         self.selection = max(0, self.selection - 1)
 
     def action_selection_down(self) -> None:
-        self._reset_blink()
         self.selection = min(len(self.options) - 1, self.selection + 1)
 
     def action_select(self) -> None:
-        self._reset_blink()
-        self.post_message(
-            self.Answer(
-                index=self.selection,
-                answer=self.options[self.selection],
-            )
-        )
-        self.selected = True
+        answer = self.options[self.selection]
 
-    def action_select_kind(self, kind: str | tuple[str]) -> None:
-        kinds = kind if isinstance(kind, tuple) else (kind,)
-        for kind in kinds:
-            for index, answer in enumerate(self.options):
-                if answer.kind == kind:
-                    self.selection = index
-                    self.action_select()
-                    break
+        # Resolve the future if present
+        if self._result_future and not self._result_future.done():
+            self._result_future.set_result(answer)
+
+        # Still post message for other listeners
+        self.post_message(Messages.Answer(index=self.selection, answer=answer))
+        self.selected = True
 
     @on(Option.Selected)
     def on_option_selected(self, event: Option.Selected) -> None:
         event.stop()
-        self._reset_blink()
         if not self.selected:
             self.selection = event.index

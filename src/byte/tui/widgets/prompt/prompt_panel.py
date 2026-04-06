@@ -31,6 +31,8 @@ class PromptContainer(containers.HorizontalGroup):
 class PromptPanel(containers.VerticalGroup):
     prompt_container = getters.query_one("#prompt-container", PromptContainer)
     prompt_text_area = getters.query_one(PromptTextArea)
+
+    prompt_input = getters.query_one(PromptInput)
     question = getters.query_one(Question)
 
     working_directory = var("")

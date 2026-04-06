@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 from dataclasses import dataclass
 from typing import Literal, NamedTuple
@@ -19,10 +20,16 @@ class Answer(NamedTuple):
 
     text: str
     id: str
-    kind: Literal["allow_once", "allow_always", "reject_once", "reject_always"] | None = None
-    """The textual response."""
-    """The id of the response."""
-    """Enumeration to potentially influence UI"""
+
+
+type Options = list[Answer]
+
+
+@dataclass
+class Ask:
+    question: str
+    options: Options
+    result_future: asyncio.Future[Answer]
 
 
 @dataclass

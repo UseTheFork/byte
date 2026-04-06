@@ -29,3 +29,7 @@ class TUIServiceProvider(ServiceProvider):
             TuiEvents.UserInputSubmitted,
             tui_manager_service.handle_user_message,
         )
+        event_bus.on(
+            TuiEvents.AskQuestion,
+            tui_manager_service.handle_ask_question,
+        )

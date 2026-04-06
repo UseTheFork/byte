@@ -1,5 +1,4 @@
-from __future__ import annotations
-
+import asyncio
 from typing import TYPE_CHECKING, Optional, TypeVar
 
 from byte.cli.service.interactions_service import (
@@ -53,7 +52,7 @@ class UserInteractive:
         interaction_service = self.app.make(InteractionService)
         return await interaction_service.confirm(message, default)
 
-    async def prompt_for_select(self, message: str, choices: list[str], default: str | None = None) -> str | None:
+    async def prompt_for_select(self, message: str, choices, default: str | None = None) -> str | None:
         """Prompt the user to select from multiple options.
 
         Displays a list of choices and waits for user selection with
@@ -64,8 +63,21 @@ class UserInteractive:
         if not self.app:
             raise RuntimeError("No container available - ensure service is properly initialized")
 
-        interaction_service = self.app.make(InteractionService)
-        return await interaction_service.select(message, choices, default)
+        from byte import EventBus
+        from byte.tui import TuiEvents
+        from byte.tui.schemas import Answer
+
+        # options = [Answer(text=text, id=id) for id, text in choices]
+        options = [Answer(text="foo", id="foo"), Answer(text="bar", id="bar")]
+
+        result_future: asyncio.Future[Answer] = asyncio.Future()
+
+        event_bus = self.app.make(EventBus)
+        await event_bus.emit(TuiEvents.AskQuestion(question=message, options=options, result_future=result_future))
+
+        await result_future
+        answer = result_future.result()
+        return answer.id
 
     async def prompt_for_select_numbered(
         self, message: str, choices: list[str], default: int | None = None

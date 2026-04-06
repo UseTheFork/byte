@@ -10,6 +10,7 @@ from byte.code_operations import PromptFormatProvider
 from byte.command import CommandServiceProvider
 from byte.conventions.service_provider import ConventionsServiceProvider
 from byte.development import DevelopmentServiceProvider
+from byte.event import EventsServiceProvider
 from byte.files import FileServiceProvider
 from byte.foundation import Application
 from byte.git import GitServiceProvider
@@ -25,6 +26,7 @@ from byte.web import WebServiceProvider
 from byte.workflow import WorkflowServiceProvider
 
 PROVIDERS = [
+    EventsServiceProvider,
     CommandServiceProvider,
     MemoryServiceProvider,
     KnowledgeServiceProvider,
