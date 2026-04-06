@@ -30,7 +30,11 @@ if TYPE_CHECKING:
 class ByteTUI(App, inherit_bindings=False):
     AUTO_FOCUS = "Conversation PromptPanel PromptTextArea"
 
-    CSS_PATH = Path(__file__).parent / "tui.tcss"
+    CSS_PATH = [
+        Path(__file__).parent / "utils.tcss",
+        Path(__file__).parent / "tui.tcss",
+    ]
+
     BINDINGS: ClassVar[list[BindingType]] = [
         Binding(
             "ctrl+q",
