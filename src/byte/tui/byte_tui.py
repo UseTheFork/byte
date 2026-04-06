@@ -21,6 +21,7 @@ from byte.tui.widgets.panels.pending_panel import PendingPanel
 from byte.tui.widgets.prompt.analytics import Analytics
 from byte.tui.widgets.prompt.flash import Flash
 from byte.tui.widgets.prompt.prompt_panel import PromptPanel
+from byte.tui.widgets.ui.loading_indicator import LoadingIndicator
 
 if TYPE_CHECKING:
     from byte import Application
@@ -56,6 +57,7 @@ class ByteTUI(App, inherit_bindings=False):
 
     prompt = getters.query_one("#prompt", PromptPanel)
     chat_container = getters.query_one("#chat-container", VerticalScroll)
+    loading_indicator = getters.query_one(LoadingIndicator)
     conversation = getters.query_one(Conversation)
 
     def __init__(self, container: Application):

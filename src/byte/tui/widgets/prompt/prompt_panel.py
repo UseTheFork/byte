@@ -10,6 +10,7 @@ from byte.tui.widgets.prompt.analytics import Analytics
 from byte.tui.widgets.prompt.flash import Flash
 from byte.tui.widgets.prompt.prompt_input import PromptInput, PromptTextArea
 from byte.tui.widgets.prompt.question import Question
+from byte.tui.widgets.ui.loading_indicator import LoadingIndicator
 from byte.tui.widgets.ui.text_area_auto_complete import TextAreaAutoComplete
 
 if TYPE_CHECKING:
@@ -59,6 +60,7 @@ class PromptPanel(containers.VerticalGroup):
         self.query_one(PromptTextArea).insert(text, maintain_selection_offset=False)
 
     def compose(self) -> ComposeResult:
+        yield LoadingIndicator(id="loading-indicator", classes="hidden")
         yield Flash()
         yield TextAreaAutoComplete("#input")
         with PromptContainer(id="prompt-container"):

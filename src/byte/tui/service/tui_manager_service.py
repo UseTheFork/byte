@@ -25,10 +25,7 @@ class TUIManagerService(Service):
 
     async def _create_pending_panel(self):
         self.pending_panel = await self.tui.mount_pending_response_panel()
-
-        # self.pending_panel.rune_spinner.display = "none"
-        # self.pending_panel.agent_response_widget.update(event.chunk)
-        # current_chatbox.agent_response_widget.update(self.current_chatbox.response)
+        self.tui.loading_indicator.show("Thinking")
 
     async def route_event(self, event: TuiEvents.ComponentEvent):
         tui_event = event.event
@@ -63,8 +60,10 @@ class TUIManagerService(Service):
             await self.pending_panel.start_markdown_stream()
         elif isinstance(tui_event, TuiComponentEvents.ResponseChunk):
             await self.pending_panel.add_markdown_chunk(tui_event.chunk)
+            self.tui.loading_indicator.hide()
         elif isinstance(tui_event, TuiComponentEvents.ResponseComplete):
             await self.pending_panel.end_markdown_stream()
+            self.tui.loading_indicator.hide()
 
         self.tui.conversation.scroll_to_latest_message()
 
