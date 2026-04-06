@@ -21,7 +21,7 @@ Tabs .underline--bar {
 }
 
 Screen {
-  padding: 0 2 1 2;
+  padding: 0 0 0 0;
   background: transparent;
   &:inline {
     height: 80vh;

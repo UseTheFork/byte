@@ -27,7 +27,6 @@ class TUIManagerService(Service):
 
         # self.pending_panel.rune_spinner.display = "none"
         # self.pending_panel.agent_response_widget.update(event.chunk)
-        # self.tui.conversation.scroll_to_latest_message()
         # current_chatbox.agent_response_widget.update(self.current_chatbox.response)
 
     async def route_event(self, event: Events.TuiEvent):
@@ -65,7 +64,10 @@ class TUIManagerService(Service):
             await self.pending_panel.add_markdown_chunk(tui_event.chunk)
         elif isinstance(tui_event, TuiEvents.ResponseComplete):
             await self.pending_panel.end_markdown_stream()
-        # # TODO: We need a fallback on to coder command here.
+
+        self.tui.conversation.scroll_to_latest_message()
+
+        # # TODO: We need a fallback here.
 
     async def _handle_command_input(self, user_input: str):
         """Parse and execute slash commands.
