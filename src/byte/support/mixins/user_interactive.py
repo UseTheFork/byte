@@ -68,16 +68,19 @@ class UserInteractive:
         from byte.tui.schemas import Answer
 
         # options = [Answer(text=text, id=id) for id, text in choices]
-        options = [Answer(text="foo", id="foo"), Answer(text="bar", id="bar")]
+        options = [Answer(label="foo", value="foo"), Answer(label="bar", value="bar")]
 
-        result_future: asyncio.Future[Answer] = asyncio.Future()
+        result_future = asyncio.Future()
 
         event_bus = self.app.make(EventBus)
-        await event_bus.emit(TuiEvents.AskQuestion(question=message, options=options, result_future=result_future))
+        await event_bus.emit(
+            TuiEvents.AskQuestion(question=message, options=options, result_future=result_future),
+        )
 
         await result_future
         answer = result_future.result()
-        return answer.id
+        self.app["log"].info(answer)
+        return answer.value
 
     async def prompt_for_select_numbered(
         self, message: str, choices: list[str], default: int | None = None

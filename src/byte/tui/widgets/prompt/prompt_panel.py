@@ -66,7 +66,6 @@ class PromptPanel(containers.VerticalGroup):
         yield Flash()
         yield TextAreaAutoComplete("#input")
         with PromptContainer(id="prompt-container"):
-            yield Question()
             yield PromptInput()
 
         yield Analytics(id="analytics-panel")

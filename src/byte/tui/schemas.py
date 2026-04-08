@@ -1,35 +1,32 @@
 import asyncio
 import datetime
 from dataclasses import dataclass
-from typing import Literal, NamedTuple
+from typing import TYPE_CHECKING, Any, Literal
 
 from langchain_core.messages import BaseMessage
 
-from byte import Command
-
-"""
-allow_once - Allow this operation only this time
-allow_always - Allow this operation and remember the choice
-reject_once - Reject this operation only this time
-reject_always - Reject this operation and remember the choice
-"""
+if TYPE_CHECKING:
+    from byte import Command
 
 
-class Answer(NamedTuple):
+@dataclass
+class Answer:
     """An answer to a question posed by the agent."""
 
-    text: str
-    id: str
+    label: str
+    value: Any
 
 
-type Options = list[Answer]
+@dataclass
+class AnswerCancelled:
+    pass
 
 
 @dataclass
 class Ask:
     question: str
-    options: Options
-    result_future: asyncio.Future[Answer]
+    options: list[Answer]
+    result_future: asyncio.Future[Answer | list[Answer] | AnswerCancelled]
 
 
 @dataclass

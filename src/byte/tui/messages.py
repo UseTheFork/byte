@@ -5,7 +5,7 @@ from textual.content import Content
 from textual.message import Message
 from textual.widget import Widget
 
-from byte.tui.schemas import Answer as AnswerSchema
+from byte.tui.schemas import Answer as AnswerSchema, AnswerCancelled
 
 if TYPE_CHECKING:
     pass
@@ -53,9 +53,7 @@ class Messages:
         """User selected a response to a question.
 
         Args:
-            index: Index of the selected option.
             answer: The Answer object containing the user's selection.
         """
 
-        index: int
-        answer: AnswerSchema
+        answer: AnswerSchema | list[AnswerSchema] | AnswerCancelled

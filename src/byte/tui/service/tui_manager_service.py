@@ -111,18 +111,25 @@ class TUIManagerService(Service):
         return
 
     async def handle_ask_question(self, event: TuiEvents.AskQuestion):
-        question_widget = self.tui.prompt.question
+        # await self._create_pending_panel()
+
+        # assert self.pending_panel
 
         ask = Ask(
             question=event.question,
             options=event.options,
             result_future=event.result_future,
         )
-        question_widget.update(ask)
 
-        # Switch prompt to ask mode
-        self.tui.prompt.prompt_input.visible = False
-        self.tui.prompt.question.visible = True
+        await self.tui.add_select(ask)
 
-        self.tui.prompt.add_class("-mode-ask")
-        question_widget.focus()
+        # select
+
+        # question_widget.update(ask)
+
+        # # Switch prompt to ask mode
+        # self.tui.prompt.prompt_input.visible = False
+        # self.tui.prompt.question.visible = True
+
+        # self.tui.prompt.add_class("-mode-ask")
+        # question_widget.focus()

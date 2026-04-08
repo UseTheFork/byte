@@ -33,13 +33,11 @@ class Option(containers.HorizontalGroup):
     ALLOW_SELECT = False
     DEFAULT_CSS = """
     Option {
-
         &:hover {
             background: $boost;
         }
         color: $text-muted;
         #caret {
-            visibility: hidden;
             padding: 0 1;
         }
         #index {
@@ -50,9 +48,6 @@ class Option(containers.HorizontalGroup):
         }
         &.-active {            
             color: $text-accent;
-            #caret {
-                visibility: visible;
-            }
         }
         &.-selected {
             opacity: 0.5;
@@ -64,14 +59,12 @@ class Option(containers.HorizontalGroup):
             #label {
                 text-style: underline;
             }
-            #caret {
-                visibility: hidden;
-            }
         }
     }
     """
 
     selected: reactive[bool] = reactive(False, toggle_class="-selected")
+    active: reactive[bool] = reactive(False, init=False)
 
     def __init__(self, index: int, content: Content, key: str | None, classes: str = "") -> None:
         super().__init__(classes=classes)
@@ -81,13 +74,24 @@ class Option(containers.HorizontalGroup):
 
     def compose(self) -> ComposeResult:
         key = self.key
-        yield NonSelectableLabel("❯", id="caret")  # noqa: RUF001
         if key:
             yield NonSelectableLabel(Content.styled(f"{key}", "b"), id="index")
         else:
             yield NonSelectableLabel(Content(" "), id="index")
 
+        # Check if we have the -active class to determine initial caret
+        initial_caret = "◼" if "-active" in self.classes else "◻"
+        yield NonSelectableLabel(initial_caret, id="caret")
         yield NonSelectableLabel(self.content, id="label")
+
+    def watch_active(self, active: bool) -> None:
+        # Only update if the widget is mounted (composed)
+        try:
+            caret = self.query_one("#caret", NonSelectableLabel)
+            caret.update("◼" if active else "◻")
+        except:
+            # Widget not yet composed, ignore
+            pass
 
     def on_click(self, event: events.Click) -> None:
         event.stop()
@@ -198,9 +202,19 @@ class Question(containers.VerticalGroup, can_focus=True):
                 ).data_bind(Question.selected)
 
     def watch_selection(self, old_selection: int, new_selection: int) -> None:
-        self.query("#option-container > .-active").remove_class("-active")
+        # Update old selection
+        if old_selection >= 0 and old_selection < len(self.query_one("#option-container").children):
+            old_option = self.query_one("#option-container").children[old_selection]
+            old_option.remove_class("-active")
+            if isinstance(old_option, Option):
+                old_option.active = False
+
+        # Update new selection
         if new_selection >= 0:
-            self.query_one("#option-container").children[new_selection].add_class("-active")
+            new_option = self.query_one("#option-container").children[new_selection]
+            new_option.add_class("-active")
+            if isinstance(new_option, Option):
+                new_option.active = True
 
     def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
         if self.selected and action in ("selection_up", "selection_down"):

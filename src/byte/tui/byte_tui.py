@@ -13,6 +13,7 @@ from byte import CommandRegistryService, EventBus
 from byte.system import SystemEvents
 from byte.tui import TuiEvents
 from byte.tui.messages import Messages
+from byte.tui.schemas import Ask
 from byte.tui.themes import ThemeRegistry
 from byte.tui.widgets.bootbox import Bootbox
 from byte.tui.widgets.conversation import Conversation
@@ -22,6 +23,7 @@ from byte.tui.widgets.prompt.analytics import Analytics
 from byte.tui.widgets.prompt.flash import Flash
 from byte.tui.widgets.prompt.prompt_panel import PromptPanel
 from byte.tui.widgets.ui.loading_indicator import LoadingIndicator
+from byte.tui.widgets.ui.select import Select
 
 if TYPE_CHECKING:
     from byte import Application
@@ -99,7 +101,7 @@ class ByteTUI(App, inherit_bindings=False):
         event_bus = self.byte.make(EventBus)
 
         # Emit our post boot message to gather all needed info.
-        payload = await event_bus.emit(SystemEvents.PostBoot(messages=[]))
+        payload = await event_bus.emit(SystemEvents.PostBoot(messages=[]), wait=True)
         messages = payload.messages
 
         styled_logo = []
@@ -163,6 +165,12 @@ class ByteTUI(App, inherit_bindings=False):
 
         return agent_response_panel
 
+    async def add_select(self, ask: Ask):
+        select = Select(ask)
+        await self.chat_container.mount(select)
+        select.focus()
+        return select
+
     def flash(
         self,
         content: str,
@@ -212,10 +220,3 @@ class ByteTUI(App, inherit_bindings=False):
             read_only: Number of read-only files in context.
         """
         self.query_one(Analytics).update_files(editable=editable, read_only=read_only)
-
-    @on(Messages.Answer)
-    async def on_question_answered(self, event: Messages.Answer):
-        # Just hide the question widget
-        # Future is already resolved by the widget itself
-        self.prompt.remove_class("-mode-ask")
-        self.prompt.prompt_text_area.focus()

@@ -106,7 +106,7 @@ class PromptTextArea(TextArea):
 
 class PromptInput(containers.VerticalGroup):
     PROMPT_NULL = " "
-    PROMPT_AI = Content.styled("❯", "$text-secondary")  # noqa: RUF001
+    PROMPT_AI = Content.styled("\u276f", "$text-secondary")
     PROMPT_MULTILINE = Content.styled("☰", "$text-secondary")
 
     multi_line = var(False)

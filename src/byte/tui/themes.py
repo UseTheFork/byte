@@ -142,6 +142,7 @@ class ThemeRegistry:
             "byte-catppuccin-frappe": CATPPUCCIN_FRAPPE,
         }
 
+        # .venv/lib/python3.14/site-packages/textual/design.py
         for theme_name, byte_theme in themes.items():
             is_dark = theme_name != "byte-catppuccin-latte"
 

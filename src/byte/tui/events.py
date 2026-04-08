@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from byte import Event
+from byte.tui.schemas import AnswerCancelled
 from byte.tui.tui_component_events import TuiComponentEvent
 
 if TYPE_CHECKING:
@@ -31,4 +32,4 @@ class TuiEvents:
 
         question: str
         options: list[Answer]
-        result_future: asyncio.Future[Answer]
+        result_future: asyncio.Future[Answer | list[Answer] | AnswerCancelled]
