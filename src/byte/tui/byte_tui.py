@@ -22,6 +22,7 @@ from byte.tui.widgets.panels.pending_panel import PendingPanel
 from byte.tui.widgets.prompt.analytics import Analytics
 from byte.tui.widgets.prompt.flash import Flash
 from byte.tui.widgets.prompt.prompt_panel import PromptPanel
+from byte.tui.widgets.ui.input import Input
 from byte.tui.widgets.ui.loading_indicator import LoadingIndicator
 from byte.tui.widgets.ui.select import Select
 
@@ -165,11 +166,17 @@ class ByteTUI(App, inherit_bindings=False):
 
         return agent_response_panel
 
-    async def add_select(self, ask: Ask):
+    async def mount_select(self, ask: Ask):
         select = Select(ask)
         await self.chat_container.mount(select)
         select.focus()
         return select
+
+    async def mount_input(self, ask: Ask):
+        input_widget = Input(ask)
+        await self.chat_container.mount(input_widget)
+        input_widget.focus()
+        return input_widget
 
     def flash(
         self,

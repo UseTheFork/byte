@@ -1,9 +1,7 @@
-import asyncio
 from typing import TYPE_CHECKING, Optional, TypeVar
 
-from byte.cli.service.interactions_service import (
-    InteractionService,
-)
+from byte.tui import InteractionService
+from byte.tui.schemas import Answer
 
 if TYPE_CHECKING:
     from byte.foundation import Application
@@ -21,7 +19,7 @@ class UserInteractive:
 
     app: Application
 
-    async def prompt_for_input(self, message) -> str | None:
+    async def prompt_for_input(self, message) -> str:
         """Prompt the user for general input via the input actor.
 
         Sends a request to the UserInteractionActor to display the input prompt,
@@ -35,7 +33,7 @@ class UserInteractive:
         interaction_service = self.app.make(InteractionService)
         return await interaction_service.input_text(message)
 
-    async def prompt_for_confirmation(self, message: str, default: bool = True):
+    async def prompt_for_confirmation(self, message: str, default: bool = True) -> bool:
         """Prompt the user for yes/no confirmation with a custom message.
 
         Displays a confirmation dialog and waits for user response with
@@ -52,7 +50,7 @@ class UserInteractive:
         interaction_service = self.app.make(InteractionService)
         return await interaction_service.confirm(message, default)
 
-    async def prompt_for_select(self, message: str, choices, default: str | None = None) -> str | None:
+    async def prompt_for_select(self, message: str, choices: list[Answer]) -> Answer:
         """Prompt the user to select from multiple options.
 
         Displays a list of choices and waits for user selection with
@@ -63,39 +61,8 @@ class UserInteractive:
         if not self.app:
             raise RuntimeError("No container available - ensure service is properly initialized")
 
-        from byte import EventBus
-        from byte.tui import TuiEvents
-        from byte.tui.schemas import Answer
-
-        # options = [Answer(text=text, id=id) for id, text in choices]
-        options = [Answer(label="foo", value="foo"), Answer(label="bar", value="bar")]
-
-        result_future = asyncio.Future()
-
-        event_bus = self.app.make(EventBus)
-        await event_bus.emit(
-            TuiEvents.AskQuestion(question=message, options=options, result_future=result_future),
-        )
-
-        await result_future
-        answer = result_future.result()
-        self.app["log"].info(answer)
-        return answer.value
-
-    async def prompt_for_select_numbered(
-        self, message: str, choices: list[str], default: int | None = None
-    ) -> str | None:
-        """Prompt the user to select from numbered options.
-
-        Displays choices as a numbered list and prompts for selection by number.
-        Usage: `choice = await self.prompt_for_select_numbered("Pick one:", ["option1", "option2"], default=1)`
-        """
-
-        if not self.app:
-            raise RuntimeError("No container available - ensure service is properly initialized")
-
         interaction_service = self.app.make(InteractionService)
-        return await interaction_service.select_numbered(message, choices, default)
+        return await interaction_service.select(message, choices)
 
     async def prompt_for_confirm_or_input(
         self, confirm_message: str, input_message: str, default_confirm: bool = True

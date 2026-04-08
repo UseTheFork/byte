@@ -30,6 +30,6 @@ class TUIServiceProvider(ServiceProvider):
             tui_manager_service.handle_user_message,
         )
         event_bus.on(
-            TuiEvents.AskQuestion,
-            tui_manager_service.handle_ask_question,
+            TuiEvents.PromptUser,
+            tui_manager_service.handle_prompt_user,
         )

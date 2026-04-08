@@ -15,6 +15,7 @@ class Answer:
 
     label: str
     value: Any
+    is_default: bool = False
 
 
 @dataclass
@@ -25,8 +26,8 @@ class AnswerCancelled:
 @dataclass
 class Ask:
     question: str
-    options: list[Answer]
-    result_future: asyncio.Future[Answer | list[Answer] | AnswerCancelled]
+    options: list[Answer] | None
+    result_future: asyncio.Future[Answer | list[Answer] | str | AnswerCancelled]
 
 
 @dataclass

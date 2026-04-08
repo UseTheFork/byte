@@ -1,6 +1,6 @@
 import asyncio
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from byte import Event
 from byte.tui.schemas import AnswerCancelled
@@ -27,9 +27,10 @@ class TuiEvents:
         event: TuiComponentEvent
 
     @dataclass
-    class AskQuestion(TuiComponentEvent):
-        """Request user to answer a question."""
+    class PromptUser(TuiComponentEvent):
+        """Request user input through an interactive prompt."""
 
         question: str
-        options: list[Answer]
-        result_future: asyncio.Future[Answer | list[Answer] | AnswerCancelled]
+        result_future: asyncio.Future[Answer | list[Answer] | str | AnswerCancelled]
+        prompt_type: Literal["select", "text", "multiselect"] = "text"
+        options: list[Answer] | None = None

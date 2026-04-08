@@ -110,26 +110,18 @@ class TUIManagerService(Service):
         )
         return
 
-    async def handle_ask_question(self, event: TuiEvents.AskQuestion):
-        # await self._create_pending_panel()
-
-        # assert self.pending_panel
-
-        ask = Ask(
-            question=event.question,
-            options=event.options,
-            result_future=event.result_future,
-        )
-
-        await self.tui.add_select(ask)
-
-        # select
-
-        # question_widget.update(ask)
-
-        # # Switch prompt to ask mode
-        # self.tui.prompt.prompt_input.visible = False
-        # self.tui.prompt.question.visible = True
-
-        # self.tui.prompt.add_class("-mode-ask")
-        # question_widget.focus()
+    async def handle_prompt_user(self, event: TuiEvents.PromptUser):
+        if event.prompt_type == "select":
+            ask = Ask(
+                question=event.question,
+                options=event.options,
+                result_future=event.result_future,
+            )
+            await self.tui.mount_select(ask)
+        else:
+            ask = Ask(
+                question=event.question,
+                options=None,
+                result_future=event.result_future,
+            )
+            await self.tui.mount_input(ask)

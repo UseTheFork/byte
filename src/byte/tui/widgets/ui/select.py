@@ -87,7 +87,7 @@ class Select(VerticalGroup):
         }
         """
 
-    _result_future: asyncio.Future[Answer | list[Answer] | AnswerCancelled] | None = None
+    _result_future: asyncio.Future[Answer | list[Answer] | str | AnswerCancelled]
     selected_item: var[Answer | AnswerCancelled] = var(AnswerCancelled())
 
     list_view = getters.query_one(ListView)

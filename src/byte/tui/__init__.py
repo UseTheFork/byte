@@ -5,8 +5,10 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.tui.byte_tui import ByteTUI
     from byte.tui.events import TuiEvents
+    from byte.tui.exceptions import InputCancelledError
     from byte.tui.messages import Messages
     from byte.tui.schemas import AutocompleteOption
+    from byte.tui.service.interactions_service import InteractionService
     from byte.tui.service.tui_manager_service import TUIManagerService
     from byte.tui.service_provider import TUIServiceProvider
     from byte.tui.tui_component_events import TuiComponentEvent, TuiComponentEvents
@@ -15,6 +17,8 @@ if TYPE_CHECKING:
 __all__ = (
     "AutocompleteOption",
     "ByteTUI",
+    "InputCancelledError",
+    "InteractionService",
     "Messages",
     "TUIManagerService",
     "TUIServiceProvider",
@@ -27,6 +31,8 @@ _dynamic_imports = {
     # keep-sorted start
     "AutocompleteOption": "schemas",
     "ByteTUI": "byte_tui",
+    "InputCancelledError": "exceptions",
+    "InteractionService": "service.interactions_service",
     "Messages": "messages",
     "TUIManagerService": "service.tui_manager_service",
     "TUIServiceProvider": "service_provider",
