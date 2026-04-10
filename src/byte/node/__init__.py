@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.node.agents.commit_agent_node import CommitAgentNode
+    from byte.node.base_agent_node import BaseAgentNode
     from byte.node.base_node import Node, Node as BaseNode
     from byte.node.events import NodeEvents
     from byte.node.implementations.dummy_node import DummyNode
@@ -23,7 +25,9 @@ if TYPE_CHECKING:
     from byte.node.service_provider import NodeServiceProvider
 
 __all__ = (
+    "BaseAgentNode",
     "BaseNode",
+    "CommitAgentNode",
     "DummyNode",
     "EndNode",
     "ExtractNode",
@@ -44,9 +48,11 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
+    "BaseAgentNode": "base_agent_node",
     "BaseNode": "base_node",
     "DummyNode": "implementations.dummy_node",
     "EndNode": "implementations.end_node",
+    "CommitAgentNode": "agents.commit_agent_node",
     "ExtractNode": "implementations.extract_node",
     "LintNode": "implementations.lint_node",
     "ModelBaseNode": "implementations.model_base_node",

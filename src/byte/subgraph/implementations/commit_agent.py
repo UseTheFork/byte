@@ -1,9 +1,21 @@
+from typing import Literal
+
 from langchain_core.prompts import ChatPromptTemplate
-from langgraph.graph.state import CompiledStateGraph
+from langgraph.graph.state import CompiledStateGraph, RunnableConfig
+from langgraph.runtime import Runtime
+from langgraph.types import Command
 
 from byte.git import CommitMessage, CommitValidator
-from byte.node import EndNode, ModelWeakNode, ValidationNode
-from byte.orchestration import AssistantContextSchema, GraphBuilder
+from byte.node import (
+    EndNode,
+    ModelWeakNode,
+    ValidationNode,
+)
+from byte.orchestration import (
+    AssistantContextSchema,
+    BaseState,
+    GraphBuilder,
+)
 from byte.subgraph import BaseAgent
 from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
@@ -93,4 +105,22 @@ class CommitAgent(BaseAgent):
             enforcement=self.get_enforcement(),
             agent=self.__class__.__name__,
             tools=self.get_tools(),
+        )
+
+    async def __call__(
+        self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
+    ) -> Command[Literal["routing_node"]]:
+        subgraph = await self.get_graph()
+
+        state["agent"] = self.get_node_name()
+        subgraph_output = await subgraph.ainvoke(
+            input=state,
+            context=await self.get_assistant_runnable(),  # ty:ignore[invalid-argument-type]
+        )
+
+        return self.route_to(
+            "end_node",
+            {
+                "scratch_messages": [subgraph_output["final_message"]],
+            },
         )

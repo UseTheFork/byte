@@ -1,6 +1,6 @@
-from byte.node import LintNode
+from byte.git import CommitValidator
+from byte.node import CommitAgentNode, EndNode, LintNode, ValidationNode
 from byte.orchestration import GraphBuilder
-from byte.subgraph import CoderAgent, CommitAgent
 from byte.workflow import BaseWorkflow
 
 
@@ -13,10 +13,16 @@ class CommitWorkflow(BaseWorkflow):
         graph = GraphBuilder(self.app, start_node=LintNode)
 
         # Add nodes
-        graph.add_node(LintNode, goto=CommitAgent)
+        graph.add_node(LintNode, goto=CommitAgentNode)
 
-        graph.add_node(CommitAgent)
-        graph.add_node(CoderAgent)
+        graph.add_node(CommitAgentNode, goto=ValidationNode)
+        graph.add_node(
+            ValidationNode,
+            goto=EndNode,
+            validators=[
+                self.app.make(CommitValidator),
+            ],
+        )
 
         # Compile graph with memory and configuration
         checkpointer = await self.get_checkpointer()

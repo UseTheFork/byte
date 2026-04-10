@@ -4,7 +4,7 @@ from pydantic.dataclasses import dataclass
 
 from byte.orchestration import BaseState
 from byte.support import Boundary, BoundaryType
-from byte.support.mixins import Bootable
+from byte.support.mixins import Bootable, Eventable
 from byte.support.utils import list_to_multiline_text
 
 
@@ -39,7 +39,7 @@ class ValidationError:
         )
 
 
-class Validator(ABC, Bootable):
+class Validator(ABC, Bootable, Eventable):
     """Base class for content validators used in ValidationNode.
 
     Usage: `class MyValidator(Validator): ...`

@@ -53,7 +53,7 @@ class ExtractNode(Node, UserInteractive):
 
     async def __call__(
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
-    ) -> Command[Literal["end_node"]]:
+    ) -> Command[Literal["routing_node"]]:
         """Execute content extraction based on configured schema.
 
         Extracts content from the last assistant message and formats it according
@@ -75,13 +75,13 @@ class ExtractNode(Node, UserInteractive):
 
         if self.parsing_service is None:
             output = extract_content_from_message(last_message)
-            return Command(goto=str(self.goto), update={"extracted_content": output})
+            return self.route_to(self.goto, {"extracted_content": output})
 
         try:
             content = extract_content_from_message(last_message)
             parsed_content = self.parsing_service.parse(content)
             self.app["log"].info(parsed_content)
-            return Command(goto=str(self.goto), update={"extracted_content": parsed_content})
+            return self.route_to(self.goto, {"extracted_content": parsed_content})
         except ValidationError as e:
             error_message = list_to_multiline_text(
                 [

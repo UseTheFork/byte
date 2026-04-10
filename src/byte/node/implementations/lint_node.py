@@ -30,7 +30,7 @@ class LintNode(Node):
         lint_service = self.app.make(LintService)
 
         if not self.app["config"].lint.enable:
-            return Command(goto="routing_node", update={"node_to": self.goto})
+            return self.route_to(self.goto)
 
         # Extract file paths from parsed blocks
         file_paths = []
@@ -43,9 +43,6 @@ class LintNode(Node):
         do_fix, failed_commands = await lint_service.display_results_summary(lint_commands)
         if do_fix:
             joined_lint_errors = lint_service.format_lint_errors(failed_commands)
-            return Command(
-                goto="routing_node",
-                update={"node_to": "coder_agent", "scratch_messages": HumanMessage(joined_lint_errors)},
-            )
+            return self.route_to("coder_agent", {"scratch_messages": HumanMessage(joined_lint_errors)})
 
-        return Command(goto="routing_node", update={"node_to": self.goto})
+        return self.route_to(self.goto)

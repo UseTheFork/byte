@@ -2,15 +2,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypeVar
 
+from textual.message import Message
+
 from byte import EventBus
 from byte.event import Event
-from byte.tui import TuiComponentEvent, TuiEvents
 
 if TYPE_CHECKING:
     from byte.foundation import Application
 
 T = TypeVar("T", bound=Event)
-TuiEvent = TypeVar("TuiEvent", bound=TuiComponentEvent)
 
 
 class Eventable:
@@ -39,9 +39,11 @@ class Eventable:
         # self.app["log"].info(payload)
 
         event_bus = self.app.make(EventBus)
-        return await event_bus.emit(payload)
+        return await event_bus.emit(
+            payload,
+        )
 
-    async def emit_tui(self, payload: TuiComponentEvent) -> TuiEvents.ComponentEvent:
+    async def emit_tui(self, payload: Message):
         """Emit a TUI event through the event bus system.
 
         Wraps the TuiEvents payload in Events.TuiEvent before emitting,
@@ -52,5 +54,5 @@ class Eventable:
         if not self.app:
             raise RuntimeError("No app available - ensure service is properly initialized")
 
-        event_bus = self.app.make(EventBus)
-        return await event_bus.emit(TuiEvents.ComponentEvent(payload))
+        byte_tui = self.app.tui()
+        byte_tui.conversation.post_message(payload)

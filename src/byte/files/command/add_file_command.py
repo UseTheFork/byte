@@ -32,10 +32,6 @@ class AddFileCommand(Command):
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Add specified file to context with editable permissions."""
-        from byte.tui.schemas import Answer
-
-        result = await self.prompt_for_select("test", [Answer("1", "1"), Answer("2", "2")])
-        self.app["log"].info(result)
 
         file_path = args.file_path
 

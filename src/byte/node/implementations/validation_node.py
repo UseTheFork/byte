@@ -9,6 +9,7 @@ from byte.node import EndNode, Node
 from byte.orchestration import AssistantContextSchema, BaseState, ValidationError, Validator
 from byte.support import Str
 from byte.support.mixins import UserInteractive
+from byte.tui import Messages
 
 
 class ValidationNode(Node, UserInteractive):
@@ -39,7 +40,7 @@ class ValidationNode(Node, UserInteractive):
 
     async def __call__(
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
-    ) -> Command[Literal["end_node", "extract_node", "main_model_node"]]:
+    ) -> Command[Literal["routing_node"]]:
         """Execute validation checks on the last assistant message.
 
         Runs configured validation checks (e.g., max_lines) on the message content.
@@ -69,12 +70,15 @@ class ValidationNode(Node, UserInteractive):
         if validation_errors:
             error_message = "# Fix the following issues:\n" + "\n".join(error.format() for error in validation_errors)
 
-            console = self.app["console"]
-            console.print_warning_panel(
-                f"{len(validation_errors)} validation error(s) found. Requesting corrections.",
-                title="Validation Failed",
+            await self.emit_tui(
+                Messages.CreatePanel(
+                    f"{len(validation_errors)} validation error(s) found. Requesting corrections.",
+                    title="Validation Failed",
+                    border_style="warning",
+                )
             )
 
-            return Command(goto="main_model_node", update={"scratch_messages": HumanMessage(error_message)})
+            # This should route to the previous node using the state.
+            return self.route_to(self.goto, {"scratch_messages": HumanMessage(error_message)})
 
-        return Command(goto=str(self.goto))
+        return self.route_to(self.goto)

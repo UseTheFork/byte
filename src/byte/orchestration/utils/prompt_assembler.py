@@ -36,7 +36,7 @@ class PromptAssembler(Bootable, Eventable):
 
         self.template = template
 
-    async def _gather_reinforcement(self, context: AssistantContextSchema) -> str:
+    async def _gather_reinforcement(self) -> str:
         """Gather reinforcement messages from various domains.
 
         Emits GATHER_REINFORCEMENT event and collects reinforcement
@@ -53,8 +53,8 @@ class PromptAssembler(Bootable, Eventable):
         reinforcement_payload = await self.emit(
             OrchestrationEvents.GatherReinforcement(
                 reinforcement=[],
-                mode=context.mode,
-                agent=context.agent,
+                mode="main",
+                agent="coder_agent",
             )
         )
         reinforcement_messages = reinforcement_payload.reinforcement
@@ -62,13 +62,15 @@ class PromptAssembler(Bootable, Eventable):
         message_parts = []
 
         # Add reinforcement section if there are messages
-        if reinforcement_messages or context.enforcement:
+        # if reinforcement_messages or context.enforcement:
+        # TODO: This needs to be fixed `reinforcements` should just come from the agent now.
+        if reinforcement_messages:
             reinforcement_parts = [
                 "",
                 Boundary.open(BoundaryType.OPERATING_PRINCIPLES),
                 Boundary.notice("You **MUST** follow these Operating Principles"),
                 *reinforcement_messages,
-                *(context.enforcement or []),
+                *([]),
             ]
 
             reinforcement_parts.append(Boundary.close(BoundaryType.OPERATING_PRINCIPLES))
@@ -332,9 +334,7 @@ class PromptAssembler(Bootable, Eventable):
         user_prompt_state["available_conventions"] = await self.gather_available_conventions(state)
 
         # Reinforcement is appended to the user message.
-        user_prompt_state["operating_principles"] = await self._gather_reinforcement(
-            context,
-        )
+        user_prompt_state["operating_principles"] = await self._gather_reinforcement()
 
         user_prompt_state["user_request"] = state.get("user_request", "")
 

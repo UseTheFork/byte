@@ -1,82 +1,34 @@
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
-from byte.event import Event
+from textual.message import Message
 
 if TYPE_CHECKING:
     from byte.tui.schemas import ChatMessage
 
 
-class TuiComponentEvent(Event):
-    pass
-
-
 # Sub events that specifically have to do with the TUI
 class TuiComponentEvents:
     @dataclass
-    class CommandExecutionStarted(TuiComponentEvent):
-        pass
-
-    @dataclass
-    class CommandExecutionCompleted(TuiComponentEvent):
-        pass
-
-    @dataclass
-    class AddHeading(TuiComponentEvent):
-        heading: str
-        classes: str = "text-muted"
-
-    @dataclass
-    class ResponseStarted(TuiComponentEvent):
-        pass
-
-    @dataclass
-    class ResponseChunk(TuiComponentEvent):
-        chunk: str
-
-    @dataclass
-    class ResponseComplete(TuiComponentEvent):
-        pass
-
-    @dataclass
-    class PromptSuggestion(TuiComponentEvent):
+    class PromptSuggestion(Message):
         suggestion: str
 
     @dataclass
-    class UserInputSubmitted(TuiComponentEvent):
+    class UserInputSubmitted(Message):
         body: str
         auto_complete: bool = False
 
     @dataclass
-    class UserInputChanged(TuiComponentEvent):
+    class UserInputChanged(Message):
         value: str
 
     @dataclass
-    class UpdateAnalytics(TuiComponentEvent):
-        tokens_sent: int
-        tokens_received: int
-        message_cost: float
-        session_cost: float
-        memory_percent: float
-
-    @dataclass
-    class UpdateFiles(TuiComponentEvent):
-        editable: int
-        read_only: int
-
-    @dataclass
-    class Notify(TuiComponentEvent):
-        content: str
-        style: Literal["default", "warning", "success", "error"] = "default"
-        duration: float | None = None
-
-    @dataclass
-    class AgentResponseFailed(TuiComponentEvent):
+    class AgentResponseFailed(Message):
         """Sent when the agent fails to respond e.g. cant connect.
         Can be used to reset UI state."""
 
         last_message: ChatMessage
 
     @dataclass
-    class NewUserMessage(TuiComponentEvent):
+    class NewUserMessage(Message):
         content: str

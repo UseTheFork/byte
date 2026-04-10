@@ -75,6 +75,7 @@ class CommitMessage(BaseModel):
         return "\n".join(message_parts)
 
 
+# TODO: Remove this.
 class CommitGroup(CommitMessage):
     files: list[str] = Field(..., description="List of file paths that are part of this commit.")
 
@@ -103,5 +104,6 @@ class CommitGroup(CommitMessage):
         return message
 
 
+# TODO: Remove this.
 class CommitPlan(BaseModel):
     commits: list[CommitGroup] = Field(..., description="List of commit groups, each with a message and files.")

@@ -4,6 +4,7 @@ from byte import ByteArgumentParser, Command
 from byte.cli import InputCancelledError
 from byte.git import GitService
 from byte.git.service.commit_service import CommitService
+from byte.tui import Messages
 from byte.workflow import CommitWorkflow, WorkflowService
 
 
@@ -45,21 +46,23 @@ class CommitCommand(Command):
         Usage: Called automatically when user types `/commit`
         """
 
+        await self.emit_tui(Messages.CommandExecutionStarted())
         try:
-            console = self.app["console"]
             await self.git_service.stage_changes()
 
             # Validate staged changes exist to prevent empty commits
 
             diff = await self.git_service.get_diff()
             if not diff:
-                console.print_warning("No staged changes to commit.")
+                await self.notify_warning("No staged changes to commit.")
                 return
 
             commit_workflow = self.app.make(CommitWorkflow)
 
             workflow_service = self.app.make(WorkflowService)
-            commit_result = await workflow_service.execute(commit_workflow, raw_args)
+            prompt = await self.commit_service.build_commit_prompt()
+
+            commit_result = await workflow_service.execute(commit_workflow, prompt)
 
             formatted_message = await self.commit_service.format_conventional_commit(
                 commit_result["data"]["result"]["extracted_content"]
@@ -68,4 +71,6 @@ class CommitCommand(Command):
             await self.git_service.commit(formatted_message)
 
         except InputCancelledError:
-            return
+            pass
+
+        await self.emit_tui(Messages.CommandExecutionCompleted())

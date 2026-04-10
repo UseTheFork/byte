@@ -1,8 +1,7 @@
 from byte import CommandRegistryService
 from byte.files import FileEvents
 from byte.support import Service
-from byte.tui import TuiComponentEvents, TuiEvents
-from byte.tui.schemas import Ask
+from byte.tui import TuiEvents
 
 
 class TUIManagerService(Service):
@@ -15,9 +14,8 @@ class TUIManagerService(Service):
 
         Usage: Called automatically during service container boot process
         """
-        from byte.tui.byte_tui import ByteTUI
 
-        self.tui = ByteTUI(container=self.app)
+        self.tui = self.app.tui()
         self.command_registry = self.app.make(CommandRegistryService)
         self.pending_panel = None
 
@@ -25,50 +23,8 @@ class TUIManagerService(Service):
         await self.tui.run_async()
 
     async def _create_pending_panel(self):
-        self.pending_panel = await self.tui.mount_pending_response_panel()
-        self.tui.loading_indicator.show("Thinking")
-
-    async def route_event(self, event: TuiEvents.ComponentEvent):
-        tui_event = event.event
-
-        if isinstance(tui_event, TuiComponentEvents.Notify):
-            self.tui.flash(
-                tui_event.content,
-                style=tui_event.style,
-                duration=tui_event.duration,
-            )
-            return
-
-        if isinstance(tui_event, TuiComponentEvents.CommandExecutionStarted):
-            await self._create_pending_panel()
-            return
-
-        if isinstance(tui_event, TuiComponentEvents.UpdateAnalytics):
-            self.tui.analytics(
-                tokens_sent=tui_event.tokens_sent,
-                tokens_received=tui_event.tokens_received,
-                message_cost=tui_event.message_cost,
-                session_cost=tui_event.session_cost,
-                memory_percent=tui_event.memory_percent,
-            )
-            return
-
-        assert self.pending_panel is not None, "TuiComponentEvents.CommandExecutionStarted() must be emitted first."
-
-        if isinstance(tui_event, TuiComponentEvents.AddHeading):
-            await self.pending_panel.add_heading(tui_event.heading)
-        elif isinstance(tui_event, TuiComponentEvents.ResponseStarted):
-            await self.pending_panel.start_markdown_stream()
-        elif isinstance(tui_event, TuiComponentEvents.ResponseChunk):
-            await self.pending_panel.add_markdown_chunk(tui_event.chunk)
-            self.tui.loading_indicator.hide()
-        elif isinstance(tui_event, TuiComponentEvents.ResponseComplete):
-            await self.pending_panel.end_markdown_stream()
-            self.tui.loading_indicator.hide()
-
-        self.tui.conversation.scroll_to_latest_message()
-
-        # # TODO: We need a fallback here.
+        if self.pending_panel is None:
+            self.pending_panel = await self.tui.mount_pending_response_panel()
 
     async def _handle_command_input(self, user_input: str):
         """Parse and execute slash commands.
@@ -83,7 +39,7 @@ class TUIManagerService(Service):
         command_name = parts[0]
         args = parts[1] if len(parts) > 1 else ""
 
-        # console = self.app["console"]
+        self.app["log"].info(user_input)
 
         # Get command registry and execute
         command_registry = self.app.make(CommandRegistryService)
@@ -109,19 +65,3 @@ class TUIManagerService(Service):
             read_only=event.read_only,
         )
         return
-
-    async def handle_prompt_user(self, event: TuiEvents.PromptUser):
-        if event.prompt_type == "select":
-            ask = Ask(
-                question=event.question,
-                options=event.options,
-                result_future=event.result_future,
-            )
-            await self.tui.mount_select(ask)
-        else:
-            ask = Ask(
-                question=event.question,
-                options=None,
-                result_future=event.result_future,
-            )
-            await self.tui.mount_input(ask)

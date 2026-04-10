@@ -169,9 +169,10 @@ class Select(VerticalGroup):
         yield self.list_view
 
     def submit_current_value(self, answer: Answer | AnswerCancelled):
-        # Resolve the future if present
+        # Resolve the future if present in the other loop since this is usually done via a worker.
         if self._result_future and not self._result_future.done():
-            self._result_future.set_result(answer)
+            loop = self._result_future.get_loop()
+            loop.call_soon_threadsafe(self._result_future.set_result, answer)
 
         self.disabled = True
         self.remove_class("border-round")

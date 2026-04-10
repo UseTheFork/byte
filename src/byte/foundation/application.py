@@ -8,6 +8,7 @@ from byte import ServiceProvider, TaskManager
 from byte.foundation import Console, Container, FoundationServiceProvider, Kernel
 from byte.foundation.bootstrap import RegisterProviders
 from byte.logging import LogService, LogServiceProvider
+from byte.tui import ByteTUI
 
 T = TypeVar("T")
 
@@ -197,6 +198,10 @@ class Application(Container):
         Usage: `app.console()` -> returns Console instance for terminal output
         """
         return self.make(Console)
+
+    def tui(self) -> ByteTUI:
+        """ """
+        return self.make(ByteTUI)
 
     def path(self, path: str = "") -> Path:
         """

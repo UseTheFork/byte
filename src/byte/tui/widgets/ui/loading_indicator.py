@@ -29,7 +29,7 @@ class LoadingIndicator(HorizontalGroup):
         yield RuneSpinner()
         yield Label(f"{self.message}", classes="pl-1")
 
-    def show(self, message: str) -> None:
+    def show(self, message: str = "Thinking") -> None:
         """Show the loading indicator with a custom message.
 
         Args:

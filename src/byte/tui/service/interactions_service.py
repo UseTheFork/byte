@@ -2,7 +2,7 @@ import asyncio
 from typing import List, Optional, cast
 
 from byte.support import Service
-from byte.tui import InputCancelledError, TuiEvents
+from byte.tui import InputCancelledError, Messages
 from byte.tui.schemas import Answer, AnswerCancelled
 
 
@@ -27,8 +27,8 @@ class InteractionService(Service):
         ]
 
         result_future: asyncio.Future[Answer | list[Answer] | str | AnswerCancelled] = asyncio.Future()
-        await self.emit(
-            TuiEvents.PromptUser(
+        await self.emit_tui(
+            Messages.PromptUser(
                 question=message,
                 options=answer_options,
                 prompt_type="select",
@@ -37,7 +37,10 @@ class InteractionService(Service):
         )
 
         await result_future
+        self.app["console"].log(result_future)
         answer = result_future.result()
+
+        self.app["console"].log(answer)
 
         if isinstance(answer, AnswerCancelled):
             raise InputCancelledError
@@ -53,8 +56,8 @@ class InteractionService(Service):
             raise ValueError("Choices list cannot be empty")
 
         result_future: asyncio.Future[Answer | list[Answer] | str | AnswerCancelled] = asyncio.Future()
-        await self.emit(
-            TuiEvents.PromptUser(
+        await self.emit_tui(
+            Messages.PromptUser(
                 question=message,
                 options=choices,
                 prompt_type="select",
@@ -76,8 +79,8 @@ class InteractionService(Service):
         Usage: `text = await interaction_service.input_text("Enter name:", "default_name")`
         """
         result_future: asyncio.Future[Answer | list[Answer] | str | AnswerCancelled] = asyncio.Future()
-        await self.emit(
-            TuiEvents.PromptUser(
+        await self.emit_tui(
+            Messages.PromptUser(
                 question=message,
                 options=None,
                 prompt_type="text",

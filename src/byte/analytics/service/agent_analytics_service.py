@@ -1,7 +1,7 @@
 from byte import Service
 from byte.analytics import UsageAnalytics
 from byte.orchestration import TokenUsageSchema
-from byte.tui import TuiComponentEvents
+from byte.tui import Messages
 
 
 class AgentAnalyticsService(Service):
@@ -100,7 +100,7 @@ class AgentAnalyticsService(Service):
             last_message_cost = 0.0
 
         await self.emit_tui(
-            TuiComponentEvents.UpdateAnalytics(
+            Messages.UpdateAnalytics(
                 tokens_sent=self.usage.last.input,
                 tokens_received=self.usage.last.output,
                 message_cost=last_message_cost,

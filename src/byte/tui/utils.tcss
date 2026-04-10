@@ -76,6 +76,8 @@
 .border-round-primary {border: round $primary;}
 .border-round-dim {border: round $foreground 30%;}
 .border-round-error {border: round $error;}
+.border-round-warning {border: round $warning;}
+.border-round-success {border: round $success;}
 
 # #####
 # Margins

@@ -11,7 +11,6 @@ if TYPE_CHECKING:
     from byte.tui.service.interactions_service import InteractionService
     from byte.tui.service.tui_manager_service import TUIManagerService
     from byte.tui.service_provider import TUIServiceProvider
-    from byte.tui.tui_component_events import TuiComponentEvent, TuiComponentEvents
 
 
 __all__ = (
@@ -22,8 +21,6 @@ __all__ = (
     "Messages",
     "TUIManagerService",
     "TUIServiceProvider",
-    "TuiComponentEvent",
-    "TuiComponentEvents",
     "TuiEvents",
 )
 
@@ -36,8 +33,6 @@ _dynamic_imports = {
     "Messages": "messages",
     "TUIManagerService": "service.tui_manager_service",
     "TUIServiceProvider": "service_provider",
-    "TuiComponentEvent": "tui_component_events",
-    "TuiComponentEvents": "tui_component_events",
     "TuiEvents": "events",
     # keep-sorted end
 }

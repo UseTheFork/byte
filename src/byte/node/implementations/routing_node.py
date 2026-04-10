@@ -8,7 +8,7 @@ from byte.node import Node
 from byte.orchestration import AssistantContextSchema, BaseState
 
 
-# THis is here to control the below Literal and be able to have all possible nodes in one place.
+# This is here to control the below Literal and be able to have all possible nodes in one place.
 class RoutingNode(Node):
     async def __call__(
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
@@ -24,6 +24,7 @@ class RoutingNode(Node):
             "tool_node",
             "validation_node",
             "coder_agent",
+            "commit_agent_node",
         ]
     ]:
         routing = state.get("routing", {})

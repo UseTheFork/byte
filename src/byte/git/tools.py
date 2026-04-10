@@ -1,8 +1,8 @@
 from langchain_core.tools import tool
 
-from byte.cli import InteractionService
 from byte.context import make
 from byte.git import GitService
+from byte.tui import InteractionService
 
 
 @tool(parse_docstring=True)

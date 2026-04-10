@@ -1,11 +1,7 @@
 import asyncio
+from itertools import groupby
 from pathlib import Path
 from typing import List
-
-from rich.console import Group
-from rich.live import Live
-from rich.progress import BarColumn, Progress, TaskID, TextColumn
-from rich.table import Column
 
 from byte import Service
 from byte.cli import Markdown
@@ -14,6 +10,7 @@ from byte.lint import LintConfigException, LintFile
 from byte.support import Boundary, BoundaryType
 from byte.support.mixins import UserInteractive
 from byte.support.utils import get_language_from_filename, list_to_multiline_text
+from byte.tui import Messages
 
 
 class LintService(Service, UserInteractive):
@@ -74,7 +71,7 @@ class LintService(Service, UserInteractive):
 
         return await self.lint_files(changed_files)
 
-    async def _execute_lint_command(self, lint_file: LintFile, task_id: TaskID, git_root) -> LintFile:
+    async def _execute_lint_command(self, lint_file: LintFile, git_root) -> LintFile:
         try:
             # Run the command and capture output
             process = await asyncio.create_subprocess_exec(
@@ -83,8 +80,6 @@ class LintService(Service, UserInteractive):
                 stderr=asyncio.subprocess.PIPE,
                 cwd=git_root,
             )
-
-            self._progress.update(task_id, advance=1)
 
             stdout, stderr = await process.communicate()
             exit_code = process.returncode
@@ -135,9 +130,6 @@ class LintService(Service, UserInteractive):
             # Append failed files to failed_commands list
             failed_commands.extend(failed_files)
 
-            # Group failed files by command
-            from itertools import groupby
-
             # Sort by command first so groupby works correctly
             failed_files_sorted = sorted(failed_files, key=lambda lf: " ".join(lf.command))
 
@@ -183,15 +175,17 @@ class LintService(Service, UserInteractive):
 
         summary_text = Markdown(markdown_content)
 
-        console = self.app["console"]
-        # Display panel
-        console.print_panel(
-            summary_text,
-            title="[secondary]Lint[/secondary]",
+        # Display panel via TUI
+        await self.emit_tui(
+            Messages.CreatePanel(
+                str(summary_text),
+                title="Lint",
+                border_style="secondary",
+            )
         )
 
         if failed_commands:
-            do_lint = console.confirm("Attempt to fix lint errors?")
+            do_lint = await self.prompt_for_confirmation("Attempt to fix lint errors?")
             if do_lint is False or do_lint is None:
                 return (False, failed_commands)
             else:
@@ -202,13 +196,20 @@ class LintService(Service, UserInteractive):
     # Group tasks by file, run commands sequentially per file, files in parallel
     async def _lint_file_sequential(self, file_path: Path, lint_files: List[LintFile], git_root: str) -> List[LintFile]:
         """Execute lint commands sequentially for a single file."""
-        num_commands = len(lint_files)
-        file_task_id = self._progress.add_task(f"{file_path.name}", total=num_commands)
-
         results = []
         for lint_file in lint_files:
-            result = await self._execute_lint_command(lint_file, file_task_id, git_root)
+            result = await self._execute_lint_command(lint_file, git_root)
             results.append(result)
+
+            # Emit progress update
+            self._completed_count += 1
+            await self.emit_tui(
+                Messages.LintProgress(
+                    current_file=str(file_path),
+                    completed=self._completed_count,
+                    total=self._total_commands,
+                )
+            )
 
         return results
 
@@ -223,7 +224,6 @@ class LintService(Service, UserInteractive):
 
 
         """
-        console = self.app["console"]
 
         git_service: GitService = self.app.make(GitService)
 
@@ -235,69 +235,75 @@ class LintService(Service, UserInteractive):
 
         # Handle commands as a list of command strings
         if self.app["config"].lint.enable and self.app["config"].lint.commands:
-            # outer status bar and progress bar
-            status = console.console.status("Not started")
-            bar_column = BarColumn(bar_width=None, table_column=Column(ratio=2))
-            self._progress = Progress(
-                TextColumn("[progress.description]{task.description}", table_column=Column(ratio=1)),
-                bar_column,
-                transient=True,
-                expand=True,
-            )
-            with Live(
-                console.panel(
-                    Group(self._progress, status),
-                    title="[secondary]Lint[/secondary]",
-                ),
-                console=console.console,
-                transient=True,
-            ):
-                # Create array of command/file combinations
-                status.update("Gathering Commands")
-                for command in self.app["config"].lint.commands:
-                    for file_path in changed_files:
-                        if str(file_path) not in self._lint_stack:
-                            self._lint_stack[str(file_path)] = []
+            # Create array of command/file combinations
+            for command in self.app["config"].lint.commands:
+                for file_path in changed_files:
+                    if str(file_path) not in self._lint_stack:
+                        self._lint_stack[str(file_path)] = []
 
-                        # Get the language for this file using Pygments
-                        file_language = get_language_from_filename(str(file_path))
+                    # Get the language for this file using Pygments
+                    file_language = get_language_from_filename(str(file_path))
 
-                        # Check if file should be processed by this command based on language
-                        if command.languages:
-                            # If "*" is in languages, process all files
-                            if "*" not in command.languages:
-                                # If languages are specified, only process files with matching language (case-insensitive)
-                                if not file_language or file_language.lower() not in [
-                                    lang.lower() for lang in command.languages
-                                ]:
-                                    continue
-                        # If no languages specified, process all files
+                    # Check if file should be processed by this command based on language
+                    if command.languages:
+                        # If "*" is in languages, process all files
+                        if "*" not in command.languages:
+                            # If languages are specified, only process files with matching language  (case-insensitive)
+                            if not file_language or file_language.lower() not in [
+                                lang.lower() for lang in command.languages
+                            ]:
+                                continue
+                    # If no languages specified, process all files
 
-                        # Check if any command part contains {file} placeholder
-                        if any("{file}" in part for part in command.command):
-                            # Replace {file} with actual file path
-                            command_parts = [part.replace("{file}", str(file_path)) for part in command.command]
-                        else:
-                            # Fallback to appending file path (current behavior)
-                            command_parts = command.command + [str(file_path)]
+                    # Check if any command part contains {file} placeholder
+                    if any("{file}" in part for part in command.command):
+                        # Replace {file} with actual file path
+                        command_parts = [part.replace("{file}", str(file_path)) for part in command.command]
+                    else:
+                        # Fallback to appending file path (current behavior)
+                        command_parts = command.command + [str(file_path)]
 
-                        self._lint_stack[str(file_path)].append(
-                            LintFile(
-                                command=command_parts,
-                                file=file_path,
-                                exit_code=0,
-                            )
+                    self._lint_stack[str(file_path)].append(
+                        LintFile(
+                            command=command_parts,
+                            file=file_path,
+                            exit_code=0,
                         )
+                    )
 
-                status.update("Linting...")
-                file_tasks = [
-                    self._lint_file_sequential(Path(file_path_str), lint_files, git_root)
-                    for file_path_str, lint_files in self._lint_stack.items()
-                ]
+            # Calculate total commands for progress tracking
+            self._total_commands = sum(len(lint_files) for lint_files in self._lint_stack.values())
+            self._completed_count = 0
 
-                all_results = await asyncio.gather(*file_tasks)
-                # Flatten results
-                results = [result for file_results in all_results for result in file_results]
+            # Emit lint started event
+            await self.emit_tui(
+                Messages.LintStarted(
+                    file_count=len(changed_files),
+                    command_count=len(self.app["config"].lint.commands),
+                )
+            )
+
+            # Execute linting
+            file_tasks = [
+                self._lint_file_sequential(Path(file_path_str), lint_files, git_root)
+                for file_path_str, lint_files in self._lint_stack.items()
+            ]
+
+            all_results = await asyncio.gather(*file_tasks)
+            # Flatten results
+            results = [result for file_results in all_results for result in file_results]
+
+            # Emit lint completed event
+            failed_count = len([r for r in results if r.exit_code != 0])
+            await self.emit_tui(
+                Messages.LintCompleted(
+                    total_files=len(changed_files),
+                    failed_files=failed_count,
+                    success=failed_count == 0,
+                )
+            )
+        else:
+            results = []
 
         await asyncio.sleep(0.2)
 
