@@ -82,41 +82,31 @@ class Analytics(containers.VerticalGroup):
             )
             yield CostInfo(self.cost, classes="px-1 w-50 text-right").data_bind(cost=Analytics.cost)
 
-    def update_analytics(
-        self,
-        tokens_sent: int,
-        tokens_received: int,
-        message_cost: float,
-        session_cost: float,
-        memory_percent: float,
-    ) -> None:
+    def update_analytics(self, event) -> None:
         """Update analytics display with current usage statistics.
 
         Args:
-            tokens_sent: Number of tokens sent in the last message.
-            tokens_received: Number of tokens received in the last message.
-            message_cost: Cost of the last message in dollars.
-            session_cost: Total cost of the session in dollars.
-            memory_percent: Percentage of memory used (0-100).
+            event: UpdateAnalytics message containing token usage and cost information.
         """
-        self.tokens_used = f"Tokens: {self.humanizer(tokens_sent)} sent, {self.humanizer(tokens_received)} received"
-        self.cost = f"Cost: ${message_cost:.2f} message, ${session_cost:.2f} session."
-        self.memory_used = f"{memory_percent:.1f}%"
-        self.memory_percent = memory_percent
+        self.tokens_used = (
+            f"Tokens: {self.humanizer(event.tokens_sent)} sent, {self.humanizer(event.tokens_received)} received"
+        )
+        self.cost = f"Cost: ${event.message_cost:.2f} message, ${event.session_cost:.2f} session."
+        self.memory_used = f"{event.memory_percent:.1f}%"
+        self.memory_percent = event.memory_percent
 
         # Update the progress bar
         progress_bar = self.query_one("#memory-progress", ProgressBar)
-        progress_bar.update(progress=memory_percent)
+        progress_bar.update(progress=event.memory_percent)
 
-    def update_files(self, editable: int, read_only: int) -> None:
+    def update_files(self, event) -> None:
         """Update file counts display.
 
         Args:
-            editable: Number of editable files in context.
-            read_only: Number of read-only files in context.
+            event: UpdateFiles message containing editable and read_only file counts.
         """
-        self.files_editable = editable
-        self.files_read_only = read_only
+        self.files_editable = event.editable
+        self.files_read_only = event.read_only
 
     def humanizer(self, number: int | float) -> str:
         divisor = 1

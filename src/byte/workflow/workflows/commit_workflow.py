@@ -1,5 +1,6 @@
 from byte.git import CommitValidator
-from byte.node import CommitAgentNode, EndNode, LintNode, ValidationNode
+from byte.node.agents import CommitAgentNode
+from byte.node.nodes import EndNode, LintNode, ValidationNode
 from byte.orchestration import GraphBuilder
 from byte.workflow import BaseWorkflow
 

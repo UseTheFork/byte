@@ -10,7 +10,7 @@ from byte.support import Str
 from byte.support.mixins import Bootable, Eventable
 
 
-class Node(ABC, Bootable, Eventable):
+class BaseNode(ABC, Bootable, Eventable):
     def get_node_name(self) -> str:
         """Get the snake_case name of the node based on its class name.
 
@@ -29,6 +29,16 @@ class Node(ABC, Bootable, Eventable):
         routing_state = {"target": goto, "source": self.get_node_name()}
 
         return Command(goto="routing_node", update={**update, "routing": routing_state})
+
+    def route_back(self, state: BaseState, update: dict | None = None) -> Command:
+        """Route back to the previous node that called this node.
+
+        Extracts the source node from the routing state and routes back to it.
+
+        Usage: `return self.route_back(state, {"errors": error_message})`
+        """
+        source = state.get("routing", {}).get("source", "end_node")
+        return self.route_to(source, update)
 
     @abstractmethod
     async def __call__(

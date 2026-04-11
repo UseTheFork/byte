@@ -4,6 +4,7 @@ from byte import ByteArgumentParser, Command
 from byte.config import ByteConfigException
 from byte.git import GitService
 from byte.lint import LintService
+from byte.tui import Messages
 from byte.workflow import CoderWorkflow, WorkflowService
 
 
@@ -30,6 +31,8 @@ class LintCommand(Command):
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute linting command with optional arguments."""
 
+        await self.emit_tui(Messages.CommandExecutionStarted())
+
         try:
             git_service = self.app.make(GitService)
             await git_service.stage_changes()
@@ -46,10 +49,6 @@ class LintCommand(Command):
                 await workflow_service.execute(coder_workflow, joined_lint_errors)
 
         except ByteConfigException as e:
-            # log.exception(e)
-            console = self.app["console"]
-            console.print_error_panel(
-                str(e),
-                title="Configuration Error",
-            )
-            return
+            await self.notify_error(str(e))
+
+        await self.emit_tui(Messages.CommandExecutionCompleted())

@@ -6,7 +6,6 @@ from byte import Service
 from byte.code_operations.schemas import AICommentType
 from byte.files import FileEvents, FileMode, FileService
 from byte.orchestration import OrchestrationEvents
-from byte.subgraph import AskAgent, CoderAgent
 from byte.support.utils import list_to_multiline_text
 
 
@@ -234,7 +233,7 @@ class AICommentWatcherService(Service):
                         "",
                     ]
                 ),
-                "agent_type": CoderAgent,
+                "agent_type": "CoderAgent",
             }
         elif action_type == "?":
             # Question - modify prompt to answer the question
@@ -245,7 +244,7 @@ class AICommentWatcherService(Service):
                         f"{ai_instruction}",
                     ]
                 ),
-                "agent_type": AskAgent,
+                "agent_type": "AskAgent",
             }
         else:
             return None

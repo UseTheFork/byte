@@ -1,17 +1,11 @@
 from __future__ import annotations
 
-import inspect
 from typing import TYPE_CHECKING, Type, TypeVar
 
 from langgraph.graph import StateGraph
 
-from byte.node import (
-    DummyNode,
-    EndNode,
-    Node,
-    RoutingNode,
-    StartNode,
-)
+from byte.node import BaseNode
+from byte.node.nodes import DummyNode, EndNode, RoutingNode, StartNode
 from byte.orchestration import (
     AssistantContextSchema,
     BaseState,
@@ -25,57 +19,47 @@ T = TypeVar("T")
 
 
 class GraphBuilder:
-    def __init__(self, app: Application, start_node: Type[Node] = DummyNode, **kwargs):
+    def __init__(self, app: Application, start_node: Type[BaseNode] = DummyNode, **kwargs):
         if app is None:
             raise ValueError("app parameter is required")
         self.app = app
         self._nodes = {}
 
         # Discover all available Node classes from the agent module.
-        self._dummy_nodes = GraphBuilder.discover_node_classes()
+        self._dummy_nodes = self.discover_node_classes()
 
         self.add_node(StartNode, goto=start_node)
         self.add_node(RoutingNode)
         self.add_node(EndNode)
 
-    @staticmethod
-    def discover_node_classes() -> dict[str, Type]:
+    def discover_node_classes(self) -> dict[str, Type]:
         """Discover all classes that extend the base Node class.
 
-        Scans the byte.agent module to find all Node subclasses and stores
-        them by their class name for later instantiation.
+        Uses the NodeServiceProvider to get all registered node and agent classes.
 
         Returns:
             Dictionary mapping node class names to their types
 
         Usage: Called internally during GraphBuilder initialization
         """
+        from byte.node import NodeServiceProvider
 
+        node_service_provider = self.app.make(NodeServiceProvider)
         node_classes = {}
 
-        # Import the agent module to scan for Node subclasses
-        import byte.node as agent_module
+        # Get nodes from the service provider
+        for node_class in node_service_provider.nodes():
+            node_string = Str.class_to_snake_case(node_class.__name__)
+            node_classes[node_string] = node_class
 
-        # Get all members of the agent module
-        for name, obj in inspect.getmembers(agent_module):
-            # Check if it's a class and subclass of Node (but not Node itself or DummyNode)
-            if inspect.isclass(obj) and issubclass(obj, Node) and obj is not Node and obj.__name__ != "DummyNode":
-                node_string = Str.class_to_snake_case(obj.__name__)
-                node_classes[node_string] = obj
-
-        # Import the agent module to scan for Node subclasses
-        import byte.subgraph as agent_module
-
-        # Get all members of the agent module
-        for name, obj in inspect.getmembers(agent_module):
-            # Check if it's a class and subclass of Node (but not Node itself or DummyNode)
-            if inspect.isclass(obj) and issubclass(obj, Node) and obj is not Node and obj.__name__ != "DummyNode":
-                node_string = Str.class_to_snake_case(obj.__name__)
-                node_classes[node_string] = obj
+        # Get agents from the service provider
+        for agent_class in node_service_provider.agents():
+            agent_string = Str.class_to_snake_case(agent_class.__name__)
+            node_classes[agent_string] = agent_class
 
         return node_classes
 
-    def add_node(self, node: Type[Node], **kwargs):
+    def add_node(self, node: Type[BaseNode], **kwargs):
         """Add a node to the graph builder.
 
         Creates an instance of the node class using the app container and stores

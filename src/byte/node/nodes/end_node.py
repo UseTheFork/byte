@@ -7,13 +7,13 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.clipboard import ClipboardService
-from byte.node import Node, NodeEvents
+from byte.node import BaseNode, NodeEvents
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.support import Boundary, BoundaryType
 from byte.support.utils import get_last_ai_message, list_to_multiline_text
 
 
-class EndNode(Node):
+class EndNode(BaseNode):
     """Finalize agent execution by promoting scratch messages to history and emitting end events.
 
     Usage: Automatically invoked by LangGraph when agent workflow completes.

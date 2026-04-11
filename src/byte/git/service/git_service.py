@@ -146,10 +146,10 @@ class GitService(Service, UserInteractive, Notifiable):
                 change_type = (
                     "modified" if change.change_type == "M" else "new" if change.change_type == "A" else "deleted"
                 )
-                file_list.append(f"  • {change.a_path} ({change_type})")
+                file_list.append(f" - {change.a_path} ({change_type})")
 
             for untracked in untracked_files:  # Add this loop
-                file_list.append(f"  • {untracked} (new)")
+                file_list.append(f" - {untracked} (new)")
 
             files_display = "\n".join(file_list)
 

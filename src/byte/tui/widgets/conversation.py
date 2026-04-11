@@ -16,11 +16,10 @@ from byte.tui.messages import Messages
 from byte.tui.schemas import Ask
 from byte.tui.widgets.chatbox import Chatbox
 from byte.tui.widgets.panels.human_message_panel import HumanMessagePanel
-from byte.tui.widgets.panels.pending_panel import PendingPanel
+from byte.tui.widgets.panels.response_panel import ResponsePanel
 from byte.tui.widgets.prompt.analytics import Analytics
 from byte.tui.widgets.prompt.flash import Flash
 from byte.tui.widgets.prompt.prompt_panel import PromptPanel
-from byte.tui.widgets.ui.loading_indicator import LoadingIndicator
 
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
@@ -51,14 +50,11 @@ class Conversation(Widget):
 
     app: ByteTUI
 
-    pending_panel: PendingPanel | None = None
-
     # Used to lock the chat input while the agent is responding.
     allow_input_submit = reactive(True)
 
     prompt = getters.query_one("#prompt", PromptPanel)
     chat_container = getters.query_one("#chat-container", VerticalScroll)
-    loading_indicator = getters.query_one(LoadingIndicator)
 
     def __init__(
         self,
@@ -143,49 +139,116 @@ class Conversation(Widget):
             )
         )
 
-    async def mount_pending_response_panel(self):
-        if self.pending_panel is None:
-            pending_panel = PendingPanel()
-            await self.chat_container.mount(pending_panel)
+    async def get_or_create_response_panel(self, panel_id: str | None) -> ResponsePanel:
+        if panel_id is None:
+            raise ValueError("panel_id cannot be None")
 
+        try:
+            pending_panel = self.query_one(f"#{panel_id}", ResponsePanel)
+            return pending_panel
+        except NoMatches:
+            pending_panel = ResponsePanel(id=panel_id)
+            await self.chat_container.mount(pending_panel)
             self.chat_container.refresh(layout=True)
-            self.pending_panel = pending_panel
+            return pending_panel
 
     @on(Messages.CommandExecutionStarted)
     async def command_execution_started(self, event: Messages.CommandExecutionStarted) -> None:
-        await self.mount_pending_response_panel()
-        self.loading_indicator.show("Thinking")
+        await self.get_or_create_response_panel(event.panel_id)
+
+    @on(Messages.CommandExecutionCompleted)
+    async def command_execution_completed(self, event: Messages.CommandExecutionCompleted) -> None:
+        self.move_focus_to_prompt()
 
     @on(Messages.CreatePanel)
     async def create_panel(self, event: Messages.CreatePanel) -> None:
-        await self.mount_pending_response_panel()
-        await self.pending_panel.mount_panel(event)
+        response_panel = await self.get_or_create_response_panel(event.panel_id)
+        await response_panel.mount_panel(event)
         self.scroll_to_latest_message()
 
     @on(Messages.AddHeading)
     async def add_heading(self, event: Messages.AddHeading) -> None:
-        assert self.pending_panel
-        await self.pending_panel.add_heading(event.heading)
+        response_panel = await self.get_or_create_response_panel(event.panel_id)
+        await response_panel.add_heading(event)
         self.scroll_to_latest_message()
 
     @on(Messages.ResponseStarted)
     async def response_started(self, event: Messages.ResponseStarted) -> None:
-        assert self.pending_panel
-        await self.pending_panel.start_markdown_stream()
+        response_panel = await self.get_or_create_response_panel(event.panel_id)
+        await response_panel.start_markdown_stream()
         self.scroll_to_latest_message()
 
     @on(Messages.ResponseChunk)
     async def response_chunk(self, event: Messages.ResponseChunk) -> None:
-        assert self.pending_panel
-        await self.pending_panel.add_markdown_chunk(event.chunk)
+        response_panel = await self.get_or_create_response_panel(event.panel_id)
+        await response_panel.add_markdown_chunk(event.chunk)
         self.scroll_to_latest_message()
 
     @on(Messages.ResponseComplete)
     async def response_complete(self, event: Messages.ResponseComplete) -> None:
-        assert self.pending_panel
-        await self.pending_panel.end_markdown_stream()
+        response_panel = await self.get_or_create_response_panel(event.panel_id)
+        await response_panel.end_markdown_stream()
         self.scroll_to_latest_message()
-        self.pending_panel = None
+
+    @on(Messages.PromptUser)
+    async def handle_prompt_user(self, event: Messages.PromptUser):
+        response_panel = await self.get_or_create_response_panel(event.panel_id)
+
+        if event.prompt_type == "select":
+            ask = Ask(
+                question=event.question,
+                options=event.options,
+                result_future=event.result_future,
+            )
+            await response_panel.mount_select(ask)
+        else:
+            ask = Ask(
+                question=event.question,
+                options=None,
+                result_future=event.result_future,
+            )
+            await response_panel.mount_input(ask)
+
+    @on(Messages.LintStarted)
+    async def lint_started(self, event: Messages.LintStarted) -> None:
+        """Handle linting operation start."""
+        response_panel = await self.get_or_create_response_panel(event.panel_id)
+
+        await response_panel.create_linting(event)
+        self.scroll_to_latest_message()
+
+    @on(Messages.LintProgress)
+    async def lint_progress(self, event: Messages.LintProgress) -> None:
+        """Handle linting progress update."""
+        response_panel = await self.get_or_create_response_panel(event.panel_id)
+        await response_panel.update_linting_progress(event.current_file, event.completed, event.total)
+        self.scroll_to_latest_message()
+
+    @on(Messages.LintCompleted)
+    async def lint_completed(self, event: Messages.LintCompleted) -> None:
+        """Handle linting operation completion."""
+        response_panel = await self.get_or_create_response_panel(event.panel_id)
+        await response_panel.complete_linting(event.total_files, event.failed_files, event.success)
+        self.scroll_to_latest_message()
+
+    @on(Messages.LoadingIndicatorShow)
+    async def loading_indicator_show(self, event: Messages.LoadingIndicatorShow) -> None:
+        """Show the loading indicator with an optional message."""
+        response_panel = await self.get_or_create_response_panel(event.panel_id)
+        response_panel.show_loading_indicator(event.message)
+
+    @on(Messages.LoadingIndicatorHide)
+    async def loading_indicator_hide(self, event: Messages.LoadingIndicatorHide) -> None:
+        """Hide the loading indicator."""
+        response_panel = await self.get_or_create_response_panel(event.panel_id)
+        response_panel.hide_loading_indicator()
+
+    @on(Messages.ToolCall)
+    async def tool_call(self, event: Messages.ToolCall) -> None:
+        """Handle tool call display."""
+        response_panel = await self.get_or_create_response_panel(event.panel_id)
+        await response_panel.mount_toolcall(event.name, event.args)
+        self.scroll_to_latest_message()
 
     @on(Messages.Notify)
     async def flash(self, event: Messages.Notify) -> None:
@@ -203,78 +266,15 @@ class Conversation(Widget):
         """Update analytics display with token usage and cost information.
 
         Args:
-            tokens_sent: Number of tokens sent in the last message.
-            tokens_received: Number of tokens received in the last message.
-            message_cost: Cost of the last message in dollars.
-            session_cost: Total cost of the session in dollars.
-            memory_percent: Percentage of memory used (0-100).
+            event: UpdateAnalytics message containing token usage and cost information.
         """
-        self.query_one(Analytics).update_analytics(
-            tokens_sent=event.tokens_sent,
-            tokens_received=event.tokens_received,
-            message_cost=event.message_cost,
-            session_cost=event.session_cost,
-            memory_percent=event.memory_percent,
-        )
+        self.query_one(Analytics).update_analytics(event)
 
     @on(Messages.UpdateFiles)
     async def update_files(self, event: Messages.UpdateFiles) -> None:
         """Update file counts display with current context statistics.
 
         Args:
-            editable: Number of editable files in context.
-            read_only: Number of read-only files in context.
+            event: UpdateFiles message containing editable and read_only file counts.
         """
-        self.query_one(Analytics).update_files(editable=event.editable, read_only=event.read_only)
-
-    @on(Messages.PromptUser)
-    async def handle_prompt_user(self, event: Messages.PromptUser):
-        await self.mount_pending_response_panel()
-        assert self.pending_panel
-
-        if event.prompt_type == "select":
-            ask = Ask(
-                question=event.question,
-                options=event.options,
-                result_future=event.result_future,
-            )
-            await self.pending_panel.mount_select(ask)
-        else:
-            ask = Ask(
-                question=event.question,
-                options=None,
-                result_future=event.result_future,
-            )
-            await self.pending_panel.mount_input(ask)
-
-    @on(Messages.LintStarted)
-    async def lint_started(self, event: Messages.LintStarted) -> None:
-        """Handle linting operation start."""
-        await self.mount_pending_response_panel()
-        assert self.pending_panel
-        await self.pending_panel.create_linting(event.file_count, event.command_count)
-        self.scroll_to_latest_message()
-
-    @on(Messages.LintProgress)
-    async def lint_progress(self, event: Messages.LintProgress) -> None:
-        """Handle linting progress update."""
-        assert self.pending_panel
-        await self.pending_panel.update_linting_progress(event.current_file, event.completed, event.total)
-        self.scroll_to_latest_message()
-
-    @on(Messages.LintCompleted)
-    async def lint_completed(self, event: Messages.LintCompleted) -> None:
-        """Handle linting operation completion."""
-        assert self.pending_panel
-        await self.pending_panel.complete_linting(event.total_files, event.failed_files, event.success)
-        self.scroll_to_latest_message()
-
-    @on(Messages.LoadingIndicatorShow)
-    async def loading_indicator_show(self, event: Messages.LoadingIndicatorShow) -> None:
-        """Show the loading indicator with an optional message."""
-        self.loading_indicator.show(event.message)
-
-    @on(Messages.LoadingIndicatorHide)
-    async def loading_indicator_hide(self, event: Messages.LoadingIndicatorHide) -> None:
-        """Hide the loading indicator."""
-        self.loading_indicator.hide()
+        self.query_one(Analytics).update_files(event)

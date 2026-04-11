@@ -5,15 +5,13 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte.cli.rich.byte_display import ByteDisplay
-from byte.node import ModelMainNode, Node
+from byte.node import BaseNode
 from byte.orchestration import AssistantContextSchema, BaseState
-from byte.support import Str
-from byte.support.mixins import UserInteractive
 from byte.support.utils import get_last_message
+from byte.tui import Messages
 
 
-class ToolNode(Node, UserInteractive):
+class ToolNode(BaseNode):
     async def __call__(
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
     ) -> Command[str]:
@@ -25,11 +23,10 @@ class ToolNode(Node, UserInteractive):
 
         # Check if tools are available
         if not tools:
-            return Command(goto=Str.class_to_snake_case(ModelMainNode), update={"scratch_messages": []})
+            return self.route_back(state, {"scratch_messages": []})
 
         # Build a mapping of tool names to tool instances
         tools_by_name = {tool.name: tool for tool in tools}
-        console = self.app["console"]
 
         for tool_call in message.tool_calls:
             # Check if the tool exists
@@ -43,13 +40,13 @@ class ToolNode(Node, UserInteractive):
                 )
                 continue
 
-            # Format tool call information
-            tool_info_lines = [f" {tool_call['name']}()"]
-            for key, value in tool_call["args"].items():
-                tool_info_lines.append(f" ╰- {key}: `{value}`")
-
-            tool_display = ByteDisplay("\n".join(tool_info_lines), theme=console.syntax_theme)
-            console.print(tool_display)
+            # Emit tool call to TUI
+            await self.emit_tui(
+                Messages.ToolCall(
+                    name=tool_call["name"],
+                    args=tool_call["args"],
+                )
+            )
 
             tool_result = await tools_by_name[tool_call["name"]].ainvoke(tool_call["args"])
 
@@ -61,4 +58,4 @@ class ToolNode(Node, UserInteractive):
                 )
             )
 
-        return Command(goto=Str.class_to_snake_case(ModelMainNode), update={"scratch_messages": outputs})
+        return self.route_back(state, {"scratch_messages": outputs})

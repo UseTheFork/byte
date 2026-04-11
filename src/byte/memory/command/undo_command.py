@@ -6,7 +6,6 @@ from langgraph.graph.state import RunnableConfig
 
 from byte import ByteArgumentParser, Command
 from byte.memory import MemoryService
-from byte.subgraph import CoderAgent
 
 
 class UndoCommand(Command):
@@ -37,6 +36,7 @@ class UndoCommand(Command):
         memory_service = self.app.make(MemoryService)
         console = self.app["console"]
 
+        # TODO: this is all wrong.
         # It dosent matter if we use CoderAgent or AskAgent here since they use the same BaseState.
         coder_agent = self.app.make(CoderAgent)
         coder_agent_graph = await coder_agent.get_graph()

@@ -37,14 +37,6 @@ class FileIgnoreService(Service):
             # Load ignore patterns from configuration
             patterns.extend(self.app["config"].files.ignore)
 
-        # Log all patterns being used for debugging
-        if patterns:
-            self.app["log"].debug(f"Loaded {len(patterns)} ignore patterns:")
-            for pattern in patterns:
-                self.app["log"].debug(f"  - {pattern}")
-        else:
-            self.app["log"].debug("No ignore patterns loaded")
-
         self._gitignore_spec = pathspec.PathSpec.from_lines("gitignore", patterns)
 
     def boot(self) -> None:

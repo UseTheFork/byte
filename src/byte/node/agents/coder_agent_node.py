@@ -1,28 +1,25 @@
 from typing import Literal, Type
 
+from langchain.messages import AIMessage
 from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte.git import CommitMessage
 from byte.llm import LLMService
 from byte.node import (
     BaseAgentNode,
     BaseNode,
 )
 from byte.node.nodes import EndNode
-from byte.orchestration import AssistantContextSchema, BaseState
+from byte.orchestration import AssistantContextSchema, BaseState, preamble
 from byte.support import Boundary, BoundaryType, Str
-from byte.support.utils import list_to_multiline_text
+from byte.support.utils import extract_content_from_message, list_to_multiline_text
 from byte.tui import Messages
 
-# Conventional commit message generation prompt
-# Adapted from Aider: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/prompts.py#L8
-# Conventional Commits specification: https://www.conventionalcommits.org/en/v1.0.0/#summary
-
-commit_user_template = [
+coder_user_template = [
+    "{masked_messages}",
     Boundary.open(BoundaryType.USER_INPUT),
     "```text",
     "{user_request}",
@@ -30,31 +27,34 @@ commit_user_template = [
     "",
     "You **MUST** consider the user input before proceeding (if not empty).",
     Boundary.close(BoundaryType.USER_INPUT),
-    "",
-    "{masked_messages}",
-    "",
-    Boundary.open(BoundaryType.TASK),
-    "You are an expert software engineer that generates concise, Git commit messages based on the provided diffs.",
-    "Review the provided context and diffs which are about to be committed to a git repo.",
-    "Review the diffs carefully.",
-    Boundary.critical("You MUST follow the commit guidelines provided in the Rules section below."),
-    "Read and apply ALL rules for commit types, scopes, and description formatting.",
-    Boundary.close(BoundaryType.TASK),
-    "{commit_guidelines}",
+    Boundary.open(BoundaryType.OPERATING_CONSTRAINTS),
+    "- Always use best practices when coding",
+    "- Respect and use existing conventions, libraries, etc that are already present in the code base",
+    "- Take requests for changes to the supplied code",
+    "- If the request is ambiguous, ask clarifying questions before proceeding",
+    "- Keep changes simple don't build more then what is asked for",
+    Boundary.close(BoundaryType.OPERATING_CONSTRAINTS),
+    "{available_conventions}",
+    "{project_hierarchy}",
+    "{project_information_and_context}",
+    "{file_context}",
+    "{operating_principles}",
 ]
 
-commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
+coder_prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
             list_to_multiline_text(
                 [
                     Boundary.open(BoundaryType.ROLE),
-                    "You are an expert software engineer that generates organized Git commits based on the provided user input.",
+                    preamble(),
+                    "Act as an expert software developer.",
                     Boundary.close(BoundaryType.ROLE),
                 ]
             ),
         ),
+        ("placeholder", "{examples}"),
         ("user", "{assembled_user_message}"),
         ("placeholder", "{scratch_messages}"),
         ("placeholder", "{errors}"),
@@ -62,20 +62,12 @@ commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
 )
 
 
-class CommitAgentNode(BaseAgentNode):
+class CoderAgentNode(BaseAgentNode):
     def boot(
         self,
         goto: Type[BaseNode] = EndNode,
         **kwargs,
     ):
-        """Initialize the validation node with constraints and routing configuration.
-
-        Args:
-                goto: Next node to route to after successful validation (default: "end_node")
-                max_lines: Maximum number of non-blank lines allowed in response content (optional)
-
-        Usage: `await node.boot(goto="end_node", max_lines=100)`
-        """
 
         self.goto = Str.class_to_snake_case(goto)
 
@@ -84,13 +76,10 @@ class CommitAgentNode(BaseAgentNode):
         return llm_service.get_weak_model()
 
     def get_prompt(self):
-        return commit_prompt
+        return coder_prompt
 
     def get_user_template(self):
-        return commit_user_template
-
-    def get_structured_output(self):
-        return CommitMessage
+        return coder_user_template
 
     async def __call__(
         self,
@@ -104,12 +93,13 @@ class CommitAgentNode(BaseAgentNode):
         runnable = self.create_runnable()
 
         await self.emit_tui(Messages.LoadingIndicatorShow())
-        await self.emit_tui(Messages.AddHeading("Commit Agent", "text-primary"))
+        await self.emit_tui(Messages.AddHeading("Coder Agent", "text-primary"))
         await self.emit_tui(Messages.ResponseStarted())
 
         result = await runnable.ainvoke(agent_state, config=config)
+        msg = extract_content_from_message(result)
 
         await self.emit_tui(Messages.ResponseComplete())
         await self.emit_tui(Messages.LoadingIndicatorHide())
 
-        return self.route_to(self.goto, {"extracted_content": result, "errors": None})
+        return self.route_to(self.goto, {"scratch_messages": AIMessage(msg)})

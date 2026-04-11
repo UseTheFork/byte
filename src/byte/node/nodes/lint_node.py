@@ -7,15 +7,16 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.lint import LintService
-from byte.node import EndNode, Node
+from byte.node import BaseNode
+from byte.node.nodes import EndNode
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.support import Str
 
 
-class LintNode(Node):
+class LintNode(BaseNode):
     def boot(
         self,
-        goto: Type[Node] = EndNode,
+        goto: Type[BaseNode] = EndNode,
         **kwargs,
     ):
         self.goto = Str.class_to_snake_case(goto)

@@ -7,13 +7,13 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable
 
 from byte.node import (
-    Node,
+    BaseNode,
     NodeEvents,
 )
 from byte.orchestration import AssistantContextSchema, BaseState, PromptAssembler
 
 
-class BaseAgentNode(Node):
+class BaseAgentNode(BaseNode):
     def get_enforcement(self) -> List[str]:
         return []
 

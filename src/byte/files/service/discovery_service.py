@@ -43,7 +43,6 @@ class FileDiscoveryService(Service):
             for file in files:
                 file_path = root_path / file
                 if not self._is_ignored(file_path) and file_path.is_file():
-                    self.app["log"].debug(f"Discovered file: {file_path}")
                     self._all_files.add(file_path)
 
     def boot(self) -> None:

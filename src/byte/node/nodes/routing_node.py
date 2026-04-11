@@ -4,27 +4,24 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte.node import Node
+from byte.node import BaseNode
 from byte.orchestration import AssistantContextSchema, BaseState
 
 
 # This is here to control the below Literal and be able to have all possible nodes in one place.
-class RoutingNode(Node):
+class RoutingNode(BaseNode):
     async def __call__(
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
     ) -> Command[
         Literal[
-            "model_weak_node",
-            "model_reasoning_node",
-            "model_main_node",
             "lint_node",
-            "ask_agent",
             "end_node",
             "parse_blocks_node",
             "tool_node",
             "validation_node",
-            "coder_agent",
             "commit_agent_node",
+            "coder_agent_node",
+            "ask_agent_node",
         ]
     ]:
         routing = state.get("routing", {})

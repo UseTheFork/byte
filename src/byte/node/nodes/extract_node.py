@@ -5,7 +5,8 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 from pydantic import BaseModel, Field
 
-from byte.node import EndNode, Node
+from byte.node import BaseNode
+from byte.node.nodes import EndNode
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.parsing import ParsingService, ValidationError
 from byte.support import Str
@@ -24,7 +25,7 @@ class SessionContextFormatter(BaseModel):
     )
 
 
-class ExtractNode(Node, UserInteractive):
+class ExtractNode(BaseNode, UserInteractive):
     """Extract and format content from assistant responses into structured output.
 
     Processes the last message from the assistant and formats it according to
@@ -37,7 +38,7 @@ class ExtractNode(Node, UserInteractive):
     def boot(
         self,
         parsing_service: ParsingService | None = None,
-        goto: Type[Node] = EndNode,
+        goto: Type[BaseNode] = EndNode,
         **kwargs,
     ):
         """Initialize the extract node with parsing_service and routing configuration.

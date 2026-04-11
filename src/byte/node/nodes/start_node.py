@@ -7,15 +7,15 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.code_operations import edit_block_messages
-from byte.node import ModelMainNode, Node
+from byte.node import BaseNode
 from byte.orchestration import AssistantContextSchema, BaseState, MetadataSchema, PromptSettingsSchema
 from byte.support import Str
 
 
-class StartNode(Node):
+class StartNode(BaseNode):
     def boot(
         self,
-        goto: Type[Node] = ModelMainNode,
+        goto: Type[BaseNode],
         **kwargs,
     ):
         self.goto = Str.class_to_snake_case(goto)

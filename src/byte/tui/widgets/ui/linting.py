@@ -50,7 +50,7 @@ class Linting(VerticalGroup):
         self,
         name: str | None = None,
         id: str | None = None,
-        classes: str | None = None,
+        classes: str = "border-round-secondary",
         disabled: bool = False,
     ) -> None:
         super().__init__(

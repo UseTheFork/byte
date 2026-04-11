@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from textual import getters
 from textual.containers import VerticalGroup
 from textual.widgets import Markdown
 
@@ -9,15 +10,18 @@ from byte.tui import Messages
 from byte.tui.schemas import Ask
 from byte.tui.widgets.ui.input import Input
 from byte.tui.widgets.ui.linting import Linting
+from byte.tui.widgets.ui.loading_indicator import LoadingIndicator
 from byte.tui.widgets.ui.select import Select
 from byte.tui.widgets.ui.text_rule import TextRule
+from byte.tui.widgets.ui.toolcall import ToolCall
 
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
 
 
-class PendingPanel(VerticalGroup):
+class ResponsePanel(VerticalGroup):
     app: ByteTUI
+    loading_indicator = getters.query_one(LoadingIndicator)
 
     def __init__(
         self,
@@ -35,8 +39,11 @@ class PendingPanel(VerticalGroup):
         self.current_stream = None
         self.current_linting: Linting | None = None
 
-    async def add_heading(self, heading: str, classes: str = "text-muted"):
-        await self.mount(TextRule(heading, classes=classes))
+    def on_mount(self) -> None:
+        self.mount(LoadingIndicator(classes="hidden dock-bottom"))
+
+    async def add_heading(self, event: Messages.AddHeading):
+        await self.mount(TextRule(event.heading, classes=event.classes))
 
     async def add_static_markdown(self, content: str = ""):
         markdown = Markdown(content)
@@ -100,7 +107,7 @@ class PendingPanel(VerticalGroup):
         await self.mount(markdown)
         return markdown
 
-    async def create_linting(self, file_count: int, command_count: int) -> Linting:
+    async def create_linting(self, event: Messages.LintStarted) -> Linting:
         """Create and mount a new Linting widget.
 
         Args:
@@ -112,7 +119,7 @@ class PendingPanel(VerticalGroup):
         """
         linting = Linting()
         await self.mount(linting)
-        linting.start_linting(file_count, command_count)
+        linting.start_linting(event.file_count, event.command_count)
         self.current_linting = linting
         return linting
 
@@ -139,6 +146,30 @@ class PendingPanel(VerticalGroup):
             self.current_linting.complete_linting(total_files, failed_files, success)
             self.current_linting = None
 
+    def show_loading_indicator(self, message: str = "Thinking") -> None:
+        """Show the loading indicator by removing the hidden class.
 
-# async def add_tool_call(self, tool_data: dict):
-#     await self.mount(ToolCallWidget(tool_data))
+        Args:
+            message: Optional message to display with the loading indicator
+        """
+        self.loading_indicator.message = message
+        self.loading_indicator.remove_class("hidden")
+
+    def hide_loading_indicator(self) -> None:
+        """Hide the loading indicator by adding the hidden class."""
+        self.loading_indicator.add_class("hidden")
+
+    async def mount_toolcall(self, name: str, args: dict | None = None):
+        """Mount a tool call widget.
+
+        Args:
+            name: Name of the tool being called
+            args: Arguments passed to the tool
+
+        Returns:
+            The mounted ToolCall widget
+        """
+
+        tool_widget = ToolCall(name=name, args=args)
+        await self.mount(tool_widget)
+        return tool_widget

@@ -16,13 +16,13 @@ from byte.code_operations import (
     PreFlightUnparsableError,
     RawBlockService,
 )
-from byte.node import Node
+from byte.node import BaseNode
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.support.mixins import UserInteractive
 from byte.support.utils import list_to_multiline_text
 
 
-class ParseBlocksNode(Node, UserInteractive):
+class ParseBlocksNode(BaseNode, UserInteractive):
     """Parse and validate edit blocks from assistant messages.
 
     This node handles the complete lifecycle of edit block processing:

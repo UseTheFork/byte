@@ -1,28 +1,23 @@
-"""Agent domain for AI agent implementations and orchestration."""
-
 from typing import TYPE_CHECKING
 
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
-    from byte.node.base_agent_node import BaseAgentNode
-    from byte.node.base_node import BaseNode
-    from byte.node.events import NodeEvents
-    from byte.node.service_provider import NodeServiceProvider
+    from byte.node.agents.ask_agent_node import AskAgentNode
+    from byte.node.agents.coder_agent_node import CoderAgentNode
+    from byte.node.agents.commit_agent_node import CommitAgentNode
 
 __all__ = (
-    "BaseAgentNode",
-    "BaseNode",
-    "NodeEvents",
-    "NodeServiceProvider",
+    "AskAgentNode",
+    "CoderAgentNode",
+    "CommitAgentNode",
 )
 
 _dynamic_imports = {
     # keep-sorted start
-    "BaseAgentNode": "base_agent_node",
-    "BaseNode": "base_node",
-    "NodeEvents": "events",
-    "NodeServiceProvider": "service_provider",
+    "CommitAgentNode": "commit_agent_node",
+    "AskAgentNode": "ask_agent_node",
+    "CoderAgentNode": "coder_agent_node",
     # keep-sorted end
 }
 

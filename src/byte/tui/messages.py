@@ -35,6 +35,7 @@ class Messages:
         content: str
         style: Literal["default", "warning", "success", "error"] = "default"
         duration: float | None = None
+        panel_id: str | None = None
 
     @dataclass
     class Answer(Message):
@@ -45,31 +46,39 @@ class Messages:
         """
 
         answer: AnswerSchema | list[AnswerSchema] | AnswerCancelled
+        panel_id: str | None = None
 
     @dataclass
     class CommandExecutionStarted(Message):
-        pass
+        panel_id: str | None = None
 
     @dataclass
     class CommandExecutionCompleted(Message):
-        pass
+        panel_id: str | None = None
 
     @dataclass
     class AddHeading(Message):
         heading: str
         classes: str = "text-muted"
+        panel_id: str | None = None
+
+    @dataclass
+    class AddStaticMarkdown(Message):
+        content: str = ""
+        panel_id: str | None = None
 
     @dataclass
     class ResponseStarted(Message):
-        pass
+        panel_id: str | None = None
 
     @dataclass
     class ResponseChunk(Message):
         chunk: str
+        panel_id: str | None = None
 
     @dataclass
     class ResponseComplete(Message):
-        pass
+        panel_id: str | None = None
 
     @dataclass
     class CreatePanel(Message):
@@ -78,6 +87,7 @@ class Messages:
         content: str
         title: str | None = None
         border_style: Literal["foreground", "primary", "secondary", "warning", "error", "success"] = "foreground"
+        panel_id: str | None = None
 
     @dataclass
     class UpdateAnalytics(Message):
@@ -103,6 +113,7 @@ class Messages:
 
         file_count: int
         command_count: int
+        panel_id: str | None = None
 
     @dataclass
     class LintCompleted(Message):
@@ -117,6 +128,7 @@ class Messages:
         total_files: int
         failed_files: int
         success: bool
+        panel_id: str | None = None
 
     @dataclass
     class LintProgress(Message):
@@ -131,6 +143,7 @@ class Messages:
         current_file: str
         completed: int
         total: int
+        panel_id: str | None = None
 
     @dataclass
     class PromptUser(Message):
@@ -140,6 +153,7 @@ class Messages:
         result_future: asyncio.Future[AnswerSchema | list[AnswerSchema] | str | AnswerCancelled]
         prompt_type: Literal["select", "text", "multiselect"] = "text"
         options: list[AnswerSchema] | None = None
+        panel_id: str | None = None
 
     @dataclass
     class LoadingIndicatorShow(Message):
@@ -150,9 +164,24 @@ class Messages:
         """
 
         message: str = "Thinking"
+        panel_id: str | None = None
 
     @dataclass
     class LoadingIndicatorHide(Message):
         """Hide the loading indicator."""
 
-        pass
+        panel_id: str | None = None
+
+    @dataclass
+    class ToolCall(Message):
+        """Tool call execution message.
+
+        Args:
+            name: Name of the tool being called
+            args: Arguments passed to the tool
+            panel_id: Optional panel identifier for UI routing
+        """
+
+        name: str
+        args: dict | None = None
+        panel_id: str | None = None

@@ -2,13 +2,14 @@ from typing import List, Type
 
 from byte import ServiceProvider
 from byte.node import (
+    BaseAgentNode,
+    BaseNode,
+)
+from byte.node.agents import AskAgentNode, CoderAgentNode, CommitAgentNode
+from byte.node.nodes import (
     EndNode,
     ExtractNode,
     LintNode,
-    ModelMainNode,
-    ModelReasoningNode,
-    ModelWeakNode,
-    Node,
     ParseBlocksNode,
     RoutingNode,
     StartNode,
@@ -20,15 +21,21 @@ from byte.node import (
 class NodeServiceProvider(ServiceProvider):
     """ """
 
-    def nodes(self) -> List[Type[Node]]:
+    def agents(self) -> List[Type[BaseAgentNode]]:
+        return [
+            # keep-sorted start
+            AskAgentNode,
+            CommitAgentNode,
+            CoderAgentNode,
+            # keep-sorted end
+        ]
+
+    def nodes(self) -> List[Type[BaseNode]]:
         return [
             # keep-sorted start
             EndNode,
             ExtractNode,
             LintNode,
-            ModelMainNode,
-            ModelReasoningNode,
-            ModelWeakNode,
             ParseBlocksNode,
             RoutingNode,
             StartNode,
@@ -41,3 +48,6 @@ class NodeServiceProvider(ServiceProvider):
         # Create all Nodes
         for node_class in self.nodes():
             self.app.bind(node_class)
+
+        for agent_class in self.agents():
+            self.app.bind(agent_class)

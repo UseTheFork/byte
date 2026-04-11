@@ -5,14 +5,15 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte.node import EndNode, Node
+from byte.node import BaseNode
+from byte.node.nodes import EndNode
 from byte.orchestration import AssistantContextSchema, BaseState, ValidationError, Validator
 from byte.support import Str
 from byte.support.mixins import UserInteractive
 from byte.tui import Messages
 
 
-class ValidationNode(Node, UserInteractive):
+class ValidationNode(BaseNode, UserInteractive):
     """Node for validating assistant responses against configured constraints.
 
     Performs validation checks on the last message content, such as line count limits.
@@ -24,7 +25,7 @@ class ValidationNode(Node, UserInteractive):
     def boot(
         self,
         validators: list[Validator],
-        goto: Type[Node] = EndNode,
+        goto: Type[BaseNode] = EndNode,
         **kwargs,
     ):
         """Initialize the validation node with constraints and routing configuration.
