@@ -20,6 +20,7 @@ from byte.node import BaseNode
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.support.mixins import UserInteractive
 from byte.support.utils import list_to_multiline_text
+from byte.tui import Messages
 
 
 class ParseBlocksNode(BaseNode, UserInteractive):
@@ -62,9 +63,8 @@ class ParseBlocksNode(BaseNode, UserInteractive):
 
     async def __call__(
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
-    ) -> Command[Literal["end_node", "main_model_node", "lint_node"]]:
+    ) -> Command[Literal["routing_node"]]:
         """Parse commands from the last assistant message."""
-        self.console = self.app["console"]
         self.edit_block_service = self.app.make(EditBlockService)
         self.raw_block_service = self.app.make(RawBlockService)
         self.runtime = runtime
@@ -85,9 +85,9 @@ class ParseBlocksNode(BaseNode, UserInteractive):
             if not should_continue:
                 # Dont store this invocation in memory
                 self.metadata.erase_history = True
-                return Command(
-                    goto="end_node",
-                    update={
+                return self.route_to(
+                    "end_node",
+                    {
                         "metadata": self.metadata,
                     },
                 )
@@ -98,9 +98,15 @@ class ParseBlocksNode(BaseNode, UserInteractive):
             self.app["log"].info(final_components)
 
         except NoBlocksFoundError:
-            return Command(goto="end_node")
+            return self.route_to("end_node")
         except PreFlightUnparsableError as e:
-            self.console.print_warning_panel(str(e), title="Parse Error: Missing block_id")
+            await self.emit_tui(
+                Messages.CreatePanel(
+                    str(e),
+                    title="Parse Error: Missing block_id",
+                    border_style="warning",
+                )
+            )
 
             error_message = list_to_multiline_text(
                 [
@@ -112,7 +118,13 @@ class ParseBlocksNode(BaseNode, UserInteractive):
                 ]
             )
 
-            return Command(goto="main_model_node", update={"errors": error_message, "metadata": self.metadata})
+            return self.route_back(
+                state,
+                {
+                    "errors": error_message,
+                    "metadata": self.metadata,
+                },
+            )
 
         # Convert raw blocks to BaseOperationBlock using EditBlockService
         components = await self.edit_block_service.convert_raw_blocks_to_parsed(final_components)
@@ -140,7 +152,13 @@ class ParseBlocksNode(BaseNode, UserInteractive):
                 ]
             )
 
-            self.console.print_warning_panel(error_message, title="Validation Error")
+            await self.emit_tui(
+                Messages.CreatePanel(
+                    str(error_message),
+                    title="Validation Error",
+                    border_style="warning",
+                )
+            )
 
             # Rebuild components with validated blocks
             updated_components = []
@@ -155,12 +173,9 @@ class ParseBlocksNode(BaseNode, UserInteractive):
             combined_content = self._components_to_content(updated_components)
             remove_messages = self._create_remove_messages(state["scratch_messages"])
 
-            # self.metadata
-
-            return Command(
-                goto="router_node",
-                update={
-                    "routing": {"node_to": "main_model_node", "node_from": "parse_blocks_node"},
+            return self.route_back(
+                state,
+                {
                     "scratch_messages": remove_messages + [AIMessage(content=combined_content)],
                     "errors": error_message,
                     "metadata": self.metadata,
@@ -192,10 +207,9 @@ class ParseBlocksNode(BaseNode, UserInteractive):
         # Create final AIMessage with combined content
         final_ai_message = AIMessage(content=final_content)
 
-        return Command(
-            goto="router_node",
-            update={
-                "routing": {"node_to": "lint_node", "node_from": "parse_blocks_node"},
+        return self.route_to(
+            "lint_node",
+            {
                 "scratch_messages": remove_messages + [final_ai_message],
                 "parsed_blocks": [block.to_dict() for block in parsed_blocks],
                 "metadata": self.metadata,

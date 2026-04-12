@@ -129,10 +129,18 @@ class AskAgentNode(BaseAgentNode):
         await self.emit_tui(Messages.ResponseStarted())
 
         result = await runnable.ainvoke(agent_state, config=config)
-        msg = extract_content_from_message(result)
-        # TODO: Should we wrap the AI message in XML.
 
         await self.emit_tui(Messages.ResponseComplete())
         await self.emit_tui(Messages.LoadingIndicatorHide())
 
+        if result.tool_calls and len(result.tool_calls) > 0:
+            return self.route_to(
+                "tool_node",
+                {
+                    "scratch_messages": [result],
+                    "errors": None,
+                },
+            )
+
+        msg = extract_content_from_message(result)
         return self.route_to(self.goto, {"scratch_messages": AIMessage(msg)})

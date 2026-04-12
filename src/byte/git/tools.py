@@ -1,12 +1,18 @@
-from langchain_core.tools import tool
+from typing import Annotated
 
-from byte.context import make
+from langchain.tools import InjectedToolArg, tool
+
+from byte import Application
 from byte.git import GitService
 from byte.tui import InteractionService
 
 
 @tool(parse_docstring=True)
-async def git_grep(pattern: str, file_pattern: str = "") -> str:
+async def git_grep(
+    pattern: str,
+    file_pattern: str = "",
+    app: Annotated[Application | None, InjectedToolArg] = None,
+) -> str:
     """Search for a pattern in tracked files using git grep.
 
     This tool searches through all files tracked by git for the specified pattern.
@@ -19,8 +25,11 @@ async def git_grep(pattern: str, file_pattern: str = "") -> str:
     Returns:
         Search results showing file paths and matching lines, or an error message if the search fails
     """
-    git_service = make(GitService)
-    interaction_service = make(InteractionService)
+    if app is None:
+        raise RuntimeError("Application instance is required but was not provided")
+
+    git_service = app.make(GitService)
+    interaction_service = app.make(InteractionService)
 
     file_pattern_msg = f" in files matching '{file_pattern}'" if file_pattern else " in all tracked files"
     if await interaction_service.confirm(

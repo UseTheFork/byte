@@ -66,13 +66,13 @@ class Analytics(containers.VerticalGroup):
         & #memory-analytics {
                 width: auto;
                 & Label {
-                    width: 1fr;
+                    width: 13;
                 }
                 & ProgressBar {
-                    width: 4fr;
+                    width: 1fr;
                 }
                 & MemoryUsedInfo {
-                    width: 1fr;
+                    width: 6;
                 }
             }
 

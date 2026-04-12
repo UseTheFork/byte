@@ -7,6 +7,7 @@ from byte.code_operations.schemas import AICommentType
 from byte.files import FileEvents, FileMode, FileService
 from byte.orchestration import OrchestrationEvents
 from byte.support.utils import list_to_multiline_text
+from byte.tui import Messages
 
 
 class AICommentWatcherService(Service):
@@ -167,10 +168,8 @@ class AICommentWatcherService(Service):
         file_path = Path(file_path)
         result = await self._handle_file_modified(file_path)
 
-        # TODO: This is going to need to come out.
-        # if result:
-        # prompt_toolkit_service = self.app.make(PromptToolkitService)
-        # await prompt_toolkit_service.interrupt()
+        if result:
+            await self.emit_user_request()
 
         return payload
 
@@ -233,7 +232,7 @@ class AICommentWatcherService(Service):
                         "",
                     ]
                 ),
-                "agent_type": "CoderAgent",
+                "agent_type": "/coder",
             }
         elif action_type == "?":
             # Question - modify prompt to answer the question
@@ -244,26 +243,20 @@ class AICommentWatcherService(Service):
                         f"{ai_instruction}",
                     ]
                 ),
-                "agent_type": "AskAgent",
+                "agent_type": "/ask",
             }
         else:
             return None
 
-    # async def modify_user_request_hook(self, payload: Events.GatherReinforcement) -> Events.GatherReinforcement:
+    async def emit_user_request(self):
+        ai_result = await self.scan_context_files_for_ai_comments()
 
-    #     interrupted = payload.interrupted
-    #     user_input = payload.user_input
-    #     if interrupted and user_input is None:
-    #         # Scan context files for AI comments
-    #         ai_result = await self.scan_context_files_for_ai_comments()
-
-    #         if ai_result:
-    #             payload.user_input = str(ai_result["prompt"])
-    #             payload.interrupted = False
-    #             # TODO: should we use our string helper here and convert the agent type to a normilzied string instead of housing a class?
-    #             payload.active_agent = ai_result["agent_type"]
-
-    #     return payload
+        if ai_result:
+            await self.emit_tui(
+                Messages.UserInputSubmitted(
+                    body=f"{ai_result['agent_type']} " + str(ai_result["prompt"]),
+                ),
+            )
 
     async def add_reinforcement_hook(
         self, payload: OrchestrationEvents.GatherReinforcement
@@ -296,3 +289,6 @@ class AICommentWatcherService(Service):
         #         )
 
         return payload
+
+
+# AI: test ai?

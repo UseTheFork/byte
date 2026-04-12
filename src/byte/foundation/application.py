@@ -471,6 +471,9 @@ class Application(Container):
         if hasattr(provider, "register_commands") and callable(provider.register_commands):
             provider.register_commands()
 
+        if hasattr(provider, "register_tools") and callable(provider.register_tools):
+            provider.register_tools()
+
         return provider
 
     def dispatch_task(self, coro):

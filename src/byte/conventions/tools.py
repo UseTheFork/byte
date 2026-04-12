@@ -1,12 +1,16 @@
-from langchain_core.tools import tool
+from typing import Annotated
+
+from langchain.tools import InjectedToolArg, tool
 
 from byte import Application
-from byte.context import make
 from byte.parsing import ConventionParsingService
 
 
 @tool(parse_docstring=True)
-async def load_convention(convention_name: str) -> str:
+async def load_convention(
+    convention_name: str,
+    app: Annotated[Application | None, InjectedToolArg] = None,
+) -> str:
     """Load a convention file by its name.
 
     This tool reads convention files using the name from convention metadata.
@@ -17,8 +21,10 @@ async def load_convention(convention_name: str) -> str:
     Returns:
             The contents of the convention, or an error message if the convention cannot be read
     """
-    convention_parsing_service = make(ConventionParsingService)
-    app = make(Application)
+    if app is None:
+        raise RuntimeError("Application instance is required but was not provided")
+
+    convention_parsing_service = app.make(ConventionParsingService)
     file_path = app.conventions_path(f"{convention_name}.md")
 
     try:

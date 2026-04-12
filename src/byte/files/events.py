@@ -21,10 +21,3 @@ class FileEvents:
 
         file_path: str
         change_type: str
-
-    @dataclass
-    class FileStats(Event):
-        """Event emitted when file statistics are updated."""
-
-        editable: int = 0
-        read_only: int = 0

@@ -1,7 +1,9 @@
 from typing import List, Type
 
+from langchain.tools import BaseTool
+
 from byte import Command, Service, ServiceProvider
-from byte.conventions import ConventionContextService
+from byte.conventions import ConventionContextService, load_convention
 
 
 class ConventionsServiceProvider(ServiceProvider):
@@ -21,3 +23,7 @@ class ConventionsServiceProvider(ServiceProvider):
     def commands(self) -> List[Type[Command]]:
         # return [ConventionCommand]
         return []
+
+    def tools(self) -> List[BaseTool]:
+        """"""
+        return [load_convention]

@@ -21,6 +21,7 @@ from byte.lsp import LSPServiceProvider
 from byte.memory import MemoryServiceProvider
 from byte.node import NodeServiceProvider
 from byte.system import SystemServiceProvider
+from byte.tools import ToolsServiceProvider
 from byte.tui import TUIServiceProvider
 from byte.web import WebServiceProvider
 from byte.workflow import WorkflowServiceProvider
@@ -28,11 +29,11 @@ from byte.workflow import WorkflowServiceProvider
 PROVIDERS = [
     EventsServiceProvider,
     CommandServiceProvider,
+    ToolsServiceProvider,
     MemoryServiceProvider,
     KnowledgeServiceProvider,
     FileServiceProvider,
     ConventionsServiceProvider,
-    # ToolsServiceProvider,
     LLMServiceProvider,
     GitServiceProvider,
     LintServiceProvider,

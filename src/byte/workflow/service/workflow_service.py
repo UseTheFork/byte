@@ -59,11 +59,6 @@ class WorkflowService(Service):
                 msg = extract_content_from_message(message_chunk)
                 await self.emit_tui(Messages.ResponseChunk(msg))
 
-            # result = tui.post_message(
-            #     Messages.CommandStreamChunk(panel_id=self.panel_id, chunk_type="message", data=chunk["data"])
-            # )
-            # self.app["log"].info(result)
-
         elif chunk["type"] == "tasks":
             pass
             # tui.post_message(Messages.CommandStreamChunk(panel_id=self.panel_id, chunk_type="task", data=chunk["data"]))

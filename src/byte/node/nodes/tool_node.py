@@ -8,6 +8,7 @@ from langgraph.types import Command
 from byte.node import BaseNode
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.support.utils import get_last_message
+from byte.tools import ToolRegistryService
 from byte.tui import Messages
 
 
@@ -19,7 +20,8 @@ class ToolNode(BaseNode):
 
         outputs = []
 
-        tools = runtime.context.tools
+        tool_registry_service = self.app.make(ToolRegistryService)
+        tools = tool_registry_service.get_all_tools()
 
         # Check if tools are available
         if not tools:
@@ -48,7 +50,12 @@ class ToolNode(BaseNode):
                 )
             )
 
-            tool_result = await tools_by_name[tool_call["name"]].ainvoke(tool_call["args"])
+            tool_result = await tools_by_name[tool_call["name"]].ainvoke(
+                {
+                    **tool_call["args"],
+                    "app": self.app,
+                }
+            )
 
             outputs.append(
                 ToolMessage(

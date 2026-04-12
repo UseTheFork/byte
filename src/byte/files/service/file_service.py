@@ -7,6 +7,7 @@ from byte import Service
 from byte.files import FileContext, FileDiscoveryService, FileEvents, FileMode
 from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
+from byte.tui import Messages
 
 
 class FileService(Service):
@@ -39,8 +40,8 @@ class FileService(Service):
         editable_count = sum(1 for f in self._context_files.values() if f.mode == FileMode.EDITABLE)
         read_only_count = sum(1 for f in self._context_files.values() if f.mode == FileMode.READ_ONLY)
 
-        await self.emit(
-            FileEvents.FileStats(
+        await self.emit_tui(
+            Messages.UpdateFiles(
                 editable=editable_count,
                 read_only=read_only_count,
             ),

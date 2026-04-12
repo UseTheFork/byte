@@ -1,4 +1,5 @@
 from byte import ServiceProvider
+from byte.tools import ToolRegistryService
 
 
 class ToolsServiceProvider(ServiceProvider):
@@ -10,4 +11,5 @@ class ToolsServiceProvider(ServiceProvider):
     Usage: Automatically registered during bootstrap to make tools available
     """
 
-    pass
+    def services(self):
+        return [ToolRegistryService]

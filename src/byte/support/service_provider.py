@@ -4,8 +4,11 @@ from abc import ABC
 from typing import TYPE_CHECKING, List, Type
 
 from byte import CommandRegistryService
+from byte.tools import ToolRegistryService
 
 if TYPE_CHECKING:
+    from langchain_core.tools.base import BaseTool
+
     from byte import Command
     from byte.foundation import Application
     from byte.support import Service
@@ -63,6 +66,23 @@ class ServiceProvider(ABC):
             self.app.bind(command_class)
             command = self.app.make(command_class)
             command_registry.register_slash_command(command)
+
+    # TODO: Doc Strings
+    def tools(self) -> List[BaseTool]:
+        """"""
+        return []
+
+    # TODO: Doc Strings
+    def register_tools(self):
+        """"""
+        tools = self.tools()
+        if not tools:
+            return
+
+        tool_registry_service = self.app.make(ToolRegistryService)
+
+        for tool in tools:
+            tool_registry_service.register_tool(tool)
 
     def set_application(self, app: Application):
         """Set the container instance for providers that need container access.
