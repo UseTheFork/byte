@@ -3,11 +3,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from textual.app import ComposeResult
-from textual.containers import VerticalGroup
+from textual.containers import HorizontalGroup, VerticalGroup
 from textual.reactive import reactive
-from textual.widgets import Label, ProgressBar
+from textual.widgets import Label, Markdown
 
-from byte.tui.widgets.ui.loading_indicator import LoadingIndicator
+from byte.tui.widgets.ui.progress_bar import ProgressBar
+from byte.tui.widgets.ui.rune_spinner import RuneSpinner
 
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
@@ -16,13 +17,22 @@ if TYPE_CHECKING:
 class Linting(VerticalGroup):
     """A widget that displays linting progress and results."""
 
+    BORDER_TITLE = "Lint"
+
     DEFAULT_CSS = """
     Linting {
         height: auto;
         background: transparent;
         
-        & LoadingIndicator {
+        & HorizontalGroup {
             height: 1;
+            & RuneSpinner {
+                width: 2;
+            }
+            
+            & ProgressBar {
+                width: 1fr;
+            }
         }
         
         & ProgressBar {
@@ -39,8 +49,6 @@ class Linting(VerticalGroup):
     app: ByteTUI
 
     # Reactive properties for tracking state
-    file_count: reactive[int] = reactive(0)
-    command_count: reactive[int] = reactive(0)
     current_file: reactive[str] = reactive("")
     completed: reactive[int] = reactive(0)
     total: reactive[int] = reactive(0)
@@ -61,34 +69,29 @@ class Linting(VerticalGroup):
         )
 
     def compose(self) -> ComposeResult:
-        yield LoadingIndicator()
-        yield ProgressBar(total=100, show_eta=False)
+        with HorizontalGroup():
+            yield RuneSpinner(2)
+            yield ProgressBar(total=100)
         yield Label("")
+        yield Markdown("", classes="hidden", id="lint-results")
 
-    def start_linting(self, file_count: int, command_count: int) -> None:
+    def start_linting(self, total_commands: int) -> None:
         """Start linting operation.
 
         Args:
-            file_count: Number of files being linted
-            command_count: Number of lint commands to execute
+            total_commands: Total number of command executions
         """
-        self.file_count = file_count
-        self.command_count = command_count
         self.is_active = True
         self.completed = 0
-        self.total = file_count * command_count
-
-        # Show loading indicator
-        loading = self.query_one(LoadingIndicator)
-        loading.show("Linting")
+        self.total = total_commands
 
         # Initialize progress bar
         progress = self.query_one(ProgressBar)
-        progress.update(total=self.total, progress=0)
+        progress.update(total=self.total, completed=0)
 
         # Update status label
         label = self.query_one(Label)
-        label.update(f"Linting {file_count} files with {command_count} commands...")
+        label.update(f"Running {total_commands} lint commands...")
 
     def update_progress(self, current_file: str, completed: int, total: int) -> None:
         """Update linting progress.
@@ -104,7 +107,7 @@ class Linting(VerticalGroup):
 
         # Update progress bar
         progress = self.query_one(ProgressBar)
-        progress.update(progress=completed)
+        progress.update(completed=completed)
 
         # Update status label
         label = self.query_one(Label)
@@ -121,16 +124,30 @@ class Linting(VerticalGroup):
         self.is_active = False
 
         # Hide loading indicator
-        loading = self.query_one(LoadingIndicator)
-        loading.hide()
+        loading = self.query_one(RuneSpinner)
+        loading.add_class("hidden")
 
         # Update progress bar to complete
         progress = self.query_one(ProgressBar)
-        progress.update(progress=self.total)
+        progress.update(completed=self.total)
+        progress.add_class("hidden")
 
         # Update status label with results
         label = self.query_one(Label)
+        self.remove_class("border-round-secondary")
         if success:
-            label.update(f"✓ Linting complete: {total_files} files processed, no errors")
+            self.add_class("border-round-success")
+            label.update(f"Linting complete: {total_files} files processed, no errors")
         else:
-            label.update(f"✗ Linting complete: {failed_files}/{total_files} files with errors")
+            self.add_class("border-round-error")
+            label.update(f"Linting complete: {failed_files}/{total_files} files with errors")
+
+    def display_results(self, content: str) -> None:
+        """Display lint results in the markdown widget.
+
+        Args:
+            content: Formatted markdown content with lint results
+        """
+        results_widget = self.query_one("#lint-results", Markdown)
+        results_widget.update(content)
+        results_widget.remove_class("hidden")

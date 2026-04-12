@@ -231,6 +231,14 @@ class Conversation(Widget):
         await response_panel.complete_linting(event.total_files, event.failed_files, event.success)
         self.scroll_to_latest_message()
 
+    @on(Messages.LintResults)
+    async def lint_results(self, event: Messages.LintResults) -> None:
+        """Handle lint results display."""
+        response_panel = await self.get_or_create_response_panel(event.panel_id)
+        if response_panel.current_linting is not None:
+            response_panel.current_linting.display_results(event.content)
+        self.scroll_to_latest_message()
+
     @on(Messages.LoadingIndicatorShow)
     async def loading_indicator_show(self, event: Messages.LoadingIndicatorShow) -> None:
         """Show the loading indicator with an optional message."""

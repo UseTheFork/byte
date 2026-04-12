@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import List
 
 from byte import Service
-from byte.cli import Markdown
 from byte.git import GitService
 from byte.lint import LintConfigException, LintFile
 from byte.support import Boundary, BoundaryType
@@ -173,14 +172,11 @@ class LintService(Service, UserInteractive):
             for command_issue in commands_with_issues:
                 markdown_content += f"{command_issue}\n"
 
-        summary_text = Markdown(markdown_content)
-
         # Display panel via TUI
         await self.emit_tui(
-            Messages.CreatePanel(
-                str(summary_text),
-                title="Lint",
-                border_style="secondary",
+            Messages.LintResults(
+                str(markdown_content),
+                total_issues,
             )
         )
 
@@ -275,11 +271,14 @@ class LintService(Service, UserInteractive):
             self._total_commands = sum(len(lint_files) for lint_files in self._lint_stack.values())
             self._completed_count = 0
 
+            self.app["log"].info(changed_files)
+
+            # AI: The below
+
             # Emit lint started event
             await self.emit_tui(
                 Messages.LintStarted(
-                    file_count=len(changed_files),
-                    command_count=len(self.app["config"].lint.commands),
+                    total_commands=self._total_commands,
                 )
             )
 

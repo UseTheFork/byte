@@ -71,9 +71,24 @@ class RichRuneSpinner(Spinner):
 
 # Credits To https://github.com/charmbracelet/crush/blob/main/internal/tui/components/anim/anim.go
 class RuneSpinner(Static):
-    def __init__(self):
-        super().__init__("")
-        self._spinner = RichRuneSpinner()
+    def __init__(
+        self,
+        size: int = 8,
+        *,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+        disabled: bool = False,
+    ) -> None:
+        """ """
+        super().__init__(
+            name=name,
+            id=id,
+            classes=classes,
+            disabled=disabled,
+        )
+        self._spinner = RichRuneSpinner(size=size)
+        self.styles.max_width = size
 
     def on_mount(self) -> None:
         self.update_render = self.set_interval(1 / 60, self.update_spinner)

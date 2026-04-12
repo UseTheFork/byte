@@ -111,15 +111,14 @@ class ResponsePanel(VerticalGroup):
         """Create and mount a new Linting widget.
 
         Args:
-            file_count: Number of files being linted
-            command_count: Number of lint commands to execute
+            event: LintStarted message containing total_commands
 
         Returns:
             The mounted Linting widget
         """
         linting = Linting()
         await self.mount(linting)
-        linting.start_linting(event.file_count, event.command_count)
+        linting.start_linting(event.total_commands)
         self.current_linting = linting
         return linting
 
@@ -144,7 +143,6 @@ class ResponsePanel(VerticalGroup):
         """
         if self.current_linting is not None:
             self.current_linting.complete_linting(total_files, failed_files, success)
-            self.current_linting = None
 
     def show_loading_indicator(self, message: str = "Thinking") -> None:
         """Show the loading indicator by removing the hidden class.

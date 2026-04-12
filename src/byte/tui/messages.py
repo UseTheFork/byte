@@ -107,12 +107,10 @@ class Messages:
         """Linting operation has started.
 
         Args:
-            file_count: Number of files being linted
-            command_count: Number of lint commands to execute
+            total_commands: Total number of command executions (files x commands)
         """
 
-        file_count: int
-        command_count: int
+        total_commands: int
         panel_id: str | None = None
 
     @dataclass
@@ -184,4 +182,18 @@ class Messages:
 
         name: str
         args: dict | None = None
+        panel_id: str | None = None
+
+    @dataclass
+    class LintResults(Message):
+        """Display lint results message.
+
+        Args:
+            content: Formatted markdown content with lint results
+            total_issues: Total number of lint issues found
+            panel_id: Optional panel identifier for UI routing
+        """
+
+        content: str
+        total_issues: int
         panel_id: str | None = None

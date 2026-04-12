@@ -12,9 +12,6 @@ class LoadingIndicator(HorizontalGroup):
     DEFAULT_CSS = """
     LoadingIndicator {
         height: 1;
-        & RuneSpinner {
-            max-width: 8;
-        }
 
         & Label {
             color: $primary;
@@ -24,9 +21,28 @@ class LoadingIndicator(HorizontalGroup):
     """
 
     message: Reactive[str] = reactive("Thinking", recompose=True)
+    spinner_size: Reactive[int] = reactive(8)
+
+    def __init__(
+        self,
+        size: int = 8,
+        *,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+        disabled: bool = False,
+    ) -> None:
+        """ """
+        super().__init__(
+            name=name,
+            id=id,
+            classes=classes,
+            disabled=disabled,
+        )
+        self.spinner_size = size
 
     def compose(self) -> ComposeResult:
-        yield RuneSpinner()
+        yield RuneSpinner(self.spinner_size)
         yield Label(f"{self.message}", classes="pl-1")
 
     def show(self, message: str = "Thinking") -> None:
