@@ -57,6 +57,21 @@ class ToolNode(BaseNode):
                 }
             )
 
+            if isinstance(tool_result, dict):
+                outputs.append(
+                    ToolMessage(
+                        content=json.dumps(tool_result["result"]),
+                        name=tool_call["name"],
+                        tool_call_id=tool_call["id"],
+                    )
+                )
+
+                extra = tool_result.get("extra", {})
+                if extra:
+                    return self.route_back(state, {"scratch_messages": outputs, **extra})
+                else:
+                    return self.route_back(state, {"scratch_messages": outputs})
+
             outputs.append(
                 ToolMessage(
                     content=json.dumps(tool_result),

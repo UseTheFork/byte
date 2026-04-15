@@ -63,7 +63,7 @@ async def edit_file(
     old_string: Annotated[str, "The exact string to find and replace"],
     new_string: Annotated[str, "The string to replace with"],
     app: Annotated[Application, InjectedToolArg],
-) -> str:
+) -> dict:
     """Edit a file by replacing a specific string. The old_string must match exactly.
 
     Args:
@@ -76,6 +76,16 @@ async def edit_file(
     """
     try:
         tool_file_service = app.make(ToolFileService)
-        return await tool_file_service.edit_file(path, old_string, new_string)
+        result = await tool_file_service.edit_file(path, old_string, new_string)
+
+        return {
+            "result": result,
+            "extra": {
+                "touched_files": [path],
+            },
+        }
+
     except Exception as e:
-        return f"Error editing file: {e!s}"
+        return {
+            "result": f"Error editing file: {e!s}",
+        }

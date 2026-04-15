@@ -45,11 +45,6 @@ class EndNode(BaseNode):
                 )
             )
 
-        if state["parsed_blocks"]:
-            if runtime.context.agent == "CoderAgent":
-                clipboard_service = self.app.make(ClipboardService)
-                self.app.dispatch_task(clipboard_service.extract_from_blocks(state["parsed_blocks"]))
-
         # This is where we promote `scratch_messages` to `history_messages`
         update_dict = {
             **state,
@@ -61,6 +56,7 @@ class EndNode(BaseNode):
 
         agent = state.get("agent", "")
 
+        # TODO: This will need to become a combined state with out the tool calls.
         # Only update messages if there are scratch messages to process
         if state["scratch_messages"] and not metadata.erase_history:
             last_message = get_last_ai_message(state["scratch_messages"])

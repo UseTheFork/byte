@@ -9,7 +9,6 @@ from textual.widgets.text_area import Selection
 from byte.tui.widgets.prompt.analytics import Analytics
 from byte.tui.widgets.prompt.flash import Flash
 from byte.tui.widgets.prompt.prompt_input import PromptInput, PromptTextArea
-from byte.tui.widgets.prompt.question import Question
 from byte.tui.widgets.ui.text_area_auto_complete import TextAreaAutoComplete
 
 if TYPE_CHECKING:
@@ -32,7 +31,6 @@ class PromptPanel(containers.VerticalGroup):
     prompt_text_area = getters.query_one(PromptTextArea)
 
     prompt_input = getters.query_one(PromptInput)
-    question = getters.query_one(Question)
 
     working_directory = var("")
     agent_info = var(Content(""))
@@ -71,3 +69,4 @@ class PromptPanel(containers.VerticalGroup):
 
     def watch_allow_input_submit(self, allow_input_submit: bool) -> None:
         self.set_class(not allow_input_submit, "hidden")
+        self.disabled = not allow_input_submit

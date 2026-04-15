@@ -35,9 +35,8 @@ class LintNode(BaseNode):
 
         # Extract file paths from parsed blocks
         file_paths = []
-        for block in state["parsed_blocks"]:
-            if block.get("file_path"):
-                file_paths.append(Path(str(block.get("file_path"))))
+        for path in state["touched_files"]:
+            file_paths.append(Path(str(path)))
 
         lint_commands = await lint_service.lint_files(file_paths)
 

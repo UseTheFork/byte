@@ -3,6 +3,7 @@ from typing import Dict
 
 from byte import Service
 from byte.files import FileContext, FileMode, FileService
+from byte.tui import Messages
 
 
 class ToolFileService(Service):
@@ -13,29 +14,39 @@ class ToolFileService(Service):
         self._context_files: Dict[str, FileContext] = {}
 
     async def edit_file(self, path: str, old_string: str, new_string: str) -> str:
-        full_path = self.app.path(path)
+        try:
+            full_path = self.app.path(path)
 
-        if not full_path.exists():
-            raise Exception(f"Error: File '{path}' does not exist")
+            if not full_path.exists():
+                raise Exception(f"Error: File '{path}' does not exist")
 
-        content = full_path.read_text(encoding="utf-8")
+            content = full_path.read_text(encoding="utf-8")
 
-        # Check how many times the old_string appears
-        count = content.count(old_string)
+            # Check how many times the old_string appears
+            count = content.count(old_string)
 
-        if count == 0:
-            raise Exception(
-                "Error: String not found in file. Make sure you're using the exact string including whitespace."
+            if count == 0:
+                raise Exception(
+                    "Error: String not found in file. Make sure you're using the exact string including whitespace."
+                )
+
+            if count > 1:
+                raise Exception(f"Error: String appears {count} times. Provide more context to make it unique.")
+
+            # Perform the replacement
+            new_content = content.replace(old_string, new_string, 1)
+            full_path.write_text(new_content, encoding="utf-8")
+
+            return f"Successfully edited '{path}'"
+        except Exception as e:
+            await self.emit_tui(
+                Messages.CreatePanel(
+                    str(e),
+                    title="Tool Error",
+                    border_style="warning",
+                )
             )
-
-        if count > 1:
-            raise Exception(f"Error: String appears {count} times. Provide more context to make it unique.")
-
-        # Perform the replacement
-        new_content = content.replace(old_string, new_string, 1)
-        full_path.write_text(new_content, encoding="utf-8")
-
-        return f"Successfully edited '{path}'"
+            raise e
 
     def _prepare_file_path(self, path: str) -> Path:
         """Validate file path exists and is not read-only.

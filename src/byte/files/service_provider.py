@@ -72,6 +72,7 @@ class FileServiceProvider(ServiceProvider):
             #     ai_comment_watcher.modify_user_request_hook,
             # )
 
+            # TODO: Is this still needed?
             event_bus.on(
                 OrchestrationEvents.GatherReinforcement,
                 ai_comment_watcher.add_reinforcement_hook,

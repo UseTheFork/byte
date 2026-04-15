@@ -44,10 +44,7 @@ class BaseState(TypedDict):
     extracted_content: str | dict | None
 
     # These are specific to Coder
-    parsed_blocks: list[dict]
-
-    # This is specific to subprocess
-    command: str
+    touched_files: list[str]
 
     routing: RoutingState
 

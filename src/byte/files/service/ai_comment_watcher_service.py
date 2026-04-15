@@ -230,6 +230,11 @@ class AICommentWatcherService(Service):
                         f'I\'ve written task instructions in code comments marked with "{AICommentType.AI.value}:" or "{AICommentType.AI.value}!" in the following files:',
                         f"{ai_instruction}",
                         "",
+                        "",
+                        '- After successfully implementing all changes, remove the "AI:" comment markers from the code.',
+                        "> **IMPORTANT**: Execute the users request following the project's coding standards and conventions.",
+                        "If multiple tasks are present, complete them in the order they appear.",
+                        'Dont Forget after successfully implementing all changes, remove the "AI:" comment markers from the code.',
                     ]
                 ),
                 "agent_type": "/coder",
@@ -241,6 +246,11 @@ class AICommentWatcherService(Service):
                     [
                         f'I\'ve written questions in code comments marked with "{AICommentType.AI.value}:" or "{AICommentType.AI.value}?" in the following files:',
                         f"{ai_instruction}",
+                        "",
+                        "- Provide clear, well-structured answers based on the code context. Include:",
+                        "  - Direct answer to each question",
+                        "  - Relevant code examples or references when applicable",
+                        "  - Recommendations or best practices if appropriate",
                     ]
                 ),
                 "agent_type": "/ask",

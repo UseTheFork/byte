@@ -64,14 +64,19 @@ coder_prompt = ChatPromptTemplate.from_messages(
 )
 
 
-# AI: Add a doc string to the below boot method. Dont ask questions just add it ai
 class CoderAgentNode(BaseAgentNode):
     def boot(
         self,
         goto: Type[BaseNode] = EndNode,
         **kwargs,
     ):
+        """
+        Initialize the CoderAgentNode with a target node to route to after execution.
 
+        Args:
+            goto: The target node class to route to after the agent completes. Defaults to EndNode.
+            **kwargs: Additional keyword arguments passed to the parent class.
+        """
         self.goto = Str.class_to_snake_case(goto)
 
     def get_model(self) -> BaseChatModel:
@@ -96,7 +101,6 @@ class CoderAgentNode(BaseAgentNode):
     ) -> Command[Literal["routing_node"]]:
 
         agent_state, config = await self.generate_agent_state(state, config, runtime.context)
-        # agent_state["examples"] = edit_block_messages
         runnable = self.create_runnable()
         record_response_service = self.app.make(RecordResponseService)
 
