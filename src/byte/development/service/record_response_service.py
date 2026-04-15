@@ -2,9 +2,7 @@ from datetime import datetime
 
 from langchain_core.runnables import Runnable
 from langgraph.graph.state import RunnableConfig
-from langgraph.runtime import Runtime
 
-from byte.orchestration import AssistantContextSchema
 from byte.support import Service
 
 
@@ -20,7 +18,7 @@ class RecordResponseService(Service):
         self,
         agent_state,
         runnable: Runnable,
-        runtime: Runtime[AssistantContextSchema],
+        agent_name: str,
         config: RunnableConfig,
     ):
         """Write assistant response to a cache file.
@@ -40,7 +38,6 @@ class RecordResponseService(Service):
         if not self.app.is_development():
             return None
 
-        agent_name = runtime.context.agent
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         cache_file = self.app.cache_path(f"development/{agent_name}_{timestamp}.md")
 

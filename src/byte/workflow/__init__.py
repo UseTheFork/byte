@@ -6,6 +6,7 @@ from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
     from byte.workflow.command.ask_command import AskCommand
+    from byte.workflow.command.coder_command import CoderCommand
     from byte.workflow.service.workflow_service import WorkflowService
     from byte.workflow.service_provider import WorkflowServiceProvider
     from byte.workflow.workflows.ask_workflow import AskWorkflow
@@ -18,6 +19,7 @@ __all__ = (
     "AskCommand",
     "AskWorkflow",
     "BaseWorkflow",
+    "CoderCommand",
     "CoderWorkflow",
     "CommitWorkflow",
     "WorkflowService",
@@ -27,6 +29,7 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "AskCommand": "command.ask_command",
+    "CoderCommand": "command.coder_command",
     "AskWorkflow": "workflows.ask_workflow",
     "BaseWorkflow": "workflows.base",
     "CoderWorkflow": "workflows.coder_workflow",

@@ -289,6 +289,3 @@ class AICommentWatcherService(Service):
         #         )
 
         return payload
-
-
-# AI: test ai?

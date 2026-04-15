@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from textual import containers, getters
 from textual.app import ComposeResult
 from textual.content import Content
-from textual.reactive import var
+from textual.reactive import reactive, var
 from textual.widgets.text_area import Selection
 
 from byte.tui.widgets.prompt.analytics import Analytics
@@ -38,6 +38,7 @@ class PromptPanel(containers.VerticalGroup):
     agent_info = var(Content(""))
 
     status: var[str] = var("")
+    allow_input_submit = reactive(True)
 
     app: ByteTUI
 
@@ -67,3 +68,6 @@ class PromptPanel(containers.VerticalGroup):
             yield PromptInput()
 
         yield Analytics(id="analytics-panel")
+
+    def watch_allow_input_submit(self, allow_input_submit: bool) -> None:
+        self.set_class(not allow_input_submit, "hidden")

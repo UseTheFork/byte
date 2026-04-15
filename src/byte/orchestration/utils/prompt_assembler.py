@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, TypeVar
 
 from typing_extensions import List
 
-from byte.code_operations import EditBlockService, edit_block_messages
+from byte.code_operations import EditBlockService
 from byte.conventions import ConventionContextService
 from byte.files import FileService
 from byte.git import CommitService
@@ -310,7 +310,7 @@ class PromptAssembler(Bootable, Eventable):
     async def generate_state(self, state: BaseState, config, context: AssistantContextSchema) -> dict:
         user_prompt_state = {**state}
 
-        user_prompt_state["examples"] = edit_block_messages
+        # user_prompt_state["examples"] = edit_block_messages
 
         if state.get("metadata", {}).prompt_settings.has_project_information_and_context:
             user_prompt_state["project_information_and_context"] = await self._gather_project_context()

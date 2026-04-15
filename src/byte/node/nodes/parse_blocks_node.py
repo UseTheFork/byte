@@ -50,6 +50,7 @@ class ParseBlocksNode(BaseNode, UserInteractive):
         """Convert components list back to combined content string."""
         parts = []
         for component in components:
+            self.app["log"].info(component)
             if isinstance(component, str):
                 parts.append(component)
             elif isinstance(component, BaseBlock):

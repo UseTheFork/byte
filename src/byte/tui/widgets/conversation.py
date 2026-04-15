@@ -75,7 +75,7 @@ class Conversation(Widget):
     def compose(self) -> ComposeResult:
         with VerticalScroll(id="chat-container") as vertical_scroll:
             vertical_scroll.can_focus = False
-        yield PromptPanel(id="prompt")
+        yield PromptPanel(id="prompt").data_bind(allow_input_submit=Conversation.allow_input_submit)
 
     def scroll_to_latest_message(self):
         container = self.chat_container
@@ -123,6 +123,9 @@ class Conversation(Widget):
     @on(Messages.UserInputSubmitted)
     async def new_user_message(self, event: Messages.UserInputSubmitted) -> None:
         """Handle a new user message."""
+        if self.allow_input_submit is False:
+            return
+
         self.allow_input_submit = False
 
         user_message_chatbox = HumanMessagePanel(event.body)
@@ -159,6 +162,7 @@ class Conversation(Widget):
     @on(Messages.CommandExecutionCompleted)
     async def command_execution_completed(self, event: Messages.CommandExecutionCompleted) -> None:
         self.move_focus_to_prompt()
+        self.allow_input_submit = True
 
     @on(Messages.CreatePanel)
     async def create_panel(self, event: Messages.CreatePanel) -> None:

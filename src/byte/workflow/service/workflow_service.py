@@ -1,12 +1,10 @@
 from typing import Any, Literal, Optional
 
-from langchain.messages import AIMessageChunk
 from langchain_core.callbacks import get_usage_metadata_callback
 
 from byte import Service
 from byte.analytics import AgentAnalyticsService
 from byte.orchestration import TokenUsageSchema
-from byte.support.utils import extract_content_from_message
 from byte.tui import Messages
 from byte.workflow import BaseWorkflow
 
@@ -16,6 +14,12 @@ class WorkflowService(Service):
 
     def boot(self) -> None:
         self.current_msg = ""
+
+    def _is_tool_call_chunk(self, block: dict) -> bool:
+        return block.get("type") in ("tool_use", "input_json_delta")
+
+    def _is_message_content_chunk(self, block: dict) -> bool:
+        return block.get("type") == "text"
 
     async def _track_token_usage(self, usage_metadata: dict, mode: str) -> None:
         """Track token usage from callback metadata and update analytics.
@@ -55,31 +59,20 @@ class WorkflowService(Service):
         if chunk["type"] == "messages":
             message_chunk, metadata = chunk["data"]
 
-            if isinstance(message_chunk, AIMessageChunk) and message_chunk.content:
-                msg = extract_content_from_message(message_chunk)
-                await self.emit_tui(Messages.ResponseChunk(msg))
+            msg_type = type(message_chunk).__name__
+            self.app["log"].debug(f"Message chunk type: {msg_type}")
+            self.app["log"].debug(message_chunk)
+
+            for block in message_chunk.content:
+                if isinstance(block, dict):
+                    if self._is_tool_call_chunk(block):
+                        pass
+                    elif self._is_message_content_chunk(block):
+                        await self.emit_tui(Messages.ResponseChunk(block.get("text", "")))
 
         elif chunk["type"] == "tasks":
             pass
             # tui.post_message(Messages.CommandStreamChunk(panel_id=self.panel_id, chunk_type="task", data=chunk["data"]))
-
-        # # self.app["log"].debug(mode)
-        # self.app["log"].debug(chunk)
-
-        # # Filter and process based on mode
-        # if chunk["type"] == "messages":
-        #     self.app["log"].debug(chunk["ns"])
-
-        #     # Extract agent node name from namespace if present
-        #     agent_name = ""
-        #     if chunk["ns"] and len(chunk["ns"]) > 0:
-        #         ns_str = chunk["ns"][0]
-        #         if ":" in ns_str:
-        #             agent_name = ns_str.split(":")[0]
-
-        # Handle LLM token streaming
-
-        #     await stream_rendering_service.handle_message(chunk["data"], agent_name)
 
         # elif chunk["type"] == "tasks":
         #     await stream_rendering_service.handle_task(chunk["data"])

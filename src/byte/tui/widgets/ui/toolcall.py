@@ -46,7 +46,7 @@ class ToolCall(VerticalGroup):
 
     def compose(self) -> ComposeResult:
         # Display tool name
-        yield Label(f"🔧 {self.tool_name}()")
+        yield Label(f"{self.tool_name}()")
 
         # Display arguments if any
         if self.tool_args:

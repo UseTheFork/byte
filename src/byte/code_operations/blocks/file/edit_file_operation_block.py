@@ -183,6 +183,8 @@ class EditFileOperationBlock(BaseFileOperationBlock):
         Usage: `formatted = block.to_block_format()` -> formatted block string
         """
 
+        self.app["log"].debug(self.raw_content)
+
         sections = [
             Boundary.open(
                 BoundaryType.EDIT_BLOCK,

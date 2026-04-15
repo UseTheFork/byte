@@ -17,8 +17,12 @@ if TYPE_CHECKING:
     from byte.files.service.discovery_service import FileDiscoveryService
     from byte.files.service.file_service import FileService
     from byte.files.service.ignore_service import FileIgnoreService
+    from byte.files.service.tool_file_service import ToolFileService
     from byte.files.service.watcher_service import FileWatcherService
     from byte.files.service_provider import FileServiceProvider
+    from byte.files.tools.delete_file import delete_file
+    from byte.files.tools.edit_file import edit_file
+    from byte.files.tools.write_file import write_file
 
 __all__ = (
     "AICommentWatcherService",
@@ -36,6 +40,10 @@ __all__ = (
     "ReadOnlyCommand",
     "ReloadFilesCommand",
     "SwitchModeCommand",
+    "ToolFileService",
+    "delete_file",
+    "edit_file",
+    "write_file",
 )
 
 _dynamic_imports = {
@@ -51,10 +59,14 @@ _dynamic_imports = {
     "FileService": "service.file_service",
     "FileServiceProvider": "service_provider",
     "FileWatcherService": "service.watcher_service",
+    "ToolFileService": "service.tool_file_service",
     "ListFilesCommand": "command.list_files_command",
     "ReadOnlyCommand": "command.add_read_only_file_command",
     "ReloadFilesCommand": "command.reload_files_command",
     "SwitchModeCommand": "command.switch_mode_command",
+    "edit_file": "tools.edit_file",
+    "write_file": "tools.write_file",
+    "delete_file": "tools.delete_file",
     # keep-sorted end
 }
 

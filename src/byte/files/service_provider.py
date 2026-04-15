@@ -1,5 +1,7 @@
 from typing import List, Type
 
+from langchain.tools import BaseTool
+
 from byte import Command, EventBus, Service, ServiceProvider
 from byte.files import (
     AddFileCommand,
@@ -14,6 +16,8 @@ from byte.files import (
     ReadOnlyCommand,
     ReloadFilesCommand,
     SwitchModeCommand,
+    ToolFileService,
+    edit_file,
 )
 from byte.orchestration import OrchestrationEvents
 from byte.system import SystemEvents
@@ -29,6 +33,7 @@ class FileServiceProvider(ServiceProvider):
             FileService,
             FileWatcherService,
             AICommentWatcherService,
+            ToolFileService,
         ]
 
     def commands(self) -> List[Type[Command]]:
@@ -40,6 +45,10 @@ class FileServiceProvider(ServiceProvider):
             SwitchModeCommand,
             ReloadFilesCommand,
         ]
+
+    def tools(self) -> List[BaseTool]:
+        """"""
+        return [edit_file]
 
     async def boot(self):
         """Boot file services and register commands with registry."""

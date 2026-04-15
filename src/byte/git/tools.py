@@ -7,7 +7,10 @@ from byte.git import GitService
 from byte.tui import InteractionService
 
 
-@tool(parse_docstring=True)
+@tool(
+    parse_docstring=True,
+    extras={"eager_input_streaming": True},
+)
 async def git_grep(
     pattern: str,
     file_pattern: str = "",

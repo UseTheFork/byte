@@ -7,6 +7,8 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
+from byte.development import RecordResponseService
+from byte.files import edit_file
 from byte.llm import LLMService
 from byte.node import (
     BaseAgentNode,
@@ -34,8 +36,8 @@ coder_user_template = [
     "- If the request is ambiguous, ask clarifying questions before proceeding",
     "- Keep changes simple don't build more then what is asked for",
     Boundary.close(BoundaryType.OPERATING_CONSTRAINTS),
-    "{available_conventions}",
-    "{project_hierarchy}",
+    # "{available_conventions}",
+    # "{project_hierarchy}",
     "{project_information_and_context}",
     "{file_context}",
     "{operating_principles}",
@@ -54,7 +56,7 @@ coder_prompt = ChatPromptTemplate.from_messages(
                 ]
             ),
         ),
-        ("placeholder", "{examples}"),
+        # ("placeholder", "{examples}"),
         ("user", "{assembled_user_message}"),
         ("placeholder", "{scratch_messages}"),
         ("placeholder", "{errors}"),
@@ -62,6 +64,7 @@ coder_prompt = ChatPromptTemplate.from_messages(
 )
 
 
+# AI: Add a doc string to the below boot method. Dont ask questions just add it ai
 class CoderAgentNode(BaseAgentNode):
     def boot(
         self,
@@ -81,6 +84,9 @@ class CoderAgentNode(BaseAgentNode):
     def get_user_template(self):
         return coder_user_template
 
+    def get_tools(self):
+        return [edit_file]
+
     async def __call__(
         self,
         state: BaseState,
@@ -90,16 +96,29 @@ class CoderAgentNode(BaseAgentNode):
     ) -> Command[Literal["routing_node"]]:
 
         agent_state, config = await self.generate_agent_state(state, config, runtime.context)
+        # agent_state["examples"] = edit_block_messages
         runnable = self.create_runnable()
+        record_response_service = self.app.make(RecordResponseService)
 
         await self.emit_tui(Messages.LoadingIndicatorShow())
         await self.emit_tui(Messages.AddHeading("Coder Agent", "text-primary"))
         await self.emit_tui(Messages.ResponseStarted())
 
         result = await runnable.ainvoke(agent_state, config=config)
-        msg = extract_content_from_message(result)
+        await record_response_service.record_response(agent_state, runnable, "coder_agent", config)
 
         await self.emit_tui(Messages.ResponseComplete())
         await self.emit_tui(Messages.LoadingIndicatorHide())
+
+        if result.tool_calls and len(result.tool_calls) > 0:
+            return self.route_to(
+                "tool_node",
+                {
+                    "scratch_messages": [result],
+                    "errors": None,
+                },
+            )
+
+        msg = extract_content_from_message(result)
 
         return self.route_to(self.goto, {"scratch_messages": AIMessage(msg)})

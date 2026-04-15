@@ -64,6 +64,7 @@ class LintService(Service, UserInteractive):
 
         git_service = self.app.make(GitService)
         all_changed_files = await git_service.get_changed_files()
+        self.app["log"].info(all_changed_files)
 
         # Filter out removed files - only lint files that actually exist
         changed_files = [f for f in all_changed_files if f.exists()]
