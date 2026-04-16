@@ -34,7 +34,7 @@ class StartNode(BaseNode):
             # We always remove scratch no matter what.
             "scratch_messages": [RemoveMessage(id=REMOVE_ALL_MESSAGES)],
             "masked_messages": [],
-            "parsed_blocks": [],
+            "touched_files": [],
             "extracted_content": None,
             "errors": None,
             "metadata": MetadataSchema(

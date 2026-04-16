@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Callable
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from textual import containers, getters, on
 from textual.app import ComposeResult
@@ -20,6 +21,14 @@ class PromptTextArea(TextArea):
             self.markdown = markdown
             super().__init__()
 
+    @dataclass
+    class CursorEscapingTop(Message):
+        pass
+
+    @dataclass
+    class CursorEscapingBottom(Message):
+        pass
+
     BINDING_GROUP_TITLE = "Prompt"
 
     BINDINGS = [
@@ -35,14 +44,14 @@ class PromptTextArea(TextArea):
             "ctrl+j,shift+enter",
             "newline",
             "Line",
-            key_display="⇧+⏎",
+            key_display="⇧ + ⏎",
             tooltip="Insert a new line character",
         ),
         Binding(
             "ctrl+j,shift+enter",
             "multiline_submit",
             "Send",
-            key_display="⇧+⏎",
+            key_display="⇧ + ⏎",
             tooltip="Send the prompt to the agent",
         ),
         Binding(
@@ -66,7 +75,6 @@ class PromptTextArea(TextArea):
         id: str | None = None,
         classes: str | None = None,
         disabled: bool = False,
-        complete_callback: Callable[[str], list[str]] | None = None,
     ):
         super().__init__(name=name, id=id, classes=classes, disabled=disabled)
         self._autocomplete = None
@@ -111,7 +119,7 @@ class PromptInput(containers.VerticalGroup):
 
     multi_line = var(False)
 
-    prompt_label = getters.query_one("#prompt", Label)
+    prompt_label = getters.query_one("#prompt-label", Label)
     prompt_text_area = getters.query_one(PromptTextArea)
 
     @on(TextArea.Changed)
@@ -141,5 +149,5 @@ class PromptInput(containers.VerticalGroup):
 
     def compose(self) -> ComposeResult:
         with containers.HorizontalGroup(id="text-prompt"):
-            yield Label(self.PROMPT_AI, id="prompt", markup=False)
+            yield Label(self.PROMPT_AI, id="prompt-label", markup=False)
             yield PromptTextArea(id="input").data_bind(multi_line=PromptInput.multi_line)

@@ -36,7 +36,6 @@ Rule {
   }
 }
 
-
 Tooltip {
   background: $background-darken-1;
   border: wide $primary-lighten-1 50%;
@@ -91,22 +90,20 @@ Conversation {
       height: auto;
       margin: 0;
       border: round $primary-lighten-1 50%;
-      border-subtitle-align: left;
-      border-subtitle-style: reverse;
 
       &:focus-within {
         border: round $primary-lighten-1;
-        #prompt {
+        #prompt-label {
           text-opacity: 100%;
         }
       }
 
-      #prompt {
+      & #prompt-label {
         padding: 0 1;
         text-opacity: 30%;
       }
 
-      PromptTextArea {
+      & PromptTextArea {
         padding: 0 1 0 0;
         background: transparent;
         border: none;
@@ -119,6 +116,38 @@ Conversation {
       }
     }
   }
+}
+
+SelectableMarkdown {
+  height: auto;
+  width: 1fr;
+  min-width: 12;
+  max-width: 1fr;
+  margin: 0;
+  padding: 0;
+
+  &.response-in-progress {
+    background: $primary 3%;
+    min-width: 30%;
+  }
+
+  &:focus-within {
+    border-left: thick $primary 50%;
+  }
+
+  & TextArea {
+    & .text-area--selection {
+      background: $primary 23%;
+      color: white 93%;
+    }
+  }
+
+  & SelectionTextArea.visual-mode {
+    & .text-area--cursor {
+      background: $primary;
+    }
+  }
+
 }
 
 

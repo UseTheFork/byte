@@ -12,6 +12,7 @@ from byte.tui.widgets.ui.input import Input
 from byte.tui.widgets.ui.linting import Linting
 from byte.tui.widgets.ui.loading_indicator import LoadingIndicator
 from byte.tui.widgets.ui.select import Select
+from byte.tui.widgets.ui.selectable_markdown import SelectableMarkdown
 from byte.tui.widgets.ui.text_rule import TextRule
 from byte.tui.widgets.ui.toolcall import ToolCall
 
@@ -46,13 +47,13 @@ class ResponsePanel(VerticalGroup):
         await self.mount(TextRule(event.heading, classes=event.classes))
 
     async def add_static_markdown(self, content: str = ""):
-        markdown = Markdown(content)
+        markdown = SelectableMarkdown(content)
         await self.mount(markdown)
         return markdown
 
     async def start_markdown_stream(self):
         markdown_widget = await self.add_static_markdown("")
-        self.current_stream = Markdown.get_stream(markdown_widget)
+        self.current_stream = SelectableMarkdown.get_stream(markdown_widget)
         return self.current_stream
 
     async def add_markdown_chunk(self, chunk: str):

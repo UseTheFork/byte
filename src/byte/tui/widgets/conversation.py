@@ -14,12 +14,12 @@ from byte import EventBus
 from byte.tui import TuiEvents
 from byte.tui.messages import Messages
 from byte.tui.schemas import Ask
-from byte.tui.widgets.chatbox import Chatbox
 from byte.tui.widgets.panels.human_message_panel import HumanMessagePanel
 from byte.tui.widgets.panels.response_panel import ResponsePanel
 from byte.tui.widgets.prompt.analytics import Analytics
 from byte.tui.widgets.prompt.flash import Flash
 from byte.tui.widgets.prompt.prompt_panel import PromptPanel
+from byte.tui.widgets.ui.selectable_markdown import SelectableMarkdown
 
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
@@ -29,7 +29,6 @@ class Conversation(Widget):
     BINDING_GROUP_TITLE = "Conversation"
 
     BINDINGS = [
-        Binding("ctrl+r", "rename", "Rename", key_display="^r"),
         Binding("shift+down", "scroll_container_down", show=False),
         Binding("shift+up", "scroll_container_up", show=False),
         Binding(
@@ -45,7 +44,6 @@ class Conversation(Widget):
             description="Latest message",
             show=False,
         ),
-        Binding(key="f2", action="details", description="Chat info"),
     ]
 
     app: ByteTUI
@@ -86,12 +84,12 @@ class Conversation(Widget):
     # async def on_cursor_up_from_prompt(self, event: PromptPanel.CursorEscapingTop) -> None:
     #     self.focus_latest_message()
 
-    @on(Chatbox.CursorEscapingBottom)
+    @on(SelectableMarkdown.CursorEscapingBottom)
     def move_focus_to_prompt(self) -> None:
         self.query_one(PromptPanel).focus()
 
-    def get_latest_chatbox(self) -> Chatbox:
-        return self.query(Chatbox).last()
+    def get_latest_chatbox(self) -> SelectableMarkdown:
+        return self.query(SelectableMarkdown).last()
 
     def focus_latest_message(self) -> None:
         try:
@@ -104,7 +102,7 @@ class Conversation(Widget):
 
     def action_focus_first_message(self) -> None:
         try:
-            self.query(Chatbox).first().focus()
+            self.query(SelectableMarkdown).first().focus()
         except NoMatches:
             pass
 

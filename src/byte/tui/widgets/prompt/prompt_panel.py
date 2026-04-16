@@ -63,10 +63,11 @@ class PromptPanel(containers.VerticalGroup):
         yield Flash()
         yield TextAreaAutoComplete("#input")
         with PromptContainer(id="prompt-container"):
-            yield PromptInput()
+            yield PromptInput(id="prompt-input")
 
         yield Analytics(id="analytics-panel")
 
     def watch_allow_input_submit(self, allow_input_submit: bool) -> None:
         self.set_class(not allow_input_submit, "hidden")
         self.disabled = not allow_input_submit
+        self.app.conversation.scroll_to_latest_message()

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import asyncio
 import bisect
 from dataclasses import dataclass
 
-from langchain.messages import HumanMessage
 from rich.console import RenderableType
 from rich.markdown import Markdown
 from textual import on
@@ -16,7 +16,76 @@ from textual.widget import Widget
 from textual.widgets import TextArea
 from textual.widgets.text_area import Selection
 
-from byte.tui.schemas import ChatMessage
+
+class MarkdownStream:
+    """An object to manage streaming markdown.
+
+    This will accumulate markdown fragments if they can't be rendered fast enough.
+
+    This object is typically created by the [Markdown.get_stream][textual.widgets.Markdown.get_stream] method.
+
+    """
+
+    def __init__(self, markdown_widget: SelectableMarkdown) -> None:
+        """
+        Args:
+            markdown_widget: Markdown widget to update.
+        """
+        self.markdown_widget = markdown_widget
+        self._task: asyncio.Task | None = None
+        self._new_markup = asyncio.Event()
+        self._pending: list[str] = []
+        self._stopped = False
+
+    def start(self) -> None:
+        """Start the updater running in the background.
+
+        No need to call this, if the object was created by [Markdown.get_stream][textual.widgets.Markdown.get_stream].
+
+        """
+        if self._task is None:
+            self._task = asyncio.create_task(self._run())
+
+    async def stop(self) -> None:
+        """Stop the stream and await its finish."""
+        if self._task is not None:
+            self._task.cancel()
+            await self._task
+            self._task = None
+            self._stopped = True
+
+    async def write(self, markdown_fragment: str) -> None:
+        """Append or enqueue a markdown fragment.
+
+        Args:
+            markdown_fragment: A string to append at the end of the document.
+        """
+        if self._stopped:
+            raise RuntimeError("Can't write to the stream after it has stopped.")
+        if not markdown_fragment:
+            # Nothing to do for empty strings.
+            return
+        # Append the new fragment, and set an event to tell the _run loop to wake up
+        self._pending.append(markdown_fragment)
+        self._new_markup.set()
+        # Allow the task to wake up and actually display the new markdown
+        await asyncio.sleep(0)
+
+    async def _run(self) -> None:
+        """Run a task to append markdown fragments when available."""
+        try:
+            while await self._new_markup.wait():
+                new_markdown = "".join(self._pending)
+                self._pending.clear()
+                self._new_markup.clear()
+                await asyncio.shield(self.markdown_widget.append(new_markdown))
+        except asyncio.CancelledError:
+            # Task has been cancelled, add any outstanding markdown
+            pass
+
+        new_markdown = "".join(self._pending)
+        if new_markdown:
+            await self.markdown_widget.append(new_markdown)
 
 
 class SelectionTextArea(TextArea):
@@ -204,10 +273,7 @@ class SelectionTextArea(TextArea):
         self.move_cursor(target)
 
 
-class Chatbox(Widget, can_focus=True):
-    class CursorEscapingBottom(Message):
-        """Sent when the cursor moves down from the bottom message."""
-
+class SelectableMarkdown(Widget, can_focus=True):
     BINDINGS = [
         Binding(key="up,k", action="up", description="Up", show=False),
         Binding(key="down,j", action="down", description="Down", show=False),
@@ -220,17 +286,21 @@ class Chatbox(Widget, can_focus=True):
         ),
         Binding(
             key="escape",
-            action="screen.focus('prompt')",
+            action="screen.focus('input')",
             description="Focus prompt",
             key_display="esc",
         ),
     ]
 
+    class CursorEscapingBottom(Message):
+        """Sent when the cursor moves down from the bottom message."""
+
     selection_mode = reactive(False, init=False)
+    message = reactive("")
 
     def __init__(
         self,
-        message: ChatMessage,
+        message: str = "",
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
@@ -244,22 +314,14 @@ class Chatbox(Widget, can_focus=True):
         )
         self.message = message
 
-    def on_mount(self) -> None:
-        if isinstance(self.message.message, HumanMessage):
-            self.add_class("human-message")
-            self.border_title = "You"
-        else:
-            self.add_class("assistant-message")
-            self.border_title = "Agent"
-
     def action_up(self) -> None:
-        self.screen.focus_previous(Chatbox)
+        self.screen.focus_previous(SelectableMarkdown)
 
     def action_down(self) -> None:
         if self.parent and self is self.parent.children[-1]:
             self.post_message(self.CursorEscapingBottom())
         else:
-            self.screen.focus_next(Chatbox)
+            self.screen.focus_next(SelectableMarkdown)
 
     def action_select(self) -> None:
         self.selection_mode = not self.selection_mode
@@ -267,7 +329,7 @@ class Chatbox(Widget, can_focus=True):
 
     def action_copy_to_clipboard(self) -> None:
         if not self.selection_mode:
-            text_to_copy = self.message.message.content
+            text_to_copy = self.message
             if isinstance(text_to_copy, str):
                 try:
                     import pyperclip
@@ -291,7 +353,7 @@ class Chatbox(Widget, can_focus=True):
         if value:
             async with self.batch():
                 self.border_subtitle = "SELECT"
-                content = self.message.message.content
+                content = self.message
                 text_area = SelectionTextArea(
                     content if isinstance(content, str) else "",
                     read_only=True,
@@ -307,7 +369,7 @@ class Chatbox(Widget, can_focus=True):
                 self.query_one(SelectionTextArea)
             except NoMatches:
                 # Shouldn't happen, but let's be defensive.
-                self.app.byte_app["log"].warning("In selection mode, but no text area found.")
+                self.log.warning("In selection mode, but no text area found.")
                 pass
             else:
                 await self.remove_children()
@@ -332,8 +394,7 @@ class Chatbox(Widget, can_focus=True):
     @property
     def markdown(self) -> Markdown:
         """Return the content as a Rich Markdown object."""
-        content = self.message.message.content
-        self.app.byte_app["log"].info(content)
+        content = self.message
         if not isinstance(content, str):
             content = ""
 
@@ -346,30 +407,19 @@ class Chatbox(Widget, can_focus=True):
             # so we do not need to render anything.
             return ""
 
-        message = self.message.message
-        # theme = self.app.theme_object
-        # if theme:
-        #     background_color = theme.background
-        # else:
-        background_color = "#121212"
-
-        # if isinstance(message, HumanMessage):
-        #     content = message.content or ""
-        #     if isinstance(content, str):
-        #         return Syntax(
-        #             content,
-        #             lexer="markdown",
-        #             word_wrap=True,
-        #             background_color=background_color,
-        #         )
-        #     else:
-        #         return ""
         return self.markdown
 
-    def append_chunk(self, chunk: str) -> None:
+    async def append(self, chunk: str) -> None:
         """Append a chunk of text to the end of the message."""
-        content = self.message.message.content
+        content = self.message
         if isinstance(content, str):
             content += chunk
-            self.message.message.content = content
+            self.message = content
             self.refresh(layout=True)
+
+    @classmethod
+    def get_stream(cls, markdown: SelectableMarkdown) -> MarkdownStream:
+        """ """
+        updater = MarkdownStream(markdown)
+        updater.start()
+        return updater

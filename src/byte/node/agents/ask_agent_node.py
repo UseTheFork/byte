@@ -7,7 +7,6 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte.conventions import load_convention
 from byte.git import git_grep
 from byte.llm import LLMService
 from byte.node import (
@@ -111,7 +110,8 @@ class AskAgentNode(BaseAgentNode):
         return ask_enforcement
 
     def get_tools(self):
-        return [load_convention, git_grep]
+        return [git_grep]
+        # return [load_convention, git_grep]
 
     async def __call__(
         self,
