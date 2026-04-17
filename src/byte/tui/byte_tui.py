@@ -61,9 +61,9 @@ class ByteTUI(App, inherit_bindings=False):
 
     @property
     def byte(self) -> Application:
-        if self.app.container is None:  # ty:ignore[possibly-missing-attribute]
+        if self.app.container is None:  # ty:ignore[unresolved-attribute]
             raise RuntimeError("Byte application is not initialized")
-        return self.app.container  # ty:ignore[possibly-missing-attribute]
+        return self.app.container  # ty:ignore[unresolved-attribute]
 
     def compose(self) -> ComposeResult:
         yield Conversation()

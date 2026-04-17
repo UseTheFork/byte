@@ -35,6 +35,22 @@ class MarkdownStream:
         self._pending: list[str] = []
         self._stopped = False
 
+    async def _run(self) -> None:
+        """Run a task to append markdown fragments when available."""
+        try:
+            while await self._new_markup.wait():
+                new_markdown = "".join(self._pending)
+                self._pending.clear()
+                self._new_markup.clear()
+                await asyncio.shield(self.markdown_widget.append(new_markdown))
+        except asyncio.CancelledError:
+            # Task has been cancelled, add any outstanding markdown
+            pass
+
+        new_markdown = "".join(self._pending)
+        if new_markdown:
+            await self.markdown_widget.append(new_markdown)
+
     def start(self) -> None:
         """Start the updater running in the background.
 
@@ -68,22 +84,6 @@ class MarkdownStream:
         self._new_markup.set()
         # Allow the task to wake up and actually display the new markdown
         await asyncio.sleep(0)
-
-    async def _run(self) -> None:
-        """Run a task to append markdown fragments when available."""
-        try:
-            while await self._new_markup.wait():
-                new_markdown = "".join(self._pending)
-                self._pending.clear()
-                self._new_markup.clear()
-                await asyncio.shield(self.markdown_widget.append(new_markdown))
-        except asyncio.CancelledError:
-            # Task has been cancelled, add any outstanding markdown
-            pass
-
-        new_markdown = "".join(self._pending)
-        if new_markdown:
-            await self.markdown_widget.append(new_markdown)
 
 
 class SelectionTextArea(TextArea):
@@ -272,6 +272,9 @@ class SelectionTextArea(TextArea):
 
 
 class SelectableMarkdown(Widget, can_focus=True):
+    class CursorEscapingBottom(Message):
+        """Sent when the cursor moves down from the bottom message."""
+
     BINDINGS = [
         Binding(key="up,k", action="up", description="Up", show=False),
         Binding(key="down,j", action="down", description="Down", show=False),
@@ -284,14 +287,11 @@ class SelectableMarkdown(Widget, can_focus=True):
         ),
         Binding(
             key="escape",
-            action="screen.focus('input')",
+            action="screen.focus('PromptTextArea')",
             description="Focus prompt",
             key_display="esc",
         ),
     ]
-
-    class CursorEscapingBottom(Message):
-        """Sent when the cursor moves down from the bottom message."""
 
     selection_mode = reactive(False, init=False)
     message = reactive("")
