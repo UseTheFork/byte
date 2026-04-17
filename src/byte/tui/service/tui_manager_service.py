@@ -3,7 +3,7 @@ import uuid
 
 from byte import CommandRegistryService
 from byte.support import Service
-from byte.tui import TuiEvents
+from byte.tui import PromptHistoryService, TuiEvents
 
 
 class TUIManagerService(Service):
@@ -32,6 +32,11 @@ class TUIManagerService(Service):
 
         Usage: Called internally when user input starts with /
         """
+        self.app["log"].info("_handle_command_input")
+
+        history_service = self.app.make(PromptHistoryService)
+        history_service.append_string(user_input)
+
         # Parse command name and args
         parts = user_input[1:].split(" ", 1)  # Remove "/" and split
         command_name = parts[0]

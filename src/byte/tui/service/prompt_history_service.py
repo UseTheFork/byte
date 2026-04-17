@@ -39,9 +39,10 @@ class PromptHistoryService(Service):
     def get_strings(self) -> list[str]:
         """
         Get the strings from the history that are loaded so far.
-        (In order. Oldest item first.)
+        (In order. Newest item first.)
         """
-        return self._loaded_strings[::-1]
+        return self._loaded_strings
+        # return self._loaded_strings[::-1]
 
     def append_string(self, string: str) -> None:
         "Add string to the history."

@@ -93,11 +93,11 @@ class PromptTextArea(TextArea):
         if self.cursor_location == (0, 0) and event.key == "up":
             event.prevent_default()
 
-            await self._navigate_history(-1)
+            await self._navigate_history(1)
             event.stop()
         elif self.cursor_at_end_of_text and event.key == "down":
             event.prevent_default()
-            await self._navigate_history(1)
+            await self._navigate_history(-1)
             event.stop()
 
         await super()._on_key(event)
