@@ -1,6 +1,6 @@
 from byte import EventBus
 from byte.support import ServiceProvider
-from byte.tui import TuiEvents, TUIManagerService
+from byte.tui import PromptHistoryService, TuiEvents, TUIManagerService
 
 
 class TUIServiceProvider(ServiceProvider):
@@ -9,12 +9,15 @@ class TUIServiceProvider(ServiceProvider):
     def services(self):
         return [
             TUIManagerService,
+            PromptHistoryService,
         ]
 
     async def boot(self):
         """Boot UI services."""
         event_bus = self.app.make(EventBus)
         tui_manager_service = self.app.make(TUIManagerService)
+        prompt_history_service = self.app.make(PromptHistoryService)
+        self.app.dispatch_task(prompt_history_service.load())
 
         # event_bus.on(
         #     FileEvents.FileStats,

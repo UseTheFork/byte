@@ -9,7 +9,7 @@ from textual.message import Message
 from textual.reactive import var
 from textual.widgets import Label, TextArea
 
-from byte.tui import Messages
+from byte.tui import Messages, PromptHistoryService
 
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
@@ -77,6 +77,7 @@ class PromptTextArea(TextArea):
         disabled: bool = False,
     ):
         super().__init__(name=name, id=id, classes=classes, disabled=disabled)
+        self._history_index = -1  # -1 means no history item selected
         self._autocomplete = None
 
     def on_mount(self) -> None:
@@ -89,7 +90,47 @@ class PromptTextArea(TextArea):
             event.stop()
             return
 
+        if self.cursor_location == (0, 0) and event.key == "up":
+            event.prevent_default()
+
+            await self._navigate_history(-1)
+            event.stop()
+        elif self.cursor_at_end_of_text and event.key == "down":
+            event.prevent_default()
+            await self._navigate_history(1)
+            event.stop()
+
         await super()._on_key(event)
+
+    async def _navigate_history(self, direction: int) -> None:
+        """Navigate through history. direction: -1 for up, 1 for down"""
+        history_service = self.app.byte.make(PromptHistoryService)
+        history_strings = history_service.get_strings()
+
+        if not history_strings:
+            return
+
+        # Save current input if we're starting history navigation
+        if self._history_index == -1:
+            self._unsaved_input = self.text
+
+        # Update index
+        self._history_index += direction
+
+        # Clamp to valid range
+        if self._history_index < -1:
+            self._history_index = -1
+        elif self._history_index >= len(history_strings):
+            self._history_index = len(history_strings) - 1
+
+        # Load text from history or restore unsaved input
+        if self._history_index == -1:
+            self.text = self._unsaved_input
+        else:
+            self.text = history_strings[self._history_index]
+
+        # Move cursor to end
+        self.cursor_location = (len(self.text.split("\n")) - 1, len(self.text.split("\n")[-1]))
 
     def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
         if action == "newline" and self.multi_line:

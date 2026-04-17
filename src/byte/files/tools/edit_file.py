@@ -4,6 +4,7 @@ from langchain.tools import InjectedToolArg, tool
 
 from byte import Application
 from byte.files import ToolFileService
+from byte.tools import ToolResult
 
 # SINGLE INSTANCE: Tool changes ONE instance when replace_all=false
 
@@ -49,21 +50,20 @@ UNIQUENESS: old_string MUST uniquely identify target instance
 </critical_requirements>
 <warnings>
 Tool fails if:
-- old_string matches multiple locations and replace_all=false
+- old_string matches multiple locations
 - old_string doesn't match exactly (including whitespace)
 - Insufficient context causes wrong instance change
 - Indentation is off by even one space
 - Missing or extra blank lines
 - Wrong tabs vs spaces
-</warnings>
-    """,
+</warnings>""",
 )
 async def edit_file(
     path: Annotated[str, "Path to a `editable` file located in `<file>`."],
     old_string: Annotated[str, "The exact string to find and replace"],
     new_string: Annotated[str, "The string to replace with"],
     app: Annotated[Application, InjectedToolArg],
-) -> dict:
+) -> ToolResult:
     """Edit a file by replacing a specific string. The old_string must match exactly.
 
     Args:
@@ -78,14 +78,14 @@ async def edit_file(
         tool_file_service = app.make(ToolFileService)
         result = await tool_file_service.edit_file(path, old_string, new_string)
 
-        return {
-            "result": result,
-            "extra": {
+        return ToolResult(
+            result=result,
+            extra={
                 "touched_files": [path],
             },
-        }
+        )
 
     except Exception as e:
-        return {
-            "result": f"Error editing file: {e!s}",
-        }
+        return ToolResult(
+            result=f"Error editing file: {e!s}",
+        )

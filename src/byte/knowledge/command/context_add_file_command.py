@@ -3,6 +3,7 @@ from pathlib import Path
 
 from byte import ByteArgumentParser, Command
 from byte.knowledge import SessionContextModel, SessionContextService
+from byte.tui import Messages
 
 
 class ContextAddFileCommand(Command):
@@ -35,7 +36,7 @@ class ContextAddFileCommand(Command):
 
         Usage: `await command.execute("config.py")`
         """
-        console = self.app["console"]
+        await self.emit_tui(Messages.CommandExecutionStarted())
 
         args_file_path = args.file_path
 
@@ -49,18 +50,18 @@ class ContextAddFileCommand(Command):
 
         # Check if file exists
         if not file_path.exists():
-            console.print(f"[error]File not found: {args_file_path}[/error]")
+            await self.notify_error(f"File not found: {args_file_path}")
             return
 
         if not file_path.is_file():
-            console.print(f"[error]Path is not a file: {args_file_path}[/error]")
+            await self.notify_error(f"Path is not a file: {args_file_path}")
             return
 
         # Read file contents
         try:
             content = file_path.read_text(encoding="utf-8")
         except Exception as e:
-            console.print(f"[error]Error reading file: {e!s}[/error]")
+            await self.notify_error(f"Error reading file: {e!s}")
             return
 
         context_key = str(file_path.relative_to(self.app["path"]))
@@ -70,4 +71,6 @@ class ContextAddFileCommand(Command):
         content = yaml_header + content
         model = self.app.make(SessionContextModel, type="file", key=context_key, content=content)
         session_context_service.add_context(model)
-        console.print(f"[success]Added {context_key} to session context[/success]")
+        await self.notify_success(f"Added {context_key} to session context")
+
+        await self.emit_tui(Messages.CommandExecutionCompleted())

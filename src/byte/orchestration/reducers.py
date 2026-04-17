@@ -37,3 +37,16 @@ def update_metadata(left: MetadataSchema | None, right: MetadataSchema) -> Metad
     Usage: `metadata: Annotated[MetadataSchema, update_metadata]`
     """
     return right
+
+
+def add_touched_files(left: list[str] | None, right: list[str]) -> list[str]:
+    """Reducer that accumulates touched files and removes duplicates.
+
+    Combines the left and right lists and removes duplicates.
+
+    Usage: `touched_files: Annotated[list[str], add_touched_files]`
+    """
+    if left is None:
+        return right
+
+    return list(set(left + right))

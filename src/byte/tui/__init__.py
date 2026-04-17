@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from byte.tui.messages import Messages
     from byte.tui.schemas import AutocompleteOption
     from byte.tui.service.interactions_service import InteractionService
+    from byte.tui.service.prompt_history_service import PromptHistoryService
     from byte.tui.service.tui_manager_service import TUIManagerService
     from byte.tui.service_provider import TUIServiceProvider
 
@@ -19,6 +20,7 @@ __all__ = (
     "InputCancelledError",
     "InteractionService",
     "Messages",
+    "PromptHistoryService",
     "TUIManagerService",
     "TUIServiceProvider",
     "TuiEvents",
@@ -32,6 +34,7 @@ _dynamic_imports = {
     "InteractionService": "service.interactions_service",
     "Messages": "messages",
     "TUIManagerService": "service.tui_manager_service",
+    "PromptHistoryService": "service.prompt_history_service",
     "TUIServiceProvider": "service_provider",
     "TuiEvents": "events",
     # keep-sorted end

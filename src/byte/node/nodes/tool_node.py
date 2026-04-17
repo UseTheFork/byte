@@ -8,7 +8,7 @@ from langgraph.types import Command
 from byte.node import BaseNode
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.support.utils import get_last_message
-from byte.tools import ToolRegistryService
+from byte.tools import ToolRegistryService, ToolResult
 from byte.tui import Messages
 
 
@@ -57,16 +57,16 @@ class ToolNode(BaseNode):
                 }
             )
 
-            if isinstance(tool_result, dict):
+            if isinstance(tool_result, ToolResult):
                 outputs.append(
                     ToolMessage(
-                        content=json.dumps(tool_result["result"]),
+                        content=json.dumps(tool_result.result),
                         name=tool_call["name"],
                         tool_call_id=tool_call["id"],
                     )
                 )
 
-                extra = tool_result.get("extra", {})
+                extra = tool_result.extra
                 if extra:
                     return self.route_back(state, {"scratch_messages": outputs, **extra})
                 else:

@@ -6,7 +6,6 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte.clipboard import ClipboardService
 from byte.node import BaseNode, NodeEvents
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.support import Boundary, BoundaryType
@@ -62,42 +61,43 @@ class EndNode(BaseNode):
             last_message = get_last_ai_message(state["scratch_messages"])
             update_dict["final_message"] = last_message
 
+            # TODO: this needsd to be removed.
             # we only need to copy from Ask and Coder agents.
-            if agent == "AskAgent":
-                clipboard_service = self.app.make(ClipboardService)
-                self.app.dispatch_task(clipboard_service.extract_from_message(last_message))
+            # if agent == "AskAgent":
+            #     clipboard_service = self.app.make(ClipboardService)
+            #     self.app.dispatch_task(clipboard_service.extract_from_message(last_message))
 
-            # For SubprocessAgent, skip adding user_message since the command is already in context
-            # TODO: this is gross we need a better way of doing this. maybe a hook that is part of the runtime?
-            if agent == "SubprocessAgent":
-                update_dict["history_messages"] = [last_message]
-            else:
-                # Extract text content from message (handles both list and string formats)
-                content_text = self._extract_text_from_content(last_message.content)
+            # Extract text content from message (handles both list and string formats)
+            content_text = self._extract_text_from_content(last_message.content)
 
-                # Wrap the message in XML for parsing later.
-                last_message = list_to_multiline_text(
-                    [
-                        Boundary.open(BoundaryType.AGENT_MESSAGE, {"agent_type": agent}),
-                        str(content_text),
-                        Boundary.close(BoundaryType.AGENT_MESSAGE),
-                    ]
-                )
-                last_message = AIMessage(content=last_message)
+            # Wrap the message in XML for parsing later.
+            last_message = list_to_multiline_text(
+                [
+                    Boundary.open(BoundaryType.AGENT_MESSAGE, {"agent_type": agent}),
+                    str(content_text),
+                    Boundary.close(BoundaryType.AGENT_MESSAGE),
+                ]
+            )
+            last_message = AIMessage(content=last_message)
 
-                # Create a HumanMessage from the user_request
-                user_message = list_to_multiline_text(
-                    [
-                        Boundary.open(BoundaryType.USER_MESSAGE),
-                        str(state["user_request"]),
-                        Boundary.close(BoundaryType.USER_MESSAGE),
-                    ]
-                )
-                user_message = HumanMessage(content=user_message)
+            # Create a HumanMessage from the user_request
+            user_message = list_to_multiline_text(
+                [
+                    Boundary.open(BoundaryType.USER_MESSAGE),
+                    str(state["user_request"]),
+                    Boundary.close(BoundaryType.USER_MESSAGE),
+                ]
+            )
+            user_message = HumanMessage(content=user_message)
 
-                update_dict["history_messages"] = [user_message, last_message]
+            update_dict["history_messages"] = [user_message, last_message]
 
         return Command(
             goto=END,
             update=update_dict,
         )
+
+    # AI: Add a new method here that we will use to generate the last_message. DONT replace the above function yet.
+    # instead this new method should iterate over `state["scratch_messages"]` if the message is a `AIMessage` we should get the text content only
+    # if its a `ToolMessage` we should add somthing like `called tool.name applied succesfully removed for berevity`
+    #

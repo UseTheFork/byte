@@ -39,7 +39,6 @@ class BaseState(TypedDict):
     agent: str
 
     errors: Annotated[str | None, replace_str]
-    examples: list[AnyMessage]
 
     extracted_content: str | dict | None
 
