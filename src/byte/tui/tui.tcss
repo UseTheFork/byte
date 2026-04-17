@@ -136,6 +136,10 @@ SelectableMarkdown {
   }
 
   & TextArea {
+
+    border: none;
+    height: auto;
+    
     & .text-area--selection {
       background: $primary 23%;
       color: white 93%;

@@ -22,8 +22,6 @@ class MarkdownStream:
 
     This will accumulate markdown fragments if they can't be rendered fast enough.
 
-    This object is typically created by the [Markdown.get_stream][textual.widgets.Markdown.get_stream] method.
-
     """
 
     def __init__(self, markdown_widget: SelectableMarkdown) -> None:
@@ -40,7 +38,7 @@ class MarkdownStream:
     def start(self) -> None:
         """Start the updater running in the background.
 
-        No need to call this, if the object was created by [Markdown.get_stream][textual.widgets.Markdown.get_stream].
+        No need to call this, if the object was created by SelectableMarkdown.get_stream.
 
         """
         if self._task is None:

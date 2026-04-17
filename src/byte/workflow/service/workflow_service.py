@@ -54,7 +54,7 @@ class WorkflowService(Service):
         """
 
         if chunk["type"] == "messages":
-            message_chunk, metadata = chunk["data"]
+            message_chunk, _ = chunk["data"]
 
             msg_type = type(message_chunk).__name__
             self.app["log"].debug(f"Message chunk type: {msg_type}")
