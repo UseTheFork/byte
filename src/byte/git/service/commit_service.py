@@ -1,5 +1,5 @@
 from byte import Service
-from byte.git import CommitGroup, CommitMessage, CommitPlan, GitService
+from byte.git import CommitGroup, CommitMessage, GitService
 from byte.support import Boundary, BoundaryType
 from byte.support.mixins import UserInteractive
 from byte.support.utils import list_to_multiline_text
@@ -29,16 +29,16 @@ class CommitService(Service, UserInteractive):
     def boot(self, *args, **kwargs) -> None:
         self.git_service = self.app.make(GitService)
 
-    async def build_commit_prompt(self) -> str:
+    async def build_commit_prompt(self) -> dict:
         """Build a formatted prompt from staged changes for AI commit message generation.
 
         Extracts the staged diff, formats it with boundaries for each file, and creates
         a structured prompt containing both diff content and file change summaries.
 
         Returns:
-            Formatted prompt string ready for AI processing
+            Dictionary with 'user_request' (formatted prompt string) and 'touched_files' (list of file paths)
 
-        Usage: `prompt = await self.build_commit_prompt()`
+        Usage: `result = await self.build_commit_prompt()`
         """
         # Extract staged changes for AI analysis
         staged_diff = await self.git_service.get_diff()
@@ -46,10 +46,12 @@ class CommitService(Service, UserInteractive):
         # Build formatted diff sections for each file
         diff_section = []
         file_section = [Boundary.open(BoundaryType.CONTEXT, meta={"type": "Files"})]
+        touched_files = []
         for diff_item in staged_diff:
             msg = diff_item["msg"]
             file_path = diff_item["file"]
             change_type = diff_item["change_type"]
+            touched_files.append(file_path)
 
             # Start file section with change type
             diff_section.append(
@@ -68,38 +70,7 @@ class CommitService(Service, UserInteractive):
 
         file_section.append(Boundary.close(BoundaryType.CONTEXT))
         prompt = list_to_multiline_text(diff_section) + list_to_multiline_text(file_section)
-        return prompt
-
-    async def process_commit_plan(self, commit_plan: CommitPlan) -> None:
-        """Process the commit plan by unstaging all files and committing each group separately.
-
-        Unstages all currently staged files, then iterates through each commit group
-        in the plan, staging only the files for that group and creating a commit with
-        the group's message.
-
-        Args:
-            commit_plan: The CommitPlan containing commit groups with messages and files
-
-        Usage: `await self.process_commit_plan(commit_plan)`
-        """
-
-        # Unstage all files
-        await self.git_service.reset()
-
-        # Iterate over each commit group
-        for commit_group in commit_plan.commits:
-            # Stage files for this commit group
-            for file_path in commit_group.files:
-                file_full_path = self.app.root_path(file_path)
-                if file_full_path.exists():
-                    await self.git_service.add(file_path)
-                else:
-                    # File was deleted, stage the deletion
-                    await self.git_service.remove(file_path)
-
-            # Commit with the group's message
-            formatted_message = await self.format_conventional_commit(commit_group)
-            await self.git_service.commit(formatted_message)
+        return {"user_request": prompt, "touched_files": touched_files}
 
     async def format_conventional_commit(self, commit_message: CommitMessage | CommitGroup) -> str:
         """Format a CommitMessage into a conventional commit string.

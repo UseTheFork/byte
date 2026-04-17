@@ -11,6 +11,7 @@ from byte.orchestration import AssistantContextSchema, BaseState, MetadataSchema
 from byte.support import Str
 
 
+# AI: how do we modify the below so that if `state.touched_files` is not none or empty we use that ai?
 class StartNode(BaseNode):
     def boot(
         self,
@@ -34,7 +35,7 @@ class StartNode(BaseNode):
             # We always remove scratch no matter what.
             "scratch_messages": [RemoveMessage(id=REMOVE_ALL_MESSAGES)],
             "masked_messages": [],
-            "touched_files": [],
+            "touched_files": state["touched_files"],
             "extracted_content": None,
             "errors": None,
             "metadata": MetadataSchema(

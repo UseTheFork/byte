@@ -60,9 +60,11 @@ class CommitCommand(Command):
             commit_workflow = self.app.make(CommitWorkflow)
 
             workflow_service = self.app.make(WorkflowService)
-            prompt = await self.commit_service.build_commit_prompt()
+            request = await self.commit_service.build_commit_prompt()
 
-            commit_result = await workflow_service.execute(commit_workflow, prompt)
+            self.app["log"].info(request)
+
+            commit_result = await workflow_service.execute(commit_workflow, request)
 
             formatted_message = await self.commit_service.format_conventional_commit(
                 commit_result["data"]["result"]["extracted_content"]

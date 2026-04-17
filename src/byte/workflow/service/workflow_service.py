@@ -12,9 +12,6 @@ from byte.workflow import BaseWorkflow
 class WorkflowService(Service):
     """Service for executing workflows with compiled graphs."""
 
-    def boot(self) -> None:
-        self.current_msg = ""
-
     def _is_tool_call_chunk(self, block: dict) -> bool:
         return block.get("type") in ("tool_use", "input_json_delta")
 
@@ -85,7 +82,7 @@ class WorkflowService(Service):
     async def execute(
         self,
         workflow: BaseWorkflow,
-        request: str,
+        request: dict,
         thread_id: Optional[str] = None,
         display_mode: Literal["verbose", "thinking", "silent"] = "verbose",
     ):
@@ -99,7 +96,6 @@ class WorkflowService(Service):
         Usage: `await workflow_service.execute(ask_workflow, "How do I...?")`
         """
         graph, initial_state, config = await workflow.compile(request, thread_id)
-        self.current_msg = ""
 
         # TODO: Do we need this?
         # Emit workflow start event
