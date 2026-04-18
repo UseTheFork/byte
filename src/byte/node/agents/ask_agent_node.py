@@ -7,6 +7,7 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
+from byte.development import RecordResponseService
 from byte.git import git_grep
 from byte.llm import LLMService
 from byte.node import (
@@ -123,12 +124,14 @@ class AskAgentNode(BaseAgentNode):
 
         agent_state, config = await self.generate_agent_state(state, config, runtime.context)
         runnable = self.create_runnable()
+        record_response_service = self.app.make(RecordResponseService)
 
         await self.emit_tui(Messages.LoadingIndicatorShow())
         await self.emit_tui(Messages.AddHeading("Ask Agent", "text-primary"))
         await self.emit_tui(Messages.ResponseStarted())
 
         result = await runnable.ainvoke(agent_state, config=config)
+        await record_response_service.record_response(agent_state, runnable, "ask_agent", config)
 
         await self.emit_tui(Messages.ResponseComplete())
         await self.emit_tui(Messages.LoadingIndicatorHide())

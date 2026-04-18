@@ -10,8 +10,6 @@ from byte.tui.schemas import Answer as AnswerSchema, AnswerCancelled
 if TYPE_CHECKING:
     pass
 
-# AI:
-
 
 class Messages:
     @dataclass

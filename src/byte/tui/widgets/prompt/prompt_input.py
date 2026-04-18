@@ -36,7 +36,7 @@ class PromptTextArea(TextArea):
             "enter",
             "submit",
             "Send",
-            key_display="⏎",
+            key_display="\u23ce ",
             priority=True,
             tooltip="Send the prompt to the agent",
         ),
@@ -44,14 +44,14 @@ class PromptTextArea(TextArea):
             "ctrl+j,shift+enter",
             "newline",
             "Line",
-            key_display="⇧ + ⏎",
+            key_display="\u21e7 + \u23ce ",
             tooltip="Insert a new line character",
         ),
         Binding(
             "ctrl+j,shift+enter",
             "multiline_submit",
             "Send",
-            key_display="⇧ + ⏎",
+            key_display="\u21e7 + \u23ce ",
             tooltip="Send the prompt to the agent",
         ),
         Binding(
@@ -84,24 +84,6 @@ class PromptTextArea(TextArea):
         self.highlight_cursor_line = False
         self.hide_suggestion_on_blur = False
 
-    async def _on_key(self, event) -> None:
-        if self._autocomplete and self._autocomplete.handle_key(event.key):
-            event.prevent_default()
-            event.stop()
-            return
-
-        if self.cursor_location == (0, 0) and event.key == "up":
-            event.prevent_default()
-
-            await self._navigate_history(1)
-            event.stop()
-        elif self.cursor_at_end_of_text and event.key == "down":
-            event.prevent_default()
-            await self._navigate_history(-1)
-            event.stop()
-
-        await super()._on_key(event)
-
     async def _navigate_history(self, direction: int) -> None:
         """Navigate through history. direction: -1 for up, 1 for down"""
         history_service = self.app.byte.make(PromptHistoryService)
@@ -131,6 +113,24 @@ class PromptTextArea(TextArea):
 
         # Move cursor to end
         self.cursor_location = (len(self.text.split("\n")) - 1, len(self.text.split("\n")[-1]))
+
+    async def _on_key(self, event) -> None:
+        if self._autocomplete and self._autocomplete.handle_key(event.key):
+            event.prevent_default()
+            event.stop()
+            return
+
+        if self.cursor_location == (0, 0) and event.key == "up":
+            event.prevent_default()
+
+            await self._navigate_history(1)
+            event.stop()
+        elif self.cursor_at_end_of_text and event.key == "down":
+            event.prevent_default()
+            await self._navigate_history(-1)
+            event.stop()
+
+        await super()._on_key(event)
 
     def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
         if action == "newline" and self.multi_line:

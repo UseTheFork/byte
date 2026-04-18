@@ -53,6 +53,8 @@ class BoundaryType(str, Enum):
 
     CONTEXT = "context"
 
+    GIT_CONTEXT = "git_context"
+
     # Specific to command execution
     STDOUT = "stdout"
     STDERR = "stderr"

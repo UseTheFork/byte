@@ -6,6 +6,7 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
+from byte.development import RecordResponseService
 from byte.git import CommitMessage
 from byte.llm import LLMService
 from byte.node import (
@@ -23,13 +24,11 @@ from byte.tui import Messages
 # Conventional Commits specification: https://www.conventionalcommits.org/en/v1.0.0/#summary
 
 commit_user_template = [
-    Boundary.open(BoundaryType.USER_INPUT),
-    "```text",
+    Boundary.open(BoundaryType.GIT_CONTEXT),
     "{user_request}",
-    "```",
     "",
-    "You **MUST** consider the user input before proceeding (if not empty).",
-    Boundary.close(BoundaryType.USER_INPUT),
+    "You **MUST** consider the above git diffs before proceeding (if not empty).",
+    Boundary.close(BoundaryType.GIT_CONTEXT),
     "",
     "{masked_messages}",
     "",
@@ -102,12 +101,14 @@ class CommitAgentNode(BaseAgentNode):
 
         agent_state, config = await self.generate_agent_state(state, config, runtime.context)
         runnable = self.create_runnable()
+        record_response_service = self.app.make(RecordResponseService)
 
         await self.emit_tui(Messages.LoadingIndicatorShow())
         await self.emit_tui(Messages.AddHeading("Commit Agent", "text-primary"))
         await self.emit_tui(Messages.ResponseStarted())
 
         result = await runnable.ainvoke(agent_state, config=config)
+        await record_response_service.record_response(agent_state, runnable, "commit_agent", config)
 
         await self.emit_tui(Messages.ResponseComplete())
         await self.emit_tui(Messages.LoadingIndicatorHide())

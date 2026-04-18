@@ -18,6 +18,7 @@ from byte.tui.widgets.panels.human_message_panel import HumanMessagePanel
 from byte.tui.widgets.panels.response_panel import ResponsePanel
 from byte.tui.widgets.prompt.analytics import Analytics
 from byte.tui.widgets.prompt.flash import Flash
+from byte.tui.widgets.prompt.prompt_input import PromptTextArea
 from byte.tui.widgets.prompt.prompt_panel import PromptPanel
 from byte.tui.widgets.ui.selectable_markdown import SelectableMarkdown
 
@@ -52,6 +53,7 @@ class Conversation(Widget):
     allow_input_submit = reactive(True)
 
     prompt = getters.query_one("#prompt", PromptPanel)
+    prompt_text_area = getters.query_one(PromptTextArea)
     chat_container = getters.query_one("#chat-container", VerticalScroll)
 
     def __init__(
@@ -86,7 +88,7 @@ class Conversation(Widget):
 
     @on(SelectableMarkdown.CursorEscapingBottom)
     def move_focus_to_prompt(self) -> None:
-        self.query_one(PromptPanel).focus()
+        self.query_one(PromptTextArea).focus()
 
     def get_latest_chatbox(self) -> SelectableMarkdown:
         return self.query(SelectableMarkdown).last()
