@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 
 class ByteTUI(App, inherit_bindings=False):
-    AUTO_FOCUS = "Conversation PromptPanel PromptTextArea"
+    AUTO_FOCUS = "PromptTextArea"
 
     CSS_PATH = [
         Path(__file__).parent / "utils.tcss",
@@ -36,8 +36,6 @@ class ByteTUI(App, inherit_bindings=False):
             priority=True,
         ),
         Binding("ctrl+c", "help_quit", show=False, system=True),
-        # Binding("ctrl+s", "sessions", "Sessions"),
-        # Binding("f1", "toggle_help_panel", "Help", priority=True),
         Binding(
             "f2,ctrl+comma",
             "settings",
@@ -75,6 +73,8 @@ class ByteTUI(App, inherit_bindings=False):
 
         # TODO: This should come from config
         self.theme = "byte-catppuccin-mocha"
+
+        # TODO: we need to also create a Rich theme and store it to keep things looking the same.
 
     async def on_mount(self):
         # Boot the application if not already booted

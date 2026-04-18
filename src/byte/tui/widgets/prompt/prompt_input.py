@@ -156,7 +156,8 @@ class PromptTextArea(TextArea):
 class PromptInput(containers.VerticalGroup):
     PROMPT_NULL = " "
     PROMPT_AI = Content.styled("\u276f", "$text-secondary")
-    PROMPT_MULTILINE = Content.styled("☰", "$text-secondary")
+    PROMPT_MULTILINE = Content.styled("\u2630", "$text-secondary")
+    # PROMPT_MULTILINE = Content.styled("☰", "$text-secondary")
 
     multi_line = var(False)
 
@@ -178,15 +179,14 @@ class PromptInput(containers.VerticalGroup):
             layout=False,
         )
 
-        # prompt_message = self.app.settings.get("ui.prompt_message", str)
-        prompt_message = " "
-        self.prompt_text_area.placeholder = Content.assemble(
-            f"{prompt_message}\t".expandtabs(8),
-            ("▌/▐", "r"),
-            " commands ",
-            ("▌@▐", "r"),
-            " files",
-        )
+        # prompt_message = " "
+        # self.prompt_text_area.placeholder = Content.assemble(
+        #     f"{prompt_message}\t".expandtabs(8),
+        #     ("▌/▐", "r"),
+        #     " commands ",
+        #     ("▌@▐", "r"),
+        #     " files",
+        # )
 
     def compose(self) -> ComposeResult:
         with containers.HorizontalGroup(id="text-prompt"):

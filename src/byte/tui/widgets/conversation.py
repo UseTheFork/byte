@@ -124,6 +124,9 @@ class Conversation(Widget):
         if self.allow_input_submit is False:
             return
 
+        if not event.body or not event.body.strip():
+            return
+
         self.allow_input_submit = False
 
         user_message_chatbox = HumanMessagePanel(event.body)
