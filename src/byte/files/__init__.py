@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from byte.files.service_provider import FileServiceProvider
     from byte.files.tools.delete_file import delete_file
     from byte.files.tools.edit_file import edit_file
+    from byte.files.tools.replace_file import replace_file
     from byte.files.tools.write_file import write_file
 
 __all__ = (
@@ -43,6 +44,7 @@ __all__ = (
     "ToolFileService",
     "delete_file",
     "edit_file",
+    "replace_file",
     "write_file",
 )
 
@@ -67,6 +69,7 @@ _dynamic_imports = {
     "edit_file": "tools.edit_file",
     "write_file": "tools.write_file",
     "delete_file": "tools.delete_file",
+    "replace_file": "tools.replace_file",
     # keep-sorted end
 }
 

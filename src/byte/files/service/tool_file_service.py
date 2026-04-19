@@ -8,6 +8,40 @@ from byte.tui import InteractionService, Messages
 class ToolFileService(Service):
     """ """
 
+    def _prepare_file_path(self, path: str) -> Path:
+        """Validate file path exists and is not read-only.
+
+        Returns:
+            Tuple of (is_valid, status_or_message). BlockStatus if invalid, empty string if valid.
+
+        Usage: `valid, status = self._validate_file_path()` -> (BlockStatus, "") or (BlockStatus, MESSAGE)
+        """
+
+        file_service = self.app.make(FileService)
+        file_path = Path(path)
+
+        # If the path is relative, resolve it against the project root
+        if not file_path.is_absolute():
+            resolved_file_path = self.app.root_path(str(file_path)).resolve()
+        else:
+            resolved_file_path = file_path.resolve()
+
+        # Check if file is in read-only context
+        file_context = file_service.get_file_context(resolved_file_path)
+
+        if file_context and file_context.mode == FileMode.READ_ONLY:
+            raise Exception(f"Cannot edit read-only file '{path}'.")
+
+        # Check if file is outside project
+        project_root = Path(self.app.root_path())
+
+        try:
+            resolved_file_path.resolve().relative_to(project_root.resolve())
+        except ValueError:
+            raise Exception(f"File is outside project root: {file_path}.")
+
+        return resolved_file_path
+
     async def edit_file(self, path: str, old_string: str, new_string: str) -> str:
         try:
             full_path = self._prepare_file_path(path)
@@ -79,6 +113,42 @@ class ToolFileService(Service):
             )
             raise e
 
+    async def replace_file(self, path: str, content: str) -> str:
+        """Replace all content of a file.
+
+        Confirms with the user before replacing the file content.
+
+        Returns:
+            Success or error message
+
+        Usage: `result = await service.replace_file(path, content)` -> "Successfully replaced content in 'path'"
+        """
+        try:
+            full_path = self._prepare_file_path(path)
+            interaction_service = self.app.make(InteractionService)
+
+            if not full_path.exists():
+                raise Exception(f"Error: File '{path}' does not exist")
+
+            if await interaction_service.confirm(
+                f"Replace all content in '{path}'?",
+                True,
+            ):
+                full_path.write_text(content, encoding="utf-8")
+                return f"Successfully replaced content in '{path}'"
+            else:
+                raise Exception("User declined request to replace file.")
+
+        except Exception as e:
+            await self.emit_tui(
+                Messages.CreatePanel(
+                    str(e),
+                    title="Tool Error",
+                    border_style="warning",
+                )
+            )
+            raise e
+
     async def delete_file(self, path: str):
         """Apply the delete operation to the file system.
 
@@ -122,37 +192,3 @@ class ToolFileService(Service):
                 )
             )
             raise e
-
-    def _prepare_file_path(self, path: str) -> Path:
-        """Validate file path exists and is not read-only.
-
-        Returns:
-            Tuple of (is_valid, status_or_message). BlockStatus if invalid, empty string if valid.
-
-        Usage: `valid, status = self._validate_file_path()` -> (BlockStatus, "") or (BlockStatus, MESSAGE)
-        """
-
-        file_service = self.app.make(FileService)
-        file_path = Path(path)
-
-        # If the path is relative, resolve it against the project root
-        if not file_path.is_absolute():
-            resolved_file_path = self.app.root_path(str(file_path)).resolve()
-        else:
-            resolved_file_path = file_path.resolve()
-
-        # Check if file is in read-only context
-        file_context = file_service.get_file_context(resolved_file_path)
-
-        if file_context and file_context.mode == FileMode.READ_ONLY:
-            raise Exception(f"Cannot edit read-only file '{path}'.")
-
-        # Check if file is outside project
-        project_root = Path(self.app.root_path())
-
-        try:
-            resolved_file_path.resolve().relative_to(project_root.resolve())
-        except ValueError:
-            raise Exception(f"File is outside project root: {file_path}.")
-
-        return resolved_file_path
