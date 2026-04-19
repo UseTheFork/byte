@@ -218,8 +218,6 @@ class TextAreaAutoComplete(Widget):
         """Execute debounced slash command argument search."""
         self._search_timer = None
 
-        self.app.byte["log"].info("_do_slash_arg_search")
-
         current_state = self._get_target_state()
         if not current_state.text.startswith("/") or " " not in current_state.text:
             self.action_hide()

@@ -17,7 +17,10 @@ from byte.files import (
     ReloadFilesCommand,
     SwitchModeCommand,
     ToolFileService,
+    delete_file,
     edit_file,
+    replace_file,
+    write_file,
 )
 from byte.orchestration import OrchestrationEvents
 from byte.system import SystemEvents
@@ -48,7 +51,7 @@ class FileServiceProvider(ServiceProvider):
 
     def tools(self) -> List[BaseTool]:
         """"""
-        return [edit_file]
+        return [edit_file, write_file, delete_file, replace_file]
 
     async def boot(self):
         """Boot file services and register commands with registry."""

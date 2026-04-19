@@ -11,10 +11,12 @@ if TYPE_CHECKING:
         ModelSchema,
         ReinforcementMode,
     )
+    from byte.llm.service.llm_registry_service import LLMRegistryService
     from byte.llm.service.llm_service import LLMService
     from byte.llm.service_provider import LLMServiceProvider
 
 __all__ = (
+    "LLMRegistryService",
     "LLMService",
     "LLMServiceProvider",
     "ModelBehavior",
@@ -24,6 +26,7 @@ __all__ = (
 )
 
 _dynamic_imports = {
+    "LLMRegistryService": "service.llm_registry_service",
     "LLMService": "service.llm_service",
     "LLMServiceProvider": "service_provider",
     "ModelBehavior": "schemas",

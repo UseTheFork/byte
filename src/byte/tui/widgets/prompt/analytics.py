@@ -72,7 +72,7 @@ class Analytics(containers.VerticalGroup):
                     width: 1fr;
                 }
                 & MemoryUsedInfo {
-                    width: 6;
+                    width: 7;
                 }
             }
 

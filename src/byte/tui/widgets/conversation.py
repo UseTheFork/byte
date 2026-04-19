@@ -294,6 +294,7 @@ class Conversation(Widget):
         Args:
             event: UpdateAnalytics message containing token usage and cost information.
         """
+        self.app.byte["log"].info(event)
         self.query_one(Analytics).update_analytics(event)
 
     @on(Messages.UpdateFiles)

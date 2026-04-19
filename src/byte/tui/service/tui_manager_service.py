@@ -67,6 +67,9 @@ class TUIManagerService(Service):
         # User Messages are always our primary entrypoint. As a result we always create a pending panel here and mount it empty.
         if user_input.startswith("/"):
             await self._handle_command_input(event.message)
+        else:
+            # Assume this is a coder command so prepend that
+            await self._handle_command_input(f"/coder {event.message}")
 
         self.tui.conversation.post_message(Messages.CommandExecutionCompleted(panel_id=self.thread_local.panel_id))
 

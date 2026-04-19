@@ -18,21 +18,21 @@ class WorkflowService(Service):
     def _is_message_content_chunk(self, block: dict) -> bool:
         return block.get("type") == "text"
 
-    async def _track_token_usage(self, usage_metadata: dict, mode: str) -> None:
-        """Track token usage from callback metadata and update analytics.
+    async def _track_token_usage(self, usage_metadata: dict) -> None:
+        """Track token usage from callback metadata by provider.
 
         Extracts usage metadata from the get_usage_metadata_callback result
-        and records it in the analytics service based on the current AI mode.
+        and records it in the analytics service by provider.
 
         Args:
-            usage_metadata: Dictionary with model names as keys and usage stats as values
-            mode: The AI mode being used ("main" or "weak")
+            usage_metadata: Dictionary with model IDs as keys and usage stats as values
 
-        Usage: `await self._track_token_usage(cb, runtime.context.mode)`
+        Usage: `await self._track_token_usage(usage_metadata_callback.usage_metadata)`
         """
         if usage_metadata:
-            # Get the first model's usage data (typically only one model)
-            model_usage = next(iter(usage_metadata.values()))
+            # Get the first (and typically only) model's usage data
+            model_id = next(iter(usage_metadata.keys()))
+            model_usage = usage_metadata[model_id]
 
             usage = TokenUsageSchema(
                 input_tokens=model_usage.get("input_tokens", 0),
@@ -40,10 +40,7 @@ class WorkflowService(Service):
                 total_tokens=model_usage.get("total_tokens", 0),
             )
             agent_analytics_service = self.app.make(AgentAnalyticsService)
-            if mode == "main":
-                await agent_analytics_service.update_main_usage(usage)
-            else:
-                await agent_analytics_service.update_weak_usage(usage)
+            await agent_analytics_service.update_usage_by_model(model_id, usage)
 
     async def _handle_stream_event(self, chunk: dict[str, Any] | Any):
         """Handle individual stream events for display and final message extraction.
@@ -126,7 +123,9 @@ class WorkflowService(Service):
             # await event_bus.emit(Events.TextualMessageReceived(Messages.AgentResponseComplete()))
 
             # TODO: need to use `processed_event` to figure out what mode we are in.
-            await self._track_token_usage(usage_metadata_callback.usage_metadata, "main")
+
+            self.app["log"].debug(usage_metadata_callback)
+            await self._track_token_usage(usage_metadata_callback.usage_metadata)
 
         # await self.event_handler(Messages.AgentResponseComplete())
         return processed_event

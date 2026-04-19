@@ -1,5 +1,6 @@
 from byte import Service
-from byte.analytics import UsageAnalytics
+from byte.analytics import ModelUsage, UsageAnalytics
+from byte.llm import LLMRegistryService
 from byte.orchestration import TokenUsageSchema
 from byte.tui import Messages
 
@@ -19,22 +20,25 @@ class AgentAnalyticsService(Service):
         """
         self.usage = UsageAnalytics()
 
-    async def update_main_usage(self, token_usage: TokenUsageSchema) -> None:
-        self.usage.main.context = token_usage.total_tokens
-        self.usage.main.total.input += token_usage.input_tokens
-        self.usage.main.total.output += token_usage.output_tokens
-        self.usage.last.input = token_usage.input_tokens
-        self.usage.last.output = token_usage.output_tokens
-        self.usage.last.type = "main"
-        await self.calculate_analytics()
+    async def update_usage_by_model(self, model_id: str, token_usage: TokenUsageSchema) -> None:
+        """Track usage by model, then aggregate by provider using LLMRegistryService."""
+        from byte.llm import LLMRegistryService
 
-    async def update_weak_usage(self, token_usage: TokenUsageSchema) -> None:
-        self.usage.weak.total.input += token_usage.input_tokens
-        self.usage.weak.total.output += token_usage.output_tokens
-        self.usage.last.input = token_usage.input_tokens
-        self.usage.last.output = token_usage.output_tokens
-        self.usage.last.type = "weak"
-        await self.calculate_analytics()
+        llm_registry = self.app.make(LLMRegistryService)
+        model_data = llm_registry.get_model(model_id)
+        if model_data:
+            # Initialize provider entry if needed
+            if model_id not in self.usage.by_model:
+                self.usage.by_model[model_id] = ModelUsage()
+
+            # Update provider's usage
+            self.usage.by_model[model_id].total.input += token_usage.input_tokens
+            self.usage.by_model[model_id].total.output += token_usage.output_tokens
+            self.usage.last.input = token_usage.input_tokens
+            self.usage.last.output = token_usage.output_tokens
+            self.usage.last.type = model_id
+
+            await self.calculate_analytics()
 
     def get_cost_per_token(self, cost) -> float:
         return cost / 1000000
@@ -48,56 +52,44 @@ class AgentAnalyticsService(Service):
 
         Usage: `analytics = await service.calculate_analytics()`
         """
-        from byte.llm import LLMService
 
-        llm_service = self.app.make(LLMService)
+        llm_registry = self.app.make(LLMRegistryService)
 
-        # Calculate usage percentages
-        memory_percent = min(
-            (self.usage.main.context / llm_service._main_schema.constraints.max_input_tokens) * 100,
-            100,
-        )
+        # Calculate session cost across all models
+        session_cost = 0.0
+        for model_id, usage in self.usage.by_model.items():
+            # Get model data to calculate costs
+            model_data = llm_registry.get_model(model_id)
 
-        # Calculate weak model cost
-        weak_cost = (
-            self.usage.weak.total.input
-            * self.get_cost_per_token(llm_service._weak_schema.constraints.input_cost_per_token)
-        ) + (
-            self.usage.weak.total.output
-            * self.get_cost_per_token(llm_service._weak_schema.constraints.output_cost_per_token)
-        )
+            if model_data:
+                # Use the model's constraints to calculate costs
+                model_cost = (
+                    usage.total.input * self.get_cost_per_token(model_data.constraints.input_cost_per_token)
+                ) + (usage.total.output * self.get_cost_per_token(model_data.constraints.output_cost_per_token))
+                session_cost += model_cost
 
-        # Calculate main model cost
-        main_cost = (
-            self.usage.main.total.input
-            * self.get_cost_per_token(llm_service._main_schema.constraints.input_cost_per_token)
-        ) + (
-            self.usage.main.total.output
-            * self.get_cost_per_token(llm_service._main_schema.constraints.output_cost_per_token)
-        )
+        # Calculate last message cost based on model
+        last_message_cost = 0.0
+        if self.usage.last.type:
+            model_data = llm_registry.get_model(self.usage.last.type)
 
-        session_cost = main_cost + weak_cost
+            if model_data:
+                last_message_cost = (
+                    self.usage.last.input * self.get_cost_per_token(model_data.constraints.input_cost_per_token)
+                ) + (self.usage.last.output * self.get_cost_per_token(model_data.constraints.output_cost_per_token))
 
-        # Calculate last message cost based on which model type was used
-        last_message_type = self.usage.last.type
-        if last_message_type == "main":
-            last_message_cost = (
-                self.usage.last.input
-                * self.get_cost_per_token(llm_service._main_schema.constraints.input_cost_per_token)
-            ) + (
-                self.usage.last.output
-                * self.get_cost_per_token(llm_service._main_schema.constraints.output_cost_per_token)
-            )
-        elif last_message_type == "weak":
-            last_message_cost = (
-                self.usage.last.input
-                * self.get_cost_per_token(llm_service._weak_schema.constraints.input_cost_per_token)
-            ) + (
-                self.usage.last.output
-                * self.get_cost_per_token(llm_service._weak_schema.constraints.output_cost_per_token)
-            )
-        else:
-            last_message_cost = 0.0
+        # Calculate memory_percent as average of averages across all models
+        memory_percent = 0.0
+        if self.usage.by_model:
+            model_percentages = []
+            for model_id, usage in self.usage.by_model.items():
+                model_data = llm_registry.get_model(model_id)
+                if model_data and model_data.constraints.max_input_tokens > 0:
+                    model_percent = (usage.context / model_data.constraints.max_input_tokens) * 100
+                    model_percentages.append(model_percent)
+
+            if model_percentages:
+                memory_percent = sum(model_percentages) / len(model_percentages)
 
         await self.emit_tui(
             Messages.UpdateAnalytics(
@@ -109,20 +101,6 @@ class AgentAnalyticsService(Service):
             )
         )
 
-    #     grid = Table.grid(expand=True)
-    #     grid.add_column()
-    #     grid.add_column(ratio=1)
-    #     grid.add_column()
-    #     grid.add_row("Memory Used ", progress, f" {main_percentage:.1f}%")
-
-    #     grid_cost = Table.grid(expand=True)
-    #     grid_cost.add_column()
-    #     grid_cost.add_column(justify="right")
-    #     grid_cost.add_row(
-    #         f"Tokens: {last_input} sent, {last_output} received",
-    #         f"Cost: ${last_message_cost:.2f} message, ${session_cost:.2f} session.",
-    #     )
-
     def reset_usage(self):
         """Reset token usage counters to zero.
 
@@ -131,10 +109,10 @@ class AgentAnalyticsService(Service):
         self.usage = UsageAnalytics()
 
     def reset_context(self) -> None:
-        """Reset context token counters for both main and weak models.
+        """Reset context token counters for all models.
 
         Clears the current context usage while preserving total session usage.
         Useful when starting a new conversation or clearing the message history.
         """
-        self.usage.main.context = 0
-        self.usage.weak.context = 0
+        for model_usage in self.usage.by_model.values():
+            model_usage.context = 0
