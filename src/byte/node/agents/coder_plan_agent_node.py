@@ -155,8 +155,8 @@ class CoderPlanAgentNode(BaseAgentNode):
         await self.emit_tui(Messages.AddHeading("Plan Agent", "text-primary"))
         await self.emit_tui(Messages.Response(status=Status.PENDING))
 
-        result = await runnable.ainvoke(agent_state, config=config)
         await record_response_service.record_response(agent_state, runnable, "coder_plan_agent", config)
+        result = await runnable.ainvoke(agent_state, config=config)
 
         await self.emit_tui(Messages.Response(status=Status.SUCCESS))
 

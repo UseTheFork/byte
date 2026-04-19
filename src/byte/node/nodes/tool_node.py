@@ -19,6 +19,7 @@ class ToolNode(BaseNode):
         message = get_last_message(state["scratch_messages"])
 
         outputs = []
+        merged_extra = {}
 
         tool_registry_service = self.app.make(ToolRegistryService)
         tools = tool_registry_service.get_all_tools()
@@ -31,7 +32,6 @@ class ToolNode(BaseNode):
         tools_by_name = {tool.name: tool for tool in tools}
 
         for tool_call in message.tool_calls:
-            # Check if the tool exists
             if tool_call["name"] not in tools_by_name:
                 outputs.append(
                     ToolMessage(
@@ -57,6 +57,7 @@ class ToolNode(BaseNode):
                 }
             )
 
+            # Handle ToolResult wrapper
             if isinstance(tool_result, ToolResult):
                 outputs.append(
                     ToolMessage(
@@ -66,18 +67,25 @@ class ToolNode(BaseNode):
                     )
                 )
 
-                extra = tool_result.extra
-                if extra:
-                    return self.route_back(state, {"scratch_messages": outputs, **extra})
-                else:
-                    return self.route_back(state, {"scratch_messages": outputs})
+                # TODO: This prob needs to have a deep merge.
+                if tool_result.extra:
+                    # merge extras
+                    merged_extra.update(tool_result.extra)
 
-            outputs.append(
-                ToolMessage(
-                    content=json.dumps(tool_result),
-                    name=tool_call["name"],
-                    tool_call_id=tool_call["id"],
+            else:
+                outputs.append(
+                    ToolMessage(
+                        content=json.dumps(tool_result),
+                        name=tool_call["name"],
+                        tool_call_id=tool_call["id"],
+                    )
                 )
-            )
 
-        return self.route_back(state, {"scratch_messages": outputs})
+        # Final single route_back after ALL tools
+        return self.route_back(
+            state,
+            {
+                "scratch_messages": outputs,
+                **merged_extra,  # only included if not empty
+            },
+        )

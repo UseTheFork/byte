@@ -139,7 +139,11 @@ class BaseAgentNode(BaseNode):
         """
 
         model_schema, merged_params = self.get_model()
-        model = init_chat_model(f"{model_schema.provider}:{model_schema.model}", **merged_params)
+        model = init_chat_model(
+            model_schema.model,
+            model_provider=model_schema.provider,
+            **merged_params,
+        )
 
         if self.get_structured_output() is not None:
             model = model.with_structured_output(self.get_structured_output())

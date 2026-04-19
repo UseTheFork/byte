@@ -1,3 +1,4 @@
+import asyncio
 import re
 from typing import TYPE_CHECKING, TypeVar
 
@@ -289,33 +290,68 @@ class PromptAssembler(Bootable, Eventable):
 
     async def generate_state(self, state: BaseState, agent, model_schema: ModelSchema) -> dict:
         user_prompt_state = {**state}
-
         agent = Str.class_to_snake_case(agent)
 
+        # Create dictionary to map task names to their coroutines
+        tasks = {}
+
+        # Add conditional tasks
         if state.get("metadata", {}).prompt_settings.has_project_information_and_context:
-            user_prompt_state["project_information_and_context"] = await self._gather_project_context()
-
+            tasks["project_context"] = self._gather_project_context()
         if state.get("metadata", {}).prompt_settings.has_project_hierarchy:
-            user_prompt_state["project_hierarchy"] = await self._gather_project_hierarchy()
+            tasks["project_hierarchy"] = self._gather_project_hierarchy()
 
-        user_prompt_state["commit_guidelines"] = await self._gather_commit_guidelines()
+        # Always executed tasks
+        tasks.update(
+            {
+                "commit_guidelines": self._gather_commit_guidelines(),
+                "constraints": self._gather_constraints(state),
+                "available_conventions": self.gather_available_conventions(state),
+                "reinforcement": self._gather_reinforcement(agent, model_schema),
+            }
+        )
 
+        # Handle file context tasks
         if state.get("metadata", {}).prompt_settings.has_file_context:
-            user_prompt_state["file_context"] = await self._gather_file_context()
+            tasks.update(
+                {
+                    "file_context": self._gather_file_context(),
+                    "file_context_with_line_numbers": self._gather_file_context(True),
+                }
+            )
 
-        if state.get("metadata", {}).prompt_settings.has_file_context:
-            user_prompt_state["file_context_with_line_numbers"] = await self._gather_file_context(True)
+        # Execute all tasks concurrently
+        results = await asyncio.gather(*tasks.values())
 
-        user_prompt_state["constraints_context"] = await self._gather_constraints(state)
+        # Map results back to their keys
+        results_dict = dict(zip(tasks.keys(), results))
 
+        # Build the state dictionary
+        if "project_context" in results_dict:
+            user_prompt_state["project_information_and_context"] = results_dict["project_context"]
+        if "project_hierarchy" in results_dict:
+            user_prompt_state["project_hierarchy"] = results_dict["project_hierarchy"]
+
+        user_prompt_state.update(
+            {
+                "commit_guidelines": results_dict["commit_guidelines"],
+                "constraints_context": results_dict["constraints"],
+                "available_conventions": results_dict["available_conventions"],
+                "operating_principles": results_dict["reinforcement"],
+            }
+        )
+
+        if "file_context" in results_dict:
+            user_prompt_state.update(
+                {
+                    "file_context": results_dict["file_context"],
+                    "file_context_with_line_numbers": results_dict["file_context_with_line_numbers"],
+                }
+            )
+
+        # Set remaining state values
         messages = state.get("history_messages", [])
         user_prompt_state["masked_messages"] = messages
-
-        user_prompt_state["available_conventions"] = await self.gather_available_conventions(state)
-
-        # Reinforcement is appended to the user message.
-        user_prompt_state["operating_principles"] = await self._gather_reinforcement(agent, model_schema)
-
         user_prompt_state["user_request"] = state.get("user_request", "")
 
         return user_prompt_state

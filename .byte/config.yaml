@@ -1,10 +1,10 @@
 llm:
   coder_plan_agent_node:
-    model: claude-opus-4-6
+    model: claude-sonnet-4-5
   ask_agent_node:
     model: claude-sonnet-4-5
   coder_agent_node:
-    model: claude-sonnet-4-5
+    model: mistral-medium-latest
   commit_agent_node:
     model: claude-haiku-4-5
 lint:

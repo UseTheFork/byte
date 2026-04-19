@@ -45,6 +45,7 @@ dependencies = [
     "textual[syntax]>=8.2.0",
     "textual-autocomplete>=4.0.6",
     "aiopath>=0.7.7",
+    "langchain-mistralai>=1.1.2",
 ]
 
 [dependency-groups]
