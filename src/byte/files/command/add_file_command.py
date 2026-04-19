@@ -3,6 +3,7 @@ from typing import List
 
 from byte import ByteArgumentParser, Command
 from byte.files import FileMode, FileService
+from byte.tui import Messages
 
 
 class AddFileCommand(Command):
@@ -33,6 +34,9 @@ class AddFileCommand(Command):
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Add specified file to context with editable permissions."""
 
+        await self.emit_tui(Messages.CommandExecutionStarted())
+        await self.emit_tui(Messages.AddUserInput(raw_args))
+
         file_path = args.file_path
 
         file_service = self.app.make(FileService)
@@ -45,6 +49,8 @@ class AddFileCommand(Command):
         else:
             await self.notify_success(f"Added {file_path} to context")
             await file_service.notify_file_stats()
+
+        await self.emit_tui(Messages.CommandExecutionCompleted())
 
     async def get_completions(self, text: str) -> List[str]:
         """Provide intelligent file path completions from project discovery.

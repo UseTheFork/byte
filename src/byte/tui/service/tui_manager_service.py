@@ -3,7 +3,7 @@ import uuid
 
 from byte import CommandRegistryService
 from byte.support import Service
-from byte.tui import PromptHistoryService, TuiEvents
+from byte.tui import Messages, PromptHistoryService, TuiEvents
 
 
 class TUIManagerService(Service):
@@ -59,9 +59,12 @@ class TUIManagerService(Service):
         panel_id = f"panel_{str(uuid.uuid4()).replace('-', '_')}"
         self.thread_local.panel_id = panel_id
 
+        self.tui.conversation.post_message(Messages.CommandExecutionStarted(panel_id=self.thread_local.panel_id))
         # User Messages are always our primary entrypoint. As a result we always create a pending panel here and mount it empty.
         if user_input.startswith("/"):
             await self._handle_command_input(event.message)
+
+        self.tui.conversation.post_message(Messages.CommandExecutionCompleted(panel_id=self.thread_local.panel_id))
 
     def get_panel_id(self) -> str:
         """Get the current panel ID for this thread.

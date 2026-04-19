@@ -61,15 +61,15 @@ _dynamic_imports = {
     "FileService": "service.file_service",
     "FileServiceProvider": "service_provider",
     "FileWatcherService": "service.watcher_service",
-    "ToolFileService": "service.tool_file_service",
     "ListFilesCommand": "command.list_files_command",
     "ReadOnlyCommand": "command.add_read_only_file_command",
     "ReloadFilesCommand": "command.reload_files_command",
     "SwitchModeCommand": "command.switch_mode_command",
-    "edit_file": "tools.edit_file",
-    "write_file": "tools.write_file",
+    "ToolFileService": "service.tool_file_service",
     "delete_file": "tools.delete_file",
+    "edit_file": "tools.edit_file",
     "replace_file": "tools.replace_file",
+    "write_file": "tools.write_file",
     # keep-sorted end
 }
 

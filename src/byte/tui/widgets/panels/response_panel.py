@@ -8,6 +8,7 @@ from textual.widgets import Markdown
 
 from byte.tui import Messages
 from byte.tui.schemas import Ask
+from byte.tui.widgets.ui.human_message import HumanMessage
 from byte.tui.widgets.ui.input import Input
 from byte.tui.widgets.ui.linting import Linting
 from byte.tui.widgets.ui.loading_indicator import LoadingIndicator
@@ -41,7 +42,10 @@ class ResponsePanel(VerticalGroup):
         self.current_linting: Linting | None = None
 
     def on_mount(self) -> None:
-        self.mount(LoadingIndicator(classes="hidden dock-bottom"))
+        self.mount(LoadingIndicator(classes="dock-bottom"))
+
+    async def add_user_message(self, event: Messages.AddUserInput):
+        await self.mount(HumanMessage(event.body))
 
     async def add_heading(self, event: Messages.AddHeading):
         await self.mount(TextRule(event.heading, classes=event.classes))

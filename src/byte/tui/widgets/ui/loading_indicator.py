@@ -13,6 +13,10 @@ class LoadingIndicator(HorizontalGroup):
     LoadingIndicator {
         height: 1;
 
+        & .is-hidden {
+            display:none;
+        }
+
         & Label {
             color: $primary;
             width: auto;
@@ -20,7 +24,7 @@ class LoadingIndicator(HorizontalGroup):
     }
     """
 
-    hidden: Reactive[bool] = reactive(False)
+    hidden: Reactive[bool] = reactive(True)
 
     message: Reactive[str] = reactive("Thinking", recompose=True)
     spinner_size: Reactive[int] = reactive(8)
@@ -48,7 +52,7 @@ class LoadingIndicator(HorizontalGroup):
         yield Label(f"{self.message}", classes="pl-1")
 
     def watch_hidden(self, hidden: bool) -> None:
-        self.set_class(hidden, "hidden")
+        self.set_class(hidden, "is-hidden")
 
     def watch_message(self, message: str) -> None:
         self.hidden = False

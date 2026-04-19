@@ -68,6 +68,12 @@ class Messages:
         panel_id: str | None = None
 
     @dataclass
+    class AddUserInput(Message):
+        body: str
+        command: str | None = None
+        panel_id: str | None = None
+
+    @dataclass
     class AddHeading(Message):
         heading: str
         classes: str = "text-muted"

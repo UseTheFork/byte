@@ -14,7 +14,6 @@ from byte import EventBus
 from byte.tui import Status, TuiEvents
 from byte.tui.messages import Messages
 from byte.tui.schemas import Ask
-from byte.tui.widgets.panels.human_message_panel import HumanMessagePanel
 from byte.tui.widgets.panels.response_panel import ResponsePanel
 from byte.tui.widgets.prompt.analytics import Analytics
 from byte.tui.widgets.prompt.prompt_input import PromptTextArea
@@ -129,10 +128,6 @@ class Conversation(Widget):
             return
 
         self.allow_input_submit = False
-
-        user_message_chatbox = HumanMessagePanel(event.body)
-        await self.chat_container.mount(user_message_chatbox)
-        self.scroll_to_latest_message()
         self.emit_user_input_submitted(event)
 
     @work(thread=True)
@@ -170,6 +165,12 @@ class Conversation(Widget):
     async def create_panel(self, event: Messages.CreatePanel) -> None:
         response_panel = await self.get_or_create_response_panel(event.panel_id)
         await response_panel.mount_panel(event)
+        self.scroll_to_latest_message()
+
+    @on(Messages.AddUserInput)
+    async def add_user_message(self, event: Messages.AddUserInput) -> None:
+        response_panel = await self.get_or_create_response_panel(event.panel_id)
+        await response_panel.add_user_message(event)
         self.scroll_to_latest_message()
 
     @on(Messages.AddHeading)

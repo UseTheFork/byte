@@ -155,7 +155,7 @@ SelectableMarkdown {
 }
 
 
-HumanMessagePanel {
+HumanMessage {
   height: auto;
   width: auto;
   min-width: 12;
