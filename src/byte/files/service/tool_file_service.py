@@ -1,21 +1,16 @@
 from pathlib import Path
-from typing import Dict
 
 from byte import Service
-from byte.files import FileContext, FileMode, FileService
-from byte.tui import Messages
+from byte.files import FileDiscoveryService, FileMode, FileService
+from byte.tui import InteractionService, Messages
 
 
 class ToolFileService(Service):
     """ """
 
-    def boot(self, **kwargs) -> None:
-        """Initialize file service and ensure discovery service is ready."""
-        self._context_files: Dict[str, FileContext] = {}
-
     async def edit_file(self, path: str, old_string: str, new_string: str) -> str:
         try:
-            full_path = self.app.path(path)
+            full_path = self._prepare_file_path(path)
 
             if not full_path.exists():
                 raise Exception(f"Error: File '{path}' does not exist")
@@ -48,6 +43,86 @@ class ToolFileService(Service):
             )
             raise e
 
+    async def write_file(self, path: str, content: str) -> str:
+        """Write content to a file. Creates parent directories if needed.
+
+        Confirms with the user before creating the file.
+
+        Returns:
+            Success or error message
+
+        Usage: `result = await service.write_file(path, content)` -> "Successfully wrote X characters to 'path'"
+        """
+        try:
+            full_path = self._prepare_file_path(path)
+            interaction_service = self.app.make(InteractionService)
+
+            if await interaction_service.confirm(
+                f"Write to file '{path}'?",
+                True,
+            ):
+                # Create parent directories if they don't exist
+                full_path.parent.mkdir(parents=True, exist_ok=True)
+
+                full_path.write_text(content, encoding="utf-8")
+                return f"Successfully wrote {len(content)} characters to '{path}'"
+            else:
+                raise Exception("User declined request to write file.")
+
+        except Exception as e:
+            await self.emit_tui(
+                Messages.CreatePanel(
+                    str(e),
+                    title="Tool Error",
+                    border_style="warning",
+                )
+            )
+            raise e
+
+    async def delete_file(self, path: str):
+        """Apply the delete operation to the file system.
+
+        Deletes the file and removes it from both the file discovery service
+        and file service context to ensure it's no longer tracked.
+
+        Returns:
+            Tuple of (status, error_message). BlockStatus.APPLIED if successful,
+            appropriate error status otherwise with error message.
+
+        Usage: `status, error = block.apply()` -> (BlockStatus.APPLIED, "") or (BlockStatus.INVALID, "error message")
+        """
+        try:
+            file_discovery_service = self.app.make(FileDiscoveryService)
+            file_service = self.app.make(FileService)
+
+            interaction_service = self.app.make(InteractionService)
+            resolved_file_path = self._prepare_file_path(path)
+
+            if not resolved_file_path.exists():
+                raise Exception(f"Error: File '{path}' does not exist")
+
+            if await interaction_service.confirm(
+                f"Delete '{path}'?",
+                True,
+            ):
+                resolved_file_path.unlink()
+
+                # Remove the deleted file from context
+                await file_discovery_service.remove_file(resolved_file_path)
+                await file_service.remove_file(str(resolved_file_path))
+            else:
+                raise Exception("User declined request to delete file.")
+
+        except Exception as e:
+            await self.emit_tui(
+                Messages.CreatePanel(
+                    str(e),
+                    title="Tool Error",
+                    border_style="warning",
+                )
+            )
+            raise e
+
     def _prepare_file_path(self, path: str) -> Path:
         """Validate file path exists and is not read-only.
 
@@ -56,8 +131,6 @@ class ToolFileService(Service):
 
         Usage: `valid, status = self._validate_file_path()` -> (BlockStatus, "") or (BlockStatus, MESSAGE)
         """
-
-        self.app["log"].info(path)
 
         file_service = self.app.make(FileService)
         file_path = Path(path)

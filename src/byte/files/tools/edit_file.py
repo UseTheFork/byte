@@ -59,7 +59,7 @@ Tool fails if:
 </warnings>""",
 )
 async def edit_file(
-    path: Annotated[str, "Path to a `editable` file located in `<file>`."],
+    path: Annotated[str, "The EXACT Path to a `editable` file located in `<file>`. Use the `source` variable."],
     old_string: Annotated[str, "The exact string to find and replace"],
     new_string: Annotated[str, "The string to replace with"],
     app: Annotated[Application, InjectedToolArg],

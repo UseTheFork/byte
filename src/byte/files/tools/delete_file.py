@@ -3,16 +3,18 @@ from typing import Annotated
 from langchain.tools import InjectedToolArg, tool
 
 from byte import Application
+from byte.files import ToolFileService
+from byte.tools import ToolResult
 
 
 @tool(
     extras={"eager_input_streaming": True},
     description="Delete a file.",
 )
-def delete_file(
-    path: Annotated[str, "Absolute path to the file to delete."],
+async def delete_file(
+    path: Annotated[str, "The EXACT Path to file located in `<file>`. Use the `source` variable."],
     app: Annotated[Application, InjectedToolArg],
-) -> str:
+) -> ToolResult:
     """Delete a file.
 
     Args:
@@ -22,16 +24,17 @@ def delete_file(
         Success or error message
     """
     try:
-        full_path = app.path(path)
+        tool_file_service = app.make(ToolFileService)
+        result = await tool_file_service.delete_file(path)
 
-        if not full_path.exists():
-            return f"Error: File '{path}' does not exist"
-
-        if full_path.is_dir():
-            return f"Error: '{path}' is a directory, not a file"
-
-        full_path.unlink()
-        return f"Successfully deleted '{path}'"
+        return ToolResult(
+            result=result,
+            extra={
+                "touched_files": [path],
+            },
+        )
 
     except Exception as e:
-        return f"Error deleting file: {e!s}"
+        return ToolResult(
+            result=f"Error editing file: {e!s}",
+        )

@@ -3,17 +3,19 @@ from typing import Annotated
 from langchain.tools import InjectedToolArg, tool
 
 from byte import Application
+from byte.files import ToolFileService
+from byte.tools import ToolResult
 
 
 @tool(
     extras={"eager_input_streaming": True},
     description="Write content to a file. Creates parent directories if needed.",
 )
-def write_file(
-    path: Annotated[str, "Absolute path to the file (e.g., /main.py, /src/utils.py)"],
+async def write_file(
+    path: Annotated[str, "The EXACT Path to the file located in `<file>`. Use the `source` variable."],
     content: Annotated[str, "Content to write to the file"],
     app: Annotated[Application, InjectedToolArg],
-) -> str:
+) -> ToolResult:
     """Write content to a file. Creates parent directories if needed.
 
     Args:
@@ -24,13 +26,17 @@ def write_file(
         Success or error message
     """
     try:
-        full_path = app.path(path)
+        tool_file_service = app.make(ToolFileService)
+        result = await tool_file_service.write_file(path, content)
 
-        # Create parent directories if they don't exist
-        full_path.parent.mkdir(parents=True, exist_ok=True)
-
-        full_path.write_text(content, encoding="utf-8")
-        return f"Successfully wrote {len(content)} characters to '{path}'"
+        return ToolResult(
+            result=result,
+            extra={
+                "touched_files": [path],
+            },
+        )
 
     except Exception as e:
-        return f"Error writing file: {e!s}"
+        return ToolResult(
+            result=f"Error writing file: {e!s}",
+        )
