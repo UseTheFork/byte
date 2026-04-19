@@ -5,7 +5,6 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from byte.analytics import AnalyticsProvider
-from byte.clipboard import ClipboardServiceProvider
 from byte.code_operations import PromptFormatProvider
 from byte.command import CommandServiceProvider
 from byte.conventions.service_provider import ConventionsServiceProvider
@@ -44,7 +43,6 @@ PROVIDERS = [
     PromptFormatProvider,
     WebServiceProvider,
     # PresetsProvider,
-    ClipboardServiceProvider,
     DevelopmentServiceProvider,
     SystemServiceProvider,
     TUIServiceProvider,
