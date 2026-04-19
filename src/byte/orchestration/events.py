@@ -12,7 +12,7 @@ class OrchestrationEvents:
         """"""
 
         agent: str
-        mode: str = "main"
+        model_id: str
         reinforcement: list[str] = field(default_factory=list)
         session_docs: list[str] = field(default_factory=list)
         system_context: list[str] = field(default_factory=list)

@@ -3,11 +3,10 @@ from typing import TYPE_CHECKING, TypeVar
 
 from typing_extensions import List
 
-from byte.code_operations import EditBlockService
 from byte.conventions import ConventionContextService
 from byte.files import FileService
 from byte.git import CommitService
-from byte.orchestration import AssistantContextSchema, BaseState, OrchestrationEvents
+from byte.orchestration import BaseState, OrchestrationEvents
 from byte.support import Boundary, BoundaryType
 from byte.support.mixins import Bootable, Eventable
 from byte.support.utils import list_to_multiline_text
@@ -53,7 +52,7 @@ class PromptAssembler(Bootable, Eventable):
         reinforcement_payload = await self.emit(
             OrchestrationEvents.GatherReinforcement(
                 reinforcement=[],
-                mode="main",
+                model_id="main",
                 agent="coder_agent",
             )
         )
@@ -286,28 +285,7 @@ class PromptAssembler(Bootable, Eventable):
 
         return list_to_multiline_text(project_information_and_context)
 
-    async def _gather_masked_messages(self, state) -> str:
-        """Gather masked messages with edit blocks removed from message history.
-
-        Processes historical messages to remove edit block content, keeping only
-        the most recent N messages (configured by mask_message_count) with their
-        original edit blocks intact. This prevents token bloat from repeated
-        edit instructions in conversation history.
-
-        Args:
-            state: The current state containing message history
-
-        Returns:
-            List of BaseMessage objects with edit blocks masked in older messages
-
-        Usage: `masked_messages = await self._gather_masked_messages(state)`
-        """
-        edit_block_service = self.app.make(EditBlockService)
-        messages = state.get("history_messages", [])
-
-        return await edit_block_service.replace_blocks_in_historic_messages_hook(messages)
-
-    async def generate_state(self, state: BaseState, config, context: AssistantContextSchema) -> dict:
+    async def generate_state(self, state: BaseState, config) -> dict:
         user_prompt_state = {**state}
 
         # user_prompt_state["examples"] = edit_block_messages
@@ -328,8 +306,8 @@ class PromptAssembler(Bootable, Eventable):
 
         user_prompt_state["constraints_context"] = await self._gather_constraints(state)
 
-        if state.get("metadata", {}).prompt_settings.has_masked_messages:
-            user_prompt_state["masked_messages"] = await self._gather_masked_messages(state)
+        messages = state.get("history_messages", [])
+        user_prompt_state["masked_messages"] = messages
 
         user_prompt_state["available_conventions"] = await self.gather_available_conventions(state)
 

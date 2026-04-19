@@ -16,7 +16,6 @@ class RoutingNode(BaseNode):
         Literal[
             "lint_node",
             "end_node",
-            "parse_blocks_node",
             "tool_node",
             "validation_node",
             "commit_agent_node",
@@ -27,6 +26,4 @@ class RoutingNode(BaseNode):
         routing = state.get("routing", {})
         self.app["log"].info(f"Routing >> From: {routing.get('source')} >> To: {routing.get('target')}")
 
-        return Command(
-            goto=routing.get("target"),
-        )
+        return Command(goto=routing.get("target"))  # ty:ignore[invalid-return-type]

@@ -10,7 +10,7 @@ from byte.node import (
     BaseNode,
     NodeEvents,
 )
-from byte.orchestration import AssistantContextSchema, BaseState, PromptAssembler
+from byte.orchestration import BaseState, PromptAssembler
 
 
 class BaseAgentNode(BaseNode):
@@ -48,7 +48,7 @@ class BaseAgentNode(BaseNode):
         """ """
         pass
 
-    async def generate_agent_state(self, state: BaseState, config, context: AssistantContextSchema) -> tuple:
+    async def generate_agent_state(self, state: BaseState, config) -> tuple:
         """Generate the agent state for the assistant node invocation.
 
         Assembles the user prompt from the state and context, emits a pre-assistant event
@@ -67,7 +67,7 @@ class BaseAgentNode(BaseNode):
         """
         # Create a new assembler
         prompt_assembler = self.app.make(PromptAssembler, template=self.get_user_template())
-        user_prompt_state = await prompt_assembler.generate_state(state, config, context)
+        user_prompt_state = await prompt_assembler.generate_state(state, config)
 
         payload = await self.emit(
             NodeEvents.PreAssistantNode(

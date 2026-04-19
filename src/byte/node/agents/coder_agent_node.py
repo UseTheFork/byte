@@ -81,7 +81,7 @@ class CoderAgentNode(BaseAgentNode):
 
     def get_model(self) -> BaseChatModel:
         llm_service = self.app.make(LLMService)
-        return llm_service.get_weak_model()
+        return llm_service.get_model("coder")
 
     def get_prompt(self):
         return coder_prompt
@@ -100,7 +100,7 @@ class CoderAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        agent_state, config = await self.generate_agent_state(state, config, runtime.context)
+        agent_state, config = await self.generate_agent_state(state, config)
         runnable = self.create_runnable()
         record_response_service = self.app.make(RecordResponseService)
 

@@ -1,13 +1,22 @@
 import re
+from enum import Enum
 from pathlib import Path
 from typing import List, Optional
 
 from byte import Service
-from byte.code_operations.schemas import AICommentType
 from byte.files import FileEvents, FileMode, FileService
 from byte.orchestration import OrchestrationEvents
 from byte.support.utils import list_to_multiline_text
 from byte.tui import Messages
+
+
+class AICommentType(str, Enum):
+    """Type of ai comment operation."""
+
+    AI = "AI"
+
+    def __str__(self):
+        return self.value
 
 
 class AICommentWatcherService(Service):

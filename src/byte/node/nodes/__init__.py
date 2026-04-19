@@ -9,7 +9,6 @@ if TYPE_CHECKING:
     from byte.node.nodes.end_node import EndNode
     from byte.node.nodes.extract_node import ExtractNode
     from byte.node.nodes.lint_node import LintNode
-    from byte.node.nodes.parse_blocks_node import ParseBlocksNode
     from byte.node.nodes.routing_node import RoutingNode
     from byte.node.nodes.start_node import StartNode
     from byte.node.nodes.tool_node import ToolNode
@@ -20,7 +19,6 @@ __all__ = (
     "EndNode",
     "ExtractNode",
     "LintNode",
-    "ParseBlocksNode",
     "RoutingNode",
     "StartNode",
     "ToolNode",
@@ -33,7 +31,6 @@ _dynamic_imports = {
     "EndNode": "end_node",
     "ExtractNode": "extract_node",
     "LintNode": "lint_node",
-    "ParseBlocksNode": "parse_blocks_node",
     "RoutingNode": "routing_node",
     "StartNode": "start_node",
     "ToolNode": "tool_node",

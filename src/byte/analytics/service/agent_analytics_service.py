@@ -22,7 +22,6 @@ class AgentAnalyticsService(Service):
 
     async def update_usage_by_model(self, model_id: str, token_usage: TokenUsageSchema) -> None:
         """Track usage by model, then aggregate by provider using LLMRegistryService."""
-        from byte.llm import LLMRegistryService
 
         llm_registry = self.app.make(LLMRegistryService)
         model_data = llm_registry.get_model(model_id)
