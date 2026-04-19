@@ -37,6 +37,7 @@ class ContextAddFileCommand(Command):
         Usage: `await command.execute("config.py")`
         """
         await self.emit_tui(Messages.CommandExecutionStarted())
+        await self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         args_file_path = args.file_path
 

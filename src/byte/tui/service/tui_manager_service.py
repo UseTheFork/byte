@@ -46,12 +46,16 @@ class TUIManagerService(Service):
         command_registry = self.app.make(CommandRegistryService)
         command = command_registry.get_slash_command(command_name)
 
+        await self.emit_tui(Messages.CommandExecutionStarted())
+
         if command:
             await command.handle(args)
         else:
             pass
             # TODO: This should flash an error
             # console.print_error(f"Unknown command: /{command_name}")
+
+        await self.emit_tui(Messages.CommandExecutionCompleted())
 
     async def handle_user_message(self, event: TuiEvents.UserInputSubmitted):
         user_input = event.message

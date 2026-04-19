@@ -11,7 +11,7 @@ class Notifiable(Eventable):
         self,
         message: str,
         style: SeverityLevel = "information",
-        duration: float | None = None,
+        duration: float = 3,
     ) -> None:
         """Display a default notification."""
 
@@ -23,14 +23,14 @@ class Notifiable(Eventable):
             )
         )
 
-    async def notify_success(self, message: str, duration: float | None = None) -> None:
+    async def notify_success(self, message: str, duration: float = 3) -> None:
         """Display a success notification (green)."""
         await self.notify(message, "information", duration)
 
-    async def notify_warning(self, message: str, duration: float | None = None) -> None:
+    async def notify_warning(self, message: str, duration: float = 3) -> None:
         """Display a warning notification (yellow)."""
         await self.notify(message, "warning", duration)
 
-    async def notify_error(self, message: str, duration: float | None = None) -> None:
+    async def notify_error(self, message: str, duration: float = 3) -> None:
         """Display an error notification (red)."""
         await self.notify(message, "error", duration)

@@ -158,6 +158,7 @@ class Conversation(Widget):
 
     @on(Messages.CommandExecutionCompleted)
     async def command_execution_completed(self, event: Messages.CommandExecutionCompleted) -> None:
+        self.post_message(Messages.LoadingIndicatorHide(panel_id=event.panel_id))
         self.move_focus_to_prompt()
         self.allow_input_submit = True
 
@@ -186,17 +187,17 @@ class Conversation(Widget):
         # Control the indicator display state.
         if isinstance(event.with_indicator, bool):
             response_panel.loading_indicator.hidden = event.with_indicator
+            self.post_message(Messages.LoadingIndicatorShow(panel_id=event.panel_id))
         elif isinstance(event.with_indicator, str):
-            response_panel.loading_indicator.message = event.with_indicator
+            self.post_message(Messages.LoadingIndicatorShow(event.with_indicator, panel_id=event.panel_id))
 
         if event.status is Status.PENDING:
             await response_panel.start_markdown_stream()
         elif event.status is Status.RUNNING:
             await response_panel.add_markdown_chunk(str(event.chunk))
         elif event.status is Status.SUCCESS:
-            response_panel.loading_indicator.hidden = True
             await response_panel.end_markdown_stream()
-            response_panel.hide_loading_indicator()
+            self.post_message(Messages.LoadingIndicatorHide(panel_id=event.panel_id))
 
         self.scroll_to_latest_message()
 
@@ -218,6 +219,8 @@ class Conversation(Widget):
                 result_future=event.result_future,
             )
             await response_panel.mount_input(ask)
+
+        self.scroll_to_latest_message()
 
     @on(Messages.LintStarted)
     async def lint_started(self, event: Messages.LintStarted) -> None:

@@ -4,7 +4,7 @@ from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.text import Text
 
-from byte.cli.rich.byte_display import ByteDisplay
+from byte.tui.rich.byte_display import ByteDisplay
 
 
 # Credits to aider: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/mdstream.py

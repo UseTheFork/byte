@@ -46,7 +46,7 @@ class LintCommand(Command):
 
                 coder_workflow = self.app.make(CoderWorkflow)
                 workflow_service = self.app.make(WorkflowService)
-                await workflow_service.execute(coder_workflow, joined_lint_errors)
+                await workflow_service.execute(coder_workflow, {"user_request": joined_lint_errors})
 
         except ByteConfigException as e:
             await self.notify_error(str(e))

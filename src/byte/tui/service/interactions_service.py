@@ -37,10 +37,7 @@ class InteractionService(Service):
         )
 
         await result_future
-        self.app["console"].log(result_future)
         answer = result_future.result()
-
-        self.app["console"].log(answer)
 
         if isinstance(answer, AnswerCancelled):
             raise InputCancelledError
