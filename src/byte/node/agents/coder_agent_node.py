@@ -18,7 +18,7 @@ from byte.node.nodes import EndNode
 from byte.orchestration import AssistantContextSchema, BaseState, preamble
 from byte.support import Boundary, BoundaryType, Str
 from byte.support.utils import extract_content_from_message, list_to_multiline_text
-from byte.tui import Messages
+from byte.tui import Messages, Status
 
 coder_user_template = [
     "{masked_messages}",
@@ -104,15 +104,13 @@ class CoderAgentNode(BaseAgentNode):
         runnable = self.create_runnable()
         record_response_service = self.app.make(RecordResponseService)
 
-        await self.emit_tui(Messages.LoadingIndicatorShow())
         await self.emit_tui(Messages.AddHeading("Coder Agent", "text-primary"))
-        await self.emit_tui(Messages.ResponseStarted())
+        await self.emit_tui(Messages.Response(status=Status.PENDING, with_indicator=True))
 
         result = await runnable.ainvoke(agent_state, config=config)
         await record_response_service.record_response(agent_state, runnable, "coder_agent", config)
 
-        await self.emit_tui(Messages.ResponseComplete())
-        await self.emit_tui(Messages.LoadingIndicatorHide())
+        await self.emit_tui(Messages.Response(status=Status.SUCCESS))
 
         if result.tool_calls and len(result.tool_calls) > 0:
             return self.route_to(

@@ -17,7 +17,7 @@ from byte.node.nodes import EndNode
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.support import Boundary, BoundaryType, Str
 from byte.support.utils import list_to_multiline_text
-from byte.tui import Messages
+from byte.tui import Messages, Status
 
 # Conventional commit message generation prompt
 # Adapted from Aider: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/prompts.py#L8
@@ -103,14 +103,12 @@ class CommitAgentNode(BaseAgentNode):
         runnable = self.create_runnable()
         record_response_service = self.app.make(RecordResponseService)
 
-        await self.emit_tui(Messages.LoadingIndicatorShow())
         await self.emit_tui(Messages.AddHeading("Commit Agent", "text-primary"))
-        await self.emit_tui(Messages.ResponseStarted())
+        await self.emit_tui(Messages.Response(status=Status.PENDING, with_indicator=True))
 
         result = await runnable.ainvoke(agent_state, config=config)
         await record_response_service.record_response(agent_state, runnable, "commit_agent", config)
 
-        await self.emit_tui(Messages.ResponseComplete())
-        await self.emit_tui(Messages.LoadingIndicatorHide())
+        await self.emit_tui(Messages.Response(status=Status.SUCCESS))
 
         return self.route_to(self.goto, {"extracted_content": result, "errors": None})

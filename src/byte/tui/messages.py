@@ -1,14 +1,26 @@
 import asyncio
 from dataclasses import dataclass
+from enum import Enum
 from typing import TYPE_CHECKING, Literal
 
 from textual.message import Message
+from textual.notifications import SeverityLevel
 from textual.widget import Widget
 
 from byte.tui.schemas import Answer as AnswerSchema, AnswerCancelled
 
 if TYPE_CHECKING:
     pass
+
+
+class Status(Enum):
+    """Status enum for operations across Messages."""
+
+    PENDING = "pending"
+    RUNNING = "running"
+    CANCELLED = "cancelled"
+    ERROR = "error"
+    SUCCESS = "success"
 
 
 class Messages:
@@ -33,9 +45,8 @@ class Messages:
     @dataclass
     class Notify(Message):
         content: str
-        style: Literal["default", "warning", "success", "error"] = "default"
-        duration: float | None = None
-        panel_id: str | None = None
+        style: SeverityLevel = "information"
+        duration: float = 3
 
     @dataclass
     class Answer(Message):
@@ -68,16 +79,10 @@ class Messages:
         panel_id: str | None = None
 
     @dataclass
-    class ResponseStarted(Message):
-        panel_id: str | None = None
-
-    @dataclass
-    class ResponseChunk(Message):
-        chunk: str
-        panel_id: str | None = None
-
-    @dataclass
-    class ResponseComplete(Message):
+    class Response(Message):
+        status: Status = Status.PENDING
+        chunk: str | None = None
+        with_indicator: bool | str | None = None
         panel_id: str | None = None
 
     @dataclass

@@ -5,7 +5,7 @@ from langchain_core.callbacks import get_usage_metadata_callback
 from byte import Service
 from byte.analytics import AgentAnalyticsService
 from byte.orchestration import TokenUsageSchema
-from byte.tui import Messages
+from byte.tui import Messages, Status
 from byte.workflow import BaseWorkflow
 
 
@@ -65,7 +65,13 @@ class WorkflowService(Service):
                     if self._is_tool_call_chunk(block):
                         pass
                     elif self._is_message_content_chunk(block):
-                        await self.emit_tui(Messages.ResponseChunk(block.get("text", "")))
+                        await self.emit_tui(
+                            Messages.Response(
+                                status=Status.RUNNING,
+                                with_indicator=False,
+                                chunk=block.get("text", ""),
+                            )
+                        )
 
         elif chunk["type"] == "tasks":
             pass

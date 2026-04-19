@@ -1,4 +1,4 @@
-from typing import Literal
+from textual.notifications import SeverityLevel
 
 from byte.support.mixins import Eventable
 from byte.tui import Messages
@@ -10,7 +10,7 @@ class Notifiable(Eventable):
     async def notify(
         self,
         message: str,
-        style: Literal["default", "warning", "success", "error"] = "default",
+        style: SeverityLevel = "information",
         duration: float | None = None,
     ) -> None:
         """Display a default notification."""
@@ -25,7 +25,7 @@ class Notifiable(Eventable):
 
     async def notify_success(self, message: str, duration: float | None = None) -> None:
         """Display a success notification (green)."""
-        await self.notify(message, "success", duration)
+        await self.notify(message, "information", duration)
 
     async def notify_warning(self, message: str, duration: float | None = None) -> None:
         """Display a warning notification (yellow)."""

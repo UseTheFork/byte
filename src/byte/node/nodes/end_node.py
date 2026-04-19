@@ -1,7 +1,6 @@
 from typing import Literal
 
-from langchain.messages import AIMessage, HumanMessage
-from langgraph.graph import END
+from langchain.messages import AIMessage, HumanMessage, ToolMessage
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
@@ -33,6 +32,27 @@ class EndNode(BaseNode):
             return "".join(text_parts)
         return str(content)
 
+    def _generate_final_message(self, scratch_messages: list) -> str:
+        """Generate a final message by combining AI and Tool messages from scratch_messages.
+
+        For AIMessage: extract text content only
+        For ToolMessage: add a summary like "called tool.name applied successfully"
+        Combines all into a single final message.
+        """
+        message_parts = []
+
+        for message in scratch_messages:
+            if isinstance(message, AIMessage):
+                # Extract text content from AIMessage
+                content_text = self._extract_text_from_content(message.content)
+                message_parts.append(content_text)
+            elif isinstance(message, ToolMessage):
+                # Add tool execution summary
+                tool_name = getattr(message, "name", "unknown tool")
+                message_parts.append(f"called {tool_name} applied successfully")
+
+        return list_to_multiline_text(message_parts)
+
     async def __call__(
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
     ) -> Command[Literal["__end__"]]:
@@ -53,7 +73,7 @@ class EndNode(BaseNode):
 
         metadata = state["metadata"]
 
-        agent = state.get("agent", "")
+        # agent = state.get("agent", "")
 
         # TODO: This will need to become a combined state with out the tool calls.
         # Only update messages if there are scratch messages to process
@@ -61,24 +81,19 @@ class EndNode(BaseNode):
             last_message = get_last_ai_message(state["scratch_messages"])
             update_dict["final_message"] = last_message
 
-            # TODO: this needsd to be removed.
-            # we only need to copy from Ask and Coder agents.
-            # if agent == "AskAgent":
-            #     clipboard_service = self.app.make(ClipboardService)
-            #     self.app.dispatch_task(clipboard_service.extract_from_message(last_message))
-
             # Extract text content from message (handles both list and string formats)
-            content_text = self._extract_text_from_content(last_message.content)
+            # content_text = self._extract_text_from_content(last_message.content)
 
             # Wrap the message in XML for parsing later.
-            last_message = list_to_multiline_text(
-                [
-                    Boundary.open(BoundaryType.AGENT_MESSAGE, {"agent_type": agent}),
-                    str(content_text),
-                    Boundary.close(BoundaryType.AGENT_MESSAGE),
-                ]
-            )
-            last_message = AIMessage(content=last_message)
+            # last_message = list_to_multiline_text(
+            #     [
+            #         Boundary.open(BoundaryType.AGENT_MESSAGE, {"agent_type": agent}),
+            #         str(content_text),
+            #         Boundary.close(BoundaryType.AGENT_MESSAGE),
+            #     ]
+            # )
+            generated_final_message = self._generate_final_message(state["scratch_messages"])
+            last_message = AIMessage(content=generated_final_message)
 
             # Create a HumanMessage from the user_request
             user_message = list_to_multiline_text(
@@ -93,11 +108,6 @@ class EndNode(BaseNode):
             update_dict["history_messages"] = [user_message, last_message]
 
         return Command(
-            goto=END,
+            goto="__end__",
             update=update_dict,
         )
-
-    # AI: Add a new method here that we will use to generate the last_message. DONT replace the above function yet.
-    # instead this new method should iterate over `state["scratch_messages"]` if the message is a `AIMessage` we should get the text content only
-    # if its a `ToolMessage` we should add somthing like `called tool.name applied succesfully removed for berevity`
-    #

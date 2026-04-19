@@ -23,3 +23,6 @@ class ClipboardServiceProvider(ServiceProvider):
             CopyDropCommand,
             # keep-sorted end
         ]
+
+
+# TODO: This service needs to be removed.

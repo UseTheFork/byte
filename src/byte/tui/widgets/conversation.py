@@ -11,13 +11,12 @@ from textual.reactive import reactive
 from textual.widget import Widget
 
 from byte import EventBus
-from byte.tui import TuiEvents
+from byte.tui import Status, TuiEvents
 from byte.tui.messages import Messages
 from byte.tui.schemas import Ask
 from byte.tui.widgets.panels.human_message_panel import HumanMessagePanel
 from byte.tui.widgets.panels.response_panel import ResponsePanel
 from byte.tui.widgets.prompt.analytics import Analytics
-from byte.tui.widgets.prompt.flash import Flash
 from byte.tui.widgets.prompt.prompt_input import PromptTextArea
 from byte.tui.widgets.prompt.prompt_panel import PromptPanel
 from byte.tui.widgets.ui.selectable_markdown import SelectableMarkdown
@@ -179,22 +178,25 @@ class Conversation(Widget):
         await response_panel.add_heading(event)
         self.scroll_to_latest_message()
 
-    @on(Messages.ResponseStarted)
-    async def response_started(self, event: Messages.ResponseStarted) -> None:
+    @on(Messages.Response)
+    async def handle_response(self, event: Messages.Response) -> None:
         response_panel = await self.get_or_create_response_panel(event.panel_id)
-        await response_panel.start_markdown_stream()
-        self.scroll_to_latest_message()
 
-    @on(Messages.ResponseChunk)
-    async def response_chunk(self, event: Messages.ResponseChunk) -> None:
-        response_panel = await self.get_or_create_response_panel(event.panel_id)
-        await response_panel.add_markdown_chunk(event.chunk)
-        self.scroll_to_latest_message()
+        # Control the indicator display state.
+        if isinstance(event.with_indicator, bool):
+            response_panel.loading_indicator.hidden = event.with_indicator
+        elif isinstance(event.with_indicator, str):
+            response_panel.loading_indicator.message = event.with_indicator
 
-    @on(Messages.ResponseComplete)
-    async def response_complete(self, event: Messages.ResponseComplete) -> None:
-        response_panel = await self.get_or_create_response_panel(event.panel_id)
-        await response_panel.end_markdown_stream()
+        if event.status is Status.PENDING:
+            await response_panel.start_markdown_stream()
+        elif event.status is Status.RUNNING:
+            await response_panel.add_markdown_chunk(str(event.chunk))
+        elif event.status is Status.SUCCESS:
+            response_panel.loading_indicator.hidden = True
+            await response_panel.end_markdown_stream()
+            response_panel.hide_loading_indicator()
+
         self.scroll_to_latest_message()
 
     @on(Messages.PromptUser)
@@ -274,7 +276,12 @@ class Conversation(Widget):
             style: A semantic style.
             duration: Duration in seconds of the flash, or `None` to use default in settings.
         """
-        self.query_one(Flash).flash(event.content, duration=event.duration, style=event.style)
+        self.notify(
+            str(event.content),
+            # title="Clipboard error",
+            severity=event.style,
+            timeout=event.duration,
+        )
 
     @on(Messages.UpdateAnalytics)
     async def analytics(self, event: Messages.UpdateAnalytics) -> None:

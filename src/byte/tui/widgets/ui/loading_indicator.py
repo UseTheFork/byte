@@ -20,6 +20,8 @@ class LoadingIndicator(HorizontalGroup):
     }
     """
 
+    hidden: Reactive[bool] = reactive(False)
+
     message: Reactive[str] = reactive("Thinking", recompose=True)
     spinner_size: Reactive[int] = reactive(8)
 
@@ -45,15 +47,9 @@ class LoadingIndicator(HorizontalGroup):
         yield RuneSpinner(self.spinner_size)
         yield Label(f"{self.message}", classes="pl-1")
 
-    def show(self, message: str = "Thinking") -> None:
-        """Show the loading indicator with a custom message.
+    def watch_hidden(self, hidden: bool) -> None:
+        self.set_class(hidden, "hidden")
 
-        Args:
-            message: The message to display next to the spinner.
-        """
-        self.message = message
-        self.remove_class("hidden")
-
-    def hide(self) -> None:
-        """Hide the loading indicator."""
-        self.add_class("hidden")
+    def watch_message(self, message: str) -> None:
+        self.hidden = False
+        self.refresh(layout=True)
