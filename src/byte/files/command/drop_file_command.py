@@ -3,6 +3,7 @@ from typing import List
 
 from byte import ByteArgumentParser, Command
 from byte.files import FileService
+from byte.tui import Messages
 
 
 class DropFileCommand(Command):
@@ -33,6 +34,9 @@ class DropFileCommand(Command):
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Remove specified file from active context."""
 
+        await self.emit_tui(Messages.CommandExecutionStarted())
+        await self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
+
         file_path = args.file_path
 
         file_service: FileService = self.app.make(FileService)
@@ -43,6 +47,8 @@ class DropFileCommand(Command):
         else:
             await self.notify_success(f"Removed {file_path} from context")
             await file_service.notify_file_stats()
+
+        await self.emit_tui(Messages.CommandExecutionCompleted())
 
     async def get_completions(self, text: str) -> List[str]:
         """Provide completions showing files currently in the context.

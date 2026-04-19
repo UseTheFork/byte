@@ -47,6 +47,7 @@ class CommitCommand(Command):
         """
 
         await self.emit_tui(Messages.CommandExecutionStarted())
+        await self.emit_tui(Messages.AddUserInput(f"/{self.name} {raw_args}"))
         try:
             await self.git_service.stage_changes()
 

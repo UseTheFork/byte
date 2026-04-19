@@ -3,6 +3,7 @@ from typing import List
 
 from byte import ByteArgumentParser, Command
 from byte.files import FileMode, FileService
+from byte.tui import Messages
 
 
 class SwitchModeCommand(Command):
@@ -33,6 +34,9 @@ class SwitchModeCommand(Command):
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Switch the mode of a file in context."""
 
+        await self.emit_tui(Messages.CommandExecutionStarted())
+        await self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
+
         file_path = args.file_path
 
         file_service = self.app.make(FileService)
@@ -55,6 +59,8 @@ class SwitchModeCommand(Command):
             mode_str = "editable" if new_mode == FileMode.EDITABLE else "read-only"
             await self.notify_success(f"Switched {file_path} to {mode_str} mode")
             await file_service.notify_file_stats()
+
+        await self.emit_tui(Messages.CommandExecutionCompleted())
 
     async def get_completions(self, text: str) -> List[str]:
         """Provide completions showing files currently in the context.

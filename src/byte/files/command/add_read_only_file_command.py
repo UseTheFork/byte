@@ -3,6 +3,7 @@ from typing import List
 
 from byte import Command
 from byte.files import FileMode, FileService
+from byte.tui import Messages
 
 
 class ReadOnlyCommand(Command):
@@ -30,6 +31,9 @@ class ReadOnlyCommand(Command):
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Add specified file to context with read-only permissions."""
 
+        await self.emit_tui(Messages.CommandExecutionStarted())
+        await self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
+
         file_path = args.file_path
 
         file_service = self.app.make(FileService)
@@ -42,6 +46,8 @@ class ReadOnlyCommand(Command):
         else:
             await self.notify_success(f"Added {file_path} to context")
             await file_service.notify_file_stats()
+
+        await self.emit_tui(Messages.CommandExecutionCompleted())
 
     async def get_completions(self, text: str) -> List[str]:
         """Provide intelligent file path completions from project discovery.

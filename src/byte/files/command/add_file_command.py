@@ -35,7 +35,7 @@ class AddFileCommand(Command):
         """Add specified file to context with editable permissions."""
 
         await self.emit_tui(Messages.CommandExecutionStarted())
-        await self.emit_tui(Messages.AddUserInput(raw_args))
+        await self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         file_path = args.file_path
 
