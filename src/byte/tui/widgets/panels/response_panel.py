@@ -45,7 +45,7 @@ class ResponsePanel(VerticalGroup):
         self.mount(LoadingIndicator(classes="dock-bottom"))
 
     async def add_user_message(self, event: Messages.AddUserInput):
-        await self.mount(HumanMessage(event.body))
+        await self.mount(HumanMessage(f"/{event.command} {event.body}"))
 
     async def add_heading(self, event: Messages.AddHeading):
         await self.mount(TextRule(event.heading, classes=event.classes))
