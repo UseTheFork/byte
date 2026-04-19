@@ -57,7 +57,6 @@ class WorkflowService(Service):
                 msg_type = type(message_chunk).__name__
                 self.app["log"].debug(chunk)
                 self.app["log"].debug(f"Message chunk type: {msg_type}")
-                self.app["log"].debug(message_chunk)
 
                 # Handle agents that dont have tools. they respond with just string content.
                 if isinstance(message_chunk.content, str):

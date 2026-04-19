@@ -25,8 +25,8 @@ class NodeServiceProvider(ServiceProvider):
             # keep-sorted start
             AskAgentNode,
             CoderAgentNode,
-            CommitAgentNode,
             CoderPlanAgentNode,
+            CommitAgentNode,
             # keep-sorted end
         ]
 

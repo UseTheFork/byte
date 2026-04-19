@@ -17,10 +17,10 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
-    "CommitAgentNode": "commit_agent_node",
     "AskAgentNode": "ask_agent_node",
     "CoderAgentNode": "coder_agent_node",
     "CoderPlanAgentNode": "coder_plan_agent_node",
+    "CommitAgentNode": "commit_agent_node",
     # keep-sorted end
 }
 
