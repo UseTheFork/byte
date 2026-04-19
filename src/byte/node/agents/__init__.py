@@ -5,11 +5,13 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.node.agents.ask_agent_node import AskAgentNode
     from byte.node.agents.coder_agent_node import CoderAgentNode
+    from byte.node.agents.coder_plan_agent_node import CoderPlanAgentNode
     from byte.node.agents.commit_agent_node import CommitAgentNode
 
 __all__ = (
     "AskAgentNode",
     "CoderAgentNode",
+    "CoderPlanAgentNode",
     "CommitAgentNode",
 )
 
@@ -18,6 +20,7 @@ _dynamic_imports = {
     "CommitAgentNode": "commit_agent_node",
     "AskAgentNode": "ask_agent_node",
     "CoderAgentNode": "coder_agent_node",
+    "CoderPlanAgentNode": "coder_plan_agent_node",
     # keep-sorted end
 }
 

@@ -79,7 +79,7 @@ class CommitAgentNode(BaseAgentNode):
 
     def get_model(self) -> tuple[ModelSchema, dict]:
         llm_service = self.app.make(LLMService)
-        return llm_service.get_model("commit")
+        return llm_service.get_model(self.name)
 
     def get_prompt(self):
         return commit_prompt

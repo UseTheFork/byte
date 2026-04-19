@@ -1,9 +1,11 @@
 llm:
-  ask:
+  coder_plan_agent_node:
+    model: claude-opus-4-6
+  ask_agent_node:
     model: claude-sonnet-4-5
-  coder:
+  coder_agent_node:
     model: claude-sonnet-4-5
-  commit:
+  commit_agent_node:
     model: claude-haiku-4-5
 lint:
   enable: true

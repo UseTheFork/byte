@@ -16,7 +16,7 @@ class LLMService(Service):
         """Configure LLM service with model settings based on global configuration."""
         self.llm_registry = self.app.make(LLMRegistryService)
 
-    def get_model(self, model_id: str, **kwargs) -> tuple[ModelSchema, dict]:
+    def get_model(self, agent_id: str, **kwargs) -> tuple[ModelSchema, dict]:
         """Get a model schema and merged parameters for initialization.
 
         Returns a tuple of (model_schema, merged_params) instead of a compiled model,
@@ -31,15 +31,15 @@ class LLMService(Service):
         """
 
         # Use getattr to dynamically access the config attribute
-        model_config = getattr(self.app["config"].llm, model_id, None)
+        model_config = getattr(self.app["config"].llm, agent_id, None)
         if model_config is None:
-            raise ValueError(f"Model configuration not found for: {model_id}")
+            raise ValueError(f"Model configuration not found for: {agent_id}")
 
         model_id_from_config = model_config.model
 
         model_schema = self.llm_registry.get_model(model_id_from_config)
         if model_schema is None:
-            raise ValueError(f"Unknown configuration: {model_id}")
+            raise ValueError(f"Unknown configuration: {agent_id}")
 
         params_dict = model_schema.extra_params
 

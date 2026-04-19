@@ -1,5 +1,6 @@
 from typing import Any, Literal, Optional
 
+from langchain.messages import AIMessageChunk
 from langchain_core.callbacks import get_usage_metadata_callback
 
 from byte import Service
@@ -52,23 +53,34 @@ class WorkflowService(Service):
 
         if chunk["type"] == "messages":
             message_chunk, _ = chunk["data"]
+            if isinstance(message_chunk, AIMessageChunk):
+                msg_type = type(message_chunk).__name__
+                self.app["log"].debug(chunk)
+                self.app["log"].debug(f"Message chunk type: {msg_type}")
+                self.app["log"].debug(message_chunk)
 
-            msg_type = type(message_chunk).__name__
-            self.app["log"].debug(f"Message chunk type: {msg_type}")
-            self.app["log"].debug(message_chunk)
-
-            for block in message_chunk.content:
-                if isinstance(block, dict):
-                    if self._is_tool_call_chunk(block):
-                        pass
-                    elif self._is_message_content_chunk(block):
-                        await self.emit_tui(
-                            Messages.Response(
-                                status=Status.RUNNING,
-                                with_indicator=False,
-                                chunk=block.get("text", ""),
-                            )
+                # Handle agents that dont have tools. they respond with just string content.
+                if isinstance(message_chunk.content, str):
+                    await self.emit_tui(
+                        Messages.Response(
+                            status=Status.RUNNING,
+                            with_indicator=False,
+                            chunk=message_chunk.content,
                         )
+                    )
+                else:
+                    for block in message_chunk.content:
+                        if isinstance(block, dict):
+                            if self._is_tool_call_chunk(block):
+                                pass
+                            elif self._is_message_content_chunk(block):
+                                await self.emit_tui(
+                                    Messages.Response(
+                                        status=Status.RUNNING,
+                                        with_indicator=False,
+                                        chunk=block.get("text", ""),
+                                    )
+                                )
 
         elif chunk["type"] == "tasks":
             pass

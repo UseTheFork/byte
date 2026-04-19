@@ -184,6 +184,8 @@ class Conversation(Widget):
     async def handle_response(self, event: Messages.Response) -> None:
         response_panel = await self.get_or_create_response_panel(event.panel_id)
 
+        self.app.byte["log"].info(event)
+
         # Control the indicator display state.
         if isinstance(event.with_indicator, bool):
             response_panel.loading_indicator.hidden = event.with_indicator

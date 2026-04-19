@@ -1,5 +1,4 @@
-# TODO: DOc String
-""""""
+"""Development utilities and services for the Byte application."""
 
 from typing import TYPE_CHECKING
 

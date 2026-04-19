@@ -12,9 +12,18 @@ from byte.node import (
     NodeEvents,
 )
 from byte.orchestration import BaseState, PromptAssembler
+from byte.support import Str
 
 
 class BaseAgentNode(BaseNode):
+    @property
+    def name(self) -> str:
+        """Command name used for invocation (without prefix).
+
+        Usage: return "add" for /add command
+        """
+        return Str.class_to_snake_case(self.__class__.__name__)
+
     def get_enforcement(self) -> List[str]:
         return []
 

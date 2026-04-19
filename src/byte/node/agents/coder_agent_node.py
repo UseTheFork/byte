@@ -20,7 +20,6 @@ from byte.support.utils import extract_content_from_message, list_to_multiline_t
 from byte.tui import Messages, Status
 
 coder_user_template = [
-    "{masked_messages}",
     Boundary.open(BoundaryType.USER_INPUT),
     "```text",
     "{user_request}",
@@ -32,14 +31,13 @@ coder_user_template = [
     "- Always use best practices when coding",
     "- Respect and use existing conventions, libraries, etc that are already present in the code base",
     "- Take requests for changes to the supplied code",
-    "- If the request is ambiguous, ask clarifying questions before proceeding",
     "- Keep changes simple don't build more then what is asked for",
     Boundary.close(BoundaryType.OPERATING_CONSTRAINTS),
-    # "{available_conventions}",
     # "{project_hierarchy}",
     "{project_information_and_context}",
     "{file_context}",
     "{operating_principles}",
+    Boundary.critical("All tool operations are applied immediately and are reflected in the file_context."),
 ]
 
 coder_prompt = ChatPromptTemplate.from_messages(
@@ -80,7 +78,7 @@ class CoderAgentNode(BaseAgentNode):
 
     def get_model(self) -> tuple[ModelSchema, dict]:
         llm_service = self.app.make(LLMService)
-        return llm_service.get_model("coder")
+        return llm_service.get_model(self.name)
 
     def get_prompt(self):
         return coder_prompt
