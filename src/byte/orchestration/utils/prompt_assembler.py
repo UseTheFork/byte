@@ -6,8 +6,9 @@ from typing_extensions import List
 from byte.conventions import ConventionContextService
 from byte.files import FileService
 from byte.git import CommitService
+from byte.llm import ModelSchema
 from byte.orchestration import BaseState, OrchestrationEvents
-from byte.support import Boundary, BoundaryType
+from byte.support import Boundary, BoundaryType, Str
 from byte.support.mixins import Bootable, Eventable
 from byte.support.utils import list_to_multiline_text
 
@@ -35,7 +36,7 @@ class PromptAssembler(Bootable, Eventable):
 
         self.template = template
 
-    async def _gather_reinforcement(self) -> str:
+    async def _gather_reinforcement(self, agent: str, model_schema: ModelSchema) -> str:
         """Gather reinforcement messages from various domains.
 
         Emits GATHER_REINFORCEMENT event and collects reinforcement
@@ -51,9 +52,10 @@ class PromptAssembler(Bootable, Eventable):
         """
         reinforcement_payload = await self.emit(
             OrchestrationEvents.GatherReinforcement(
+                model=model_schema.model,
+                provider=model_schema.provider,
+                agent=agent,
                 reinforcement=[],
-                model_id="main",
-                agent="coder_agent",
             )
         )
         reinforcement_messages = reinforcement_payload.reinforcement
@@ -285,10 +287,10 @@ class PromptAssembler(Bootable, Eventable):
 
         return list_to_multiline_text(project_information_and_context)
 
-    async def generate_state(self, state: BaseState, config) -> dict:
+    async def generate_state(self, state: BaseState, agent, model_schema: ModelSchema) -> dict:
         user_prompt_state = {**state}
 
-        # user_prompt_state["examples"] = edit_block_messages
+        agent = Str.class_to_snake_case(agent)
 
         if state.get("metadata", {}).prompt_settings.has_project_information_and_context:
             user_prompt_state["project_information_and_context"] = await self._gather_project_context()
@@ -312,7 +314,7 @@ class PromptAssembler(Bootable, Eventable):
         user_prompt_state["available_conventions"] = await self.gather_available_conventions(state)
 
         # Reinforcement is appended to the user message.
-        user_prompt_state["operating_principles"] = await self._gather_reinforcement()
+        user_prompt_state["operating_principles"] = await self._gather_reinforcement(agent, model_schema)
 
         user_prompt_state["user_request"] = state.get("user_request", "")
 

@@ -1,7 +1,5 @@
-from langchain.chat_models import BaseChatModel, init_chat_model
-
 from byte import Service
-from byte.llm import LLMRegistryService
+from byte.llm import LLMRegistryService, ModelSchema
 from byte.orchestration import OrchestrationEvents
 
 
@@ -18,8 +16,19 @@ class LLMService(Service):
         """Configure LLM service with model settings based on global configuration."""
         self.llm_registry = self.app.make(LLMRegistryService)
 
-    def get_model(self, model_id: str, **kwargs) -> BaseChatModel:
-        """Get a model instance with lazy initialization and caching."""
+    def get_model(self, model_id: str, **kwargs) -> tuple[ModelSchema, dict]:
+        """Get a model schema and merged parameters for initialization.
+
+        Returns a tuple of (model_schema, merged_params) instead of a compiled model,
+        allowing callers to customize initialization as needed.
+
+        Args:
+            model_id: The configuration key (e.g., "ask", "coder", "commit")
+            **kwargs: Additional parameters to merge with model configuration
+
+        Returns:
+            Tuple of (ModelSchema, dict) containing model configuration and merged parameters
+        """
 
         # Use getattr to dynamically access the config attribute
         model_config = getattr(self.app["config"].llm, model_id, None)
@@ -40,8 +49,7 @@ class LLMService(Service):
             **kwargs,
         }
 
-        compiled_agent = init_chat_model(f"{model_schema.provider}:{model_schema.model}", **merged_params)
-        return compiled_agent
+        return (model_schema, merged_params)
 
     async def add_reinforcement_hook(
         self, payload: OrchestrationEvents.GatherReinforcement
@@ -53,14 +61,11 @@ class LLMService(Service):
 
         Usage: `payload = await service.add_reinforcement_hook(payload)`
         """
-        pass
-        # TODO: should we also check what agent this is?
-        mode = payload.mode
 
         reinforcement = []
 
         # Check reinforcement mode and add messages accordingly
-        if model_schema.behavior.reinforcement_mode.value == "eager":
+        if payload.provider in ["anthropic", "openai"]:
             # Add strong reinforcement for eager mode
             reinforcement.extend(
                 [
@@ -70,7 +75,7 @@ class LLMService(Service):
                 ]
             )
 
-        elif model_schema.behavior.reinforcement_mode.value == "lazy":
+        elif payload.provider in ["google"]:
             # Add gentle reinforcement for lazy mode
             reinforcement.extend(
                 [

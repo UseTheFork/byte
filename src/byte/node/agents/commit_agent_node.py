@@ -1,6 +1,5 @@
 from typing import Literal, Type
 
-from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
@@ -8,7 +7,7 @@ from langgraph.types import Command
 
 from byte.development import RecordResponseService
 from byte.git import CommitMessage
-from byte.llm import LLMService
+from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
     BaseNode,
@@ -78,7 +77,7 @@ class CommitAgentNode(BaseAgentNode):
 
         self.goto = Str.class_to_snake_case(goto)
 
-    def get_model(self) -> BaseChatModel:
+    def get_model(self) -> tuple[ModelSchema, dict]:
         llm_service = self.app.make(LLMService)
         return llm_service.get_model("commit")
 
@@ -99,8 +98,9 @@ class CommitAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        agent_state, config = await self.generate_agent_state(state, config)
         runnable = self.create_runnable()
+
+        agent_state, config = await self.generate_agent_state(state, config)
         record_response_service = self.app.make(RecordResponseService)
 
         await self.emit_tui(Messages.AddHeading("Commit Agent", "text-primary"))

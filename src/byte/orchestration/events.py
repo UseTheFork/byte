@@ -12,7 +12,8 @@ class OrchestrationEvents:
         """"""
 
         agent: str
-        model_id: str
+        model: str
+        provider: str
         reinforcement: list[str] = field(default_factory=list)
         session_docs: list[str] = field(default_factory=list)
         system_context: list[str] = field(default_factory=list)

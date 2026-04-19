@@ -1,7 +1,6 @@
 from typing import Literal, Type
 
 from langchain.messages import AIMessage
-from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
@@ -9,7 +8,7 @@ from langgraph.types import Command
 
 from byte.development import RecordResponseService
 from byte.files import delete_file, edit_file, replace_file, write_file
-from byte.llm import LLMService
+from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
     BaseNode,
@@ -79,7 +78,7 @@ class CoderAgentNode(BaseAgentNode):
         """
         self.goto = Str.class_to_snake_case(goto)
 
-    def get_model(self) -> BaseChatModel:
+    def get_model(self) -> tuple[ModelSchema, dict]:
         llm_service = self.app.make(LLMService)
         return llm_service.get_model("coder")
 

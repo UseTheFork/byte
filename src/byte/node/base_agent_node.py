@@ -1,11 +1,12 @@
 from abc import abstractmethod
 from typing import List
 
-from langchain.chat_models import BaseChatModel
+from langchain.chat_models import init_chat_model
 from langchain.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable
 
+from byte.llm import ModelSchema
 from byte.node import (
     BaseNode,
     NodeEvents,
@@ -44,9 +45,30 @@ class BaseAgentNode(BaseNode):
         pass
 
     @abstractmethod
-    def get_model(self) -> BaseChatModel:
+    def get_model(self) -> tuple[ModelSchema, dict]:
         """ """
         pass
+
+    async def _gather_errors(self, state) -> list[HumanMessage]:
+        """Gather error messages from state for re-prompting the assistant.
+
+        Formats validation or other errors into a user message that will
+        be added to the conversation to guide the assistant's correction.
+
+        Args:
+                state: The current state containing errors
+
+        Returns:
+                List containing a single HumanMessage with error content, or empty list
+
+        Usage: `error_messages = await self._gather_errors(state)`
+        """
+        errors = state.get("errors", None)
+
+        if errors is None:
+            return []
+
+        return [HumanMessage(errors)]
 
     async def generate_agent_state(self, state: BaseState, config) -> tuple:
         """Generate the agent state for the assistant node invocation.
@@ -67,7 +89,9 @@ class BaseAgentNode(BaseNode):
         """
         # Create a new assembler
         prompt_assembler = self.app.make(PromptAssembler, template=self.get_user_template())
-        user_prompt_state = await prompt_assembler.generate_state(state, config)
+
+        model_schema, _ = self.get_model()
+        user_prompt_state = await prompt_assembler.generate_state(state, self.__class__.__name__, model_schema)
 
         payload = await self.emit(
             NodeEvents.PreAssistantNode(
@@ -105,37 +129,17 @@ class BaseAgentNode(BaseNode):
         Usage: `runnable = self._create_runnable(model, runtime.context)`
         """
 
-        model = self.get_model()
+        model_schema, merged_params = self.get_model()
+        model = init_chat_model(f"{model_schema.provider}:{model_schema.model}", **merged_params)
 
         if self.get_structured_output() is not None:
             model = model.with_structured_output(self.get_structured_output())
 
         # Bind tools if provided
         if self.get_tools() is not None and len(self.get_tools()) > 0:
-            model = model.bind_tools(self.get_tools())  # ty:ignore[unresolved-attribute]
+            model = model.bind_tools(self.get_tools())
 
         # Assemble the chain
         runnable = self.get_prompt() | model
 
         return runnable
-
-    async def _gather_errors(self, state) -> list[HumanMessage]:
-        """Gather error messages from state for re-prompting the assistant.
-
-        Formats validation or other errors into a user message that will
-        be added to the conversation to guide the assistant's correction.
-
-        Args:
-                state: The current state containing errors
-
-        Returns:
-                List containing a single HumanMessage with error content, or empty list
-
-        Usage: `error_messages = await self._gather_errors(state)`
-        """
-        errors = state.get("errors", None)
-
-        if errors is None:
-            return []
-
-        return [HumanMessage(errors)]

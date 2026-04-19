@@ -1,6 +1,6 @@
 llm:
   ask:
-    model: claude-opus-4-6
+    model: claude-sonnet-4-5
   coder:
     model: claude-sonnet-4-5
   commit:
