@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import asyncio
 import bisect
 from dataclasses import dataclass

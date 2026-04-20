@@ -78,7 +78,7 @@ byte = "byte.main:cli"
 module-name = "byte"
 
 [tool.ty.environment]
-python-version = "3.12"
+python-version = "3.14"
 
 
 [tool.pytest.ini_options]
@@ -93,7 +93,7 @@ addopts = "--record-mode=once"
 env = ["BYTE_ENV=testing"]
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py314"
 line-length = 120
 
 [tool.ruff.lint]
