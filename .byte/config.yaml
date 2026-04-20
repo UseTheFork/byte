@@ -1,10 +1,10 @@
 llm:
   coder_plan_agent_node:
-    model: claude-sonnet-4-5
+    model: claude-sonnet-4-6
   ask_agent_node:
-    model: claude-sonnet-4-5
+    model: claude-sonnet-4-6
   coder_agent_node:
-    model: devstral-medium-latest
+    model: claude-haiku-4-5
   commit_agent_node:
     model: claude-haiku-4-5
 lint:

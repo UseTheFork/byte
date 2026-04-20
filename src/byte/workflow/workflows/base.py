@@ -6,6 +6,7 @@ from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 from byte.memory import MemoryService
 from byte.orchestration import BaseState
 from byte.support.mixins import Bootable, Configurable, Eventable
+from byte.tui import TUIManagerService
 
 
 class BaseWorkflow(ABC, Bootable, Eventable, Configurable):
@@ -41,8 +42,11 @@ class BaseWorkflow(ABC, Bootable, Eventable, Configurable):
             memory_service = self.app.make(MemoryService)
             thread_id = await memory_service.get_or_create_thread()
 
+        tui_manager_service = self.app.make(TUIManagerService)
+        panel_id = tui_manager_service.get_panel_id()
+
         # Create configuration with thread ID
-        config = RunnableConfig(configurable={"thread_id": thread_id})
+        config = RunnableConfig(configurable={"thread_id": thread_id}, metadata={"panel_id": panel_id})
 
         # Create initial state using the agent's state class
         initial_state = BaseState(**request)

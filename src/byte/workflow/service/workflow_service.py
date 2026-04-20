@@ -1,4 +1,4 @@
-from typing import Any, Literal, Optional
+from typing import Any, Optional
 
 from langchain.messages import AIMessageChunk
 from langchain_core.callbacks import get_usage_metadata_callback
@@ -98,7 +98,6 @@ class WorkflowService(Service):
         workflow: BaseWorkflow,
         request: dict,
         thread_id: Optional[str] = None,
-        display_mode: Literal["verbose", "thinking", "silent"] = "verbose",
     ):
         """Execute a workflow with the provided request.
 
@@ -107,18 +106,9 @@ class WorkflowService(Service):
             request: The user request to process
             thread_id: Optional thread ID for conversation context
 
-        Usage: `await workflow_service.execute(ask_workflow, "How do I...?")`
+        Usage: `await workflow_service.execute(ask_workflow, {"user_request" : "How do I...?"})`
         """
         graph, initial_state, config = await workflow.compile(request, thread_id)
-
-        # TODO: Do we need this?
-        # Emit workflow start event
-        # await self.emit(
-        #     Payload(
-        #         event_type=EventType.WORKFLOW_STARTED,
-        #         data={"workflow": workflow.__class__.__name__, "thread_id": thread_id},
-        #     )
-        # )
 
         processed_event = None
         with get_usage_metadata_callback() as usage_metadata_callback:
@@ -135,8 +125,6 @@ class WorkflowService(Service):
 
             # TODO: need to use `processed_event` to figure out what mode we are in.
 
-            self.app["log"].debug(usage_metadata_callback)
             await self._track_token_usage(usage_metadata_callback.usage_metadata)
 
-        # await self.event_handler(Messages.AgentResponseComplete())
         return processed_event
