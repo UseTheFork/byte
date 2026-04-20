@@ -1,10 +1,9 @@
 from argparse import Namespace
 
-from rich.panel import Panel
-
 from byte import ByteArgumentParser, Command
 from byte.analytics import AgentAnalyticsService
 from byte.memory import MemoryService
+from byte.tui import Messages
 
 
 class ClearCommand(Command):
@@ -38,12 +37,14 @@ class ClearCommand(Command):
         conversation history and establishing a fresh context for future messages.
         """
 
+        await self.emit_tui(Messages.CommandExecutionStarted())
+        await self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
+
         memory_service = self.app.make(MemoryService)
         await memory_service.new_thread()
 
         agent_analytics_service = self.app.make(AgentAnalyticsService)
         agent_analytics_service.reset_context()
 
-        console = self.app["console"]
-        # Display success confirmation to user
-        console.print(Panel("[success]Conversation history cleared[/success]"))
+        await self.notify_success("Conversation history cleared")
+        await self.emit_tui(Messages.CommandExecutionCompleted())
