@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, ClassVar
 
 from textual import getters, work
 from textual.app import ComposeResult
-from textual.binding import Binding, BindingType
+from textual.binding import BindingType
 from textual.screen import Screen
 from textual.widgets import Footer
 
@@ -30,20 +30,11 @@ class ConversationScreen(Screen[None]):
         }
         """
 
-    BINDINGS: ClassVar[list[BindingType]] = [
-        Binding(
-            "escape",
-            "dismiss_screen",
-            "Dismiss",
-            tooltip="Dismiss this screen.",
-            show=True,
-            priority=True,
-        ),
-    ]
+    BINDINGS: ClassVar[list[BindingType]] = []
 
     def compose(self) -> ComposeResult:
         yield Conversation()
-        yield Footer()
+        yield Footer(show_command_palette=False)
 
     async def on_mount(self):
 

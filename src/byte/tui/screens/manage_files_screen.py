@@ -21,14 +21,17 @@ class ManageFilesScreen(ModalScreen[None]):
     DEFAULT_CSS = """
         ManageFilesScreen {
             align: center middle;
-            background: $background 60%;
             
             & VerticalGroup {
                 padding: 0 1;
                 width: 80%;
                 height: auto;
-                border: thick $background 80%;
+                border: round $surface 80%;
                 background: $surface;
+
+                & Footer {
+                    margin-top: 1;
+                }
             }
             
         }
@@ -48,7 +51,7 @@ class ManageFilesScreen(ModalScreen[None]):
     def compose(self) -> ComposeResult:
         yield VerticalGroup(
             DataTable(cursor_type="row"),
-            Footer(),
+            Footer(show_command_palette=False),
         )
 
     def on_mount(self) -> None:

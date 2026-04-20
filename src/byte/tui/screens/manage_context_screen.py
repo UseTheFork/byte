@@ -48,7 +48,7 @@ class ManageContextScreen(ModalScreen[None]):
     def compose(self) -> ComposeResult:
         yield VerticalGroup(
             DataTable(cursor_type="row"),
-            Footer(),
+            Footer(show_command_palette=False),
         )
 
     def on_mount(self) -> None:
