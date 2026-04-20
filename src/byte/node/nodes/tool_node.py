@@ -32,6 +32,10 @@ class ToolNode(BaseNode):
         tools_by_name = {tool.name: tool for tool in tools}
 
         for tool_call in message.tool_calls:
+            self.app["log"].info(tool_call)
+
+            # self.emit_tui(Messages.ToolResponse(status=Status.SUCCESS))
+
             if tool_call["name"] not in tools_by_name:
                 outputs.append(
                     ToolMessage(

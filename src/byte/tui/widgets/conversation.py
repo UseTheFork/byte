@@ -184,8 +184,6 @@ class Conversation(Widget):
     async def handle_response(self, event: Messages.Response) -> None:
         response_panel = await self.get_or_create_response_panel(event.panel_id)
 
-        self.app.byte["log"].info(event)
-
         # Control the indicator display state.
         if isinstance(event.with_indicator, bool):
             response_panel.loading_indicator.hidden = event.with_indicator
@@ -199,6 +197,25 @@ class Conversation(Widget):
             await response_panel.add_markdown_chunk(str(event.chunk))
         elif event.status is Status.SUCCESS:
             await response_panel.end_markdown_stream()
+            self.post_message(Messages.LoadingIndicatorHide(panel_id=event.panel_id))
+
+        self.scroll_to_latest_message()
+
+    @on(Messages.ToolResponse)
+    async def handle_tool_response(self, event: Messages.ToolResponse) -> None:
+        response_panel = await self.get_or_create_response_panel(event.panel_id)
+
+        if event.status is Status.PENDING:
+            await response_panel.start_tool_stream(
+                tool_name=str(event.tool_name),
+                tool_id=str(event.tool_id),
+            )
+        elif event.status is Status.RUNNING:
+            self.app.byte["log"].info(event)
+            await response_panel.add_tool_chunk(str(event.chunk))
+        elif event.status is Status.SUCCESS:
+            self.app.byte["log"].info("done")
+            await response_panel.end_tool_stream()
             self.post_message(Messages.LoadingIndicatorHide(panel_id=event.panel_id))
 
         self.scroll_to_latest_message()

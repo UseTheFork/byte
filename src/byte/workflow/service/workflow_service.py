@@ -14,7 +14,10 @@ class WorkflowService(Service):
     """Service for executing workflows with compiled graphs."""
 
     def _is_tool_call_chunk(self, block: dict) -> bool:
-        return block.get("type") in ("tool_use", "input_json_delta")
+        return block.get("type") == ("input_json_delta")
+
+    def _is_starting_tool_call_chunk(self, block: dict) -> bool:
+        return block.get("type") == ("tool_use")
 
     def _is_message_content_chunk(self, block: dict) -> bool:
         return block.get("type") == "text"
@@ -54,9 +57,7 @@ class WorkflowService(Service):
         if chunk["type"] == "messages":
             message_chunk, _ = chunk["data"]
             if isinstance(message_chunk, AIMessageChunk):
-                msg_type = type(message_chunk).__name__
                 self.app["log"].debug(chunk)
-                self.app["log"].debug(f"Message chunk type: {msg_type}")
 
                 # Handle agents that dont have tools. they respond with just string content.
                 if isinstance(message_chunk.content, str):
@@ -70,8 +71,50 @@ class WorkflowService(Service):
                 else:
                     for block in message_chunk.content:
                         if isinstance(block, dict):
-                            if self._is_tool_call_chunk(block):
+                            # First we try and complete any open streams.
+                            for idx, tracked in self.message_chunks.items():
+                                if idx != block["index"] and tracked["completed"] == False:
+                                    self.message_chunks[idx]["completed"] = True
+
+                                    if self.message_chunks[idx]["type"] == "text":
+                                        self.emit_tui(Messages.Response(status=Status.SUCCESS))
+
+                                    elif self.message_chunks[idx]["type"] == "tool_use":
+                                        self.emit_tui(Messages.ToolResponse(status=Status.SUCCESS))
+
+                            # Next start a new stream if needed
+                            if not self.message_chunks.get(block["index"]):
+                                self.message_chunks[block["index"]] = {
+                                    "completed": False,
+                                    "type": block.get("type"),
+                                }
+
+                                if block.get("type") == "text":
+                                    self.emit_tui(Messages.Response(status=Status.PENDING))
+
+                                elif block.get("type") == "tool_use":
+                                    self.message_chunks[block["index"]]["id"] = block.get("id")
+                                    self.message_chunks[block["index"]]["name"] = block.get("name")
+                                    self.emit_tui(
+                                        Messages.ToolResponse(
+                                            status=Status.PENDING,
+                                            tool_name=block.get("name"),
+                                            tool_id=block.get("id"),
+                                        )
+                                    )
+
+                            if self._is_starting_tool_call_chunk(block):
                                 pass
+
+                            if self._is_tool_call_chunk(block):
+                                self.emit_tui(
+                                    Messages.ToolResponse(
+                                        status=Status.RUNNING,
+                                        with_indicator=False,
+                                        chunk=block.get("partial_json", ""),
+                                    )
+                                )
+
                             elif self._is_message_content_chunk(block):
                                 self.emit_tui(
                                     Messages.Response(
@@ -84,12 +127,6 @@ class WorkflowService(Service):
         elif chunk["type"] == "tasks":
             pass
             # tui.post_message(Messages.CommandStreamChunk(panel_id=self.panel_id, chunk_type="task", data=chunk["data"]))
-
-        # elif chunk["type"] == "tasks":
-        #     await stream_rendering_service.handle_task(chunk["data"])
-        #     # self.app["log"].debug(chunk)
-        #     # self.app["log"].debug(chunk.get("id"))
-        #     # self.app["log"].debug(chunk.get("name"))
 
         return chunk
 
@@ -111,6 +148,9 @@ class WorkflowService(Service):
         graph, initial_state, config = await workflow.compile(request, thread_id)
 
         processed_event = None
+
+        self.message_chunks = {}
+
         with get_usage_metadata_callback() as usage_metadata_callback:
             async for chunk in graph.astream(
                 input=initial_state,
@@ -123,7 +163,13 @@ class WorkflowService(Service):
 
             # await event_bus.emit(Events.TextualMessageReceived(Messages.AgentResponseComplete()))
 
-            # TODO: need to use `processed_event` to figure out what mode we are in.
+            # # Close the last open block after the stream ends
+            # if self.message_chunks:
+            #     last = self.message_chunks[max(self.message_chunks.keys())]
+            #     if last["type"] == "text":
+            #         self.emit_tui(Messages.Response(status=Status.SUCCESS))
+            #     elif last["type"] == "tool_use":
+            #         self.emit_tui(Messages.ToolResponse(status=Status.SUCCESS))
 
             await self._track_token_usage(usage_metadata_callback.usage_metadata)
 

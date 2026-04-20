@@ -15,7 +15,7 @@ from byte.tui.widgets.ui.loading_indicator import LoadingIndicator
 from byte.tui.widgets.ui.select import Select
 from byte.tui.widgets.ui.selectable_markdown import SelectableMarkdown
 from byte.tui.widgets.ui.text_rule import TextRule
-from byte.tui.widgets.ui.toolcall import ToolCall
+from byte.tui.widgets.ui.tool_call import ToolCall
 
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
@@ -39,6 +39,7 @@ class ResponsePanel(VerticalGroup):
             disabled=disabled,
         )
         self.current_stream = None
+        self.current_tool_stream = None
         self.current_linting: Linting | None = None
 
     def on_mount(self) -> None:
@@ -69,6 +70,26 @@ class ResponsePanel(VerticalGroup):
             return
 
         await self.current_stream.stop()
+
+    async def start_tool_stream(
+        self,
+        tool_name: str,
+        tool_id: str,
+    ):
+        tool_widget = ToolCall(tool_name=tool_name, id=f"tool_{tool_id}")
+        await self.mount(tool_widget)
+        self.current_tool_stream = ToolCall.get_stream(tool_widget)
+        return self.current_tool_stream
+
+    async def add_tool_chunk(self, chunk: str):
+        assert self.current_tool_stream is not None, "start_tool_stream() must be called before add_tool_chunk()"
+        await self.current_tool_stream.write(chunk)
+
+    async def end_tool_stream(self):
+        if self.current_tool_stream is None:
+            return
+
+        await self.current_tool_stream.stop()
 
     async def mount_select(self, ask: Ask) -> Select:
         select = Select(ask)
@@ -172,7 +193,7 @@ class ResponsePanel(VerticalGroup):
         Returns:
             The mounted ToolCall widget
         """
-
-        tool_widget = ToolCall(name=name, args=args)
-        await self.mount(tool_widget)
-        return tool_widget
+        pass
+        # tool_widget = ToolCall(name=name, args=args)
+        # await self.mount(tool_widget)
+        # return tool_widget

@@ -16,7 +16,7 @@ from byte.node.nodes import EndNode
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.support import Boundary, BoundaryType, Str
 from byte.support.utils import list_to_multiline_text
-from byte.tui import Messages, Status
+from byte.tui import Messages
 
 # Conventional commit message generation prompt
 # Adapted from Aider: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/prompts.py#L8
@@ -39,6 +39,7 @@ commit_user_template = [
     "Read and apply ALL rules for commit types, scopes, and description formatting.",
     Boundary.close(BoundaryType.TASK),
     "{commit_guidelines}",
+    Boundary.critical("You MUST use the `git_commit` to respond."),
 ]
 
 commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
@@ -98,17 +99,14 @@ class CommitAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        runnable = self.create_runnable()
+        runnable = self.create_runnable(force_tool_choice="git_commit")
 
         agent_state, config = await self.generate_agent_state(state, config)
         record_response_service = self.app.make(RecordResponseService)
 
         self.emit_tui(Messages.AddHeading("Commit Agent", "text-primary"))
-        self.emit_tui(Messages.Response(status=Status.PENDING, with_indicator=True))
 
         result = await runnable.ainvoke(agent_state, config=config)
         await record_response_service.record_response(agent_state, runnable, "commit_agent", config)
-
-        self.emit_tui(Messages.Response(status=Status.SUCCESS))
 
         return self.route_to(self.goto, {"extracted_content": result, "errors": None})

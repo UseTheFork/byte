@@ -92,6 +92,15 @@ class Messages:
         panel_id: str | None = None
 
     @dataclass
+    class ToolResponse(Message):
+        status: Status = Status.PENDING
+        chunk: str | None = None
+        with_indicator: bool | str | None = None
+        tool_name: str | None = None
+        tool_id: str | None = None
+        panel_id: str | None = None
+
+    @dataclass
     class CreatePanel(Message):
         """A generic panel for displaying content in the TUI."""
 

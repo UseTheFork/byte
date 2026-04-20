@@ -284,8 +284,6 @@ class CoderAgentNode(BaseAgentNode):
         await record_response_service.record_response(agent_state, runnable, "coder_agent", config)
         result = await runnable.ainvoke(agent_state, config=config)
 
-        self.emit_tui(Messages.Response(status=Status.SUCCESS))
-
         if result.tool_calls and len(result.tool_calls) > 0:
             return self.route_to(
                 "tool_node",
@@ -294,6 +292,8 @@ class CoderAgentNode(BaseAgentNode):
                     "errors": None,
                 },
             )
+        else:
+            self.emit_tui(Messages.Response(status=Status.SUCCESS))
 
         msg = extract_content_from_message(result)
 
