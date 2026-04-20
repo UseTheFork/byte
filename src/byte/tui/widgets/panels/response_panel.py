@@ -42,7 +42,7 @@ class ResponsePanel(VerticalGroup):
         self.current_linting: Linting | None = None
 
     def on_mount(self) -> None:
-        self.mount(LoadingIndicator(classes="dock-bottom"))
+        self.mount(LoadingIndicator(classes="dock-bottom hidden"))
 
     async def add_user_message(self, event: Messages.AddUserInput):
         await self.mount(HumanMessage(f"/{event.command} {event.body}"))
