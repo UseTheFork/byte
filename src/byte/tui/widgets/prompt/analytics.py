@@ -4,7 +4,7 @@ from textual import containers
 from textual.app import ComposeResult
 from textual.containers import HorizontalGroup
 from textual.reactive import reactive, var
-from textual.widgets import Label
+from textual.widgets import Label, Static
 
 from byte.tui.widgets.ui.progress_bar import ProgressBar
 
@@ -36,13 +36,13 @@ class MemoryUsedInfo(Label):
         self.update(memory_used)
 
 
-class FileInfo(Label):
+class FileInfo(Static):
     editable: reactive[int] = reactive(0)
     read_only: reactive[int] = reactive(0)
 
     def _format_file_info(self) -> str:
         """Format the file info display text."""
-        return f"Files: {self.editable} Editable | {self.read_only} Read Only"
+        return f"Files: [@click=screen.request_manage_files()]{self.editable} Editable | {self.read_only} Read Only[/]"
 
     def watch_editable(self, editable: int) -> None:
         """Update the label when editable changes."""

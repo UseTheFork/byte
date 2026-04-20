@@ -22,11 +22,6 @@ Tabs .underline--bar {
 
 Screen {
   padding: 0 0 0 0;
-  background: transparent;
-  &:inline {
-    height: 80vh;
-    padding: 0 2;
-  }
 }
 
 Rule {
