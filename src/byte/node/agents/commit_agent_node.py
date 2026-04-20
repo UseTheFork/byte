@@ -39,7 +39,6 @@ commit_user_template = [
     "Read and apply ALL rules for commit types, scopes, and description formatting.",
     Boundary.close(BoundaryType.TASK),
     "{commit_guidelines}",
-    Boundary.critical("You MUST use the `git_commit` to respond."),
 ]
 
 commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
@@ -99,7 +98,8 @@ class CommitAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        runnable = self.create_runnable(force_tool_choice="git_commit")
+        # force_tool_choice="git_commit"
+        runnable = self.create_runnable()
 
         agent_state, config = await self.generate_agent_state(state, config)
         record_response_service = self.app.make(RecordResponseService)

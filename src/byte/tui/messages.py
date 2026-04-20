@@ -93,11 +93,11 @@ class Messages:
 
     @dataclass
     class ToolResponse(Message):
+        tool_id: str
         status: Status = Status.PENDING
         chunk: str | None = None
         with_indicator: bool | str | None = None
         tool_name: str | None = None
-        tool_id: str | None = None
         panel_id: str | None = None
 
     @dataclass

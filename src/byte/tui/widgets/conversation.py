@@ -211,11 +211,9 @@ class Conversation(Widget):
                 tool_id=str(event.tool_id),
             )
         elif event.status is Status.RUNNING:
-            self.app.byte["log"].info(event)
-            await response_panel.add_tool_chunk(str(event.chunk))
+            await response_panel.add_tool_chunk(event.tool_id, str(event.chunk))
         elif event.status is Status.SUCCESS:
-            self.app.byte["log"].info("done")
-            await response_panel.end_tool_stream()
+            await response_panel.end_tool_stream(event.tool_id)
             self.post_message(Messages.LoadingIndicatorHide(panel_id=event.panel_id))
 
         self.scroll_to_latest_message()

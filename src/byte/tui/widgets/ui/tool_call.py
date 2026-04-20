@@ -1,12 +1,10 @@
 import asyncio
-import json
 
+from partial_json_parser import OBJ, MalformedJSON, loads
 from rich.console import RenderableType
 from rich.text import Text
 from textual.reactive import reactive
 from textual.widget import Widget
-
-from byte.support.utils.parse_partial_json import parse_partial_json
 
 
 class ToolCallStream:
@@ -81,6 +79,18 @@ class ToolCall(Widget, can_focus=False):
 
     raw_args = reactive("")
 
+    DEFAULT_CSS = """
+    ToolCall {
+        height: auto;
+        background: transparent;
+        
+        & Label {
+            height: auto;
+            width: 100%;
+        }
+    }
+    """
+
     def __init__(
         self,
         tool_name: str,
@@ -101,8 +111,8 @@ class ToolCall(Widget, can_focus=False):
     def render(self) -> RenderableType:
         """Render the tool call display."""
         try:
-            parsed = parse_partial_json(self.raw_args)
-        except json.JSONDecodeError:
+            parsed = loads(self.raw_args, OBJ)
+        except MalformedJSON:
             parsed = None
 
         # Build the output text

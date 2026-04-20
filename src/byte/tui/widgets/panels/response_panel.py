@@ -39,7 +39,7 @@ class ResponsePanel(VerticalGroup):
             disabled=disabled,
         )
         self.current_stream = None
-        self.current_tool_stream = None
+        self.streams = {}
         self.current_linting: Linting | None = None
 
     def on_mount(self) -> None:
@@ -76,20 +76,20 @@ class ResponsePanel(VerticalGroup):
         tool_name: str,
         tool_id: str,
     ):
-        tool_widget = ToolCall(tool_name=tool_name, id=f"tool_{tool_id}")
+        tool_widget = ToolCall(tool_name=tool_name, id=f"{tool_id}")
         await self.mount(tool_widget)
-        self.current_tool_stream = ToolCall.get_stream(tool_widget)
-        return self.current_tool_stream
+        self.streams[tool_id] = ToolCall.get_stream(tool_widget)
+        return self.streams[tool_id]
 
-    async def add_tool_chunk(self, chunk: str):
-        assert self.current_tool_stream is not None, "start_tool_stream() must be called before add_tool_chunk()"
-        await self.current_tool_stream.write(chunk)
+    async def add_tool_chunk(self, tool_id: str, chunk: str):
+        assert self.streams[tool_id] is not None, "start_tool_stream() must be called before add_tool_chunk()"
+        await self.streams[tool_id].write(chunk)
 
-    async def end_tool_stream(self):
-        if self.current_tool_stream is None:
+    async def end_tool_stream(self, tool_id: str):
+        if self.streams[tool_id] is None:
             return
 
-        await self.current_tool_stream.stop()
+        await self.streams[tool_id].stop()
 
     async def mount_select(self, ask: Ask) -> Select:
         select = Select(ask)
