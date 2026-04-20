@@ -8,7 +8,9 @@ from textual.widgets import Footer
 
 from byte import EventBus
 from byte.files import FileService
+from byte.knowledge import SessionContextService
 from byte.system import SystemEvents
+from byte.tui.screens.manage_context_screen import ManageContextScreen
 from byte.tui.screens.manage_files_screen import ManageFilesScreen
 from byte.tui.widgets.bootbox import Bootbox
 from byte.tui.widgets.conversation import Conversation
@@ -94,3 +96,10 @@ class ConversationScreen(Screen[None]):
         await self.app.push_screen_wait(ManageFilesScreen())
         file_service = self.app.byte.make(FileService)
         await file_service.notify_file_stats()
+
+    @work
+    async def action_request_manage_context(self) -> None:
+        """"""
+        await self.app.push_screen_wait(ManageContextScreen())
+        session_context_service = self.app.byte.make(SessionContextService)
+        session_context_service.notify_context_stats()

@@ -109,6 +109,10 @@ class Messages:
         memory_percent: float
 
     @dataclass
+    class UpdateContext(Message):
+        context_count: int
+
+    @dataclass
     class UpdateFiles(Message):
         editable: int
         read_only: int

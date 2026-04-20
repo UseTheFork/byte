@@ -289,6 +289,15 @@ class Conversation(Widget):
             timeout=event.duration,
         )
 
+    @on(Messages.UpdateContext)
+    async def update_context(self, event: Messages.UpdateContext) -> None:
+        """Update context count display with current context statistics.
+
+        Args:
+            event: UpdateContext message containing context_count information.
+        """
+        self.query_one(Analytics).update_context(event)
+
     @on(Messages.UpdateAnalytics)
     async def analytics(self, event: Messages.UpdateAnalytics) -> None:
         """Update analytics display with token usage and cost information.
@@ -296,7 +305,6 @@ class Conversation(Widget):
         Args:
             event: UpdateAnalytics message containing token usage and cost information.
         """
-        self.app.byte["log"].info(event)
         self.query_one(Analytics).update_analytics(event)
 
     @on(Messages.UpdateFiles)

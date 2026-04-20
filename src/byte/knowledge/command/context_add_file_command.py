@@ -36,8 +36,8 @@ class ContextAddFileCommand(Command):
 
         Usage: `await command.execute("config.py")`
         """
-        await self.emit_tui(Messages.CommandExecutionStarted())
-        await self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
+        self.emit_tui(Messages.CommandExecutionStarted())
+        self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         args_file_path = args.file_path
 
@@ -74,4 +74,4 @@ class ContextAddFileCommand(Command):
         session_context_service.add_context(model)
         await self.notify_success(f"Added {context_key} to session context")
 
-        await self.emit_tui(Messages.CommandExecutionCompleted())
+        self.emit_tui(Messages.CommandExecutionCompleted())

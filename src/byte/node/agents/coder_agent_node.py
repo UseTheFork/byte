@@ -278,13 +278,13 @@ class CoderAgentNode(BaseAgentNode):
         runnable = self.create_runnable()
         record_response_service = self.app.make(RecordResponseService)
 
-        await self.emit_tui(Messages.AddHeading("Coder Agent", "text-primary"))
-        await self.emit_tui(Messages.Response(status=Status.PENDING, with_indicator=True))
+        self.emit_tui(Messages.AddHeading("Coder Agent", "text-primary"))
+        self.emit_tui(Messages.Response(status=Status.PENDING, with_indicator=True))
 
         await record_response_service.record_response(agent_state, runnable, "coder_agent", config)
         result = await runnable.ainvoke(agent_state, config=config)
 
-        await self.emit_tui(Messages.Response(status=Status.SUCCESS))
+        self.emit_tui(Messages.Response(status=Status.SUCCESS))
 
         if result.tool_calls and len(result.tool_calls) > 0:
             return self.route_to(

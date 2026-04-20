@@ -152,13 +152,13 @@ class CoderPlanAgentNode(BaseAgentNode):
         agent_state, config = await self.generate_agent_state(state, config)
         record_response_service = self.app.make(RecordResponseService)
 
-        await self.emit_tui(Messages.AddHeading("Plan Agent", "text-primary"))
-        await self.emit_tui(Messages.Response(status=Status.PENDING))
+        self.emit_tui(Messages.AddHeading("Plan Agent", "text-primary"))
+        self.emit_tui(Messages.Response(status=Status.PENDING))
 
         await record_response_service.record_response(agent_state, runnable, "coder_plan_agent", config)
         result = await runnable.ainvoke(agent_state, config=config)
 
-        await self.emit_tui(Messages.Response(status=Status.SUCCESS))
+        self.emit_tui(Messages.Response(status=Status.SUCCESS))
 
         if result.tool_calls and len(result.tool_calls) > 0:
             return self.route_to(

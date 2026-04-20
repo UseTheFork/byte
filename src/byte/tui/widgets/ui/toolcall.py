@@ -51,4 +51,5 @@ class ToolCall(VerticalGroup):
         # Display arguments if any
         if self.tool_args:
             for key, value in self.tool_args.items():
-                yield Label(f" ╰─ {key}: `{value}`")
+                # `{value}`
+                yield Label(f" ╰─ {key}: ")

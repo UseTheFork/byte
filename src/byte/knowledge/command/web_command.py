@@ -48,7 +48,7 @@ class WebCommand(Command, UserInteractive):
         Usage: Called when user types `/web <url>`
         """
 
-        await self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
+        self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         session_context_service = self.app.make(SessionContextService)
 
@@ -58,7 +58,7 @@ class WebCommand(Command, UserInteractive):
             chromium_service = self.app.make(ChromiumService)
             markdown_content = await chromium_service.do_scrape(url)
         except ByteConfigException as e:
-            await self.emit_tui(
+            self.emit_tui(
                 Messages.CreatePanel(
                     str(e),
                     title="Configuration Error",
@@ -67,7 +67,7 @@ class WebCommand(Command, UserInteractive):
             )
             return
 
-        await self.emit_tui(
+        self.emit_tui(
             Messages.CreatePanel(
                 str(markdown_content),
                 f"Content: {url}",

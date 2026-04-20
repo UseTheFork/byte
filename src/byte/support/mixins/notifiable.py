@@ -15,7 +15,7 @@ class Notifiable(Eventable):
     ) -> None:
         """Display a default notification."""
 
-        await self.emit_tui(
+        self.emit_tui(
             Messages.Notify(
                 content=message,
                 style=style,

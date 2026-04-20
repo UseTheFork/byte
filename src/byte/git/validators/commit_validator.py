@@ -28,7 +28,7 @@ class CommitValidator(Validator, UserInteractive):
         else:
             formatted_content = content.format()
 
-        await self.emit_tui(
+        self.emit_tui(
             Messages.CreatePanel(
                 formatted_content,
                 title=f"Commit Message ({message_number} / {total_number})",

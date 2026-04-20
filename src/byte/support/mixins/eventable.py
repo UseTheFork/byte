@@ -43,12 +43,12 @@ class Eventable:
             payload,
         )
 
-    async def emit_tui(self, payload: Message):
+    def emit_tui(self, payload: Message):
         """Emit a TUI event through the event bus system.
 
         Wraps the TuiEvents payload in Events.TuiEvent before emitting,
         allowing TUI-specific events to be processed by registered listeners.
-        Usage: `await self.emit_tui(TuiEvents.ResponseStarted())`
+        Usage: `self.emit_tui(TuiEvents.ResponseStarted())`
         """
 
         if not self.app:

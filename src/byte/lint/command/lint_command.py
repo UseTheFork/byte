@@ -31,7 +31,7 @@ class LintCommand(Command):
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute linting command with optional arguments."""
 
-        await self.emit_tui(Messages.CommandExecutionStarted())
+        self.emit_tui(Messages.CommandExecutionStarted())
 
         try:
             git_service = self.app.make(GitService)
@@ -51,4 +51,4 @@ class LintCommand(Command):
         except ByteConfigException as e:
             await self.notify_error(str(e))
 
-        await self.emit_tui(Messages.CommandExecutionCompleted())
+        self.emit_tui(Messages.CommandExecutionCompleted())

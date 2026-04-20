@@ -34,8 +34,8 @@ class SwitchModeCommand(Command):
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Switch the mode of a file in context."""
 
-        await self.emit_tui(Messages.CommandExecutionStarted())
-        await self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
+        self.emit_tui(Messages.CommandExecutionStarted())
+        self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         file_path = args.file_path
 
@@ -60,7 +60,7 @@ class SwitchModeCommand(Command):
             await self.notify_success(f"Switched {file_path} to {mode_str} mode")
             await file_service.notify_file_stats()
 
-        await self.emit_tui(Messages.CommandExecutionCompleted())
+        self.emit_tui(Messages.CommandExecutionCompleted())
 
     async def get_completions(self, text: str) -> List[str]:
         """Provide completions showing files currently in the context.

@@ -40,8 +40,8 @@ class ResetCommand(Command):
         the file service context, providing a complete reset of the conversation state.
         """
 
-        await self.emit_tui(Messages.CommandExecutionStarted())
-        await self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
+        self.emit_tui(Messages.CommandExecutionStarted())
+        self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         memory_service = self.app.make(MemoryService)
         await memory_service.new_thread()
@@ -75,4 +75,4 @@ class ResetCommand(Command):
             # Notify success
             await self.notify_success("Conversation and file context completely reset")
 
-        await self.emit_tui(Messages.CommandExecutionCompleted())
+        self.emit_tui(Messages.CommandExecutionCompleted())

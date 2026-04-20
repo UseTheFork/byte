@@ -60,7 +60,7 @@ class WorkflowService(Service):
 
                 # Handle agents that dont have tools. they respond with just string content.
                 if isinstance(message_chunk.content, str):
-                    await self.emit_tui(
+                    self.emit_tui(
                         Messages.Response(
                             status=Status.RUNNING,
                             with_indicator=False,
@@ -73,7 +73,7 @@ class WorkflowService(Service):
                             if self._is_tool_call_chunk(block):
                                 pass
                             elif self._is_message_content_chunk(block):
-                                await self.emit_tui(
+                                self.emit_tui(
                                     Messages.Response(
                                         status=Status.RUNNING,
                                         with_indicator=False,

@@ -174,7 +174,7 @@ class LintService(Service, UserInteractive):
                 markdown_content += f"{command_issue}\n"
 
         # Display panel via TUI
-        await self.emit_tui(
+        self.emit_tui(
             Messages.LintResults(
                 str(markdown_content),
                 total_issues,
@@ -200,7 +200,7 @@ class LintService(Service, UserInteractive):
 
             # Emit progress update
             self._completed_count += 1
-            await self.emit_tui(
+            self.emit_tui(
                 Messages.LintProgress(
                     current_file=str(file_path),
                     completed=self._completed_count,
@@ -277,7 +277,7 @@ class LintService(Service, UserInteractive):
             # AI: The below
 
             # Emit lint started event
-            await self.emit_tui(
+            self.emit_tui(
                 Messages.LintStarted(
                     total_commands=self._total_commands,
                 )
@@ -295,7 +295,7 @@ class LintService(Service, UserInteractive):
 
             # Emit lint completed event
             failed_count = len([r for r in results if r.exit_code != 0])
-            await self.emit_tui(
+            self.emit_tui(
                 Messages.LintCompleted(
                     total_files=len(changed_files),
                     failed_files=failed_count,

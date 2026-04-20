@@ -40,10 +40,10 @@ class AskCommand(Command):
 
         ask_workflow = self.app.make(AskWorkflow)
 
-        await self.emit_tui(Messages.CommandExecutionStarted())
-        await self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
+        self.emit_tui(Messages.CommandExecutionStarted())
+        self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         workflow_service = self.app.make(WorkflowService)
         await workflow_service.execute(ask_workflow, {"user_request": raw_args})
 
-        await self.emit_tui(Messages.CommandExecutionCompleted())
+        self.emit_tui(Messages.CommandExecutionCompleted())

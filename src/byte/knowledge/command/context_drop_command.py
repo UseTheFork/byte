@@ -36,8 +36,8 @@ class ContextDropCommand(Command):
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Remove specified item from session context."""
-        await self.emit_tui(Messages.CommandExecutionStarted())
-        await self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
+        self.emit_tui(Messages.CommandExecutionStarted())
+        self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         console = self.app["console"]
         session_context_service = self.app.make(SessionContextService)
@@ -45,7 +45,7 @@ class ContextDropCommand(Command):
 
         if not context_items:
             await self.notify_warning("No context items to remove")
-            await self.emit_tui(Messages.CommandExecutionCompleted())
+            self.emit_tui(Messages.CommandExecutionCompleted())
             return
 
         args_file_path = args.file_path
@@ -55,11 +55,11 @@ class ContextDropCommand(Command):
             if args_file_path in context_items:
                 session_context_service.remove_context(args_file_path)
                 await self.notify_success(f"Removed {args_file_path} from session context")
-                await self.emit_tui(Messages.CommandExecutionCompleted())
+                self.emit_tui(Messages.CommandExecutionCompleted())
                 return
             else:
                 await self.notify_error(f"Context item {args_file_path} not found")
-                await self.emit_tui(Messages.CommandExecutionCompleted())
+                self.emit_tui(Messages.CommandExecutionCompleted())
                 return
 
         # If no file_path provided, show multiselect menu
@@ -73,7 +73,7 @@ class ContextDropCommand(Command):
 
             if not selected_items:
                 await self.notify_warning("No items selected")
-                await self.emit_tui(Messages.CommandExecutionCompleted())
+                self.emit_tui(Messages.CommandExecutionCompleted())
                 return
 
             # Remove all selected items
@@ -87,10 +87,10 @@ class ContextDropCommand(Command):
 
         except (KeyboardInterrupt, InputCancelledError):
             await self.notify_warning("Operation cancelled")
-            await self.emit_tui(Messages.CommandExecutionCompleted())
+            self.emit_tui(Messages.CommandExecutionCompleted())
             return
 
-        await self.emit_tui(Messages.CommandExecutionCompleted())
+        self.emit_tui(Messages.CommandExecutionCompleted())
 
     async def get_completions(self, text: str) -> List[str]:
         """Provide intelligent context key completions.

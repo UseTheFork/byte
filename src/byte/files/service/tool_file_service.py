@@ -68,7 +68,7 @@ class ToolFileService(Service):
 
             return f"Successfully edited '{path}'"
         except Exception as e:
-            await self.emit_tui(
+            self.emit_tui(
                 Messages.CreatePanel(
                     str(e),
                     title="Tool Error",
@@ -104,7 +104,7 @@ class ToolFileService(Service):
                 raise Exception("User declined request to write file.")
 
         except Exception as e:
-            await self.emit_tui(
+            self.emit_tui(
                 Messages.CreatePanel(
                     str(e),
                     title="Tool Error",
@@ -140,7 +140,7 @@ class ToolFileService(Service):
                 raise Exception("User declined request to replace file.")
 
         except Exception as e:
-            await self.emit_tui(
+            self.emit_tui(
                 Messages.CreatePanel(
                     str(e),
                     title="Tool Error",
@@ -184,7 +184,7 @@ class ToolFileService(Service):
                 raise Exception("User declined request to delete file.")
 
         except Exception as e:
-            await self.emit_tui(
+            self.emit_tui(
                 Messages.CreatePanel(
                     str(e),
                     title="Tool Error",

@@ -271,7 +271,7 @@ class AICommentWatcherService(Service):
         ai_result = await self.scan_context_files_for_ai_comments()
 
         if ai_result:
-            await self.emit_tui(
+            self.emit_tui(
                 Messages.UserInputSubmitted(
                     body=f"{ai_result['agent_type']} " + str(ai_result["prompt"]),
                 ),

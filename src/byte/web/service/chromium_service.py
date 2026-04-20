@@ -60,16 +60,16 @@ class ChromiumService(Service):
         options.start_timeout = 20
 
         async with Chrome(options=options) as browser:
-            await self.emit_tui(Messages.LoadingIndicatorShow("Opening browser..."))
+            self.emit_tui(Messages.LoadingIndicatorShow("Opening browser..."))
             tab = await browser.start()
 
-            await self.emit_tui(Messages.LoadingIndicatorShow(f"Loading {url}..."))
+            self.emit_tui(Messages.LoadingIndicatorShow(f"Loading {url}..."))
             await tab.go_to(url)
 
-            await self.emit_tui(Messages.LoadingIndicatorShow("Extracting content..."))
+            self.emit_tui(Messages.LoadingIndicatorShow("Extracting content..."))
             html_content = await tab.execute_script("return document.documentElement.outerHTML")
 
-            await self.emit_tui(Messages.LoadingIndicatorShow("Converting to markdown..."))
+            self.emit_tui(Messages.LoadingIndicatorShow("Converting to markdown..."))
             html_content = html_content.get("result", {}).get("result", {}).get("value", "")
 
             soup = BeautifulSoup(
@@ -82,7 +82,7 @@ class ChromiumService(Service):
             for parser_class in self.parsers:
                 parser = self.app.make(parser_class)
                 if parser.can_parse(soup, url):
-                    await self.emit_tui(Messages.LoadingIndicatorShow(f"Parsing with {parser.__class__.__name__}..."))
+                    self.emit_tui(Messages.LoadingIndicatorShow(f"Parsing with {parser.__class__.__name__}..."))
                     self.app["log"].info(f"Parsing with {parser.__class__.__name__}...")
 
                     # Extract content element
@@ -97,5 +97,5 @@ class ChromiumService(Service):
                             self.app["log"].info(f"Parsed successfully with {parser.__class__.__name__}...")
                             break
 
-            await self.emit_tui(Messages.LoadingIndicatorHide())
+            self.emit_tui(Messages.LoadingIndicatorHide())
             return text_content

@@ -90,7 +90,7 @@ class AgentAnalyticsService(Service):
             if model_percentages:
                 memory_percent = sum(model_percentages) / len(model_percentages)
 
-        await self.emit_tui(
+        self.emit_tui(
             Messages.UpdateAnalytics(
                 tokens_sent=self.usage.last.input,
                 tokens_received=self.usage.last.output,

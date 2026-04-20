@@ -89,7 +89,7 @@ class GitService(Service, UserInteractive, Notifiable):
 
                 # Display success panel
                 # TODO: Should we flash this?
-                await self.emit_tui(
+                self.emit_tui(
                     Messages.CreatePanel(
                         f"({commit_hash}) {commit_message}",
                         title="Commit Created",
@@ -102,7 +102,7 @@ class GitService(Service, UserInteractive, Notifiable):
 
             except Exception as e:
                 # Display error panel if commit fails
-                await self.emit_tui(
+                self.emit_tui(
                     Messages.CreatePanel(
                         f"Failed to create commit: {e!s}",
                         title="Commit Failed",
@@ -155,7 +155,7 @@ class GitService(Service, UserInteractive, Notifiable):
 
             total_changes = len(unstaged_changes) + len(untracked_files)
 
-            await self.emit_tui(
+            self.emit_tui(
                 Messages.CreatePanel(
                     f"Found {len(unstaged_changes)} unstaged changes and {len(untracked_files)} untracked changes:\n\n{files_display}",
                     title="Unstaged Changes",

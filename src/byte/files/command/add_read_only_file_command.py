@@ -31,8 +31,8 @@ class ReadOnlyCommand(Command):
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Add specified file to context with read-only permissions."""
 
-        await self.emit_tui(Messages.CommandExecutionStarted())
-        await self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
+        self.emit_tui(Messages.CommandExecutionStarted())
+        self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         file_path = args.file_path
 
@@ -47,7 +47,7 @@ class ReadOnlyCommand(Command):
             await self.notify_success(f"Added {file_path} to context")
             await file_service.notify_file_stats()
 
-        await self.emit_tui(Messages.CommandExecutionCompleted())
+        self.emit_tui(Messages.CommandExecutionCompleted())
 
     async def get_completions(self, text: str) -> List[str]:
         """Provide intelligent file path completions from project discovery.

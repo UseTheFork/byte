@@ -71,7 +71,7 @@ class ValidationNode(BaseNode, UserInteractive):
         if validation_errors:
             error_message = "# Fix the following issues:\n" + "\n".join(error.format() for error in validation_errors)
 
-            await self.emit_tui(
+            self.emit_tui(
                 Messages.CreatePanel(
                     f"{len(validation_errors)} validation error(s) found. Requesting corrections.",
                     title="Validation Failed",

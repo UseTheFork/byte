@@ -43,7 +43,7 @@ class ToolNode(BaseNode):
                 continue
 
             # Emit tool call to TUI
-            await self.emit_tui(
+            self.emit_tui(
                 Messages.ToolCall(
                     name=tool_call["name"],
                     args=tool_call["args"],

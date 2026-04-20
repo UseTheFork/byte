@@ -37,8 +37,8 @@ class ClearCommand(Command):
         conversation history and establishing a fresh context for future messages.
         """
 
-        await self.emit_tui(Messages.CommandExecutionStarted())
-        await self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
+        self.emit_tui(Messages.CommandExecutionStarted())
+        self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         memory_service = self.app.make(MemoryService)
         await memory_service.new_thread()
@@ -47,4 +47,4 @@ class ClearCommand(Command):
         agent_analytics_service.reset_context()
 
         await self.notify_success("Conversation history cleared")
-        await self.emit_tui(Messages.CommandExecutionCompleted())
+        self.emit_tui(Messages.CommandExecutionCompleted())

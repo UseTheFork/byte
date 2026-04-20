@@ -103,12 +103,12 @@ class CommitAgentNode(BaseAgentNode):
         agent_state, config = await self.generate_agent_state(state, config)
         record_response_service = self.app.make(RecordResponseService)
 
-        await self.emit_tui(Messages.AddHeading("Commit Agent", "text-primary"))
-        await self.emit_tui(Messages.Response(status=Status.PENDING, with_indicator=True))
+        self.emit_tui(Messages.AddHeading("Commit Agent", "text-primary"))
+        self.emit_tui(Messages.Response(status=Status.PENDING, with_indicator=True))
 
         result = await runnable.ainvoke(agent_state, config=config)
         await record_response_service.record_response(agent_state, runnable, "commit_agent", config)
 
-        await self.emit_tui(Messages.Response(status=Status.SUCCESS))
+        self.emit_tui(Messages.Response(status=Status.SUCCESS))
 
         return self.route_to(self.goto, {"extracted_content": result, "errors": None})

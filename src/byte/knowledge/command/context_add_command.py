@@ -38,7 +38,7 @@ class ContextAddCommand(Command):
         from byte.knowledge.command.context_add_file_command import ContextAddFileCommand
         from byte.knowledge.command.web_command import WebCommand
 
-        await self.emit_tui(Messages.CommandExecutionStarted())
+        self.emit_tui(Messages.CommandExecutionStarted())
 
         target = args.target
 
@@ -57,4 +57,4 @@ class ContextAddCommand(Command):
             file_args = Namespace(file_path=target)
             await file_command.execute(file_args, raw_args)
 
-        await self.emit_tui(Messages.CommandExecutionCompleted())
+        self.emit_tui(Messages.CommandExecutionCompleted())

@@ -27,7 +27,7 @@ class InteractionService(Service):
         ]
 
         result_future: asyncio.Future[Answer | list[Answer] | str | AnswerCancelled] = asyncio.Future()
-        await self.emit_tui(
+        self.emit_tui(
             Messages.PromptUser(
                 question=message,
                 options=answer_options,
@@ -53,7 +53,7 @@ class InteractionService(Service):
             raise ValueError("Choices list cannot be empty")
 
         result_future: asyncio.Future[Answer | list[Answer] | str | AnswerCancelled] = asyncio.Future()
-        await self.emit_tui(
+        self.emit_tui(
             Messages.PromptUser(
                 question=message,
                 options=choices,
@@ -76,7 +76,7 @@ class InteractionService(Service):
         Usage: `text = await interaction_service.input_text("Enter name:", "default_name")`
         """
         result_future: asyncio.Future[Answer | list[Answer] | str | AnswerCancelled] = asyncio.Future()
-        await self.emit_tui(
+        self.emit_tui(
             Messages.PromptUser(
                 question=message,
                 options=None,

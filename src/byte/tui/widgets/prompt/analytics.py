@@ -1,5 +1,3 @@
-from typing import TYPE_CHECKING
-
 from textual import containers
 from textual.app import ComposeResult
 from textual.containers import HorizontalGroup
@@ -8,11 +6,8 @@ from textual.widgets import Label, Static
 
 from byte.tui.widgets.ui.progress_bar import ProgressBar
 
-if TYPE_CHECKING:
-    pass
 
-
-class TokensInfo(Label):
+class TokensInfo(Static):
     tokens_used: reactive[str] = reactive("")
 
     def watch_tokens_used(self, tokens_used: str) -> None:
@@ -20,7 +15,7 @@ class TokensInfo(Label):
         self.update(tokens_used)
 
 
-class CostInfo(Label):
+class CostInfo(Static):
     cost: reactive[str] = reactive("")
 
     def watch_cost(self, cost: str) -> None:
@@ -28,7 +23,7 @@ class CostInfo(Label):
         self.update(cost)
 
 
-class MemoryUsedInfo(Label):
+class MemoryUsedInfo(Static):
     memory_used: reactive[str] = reactive("")
 
     def watch_memory_used(self, memory_used: str) -> None:
@@ -51,6 +46,18 @@ class FileInfo(Static):
     def watch_read_only(self, read_only: int) -> None:
         """Update the label when read_only changes."""
         self.update(self._format_file_info())
+
+
+class ContextInfo(Static):
+    context_count: reactive[int] = reactive(0)
+
+    def _format_context_info(self) -> str:
+        """Format the context info display text."""
+        return f"Context: [@click=screen.request_manage_context()]{self.context_count} Items[/]"
+
+    def watch_context_count(self, context_count: int) -> None:
+        """Update the label when context_count changes."""
+        self.update(self._format_context_info())
 
 
 class Analytics(containers.VerticalGroup):
@@ -78,6 +85,13 @@ class Analytics(containers.VerticalGroup):
 
         & #file-analytics {
             width: 1fr;
+
+            & FileInfo {
+                width: 50%;
+            }
+            & ContextInfo {
+                width: 50%;
+            }
         }
         & #token-analytics {
             width: 1fr;
@@ -99,6 +113,7 @@ class Analytics(containers.VerticalGroup):
 
     files_read_only: var[int] = var(0)
     files_editable: reactive[int] = reactive(0)
+    context_count: var[int] = var(0)
 
     def __init__(
         self,
@@ -120,9 +135,10 @@ class Analytics(containers.VerticalGroup):
             yield ProgressBar(total=100, classes="", id="memory-progress")
             yield MemoryUsedInfo(self.memory_used, classes="px-1").data_bind(memory_used=Analytics.memory_used)
         with HorizontalGroup(id="file-analytics"):
-            yield FileInfo(classes="px-1 text-right").data_bind(
+            yield FileInfo(classes="px-1 text-left").data_bind(
                 editable=Analytics.files_editable, read_only=Analytics.files_read_only
             )
+            yield ContextInfo(classes="px-1 text-right").data_bind(context_count=Analytics.context_count)
         with HorizontalGroup(id="token-analytics"):
             yield TokensInfo(self.tokens_used, classes="px-1 text-left").data_bind(tokens_used=Analytics.tokens_used)
             yield CostInfo(self.cost, classes="px-1 text-right").data_bind(cost=Analytics.cost)
@@ -152,6 +168,14 @@ class Analytics(containers.VerticalGroup):
         """
         self.files_editable = event.editable
         self.files_read_only = event.read_only
+
+    def update_context(self, event) -> None:
+        """Update context count display.
+
+        Args:
+            event: Event containing context_count information.
+        """
+        self.context_count = event.context_count
 
     def humanizer(self, number: int | float) -> str:
         divisor = 1

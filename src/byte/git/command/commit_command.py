@@ -46,8 +46,8 @@ class CommitCommand(Command):
         Usage: Called automatically when user types `/commit`
         """
 
-        await self.emit_tui(Messages.CommandExecutionStarted())
-        await self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
+        self.emit_tui(Messages.CommandExecutionStarted())
+        self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
         try:
             await self.git_service.stage_changes()
 
@@ -74,4 +74,4 @@ class CommitCommand(Command):
         except InputCancelledError:
             pass
 
-        await self.emit_tui(Messages.CommandExecutionCompleted())
+        self.emit_tui(Messages.CommandExecutionCompleted())
