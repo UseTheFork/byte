@@ -26,37 +26,13 @@ EXACT MATCHING: The tool is extremely literal. Text must match **EXACTLY**
 - Comment spacing (`// comment` vs `//comment`)
 - Brace positioning (`func() {` vs `func(){`)
 
-Common failures:
-
-```
-Expected: "    func foo() {"     (4 spaces)
-Provided: "  func foo() {"       (2 spaces) ❌ FAILS
-
-Expected: "}\n\nfunc bar() {"    (2 newlines)
-Provided: "}\nfunc bar() {"      (1 newline) ❌ FAILS
-
-Expected: "// Comment"           (space after //)
-Provided: "//Comment"            (no space) ❌ FAILS
-```
-
 UNIQUENESS: old_string MUST uniquely identify target instance
 
 - Include 3-5 lines context BEFORE and AFTER change point
 - Include exact whitespace, indentation, surrounding code
 - If text appears multiple times, add more context to make it unique
 
-
-- Plan calls carefully to avoid conflicts
-</critical_requirements>
-<warnings>
-Tool fails if:
-- old_string matches multiple locations
-- old_string doesn't match exactly (including whitespace)
-- Insufficient context causes wrong instance change
-- Indentation is off by even one space
-- Missing or extra blank lines
-- Wrong tabs vs spaces
-</warnings>""",
+</critical_requirements>""",
 )
 async def edit_file(
     path: Annotated[str, "The EXACT Path to a `editable` file located in `<file>`. Use the `source` variable."],

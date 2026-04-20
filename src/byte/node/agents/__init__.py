@@ -35,3 +35,6 @@ def __getattr__(attr_name: str) -> object:
 
 def __dir__() -> list[str]:
     return list(__all__)
+
+
+# AI: add a doc string to this file ai!

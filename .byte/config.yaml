@@ -4,7 +4,7 @@ llm:
   ask_agent_node:
     model: claude-sonnet-4-5
   coder_agent_node:
-    model: mistral-medium-latest
+    model: devstral-medium-latest
   commit_agent_node:
     model: claude-haiku-4-5
 lint:

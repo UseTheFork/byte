@@ -1,4 +1,4 @@
-"""Agent domain for AI agent implementations and orchestration."""
+"""Node implementations for the Byte framework."""
 
 from typing import TYPE_CHECKING
 
@@ -37,3 +37,6 @@ def __getattr__(attr_name: str) -> object:
 
 def __dir__() -> list[str]:
     return list(__all__)
+
+
+
