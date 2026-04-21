@@ -57,7 +57,7 @@ class WorkflowService(Service):
         if chunk["type"] == "messages":
             message_chunk, _ = chunk["data"]
             if isinstance(message_chunk, AIMessageChunk):
-                # self.app["log"].debug(chunk)
+                self.app["log"].debug(chunk)
 
                 # Handle agents that dont have tools. they respond with just string content.
                 if isinstance(message_chunk.content, str):
