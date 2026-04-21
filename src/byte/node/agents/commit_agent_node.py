@@ -98,7 +98,6 @@ class CommitAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        # force_tool_choice="git_commit"
         runnable = self.create_runnable()
 
         agent_state, config = await self.generate_agent_state(state, config)

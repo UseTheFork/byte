@@ -274,8 +274,6 @@ class LintService(Service, UserInteractive):
 
             self.app["log"].info(changed_files)
 
-            # AI: The below
-
             # Emit lint started event
             self.emit_tui(
                 Messages.LintStarted(

@@ -1,6 +1,6 @@
 import asyncio
 
-from partial_json_parser import OBJ, MalformedJSON, loads
+from partial_json_parser import OBJ, loads
 from rich.console import RenderableType
 from rich.text import Text
 from textual.reactive import reactive
@@ -112,7 +112,7 @@ class ToolCall(Widget, can_focus=False):
         """Render the tool call display."""
         try:
             parsed = loads(self.raw_args, OBJ)
-        except MalformedJSON:
+        except Exception:
             parsed = None
 
         # Build the output text

@@ -130,8 +130,6 @@ class WorkflowService(Service):
                                     )
                                 )
 
-                self.app["log"].debug(self.message_chunks)
-
         elif chunk["type"] == "tasks":
             # Close any open streams when we switch tasks
             for idx, tracked in self.message_chunks.items():
@@ -145,7 +143,8 @@ class WorkflowService(Service):
                             Messages.ToolResponse(tool_id=self.message_chunks[idx]["id"], status=Status.SUCCESS)
                         )
 
-            # tui.post_message(Messages.CommandStreamChunk(panel_id=self.panel_id, chunk_type="task", data=chunk["data"]))
+            # Reset message_chunks betwean tasks
+            self.message_chunks = {}
 
         return chunk
 
