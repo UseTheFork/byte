@@ -133,11 +133,11 @@ class ResponsePanel(VerticalGroup):
         await self.mount(markdown)
         return markdown
 
-    async def create_linting(self, event: Messages.LintStarted) -> Linting:
+    async def create_linting(self, event: Messages.Lint) -> Linting:
         """Create and mount a new Linting widget.
 
         Args:
-            event: LintStarted message containing total_commands
+            event: Lint message containing total_commands
 
         Returns:
             The mounted Linting widget

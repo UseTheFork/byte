@@ -239,26 +239,18 @@ class Conversation(Widget):
 
         self.scroll_to_latest_message()
 
-    @on(Messages.LintStarted)
-    async def lint_started(self, event: Messages.LintStarted) -> None:
-        """Handle linting operation start."""
+    @on(Messages.Lint)
+    async def handle_lint(self, event: Messages.Lint) -> None:
+        """Handle linting operation with status-based dispatch."""
         response_panel = await self.get_or_create_response_panel(event.panel_id)
 
-        await response_panel.create_linting(event)
-        self.scroll_to_latest_message()
+        if event.status is Status.PENDING:
+            await response_panel.create_linting(event)
+        elif event.status is Status.RUNNING:
+            await response_panel.update_linting_progress(event.current_file, event.completed, event.total)
+        elif event.status is Status.SUCCESS:
+            await response_panel.complete_linting(event.total_files, event.failed_files, event.success)
 
-    @on(Messages.LintProgress)
-    async def lint_progress(self, event: Messages.LintProgress) -> None:
-        """Handle linting progress update."""
-        response_panel = await self.get_or_create_response_panel(event.panel_id)
-        await response_panel.update_linting_progress(event.current_file, event.completed, event.total)
-        self.scroll_to_latest_message()
-
-    @on(Messages.LintCompleted)
-    async def lint_completed(self, event: Messages.LintCompleted) -> None:
-        """Handle linting operation completion."""
-        response_panel = await self.get_or_create_response_panel(event.panel_id)
-        await response_panel.complete_linting(event.total_files, event.failed_files, event.success)
         self.scroll_to_latest_message()
 
     @on(Messages.LintResults)

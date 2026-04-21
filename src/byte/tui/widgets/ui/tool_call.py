@@ -83,6 +83,7 @@ class ToolCall(Widget, can_focus=False):
     ToolCall {
         height: auto;
         background: transparent;
+        border-top: round $secondary;
         
         & Label {
             height: auto;
@@ -106,6 +107,7 @@ class ToolCall(Widget, can_focus=False):
             disabled=disabled,
         )
         self.tool_name = tool_name
+        self.border_title = f"{self.tool_name}()"
         self.raw_args = ""
 
     def render(self) -> RenderableType:
@@ -116,7 +118,7 @@ class ToolCall(Widget, can_focus=False):
             parsed = None
 
         # Build the output text
-        output = Text(f"{self.tool_name}()")
+        output = Text("")
 
         # If we have a valid parsed dictionary, display its contents
         if parsed is not None and isinstance(parsed, dict) and parsed:

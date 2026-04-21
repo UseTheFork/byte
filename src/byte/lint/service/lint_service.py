@@ -9,7 +9,7 @@ from byte.lint import LintConfigException, LintFile
 from byte.support import Boundary, BoundaryType
 from byte.support.mixins import UserInteractive
 from byte.support.utils import get_language_from_filename, list_to_multiline_text
-from byte.tui import Messages
+from byte.tui import Messages, Status
 
 
 class LintService(Service, UserInteractive):
@@ -201,7 +201,8 @@ class LintService(Service, UserInteractive):
             # Emit progress update
             self._completed_count += 1
             self.emit_tui(
-                Messages.LintProgress(
+                Messages.Lint(
+                    status=Status.RUNNING,
                     current_file=str(file_path),
                     completed=self._completed_count,
                     total=self._total_commands,
@@ -276,7 +277,8 @@ class LintService(Service, UserInteractive):
 
             # Emit lint started event
             self.emit_tui(
-                Messages.LintStarted(
+                Messages.Lint(
+                    status=Status.PENDING,
                     total_commands=self._total_commands,
                 )
             )
@@ -294,7 +296,8 @@ class LintService(Service, UserInteractive):
             # Emit lint completed event
             failed_count = len([r for r in results if r.exit_code != 0])
             self.emit_tui(
-                Messages.LintCompleted(
+                Messages.Lint(
+                    status=Status.SUCCESS,
                     total_files=len(changed_files),
                     failed_files=failed_count,
                     success=failed_count == 0,

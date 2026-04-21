@@ -127,47 +127,6 @@ class Messages:
         read_only: int
 
     @dataclass
-    class LintStarted(Message):
-        """Linting operation has started.
-
-        Args:
-            total_commands: Total number of command executions (files x commands)
-        """
-
-        total_commands: int
-        panel_id: str | None = None
-
-    @dataclass
-    class LintCompleted(Message):
-        """Linting operation has completed.
-
-        Args:
-            total_files: Total files processed
-            failed_files: Number of files with lint errors
-            success: Whether all lints passed (no errors)
-        """
-
-        total_files: int
-        failed_files: int
-        success: bool
-        panel_id: str | None = None
-
-    @dataclass
-    class LintProgress(Message):
-        """Progress update during linting.
-
-        Args:
-            current_file: Name of file currently being linted
-            completed: Number of files completed
-            total: Total number of files
-        """
-
-        current_file: str
-        completed: int
-        total: int
-        panel_id: str | None = None
-
-    @dataclass
     class PromptUser(Message):
         """Request user input through an interactive prompt."""
 
@@ -206,6 +165,32 @@ class Messages:
 
         name: str
         args: dict | None = None
+        panel_id: str | None = None
+
+    @dataclass
+    class Lint(Message):
+        """Unified linting operation message with status-based fields.
+
+        Args:
+            status: Current status of the linting operation
+            total_commands: Total number of command executions (used on PENDING)
+            current_file: Name of file currently being linted (used on RUNNING)
+            completed: Number of files completed (used on RUNNING)
+            total: Total number of files (used on RUNNING)
+            total_files: Total files processed (used on SUCCESS)
+            failed_files: Number of files with lint errors (used on SUCCESS)
+            success: Whether all lints passed (used on SUCCESS)
+            panel_id: Optional panel identifier for UI routing
+        """
+
+        status: Status = Status.PENDING
+        total_commands: int = 0
+        current_file: str | None = None
+        completed: int = 0
+        total: int = 0
+        total_files: int = 0
+        failed_files: int = 0
+        success: bool = True
         panel_id: str | None = None
 
     @dataclass
