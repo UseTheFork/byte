@@ -124,10 +124,10 @@ class AskAgentNode(BaseAgentNode):
         agent_state, config = await self.generate_agent_state(state, config)
         record_response_service = self.app.make(RecordResponseService)
 
-        self.emit_tui(Messages.AddHeading("Ask Agent", "text-primary"))
+        self.emit_tui(Messages.AddHeading(self.human_name, "text-primary"))
 
         self.app.dispatch_task(
-            record_response_service.record_response(agent_state, runnable, "ask_agent", config),
+            record_response_service.record_response(agent_state, runnable, self.name, config),
         )
         result = await runnable.ainvoke(agent_state, config=config)
 

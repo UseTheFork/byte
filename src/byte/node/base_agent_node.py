@@ -18,11 +18,13 @@ from byte.support import Str
 class BaseAgentNode(BaseNode):
     @property
     def name(self) -> str:
-        """Command name used for invocation (without prefix).
-
-        Usage: return "add" for /add command
-        """
+        """Agent Name"""
         return Str.class_to_snake_case(self.__class__.__name__)
+
+    @property
+    def human_name(self) -> str:
+        """Human readable agent name"""
+        return Str.snake_to_title(self.name).replace("Agent Node", "").strip()
 
     def get_enforcement(self) -> List[str]:
         return []

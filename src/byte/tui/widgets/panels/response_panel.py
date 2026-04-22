@@ -62,6 +62,9 @@ class ResponsePanel(VerticalGroup):
         return self.current_stream
 
     async def add_markdown_chunk(self, chunk: str):
+        if self.current_stream is None:
+            await self.start_markdown_stream()
+
         assert self.current_stream is not None, "start_markdown_stream() must be called before add_markdown_chunk()"
         await self.current_stream.write(chunk)
 

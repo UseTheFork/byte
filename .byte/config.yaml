@@ -6,7 +6,7 @@ llm:
     model: claude-sonnet-4-6
     provider: anthropic
   coder_agent_node:
-    model: claude-haiku-4-5
+    model: claude-sonnet-4-6
     provider: anthropic
   commit_agent_node:
     model: claude-haiku-4-5
