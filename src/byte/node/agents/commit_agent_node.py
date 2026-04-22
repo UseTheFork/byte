@@ -39,6 +39,15 @@ commit_user_template = [
     "Read and apply ALL rules for commit types, scopes, and description formatting.",
     Boundary.close(BoundaryType.TASK),
     "{commit_guidelines}",
+    "",
+    Boundary.open(BoundaryType.RESPONSE_FORMAT),
+    "Format your response as follows:",
+    "",
+    "1. Start with a SHORT analysis of the changes in list format.",
+    "2. Call the `git_commit` tool ONCE.",
+    "3. If the tool call is successful, end your turn with no further output.",
+    Boundary.close(BoundaryType.RESPONSE_FORMAT),
+    "",
 ]
 
 commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
