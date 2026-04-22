@@ -293,3 +293,11 @@ class GitService(Service, UserInteractive, Notifiable):
             )
 
         return diff_data
+
+    def get_tracked_files(self) -> List[Path]:
+        """Get all files tracked by git (respects .gitignore naturally).
+
+        Usage: `files = await git_service.get_tracked_files()` -> all tracked files
+        """
+        tracked = self._repo.git.ls_files().splitlines()
+        return [Path(f) for f in tracked]
