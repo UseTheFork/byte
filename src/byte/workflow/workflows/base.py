@@ -24,7 +24,9 @@ class BaseWorkflow(ABC, Bootable, Eventable, Configurable):
         """
         pass
 
-    async def compile(self, request: dict, thread_id: Optional[str] = None):
+    async def compile(
+        self, request: dict, thread_id: Optional[str] = None
+    ) -> tuple[CompiledStateGraph, BaseState, RunnableConfig]:
         """Stream agent responses using astream_events for comprehensive event handling.
 
         Yields events from the agent graph processing, enabling fine-grained

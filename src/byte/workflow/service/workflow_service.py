@@ -176,6 +176,7 @@ class WorkflowService(Service):
                 stream_mode=["messages", "tasks"],
                 version="v2",
                 subgraphs=True,
+                debug=True,
             ):
                 processed_event = await self._handle_stream_event(chunk)
 
