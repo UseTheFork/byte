@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from langchain_core.runnables import Runnable
 from langgraph.graph.state import RunnableConfig
 
@@ -38,8 +36,8 @@ class RecordResponseService(Service):
         if not self.app.is_development():
             return None
 
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        cache_file = self.app.cache_path(f"development/{agent_name}_{timestamp}.md")
+        # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        cache_file = self.app.cache_path(f"development/{agent_name}.md")
 
         # Ensure cache directory exists
         cache_file.parent.mkdir(parents=True, exist_ok=True)

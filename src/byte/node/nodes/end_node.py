@@ -1,6 +1,10 @@
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from langchain.messages import AIMessage, HumanMessage, ToolMessage
+
+if TYPE_CHECKING:
+    from byte.node.agents import AskAgentMessage, CoderAgentMessage, CoderPlanAgentMessage
+
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
@@ -41,15 +45,55 @@ class EndNode(BaseNode):
         """
         message_parts = []
 
+        # Find the last CoderPlanAgentMessage by iterating in reverse
+        last_coder_plan_message = None
+        for msg in reversed(scratch_messages):
+            if isinstance(msg, CoderPlanAgentMessage):
+                last_coder_plan_message = msg
+                break
+
         for message in scratch_messages:
             if isinstance(message, AIMessage):
                 # Extract text content from AIMessage
                 content_text = self._extract_text_from_content(message.content)
+
+                if message is last_coder_plan_message:
+                    content_text = list_to_multiline_text(
+                        [
+                            Boundary.open(BoundaryType.AGENT_MESSAGE, meta={"agent_type": "Coder Agent"}),
+                            content_text,
+                            Boundary.close(BoundaryType.AGENT_MESSAGE),
+                        ]
+                    )
+                elif isinstance(message, CoderAgentMessage):
+                    content_text = list_to_multiline_text(
+                        [
+                            Boundary.open(BoundaryType.AGENT_MESSAGE, meta={"agent_type": "Coder Agent"}),
+                            content_text,
+                            Boundary.close(BoundaryType.AGENT_MESSAGE),
+                        ]
+                    )
+                elif isinstance(message, AskAgentMessage):
+                    content_text = list_to_multiline_text(
+                        [
+                            Boundary.open(BoundaryType.AGENT_MESSAGE, meta={"agent_type": "Ask Agent"}),
+                            content_text,
+                            Boundary.close(BoundaryType.AGENT_MESSAGE),
+                        ]
+                    )
+
                 message_parts.append(content_text)
             elif isinstance(message, ToolMessage):
                 # Add tool execution summary
                 tool_name = getattr(message, "name", "unknown tool")
-                message_parts.append(f"called {tool_name} applied successfully")
+                tool_status = getattr(message, "status", "unknown")
+                content_text = list_to_multiline_text(
+                    [
+                        Boundary.open(BoundaryType.TOOL_CALL),
+                        f"Called {tool_name} applied with status {tool_status}",
+                        Boundary.close(BoundaryType.TOOL_CALL),
+                    ]
+                )
 
         return list_to_multiline_text(message_parts)
 

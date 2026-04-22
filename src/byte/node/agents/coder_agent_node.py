@@ -1,6 +1,5 @@
-from typing import Literal, Type
+from typing import Literal, Type, cast
 
-from langchain.messages import AIMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
@@ -13,16 +12,18 @@ from byte.node import (
     BaseAgentNode,
     BaseNode,
 )
+from byte.node.agents import CoderPlanAgentMessage
+from byte.node.base_agent_node import BaseByteAIMessage
 from byte.node.nodes import EndNode
 from byte.orchestration import AssistantContextSchema, BaseState, preamble
 from byte.support import Boundary, BoundaryType, Str
 from byte.support.utils import extract_content_from_message, list_to_multiline_text
-from byte.tui import Messages, Status
+from byte.tui import Messages
 
 coder_user_template = [
     Boundary.open(BoundaryType.PLAN),
     "```text",
-    "{user_request}",
+    "{coder_plan_agent_request}",
     "```",
     "",
     "You **MUST** follow the plan provided above.",
@@ -48,7 +49,7 @@ coder_user_template = [
     "4. **Round 3** - Final draft and validation:",
     "   - Draft: Final pseudo code ready for execution",
     "   - Reflection: Confirm no further improvements needed",
-    "5. **Tool Usage (MANDATORY)** - Execute the implementation using tool calls",
+    "5. **Tool Usage** - Execute the implementation using tool calls",
     "6. **Summary** - SHORT, CONCISE bulleted list of what was changed",
     "",
     "Requirements:",
@@ -211,8 +212,10 @@ coder_user_template = [
     "- Updated auth logic",
     "```",
     Boundary.close(BoundaryType.EXAMPLE),
-    "{file_context}",
+    "{file_context_with_line_numbers}",
+    "",
     "{operating_principles}",
+    "",
     Boundary.critical("All tool operations are applied immediately and are reflected in the file_context."),
     # Boundary.critical("REMEMBER: You MUST use the tools AFTER completing all drafting rounds."),
 ]
@@ -236,6 +239,10 @@ coder_prompt = ChatPromptTemplate.from_messages(
         ("placeholder", "{errors}"),
     ]
 )
+
+
+class CoderAgentMessage(BaseByteAIMessage):
+    pass
 
 
 class CoderAgentNode(BaseAgentNode):
@@ -279,12 +286,23 @@ class CoderAgentNode(BaseAgentNode):
         record_response_service = self.app.make(RecordResponseService)
 
         self.emit_tui(Messages.AddHeading("Coder Agent", "text-primary"))
-        self.emit_tui(Messages.Response(status=Status.PENDING, with_indicator=True))
 
-        await record_response_service.record_response(agent_state, runnable, "coder_agent", config)
+        # Extract the last CoderPlanAgentMessage from scratch_messages
+        last_coder_plan_message = None
+        for msg in reversed(state.get("scratch_messages", [])):
+            if isinstance(msg, CoderPlanAgentMessage):
+                last_coder_plan_message = msg
+                break
+
+        agent_state["coder_plan_agent_request"] = last_coder_plan_message.content if last_coder_plan_message else ""
+
         result = await runnable.ainvoke(agent_state, config=config)
+        self.app.dispatch_task(
+            record_response_service.record_response(agent_state, runnable, "ask_agent", config),
+        )
 
         if result.tool_calls and len(result.tool_calls) > 0:
+            result = cast(CoderAgentMessage, result)
             return self.route_to(
                 "tool_node",
                 {
@@ -292,9 +310,7 @@ class CoderAgentNode(BaseAgentNode):
                     "errors": None,
                 },
             )
-        else:
-            self.emit_tui(Messages.Response(status=Status.SUCCESS))
 
         msg = extract_content_from_message(result)
 
-        return self.route_to(self.goto, {"scratch_messages": AIMessage(msg)})
+        return self.route_to(self.goto, {"scratch_messages": CoderAgentMessage(content=msg)})

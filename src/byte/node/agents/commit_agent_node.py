@@ -1,5 +1,6 @@
 from typing import Literal, Type
 
+from langchain.messages import AIMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
@@ -60,6 +61,10 @@ commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
 )
 
 
+class CommitAgentMessage(AIMessage):
+    pass
+
+
 class CommitAgentNode(BaseAgentNode):
     def boot(
         self,
@@ -106,6 +111,8 @@ class CommitAgentNode(BaseAgentNode):
         self.emit_tui(Messages.AddHeading("Commit Agent", "text-primary"))
 
         result = await runnable.ainvoke(agent_state, config=config)
-        await record_response_service.record_response(agent_state, runnable, "commit_agent", config)
+        self.app.dispatch_task(
+            record_response_service.record_response(agent_state, runnable, "commit_agent", config),
+        )
 
         return self.route_to(self.goto, {"extracted_content": result, "errors": None})

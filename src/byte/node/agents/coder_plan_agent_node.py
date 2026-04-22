@@ -1,4 +1,4 @@
-from typing import Literal, Type
+from typing import Literal, Type, cast
 
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
@@ -12,6 +12,7 @@ from byte.node import (
     BaseNode,
 )
 from byte.node.agents import CoderAgentNode
+from byte.node.base_agent_node import BaseByteAIMessage
 from byte.orchestration import (
     AssistantContextSchema,
     BaseState,
@@ -19,7 +20,7 @@ from byte.orchestration import (
 )
 from byte.support import Boundary, BoundaryType, Str
 from byte.support.utils import extract_content_from_message, list_to_multiline_text
-from byte.tui import Messages, Status
+from byte.tui import Messages
 
 coder_plan_user_template = [
     "{modified_messages}",
@@ -117,6 +118,10 @@ coder_plan_enforcement = [
 ]
 
 
+class CoderPlanAgentMessage(BaseByteAIMessage):
+    pass
+
+
 class CoderPlanAgentNode(BaseAgentNode):
     def boot(
         self,
@@ -153,14 +158,14 @@ class CoderPlanAgentNode(BaseAgentNode):
         record_response_service = self.app.make(RecordResponseService)
 
         self.emit_tui(Messages.AddHeading("Plan Agent", "text-primary"))
-        self.emit_tui(Messages.Response(status=Status.PENDING))
 
-        await record_response_service.record_response(agent_state, runnable, "coder_plan_agent", config)
         result = await runnable.ainvoke(agent_state, config=config)
-
-        self.emit_tui(Messages.Response(status=Status.SUCCESS))
+        self.app.dispatch_task(
+            record_response_service.record_response(agent_state, runnable, "coder_plan_agent", config),
+        )
 
         if result.tool_calls and len(result.tool_calls) > 0:
+            result = cast(CoderPlanAgentMessage, result)
             return self.route_to(
                 "tool_node",
                 {
@@ -171,4 +176,4 @@ class CoderPlanAgentNode(BaseAgentNode):
 
         # Replace the user request with the agent plan
         msg = extract_content_from_message(result)
-        return self.route_to(self.goto, {"user_request": msg})
+        return self.route_to(self.goto, {"scratch_messages": CoderPlanAgentMessage(content=msg)})

@@ -1,6 +1,5 @@
-from typing import Literal, Type
+from typing import Literal, Type, cast
 
-from langchain_core.messages import AIMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
@@ -13,6 +12,7 @@ from byte.node import (
     BaseAgentNode,
     BaseNode,
 )
+from byte.node.base_agent_node import BaseByteAIMessage
 from byte.node.nodes import EndNode
 from byte.orchestration import (
     AssistantContextSchema,
@@ -21,7 +21,7 @@ from byte.orchestration import (
 )
 from byte.support import Boundary, BoundaryType, Str
 from byte.support.utils import extract_content_from_message, list_to_multiline_text
-from byte.tui import Messages, Status
+from byte.tui import Messages
 
 ask_user_template = [
     "{modified_messages}",
@@ -78,6 +78,10 @@ ask_enforcement = [
 ]
 
 
+class AskAgentMessage(BaseByteAIMessage):
+    pass
+
+
 class AskAgentNode(BaseAgentNode):
     def boot(
         self,
@@ -125,14 +129,14 @@ class AskAgentNode(BaseAgentNode):
         record_response_service = self.app.make(RecordResponseService)
 
         self.emit_tui(Messages.AddHeading("Ask Agent", "text-primary"))
-        self.emit_tui(Messages.Response(status=Status.PENDING))
 
+        self.app.dispatch_task(
+            record_response_service.record_response(agent_state, runnable, "ask_agent", config),
+        )
         result = await runnable.ainvoke(agent_state, config=config)
-        await record_response_service.record_response(agent_state, runnable, "ask_agent", config)
-
-        self.emit_tui(Messages.Response(status=Status.SUCCESS))
 
         if result.tool_calls and len(result.tool_calls) > 0:
+            result = cast(AskAgentMessage, result)
             return self.route_to(
                 "tool_node",
                 {
@@ -142,4 +146,4 @@ class AskAgentNode(BaseAgentNode):
             )
 
         msg = extract_content_from_message(result)
-        return self.route_to(self.goto, {"scratch_messages": AIMessage(msg)})
+        return self.route_to(self.goto, {"scratch_messages": AskAgentMessage(content=msg)})

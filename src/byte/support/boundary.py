@@ -66,6 +66,7 @@ class BoundaryType(str, Enum):
 
     CONVERSATION_HISTORY = "conversation_history"
     AGENT_MESSAGE = "agent_message"
+    TOOL_CALL = "tool_call"
     USER_MESSAGE = "user_message"
 
     def __str__(self):

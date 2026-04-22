@@ -107,7 +107,7 @@ class ToolCall(Widget, can_focus=False):
             disabled=disabled,
         )
         self.tool_name = tool_name
-        self.border_title = f"{self.tool_name}()"
+        self.border_title = f" {self.tool_name}() "
         self.raw_args = ""
 
     def render(self) -> RenderableType:
