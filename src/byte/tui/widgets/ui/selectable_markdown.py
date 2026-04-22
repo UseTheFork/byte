@@ -298,6 +298,7 @@ class SelectableMarkdown(Widget, can_focus=True):
     def __init__(
         self,
         message: str = "",
+        border_title: str = "",
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
@@ -310,6 +311,7 @@ class SelectableMarkdown(Widget, can_focus=True):
             disabled=disabled,
         )
         self.message = message
+        self.border_title = f" {border_title} "
 
     def action_up(self) -> None:
         self.screen.focus_previous(SelectableMarkdown)

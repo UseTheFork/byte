@@ -11,6 +11,7 @@ from textual.reactive import reactive
 from textual.widget import Widget
 
 from byte import EventBus
+from byte.support import Str
 from byte.tui import Status, TuiEvents
 from byte.tui.messages import Messages
 from byte.tui.schemas import Ask
@@ -175,8 +176,8 @@ class Conversation(Widget):
         await response_panel.add_user_message(event)
         self.scroll_to_latest_message()
 
-    @on(Messages.AddHeading)
-    async def add_heading(self, event: Messages.AddHeading) -> None:
+    @on(Messages.CreateHeading)
+    async def add_heading(self, event: Messages.CreateHeading) -> None:
         response_panel = await self.get_or_create_response_panel(event.panel_id)
         await response_panel.add_heading(event)
         self.scroll_to_latest_message()
@@ -193,7 +194,8 @@ class Conversation(Widget):
             self.post_message(Messages.LoadingIndicatorShow(event.with_indicator, panel_id=event.panel_id))
 
         if event.status is Status.PENDING:
-            await response_panel.start_markdown_stream()
+            heading = Str.snake_to_title(str(event.chunk)).replace(" Node", "").strip()
+            await response_panel.start_markdown_stream(heading)
         elif event.status is Status.RUNNING:
             await response_panel.add_markdown_chunk(str(event.chunk))
         elif event.status is Status.SUCCESS:

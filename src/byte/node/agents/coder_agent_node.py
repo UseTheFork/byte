@@ -17,7 +17,6 @@ from byte.node.nodes import EndNode
 from byte.orchestration import AssistantContextSchema, BaseState, preamble
 from byte.support import Boundary, BoundaryType, Str
 from byte.support.utils import extract_content_from_message, list_to_multiline_text
-from byte.tui import Messages
 
 coder_user_template = [
     "{modified_messages}",
@@ -148,8 +147,6 @@ class CoderAgentNode(BaseAgentNode):
         agent_state, config = await self.generate_agent_state(state, config)
         runnable = self.create_runnable()
         record_response_service = self.app.make(RecordResponseService)
-
-        self.emit_tui(Messages.AddHeading(self.human_name, "text-primary"))
 
         # Extract the last CoderPlanAgentMessage from scratch_messages
         last_coder_plan_message = None

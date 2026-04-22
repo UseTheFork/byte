@@ -17,7 +17,6 @@ from byte.node.nodes import EndNode
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.support import Boundary, BoundaryType, Str
 from byte.support.utils import extract_content_from_message, list_to_multiline_text
-from byte.tui import Messages
 
 # Conventional commit message generation prompt
 # Adapted from Aider: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/prompts.py#L8
@@ -103,8 +102,6 @@ class CommitAgentNode(BaseAgentNode):
 
         agent_state, config = await self.generate_agent_state(state, config)
         record_response_service = self.app.make(RecordResponseService)
-
-        self.emit_tui(Messages.AddHeading(self.human_name, "text-primary"))
 
         result = await runnable.ainvoke(agent_state, config=config)
         self.app.dispatch_task(

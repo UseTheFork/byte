@@ -48,16 +48,16 @@ class ResponsePanel(VerticalGroup):
     async def add_user_message(self, event: Messages.AddUserInput):
         await self.mount(HumanMessage(f"/{event.command} {event.body}"))
 
-    async def add_heading(self, event: Messages.AddHeading):
+    async def add_heading(self, event: Messages.CreateHeading):
         await self.mount(TextRule(event.heading, classes=event.classes))
 
-    async def add_static_markdown(self, content: str = ""):
-        markdown = SelectableMarkdown(content)
+    async def add_static_markdown(self, content: str = "", border_title: str = ""):
+        markdown = SelectableMarkdown(content, border_title=border_title)
         await self.mount(markdown)
         return markdown
 
-    async def start_markdown_stream(self):
-        markdown_widget = await self.add_static_markdown("")
+    async def start_markdown_stream(self, border_title: str = ""):
+        markdown_widget = await self.add_static_markdown("", border_title)
         self.current_stream = SelectableMarkdown.get_stream(markdown_widget)
         return self.current_stream
 

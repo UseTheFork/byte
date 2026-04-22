@@ -120,6 +120,7 @@ SelectableMarkdown {
   max-width: 1fr;
   margin: 0;
   padding: 0;
+  border-top: round $primary;
 
   &.response-in-progress {
     background: $primary 3%;

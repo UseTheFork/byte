@@ -75,7 +75,7 @@ class Messages:
         panel_id: str | None = None
 
     @dataclass
-    class AddHeading(Message):
+    class CreateHeading(Message):
         heading: str
         classes: str = "text-muted"
         panel_id: str | None = None

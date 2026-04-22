@@ -21,7 +21,6 @@ from byte.orchestration import (
 )
 from byte.support import Boundary, BoundaryType, Str
 from byte.support.utils import extract_content_from_message, list_to_multiline_text
-from byte.tui import Messages
 
 ask_user_template = [
     "{modified_messages}",
@@ -124,8 +123,6 @@ class AskAgentNode(BaseAgentNode):
 
         agent_state, config = await self.generate_agent_state(state, config)
         record_response_service = self.app.make(RecordResponseService)
-
-        self.emit_tui(Messages.AddHeading(self.human_name, "text-primary"))
 
         self.app.dispatch_task(
             record_response_service.record_response(agent_state, runnable, self.name, config),

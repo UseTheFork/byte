@@ -6,6 +6,7 @@ from langchain_core.callbacks import get_usage_metadata_callback
 from byte import Service
 from byte.analytics import AgentAnalyticsService
 from byte.orchestration import TokenUsageSchema
+from byte.support import Str
 from byte.tui import Messages, Status
 from byte.workflow import BaseWorkflow
 
@@ -55,9 +56,10 @@ class WorkflowService(Service):
         """
 
         if chunk["type"] == "messages":
-            message_chunk, _ = chunk["data"]
+            message_chunk, metadata = chunk["data"]
             if isinstance(message_chunk, AIMessageChunk):
                 self.app["log"].debug(chunk)
+                self.app["log"].debug(metadata)
 
                 # Handle agents that dont have tools. they respond with just string content.
                 if isinstance(message_chunk.content, str):
@@ -95,7 +97,9 @@ class WorkflowService(Service):
                                 }
 
                                 if block.get("type") == "text":
-                                    self.emit_tui(Messages.Response(status=Status.PENDING))
+                                    self.emit_tui(
+                                        Messages.Response(status=Status.PENDING, chunk=metadata.get("langgraph_node"))
+                                    )
 
                                 elif block.get("type") == "tool_use":
                                     self.message_chunks[block["index"]]["id"] = block.get("id")
@@ -168,6 +172,10 @@ class WorkflowService(Service):
         processed_event = None
 
         self.message_chunks = {}
+
+        self.emit_tui(
+            Messages.CreateHeading(Str.snake_to_title(Str.snake_case(workflow.__class__.__name__)), "text-primary")
+        )
 
         with get_usage_metadata_callback() as usage_metadata_callback:
             async for chunk in graph.astream(
