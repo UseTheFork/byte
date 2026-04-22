@@ -1,5 +1,5 @@
 from byte import Service
-from byte.git import CommitGroup, CommitMessage, GitService
+from byte.git import CommitMessage, GitService
 from byte.support import Boundary, BoundaryType
 from byte.support.mixins import UserInteractive
 from byte.support.utils import list_to_multiline_text
@@ -72,7 +72,7 @@ class CommitService(Service, UserInteractive):
         prompt = list_to_multiline_text(diff_section) + list_to_multiline_text(file_section)
         return {"user_request": prompt, "touched_files": touched_files}
 
-    async def format_conventional_commit(self, commit_message: CommitMessage | CommitGroup) -> str:
+    async def format_conventional_commit(self, commit_message: CommitMessage) -> str:
         """Format a CommitMessage into a conventional commit string.
 
         Formats according to the Conventional Commits specification:
@@ -126,8 +126,8 @@ class CommitService(Service, UserInteractive):
             if git_config.enable_body and commit_message.body:
                 context_parts.append(f"Body: {commit_message.body}")
 
-            if hasattr(commit_message, "files") and commit_message.files:
-                context_parts.append(f"Files: {', '.join(commit_message.files)}")
+            # if hasattr(commit_message, "files") and commit_message.files:
+            #     context_parts.append(f"Files: {', '.join(commit_message.files)}")
 
             console.print_panel("\n".join(context_parts), title="Commit Details")
 

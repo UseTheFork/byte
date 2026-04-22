@@ -84,6 +84,8 @@ coder_user_template = [
     Boundary.close(BoundaryType.RESPONSE_FORMAT),
     Boundary.close(BoundaryType.TASK),
     "{operating_principles}",
+    "",
+    Boundary.critical("All tool operations are applied immediately and are reflected in the <context>."),
 ]
 
 coder_prompt = ChatPromptTemplate.from_messages(

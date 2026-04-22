@@ -23,6 +23,7 @@ class ToolNode(BaseNode):
 
         tool_registry_service = self.app.make(ToolRegistryService)
         tools = tool_registry_service.get_all_tools()
+        self.app["log"].info(tools)
 
         # Check if tools are available
         if not tools:

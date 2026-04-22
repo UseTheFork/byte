@@ -63,13 +63,7 @@ class CommitCommand(Command):
             workflow_service = self.app.make(WorkflowService)
             request = await self.commit_service.build_commit_prompt()
 
-            commit_result = await workflow_service.execute(commit_workflow, request)
-
-            formatted_message = await self.commit_service.format_conventional_commit(
-                commit_result["data"]["result"]["extracted_content"]
-            )
-
-            await self.git_service.commit(formatted_message)
+            await workflow_service.execute(commit_workflow, request)
 
         except InputCancelledError:
             pass

@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Callable, Optional, TypeVar
 
 from git import InvalidGitRepositoryError, Repo
+from textual.message import Message
 
 from byte import ServiceProvider, TaskManager
 from byte.foundation import Console, Container, FoundationServiceProvider, Kernel
@@ -483,3 +484,15 @@ class Application(Container):
         """
         task_manager = self.make(TaskManager)
         return task_manager.dispatch_task(coro)
+
+    # TODO: Docs strings
+    def emit_tui(self, payload: Message):
+        """ """
+        if hasattr(payload, "panel_id"):
+            from byte.tui import TUIManagerService
+
+            tui_manager_service = self.make(TUIManagerService)
+            payload.panel_id = tui_manager_service.get_panel_id()  # ty:ignore[invalid-assignment]
+
+        byte_tui = self.tui()
+        byte_tui.conversation.post_message(payload)

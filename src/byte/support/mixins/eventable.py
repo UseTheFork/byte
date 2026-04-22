@@ -54,11 +54,4 @@ class Eventable:
         if not self.app:
             raise RuntimeError("No app available - ensure service is properly initialized")
 
-        if hasattr(payload, "panel_id"):
-            from byte.tui import TUIManagerService
-
-            tui_manager_service = self.app.make(TUIManagerService)
-            payload.panel_id = tui_manager_service.get_panel_id()  # ty:ignore[invalid-assignment]
-
-        byte_tui = self.app.tui()
-        byte_tui.conversation.post_message(payload)
+        self.app.emit_tui(payload)

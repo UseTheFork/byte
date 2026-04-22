@@ -3,7 +3,7 @@ from typing import List, Type
 from langchain.tools import BaseTool
 
 from byte import Command, Service, ServiceProvider
-from byte.git import CommitCommand, CommitService, GitService, git_grep
+from byte.git import CommitCommand, CommitService, GitService, git_commit, git_grep
 
 
 class GitServiceProvider(ServiceProvider):
@@ -16,7 +16,7 @@ class GitServiceProvider(ServiceProvider):
 
     def tools(self) -> List[BaseTool]:
         """"""
-        return [git_grep]
+        return [git_grep, git_commit]
 
     def services(self) -> List[Type[Service]]:
         return [

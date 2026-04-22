@@ -1,4 +1,4 @@
-from typing import Literal, Type
+from typing import Literal, Type, cast
 
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
@@ -6,16 +6,17 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
-from byte.git import CommitMessage
+from byte.git import git_commit
 from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
     BaseNode,
+    ByteAIMessage,
 )
 from byte.node.nodes import EndNode
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.support import Boundary, BoundaryType, Str
-from byte.support.utils import list_to_multiline_text
+from byte.support.utils import extract_content_from_message, list_to_multiline_text
 from byte.tui import Messages
 
 # Conventional commit message generation prompt
@@ -87,8 +88,8 @@ class CommitAgentNode(BaseAgentNode):
     def get_user_template(self):
         return commit_user_template
 
-    def get_structured_output(self):
-        return CommitMessage
+    def get_tools(self):
+        return [git_commit]
 
     async def __call__(
         self,
@@ -110,4 +111,15 @@ class CommitAgentNode(BaseAgentNode):
             record_response_service.record_response(agent_state, runnable, self.name, config),
         )
 
-        return self.route_to(self.goto, {"extracted_content": result, "errors": None})
+        if result.tool_calls and len(result.tool_calls) > 0:
+            result = cast(ByteAIMessage.CommitAgentMessage, result)
+            return self.route_to(
+                "tool_node",
+                {
+                    "scratch_messages": [result],
+                    "errors": None,
+                },
+            )
+
+        msg = extract_content_from_message(result)
+        return self.route_to(self.goto, {"scratch_messages": ByteAIMessage.CommitAgentMessage(content=msg)})

@@ -28,8 +28,8 @@ from byte.workflow import WorkflowServiceProvider
 PROVIDERS = [
     EventsServiceProvider,
     CommandServiceProvider,
-    GitServiceProvider,
     ToolsServiceProvider,
+    GitServiceProvider,
     MemoryServiceProvider,
     KnowledgeServiceProvider,
     FileServiceProvider,
