@@ -136,6 +136,7 @@ class Conversation(Widget):
         await self.event_bus.emit(
             TuiEvents.UserInputSubmitted(
                 event.body,
+                interrupted=event.interrupted,
             )
         )
 

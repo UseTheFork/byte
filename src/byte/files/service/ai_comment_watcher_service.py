@@ -7,7 +7,7 @@ from byte import Service
 from byte.files import FileEvents, FileMode, FileService
 from byte.orchestration import OrchestrationEvents
 from byte.support.utils import list_to_multiline_text
-from byte.tui import Messages
+from byte.tui import Messages, TUIManagerService
 
 
 class AICommentType(str, Enum):
@@ -163,7 +163,7 @@ class AICommentWatcherService(Service):
                 return auto_add_result or bool(ai_result.get("action_type"))
 
             return False
-        except (FileNotFoundError, PermissionError, UnicodeDecodeError):
+        except FileNotFoundError, PermissionError, UnicodeDecodeError:
             return False
 
     async def handle_file_change(self, payload: FileEvents.FileChanged) -> FileEvents.FileChanged:
@@ -238,12 +238,6 @@ class AICommentWatcherService(Service):
                     [
                         f'I\'ve written task instructions in code comments marked with "{AICommentType.AI.value}:" or "{AICommentType.AI.value}!" in the following files:',
                         f"{ai_instruction}",
-                        "",
-                        "",
-                        '- After successfully implementing all changes, remove the "AI:" comment markers from the code.',
-                        "> **IMPORTANT**: Execute the users request following the project's coding standards and conventions.",
-                        "If multiple tasks are present, complete them in the order they appear.",
-                        'Dont Forget after successfully implementing all changes, remove the "AI:" comment markers from the code.',
                     ]
                 ),
                 "agent_type": "/coder",
@@ -255,11 +249,6 @@ class AICommentWatcherService(Service):
                     [
                         f'I\'ve written questions in code comments marked with "{AICommentType.AI.value}:" or "{AICommentType.AI.value}?" in the following files:',
                         f"{ai_instruction}",
-                        "",
-                        "- Provide clear, well-structured answers based on the code context. Include:",
-                        "  - Direct answer to each question",
-                        "  - Relevant code examples or references when applicable",
-                        "  - Recommendations or best practices if appropriate",
                     ]
                 ),
                 "agent_type": "/ask",
@@ -274,37 +263,39 @@ class AICommentWatcherService(Service):
             self.emit_tui(
                 Messages.UserInputSubmitted(
                     body=f"{ai_result['agent_type']} " + str(ai_result["prompt"]),
+                    interrupted=True,
                 ),
             )
 
+    # AI?
     async def add_reinforcement_hook(
         self, payload: OrchestrationEvents.GatherReinforcement
     ) -> OrchestrationEvents.GatherReinforcement:
-        # prompt_toolkit_service = self.app.make(PromptToolkitService)
-        # if prompt_toolkit_service.is_interrupted():
-        #     active_agent = payload.agent
-        #     reinforcement_list = payload.reinforcement
+        tui_manager_service = self.app.make(TUIManagerService)
+        if tui_manager_service.is_interrupted():
+            active_agent = payload.agent
+            reinforcement_list = payload.reinforcement
 
-        #     if active_agent == "ask_agent":
-        #         reinforcement_list.extend(
-        #             [
-        #                 "",
-        #                 "- Provide clear, well-structured answers based on the code context. Include:",
-        #                 "  - Direct answer to each question",
-        #                 "  - Relevant code examples or references when applicable",
-        #                 "  - Recommendations or best practices if appropriate",
-        #             ]
-        #         )
+            if active_agent == "ask_agent_node":
+                reinforcement_list.extend(
+                    [
+                        "",
+                        "- Provide clear, well-structured answers based on the code context. Include:",
+                        "  - Direct answer to each question",
+                        "  - Relevant code examples or references when applicable",
+                        "  - Recommendations or best practices if appropriate",
+                    ]
+                )
 
-        #     if active_agent == "coder_agent":
-        #         reinforcement_list.extend(
-        #             [
-        #                 "",
-        #                 '- After successfully implementing all changes, remove the "AI:" comment markers from the code.',
-        #                 "> **IMPORTANT**: Execute the users request following the project's coding standards and conventions.",
-        #                 "If multiple tasks are present, complete them in the order they appear.",
-        #                 'After successfully implementing all changes, remove the "AI:" comment markers from the code.',
-        #             ]
-        #         )
+            if active_agent == "coder_agent_node":
+                reinforcement_list.extend(
+                    [
+                        "",
+                        '- After successfully implementing all changes, remove the "AI:" comment markers from the code.',
+                        "> **IMPORTANT**: Execute the users request following the project's coding standards and conventions.",
+                        "If multiple tasks are present, complete them in the order they appear.",
+                        'After successfully implementing all changes, remove the "AI:" comment markers from the code.',
+                    ]
+                )
 
         return payload

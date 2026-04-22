@@ -36,6 +36,7 @@ class Messages:
     class UserInputSubmitted(Message):
         body: str
         auto_complete: bool = False
+        interrupted: bool = False
 
     # TODO: Do we need this?
     @dataclass

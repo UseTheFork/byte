@@ -32,10 +32,11 @@ class TUIManagerService(Service):
 
         Usage: Called internally when user input starts with /
         """
-        self.app["log"].info("_handle_command_input")
 
-        history_service = self.app.make(PromptHistoryService)
-        history_service.append_string(user_input)
+        # Only append messages the user sends not AI comment messages.
+        if not self.is_interrupted():
+            history_service = self.app.make(PromptHistoryService)
+            history_service.append_string(user_input)
 
         # Parse command name and args
         parts = user_input[1:].split(" ", 1)  # Remove "/" and split
@@ -63,6 +64,8 @@ class TUIManagerService(Service):
         panel_id = f"panel_{str(uuid.uuid4()).replace('-', '_')}"
         self.thread_local.panel_id = panel_id
 
+        self.thread_local.is_interrupted = event.interrupted
+
         self.tui.conversation.post_message(Messages.CommandExecutionStarted(panel_id=self.thread_local.panel_id))
         # User Messages are always our primary entrypoint. As a result we always create a pending panel here and mount it empty.
         if user_input.startswith("/"):
@@ -82,3 +85,13 @@ class TUIManagerService(Service):
         Usage: `panel_id = self.get_panel_id()`
         """
         return self.thread_local.panel_id
+
+    def is_interrupted(self) -> bool:
+        """Check if the current thread is interrupted.
+
+        Returns:
+            True if the current thread is interrupted, False otherwise
+
+        Usage: `interrupted = self.is_interrupted()`
+        """
+        return self.thread_local.is_interrupted

@@ -15,3 +15,4 @@ class TuiEvents:
         """Event emitted when user submits input."""
 
         message: str
+        interrupted: bool = False
