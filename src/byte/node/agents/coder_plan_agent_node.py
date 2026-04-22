@@ -22,7 +22,7 @@ from byte.support.utils import extract_content_from_message, list_to_multiline_t
 from byte.tui import Messages, Status
 
 coder_plan_user_template = [
-    "{masked_messages}",
+    "{modified_messages}",
     Boundary.open(BoundaryType.USER_INPUT),
     "```text",
     "{user_request}",

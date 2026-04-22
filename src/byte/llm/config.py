@@ -7,6 +7,7 @@ class LLMModelConfig(BaseModel):
     """Configuration for a specific LLM model."""
 
     model: str = Field(default="", description="The model identifier to use")
+    provider: str = Field(default="", description="The models provider to use")
     extra_params: Dict[str, Any] = Field(
         default_factory=dict, description="Additional parameters to pass to the model initialization"
     )

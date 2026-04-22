@@ -29,7 +29,7 @@ commit_user_template = [
     "You **MUST** consider the above git diffs before proceeding (if not empty).",
     Boundary.close(BoundaryType.GIT_CONTEXT),
     "",
-    "{masked_messages}",
+    "{modified_messages}",
     "",
     Boundary.open(BoundaryType.TASK),
     "You are an expert software engineer that generates concise, Git commit messages based on the provided diffs.",

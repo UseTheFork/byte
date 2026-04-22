@@ -2,6 +2,8 @@ import asyncio
 import re
 from typing import TYPE_CHECKING, TypeVar
 
+from langchain.messages import AIMessage
+from langchain_core.messages import BaseMessage
 from typing_extensions import List
 
 from byte.conventions import ConventionContextService
@@ -126,6 +128,36 @@ class PromptAssembler(Bootable, Eventable):
         commit_service = self.app.make(CommitService)
         git_guidelines = await commit_service.generate_commit_guidelines()
         return git_guidelines
+
+    async def _gather_modified_messages(self, state) -> str:
+        """ """
+        messages: list[BaseMessage] = state.get("history_messages", [])
+
+        # Create masked_messages list identical to messages except for processed AIMessages
+        masked_messages = [
+            Boundary.open(BoundaryType.CONVERSATION_HISTORY),
+            Boundary.open(BoundaryType.HEADING),
+            "Below is the conversation history between Byte agents and the user.",
+            Boundary.open(BoundaryType.HEADING),
+        ]
+
+        if not messages:
+            masked_messages.append("The conversation history is empty.")
+            masked_messages.append(Boundary.close(BoundaryType.CONVERSATION_HISTORY))
+            return list_to_multiline_text(masked_messages)
+
+        for message in messages:
+            if isinstance(message, AIMessage):
+                # TODO: Improve on this.
+                masked_messages.append(message.content)
+            else:
+                # Keep non-AIMessages unchanged
+                masked_messages.append(message.content)
+
+        masked_messages.append(Boundary.notice("You **MUST** consider the conversation history before proceeding."))
+        masked_messages.append(Boundary.close(BoundaryType.CONVERSATION_HISTORY))
+
+        return list_to_multiline_text(masked_messages)
 
     async def _gather_file_context(self, with_line_numbers=False) -> str:
         """Gather file context including read-only and editable files.
@@ -304,6 +336,7 @@ class PromptAssembler(Bootable, Eventable):
         # Always executed tasks
         tasks.update(
             {
+                "modified_messages": self._gather_modified_messages(state),
                 "commit_guidelines": self._gather_commit_guidelines(),
                 "constraints": self._gather_constraints(state),
                 "available_conventions": self.gather_available_conventions(state),
@@ -334,6 +367,7 @@ class PromptAssembler(Bootable, Eventable):
 
         user_prompt_state.update(
             {
+                "modified_messages": results_dict["modified_messages"],
                 "commit_guidelines": results_dict["commit_guidelines"],
                 "constraints_context": results_dict["constraints"],
                 "available_conventions": results_dict["available_conventions"],
@@ -349,9 +383,6 @@ class PromptAssembler(Bootable, Eventable):
                 }
             )
 
-        # Set remaining state values
-        messages = state.get("history_messages", [])
-        user_prompt_state["masked_messages"] = messages
         user_prompt_state["user_request"] = state.get("user_request", "")
 
         return user_prompt_state

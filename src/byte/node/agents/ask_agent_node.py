@@ -24,7 +24,7 @@ from byte.support.utils import extract_content_from_message, list_to_multiline_t
 from byte.tui import Messages, Status
 
 ask_user_template = [
-    "{masked_messages}",
+    "{modified_messages}",
     Boundary.open(BoundaryType.USER_INPUT),
     "```text",
     "{user_request}",
@@ -48,7 +48,6 @@ ask_user_template = [
     "- Provide context for suggested changes",
     "- Focus on actionable findings, not exhaustive documentation",
     Boundary.close(BoundaryType.RESPONSE_FORMAT),
-    "{available_conventions}",
     "{project_hierarchy}",
     "{project_information_and_context}",
     "{file_context}",

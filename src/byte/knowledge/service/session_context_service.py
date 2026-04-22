@@ -33,7 +33,7 @@ class SessionContextService(Service):
             ),
         )
 
-    def add_context(self, model: SessionContextModel) -> "SessionContextService":
+    def add_context(self, model: SessionContextModel) -> SessionContextService:
         """Add a context item to the session store.
 
         Usage: `service.add_context(SessionContextModel(type="file", key="style_guide", content="Follow PEP 8..."))`
@@ -42,7 +42,7 @@ class SessionContextService(Service):
         self.notify_context_stats()
         return self
 
-    def remove_context(self, key: str) -> "SessionContextService":
+    def remove_context(self, key: str) -> SessionContextService:
         """Remove a context item from the session store.
 
         Usage: `service.remove_context("old_convention")`
@@ -61,7 +61,7 @@ class SessionContextService(Service):
         """
         return self.session_context.get(key, None)
 
-    def clear_context(self) -> "SessionContextService":
+    def clear_context(self) -> SessionContextService:
         """Clear all context items from the session store.
 
         Usage: `service.clear_context()`
@@ -80,8 +80,8 @@ class SessionContextService(Service):
         return self.session_context.all()
 
     async def add_session_context_hook(
-        self, payload: OrchestrationEvents.GatherReinforcement
-    ) -> OrchestrationEvents.GatherReinforcement:
+        self, payload: OrchestrationEvents.GatherProjectContext
+    ) -> OrchestrationEvents.GatherProjectContext:
         """Inject session context into the prompt state.
 
         Aggregates all stored context items and adds them to the

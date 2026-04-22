@@ -46,7 +46,6 @@ class ContextAddFileCommand(Command):
         # Convert to Path object, resolve relative paths from project root
         file_path = Path(args_file_path)
         if not file_path.is_absolute():
-            # self.app["path"]
             file_path = self.app.root_path(str(file_path))
 
         # Check if file exists
@@ -68,8 +67,6 @@ class ContextAddFileCommand(Command):
         context_key = str(file_path.relative_to(self.app["path"]))
 
         # Add YAML header with file path
-        yaml_header = f"---\nfile_path: {context_key}\n---\n\n"
-        content = yaml_header + content
         model = self.app.make(SessionContextModel, type="file", key=context_key, content=content)
         session_context_service.add_context(model)
         await self.notify_success(f"Added {context_key} to session context")

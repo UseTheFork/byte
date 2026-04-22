@@ -1,3 +1,5 @@
+from typing import cast
+
 from byte import Service
 from byte.llm import LLMRegistryService, ModelSchema
 from byte.orchestration import OrchestrationEvents
@@ -37,7 +39,8 @@ class LLMService(Service):
 
         model_id_from_config = model_config.model
 
-        model_schema = self.llm_registry.get_model(model_id_from_config)
+        model_schema = cast(ModelSchema, self.llm_registry.get_model(model_id_from_config))
+        model_schema.provider = str(model_config.provider)
         if model_schema is None:
             raise ValueError(f"Unknown configuration: {agent_id}")
 

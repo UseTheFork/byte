@@ -52,11 +52,6 @@ class KnowledgeServiceProvider(ServiceProvider):
 
         # Register listener that calls list_in_context_files before each prompt
         event_bus.on(
-            OrchestrationEvents.GatherReinforcement,
+            OrchestrationEvents.GatherProjectContext,
             session_context_service.add_session_context_hook,
         )
-
-        # event_bus.on(
-        #     EventType.PRE_PROMPT_TOOLKIT.value,
-        #     cli_context_display_service.display_context_panel_hook,
-        # )

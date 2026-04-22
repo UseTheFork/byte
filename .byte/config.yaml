@@ -1,12 +1,16 @@
 llm:
   coder_plan_agent_node:
     model: claude-sonnet-4-6
+    provider: anthropic
   ask_agent_node:
     model: claude-sonnet-4-6
+    provider: anthropic
   coder_agent_node:
     model: claude-haiku-4-5
+    provider: anthropic
   commit_agent_node:
     model: claude-haiku-4-5
+    provider: anthropic
 lint:
   enable: true
   commands:
