@@ -2,6 +2,7 @@ import asyncio
 import sys
 from pathlib import Path
 
+import uvloop
 from pydantic import ValidationError
 
 from byte.analytics import AnalyticsProvider
@@ -56,6 +57,7 @@ def cli():
     except ValidationError:
         raise
 
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     asyncio.run(application.handle_command(sys.argv))
 
 
