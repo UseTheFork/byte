@@ -19,6 +19,7 @@ from byte.tui.widgets.panels.response_panel import ResponsePanel
 from byte.tui.widgets.prompt.analytics import Analytics
 from byte.tui.widgets.prompt.prompt_input import PromptTextArea
 from byte.tui.widgets.prompt.prompt_panel import PromptPanel
+from byte.tui.widgets.prompt.status_bar import StatusBar
 from byte.tui.widgets.ui.selectable_markdown import SelectableMarkdown
 
 if TYPE_CHECKING:
@@ -53,6 +54,7 @@ class Conversation(Widget):
 
     prompt = getters.query_one("#prompt", PromptPanel)
     prompt_text_area = getters.query_one(PromptTextArea)
+    status_bar = getters.query_one(StatusBar)
     chat_container = getters.query_one("#chat-container", VerticalScroll)
 
     def __init__(
@@ -160,7 +162,7 @@ class Conversation(Widget):
 
     @on(Messages.CommandExecutionCompleted)
     async def command_execution_completed(self, event: Messages.CommandExecutionCompleted) -> None:
-        self.post_message(Messages.LoadingIndicatorHide(panel_id=event.panel_id))
+        self.post_message(Messages.Status())
         self.move_focus_to_prompt()
         self.allow_input_submit = True
 
@@ -188,10 +190,9 @@ class Conversation(Widget):
 
         # Control the indicator display state.
         if isinstance(event.with_indicator, bool):
-            response_panel.loading_indicator.hidden = event.with_indicator
-            self.post_message(Messages.LoadingIndicatorShow(panel_id=event.panel_id))
+            self.post_message(Messages.Status(state="loading", message="Thinking..."))
         elif isinstance(event.with_indicator, str):
-            self.post_message(Messages.LoadingIndicatorShow(event.with_indicator, panel_id=event.panel_id))
+            self.post_message(Messages.Status(state="loading", message=event.with_indicator))
 
         if event.status is Status.PENDING:
             heading = Str.snake_to_title(str(event.chunk)).replace(" Node", "").strip()
@@ -200,7 +201,7 @@ class Conversation(Widget):
             await response_panel.add_markdown_chunk(str(event.chunk))
         elif event.status is Status.SUCCESS:
             await response_panel.end_markdown_stream()
-            self.post_message(Messages.LoadingIndicatorHide(panel_id=event.panel_id))
+            self.post_message(Messages.Status())
 
         self.scroll_to_latest_message()
 
@@ -209,6 +210,7 @@ class Conversation(Widget):
         response_panel = await self.get_or_create_response_panel(event.panel_id)
 
         if event.status is Status.PENDING:
+            self.post_message(Messages.Status(state="loading", message="Using Tool..."))
             await response_panel.start_tool_stream(
                 tool_name=str(event.tool_name),
                 tool_id=str(event.tool_id),
@@ -217,13 +219,14 @@ class Conversation(Widget):
             await response_panel.add_tool_chunk(event.tool_id, str(event.chunk))
         elif event.status is Status.SUCCESS:
             await response_panel.end_tool_stream(event.tool_id)
-            self.post_message(Messages.LoadingIndicatorHide(panel_id=event.panel_id))
+            self.post_message(Messages.Status())
 
         self.scroll_to_latest_message()
 
     @on(Messages.PromptUser)
     async def handle_prompt_user(self, event: Messages.PromptUser):
         response_panel = await self.get_or_create_response_panel(event.panel_id)
+        self.post_message(Messages.Status("question"))
 
         if event.prompt_type == "select":
             ask = Ask(
@@ -240,6 +243,7 @@ class Conversation(Widget):
             )
             await response_panel.mount_input(ask)
 
+        self.post_message(Messages.Status())
         self.scroll_to_latest_message()
 
     @on(Messages.Lint)
@@ -250,7 +254,7 @@ class Conversation(Widget):
         if event.status is Status.PENDING:
             await response_panel.create_linting(event)
         elif event.status is Status.RUNNING:
-            await response_panel.update_linting_progress(event.current_file, event.completed, event.total)
+            await response_panel.update_linting_progress(str(event.current_file), event.completed, event.total)
         elif event.status is Status.SUCCESS:
             await response_panel.complete_linting(event.total_files, event.failed_files, event.success)
 
@@ -264,17 +268,13 @@ class Conversation(Widget):
             response_panel.current_linting.display_results(event.content)
         self.scroll_to_latest_message()
 
-    @on(Messages.LoadingIndicatorShow)
-    async def loading_indicator_show(self, event: Messages.LoadingIndicatorShow) -> None:
+    @on(Messages.Status)
+    async def update_status(self, event: Messages.Status) -> None:
         """Show the loading indicator with an optional message."""
-        response_panel = await self.get_or_create_response_panel(event.panel_id)
-        response_panel.show_loading_indicator(event.message)
-
-    @on(Messages.LoadingIndicatorHide)
-    async def loading_indicator_hide(self, event: Messages.LoadingIndicatorHide) -> None:
-        """Hide the loading indicator."""
-        response_panel = await self.get_or_create_response_panel(event.panel_id)
-        response_panel.hide_loading_indicator()
+        if event.state == "loading":
+            self.status_bar.show_loading()
+        else:
+            self.status_bar.show_status(event.message if event.message is not None else "", state=event.state)
 
     @on(Messages.ToolCall)
     async def tool_call(self, event: Messages.ToolCall) -> None:

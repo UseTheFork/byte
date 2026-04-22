@@ -42,9 +42,6 @@ class ResponsePanel(VerticalGroup):
         self.streams = {}
         self.current_linting: Linting | None = None
 
-    def on_mount(self) -> None:
-        self.mount(LoadingIndicator(classes="dock-bottom hidden"))
-
     async def add_user_message(self, event: Messages.AddUserInput):
         await self.mount(HumanMessage(f"/{event.command} {event.body}"))
 
@@ -172,19 +169,6 @@ class ResponsePanel(VerticalGroup):
         """
         if self.current_linting is not None:
             self.current_linting.complete_linting(total_files, failed_files, success)
-
-    def show_loading_indicator(self, message: str = "Thinking") -> None:
-        """Show the loading indicator by removing the hidden class.
-
-        Args:
-            message: Optional message to display with the loading indicator
-        """
-        self.loading_indicator.message = message
-        self.loading_indicator.remove_class("hidden")
-
-    def hide_loading_indicator(self) -> None:
-        """Hide the loading indicator by adding the hidden class."""
-        self.loading_indicator.add_class("hidden")
 
     async def mount_toolcall(self, name: str, args: dict | None = None):
         """Mount a tool call widget.

@@ -7,12 +7,16 @@ from textual.reactive import reactive, var
 from textual.widgets.text_area import Selection
 
 from byte.tui.widgets.prompt.analytics import Analytics
-from byte.tui.widgets.prompt.flash import Flash
 from byte.tui.widgets.prompt.prompt_input import PromptInput, PromptTextArea
+from byte.tui.widgets.prompt.status_bar import StatusBar
 from byte.tui.widgets.ui.text_area_auto_complete import TextAreaAutoComplete
 
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
+
+
+class PromptInputContainer(containers.VerticalGroup):
+    pass
 
 
 class PromptContainer(containers.HorizontalGroup):
@@ -27,6 +31,7 @@ class PromptContainer(containers.HorizontalGroup):
 
 
 class PromptPanel(containers.VerticalGroup):
+    prompt_input_container = getters.query_one(PromptInputContainer)
     prompt_container = getters.query_one("#prompt-container", PromptContainer)
     prompt_text_area = getters.query_one(PromptTextArea)
 
@@ -49,25 +54,19 @@ class PromptPanel(containers.VerticalGroup):
         self.prompt_text_area.text = text
         self.prompt_text_area.selection = Selection.cursor(self.prompt_text_area.get_cursor_line_end_location())
 
-    # def focus(self, scroll_visible: bool = True) -> Self:
-    #     if self._ask is not None:
-    #         self.question.focus()
-    #     else:
-    #         self.query(PromptTextArea).focus()
-    #     return self
-
     def append(self, text: str) -> None:
         self.query_one(PromptTextArea).insert(text, maintain_selection_offset=False)
 
     def compose(self) -> ComposeResult:
-        yield Flash()
-        yield TextAreaAutoComplete("#input")
-        with PromptContainer(id="prompt-container"):
-            yield PromptInput(id="prompt-input")
+        yield StatusBar()
+        with PromptInputContainer():
+            yield TextAreaAutoComplete("#input")
+            with PromptContainer(id="prompt-container"):
+                yield PromptInput(id="prompt-input")
 
-        yield Analytics(id="analytics-panel")
+            yield Analytics(id="analytics-panel")
 
     def watch_allow_input_submit(self, allow_input_submit: bool) -> None:
-        self.set_class(not allow_input_submit, "hidden")
-        self.disabled = not allow_input_submit
+        self.prompt_input_container.set_class(not allow_input_submit, "hidden")
+        self.prompt_input_container.disabled = not allow_input_submit
         self.app.conversation.scroll_to_latest_message()

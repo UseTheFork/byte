@@ -8,6 +8,7 @@ from textual.notifications import SeverityLevel
 from textual.widget import Widget
 
 from byte.tui.schemas import Answer as AnswerSchema, AnswerCancelled
+from byte.tui.widgets.prompt.status_bar import StatusState
 
 if TYPE_CHECKING:
     pass
@@ -138,21 +139,11 @@ class Messages:
         panel_id: str | None = None
 
     @dataclass
-    class LoadingIndicatorShow(Message):
-        """Show the loading indicator with an optional message.
+    class Status(Message):
+        """ """
 
-        Args:
-            message: Optional message to display with the loading indicator
-        """
-
-        message: str = "Thinking"
-        panel_id: str | None = None
-
-    @dataclass
-    class LoadingIndicatorHide(Message):
-        """Hide the loading indicator."""
-
-        panel_id: str | None = None
+        state: StatusState = "default"
+        message: str | None = None
 
     @dataclass
     class ToolCall(Message):
