@@ -1,13 +1,9 @@
 import inspect
 import logging
-from typing import TYPE_CHECKING
 
 from loguru import logger
 
 from byte import Service
-
-if TYPE_CHECKING:
-    pass
 
 
 class InterceptHandler(logging.Handler):
