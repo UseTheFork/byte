@@ -33,8 +33,6 @@ class RecordResponseService(Service):
 
         Usage: `file_path = await service.cache_response(result, runtime.context)`
         """
-        if not self.app.is_development():
-            return None
 
         # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         cache_file = self.app.cache_path(f"development/{agent_name}.md")
