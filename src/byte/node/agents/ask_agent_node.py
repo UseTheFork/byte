@@ -120,21 +120,16 @@ class AskAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        self.app["log"].info("create_runnable")
         runnable = self.create_runnable()
 
-        self.app["log"].info("generate_agent_state")
         agent_state, config = await self.generate_agent_state(state, config)
         record_response_service = self.app.make(RecordResponseService)
 
-        self.app["log"].info("add heading")
         self.emit_tui(Messages.AddHeading(self.human_name, "text-primary"))
 
-        self.app["log"].info("dispatch_task")
         self.app.dispatch_task(
             record_response_service.record_response(agent_state, runnable, self.name, config),
         )
-        self.app["log"].info("ainvoke")
         result = await runnable.ainvoke(agent_state, config=config)
 
         if result.tool_calls and len(result.tool_calls) > 0:

@@ -18,7 +18,7 @@ class PromptSettingsSchema:
     Usage: `settings = PromptSettingsSchema(has_project_hierarchy=True)`
     """
 
-    has_project_hierarchy: bool = Field(default=True)
+    has_project_hierarchy: bool = Field(default=False)
     has_project_information_and_context: bool = Field(default=True)
     has_file_context: bool = Field(default=True)
     has_masked_messages: bool = Field(default=True)
