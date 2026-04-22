@@ -84,6 +84,7 @@ class ToolCall(Widget, can_focus=False):
         height: auto;
         background: transparent;
         border-top: round $secondary;
+        margin-bottom: 1;
         
         & Label {
             height: auto;

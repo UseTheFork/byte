@@ -27,6 +27,7 @@ class InteractionService(Service):
         ]
 
         result_future: asyncio.Future[Answer | list[Answer] | str | AnswerCancelled] = asyncio.Future()
+        self.emit_tui(Messages.Status(state="question"))
         self.emit_tui(
             Messages.PromptUser(
                 question=message,
@@ -42,6 +43,7 @@ class InteractionService(Service):
         if isinstance(answer, AnswerCancelled):
             raise InputCancelledError
 
+        self.emit_tui(Messages.Status())
         return cast(Answer, answer).value
 
     async def select(self, message: str, choices: List[Answer]) -> Answer:
@@ -53,6 +55,7 @@ class InteractionService(Service):
             raise ValueError("Choices list cannot be empty")
 
         result_future: asyncio.Future[Answer | list[Answer] | str | AnswerCancelled] = asyncio.Future()
+        self.emit_tui(Messages.Status(state="question"))
         self.emit_tui(
             Messages.PromptUser(
                 question=message,
@@ -68,6 +71,7 @@ class InteractionService(Service):
         if isinstance(answer, AnswerCancelled):
             raise InputCancelledError
 
+        self.emit_tui(Messages.Status())
         return cast(Answer, answer)
 
     async def input_text(self, message: str) -> str:
@@ -76,6 +80,7 @@ class InteractionService(Service):
         Usage: `text = await interaction_service.input_text("Enter name:", "default_name")`
         """
         result_future: asyncio.Future[Answer | list[Answer] | str | AnswerCancelled] = asyncio.Future()
+        self.emit_tui(Messages.Status(state="question"))
         self.emit_tui(
             Messages.PromptUser(
                 question=message,
@@ -91,6 +96,7 @@ class InteractionService(Service):
         if isinstance(answer, AnswerCancelled):
             raise InputCancelledError
 
+        self.emit_tui(Messages.Status())
         return cast(str, answer)
 
     async def confirm_or_input(

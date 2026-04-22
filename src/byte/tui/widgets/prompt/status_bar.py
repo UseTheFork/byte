@@ -1,9 +1,13 @@
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from textual.app import ComposeResult
 from textual.containers import HorizontalGroup
 from textual.reactive import reactive
 from textual.widgets import Rule, Static
+
+if TYPE_CHECKING:
+    from byte.tui import ByteTUI
+
 
 LOADING_EMOJIS = [
     "[$primary](⁠[/]  [$primary]^[/][$secondary]⁠‿[/]⁠[$primary]^[/][$primary]⁠)[/]",
@@ -23,7 +27,7 @@ StatusState = Literal[
     "loading",
 ]
 
-_BYTE_STATES: dict[StatusState, str] = {
+BYTE_STATES: dict[StatusState, str] = {
     "default": "[$primary](⁠  ^⁠‿⁠^⁠)[/]",
     "error": "[$error](-_-メ)[/]",
     "success": "(⁠ ⁠◕⁠‿⁠◕⁠)",
@@ -61,6 +65,8 @@ class LoadingEmoji(Static):
 class StatusEmoji(Static):
     """Non-animated emoji that displays a static kaomoji based on the current state."""
 
+    app: ByteTUI
+
     DEFAULT_CSS = """
     StatusEmoji {
         width: auto;
@@ -71,10 +77,11 @@ class StatusEmoji(Static):
     state: reactive[StatusState] = reactive("default")
 
     def watch_state(self, state: StatusState) -> None:
-        self.update(_BYTE_STATES.get(state, _BYTE_STATES["default"]))
+        self.app.byte["log"].info(state)
+        self.update(BYTE_STATES.get(state, BYTE_STATES["default"]))
 
     def render(self):
-        return _BYTE_STATES.get(self.state, _BYTE_STATES["default"])
+        return BYTE_STATES.get(self.state, BYTE_STATES["default"])
 
 
 class StatusBar(HorizontalGroup, can_focus=False):
@@ -140,7 +147,6 @@ class StatusBar(HorizontalGroup, can_focus=False):
         if text:
             self.text = text
         self.is_loading = True
-        self.visible = True
 
     def show_status(self, text: str = "", state: StatusState = "default") -> None:
         """Show the status bar with a static status emoji."""
@@ -148,11 +154,6 @@ class StatusBar(HorizontalGroup, can_focus=False):
             self.text = text
         self.is_loading = False
         self.query_one(StatusEmoji).state = state
-        self.visible = True
-
-    def hide(self) -> None:
-        """Hide the status bar."""
-        self.visible = False
 
     def watch_is_loading(self, loading: bool) -> None:
         try:

@@ -226,7 +226,6 @@ class Conversation(Widget):
     @on(Messages.PromptUser)
     async def handle_prompt_user(self, event: Messages.PromptUser):
         response_panel = await self.get_or_create_response_panel(event.panel_id)
-        self.post_message(Messages.Status("question"))
 
         if event.prompt_type == "select":
             ask = Ask(
@@ -243,7 +242,6 @@ class Conversation(Widget):
             )
             await response_panel.mount_input(ask)
 
-        self.post_message(Messages.Status())
         self.scroll_to_latest_message()
 
     @on(Messages.Lint)
