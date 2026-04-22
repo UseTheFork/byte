@@ -10,9 +10,9 @@ from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
     BaseNode,
+    ByteAIMessage,
 )
-from byte.node.agents import CoderAgentNode
-from byte.node.base_agent_node import BaseByteAIMessage
+from byte.node.agents.coder_agent_node import CoderAgentNode
 from byte.orchestration import (
     AssistantContextSchema,
     BaseState,
@@ -118,10 +118,6 @@ coder_plan_enforcement = [
 ]
 
 
-class CoderPlanAgentMessage(BaseByteAIMessage):
-    pass
-
-
 class CoderPlanAgentNode(BaseAgentNode):
     def boot(
         self,
@@ -165,7 +161,7 @@ class CoderPlanAgentNode(BaseAgentNode):
         )
 
         if result.tool_calls and len(result.tool_calls) > 0:
-            result = cast(CoderPlanAgentMessage, result)
+            result = cast(ByteAIMessage.CoderPlanAgentMessage, result)
             return self.route_to(
                 "tool_node",
                 {
@@ -176,4 +172,4 @@ class CoderPlanAgentNode(BaseAgentNode):
 
         # Replace the user request with the agent plan
         msg = extract_content_from_message(result)
-        return self.route_to(self.goto, {"scratch_messages": CoderPlanAgentMessage(content=msg)})
+        return self.route_to(self.goto, {"scratch_messages": ByteAIMessage.CoderPlanAgentMessage(content=msg)})

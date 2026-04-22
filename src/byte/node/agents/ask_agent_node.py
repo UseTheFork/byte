@@ -11,8 +11,8 @@ from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
     BaseNode,
+    ByteAIMessage,
 )
-from byte.node.base_agent_node import BaseByteAIMessage
 from byte.node.nodes import EndNode
 from byte.orchestration import (
     AssistantContextSchema,
@@ -78,10 +78,6 @@ ask_enforcement = [
 ]
 
 
-class AskAgentMessage(BaseByteAIMessage):
-    pass
-
-
 class AskAgentNode(BaseAgentNode):
     def boot(
         self,
@@ -136,7 +132,7 @@ class AskAgentNode(BaseAgentNode):
         result = await runnable.ainvoke(agent_state, config=config)
 
         if result.tool_calls and len(result.tool_calls) > 0:
-            result = cast(AskAgentMessage, result)
+            result = cast(ByteAIMessage.AskAgentMessage, result)
             return self.route_to(
                 "tool_node",
                 {
@@ -146,4 +142,4 @@ class AskAgentNode(BaseAgentNode):
             )
 
         msg = extract_content_from_message(result)
-        return self.route_to(self.goto, {"scratch_messages": AskAgentMessage(content=msg)})
+        return self.route_to(self.goto, {"scratch_messages": ByteAIMessage.AskAgentMessage(content=msg)})

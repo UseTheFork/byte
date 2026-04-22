@@ -1,12 +1,10 @@
 from abc import abstractmethod
-from datetime import datetime
 from typing import List
 
 from langchain.chat_models import init_chat_model
-from langchain.messages import AIMessage, HumanMessage
+from langchain.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable
-from pydantic import Field
 
 from byte.llm import ModelSchema
 from byte.node import (
@@ -15,10 +13,6 @@ from byte.node import (
 )
 from byte.orchestration import BaseState, PromptAssembler
 from byte.support import Str
-
-
-class BaseByteAIMessage(AIMessage):
-    created_at: datetime = Field(default_factory=datetime.now)
 
 
 class BaseAgentNode(BaseNode):

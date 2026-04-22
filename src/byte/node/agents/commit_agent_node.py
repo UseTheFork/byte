@@ -1,6 +1,5 @@
 from typing import Literal, Type
 
-from langchain.messages import AIMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
@@ -59,10 +58,6 @@ commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
         ("placeholder", "{errors}"),
     ]
 )
-
-
-class CommitAgentMessage(AIMessage):
-    pass
 
 
 class CommitAgentNode(BaseAgentNode):

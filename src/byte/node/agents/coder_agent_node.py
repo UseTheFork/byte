@@ -11,9 +11,8 @@ from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
     BaseNode,
+    ByteAIMessage,
 )
-from byte.node.agents import CoderPlanAgentMessage
-from byte.node.base_agent_node import BaseByteAIMessage
 from byte.node.nodes import EndNode
 from byte.orchestration import AssistantContextSchema, BaseState, preamble
 from byte.support import Boundary, BoundaryType, Str
@@ -241,10 +240,6 @@ coder_prompt = ChatPromptTemplate.from_messages(
 )
 
 
-class CoderAgentMessage(BaseByteAIMessage):
-    pass
-
-
 class CoderAgentNode(BaseAgentNode):
     def boot(
         self,
@@ -290,7 +285,7 @@ class CoderAgentNode(BaseAgentNode):
         # Extract the last CoderPlanAgentMessage from scratch_messages
         last_coder_plan_message = None
         for msg in reversed(state.get("scratch_messages", [])):
-            if isinstance(msg, CoderPlanAgentMessage):
+            if isinstance(msg, ByteAIMessage.CoderPlanAgentMessage):
                 last_coder_plan_message = msg
                 break
 
@@ -302,7 +297,7 @@ class CoderAgentNode(BaseAgentNode):
         )
 
         if result.tool_calls and len(result.tool_calls) > 0:
-            result = cast(CoderAgentMessage, result)
+            result = cast(ByteAIMessage.CoderAgentMessage, result)
             return self.route_to(
                 "tool_node",
                 {
@@ -313,4 +308,4 @@ class CoderAgentNode(BaseAgentNode):
 
         msg = extract_content_from_message(result)
 
-        return self.route_to(self.goto, {"scratch_messages": CoderAgentMessage(content=msg)})
+        return self.route_to(self.goto, {"scratch_messages": ByteAIMessage.CoderAgentMessage(content=msg)})

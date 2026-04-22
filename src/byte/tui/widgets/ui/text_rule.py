@@ -52,8 +52,8 @@ class TextRule(HorizontalGroup):
     def validate_text(self, text: str) -> str:
         return text.strip()
 
-    def watch_text(self, text: str) -> None:
-        self.query_one(Static).update(text)
+    # def watch_text(self, text: str) -> None:
+    # self.query_one(Static).update(text)
 
     def compose(self) -> ComposeResult:
         header = Static(self.text)
