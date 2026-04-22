@@ -4,30 +4,27 @@ from langchain.tools import InjectedToolArg, tool
 
 from byte import Application
 from byte.git import GitService
+from byte.support import Boundary, BoundaryType
+from byte.support.utils import list_to_multiline_text
 from byte.tui import InteractionService
 
 
 @tool(
-    parse_docstring=True,
     extras={"eager_input_streaming": True},
+    description=list_to_multiline_text(
+        [
+            "Search for a pattern in tracked files using git grep. This tool searches through all files tracked by git for the specified pattern. It's useful for finding where specific code, functions, or text appears in the codebase.",
+            Boundary.important(
+                f"BEFORE using this tool you MUST check the provided {Boundary.open(BoundaryType.FILE)} in {Boundary.open(BoundaryType.CONTEXT)}."
+            ),
+        ]
+    ),
 )
 async def git_grep(
-    pattern: str,
-    file_pattern: str = "",
+    pattern: Annotated[str, "The search pattern to look for (supports regex)"],
+    file_pattern: Annotated[str, "Optional file pattern to limit search (e.g., '*.py' for Python files only)"] = "",
     app: Annotated[Application | None, InjectedToolArg] = None,
 ) -> str:
-    """Search for a pattern in tracked files using git grep.
-
-    This tool searches through all files tracked by git for the specified pattern.
-    It's useful for finding where specific code, functions, or text appears in the codebase.
-
-    Args:
-        pattern: The search pattern to look for (supports regex)
-        file_pattern: Optional file pattern to limit search (e.g., "*.py" for Python files only)
-
-    Returns:
-        Search results showing file paths and matching lines, or an error message if the search fails
-    """
     if app is None:
         raise RuntimeError("Application instance is required but was not provided")
 

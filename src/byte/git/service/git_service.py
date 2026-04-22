@@ -28,7 +28,7 @@ class GitService(Service, UserInteractive, Notifiable):
                 f"Not a git repository: {self.app['path.root']}. Please run 'git init' or navigate to a git repository."
             )
 
-    async def get_repo(self):
+    async def get_repo(self) -> git.Repo:
         """Get the git repository instance, ensuring service is booted.
 
         Usage: `repo = await git_service.get_repo()` -> git.Repo instance
