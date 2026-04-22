@@ -3,13 +3,13 @@ from typing import TYPE_CHECKING, Literal
 from langchain.messages import AIMessage, HumanMessage, ToolMessage
 
 if TYPE_CHECKING:
-    from byte.node.agents import AskAgentMessage, CoderAgentMessage, CoderPlanAgentMessage
+    pass
 
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte.node import BaseNode, NodeEvents
+from byte.node import BaseNode, ByteAIMessage, NodeEvents
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.support import Boundary, BoundaryType
 from byte.support.utils import get_last_ai_message, list_to_multiline_text
@@ -48,7 +48,7 @@ class EndNode(BaseNode):
         # Find the last CoderPlanAgentMessage by iterating in reverse
         last_coder_plan_message = None
         for msg in reversed(scratch_messages):
-            if isinstance(msg, CoderPlanAgentMessage):
+            if isinstance(msg, ByteAIMessage.CoderPlanAgentMessage):
                 last_coder_plan_message = msg
                 break
 
@@ -65,7 +65,7 @@ class EndNode(BaseNode):
                             Boundary.close(BoundaryType.AGENT_MESSAGE),
                         ]
                     )
-                elif isinstance(message, CoderAgentMessage):
+                elif isinstance(message, ByteAIMessage.CoderAgentMessage):
                     content_text = list_to_multiline_text(
                         [
                             Boundary.open(BoundaryType.AGENT_MESSAGE, meta={"agent_type": "Coder Agent"}),
@@ -73,7 +73,7 @@ class EndNode(BaseNode):
                             Boundary.close(BoundaryType.AGENT_MESSAGE),
                         ]
                     )
-                elif isinstance(message, AskAgentMessage):
+                elif isinstance(message, ByteAIMessage.AskAgentMessage):
                     content_text = list_to_multiline_text(
                         [
                             Boundary.open(BoundaryType.AGENT_MESSAGE, meta={"agent_type": "Ask Agent"}),

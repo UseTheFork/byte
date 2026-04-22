@@ -8,7 +8,7 @@ from textual.widgets import Rule, Static
 from byte.tui.widgets.ui.byte_bug import ByteBug
 
 
-class TextRule(HorizontalGroup):
+class TextRule(HorizontalGroup, can_focus=False):
     """A horizontal rule with text on the left side.
 
     Example:
@@ -20,6 +20,7 @@ class TextRule(HorizontalGroup):
         height: 1;
         width: 1fr;
         margin-bottom: 1;
+        padding-right: 1;
         & Static { 
             width: auto;
             padding-right: 1;
@@ -51,9 +52,6 @@ class TextRule(HorizontalGroup):
 
     def validate_text(self, text: str) -> str:
         return text.strip()
-
-    # def watch_text(self, text: str) -> None:
-    # self.query_one(Static).update(text)
 
     def compose(self) -> ComposeResult:
         header = Static(self.text)
