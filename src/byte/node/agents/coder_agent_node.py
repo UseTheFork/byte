@@ -1,4 +1,4 @@
-from typing import Literal, Type, cast
+from typing import Literal, Type
 
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
@@ -13,6 +13,7 @@ from byte.node import (
     BaseNode,
     ByteAIMessage,
 )
+from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
 from byte.orchestration import AssistantContextSchema, BaseState, preamble
 from byte.support import Boundary, BoundaryType, Str
@@ -39,7 +40,6 @@ coder_user_template = [
     "",
     "{project_information_and_context}",
     "",
-    "{file_context_with_line_numbers}",
     "",
     Boundary.open(BoundaryType.TASK),
     "Your task has THREE phases:",
@@ -100,9 +100,9 @@ coder_prompt = ChatPromptTemplate.from_messages(
                 ]
             ),
         ),
-        # ("placeholder", "{examples}"),
         ("user", "{assembled_user_message}"),
         ("placeholder", "{scratch_messages}"),
+        ("placeholder", "{refreshed_context}"),
         ("placeholder", "{errors}"),
     ]
 )
@@ -122,6 +122,10 @@ class CoderAgentNode(BaseAgentNode):
             **kwargs: Additional keyword arguments passed to the parent class.
         """
         self.goto = Str.class_to_snake_case(goto)
+
+    @property
+    def message_type(self) -> Type[BaseAIMessage]:
+        return ByteAIMessage.CoderAgentMessage
 
     def get_model(self) -> tuple[ModelSchema, dict]:
         llm_service = self.app.make(LLMService)
@@ -162,16 +166,9 @@ class CoderAgentNode(BaseAgentNode):
             record_response_service.record_response(agent_state, runnable, self.name, config),
         )
 
-        if result.tool_calls and len(result.tool_calls) > 0:
-            result = cast(ByteAIMessage.CoderAgentMessage, result)
-            return self.route_to(
-                "tool_node",
-                {
-                    "scratch_messages": [result],
-                    "errors": None,
-                },
-            )
+        route_tool_call = self.route_tool_calls(result)
+        if route_tool_call is not None:
+            return route_tool_call
 
         msg = extract_content_from_message(result)
-
         return self.route_to(self.goto, {"scratch_messages": ByteAIMessage.CoderAgentMessage(content=msg)})

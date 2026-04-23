@@ -1,16 +1,18 @@
 from abc import abstractmethod
-from typing import List
+from typing import List, Type, cast
 
 from langchain.chat_models import init_chat_model
 from langchain.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable
+from langgraph.types import Command
 
 from byte.llm import ModelSchema
 from byte.node import (
     BaseNode,
     NodeEvents,
 )
+from byte.node.messages import BaseAIMessage
 from byte.orchestration import BaseState, PromptAssembler
 from byte.support import Str
 
@@ -25,6 +27,16 @@ class BaseAgentNode(BaseNode):
     def human_name(self) -> str:
         """Human readable agent name"""
         return Str.snake_to_title(self.name).replace("Agent Node", "").strip()
+
+    @property
+    @abstractmethod
+    def message_type(self) -> Type[BaseAIMessage]:
+        """The ByteAIMessage subclass to cast this agent's messages to.
+
+        Must be implemented by subclasses to return their specific message type.
+        Usage: Override in subclass to return e.g. `ByteAIMessage.CoderAgentMessage`
+        """
+        pass
 
     def get_enforcement(self) -> List[str]:
         return []
@@ -114,7 +126,8 @@ class BaseAgentNode(BaseNode):
 
         agent_state = {**state}
 
-        agent_state["assembled_user_message"] = prompt_assembler.assemble(**user_prompt_state)
+        agent_state["assembled_user_message"] = prompt_assembler.assemble_user_message(**user_prompt_state)
+        agent_state["refreshed_context"] = prompt_assembler.assemble_refreshed_context(state)
 
         if state.get("errors", None) is not None:
             agent_state["errors"] = await self._gather_errors(agent_state)
@@ -161,3 +174,27 @@ class BaseAgentNode(BaseNode):
         runnable = self.get_prompt() | model
 
         return runnable
+
+    def route_tool_calls(self, result) -> Command | None:
+        """Route to the tool node when the model returns tool calls.
+
+        Casts the result to this agent's message type and routes to the tool node
+        with the result appended to scratch_messages.
+
+        Args:
+            result: The raw model result containing tool calls
+
+        Returns:
+            Command routing to "tool_node" with the cast result in scratch_messages
+        """
+        if result.tool_calls and len(result.tool_calls) > 0:
+            result = cast(self.message_type, result)  # ty:ignore[invalid-type-form]
+            return self.route_to(
+                "tool_node",
+                {
+                    "scratch_messages": [result],
+                    "errors": None,
+                },
+            )
+
+        return None

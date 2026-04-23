@@ -1,4 +1,4 @@
-from typing import Literal, Type, cast
+from typing import Literal, Type
 
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
@@ -13,6 +13,7 @@ from byte.node import (
     BaseNode,
     ByteAIMessage,
 )
+from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.support import Boundary, BoundaryType, Str
@@ -86,6 +87,10 @@ class CommitAgentNode(BaseAgentNode):
 
         self.goto = Str.class_to_snake_case(goto)
 
+    @property
+    def message_type(self) -> Type[BaseAIMessage]:
+        return ByteAIMessage.CommitAgentMessage
+
     def get_model(self) -> tuple[ModelSchema, dict]:
         llm_service = self.app.make(LLMService)
         return llm_service.get_model(self.name)
@@ -117,15 +122,9 @@ class CommitAgentNode(BaseAgentNode):
             record_response_service.record_response(agent_state, runnable, self.name, config),
         )
 
-        if result.tool_calls and len(result.tool_calls) > 0:
-            result = cast(ByteAIMessage.CommitAgentMessage, result)
-            return self.route_to(
-                "tool_node",
-                {
-                    "scratch_messages": [result],
-                    "errors": None,
-                },
-            )
+        route_tool_call = self.route_tool_calls(result)
+        if route_tool_call is not None:
+            return route_tool_call
 
         msg = extract_content_from_message(result)
         return self.route_to(self.goto, {"scratch_messages": ByteAIMessage.CommitAgentMessage(content=msg)})

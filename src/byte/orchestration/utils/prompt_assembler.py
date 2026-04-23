@@ -2,7 +2,7 @@ import asyncio
 import re
 from typing import TYPE_CHECKING, TypeVar
 
-from langchain.messages import AIMessage
+from langchain.messages import AIMessage, HumanMessage
 from langchain_core.messages import BaseMessage
 from typing_extensions import List
 
@@ -38,6 +38,7 @@ class PromptAssembler(Bootable, Eventable):
             raise ValueError("template parameter is required and cannot be empty")
 
         self.template = template
+        self.prompt_state = {}
 
     async def _gather_reinforcement(self, agent: str, model_schema: ModelSchema) -> str:
         """Gather reinforcement messages from various domains.
@@ -384,10 +385,11 @@ class PromptAssembler(Bootable, Eventable):
             )
 
         user_prompt_state["user_request"] = state.get("user_request", "")
+        self.prompt_state = user_prompt_state
 
         return user_prompt_state
 
-    def assemble(self, **replacements) -> str:
+    def assemble_user_message(self, **replacements) -> str:
         """Replace {placeholder} tokens in template with provided values.
 
         Automatically removes lines containing only placeholders that don't have corresponding values.
@@ -414,3 +416,28 @@ class PromptAssembler(Bootable, Eventable):
                 result_lines.append(line)
 
         return list_to_multiline_text(result_lines)
+
+    def assemble_refreshed_context(self, state: BaseState) -> list[BaseMessage]:
+        """ """
+
+        scratch_messages = state.get("scratch_messages", [])
+        context_prefix = (
+            []
+            if scratch_messages
+            else [AIMessage(content="Please provide any additional context I may need for this task.")]
+        )
+
+        refreshed_context_message = list_to_multiline_text(
+            [
+                Boundary.open(BoundaryType.HEADING),
+                "Below is the current state of the project. It includes all previous tool calls etc.",
+                Boundary.open(BoundaryType.HEADING),
+                "",
+                self.prompt_state["file_context_with_line_numbers"],
+                "",
+            ]
+        )
+
+        refreshed_context = context_prefix + [HumanMessage(content=refreshed_context_message)]
+
+        return refreshed_context  # ty:ignore[invalid-return-type]
