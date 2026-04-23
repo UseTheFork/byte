@@ -3,11 +3,13 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.tools.base_tool import BaseTool
     from byte.tools.schemas import ToolResult
     from byte.tools.service.tool_registry_service import ToolRegistryService
     from byte.tools.service_provider import ToolsServiceProvider
 
 __all__ = (
+    "BaseTool",
     "ToolRegistryService",
     "ToolResult",
     "ToolsServiceProvider",
@@ -15,9 +17,10 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
+    "BaseTool": "BaseTool",
     "ToolRegistryService": "service.tool_registry_service",
-    "ToolsServiceProvider": "service_provider",
     "ToolResult": "schemas",
+    "ToolsServiceProvider": "service_provider",
     # keep-sorted end
 }
 
