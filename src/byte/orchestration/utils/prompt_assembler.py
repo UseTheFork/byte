@@ -10,6 +10,7 @@ from byte.conventions import ConventionContextService
 from byte.files import FileService
 from byte.git import CommitService
 from byte.llm import ModelSchema
+from byte.node import ByteAIMessage
 from byte.orchestration import BaseState, OrchestrationEvents
 from byte.support import Boundary, BoundaryType, Str
 from byte.support.mixins import Bootable, Eventable
@@ -148,8 +149,11 @@ class PromptAssembler(Bootable, Eventable):
             return list_to_multiline_text(masked_messages)
 
         for message in messages:
-            if isinstance(message, AIMessage):
-                # TODO: Improve on this.
+            if (
+                isinstance(message, ByteAIMessage.AskAgentMessage)
+                or isinstance(message, ByteAIMessage.CoderAgentMessage)
+                or isinstance(message, ByteAIMessage.CoderPlanAgentMessage)
+            ):
                 masked_messages.append(message.content)
             else:
                 # Keep non-AIMessages unchanged
@@ -429,12 +433,14 @@ class PromptAssembler(Bootable, Eventable):
 
         refreshed_context_message = list_to_multiline_text(
             [
+                Boundary.open(BoundaryType.PROJECT_STATE),
                 Boundary.open(BoundaryType.HEADING),
                 "Below is the current state of the project. It includes all previous tool calls etc.",
-                Boundary.open(BoundaryType.HEADING),
+                Boundary.close(BoundaryType.HEADING),
                 "",
                 self.prompt_state["file_context_with_line_numbers"],
                 "",
+                Boundary.close(BoundaryType.PROJECT_STATE),
             ]
         )
 

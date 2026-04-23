@@ -46,6 +46,7 @@ coder_user_template = [
     "",
     "PHASE 1: Create a clear, step-by-step plan for implementing the requested changes.",
     "PHASE 2: Use available tools to apply the changes.",
+    f"Between each tool call you **MUST** reference the user message containing `{Boundary.open(BoundaryType.PROJECT_STATE)}` — this is always updated to reflect the current state of the project. Use it to continue executing your step-by-step plan from Phase 1.",
     "PHASE 3: Provide a summary of what was changed.",
     "",
     Boundary.open(BoundaryType.RESPONSE_FORMAT),
@@ -84,7 +85,9 @@ coder_user_template = [
     Boundary.close(BoundaryType.TASK),
     "{operating_principles}",
     "",
-    Boundary.critical("All tool operations are applied immediately and are reflected in the <context>."),
+    Boundary.critical(
+        f"All tool operations are applied immediately and are reflected in the `{Boundary.open(BoundaryType.PROJECT_STATE)}`."
+    ),
 ]
 
 coder_prompt = ChatPromptTemplate.from_messages(
