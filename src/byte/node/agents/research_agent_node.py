@@ -6,7 +6,7 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
-from byte.git import GitCommitTool
+from byte.git import GitGrepTool
 from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
@@ -15,62 +15,66 @@ from byte.node import (
 )
 from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
-from byte.orchestration import AssistantContextSchema, BaseState
+from byte.orchestration import (
+    AssistantContextSchema,
+    BaseState,
+    preamble,
+)
 from byte.support import Boundary, BoundaryType, Str
 from byte.support.utils import extract_content_from_message, list_to_multiline_text
+from byte.web import SearchWebTool
 
-# Conventional commit message generation prompt
-# Adapted from Aider: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/prompts.py#L8
-# Conventional Commits specification: https://www.conventionalcommits.org/en/v1.0.0/#summary
-
-commit_user_template = [
-    Boundary.open(BoundaryType.GIT_CONTEXT),
-    "{user_request}",
-    "",
-    "You **MUST** consider the above git diffs before proceeding (if not empty).",
-    Boundary.close(BoundaryType.GIT_CONTEXT),
-    "",
+ask_user_template = [
     "{modified_messages}",
+    Boundary.open(BoundaryType.USER_INPUT),
+    "```text",
+    "{user_request}",
+    "```",
     "",
-    Boundary.open(BoundaryType.TASK),
-    "You are an expert software engineer that generates concise, Git commit messages based on the provided diffs.",
-    "Review the provided context and diffs which are about to be committed to a git repo.",
-    "Review the diffs carefully.",
-    Boundary.critical("You MUST follow the commit guidelines provided in the Rules section below."),
-    "Read and apply ALL rules for commit types, scopes, and description formatting.",
-    Boundary.close(BoundaryType.TASK),
-    "{commit_guidelines}",
+    "You **MUST** consider the user input before proceeding (if not empty).",
+    Boundary.close(BoundaryType.USER_INPUT),
+    Boundary.open(BoundaryType.OPERATING_CONSTRAINTS),
+    "- Always use best practices when coding",
+    "- Respect and use existing conventions, libraries, etc that are already present in the code base",
+    "- Take requests for changes to the supplied code",
+    "- If the request is ambiguous, ask questions",
+    "- Keep changes simple don't build more then what is asked for",
+    "- Never use XML-style tags in your responses (e.g., <file>, <search>, <replace>). These are for internal parsing only.",
+    "- Do not provide full code implementations unless explicitly requested. Describe the changes needed first.",
+    Boundary.close(BoundaryType.OPERATING_CONSTRAINTS),
     "",
     Boundary.open(BoundaryType.RESPONSE_FORMAT),
-    "Format your response as follows:",
-    "",
-    "1. Start with a SHORT analysis of the changes in list format.",
-    "2. Call the `git_commit` tool ONCE.",
-    "3. If the tool call is successful, end your turn with no further output.",
+    "- Use clear, concise explanations",
+    "- Format code with proper syntax highlighting",
+    "- Provide context for suggested changes",
+    "- Focus on actionable findings, not exhaustive documentation",
     Boundary.close(BoundaryType.RESPONSE_FORMAT),
-    "",
+    "{project_hierarchy}",
+    "{project_information_and_context}",
+    "{file_context}",
+    "{operating_principles}",
 ]
 
-commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
+ask_prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
             list_to_multiline_text(
                 [
                     Boundary.open(BoundaryType.ROLE),
-                    "You are an expert software engineer that generates organized Git commits based on the provided user input.",
+                    preamble(),
+                    "Act as an expert software developer.",
                     Boundary.close(BoundaryType.ROLE),
                 ]
             ),
         ),
         ("user", "{assembled_user_message}"),
         ("placeholder", "{scratch_messages}"),
-        ("placeholder", "{errors}"),
     ]
 )
 
 
-class CommitAgentNode(BaseAgentNode):
+class ResearchAgentNode(BaseAgentNode):
     def boot(
         self,
         goto: Type[BaseNode] = EndNode,
@@ -89,20 +93,23 @@ class CommitAgentNode(BaseAgentNode):
 
     @property
     def message_type(self) -> Type[BaseAIMessage]:
-        return ByteAIMessage.CommitAgentMessage
+        return ByteAIMessage.AskAgentMessage
 
     def get_model(self) -> tuple[ModelSchema, dict]:
         llm_service = self.app.make(LLMService)
         return llm_service.get_model(self.name)
 
     def get_prompt(self):
-        return commit_prompt
+        return ask_prompt
 
     def get_user_template(self):
-        return commit_user_template
+        return ask_user_template
 
     def get_tools(self):
-        return [GitCommitTool]
+        return [
+            GitGrepTool,
+            SearchWebTool,
+        ]
 
     async def __call__(
         self,
@@ -117,14 +124,14 @@ class CommitAgentNode(BaseAgentNode):
         agent_state, config = await self.generate_agent_state(state, config)
         record_response_service = self.app.make(RecordResponseService)
 
-        result = await runnable.ainvoke(agent_state, config=config)
         self.app.dispatch_task(
             record_response_service.record_response(agent_state, runnable, self.name, config),
         )
+        result = await runnable.ainvoke(agent_state, config=config)
 
         route_tool_call = self.route_tool_calls(result)
         if route_tool_call is not None:
             return route_tool_call
 
         msg = extract_content_from_message(result)
-        return self.route_to(self.goto, {"scratch_messages": ByteAIMessage.CommitAgentMessage(content=msg)})
+        return self.route_to(self.goto, {"scratch_messages": ByteAIMessage.AskAgentMessage(content=msg)})

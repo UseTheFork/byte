@@ -1,15 +1,12 @@
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 from langchain.messages import AIMessage, HumanMessage, ToolMessage
-
-if TYPE_CHECKING:
-    pass
-
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte.node import BaseNode, ByteAIMessage, NodeEvents
+from byte.node import BaseNode, NodeEvents
+from byte.node.messages import BaseAIMessage
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.support import Boundary, BoundaryType
 from byte.support.utils import get_last_ai_message, list_to_multiline_text
@@ -45,38 +42,15 @@ class EndNode(BaseNode):
         """
         message_parts = []
 
-        # Find the last CoderPlanAgentMessage by iterating in reverse
-        last_coder_plan_message = None
-        for msg in reversed(scratch_messages):
-            if isinstance(msg, ByteAIMessage.CoderPlanAgentMessage):
-                last_coder_plan_message = msg
-                break
-
         for message in scratch_messages:
-            if isinstance(message, AIMessage):
+            if isinstance(message, BaseAIMessage):
                 # Extract text content from AIMessage
                 content_text = self._extract_text_from_content(message.content)
 
-                if message is last_coder_plan_message:
+                if not message.mask:
                     content_text = list_to_multiline_text(
                         [
-                            Boundary.open(BoundaryType.AGENT_MESSAGE, meta={"agent_type": "Coder Agent"}),
-                            content_text,
-                            Boundary.close(BoundaryType.AGENT_MESSAGE),
-                        ]
-                    )
-                elif isinstance(message, ByteAIMessage.CoderAgentMessage):
-                    content_text = list_to_multiline_text(
-                        [
-                            Boundary.open(BoundaryType.AGENT_MESSAGE, meta={"agent_type": "Coder Agent"}),
-                            content_text,
-                            Boundary.close(BoundaryType.AGENT_MESSAGE),
-                        ]
-                    )
-                elif isinstance(message, ByteAIMessage.AskAgentMessage):
-                    content_text = list_to_multiline_text(
-                        [
-                            Boundary.open(BoundaryType.AGENT_MESSAGE, meta={"agent_type": "Ask Agent"}),
+                            Boundary.open(BoundaryType.AGENT_MESSAGE, meta={"agent_type": message.agent_name}),
                             content_text,
                             Boundary.close(BoundaryType.AGENT_MESSAGE),
                         ]
@@ -125,17 +99,6 @@ class EndNode(BaseNode):
             last_message = get_last_ai_message(state["scratch_messages"])
             update_dict["final_message"] = last_message
 
-            # Extract text content from message (handles both list and string formats)
-            # content_text = self._extract_text_from_content(last_message.content)
-
-            # Wrap the message in XML for parsing later.
-            # last_message = list_to_multiline_text(
-            #     [
-            #         Boundary.open(BoundaryType.AGENT_MESSAGE, {"agent_type": agent}),
-            #         str(content_text),
-            #         Boundary.close(BoundaryType.AGENT_MESSAGE),
-            #     ]
-            # )
             generated_final_message = self._generate_final_message(state["scratch_messages"])
             last_message = AIMessage(content=generated_final_message)
 

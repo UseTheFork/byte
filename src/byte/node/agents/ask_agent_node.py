@@ -6,7 +6,7 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
-from byte.git import git_grep
+from byte.git import GitGrepTool
 from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
@@ -22,6 +22,7 @@ from byte.orchestration import (
 )
 from byte.support import Boundary, BoundaryType, Str
 from byte.support.utils import extract_content_from_message, list_to_multiline_text
+from byte.web import SearchWebTool
 
 ask_user_template = [
     "{modified_messages}",
@@ -50,7 +51,6 @@ ask_user_template = [
     Boundary.close(BoundaryType.RESPONSE_FORMAT),
     "{project_hierarchy}",
     "{project_information_and_context}",
-    "{file_context}",
     "{operating_principles}",
 ]
 
@@ -69,6 +69,8 @@ ask_prompt = ChatPromptTemplate.from_messages(
         ),
         ("user", "{assembled_user_message}"),
         ("placeholder", "{scratch_messages}"),
+        ("placeholder", "{refreshed_context}"),
+        ("placeholder", "{errors}"),
     ]
 )
 
@@ -113,8 +115,7 @@ class AskAgentNode(BaseAgentNode):
         return ask_enforcement
 
     def get_tools(self):
-        return [git_grep]
-        # return [load_convention, git_grep]
+        return [GitGrepTool, SearchWebTool]
 
     async def __call__(
         self,

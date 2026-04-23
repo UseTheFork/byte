@@ -20,15 +20,17 @@ if TYPE_CHECKING:
     from byte.files.service.tool_file_service import ToolFileService
     from byte.files.service.watcher_service import FileWatcherService
     from byte.files.service_provider import FileServiceProvider
-    from byte.files.tools.delete_file import delete_file
-    from byte.files.tools.edit_file import edit_file
-    from byte.files.tools.replace_file import replace_file
-    from byte.files.tools.write_file import write_file
+    from byte.files.tools.delete_file_tool import DeleteFileTool
+    from byte.files.tools.edit_file_tool import EditFileTool
+    from byte.files.tools.replace_file_tool import ReplaceFileTool
+    from byte.files.tools.write_file_tool import WriteFileTool
 
 __all__ = (
     "AICommentWatcherService",
     "AddFileCommand",
+    "DeleteFileTool",
     "DropFileCommand",
+    "EditFileTool",
     "FileContext",
     "FileDiscoveryService",
     "FileEvents",
@@ -40,12 +42,10 @@ __all__ = (
     "ListFilesCommand",
     "ReadOnlyCommand",
     "ReloadFilesCommand",
+    "ReplaceFileTool",
     "SwitchModeCommand",
     "ToolFileService",
-    "delete_file",
-    "edit_file",
-    "replace_file",
-    "write_file",
+    "WriteFileTool",
 )
 
 _dynamic_imports = {
@@ -66,10 +66,10 @@ _dynamic_imports = {
     "ReloadFilesCommand": "command.reload_files_command",
     "SwitchModeCommand": "command.switch_mode_command",
     "ToolFileService": "service.tool_file_service",
-    "delete_file": "tools.delete_file",
-    "edit_file": "tools.edit_file",
-    "replace_file": "tools.replace_file",
-    "write_file": "tools.write_file",
+    "DeleteFileTool": "tools.delete_file_tool",
+    "EditFileTool": "tools.edit_file_tool",
+    "ReplaceFileTool": "tools.replace_file_tool",
+    "WriteFileTool": "tools.write_file_tool",
     # keep-sorted end
 }
 

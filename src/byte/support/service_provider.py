@@ -68,7 +68,7 @@ class ServiceProvider(ABC):
             command_registry.register_slash_command(command)
 
     # TODO: Doc Strings
-    def tools(self) -> List[BaseTool]:
+    def tools(self) -> List[Type[BaseTool]]:
         """"""
         return []
 
@@ -81,7 +81,9 @@ class ServiceProvider(ABC):
 
         tool_registry_service = self.app.make(ToolRegistryService)
 
-        for tool in tools:
+        for tool_class in tools:
+            # AI: How do we fix the below I am getting `TypeError: 'StructuredTool' object is not callable` ai?
+            tool = tool_class()
             tool_registry_service.register_tool(tool)
 
     def set_application(self, app: Application):

@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from byte.web.service.chromium_service import ChromiumService
     from byte.web.service.content_cleaner import ContentCleaner
     from byte.web.service_provider import WebServiceProvider
+    from byte.web.tools.search_web_tool import SearchWebTool
 
 __all__ = (
     "BaseWebParser",
@@ -27,6 +28,7 @@ __all__ = (
     "GitHubParser",
     "MkDocsParser",
     "RawContentParser",
+    "SearchWebTool",
     "SphinxParser",
     "WebConfig",
     "WebNotEnabledException",
@@ -47,6 +49,7 @@ _dynamic_imports = {
     "WebConfig": "config",
     "WebNotEnabledException": "exceptions",
     "WebServiceProvider": "service_provider",
+    "SearchWebTool": "tools.search_web_tool",
     # keep-sorted end
 }
 

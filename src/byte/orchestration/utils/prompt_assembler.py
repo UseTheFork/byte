@@ -187,10 +187,15 @@ class PromptAssembler(Bootable, Eventable):
         if read_only_files or editable_files:
             file_context_content.extend(
                 [
-                    "# Here are the files in the current context:",
+                    Boundary.open(BoundaryType.FILE_CONTEXT, meta={"type": "read only files"}),
+                    Boundary.open(BoundaryType.HEADING),
+                    "Here are the files in the current context",
+                    Boundary.close(BoundaryType.HEADING),
                     "",
-                    Boundary.notice("Trust the bellow as the true contents of these files!"),
-                    "Any other messages may contain outdated versions of the files' contents.",
+                    Boundary.notice(
+                        "Trust the bellow as the true contents of these files!\n Any other messages may contain outdated versions of the files' contents."
+                    ),
+                    "",
                 ]
             )
 
@@ -212,6 +217,12 @@ class PromptAssembler(Bootable, Eventable):
                     Boundary.open(BoundaryType.CONTEXT, meta={"type": "editable files"}),
                     f"{editable_content}",
                     Boundary.close(BoundaryType.CONTEXT),
+                ]
+            )
+
+            file_context_content.extend(
+                [
+                    Boundary.close(BoundaryType.FILE_CONTEXT),
                 ]
             )
 

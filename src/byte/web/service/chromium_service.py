@@ -11,6 +11,7 @@ from byte.web.parser.base import BaseWebParser
 from byte.web.parser.generic_parser import GenericParser
 from byte.web.parser.gitbook_parser import GitBookParser
 from byte.web.parser.github_parser import GitHubParser
+from byte.web.parser.google_search_parser import GoogleSearchParser
 from byte.web.parser.mkdocs_parser import MkDocsParser
 from byte.web.parser.raw_content_parser import RawContentParser
 from byte.web.parser.sphinx_parser import SphinxParser
@@ -60,16 +61,16 @@ class ChromiumService(Service):
         options.start_timeout = 20
 
         async with Chrome(options=options) as browser:
-            self.emit_tui(Messages.LoadingIndicatorShow("Opening browser..."))
+            self.emit_tui(Messages.Status("loading", "Opening browser..."))
             tab = await browser.start()
 
-            self.emit_tui(Messages.LoadingIndicatorShow(f"Loading {url}..."))
+            self.emit_tui(Messages.Status("loading", f"Loading {url}..."))
             await tab.go_to(url)
 
-            self.emit_tui(Messages.LoadingIndicatorShow("Extracting content..."))
+            self.emit_tui(Messages.Status("loading", "Extracting content..."))
             html_content = await tab.execute_script("return document.documentElement.outerHTML")
 
-            self.emit_tui(Messages.LoadingIndicatorShow("Converting to markdown..."))
+            self.emit_tui(Messages.Status("loading", "Converting to markdown..."))
             html_content = html_content.get("result", {}).get("result", {}).get("value", "")
 
             soup = BeautifulSoup(
@@ -82,7 +83,7 @@ class ChromiumService(Service):
             for parser_class in self.parsers:
                 parser = self.app.make(parser_class)
                 if parser.can_parse(soup, url):
-                    self.emit_tui(Messages.LoadingIndicatorShow(f"Parsing with {parser.__class__.__name__}..."))
+                    self.emit_tui(Messages.Status("loading", f"Parsing with {parser.__class__.__name__}..."))
                     self.app["log"].info(f"Parsing with {parser.__class__.__name__}...")
 
                     # Extract content element
@@ -97,5 +98,55 @@ class ChromiumService(Service):
                             self.app["log"].info(f"Parsed successfully with {parser.__class__.__name__}...")
                             break
 
-            self.emit_tui(Messages.LoadingIndicatorHide())
+            self.emit_tui(Messages.Status())
+            return text_content
+
+    async def do_search(self, query: str) -> str:
+        """ """
+        # Check if web commands are enabled in configuration
+        if not self.app["config"].web.enable:
+            raise WebNotEnabledException
+
+        options = ChromiumOptions()
+        options.add_argument("--headless=new")
+        options.binary_location = str(self.app["config"].web.chrome_binary_location)
+        options.start_timeout = 20
+
+        async with Chrome(options=options) as browser:
+            self.emit_tui(Messages.Status("loading", "Opening browser..."))
+            tab = await browser.start()
+
+            self.emit_tui(Messages.Status("loading", f"Searching for {query}..."))
+            await tab.go_to(f"https://www.google.com/search?q={query}")
+
+            self.emit_tui(Messages.Status("loading", "Extracting content..."))
+            html_content = await tab.execute_script("return document.documentElement.outerHTML")
+
+            self.emit_tui(Messages.Status("loading", "Converting to markdown..."))
+            html_content = html_content.get("result", {}).get("result", {}).get("value", "")
+
+            soup = BeautifulSoup(
+                html_content,
+                "html.parser",
+            )
+
+            # Try to find a suitable parser for this content
+            text_content = ""
+
+            parser = self.app.make(GoogleSearchParser)
+            self.emit_tui(Messages.Status("loading", f"Parsing with {parser.__class__.__name__}..."))
+            self.app["log"].info(f"Parsing with {parser.__class__.__name__}...")
+
+            # Extract content element
+            element = parser.extract_content_element(soup)
+            if element is not None:
+                # Apply cleaning pipeline
+                cleaner = self.app.make(ContentCleaner)
+                config = parser.get_cleaning_config()
+                text_content = cleaner.apply_pipeline(element, **config)
+
+                if text_content.strip():
+                    self.app["log"].info(f"Parsed successfully with {parser.__class__.__name__}...")
+
+            self.emit_tui(Messages.Status())
             return text_content

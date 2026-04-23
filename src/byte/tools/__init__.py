@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 
 __all__ = (
     "BaseTool",
+    "BaseTool",
     "ToolRegistryService",
     "ToolResult",
     "ToolsServiceProvider",
@@ -17,10 +18,10 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
-    "BaseTool": "BaseTool",
     "ToolRegistryService": "service.tool_registry_service",
     "ToolResult": "schemas",
     "ToolsServiceProvider": "service_provider",
+    "BaseTool": "base_tool",
     # keep-sorted end
 }
 

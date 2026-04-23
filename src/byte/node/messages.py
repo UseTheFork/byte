@@ -5,18 +5,21 @@ from pydantic import Field
 
 
 class BaseAIMessage(LangchainAIMessage):
+    agent_name: str = Field(default="")
+    mask: bool = Field(default=False)
     created_at: datetime = Field(default_factory=datetime.now)
 
 
 class ByteAIMessage:
     class CoderPlanAgentMessage(BaseAIMessage):
-        pass
+        agent_name: str = "Coder Plan Agent"
 
     class CoderAgentMessage(BaseAIMessage):
-        pass
+        agent_name: str = "Coder Agent"
 
     class AskAgentMessage(BaseAIMessage):
-        pass
+        agent_name: str = "Ask Agent"
 
     class CommitAgentMessage(BaseAIMessage):
-        pass
+        agent_name: str = "Commit Agent"
+        mask: bool = True

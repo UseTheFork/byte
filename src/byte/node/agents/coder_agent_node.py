@@ -6,7 +6,12 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
-from byte.files import delete_file, edit_file, replace_file, write_file
+from byte.files import (
+    DeleteFileTool,
+    EditFileTool,
+    ReplaceFileTool,
+    WriteFileTool,
+)
 from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
@@ -141,7 +146,12 @@ class CoderAgentNode(BaseAgentNode):
         return coder_user_template
 
     def get_tools(self):
-        return [edit_file, write_file, delete_file, replace_file]
+        return [
+            EditFileTool,
+            WriteFileTool,
+            DeleteFileTool,
+            ReplaceFileTool,
+        ]
 
     async def __call__(
         self,

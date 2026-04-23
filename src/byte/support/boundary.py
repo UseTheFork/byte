@@ -52,6 +52,7 @@ class BoundaryType(str, Enum):
 
     CONTEXT = "context"
     PROJECT_STATE = "project_state"
+    FILE_CONTEXT = "file_context"
 
     GIT_CONTEXT = "git_context"
 

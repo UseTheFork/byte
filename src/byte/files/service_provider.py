@@ -6,7 +6,9 @@ from byte import Command, EventBus, Service, ServiceProvider
 from byte.files import (
     AddFileCommand,
     AICommentWatcherService,
+    DeleteFileTool,
     DropFileCommand,
+    EditFileTool,
     FileDiscoveryService,
     FileEvents,
     FileIgnoreService,
@@ -15,12 +17,10 @@ from byte.files import (
     ListFilesCommand,
     ReadOnlyCommand,
     ReloadFilesCommand,
+    ReplaceFileTool,
     SwitchModeCommand,
     ToolFileService,
-    delete_file,
-    edit_file,
-    replace_file,
-    write_file,
+    WriteFileTool,
 )
 from byte.orchestration import OrchestrationEvents
 from byte.system import SystemEvents
@@ -49,9 +49,14 @@ class FileServiceProvider(ServiceProvider):
             ReloadFilesCommand,
         ]
 
-    def tools(self) -> List[BaseTool]:
+    def tools(self) -> List[Type[BaseTool]]:
         """"""
-        return [edit_file, write_file, delete_file, replace_file]
+        return [
+            EditFileTool,
+            WriteFileTool,
+            DeleteFileTool,
+            ReplaceFileTool,
+        ]
 
     async def boot(self):
         """Boot file services and register commands with registry."""
