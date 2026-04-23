@@ -82,8 +82,7 @@ class ServiceProvider(ABC):
         tool_registry_service = self.app.make(ToolRegistryService)
 
         for tool_class in tools:
-            # AI: How do we fix the below I am getting `TypeError: 'StructuredTool' object is not callable` ai?
-            tool = tool_class()
+            tool = self.app.make(tool_class)
             tool_registry_service.register_tool(tool)
 
     def set_application(self, app: Application):

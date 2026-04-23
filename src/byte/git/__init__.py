@@ -35,10 +35,10 @@ _dynamic_imports = {
     "CommitPlan": "schemas",
     "CommitService": "service.commit_service",
     "CommitValidator": "validators.commit_validator",
-    "GitService": "service.git_service",
-    "GitServiceProvider": "service_provider",
     "GitCommitTool": "tools.git_commit_tool",
     "GitGrepTool": "tools.git_grep_tool",
+    "GitService": "service.git_service",
+    "GitServiceProvider": "service_provider",
     # keep-sorted end
 }
 

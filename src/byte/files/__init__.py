@@ -52,7 +52,9 @@ _dynamic_imports = {
     # keep-sorted start
     "AICommentWatcherService": "service.ai_comment_watcher_service",
     "AddFileCommand": "command.add_file_command",
+    "DeleteFileTool": "tools.delete_file_tool",
     "DropFileCommand": "command.drop_file_command",
+    "EditFileTool": "tools.edit_file_tool",
     "FileContext": "models",
     "FileDiscoveryService": "service.discovery_service",
     "FileEvents": "events",
@@ -64,11 +66,9 @@ _dynamic_imports = {
     "ListFilesCommand": "command.list_files_command",
     "ReadOnlyCommand": "command.add_read_only_file_command",
     "ReloadFilesCommand": "command.reload_files_command",
+    "ReplaceFileTool": "tools.replace_file_tool",
     "SwitchModeCommand": "command.switch_mode_command",
     "ToolFileService": "service.tool_file_service",
-    "DeleteFileTool": "tools.delete_file_tool",
-    "EditFileTool": "tools.edit_file_tool",
-    "ReplaceFileTool": "tools.replace_file_tool",
     "WriteFileTool": "tools.write_file_tool",
     # keep-sorted end
 }

@@ -45,11 +45,11 @@ _dynamic_imports = {
     "GitHubParser": "parser.github_parser",
     "MkDocsParser": "parser.mkdocs_parser",
     "RawContentParser": "parser.raw_content_parser",
+    "SearchWebTool": "tools.search_web_tool",
     "SphinxParser": "parser.sphinx_parser",
     "WebConfig": "config",
     "WebNotEnabledException": "exceptions",
     "WebServiceProvider": "service_provider",
-    "SearchWebTool": "tools.search_web_tool",
     # keep-sorted end
 }
 

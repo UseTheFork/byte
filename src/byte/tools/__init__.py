@@ -18,10 +18,10 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
+    "BaseTool": "base_tool",
     "ToolRegistryService": "service.tool_registry_service",
     "ToolResult": "schemas",
     "ToolsServiceProvider": "service_provider",
-    "BaseTool": "base_tool",
     # keep-sorted end
 }
 
