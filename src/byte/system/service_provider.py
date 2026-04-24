@@ -1,9 +1,18 @@
 from typing import List, Type
 
+from langchain.tools import BaseTool
+
 from byte import Command, EventBus, Service, ServiceProvider
 from byte.memory import UndoCommand
 from byte.orchestration import OrchestrationEvents
-from byte.system import ExitCommand, SystemContextService
+from byte.system import (
+    ExitCommand,
+    SystemContextService,
+    UserConfirmOrInputTool,
+    UserConfirmTool,
+    UserInputTextTool,
+    UserSelectTool,
+)
 
 
 class SystemServiceProvider(ServiceProvider):
@@ -13,6 +22,15 @@ class SystemServiceProvider(ServiceProvider):
     through the command registry for user interaction via slash commands.
     Usage: Register with container to enable /exit and /help commands
     """
+
+    def tools(self) -> List[Type[BaseTool]]:
+        """"""
+        return [
+            UserConfirmOrInputTool,
+            UserConfirmTool,
+            UserInputTextTool,
+            UserSelectTool,
+        ]
 
     def commands(self) -> List[Type[Command]]:
         return [

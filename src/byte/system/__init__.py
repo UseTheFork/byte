@@ -11,6 +11,10 @@ if TYPE_CHECKING:
     from byte.system.service.config_writer_service import ConfigWriterService
     from byte.system.service.system_context_service import SystemContextService
     from byte.system.service_provider import SystemServiceProvider
+    from byte.system.tools.user_confirm_or_input_tool import UserConfirmOrInputTool
+    from byte.system.tools.user_confirm_tool import UserConfirmTool
+    from byte.system.tools.user_input_text_tool import UserInputTextTool
+    from byte.system.tools.user_select_tool import UserSelectTool
 
 __all__ = (
     "ConfigWriterService",
@@ -20,6 +24,10 @@ __all__ = (
     "SystemContextService",
     "SystemEvents",
     "SystemServiceProvider",
+    "UserConfirmOrInputTool",
+    "UserConfirmTool",
+    "UserInputTextTool",
+    "UserSelectTool",
 )
 
 _dynamic_imports = {
@@ -31,6 +39,10 @@ _dynamic_imports = {
     "SystemContextService": "service.system_context_service",
     "SystemEvents": "events",
     "SystemServiceProvider": "service_provider",
+    "UserConfirmOrInputTool": "tools.user_confirm_or_input_tool",
+    "UserConfirmTool": "tools.user_confirm_tool",
+    "UserInputTextTool": "tools.user_input_text_tool",
+    "UserSelectTool": "tools.user_select_tool",
     # keep-sorted end
 }
 
