@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Optional, override
+from typing import TYPE_CHECKING, Any, override
 
 from langchain_core.tools import ArgsSchema
 
