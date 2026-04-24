@@ -36,7 +36,6 @@ class ByteConfig(BaseModel):
     # keep-sorted start
     app: AppConfig = Field(default_factory=AppConfig)
     boot: BootConfig = Field(default_factory=BootConfig)
-    tui: TUIConfig = Field(default_factory=TUIConfig)
     files: FilesConfig = Field(default_factory=FilesConfig)
     git: GitConfig = Field(default_factory=GitConfig)
     lint: LintConfig = Field(default_factory=LintConfig, description="Code linting and formatting configuration")
@@ -44,5 +43,6 @@ class ByteConfig(BaseModel):
     lsp: LSPConfig = Field(default_factory=LSPConfig)
     presets: Optional[list[PresetsConfig]] = Field(default_factory=list)
     system: SystemConfig = Field(default_factory=SystemConfig)
+    tui: TUIConfig = Field(default_factory=TUIConfig)
     web: WebConfig = Field(default_factory=WebConfig)
     # keep-sorted end
