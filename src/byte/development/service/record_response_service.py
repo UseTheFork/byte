@@ -36,8 +36,11 @@ class RecordResponseService(Service):
         Usage: `file_path = await service.cache_response(result, runtime.context)`
         """
 
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        cache_file = self.app.cache_path(f"development/{agent_name}_{timestamp}.md")
+        if self.app.is_development():
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            cache_file = self.app.cache_path(f"development/{agent_name}_{timestamp}.md")
+        else:
+            cache_file = self.app.cache_path(f"development/{agent_name}.md")
 
         # Ensure cache directory exists
         cache_file.parent.mkdir(parents=True, exist_ok=True)
