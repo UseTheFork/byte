@@ -4,20 +4,18 @@ from typing import TYPE_CHECKING, TypeVar
 
 from langchain.messages import AIMessage, HumanMessage
 from langchain_core.messages import BaseMessage
-from typing_extensions import List
 
 from byte.conventions import ConventionContextService
 from byte.files import FileService
 from byte.git import CommitService
-from byte.llm import ModelSchema
 from byte.node import ByteAIMessage
 from byte.orchestration import BaseState, OrchestrationEvents
-from byte.support import Boundary, BoundaryType, Str
+from byte.support import Boundary, BoundaryType
 from byte.support.mixins import Bootable, Eventable
 from byte.support.utils import list_to_multiline_text
 
 if TYPE_CHECKING:
-    pass
+    from byte.node import BaseAgentNode
 
 T = TypeVar("T")
 
@@ -34,14 +32,24 @@ class PromptAssembler(Bootable, Eventable):
     Usage: `prompt = assembler.assemble(name="World", age=30)`
     """
 
-    def boot(self, template: List[str] | None, **kwargs):
+    def boot(self, agent_node: BaseAgentNode | None, **kwargs):
+
+        if agent_node is None:
+            raise ValueError("agent_node is required and cannot be empty")
+
+        self.agent_node = agent_node
+        template = agent_node.get_user_template()
         if template is None or len(template) == 0:
-            raise ValueError("template parameter is required and cannot be empty")
+            raise ValueError("user template is required and cannot be empty")
 
         self.template = template
+
+        model_schema, _ = self.agent_node.get_model()
+        self.model_schema = model_schema
+
         self.prompt_state = {}
 
-    async def _gather_reinforcement(self, agent: str, model_schema: ModelSchema) -> str:
+    async def _gather_reinforcement(self) -> str:
         """Gather reinforcement messages from various domains.
 
         Emits GATHER_REINFORCEMENT event and collects reinforcement
@@ -57,9 +65,9 @@ class PromptAssembler(Bootable, Eventable):
         """
         reinforcement_payload = await self.emit(
             OrchestrationEvents.GatherReinforcement(
-                model=model_schema.model,
-                provider=model_schema.provider,
-                agent=agent,
+                model=self.model_schema.model,
+                provider=self.model_schema.provider,
+                agent=self.agent_node.name,
                 reinforcement=[],
             )
         )
@@ -134,6 +142,7 @@ class PromptAssembler(Bootable, Eventable):
     async def _gather_modified_messages(self, state) -> str:
         """ """
         messages: list[BaseMessage] = state.get("history_messages", [])
+        messages = self.agent_node.filter_message_history(messages)
 
         # Create masked_messages list identical to messages except for processed AIMessages
         masked_messages = [
@@ -148,6 +157,7 @@ class PromptAssembler(Bootable, Eventable):
             masked_messages.append(Boundary.close(BoundaryType.CONVERSATION_HISTORY))
             return list_to_multiline_text(masked_messages)
 
+        # TODO: type checking for message.content need to use helper
         for message in messages:
             if (
                 isinstance(message, ByteAIMessage.AskAgentMessage)
@@ -336,9 +346,8 @@ class PromptAssembler(Bootable, Eventable):
 
         return list_to_multiline_text(project_information_and_context)
 
-    async def generate_state(self, state: BaseState, agent, model_schema: ModelSchema) -> dict:
+    async def generate_state(self, state: BaseState) -> dict:
         user_prompt_state = {**state}
-        agent = Str.class_to_snake_case(agent)
 
         # Create dictionary to map task names to their coroutines
         tasks = {}
@@ -356,7 +365,7 @@ class PromptAssembler(Bootable, Eventable):
                 "commit_guidelines": self._gather_commit_guidelines(),
                 "constraints": self._gather_constraints(state),
                 "available_conventions": self.gather_available_conventions(state),
-                "reinforcement": self._gather_reinforcement(agent, model_schema),
+                "reinforcement": self._gather_reinforcement(),
             }
         )
 

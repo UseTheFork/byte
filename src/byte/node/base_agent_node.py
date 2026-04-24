@@ -3,6 +3,7 @@ from typing import List, Type, cast
 
 from langchain.chat_models import init_chat_model
 from langchain.messages import HumanMessage
+from langchain_core.messages import BaseMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable
 from langgraph.types import Command
@@ -44,8 +45,8 @@ class BaseAgentNode(BaseNode):
     def get_tools(self):
         return []
 
-    def get_structured_output(self):
-        return None
+    def filter_message_history(self, messages: List[BaseMessage]) -> List[BaseMessage]:
+        return messages
 
     @abstractmethod
     def get_user_template(self) -> List[str]:
@@ -111,10 +112,8 @@ class BaseAgentNode(BaseNode):
         Usage: `agent_state, config = await self._generate_agent_state(state, config, runtime.context)`
         """
         # Create a new assembler
-        prompt_assembler = self.app.make(PromptAssembler, template=self.get_user_template())
-
-        model_schema, _ = self.get_model()
-        user_prompt_state = await prompt_assembler.generate_state(state, self.__class__.__name__, model_schema)
+        prompt_assembler = self.app.make(PromptAssembler, agent_node=self)
+        user_prompt_state = await prompt_assembler.generate_state(state)
 
         payload = await self.emit(
             NodeEvents.PreAssistantNode(
@@ -159,9 +158,6 @@ class BaseAgentNode(BaseNode):
             model_provider=model_schema.provider,
             **merged_params,
         )
-
-        if self.get_structured_output() is not None:
-            model = model.with_structured_output(self.get_structured_output())
 
         # Bind tools if provided
         if self.get_tools() is not None and len(self.get_tools()) > 0:

@@ -1,5 +1,6 @@
-from typing import Literal, Type
+from typing import List, Literal, Type
 
+from langchain_core.messages import BaseMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
@@ -103,6 +104,16 @@ class CommitAgentNode(BaseAgentNode):
 
     def get_tools(self):
         return [GitCommitTool]
+
+    def filter_message_history(self, messages: List[BaseMessage]) -> List[BaseMessage]:
+        last_index = next(
+            (i for i in range(len(messages) - 1, -1, -1) if isinstance(messages[i], self.message_type)),
+            None,
+        )
+        if last_index is not None:
+            messages = messages[last_index:]
+
+        return messages
 
     async def __call__(
         self,
