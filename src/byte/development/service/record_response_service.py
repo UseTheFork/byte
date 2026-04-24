@@ -54,6 +54,7 @@ class RecordResponseService(Service):
         for message in messages:
             message_type = type(message).__name__
             content_parts.append(f"======== {message_type} ========")
+            # TODO: The below should check if its a dict and if it is use json dumps to make it pretty etc.
             content_parts.append(str(message.content))
             content_parts.append("")
 
