@@ -60,7 +60,7 @@ class PromptPanel(containers.VerticalGroup):
     def compose(self) -> ComposeResult:
         yield StatusBar()
         with PromptInputContainer():
-            yield TextAreaAutoComplete("#input")
+            yield TextAreaAutoComplete("#prompt-text-area")
             with PromptContainer(id="prompt-container"):
                 yield PromptInput(id="prompt-input")
 

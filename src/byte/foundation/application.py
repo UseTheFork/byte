@@ -39,7 +39,6 @@ class Application(Container):
 
         Usage: Called internally during application initialization to bind log and console services.
         """
-        self.instance("tui", self.tui())
 
         return self
 

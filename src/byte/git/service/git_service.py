@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List
 
 import git
-from git.exc import InvalidGitRepositoryError
+from git import InvalidGitRepositoryError
 
 from byte import Service
 from byte.support.mixins import Notifiable, UserInteractive

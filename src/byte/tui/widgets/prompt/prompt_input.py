@@ -191,4 +191,4 @@ class PromptInput(containers.VerticalGroup):
     def compose(self) -> ComposeResult:
         with containers.HorizontalGroup(id="text-prompt"):
             yield Label(self.PROMPT_AI, id="prompt-label", markup=False)
-            yield PromptTextArea(id="input").data_bind(multi_line=PromptInput.multi_line)
+            yield PromptTextArea(id="prompt-text-area").data_bind(multi_line=PromptInput.multi_line)
