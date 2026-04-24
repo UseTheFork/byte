@@ -168,8 +168,6 @@ class GitService(Service, UserInteractive, Notifiable):
             else:
                 user_input = True
 
-            self.app["console"].log(user_input)
-
             if user_input:
                 # Add all unstaged changes
                 self._repo.git.add("--all")

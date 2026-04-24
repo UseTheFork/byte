@@ -323,3 +323,11 @@ class Conversation(Widget):
             event: UpdateFiles message containing editable and read_only file counts.
         """
         self.query_one(Analytics).update_files(event)
+
+    @on(Messages.Clear)
+    async def clear_conversation(self, event: Messages.Clear) -> None:
+        try:
+            for child in self.chat_container.query(ResponsePanel).results():
+                await child.remove()
+        except Exception:
+            pass

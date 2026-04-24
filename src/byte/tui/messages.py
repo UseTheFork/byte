@@ -198,3 +198,7 @@ class Messages:
         content: str
         total_issues: int
         panel_id: str | None = None
+
+    @dataclass
+    class Clear(Message):
+        pass

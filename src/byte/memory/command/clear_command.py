@@ -46,5 +46,7 @@ class ClearCommand(Command):
         agent_analytics_service = self.app.make(AgentAnalyticsService)
         agent_analytics_service.reset_context()
 
+        self.emit_tui(Messages.Clear())
+
         await self.notify_success("Conversation history cleared")
         self.emit_tui(Messages.CommandExecutionCompleted())
