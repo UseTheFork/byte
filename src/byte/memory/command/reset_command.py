@@ -2,11 +2,10 @@ from argparse import Namespace
 
 from byte import ByteArgumentParser, Command
 from byte.analytics import AgentAnalyticsService
-from byte.cli import InputCancelledError
 from byte.files import FileService
 from byte.knowledge import SessionContextService
 from byte.memory import MemoryService
-from byte.tui import Messages
+from byte.tui import InputCancelledError, Messages
 
 
 class ResetCommand(Command):
@@ -69,7 +68,7 @@ class ResetCommand(Command):
                 else:
                     await self.notify_success("Conversation and file context completely reset")
 
-            except (KeyboardInterrupt, InputCancelledError):
+            except KeyboardInterrupt, InputCancelledError:
                 await self.notify_success("Conversation and file context completely reset")
         else:
             # Notify success

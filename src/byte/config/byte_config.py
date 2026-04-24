@@ -2,7 +2,6 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from byte.cli.config import CLIConfig
 from byte.files.config import FilesConfig
 from byte.git.config import GitConfig
 from byte.lint.config import LintConfig
@@ -10,6 +9,7 @@ from byte.llm.config import LLMConfig
 from byte.lsp.config import LSPConfig
 from byte.presets.config import PresetsConfig
 from byte.system.config import SystemConfig
+from byte.tui.config import TUIConfig
 from byte.web.config import WebConfig
 
 
@@ -36,7 +36,7 @@ class ByteConfig(BaseModel):
     # keep-sorted start
     app: AppConfig = Field(default_factory=AppConfig)
     boot: BootConfig = Field(default_factory=BootConfig)
-    cli: CLIConfig = Field(default_factory=CLIConfig)
+    tui: TUIConfig = Field(default_factory=TUIConfig)
     files: FilesConfig = Field(default_factory=FilesConfig)
     git: GitConfig = Field(default_factory=GitConfig)
     lint: LintConfig = Field(default_factory=LintConfig, description="Code linting and formatting configuration")

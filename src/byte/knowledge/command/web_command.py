@@ -1,12 +1,11 @@
 from argparse import Namespace
 
 from byte import ByteArgumentParser, Command
-from byte.cli import InputCancelledError
 from byte.config import ByteConfigException
 from byte.knowledge import SessionContextModel, SessionContextService
 from byte.support.mixins import UserInteractive
 from byte.support.utils import slugify
-from byte.tui import InteractionService, Messages
+from byte.tui import InputCancelledError, InteractionService, Messages
 from byte.tui.schemas import Answer
 from byte.web import ChromiumService
 

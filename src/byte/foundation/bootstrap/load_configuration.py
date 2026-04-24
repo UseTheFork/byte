@@ -46,16 +46,6 @@ class LoadConfiguration(Bootstrapper):
         editable_files = list(set(config.boot.editable_files + editable_files))
         config.boot.editable_files = editable_files
 
-    def _setup_console(self, app: Application, config: ByteConfig):
-        """Configure console UI and syntax themes from configuration.
-
-        Usage: `self._setup_console(app, config)`
-        """
-        console = app["console"]
-        console.ui_theme = config.cli.ui_theme
-        console.syntax_theme = config.cli.syntax_theme
-        console.setup_console()
-
     def _migrate(self, app: Application, config: dict) -> dict:
         """Migrate configuration from older versions to current version.
 
@@ -88,7 +78,6 @@ class LoadConfiguration(Bootstrapper):
         migrated_config = self._migrate(app, yaml_config)
 
         config = app.instance("config", ByteConfig(**migrated_config))
-        self._setup_console(app, config)
         self._load_boot_config(app, config)
 
         app.detect_environment(lambda: config.app.env)

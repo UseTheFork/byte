@@ -2,9 +2,8 @@ from argparse import Namespace
 from typing import List
 
 from byte import ByteArgumentParser, Command
-from byte.cli import InputCancelledError
 from byte.knowledge import SessionContextService
-from byte.tui import Messages
+from byte.tui import InputCancelledError, Messages
 
 
 class ContextDropCommand(Command):
@@ -85,7 +84,7 @@ class ContextDropCommand(Command):
             else:
                 await self.notify_success(f"Removed {len(selected_items)} items from session context")
 
-        except (KeyboardInterrupt, InputCancelledError):
+        except KeyboardInterrupt, InputCancelledError:
             await self.notify_warning("Operation cancelled")
             self.emit_tui(Messages.CommandExecutionCompleted())
             return

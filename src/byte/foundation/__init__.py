@@ -6,7 +6,6 @@ from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
     from byte.foundation.application import Application
-    from byte.foundation.console.console import Console
     from byte.foundation.console.kernel import Kernel
     from byte.foundation.container import Container
     from byte.foundation.exceptions import ByteException
@@ -16,7 +15,6 @@ if TYPE_CHECKING:
 __all__ = (
     "Application",
     "ByteException",
-    "Console",
     "Container",
     "FoundationServiceProvider",
     "Kernel",
@@ -27,7 +25,6 @@ _dynamic_imports = {
     # keep-sorted start
     "Application": "application",
     "ByteException": "exceptions",
-    "Console": "console.console",
     "Container": "container",
     "FoundationServiceProvider": "service_provider",
     "Kernel": "console.kernel",

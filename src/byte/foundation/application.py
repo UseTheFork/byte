@@ -6,7 +6,7 @@ from git import InvalidGitRepositoryError, Repo
 from textual.message import Message
 
 from byte import ServiceProvider, TaskManager
-from byte.foundation import Console, Container, FoundationServiceProvider, Kernel
+from byte.foundation import Container, FoundationServiceProvider, Kernel
 from byte.foundation.bootstrap import RegisterProviders
 from byte.logging import LogService, LogServiceProvider
 from byte.tui import ByteTUI
@@ -39,7 +39,7 @@ class Application(Container):
 
         Usage: Called internally during application initialization to bind log and console services.
         """
-        self.instance("console", self.console())
+        self.instance("tui", self.tui())
 
         return self
 
@@ -192,13 +192,6 @@ class Application(Container):
         Usage: `app.log()` -> returns Log instance for logging operations
         """
         return self.make(LogService)
-
-    def console(self) -> Console:
-        """Get the Console service instance from the container.
-
-        Usage: `app.console()` -> returns Console instance for terminal output
-        """
-        return self.make(Console)
 
     def tui(self) -> ByteTUI:
         """ """
