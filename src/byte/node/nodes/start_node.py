@@ -42,6 +42,7 @@ class StartNode(BaseNode):
                 erase_history=False,
                 prompt_settings=prompt_settings,
             ),
+            "is_cancelled": False,
         }
 
         return self.route_to(

@@ -95,7 +95,7 @@ class EndNode(BaseNode):
 
         # TODO: This will need to become a combined state with out the tool calls.
         # Only update messages if there are scratch messages to process
-        if state["scratch_messages"] and not metadata.erase_history:
+        if state["scratch_messages"] and not metadata.erase_history and not state["is_cancelled"]:
             last_message = get_last_ai_message(state["scratch_messages"])
             update_dict["final_message"] = last_message
 

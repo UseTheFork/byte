@@ -1,3 +1,4 @@
+import threading
 from typing import Any, Optional
 
 from langchain.messages import AIMessageChunk
@@ -13,6 +14,13 @@ from byte.workflow import BaseWorkflow
 
 class WorkflowService(Service):
     """Service for executing workflows with compiled graphs."""
+
+    def boot(self):
+        self.cancel_event = threading.Event()
+
+    def cancel(self):
+        """Signal the current workflow execution to stop."""
+        self.cancel_event.set()
 
     def _is_tool_call_chunk(self, block: dict) -> bool:
         return block.get("type") == ("input_json_delta")
@@ -171,7 +179,9 @@ class WorkflowService(Service):
 
         processed_event = None
 
+        # Reset Message chunks and our cancel Listener
         self.message_chunks = {}
+        self.cancel_event = threading.Event()
 
         self.emit_tui(
             Messages.CreateHeading(Str.snake_to_title(Str.snake_case(workflow.__class__.__name__)), "text-primary")

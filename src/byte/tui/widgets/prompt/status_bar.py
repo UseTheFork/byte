@@ -5,12 +5,27 @@ from textual.containers import HorizontalGroup
 from textual.reactive import reactive
 from textual.widgets import Rule, Static
 
+from byte.tui.constants import (
+    ACCENT_X,
+    ARM_LEFT_BOX_DRAW,
+    ARM_RIGHT_BOX_DRAW,
+    EYE_CIRCUMFLEX,
+    EYE_HYPHEN,
+    EYE_KEP,
+    L_PARENTHESIS,
+    MOUTH_HALF_O,
+    MOUTH_LOW_LINE,
+    MOUTH_UNDERTIE,
+    R_PARENTHESIS,
+    SPACE,
+    WORD_JOINER,
+)
+
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
 
-
 LOADING_EMOJIS = [
-    "[$primary](⁠[/]  [$primary]^[/][$secondary]⁠‿[/]⁠[$primary]^[/][$primary]⁠)[/]",
+    f"[$primary]{L_PARENTHESIS}{WORD_JOINER}[/]{SPACE}{SPACE}{SPACE}[$primary]{EYE_CIRCUMFLEX}[/][$secondary]⁠{MOUTH_UNDERTIE}[/]{WORD_JOINER}[$primary]{EYE_CIRCUMFLEX}[/][$primary]{WORD_JOINER}{R_PARENTHESIS}[/]",
     "[$primary](⁠[/]  [$primary]^[/][$primary]⁠‿[/]⁠[$secondary]^[/][$primary]⁠)[/]",
     "[$primary](⁠[/]  [$primary]^[/][$primary]⁠‿[/]⁠[$primary]^[/][$secondary]⁠)[/]",
     "[$secondary](⁠[/]  [$primary]^[/][$primary]⁠‿[/]⁠[$primary]^[/][$primary]⁠)[/]",
@@ -28,12 +43,12 @@ StatusState = Literal[
 ]
 
 BYTE_STATES: dict[StatusState, str] = {
-    "default": "[$primary](⁠  ^⁠‿⁠^⁠)[/]",
-    "error": "[$error](-_-メ)[/]",
-    "success": "(⁠ ⁠◕⁠‿⁠◕⁠)",
-    "warning": "(⁠ ⁠°⁠▽⁠°⁠)",
-    "info": "(⁠ ⁠ꈍ⁠ᴗ⁠ꈍ⁠)",
-    "question": "[$secondary]┐⁠(⁠  -_⁠-⁠)⁠┌[/]",
+    "default": f"[$primary]{L_PARENTHESIS}{WORD_JOINER}{SPACE}{SPACE}{SPACE}{EYE_CIRCUMFLEX}{WORD_JOINER}{MOUTH_UNDERTIE}{WORD_JOINER}{EYE_CIRCUMFLEX}{WORD_JOINER}{R_PARENTHESIS}[/]",  # (⁠   ^⁠‿⁠^⁠)
+    "error": f"[$error]{L_PARENTHESIS}{WORD_JOINER}{ACCENT_X}{SPACE}{EYE_HYPHEN}{WORD_JOINER}{MOUTH_LOW_LINE}{WORD_JOINER}{EYE_HYPHEN}{WORD_JOINER}{R_PARENTHESIS}[/]",  # (メ -_-)
+    "success": "(⁠ ⁠◕⁠‿⁠◕⁠)",  # (⁠ ⁠◕⁠‿⁠◕⁠)
+    "warning": "(⁠ ⁠°⁠▽⁠°⁠)",  # (⁠ ⁠°⁠▽⁠°⁠)
+    "info": f"{L_PARENTHESIS}{WORD_JOINER}{SPACE}{SPACE}{SPACE}{EYE_KEP}{WORD_JOINER}{MOUTH_HALF_O}{WORD_JOINER}{EYE_KEP}{WORD_JOINER}{R_PARENTHESIS}",  # (⁠   ⁠ꈍ⁠ᴗ⁠ꈍ⁠)
+    "question": f"[$secondary]{ARM_RIGHT_BOX_DRAW}{L_PARENTHESIS}{WORD_JOINER}{SPACE}{SPACE}{SPACE}{EYE_HYPHEN}{WORD_JOINER}{MOUTH_LOW_LINE}{WORD_JOINER}{EYE_HYPHEN}{WORD_JOINER}{R_PARENTHESIS}{ARM_LEFT_BOX_DRAW}[/]",  # ┐⁠(⁠  -_⁠-⁠)⁠┌
 }
 
 

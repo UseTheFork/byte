@@ -1,8 +1,9 @@
 from typing import TYPE_CHECKING, ClassVar
 
-from textual import getters, work
+from textual import getters, on, work
 from textual.app import ComposeResult
-from textual.binding import BindingType
+from textual.binding import Binding, BindingType
+from textual.reactive import reactive
 from textual.screen import Screen
 from textual.widgets import Footer
 
@@ -10,6 +11,7 @@ from byte import EventBus
 from byte.files import FileService
 from byte.knowledge import SessionContextService
 from byte.system import SystemEvents
+from byte.tui import Messages
 from byte.tui.screens.manage_context_screen import ManageContextScreen
 from byte.tui.screens.manage_files_screen import ManageFilesScreen
 from byte.tui.widgets.bootbox import Bootbox
@@ -23,6 +25,7 @@ class ConversationScreen(Screen[None]):
     app: ByteTUI
 
     conversation = getters.query_one(Conversation)
+    is_working = reactive(False, bindings=True)
 
     DEFAULT_CSS = """
         ConversationScreen {
@@ -30,7 +33,36 @@ class ConversationScreen(Screen[None]):
         }
         """
 
-    BINDINGS: ClassVar[list[BindingType]] = []
+    BINDINGS: ClassVar[list[BindingType]] = [
+        Binding(
+            key="ctrl+z",
+            action="cancel_request",
+            description="Cancel",
+            show=True,
+            priority=True,
+        ),
+    ]
+
+    def action_cancel_request(self) -> None:
+        from byte.workflow import WorkflowService
+
+        workflow_service = self.app.byte.make(WorkflowService)
+        workflow_service.cancel()
+
+    def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
+        self.app.byte["log"].info(action)
+        if action == "cancel_request":
+            if not self.is_working:
+                return False
+        return True
+
+    @on(Messages.CommandExecutionStarted)
+    async def command_execution_started(self, event: Messages.CommandExecutionStarted) -> None:
+        self.is_working = True
+
+    @on(Messages.CommandExecutionCompleted)
+    async def command_execution_completed(self, event: Messages.CommandExecutionCompleted) -> None:
+        self.is_working = False
 
     def compose(self) -> ComposeResult:
         yield Conversation()

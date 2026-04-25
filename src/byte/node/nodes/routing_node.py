@@ -6,6 +6,7 @@ from langgraph.types import Command
 
 from byte.node import BaseNode
 from byte.orchestration import AssistantContextSchema, BaseState
+from byte.workflow import WorkflowService
 
 
 # This is here to control the below Literal and be able to have all possible nodes in one place.
@@ -26,5 +27,10 @@ class RoutingNode(BaseNode):
     ]:
         routing = state.get("routing", {})
         self.app["log"].info(f"Routing >> From: {routing.get('source')} >> To: {routing.get('target')}")
+
+        # Check if the user has cancelled execution
+        workflow_service = self.app.make(WorkflowService)
+        if workflow_service.cancel_event.is_set():
+            return Command(goto="end_node")
 
         return Command(goto=routing.get("target"))  # ty:ignore[invalid-return-type]

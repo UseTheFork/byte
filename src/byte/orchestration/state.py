@@ -47,4 +47,6 @@ class BaseState(TypedDict):
 
     routing: RoutingState
 
+    is_cancelled: bool
+
     metadata: Annotated[MetadataSchema, update_metadata]
