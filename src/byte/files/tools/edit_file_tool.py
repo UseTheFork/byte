@@ -1,23 +1,30 @@
-from typing import Any, override
+from typing import Annotated, Any, override
 
+from langchain.tools import InjectedToolArg
 from langchain_core.tools import ArgsSchema
+from pydantic import BaseModel, Field
 
 from byte import Application
 from byte.files import ToolFileService
 from byte.tools import BaseTool, ToolResult
 
-edit_file_schema = {
-    "type": "object",
-    "properties": {
-        "path": {
-            "type": "string",
-            "description": "The EXACT Path to a `editable` file located in `<file>`. Use the `source` variable.",
-        },
-        "old_string": {"type": "string", "description": "The exact string to find and replace"},
-        "new_string": {"type": "string", "description": "The string to replace with"},
-    },
-    "required": ["path", "old_string", "new_string"],
-}
+
+class EditFileToolInput(BaseModel):
+    """Input for EditFileTool"""
+
+    old_string: Annotated[
+        str,
+        Field(description="The EXACT string to find and replace"),
+    ]
+    new_string: Annotated[
+        str,
+        Field(description="The string to replace with."),
+    ]
+    path: Annotated[
+        str,
+        Field(description="The EXACT Path to a `editable` file located in `<file>`. Use the `source` variable."),
+    ]
+    app: Annotated[Any | None, InjectedToolArg]
 
 
 class EditFileTool(BaseTool):
@@ -41,20 +48,20 @@ UNIQUENESS: old_string MUST uniquely identify target instance
 - If text appears multiple times, add more context to make it unique
 
 </critical_requirements>"""
-    args_schema: ArgsSchema | None = edit_file_schema
+    args_schema: ArgsSchema | None = EditFileToolInput
 
     @override
     async def _arun(
         self,
+        app: Application,
         path: str = "",
         old_string: str = "",
         new_string: str = "",
-        **kwargs: Any,
     ) -> ToolResult:
-        app: Application = kwargs.get("app")  # ty:ignore[invalid-assignment]
 
         try:
             tool_file_service = app.make(ToolFileService)
+
             result = await tool_file_service.edit_file(path, old_string, new_string)
 
             return ToolResult(

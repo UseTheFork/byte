@@ -1,14 +1,14 @@
 import json
 
-from langchain_core.messages import ToolMessage
 from langchain_core.runnables import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
+from pydantic import ValidationError
 
 from byte.node import BaseNode
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.support.utils import get_last_message
-from byte.tools import ToolRegistryService, ToolResult
+from byte.tools import ToolMessage, ToolRegistryService, ToolResult
 from byte.tui import Messages
 
 
@@ -23,7 +23,6 @@ class ToolNode(BaseNode):
 
         tool_registry_service = self.app.make(ToolRegistryService)
         tools = tool_registry_service.get_all_tools()
-        self.app["log"].info(tools)
 
         # Check if tools are available
         if not tools:
@@ -33,8 +32,6 @@ class ToolNode(BaseNode):
         tools_by_name = {tool.name: tool for tool in tools}
 
         for tool_call in message.tool_calls:
-            self.app["log"].info(tool_call)
-
             # self.emit_tui(Messages.ToolResponse(status=Status.SUCCESS))
 
             if tool_call["name"] not in tools_by_name:
@@ -55,12 +52,22 @@ class ToolNode(BaseNode):
                 )
             )
 
-            tool_result = await tools_by_name[tool_call["name"]].ainvoke(
-                {
-                    **tool_call["args"],
-                    "app": self.app,
-                }
-            )
+            try:
+                tool_result = await tools_by_name[tool_call["name"]].ainvoke(
+                    {
+                        **tool_call["args"],
+                        "app": self.app,
+                    },
+                )
+            except ValidationError as err:
+                outputs.append(
+                    ToolMessage(
+                        content=f"Error: Input validation Failed {err}",
+                        name=tool_call["name"],
+                        tool_call_id=tool_call["id"],
+                    )
+                )
+                continue
 
             # Handle ToolResult wrapper
             if isinstance(tool_result, ToolResult):

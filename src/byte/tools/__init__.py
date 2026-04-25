@@ -7,10 +7,11 @@ if TYPE_CHECKING:
     from byte.tools.schemas import ToolResult
     from byte.tools.service.tool_registry_service import ToolRegistryService
     from byte.tools.service_provider import ToolsServiceProvider
+    from byte.tools.tool_message import ToolMessage
 
 __all__ = (
     "BaseTool",
-    "BaseTool",
+    "ToolMessage",
     "ToolRegistryService",
     "ToolResult",
     "ToolsServiceProvider",
@@ -19,6 +20,7 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "BaseTool": "base_tool",
+    "ToolMessage": "tool_message",
     "ToolRegistryService": "service.tool_registry_service",
     "ToolResult": "schemas",
     "ToolsServiceProvider": "service_provider",

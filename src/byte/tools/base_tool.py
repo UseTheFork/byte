@@ -9,3 +9,14 @@ class BaseTool(LangchainBaseTool, metaclass=ABCMeta):
 
     def _run(self, *args: Any, **kwargs: Any) -> Any:
         pass
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        """Validate the tool class definition during subclass creation.
+
+        Args:
+            **kwargs: Additional keyword arguments passed to the parent class.
+
+        Raises:
+            SchemaAnnotationError: If `args_schema` has incorrect type annotation.
+        """
+        super().__init_subclass__(**kwargs)

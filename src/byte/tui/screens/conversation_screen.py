@@ -50,7 +50,6 @@ class ConversationScreen(Screen[None]):
         workflow_service.cancel()
 
     def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
-        self.app.byte["log"].info(action)
         if action == "cancel_request":
             if not self.is_working:
                 return False

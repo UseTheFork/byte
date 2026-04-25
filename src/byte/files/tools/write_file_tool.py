@@ -1,34 +1,40 @@
-from typing import Any, override
+from typing import Annotated, Any, override
 
+from langchain.tools import InjectedToolArg
 from langchain_core.tools import ArgsSchema
+from pydantic import BaseModel, Field
 
 from byte import Application
 from byte.files import ToolFileService
 from byte.tools import BaseTool, ToolResult
 
-write_file_schema = {
-    "type": "object",
-    "properties": {
-        "path": {"type": "string", "description": "The EXACT Path to the file."},
-        "content": {"type": "string", "description": "Content to write to the file"},
-    },
-    "required": ["path", "content"],
-}
+
+class WriteFileToolInput(BaseModel):
+    """Input for WriteFileTool"""
+
+    path: Annotated[
+        str,
+        Field(description="The EXACT Path to the file."),
+    ]
+    content: Annotated[
+        str,
+        Field(description="Content to write to the file."),
+    ]
+    app: Annotated[Any | None, InjectedToolArg]
 
 
 class WriteFileTool(BaseTool):
     name: str = "WriteFileTool"
     description: str = "Write content to a file. Creates parent directories if needed."
-    args_schema: ArgsSchema | None = write_file_schema
+    args_schema: ArgsSchema | None = WriteFileToolInput
 
     @override
     async def _arun(
         self,
+        app: Application,
         path: str = "",
         content: str = "",
-        **kwargs: Any,
     ) -> ToolResult:
-        app: Application = kwargs.get("app")  # ty:ignore[invalid-assignment]
 
         try:
             tool_file_service = app.make(ToolFileService)

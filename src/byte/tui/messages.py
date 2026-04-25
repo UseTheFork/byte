@@ -202,3 +202,7 @@ class Messages:
     @dataclass
     class Clear(Message):
         pass
+
+    @dataclass
+    class UserCancelled(Message):
+        panel_id: str | None = None
