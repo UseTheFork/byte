@@ -1,28 +1,27 @@
-from typing import Annotated, Any, override
+from typing import override
 
-from langchain.tools import InjectedToolArg
 from langchain_core.tools import ArgsSchema
-from pydantic import BaseModel, Field
 
 from byte import Application
 from byte.files import ToolFileService
 from byte.tools import BaseTool, ToolResult
 
-
-class DeleteFileToolInput(BaseModel):
-    """Input for DeleteFileTool"""
-
-    path: Annotated[
-        str,
-        Field(description="The EXACT Path to file located in `<file>`. Use the `source` variable."),
-    ]
-    app: Annotated[Any | None, InjectedToolArg]
+delete_file_schema = {
+    "type": "object",
+    "properties": {
+        "path": {
+            "type": "string",
+            "description": "The EXACT Path to file located in `<file>`. Use the `source` variable.",
+        },
+    },
+    "required": ["path"],
+}
 
 
 class DeleteFileTool(BaseTool):
     name: str = "DeleteFileTool"
     description: str = "Delete a file."
-    args_schema: ArgsSchema | None = DeleteFileToolInput
+    args_schema: ArgsSchema = delete_file_schema
 
     @override
     async def _arun(

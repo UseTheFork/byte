@@ -38,7 +38,7 @@ class ToolNode(BaseNode):
             return self.route_back(state, {"scratch_messages": []})
 
         # Build a mapping of tool names to tool instances
-        tools_by_name = {tool.name: tool for tool in tools}
+        tools_by_name = {tool.__class__.__name__: tool for tool in tools}
 
         for tool_call in message.tool_calls:
             if tool_call["name"] not in tools_by_name:

@@ -1,32 +1,28 @@
-from typing import Annotated, Any, override
+from typing import override
 
-from langchain.tools import InjectedToolArg
 from langchain_core.tools import ArgsSchema
-from pydantic import BaseModel, Field
 
 from byte import Application
 from byte.files import ToolFileService
 from byte.tools import BaseTool, ToolResult
 
-
-class ReplaceFileToolInput(BaseModel):
-    """Input for ReplaceFileTool"""
-
-    path: Annotated[
-        str,
-        Field(description="The EXACT Path to file located in `<file>`. Use the `source` variable."),
-    ]
-    content: Annotated[
-        str,
-        Field(description="Content to replace the file with"),
-    ]
-    app: Annotated[Any | None, InjectedToolArg]
+replace_file_schema = {
+    "type": "object",
+    "properties": {
+        "path": {
+            "type": "string",
+            "description": "The EXACT Path to file located in `<file>`. Use the `source` variable.",
+        },
+        "content": {"type": "string", "description": "Content to replace the file with"},
+    },
+    "required": ["path", "content"],
+}
 
 
 class ReplaceFileTool(BaseTool):
     name: str = "ReplaceFileTool"
     description: str = "Replace all content in a file."
-    args_schema: ArgsSchema | None = ReplaceFileToolInput
+    args_schema: ArgsSchema = replace_file_schema
 
     @override
     async def _arun(

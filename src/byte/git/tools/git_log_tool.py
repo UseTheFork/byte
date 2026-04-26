@@ -42,7 +42,7 @@ class GitLogTool(BaseTool):
         "Use max_count to limit results, author/since/until to filter commits, "
         "branch to target a specific ref, and file_path to scope to a specific file or directory."
     )
-    args_schema: ArgsSchema | None = git_log_schema
+    args_schema: ArgsSchema = git_log_schema
 
     @override
     async def _arun(

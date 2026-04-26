@@ -45,7 +45,7 @@ class GitCommitTool(BaseTool):
     description: str = (
         "Create a git commit with the provided commit message details following conventional commit standards."
     )
-    args_schema: ArgsSchema | None = git_commit_schema
+    args_schema: ArgsSchema = git_commit_schema
 
     @override
     async def _arun(
