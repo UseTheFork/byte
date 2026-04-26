@@ -13,11 +13,11 @@ from byte.support import Str
 from byte.tui import Status, TuiEvents
 from byte.tui.messages import Messages
 from byte.tui.schemas import Ask
-from byte.tui.widgets.panels.response_panel import ResponsePanel
 from byte.tui.widgets.prompt.analytics import Analytics
 from byte.tui.widgets.prompt.prompt_input import PromptTextArea
 from byte.tui.widgets.prompt.prompt_panel import PromptPanel
 from byte.tui.widgets.prompt.status_bar import StatusBar
+from byte.tui.widgets.response_panel import ResponsePanel
 from byte.tui.widgets.ui.selectable_markdown import SelectableMarkdown
 
 if TYPE_CHECKING:

@@ -25,11 +25,11 @@ if TYPE_CHECKING:
     from byte.tui import ByteTUI
 
 LOADING_EMOJIS = [
-    f"[$primary]{L_PARENTHESIS}{WORD_JOINER}[/]{SPACE}{SPACE}{SPACE}[$primary]{EYE_CIRCUMFLEX}[/][$secondary]⁠{MOUTH_UNDERTIE}[/]{WORD_JOINER}[$primary]{EYE_CIRCUMFLEX}[/][$primary]{WORD_JOINER}{R_PARENTHESIS}[/]",
-    "[$primary](⁠[/]  [$primary]^[/][$primary]⁠‿[/]⁠[$secondary]^[/][$primary]⁠)[/]",
-    "[$primary](⁠[/]  [$primary]^[/][$primary]⁠‿[/]⁠[$primary]^[/][$secondary]⁠)[/]",
-    "[$secondary](⁠[/]  [$primary]^[/][$primary]⁠‿[/]⁠[$primary]^[/][$primary]⁠)[/]",
-    "[$primary](⁠[/]  [$secondary]^[/][$primary]⁠‿[/]⁠[$primary]^[/][$primary]⁠)[/]",
+    f"[$primary]{L_PARENTHESIS}{WORD_JOINER}{SPACE}{SPACE}{SPACE}{EYE_CIRCUMFLEX}{MOUTH_UNDERTIE}{WORD_JOINER}{EYE_CIRCUMFLEX}{WORD_JOINER}{R_PARENTHESIS}[/]",
+    f"[$primary]{L_PARENTHESIS}{WORD_JOINER}{SPACE}{SPACE}{SPACE}{EYE_CIRCUMFLEX}{MOUTH_UNDERTIE}{WORD_JOINER}{EYE_CIRCUMFLEX}{WORD_JOINER}{R_PARENTHESIS}[/].",
+    f"[$primary]{L_PARENTHESIS}{WORD_JOINER}{SPACE}{SPACE}{SPACE}{EYE_CIRCUMFLEX}{MOUTH_UNDERTIE}{WORD_JOINER}{EYE_CIRCUMFLEX}{WORD_JOINER}{R_PARENTHESIS}[/].｡",
+    f"[$primary]{L_PARENTHESIS}{WORD_JOINER}{SPACE}{SPACE}{SPACE}{EYE_CIRCUMFLEX}{MOUTH_UNDERTIE}{WORD_JOINER}{EYE_CIRCUMFLEX}{WORD_JOINER}{R_PARENTHESIS}[/].｡o",
+    f"[$primary]{L_PARENTHESIS}{WORD_JOINER}{SPACE}{SPACE}{SPACE}{EYE_CIRCUMFLEX}{MOUTH_UNDERTIE}{WORD_JOINER}{EYE_CIRCUMFLEX}{WORD_JOINER}{R_PARENTHESIS}[/].｡oO",
 ]
 
 StatusState = Literal[
