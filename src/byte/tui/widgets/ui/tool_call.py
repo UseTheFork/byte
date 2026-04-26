@@ -14,6 +14,65 @@ if TYPE_CHECKING:
     from byte.tui import ByteTUI
 
 
+class ToolArgs(Widget, can_focus=False):
+    """Displays streaming tool call arguments."""
+
+    app: ByteTUI
+
+    DEFAULT_CSS = """
+    ToolArgs {
+        height: auto;
+
+        & Label {
+            height: auto;
+            width: 100%;
+        }
+    }
+    """
+
+    def __init__(
+        self,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+        disabled: bool = False,
+    ) -> None:
+        super().__init__(
+            name=name,
+            id=id,
+            classes=classes,
+            disabled=disabled,
+        )
+        self.raw_args = ""
+
+    def render(self) -> RenderableType:
+        """Render the tool call display."""
+        try:
+            parsed = loads(self.raw_args, OBJ)
+        except Exception:
+            parsed = None
+
+        self.app.byte["log"].info(self.raw_args)
+
+        # Build the output text
+        output = Text("")
+
+        # If we have a valid parsed dictionary, display its contents
+        if parsed is not None and isinstance(parsed, dict) and parsed:
+            for key, value in parsed.items():
+                output.append(f"\n╰─ {key}: {value}")
+        elif self.raw_args:
+            # If parsing failed but we have raw args, show them
+            output.append(f"\n{self.raw_args}")
+
+        return output
+
+    async def append(self, fragment: str) -> None:
+
+        self.raw_args = self.raw_args + fragment
+        self.refresh(layout=True)
+
+
 class ToolCallStream:
     """An object to manage streaming tool call arguments.
 
@@ -79,65 +138,6 @@ class ToolCallStream:
         self._new_markup.set()
         # Allow the task to wake up and actually display the new arguments
         await asyncio.sleep(0)
-
-
-class ToolArgs(Widget, can_focus=False):
-    """Displays streaming tool call arguments."""
-
-    app: ByteTUI
-
-    DEFAULT_CSS = """
-    ToolArgs {
-        height: auto;
-
-        & Label {
-            height: auto;
-            width: 100%;
-        }
-    }
-    """
-
-    def __init__(
-        self,
-        name: str | None = None,
-        id: str | None = None,
-        classes: str | None = None,
-        disabled: bool = False,
-    ) -> None:
-        super().__init__(
-            name=name,
-            id=id,
-            classes=classes,
-            disabled=disabled,
-        )
-        self.raw_args = ""
-
-    def render(self) -> RenderableType:
-        """Render the tool call display."""
-        try:
-            parsed = loads(self.raw_args, OBJ)
-        except Exception:
-            parsed = None
-
-        self.app.byte["log"].info(self.raw_args)
-
-        # Build the output text
-        output = Text("")
-
-        # If we have a valid parsed dictionary, display its contents
-        if parsed is not None and isinstance(parsed, dict) and parsed:
-            for key, value in parsed.items():
-                output.append(f"\n╰─ {key}: {value}")
-        elif self.raw_args:
-            # If parsing failed but we have raw args, show them
-            output.append(f"\n{self.raw_args}")
-
-        return output
-
-    async def append(self, fragment: str) -> None:
-
-        self.raw_args = self.raw_args + fragment
-        self.refresh(layout=True)
 
 
 class ToolResult(Widget, can_focus=False):

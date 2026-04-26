@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from textual import getters
 from textual.containers import VerticalGroup
+from textual.css.query import NoMatches
 from textual.widgets import Markdown
 
 from byte.tui import Messages
@@ -171,5 +172,8 @@ class ResponsePanel(VerticalGroup):
             self.current_linting.complete_linting(total_files, failed_files, success)
 
     async def complete_toolcall(self, event: Messages.ToolCall):
-        tool_call = self.query_one(f"#{event.tool_id}", ToolCall)
-        tool_call.complete(status=event.status, content=event.content)
+        try:
+            tool_call = self.query_one(f"#{event.tool_id}", ToolCall)
+            tool_call.complete(status=event.status, content=event.content)
+        except NoMatches:
+            self.app.byte["log"].info(event)

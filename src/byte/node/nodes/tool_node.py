@@ -13,6 +13,15 @@ from byte.tui import Messages
 
 
 class ToolNode(BaseNode):
+    def _update_tui(self, tool_message: ToolMessage) -> None:
+        self.emit_tui(
+            Messages.ToolCall(
+                tool_id=str(tool_message.id),
+                status=tool_message.status,
+                content=str(tool_message.content),
+            )
+        )
+
     async def __call__(
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
     ) -> Command[str]:
@@ -95,13 +104,4 @@ class ToolNode(BaseNode):
                 "scratch_messages": outputs,
                 **merged_extra,  # only included if not empty
             },
-        )
-
-    def _update_tui(self, tool_message: ToolMessage) -> None:
-        self.emit_tui(
-            Messages.ToolCall(
-                tool_id=str(tool_message.id),
-                status=tool_message.status,
-                content=str(tool_message.content),
-            )
         )
