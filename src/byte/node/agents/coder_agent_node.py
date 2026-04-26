@@ -51,7 +51,7 @@ coder_user_template = [
     "",
     "PHASE 1: Create a clear, step-by-step plan for implementing the requested changes.",
     "PHASE 2: Use available tools to apply the changes.",
-    f"Between each tool call you **MUST** reference the user message containing `{SectionType.PROJECT_STATE}` — this is always updated to reflect the current state of the project. Use it to continue executing your step-by-step plan from Phase 1.",
+    f"Between each tool call you **MUST** reference the user message containing `{SectionType.PROJECT_STATE}` - this is always updated to reflect the current state of the project. Use it to continue executing your step-by-step plan from Phase 1.",
     "PHASE 3: Provide a summary of what was changed.",
     Section.end(),
     "",

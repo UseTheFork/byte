@@ -62,7 +62,9 @@ class CommitCommand(Command):
             workflow_service = self.app.make(WorkflowService)
             request = await self.commit_service.build_commit_prompt()
 
-            await workflow_service.execute(commit_workflow, {"touched_files": request["touched_files"]})
+            await workflow_service.execute(
+                commit_workflow, {"user_request": "commit", "touched_files": request["touched_files"]}
+            )
 
         except InputCancelledError:
             pass

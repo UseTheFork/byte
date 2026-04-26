@@ -487,7 +487,7 @@ class FileService(Service):
                 if content is not None:
                     # Add line numbers to content
                     lines = content.splitlines()
-                    numbered_lines = [f"{i:4d} | {line}" for i, line in enumerate(lines)]
+                    numbered_lines = [f"{i:6d} | {line}" for i, line in enumerate(lines)]
                     numbered_content = "\n".join(numbered_lines)
                     language = file_ctx.language
                     opening = Boundary.open(
@@ -503,7 +503,7 @@ class FileService(Service):
                 if content is not None:
                     # Add line numbers to content
                     lines = content.splitlines()
-                    numbered_lines = [f"{i + 1:4d} | {line}" for i, line in enumerate(lines)]
+                    numbered_lines = [f"{i + 1:6d} | {line}" for i, line in enumerate(lines)]
                     numbered_content = "\n".join(numbered_lines)
                     language = file_ctx.language
                     opening = Boundary.open(

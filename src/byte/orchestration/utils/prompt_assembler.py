@@ -157,7 +157,12 @@ class PromptAssembler(Bootable, Eventable):
         ]
 
         if not messages:
-            masked_messages.append("The conversation history is empty.")
+            masked_messages.extend(
+                [
+                    "The conversation history is empty.",
+                    "```",
+                ]
+            )
             return list_to_multiline_text(masked_messages)
 
         for message in messages:
@@ -349,16 +354,22 @@ class PromptAssembler(Bootable, Eventable):
 
         for message in messages:
             if isinstance(message, AIMessage):
-                masked_messages.append(message.text)
+                masked_messages.extend(
+                    [
+                        "",
+                        Boundary.open(BoundaryType.AGENT_MESSAGE),
+                        f"{message.text}",
+                        Boundary.close(BoundaryType.AGENT_MESSAGE),
+                        "",
+                    ]
+                )
             elif isinstance(message, ToolMessage):
                 masked_messages.extend(
                     [
                         "",
-                        f"Used Tool: {message.name}",
-                        "Result:",
-                        "```",
+                        Boundary.open(BoundaryType.TOOL_CALL, meta={"tool": str(message.name)}),
                         f"{message.text}",
-                        "```",
+                        Boundary.close(BoundaryType.TOOL_CALL),
                         "",
                     ]
                 )

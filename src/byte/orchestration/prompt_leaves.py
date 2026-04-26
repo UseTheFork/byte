@@ -9,7 +9,7 @@ def preamble() -> str:
         "",
         "Conversations are always structured in a consistent format:",
         "- **System Prompt** — Sets your role, identity, and core behavioral guidelines.",
-        "- **User Message** — Contains the conversation history, the current user request, task instructions, response format, and other relevant context. Sections are clearly labelled with `# Section: ` headings.",
+        "- **User Message** — Contains the conversation history, the current user request, task instructions, response format, and other relevant context. Sections are clearly labelled with `# Section: FOO [section-foo]` headings.",
         "- **Agent Message** — A summarized representation of your previous responses and tool calls, modified for brevity.",
         f"- **User Message ({SectionType.PROJECT_STATE})** — An automatically generated message containing the most up-to-date state of all relevant files and system context. This message is regenerated after **every** tool call to reflect the latest changes.",
         "",
@@ -38,7 +38,7 @@ def epilogue() -> str:
     lines = [
         Section.start(SectionType.RESUME_FORMAT),
         "",
-        f'> *"Before continuing, reference the {Section.ref(SectionType.RESPONSE_FORMAT)} section. Determine which step of that format you are currently at, then continue execution from that point."*',
+        f"> *Before continuing, reference the {Section.ref(SectionType.RESPONSE_FORMAT)} section. Determine which step of that format you are currently at, then continue execution from that point.*",
         Section.end(),
     ]
     return list_to_multiline_text(lines)
