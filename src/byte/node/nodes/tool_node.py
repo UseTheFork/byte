@@ -16,7 +16,7 @@ class ToolNode(BaseNode):
     def _update_tui(self, tool_message: ToolMessage) -> None:
         self.emit_tui(
             Messages.ToolCall(
-                tool_id=str(tool_message.id),
+                tool_id=str(tool_message.tool_call_id),
                 status=tool_message.status,
                 content=str(tool_message.content),
             )
