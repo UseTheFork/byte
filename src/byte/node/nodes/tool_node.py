@@ -18,7 +18,7 @@ class ToolNode(BaseNode):
             Messages.ToolCall(
                 tool_id=str(tool_message.tool_call_id),
                 status=tool_message.status,
-                content=str(tool_message.content),
+                content=str(tool_message.text),
             )
         )
 

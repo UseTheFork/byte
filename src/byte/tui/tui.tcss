@@ -118,7 +118,7 @@ SelectableMarkdown {
   width: 1fr;
   min-width: 12;
   max-width: 1fr;
-  margin: 0;
+  margin: 1 0;
   padding: 0;
   border-top: round $primary;
 
@@ -148,6 +148,17 @@ SelectableMarkdown {
     }
   }
 
+}
+
+ToolCall {
+  height: auto;
+  width: 1fr;
+  min-width: 12;
+  max-width: 1fr;
+  margin: 1 0;
+  padding: 0;
+  border-top: round $secondary;
+  
 }
 
 
