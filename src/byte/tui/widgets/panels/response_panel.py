@@ -170,17 +170,6 @@ class ResponsePanel(VerticalGroup):
         if self.current_linting is not None:
             self.current_linting.complete_linting(total_files, failed_files, success)
 
-    async def mount_toolcall(self, name: str, args: dict | None = None):
-        """Mount a tool call widget.
-
-        Args:
-            name: Name of the tool being called
-            args: Arguments passed to the tool
-
-        Returns:
-            The mounted ToolCall widget
-        """
-        pass
-        # tool_widget = ToolCall(name=name, args=args)
-        # await self.mount(tool_widget)
-        # return tool_widget
+    async def complete_toolcall(self, event: Messages.ToolCall):
+        tool_call = self.query_one(f"#{event.tool_id}", ToolCall)
+        tool_call.complete(status=event.status, content=event.content)

@@ -273,10 +273,10 @@ class Conversation(Widget):
             self.status_bar.show_status(event.message if event.message is not None else "", state=event.state)
 
     @on(Messages.ToolCall)
-    async def tool_call(self, event: Messages.ToolCall) -> None:
+    async def complete_toolcall(self, event: Messages.ToolCall) -> None:
         """Handle tool call display."""
         response_panel = await self.get_or_create_response_panel(event.panel_id)
-        await response_panel.mount_toolcall(event.name, event.args)
+        await response_panel.complete_toolcall(event)
         self.scroll_to_latest_message()
 
     @on(Messages.Notify)

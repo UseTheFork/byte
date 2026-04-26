@@ -32,26 +32,17 @@ class ToolNode(BaseNode):
         tools_by_name = {tool.name: tool for tool in tools}
 
         for tool_call in message.tool_calls:
-            # self.emit_tui(Messages.ToolResponse(status=Status.SUCCESS))
-
             if tool_call["name"] not in tools_by_name:
-                outputs.append(
-                    ToolMessage(
-                        status="error",
-                        content=f"Error: Tool '{tool_call['name']}' is not available or does not exist.",
-                        name=tool_call["name"],
-                        tool_call_id=tool_call["id"],
-                    )
-                )
-                continue
-
-            # Emit tool call to TUI
-            self.emit_tui(
-                Messages.ToolCall(
+                tool_message = ToolMessage(
+                    status="error",
+                    content=f"Error: Tool '{tool_call['name']}' is not available or does not exist.",
                     name=tool_call["name"],
-                    args=tool_call["args"],
+                    tool_call_id=tool_call["id"],
                 )
-            )
+
+                self._update_tui(tool_message)
+                outputs.append(tool_message)
+                continue
 
             try:
                 tool_result = await tools_by_name[tool_call["name"]].ainvoke(
@@ -61,25 +52,27 @@ class ToolNode(BaseNode):
                     },
                 )
             except ValidationError as err:
-                outputs.append(
-                    ToolMessage(
-                        status="error",
-                        content=f"Error: Input validation Failed {err}",
-                        name=tool_call["name"],
-                        tool_call_id=tool_call["id"],
-                    )
+                tool_message = ToolMessage(
+                    status="error",
+                    content=f"Error: Input validation Failed {err}",
+                    name=tool_call["name"],
+                    tool_call_id=tool_call["id"],
                 )
+
+                self._update_tui(tool_message)
+                outputs.append(tool_message)
                 continue
 
             # Handle ToolResult wrapper
             if isinstance(tool_result, ToolResult):
-                outputs.append(
-                    ToolMessage(
-                        content=json.dumps(tool_result.result),
-                        name=tool_call["name"],
-                        tool_call_id=tool_call["id"],
-                    )
+                tool_message = ToolMessage(
+                    content=json.dumps(tool_result.result),
+                    name=tool_call["name"],
+                    tool_call_id=tool_call["id"],
                 )
+
+                self._update_tui(tool_message)
+                outputs.append(tool_message)
 
                 # TODO: This prob needs to have a deep merge.
                 if tool_result.extra:
@@ -87,13 +80,13 @@ class ToolNode(BaseNode):
                     merged_extra.update(tool_result.extra)
 
             else:
-                outputs.append(
-                    ToolMessage(
-                        content=json.dumps(tool_result),
-                        name=tool_call["name"],
-                        tool_call_id=tool_call["id"],
-                    )
+                tool_message = ToolMessage(
+                    content=json.dumps(tool_result),
+                    name=tool_call["name"],
+                    tool_call_id=tool_call["id"],
                 )
+                self._update_tui(tool_message)
+                outputs.append(tool_message)
 
         # Final single route_back after ALL tools
         return self.route_back(
@@ -102,4 +95,13 @@ class ToolNode(BaseNode):
                 "scratch_messages": outputs,
                 **merged_extra,  # only included if not empty
             },
+        )
+
+    def _update_tui(self, tool_message: ToolMessage) -> None:
+        self.emit_tui(
+            Messages.ToolCall(
+                tool_id=str(tool_message.id),
+                status=tool_message.status,
+                content=str(tool_message.content),
+            )
         )

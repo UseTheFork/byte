@@ -35,7 +35,7 @@ class Section:
 
         anchor = section_type.value.lower().replace(" ", "-")
 
-        return f"# Section: {section_type.value} {{#section-{anchor}}}\n\n"
+        return f"# Section: {section_type.value} [section-{anchor}]\n\n"
 
     @staticmethod
     def ref(section_type: SectionType) -> str:

@@ -1,10 +1,17 @@
 import asyncio
+from typing import TYPE_CHECKING
 
 from partial_json_parser import OBJ, loads
 from rich.console import RenderableType
+from rich.markdown import Markdown
 from rich.text import Text
+from textual.app import ComposeResult
 from textual.reactive import reactive
 from textual.widget import Widget
+from textual.widgets import Collapsible
+
+if TYPE_CHECKING:
+    from byte.tui import ByteTUI
 
 
 class ToolCallStream:
@@ -13,7 +20,7 @@ class ToolCallStream:
     This will accumulate argument fragments if they can't be rendered fast enough.
     """
 
-    def __init__(self, tool_call_display: ToolCall) -> None:
+    def __init__(self, tool_call_display: ToolArgs) -> None:
         """
         Args:
             tool_call_display: ToolCallDisplay widget to update.
@@ -74,6 +81,93 @@ class ToolCallStream:
         await asyncio.sleep(0)
 
 
+class ToolArgs(Widget, can_focus=False):
+    """Displays streaming tool call arguments."""
+
+    app: ByteTUI
+
+    DEFAULT_CSS = """
+    ToolArgs {
+        height: auto;
+
+        & Label {
+            height: auto;
+            width: 100%;
+        }
+    }
+    """
+
+    def __init__(
+        self,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+        disabled: bool = False,
+    ) -> None:
+        super().__init__(
+            name=name,
+            id=id,
+            classes=classes,
+            disabled=disabled,
+        )
+        self.raw_args = ""
+
+    def render(self) -> RenderableType:
+        """Render the tool call display."""
+        try:
+            parsed = loads(self.raw_args, OBJ)
+        except Exception:
+            parsed = None
+
+        self.app.byte["log"].info(self.raw_args)
+
+        # Build the output text
+        output = Text("")
+
+        # If we have a valid parsed dictionary, display its contents
+        if parsed is not None and isinstance(parsed, dict) and parsed:
+            for key, value in parsed.items():
+                output.append(f"\n╰─ {key}: {value}")
+        elif self.raw_args:
+            # If parsing failed but we have raw args, show them
+            output.append(f"\n{self.raw_args}")
+
+        return output
+
+    async def append(self, fragment: str) -> None:
+
+        self.raw_args = self.raw_args + fragment
+        self.refresh(layout=True)
+
+
+class ToolResult(Widget, can_focus=False):
+    """Displays the final result of a tool call."""
+
+    DEFAULT_CSS = """
+    ToolResult {
+        display: none;
+        height: auto;
+    }
+    """
+
+    message = reactive("")
+
+    @property
+    def markdown(self) -> Markdown:
+        """Return the content as a Rich Markdown object."""
+        content = str(self.message)
+
+        return Markdown(content)
+        # return Markdown(content, code_theme=self.app.launch_config.message_code_theme)
+
+    def render(self) -> RenderableType:
+        return self.markdown
+
+
+class ToolArgsCollapsible(Collapsible):
+    pass
+
+
 class ToolCall(Widget, can_focus=False):
     """A widget that displays tool call information with streaming support."""
 
@@ -85,11 +179,6 @@ class ToolCall(Widget, can_focus=False):
         background: transparent;
         border-top: round $secondary;
         margin-bottom: 1;
-        
-        & Label {
-            height: auto;
-            width: 100%;
-        }
     }
     """
 
@@ -109,36 +198,29 @@ class ToolCall(Widget, can_focus=False):
         )
         self.tool_name = tool_name
         self.border_title = f" {self.tool_name}() "
-        self.raw_args = ""
 
-    def render(self) -> RenderableType:
-        """Render the tool call display."""
-        try:
-            parsed = loads(self.raw_args, OBJ)
-        except Exception:
-            parsed = None
+    def compose(self) -> ComposeResult:
+        with ToolArgsCollapsible(title="Arguments", collapsed=False):
+            yield ToolArgs()
+        yield ToolResult()
 
-        # Build the output text
-        output = Text("")
+    def complete(self, status: str = "success", content: str | None = None) -> None:
+        """Collapse args and show result."""
+        collapsible = self.query_one(ToolArgsCollapsible)
+        collapsible.collapsed = True
 
-        # If we have a valid parsed dictionary, display its contents
-        if parsed is not None and isinstance(parsed, dict) and parsed:
-            for key, value in parsed.items():
-                output.append(f"\n╰─ {key}: {value}")
-        elif self.raw_args:
-            # If parsing failed but we have raw args, show them
-            output.append(f"\n{self.raw_args}")
+        result_widget = self.query_one(ToolResult)
+        if status == "success":
+            pass
+        else:
+            pass
 
-        return output
-
-    async def append(self, fragment: str) -> None:
-        """Append a fragment to the raw arguments."""
-        self.raw_args = self.raw_args + fragment
-        self.refresh(layout=True)
+        result_widget.message = f" {content or status}"
+        result_widget.styles.display = "block"
 
     @classmethod
     def get_stream(cls, widget: ToolCall) -> ToolCallStream:
-        """Get a stream for writing tool call arguments to this widget."""
-        stream = ToolCallStream(widget)
+        tool_args = widget.query_one(ToolArgs)
+        stream = ToolCallStream(tool_args)  # Stream targets ToolArgs now
         stream.start()
         return stream

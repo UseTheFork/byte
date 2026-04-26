@@ -1,7 +1,7 @@
 import asyncio
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 from textual.message import Message
 from textual.notifications import SeverityLevel
@@ -9,9 +9,6 @@ from textual.widget import Widget
 
 from byte.tui.schemas import Answer as AnswerSchema, AnswerCancelled
 from byte.tui.widgets.prompt.status_bar import StatusState
-
-if TYPE_CHECKING:
-    pass
 
 
 class Status(Enum):
@@ -103,6 +100,13 @@ class Messages:
         panel_id: str | None = None
 
     @dataclass
+    class ToolCall(Message):
+        tool_id: str
+        status: Literal["success", "error"] = "success"
+        content: str | None = None
+        panel_id: str | None = None
+
+    @dataclass
     class CreatePanel(Message):
         """A generic panel for displaying content in the TUI."""
 
@@ -144,20 +148,6 @@ class Messages:
 
         state: StatusState = "default"
         message: str | None = None
-
-    @dataclass
-    class ToolCall(Message):
-        """Tool call execution message.
-
-        Args:
-            name: Name of the tool being called
-            args: Arguments passed to the tool
-            panel_id: Optional panel identifier for UI routing
-        """
-
-        name: str
-        args: dict | None = None
-        panel_id: str | None = None
 
     @dataclass
     class Lint(Message):
