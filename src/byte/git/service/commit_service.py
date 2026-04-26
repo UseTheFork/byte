@@ -70,7 +70,7 @@ class CommitService(Service, UserInteractive):
 
         file_section.append(Boundary.close(BoundaryType.CONTEXT))
         prompt = list_to_multiline_text(diff_section) + list_to_multiline_text(file_section)
-        return {"user_request": prompt, "touched_files": touched_files}
+        return {"git_diffs": prompt, "touched_files": touched_files}
 
     async def format_conventional_commit(self, commit_message: CommitMessage) -> str:
         """Format a CommitMessage into a conventional commit string.

@@ -7,7 +7,7 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
-from byte.git import GitCommitTool
+from byte.git import CommitService, GitCommitTool
 from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
@@ -26,9 +26,9 @@ from byte.support.utils import list_to_multiline_text
 
 commit_user_template = [
     Section.sub_heading("Git Diffs", 2),
-    "{user_request}",
+    "{git_diffs}",
     "",
-    "You **MUST** consider the above git diffs before proceeding (if not empty).",
+    Section.important("You **MUST** consider the above git diffs before proceeding (if not empty)."),
     "",
     "{modified_messages}",
     "",
@@ -48,7 +48,6 @@ commit_user_template = [
     "2. Call the `git_commit` tool ONCE.",
     "3. If the tool call is successful, end your turn with no further output.",
     Section.end(),
-    "",
 ]
 
 commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
@@ -127,7 +126,10 @@ class CommitAgentNode(BaseAgentNode):
 
         runnable = self.create_runnable()
 
-        agent_state, config = await self.generate_agent_state(state, config)
+        commit_service = self.app.make(CommitService)
+        request = await commit_service.build_commit_prompt()
+
+        agent_state, config = await self.generate_agent_state(state, config, request)
         record_response_service = self.app.make(RecordResponseService)
 
         result = await runnable.ainvoke(agent_state, config=config)

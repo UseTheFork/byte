@@ -365,8 +365,8 @@ class PromptAssembler(Bootable, Eventable):
 
         return [AIMessage(content=list_to_multiline_text(masked_messages))]
 
-    async def generate_state(self, state: BaseState) -> dict:
-        user_prompt_state = {**state}
+    async def generate_state(self, state: BaseState, extra: dict | None = {}) -> dict:
+        user_prompt_state = {**state, **(extra or {})}
 
         # Create dictionary to map task names to their coroutines
         tasks = {}

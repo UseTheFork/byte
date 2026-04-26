@@ -94,7 +94,7 @@ class BaseAgentNode(BaseNode):
 
         return [HumanMessage(errors)]
 
-    async def generate_agent_state(self, state: BaseState, config) -> tuple:
+    async def generate_agent_state(self, state: BaseState, config, extra: dict | None = {}) -> tuple:
         """Generate the agent state for the assistant node invocation.
 
         Assembles the user prompt from the state and context, emits a pre-assistant event
@@ -113,7 +113,7 @@ class BaseAgentNode(BaseNode):
         """
         # Create a new assembler
         prompt_assembler = self.app.make(PromptAssembler, agent_node=self)
-        user_prompt_state = await prompt_assembler.generate_state(state)
+        user_prompt_state = await prompt_assembler.generate_state(state, extra)
 
         payload = await self.emit(
             NodeEvents.PreAssistantNode(
