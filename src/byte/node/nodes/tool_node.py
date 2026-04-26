@@ -37,6 +37,7 @@ class ToolNode(BaseNode):
             if tool_call["name"] not in tools_by_name:
                 outputs.append(
                     ToolMessage(
+                        status="error",
                         content=f"Error: Tool '{tool_call['name']}' is not available or does not exist.",
                         name=tool_call["name"],
                         tool_call_id=tool_call["id"],
@@ -62,6 +63,7 @@ class ToolNode(BaseNode):
             except ValidationError as err:
                 outputs.append(
                     ToolMessage(
+                        status="error",
                         content=f"Error: Input validation Failed {err}",
                         name=tool_call["name"],
                         tool_call_id=tool_call["id"],

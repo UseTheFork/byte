@@ -7,7 +7,7 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.orchestration.events import OrchestrationEvents
     from byte.orchestration.exceptions import ByteAgentException, DummyNodeReachedException
-    from byte.orchestration.prompt_leaves import core_mandates, preamble
+    from byte.orchestration.prompt_leaves import core_mandates, epilogue, preamble
     from byte.orchestration.reducers import add_constraints, replace_list, replace_str, update_metadata
     from byte.orchestration.schemas import (
         AgentConfigBoolSchema,
@@ -48,6 +48,7 @@ __all__ = (
     "Validator",
     "add_constraints",
     "core_mandates",
+    "epilogue",
     "preamble",
     "replace_list",
     "replace_str",
@@ -78,6 +79,7 @@ _dynamic_imports = {
     "add_constraints": "reducers",
     "core_mandates": "prompt_leaves",
     "preamble": "prompt_leaves",
+    "epilogue": "prompt_leaves",
     "replace_list": "reducers",
     "replace_str": "reducers",
     "update_metadata": "reducers",

@@ -49,5 +49,6 @@ class WriteFileTool(BaseTool):
 
         except Exception as e:
             return ToolResult(
+                success=False,
                 result=f"Error writing file: {e!s}",
             )

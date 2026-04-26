@@ -1,78 +1,44 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class BoundaryType(str, Enum):
+class BoundaryType(StrEnum):
     """Type of boundary marker for content sections."""
 
-    ROLE = "role"
-    TASK = "task"
-    USER_INPUT = "user_input"
-
     CORE_MANDATES = "core_mandates"
-
-    GOAL = "goal"
-    RESPONSE_FORMAT = "response_format"
 
     RULES = "rules"
 
     ERROR = "error"
 
+    # conventions
     NAME = "name"
     DESCRIPTION = "description"
     LOCATION = "location"
-
     AVAILABLE_CONVENTIONS = "available_conventions"
     CONVENTION = "convention"
-
-    REFERENCE = "reference"
+    # / conventions
 
     SESSION_CONTEXT = "session_context"
     SHELL_COMMAND = "shell_command"
 
     FILE = "file"
 
-    EDIT_BLOCK = "operation_block"
-    SEARCH = "search"
-    REPLACE = "replace"
     EXAMPLE = "example"
-    REINFORCEMENT = "reinforcement"
+
     PROJECT_HIERARCHY = "project_hierarchy"
     CONSTRAINTS = "constraints"
-    PLAN = "agent_plan"
 
     # Operating Constraints
-    GUIDELINES = "guidelines"
-    OPERATING_CONSTRAINTS = "operating_constraints"
-    OPERATING_PRINCIPLES = "operating_principles"
-
-    CRITICAL_REQUIREMENTS = "response_requirements"
-    RECOVERY_STEPS = "recovery_steps"
-
-    RESPONSE_TEMPLATE = "response_template"
 
     CONTEXT = "context"
-    PROJECT_STATE = "project_state"
-    FILE_CONTEXT = "file_context"
-
-    GIT_CONTEXT = "git_context"
 
     # Specific to command execution
     STDOUT = "stdout"
     STDERR = "stderr"
 
-    SYSTEM_CONTEXT = "system_context"
-
-    NOTE = "note"
-
-    HEADING = "heading"
-
-    CONVERSATION_HISTORY = "conversation_history"
     AGENT_MESSAGE = "agent_message"
-    TOOL_CALL = "tool_call"
     USER_MESSAGE = "user_message"
-
-    def __str__(self):
-        return self.value
+    TOOL_CALL = "tool_call"
 
 
 class Boundary:

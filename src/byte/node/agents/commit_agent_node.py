@@ -16,39 +16,38 @@ from byte.node import (
 )
 from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
-from byte.orchestration import AssistantContextSchema, BaseState
-from byte.support import Boundary, BoundaryType, Str
-from byte.support.utils import extract_content_from_message, list_to_multiline_text
+from byte.orchestration import AssistantContextSchema, BaseState, preamble
+from byte.support import Section, SectionType, Str
+from byte.support.utils import list_to_multiline_text
 
 # Conventional commit message generation prompt
 # Adapted from Aider: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/prompts.py#L8
 # Conventional Commits specification: https://www.conventionalcommits.org/en/v1.0.0/#summary
 
 commit_user_template = [
-    Boundary.open(BoundaryType.GIT_CONTEXT),
+    Section.sub_heading("Git Diffs", 2),
     "{user_request}",
     "",
     "You **MUST** consider the above git diffs before proceeding (if not empty).",
-    Boundary.close(BoundaryType.GIT_CONTEXT),
     "",
     "{modified_messages}",
     "",
-    Boundary.open(BoundaryType.TASK),
+    Section.start(SectionType.TASK),
     "You are an expert software engineer that generates concise, Git commit messages based on the provided diffs.",
     "Review the provided context and diffs which are about to be committed to a git repo.",
     "Review the diffs carefully.",
-    Boundary.critical("You MUST follow the commit guidelines provided in the Rules section below."),
+    Section.important("You MUST follow the commit guidelines provided in the Rules section below."),
     "Read and apply ALL rules for commit types, scopes, and description formatting.",
-    Boundary.close(BoundaryType.TASK),
+    Section.end(),
     "{commit_guidelines}",
     "",
-    Boundary.open(BoundaryType.RESPONSE_FORMAT),
+    Section.start(SectionType.RESPONSE_FORMAT),
     "Format your response as follows:",
     "",
     "1. Start with a SHORT analysis of the changes in list format.",
     "2. Call the `git_commit` tool ONCE.",
     "3. If the tool call is successful, end your turn with no further output.",
-    Boundary.close(BoundaryType.RESPONSE_FORMAT),
+    Section.end(),
     "",
 ]
 
@@ -58,14 +57,17 @@ commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
             "system",
             list_to_multiline_text(
                 [
-                    Boundary.open(BoundaryType.ROLE),
+                    preamble(),
+                    "",
+                    Section.start(SectionType.ROLE),
                     "You are an expert software engineer that generates organized Git commits based on the provided user input.",
-                    Boundary.close(BoundaryType.ROLE),
+                    Section.end(),
                 ]
             ),
         ),
         ("user", "{assembled_user_message}"),
-        ("placeholder", "{scratch_messages}"),
+        ("placeholder", "{pending_agent_state}"),
+        ("placeholder", "{refreshed_context_state}"),
         ("placeholder", "{errors}"),
     ]
 )
@@ -137,5 +139,4 @@ class CommitAgentNode(BaseAgentNode):
         if route_tool_call is not None:
             return route_tool_call
 
-        msg = extract_content_from_message(result)
-        return self.route_to(self.goto, {"scratch_messages": ByteAIMessage.CommitAgentMessage(content=msg)})
+        return self.route_to(self.goto, {"scratch_messages": ByteAIMessage.CommitAgentMessage(content=result.text)})

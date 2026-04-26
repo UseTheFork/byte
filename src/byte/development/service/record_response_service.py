@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from langchain_core.runnables import Runnable
 from langgraph.graph.state import RunnableConfig
 
@@ -36,11 +34,11 @@ class RecordResponseService(Service):
         Usage: `file_path = await service.cache_response(result, runtime.context)`
         """
 
-        if self.app.is_development():
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            cache_file = self.app.cache_path(f"development/{agent_name}_{timestamp}.md")
-        else:
-            cache_file = self.app.cache_path(f"development/{agent_name}.md")
+        # if self.app.is_development():
+        #     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        #     cache_file = self.app.cache_path(f"development/{agent_name}_{timestamp}.md")
+        # else:
+        cache_file = self.app.cache_path(f"development/{agent_name}.md")
 
         # Ensure cache directory exists
         cache_file.parent.mkdir(parents=True, exist_ok=True)
@@ -55,7 +53,7 @@ class RecordResponseService(Service):
             message_type = type(message).__name__
             content_parts.append(f"======== {message_type} ========")
             # TODO: The below should check if its a dict and if it is use json dumps to make it pretty etc.
-            content_parts.append(str(message.content))
+            content_parts.append(str(message.text))
             content_parts.append("")
 
         content = "\n".join(content_parts)

@@ -20,20 +20,21 @@ from byte.orchestration import (
     BaseState,
     preamble,
 )
-from byte.support import Boundary, BoundaryType, Str
+from byte.support import Section, SectionType, Str
 from byte.support.utils import extract_content_from_message, list_to_multiline_text
 from byte.web import SearchWebTool
 
 ask_user_template = [
     "{modified_messages}",
-    Boundary.open(BoundaryType.USER_INPUT),
+    Section.start(SectionType.USER_INPUT),
     "```text",
     "{user_request}",
     "```",
     "",
     "You **MUST** consider the user input before proceeding (if not empty).",
-    Boundary.close(BoundaryType.USER_INPUT),
-    Boundary.open(BoundaryType.OPERATING_CONSTRAINTS),
+    Section.end(),
+    "",
+    Section.start(SectionType.OPERATING_CONSTRAINTS),
     "- Always use best practices when coding",
     "- Respect and use existing conventions, libraries, etc that are already present in the code base",
     "- Take requests for changes to the supplied code",
@@ -41,14 +42,15 @@ ask_user_template = [
     "- Keep changes simple don't build more then what is asked for",
     "- Never use XML-style tags in your responses (e.g., <file>, <search>, <replace>). These are for internal parsing only.",
     "- Do not provide full code implementations unless explicitly requested. Describe the changes needed first.",
-    Boundary.close(BoundaryType.OPERATING_CONSTRAINTS),
+    Section.end(),
     "",
-    Boundary.open(BoundaryType.RESPONSE_FORMAT),
+    Section.start(SectionType.RESPONSE_FORMAT),
     "- Use clear, concise explanations",
     "- Format code with proper syntax highlighting",
     "- Provide context for suggested changes",
     "- Focus on actionable findings, not exhaustive documentation",
-    Boundary.close(BoundaryType.RESPONSE_FORMAT),
+    Section.end(),
+    "",
     "{project_hierarchy}",
     "{project_information_and_context}",
     "{operating_principles}",
@@ -60,16 +62,17 @@ ask_prompt = ChatPromptTemplate.from_messages(
             "system",
             list_to_multiline_text(
                 [
-                    Boundary.open(BoundaryType.ROLE),
                     preamble(),
+                    "",
+                    Section.start(SectionType.ROLE),
                     "Act as an expert software developer.",
-                    Boundary.close(BoundaryType.ROLE),
+                    Section.end(),
                 ]
             ),
         ),
         ("user", "{assembled_user_message}"),
-        ("placeholder", "{scratch_messages}"),
-        ("placeholder", "{refreshed_context}"),
+        ("placeholder", "{pending_agent_state}"),
+        ("placeholder", "{refreshed_context_state}"),
         ("placeholder", "{errors}"),
     ]
 )

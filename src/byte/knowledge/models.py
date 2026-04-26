@@ -26,7 +26,7 @@ class SessionContextModel(Bootable):
         """
         try:
             return self.file_path.read_text(encoding="utf-8")
-        except (FileNotFoundError, PermissionError, UnicodeDecodeError):
+        except FileNotFoundError, PermissionError, UnicodeDecodeError:
             return ""
 
     def set_content(self, content: str) -> None:

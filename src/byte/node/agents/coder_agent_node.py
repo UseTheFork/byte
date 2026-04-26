@@ -21,19 +21,19 @@ from byte.node import (
 from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
 from byte.orchestration import AssistantContextSchema, BaseState, preamble
-from byte.support import Boundary, BoundaryType, Str
+from byte.support import Boundary, BoundaryType, Section, SectionType, Str
 from byte.support.utils import extract_content_from_message, list_to_multiline_text
 
 coder_user_template = [
     "{modified_messages}",
-    Boundary.open(BoundaryType.USER_INPUT),
-    "```text",
+    Section.start(SectionType.USER_INPUT),
+    "```",
     "{user_request}",
     "```",
     "",
     "You **MUST** consider the user input before proceeding (if not empty).",
-    Boundary.close(BoundaryType.USER_INPUT),
-    Boundary.open(BoundaryType.OPERATING_CONSTRAINTS),
+    Section.end(),
+    Section.start(SectionType.OPERATING_CONSTRAINTS),
     "- Analyze the user's request and the provided file context",
     "- If the request is ambiguous, ask clarifying questions",
     "- Identify which files need to be modified, created, or deleted",
@@ -41,22 +41,24 @@ coder_user_template = [
     "- FIRST create a plan, THEN use available tools to implement the changes",
     "- Do NOT provide full code implementations unless required by tools",
     "- Keep the plan concise and actionable",
-    Boundary.close(BoundaryType.OPERATING_CONSTRAINTS),
+    Section.end(),
     "",
     "{project_information_and_context}",
     "",
     "",
-    Boundary.open(BoundaryType.TASK),
+    Section.start(SectionType.TASK),
     "Your task has THREE phases:",
     "",
     "PHASE 1: Create a clear, step-by-step plan for implementing the requested changes.",
     "PHASE 2: Use available tools to apply the changes.",
-    f"Between each tool call you **MUST** reference the user message containing `{Boundary.open(BoundaryType.PROJECT_STATE)}` — this is always updated to reflect the current state of the project. Use it to continue executing your step-by-step plan from Phase 1.",
+    f"Between each tool call you **MUST** reference the user message containing `{SectionType.PROJECT_STATE}` — this is always updated to reflect the current state of the project. Use it to continue executing your step-by-step plan from Phase 1.",
     "PHASE 3: Provide a summary of what was changed.",
+    Section.end(),
     "",
-    Boundary.open(BoundaryType.RESPONSE_FORMAT),
+    Section.start(SectionType.RESPONSE_FORMAT),
     "Format your response as follows:",
     "",
+    "```md",
     "## Plan",
     "1. Start with a brief summary: 'To make this change we need to modify/create/delete [file(s)]:'",
     "2. Leave a blank line",
@@ -68,10 +70,13 @@ coder_user_template = [
     "",
     "## Summary",
     "**Summary** - SHORT, CONCISE bulleted list of what was changed",
-    "",
-    Boundary.open(BoundaryType.EXAMPLE),
-    "Example:",
     "```",
+    Section.end(),
+    "",
+    Section.start(SectionType.EXAMPLES),
+    "",
+    "```",
+    Boundary.open(BoundaryType.EXAMPLE),
     "## Plan",
     "To make this change we need to modify `main.py`:",
     "",
@@ -84,14 +89,15 @@ coder_user_template = [
     "## Summary",
     "- Removed old function",
     "- Added helper function",
-    "```",
     Boundary.close(BoundaryType.EXAMPLE),
-    Boundary.close(BoundaryType.RESPONSE_FORMAT),
-    Boundary.close(BoundaryType.TASK),
+    "```",
+    "",
+    Section.end(),
+    "",
     "{operating_principles}",
     "",
-    Boundary.critical(
-        f"All tool operations are applied immediately and are reflected in the `{Boundary.open(BoundaryType.PROJECT_STATE)}`."
+    Section.important(
+        f"All tool operations are applied immediately and are reflected in the nest User message containing {SectionType.PROJECT_STATE}."
     ),
 ]
 
@@ -101,16 +107,17 @@ coder_prompt = ChatPromptTemplate.from_messages(
             "system",
             list_to_multiline_text(
                 [
-                    Boundary.open(BoundaryType.ROLE),
                     preamble(),
+                    "",
+                    Section.start(SectionType.ROLE),
                     "Act as an expert software developer.",
-                    Boundary.close(BoundaryType.ROLE),
+                    Section.end(),
                 ]
             ),
         ),
         ("user", "{assembled_user_message}"),
-        ("placeholder", "{scratch_messages}"),
-        ("placeholder", "{refreshed_context}"),
+        ("placeholder", "{pending_agent_state}"),
+        ("placeholder", "{refreshed_context_state}"),
         ("placeholder", "{errors}"),
     ]
 )

@@ -7,9 +7,6 @@ from langchain_core.tools.base import BaseTool as LangchainBaseTool
 class BaseTool(LangchainBaseTool, metaclass=ABCMeta):
     extras: dict[str, Any] | None = {"eager_input_streaming": True}
 
-    def _run(self, *args: Any, **kwargs: Any) -> Any:
-        pass
-
     def __init_subclass__(cls, **kwargs: Any) -> None:
         """Validate the tool class definition during subclass creation.
 
@@ -20,3 +17,6 @@ class BaseTool(LangchainBaseTool, metaclass=ABCMeta):
             SchemaAnnotationError: If `args_schema` has incorrect type annotation.
         """
         super().__init_subclass__(**kwargs)
+
+    def _run(self, *args: Any, **kwargs: Any) -> Any:
+        pass

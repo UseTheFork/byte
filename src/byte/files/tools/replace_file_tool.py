@@ -49,5 +49,6 @@ class ReplaceFileTool(BaseTool):
 
         except Exception as e:
             return ToolResult(
+                success=False,
                 result=f"Error replacing file: {e!s}",
             )

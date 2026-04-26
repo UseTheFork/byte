@@ -44,5 +44,6 @@ class DeleteFileTool(BaseTool):
 
         except Exception as e:
             return ToolResult(
+                success=False,
                 result=f"Error editing file: {e!s}",
             )

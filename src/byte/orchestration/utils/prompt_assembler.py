@@ -8,11 +8,11 @@ from langchain_core.messages import BaseMessage
 from byte.conventions import ConventionContextService
 from byte.files import FileService
 from byte.git import CommitService
-from byte.node import ByteAIMessage
-from byte.orchestration import BaseState, OrchestrationEvents
-from byte.support import Boundary, BoundaryType
+from byte.orchestration import BaseState, OrchestrationEvents, epilogue
+from byte.support import Boundary, BoundaryType, Section, SectionType
 from byte.support.mixins import Bootable, Eventable
 from byte.support.utils import list_to_multiline_text
+from byte.tools import ToolMessage
 
 if TYPE_CHECKING:
     from byte.node import BaseAgentNode
@@ -81,13 +81,13 @@ class PromptAssembler(Bootable, Eventable):
         if reinforcement_messages:
             reinforcement_parts = [
                 "",
-                Boundary.open(BoundaryType.OPERATING_PRINCIPLES),
-                Boundary.notice("You **MUST** follow these Operating Principles"),
+                Section.start(SectionType.OPERATING_PRINCIPLES),
+                Section.important("You **MUST** follow these Operating Principles"),
                 *reinforcement_messages,
                 *([]),
+                Section.end(),
             ]
 
-            reinforcement_parts.append(Boundary.close(BoundaryType.OPERATING_PRINCIPLES))
             message_parts.extend(reinforcement_parts)
 
         return list_to_multiline_text(message_parts)
@@ -96,13 +96,13 @@ class PromptAssembler(Bootable, Eventable):
         """Gather reinforcement messages from various domains."""
 
         message_parts = [
-            Boundary.open(BoundaryType.USER_INPUT),
-            "```text",
+            Section.start(SectionType.USER_INPUT),
+            "```",
             user_request,
             "```",
             "",
             "You **MUST** consider the user input before proceeding (if not empty).",
-            Boundary.close(BoundaryType.USER_INPUT),
+            Section.end(),
         ]
 
         return list_to_multiline_text(message_parts)
@@ -145,32 +145,32 @@ class PromptAssembler(Bootable, Eventable):
         messages = self.agent_node.filter_message_history(messages)
 
         # Create masked_messages list identical to messages except for processed AIMessages
+
         masked_messages = [
-            Boundary.open(BoundaryType.CONVERSATION_HISTORY),
-            Boundary.open(BoundaryType.HEADING),
+            Section.start(SectionType.CONVERSATION_HISTORY),
+            "",
             "Below is the conversation history between Byte agents and the user.",
-            Boundary.open(BoundaryType.HEADING),
+            "",
+            f"Messages are wrapped in XML tags corresponding to their type (e.g. `{Boundary.open(BoundaryType.AGENT_MESSAGE)}`, `{Boundary.open(BoundaryType.USER_MESSAGE)}`, `{Boundary.open(BoundaryType.TOOL_CALL)}`).",
+            "",
+            "```",
         ]
 
         if not messages:
             masked_messages.append("The conversation history is empty.")
-            masked_messages.append(Boundary.close(BoundaryType.CONVERSATION_HISTORY))
             return list_to_multiline_text(masked_messages)
 
-        # TODO: type checking for message.content need to use helper
         for message in messages:
-            if (
-                isinstance(message, ByteAIMessage.AskAgentMessage)
-                or isinstance(message, ByteAIMessage.CoderAgentMessage)
-                or isinstance(message, ByteAIMessage.CoderPlanAgentMessage)
-            ):
-                masked_messages.append(message.content)
-            else:
-                # Keep non-AIMessages unchanged
-                masked_messages.append(message.content)
+            masked_messages.append(message.text)
 
-        masked_messages.append(Boundary.notice("You **MUST** consider the conversation history before proceeding."))
-        masked_messages.append(Boundary.close(BoundaryType.CONVERSATION_HISTORY))
+        masked_messages.extend(
+            [
+                "```",
+                "",
+                Section.important("You **MUST** consider the conversation history before proceeding."),
+                Section.end(),
+            ]
+        )
 
         return list_to_multiline_text(masked_messages)
 
@@ -197,14 +197,8 @@ class PromptAssembler(Bootable, Eventable):
         if read_only_files or editable_files:
             file_context_content.extend(
                 [
-                    Boundary.open(BoundaryType.FILE_CONTEXT, meta={"type": "read only files"}),
-                    Boundary.open(BoundaryType.HEADING),
+                    Section.sub_heading("Project Files", 2),
                     "Here are the files in the current context",
-                    Boundary.close(BoundaryType.HEADING),
-                    "",
-                    Boundary.notice(
-                        "Trust the bellow as the true contents of these files!\n Any other messages may contain outdated versions of the files' contents."
-                    ),
                     "",
                 ]
             )
@@ -213,10 +207,12 @@ class PromptAssembler(Bootable, Eventable):
             read_only_content = "\n".join(read_only_files)
             file_context_content.extend(
                 [
-                    Boundary.open(BoundaryType.CONTEXT, meta={"type": "read only files"}),
-                    Boundary.notice("Any edits to these files will be rejected"),
+                    Section.sub_heading("Read Only Files", 3),
+                    "Any edits to these files will be rejected",
+                    "",
+                    "```",
                     f"{read_only_content}",
-                    Boundary.close(BoundaryType.CONTEXT),
+                    "```",
                 ]
             )
 
@@ -224,15 +220,11 @@ class PromptAssembler(Bootable, Eventable):
             editable_content = "\n".join(editable_files)
             file_context_content.extend(
                 [
-                    Boundary.open(BoundaryType.CONTEXT, meta={"type": "editable files"}),
+                    Section.sub_heading("Editable Files", 3),
+                    "",
+                    "```",
                     f"{editable_content}",
-                    Boundary.close(BoundaryType.CONTEXT),
-                ]
-            )
-
-            file_context_content.extend(
-                [
-                    Boundary.close(BoundaryType.FILE_CONTEXT),
+                    "```",
                 ]
             )
 
@@ -338,6 +330,7 @@ class PromptAssembler(Bootable, Eventable):
             system_info_content = "\n".join(system_context)
             project_information_and_context.extend(
                 [
+                    "# ",
                     Boundary.open(BoundaryType.CONTEXT, meta={"type": "system"}),
                     f"{system_info_content}",
                     Boundary.close(BoundaryType.CONTEXT),
@@ -345,6 +338,32 @@ class PromptAssembler(Bootable, Eventable):
             )
 
         return list_to_multiline_text(project_information_and_context)
+
+    def generate_pending_agent_state(self, state: BaseState) -> list[BaseMessage]:
+
+        masked_messages = []
+        messages = state["scratch_messages"]
+
+        if not messages:
+            masked_messages.append("Please provide any additional context I may need for this task.")
+
+        for message in messages:
+            if isinstance(message, AIMessage):
+                masked_messages.append(message.text)
+            elif isinstance(message, ToolMessage):
+                masked_messages.extend(
+                    [
+                        "",
+                        f"Used Tool: {message.name}",
+                        "Result:",
+                        "```",
+                        f"{message.text}",
+                        "```",
+                        "",
+                    ]
+                )
+
+        return [AIMessage(content=list_to_multiline_text(masked_messages))]
 
     async def generate_state(self, state: BaseState) -> dict:
         user_prompt_state = {**state}
@@ -441,29 +460,21 @@ class PromptAssembler(Bootable, Eventable):
 
         return list_to_multiline_text(result_lines)
 
-    def assemble_refreshed_context(self, state: BaseState) -> list[BaseMessage]:
+    def generate_refreshed_context_state(self, state: BaseState) -> list[BaseMessage]:
         """ """
-
-        scratch_messages = state.get("scratch_messages", [])
-        context_prefix = (
-            []
-            if scratch_messages
-            else [AIMessage(content="Please provide any additional context I may need for this task.")]
-        )
-
         refreshed_context_message = list_to_multiline_text(
             [
-                Boundary.open(BoundaryType.PROJECT_STATE),
-                Boundary.open(BoundaryType.HEADING),
-                "Below is the current state of the project. It includes all previous tool calls etc.",
-                Boundary.close(BoundaryType.HEADING),
+                Section.start(SectionType.PROJECT_STATE),
+                "Below is the current state of the project. It includes all your previous tool calls that have been masked for brevity.",
+                "",
+                Section.important("You MUST trust this information as the current state of the files etc."),
                 "",
                 self.prompt_state["file_context_with_line_numbers"],
                 "",
-                Boundary.close(BoundaryType.PROJECT_STATE),
+                Section.end(),
+                "",
+                epilogue(),
             ]
         )
 
-        refreshed_context = context_prefix + [HumanMessage(content=refreshed_context_message)]
-
-        return refreshed_context  # ty:ignore[invalid-return-type]
+        return [HumanMessage(content=refreshed_context_message)]

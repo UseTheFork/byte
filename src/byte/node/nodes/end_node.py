@@ -45,13 +45,12 @@ class EndNode(BaseNode):
         for message in scratch_messages:
             if isinstance(message, BaseAIMessage):
                 # Extract text content from AIMessage
-                content_text = self._extract_text_from_content(message.content)
 
                 if not message.mask:
                     content_text = list_to_multiline_text(
                         [
                             Boundary.open(BoundaryType.AGENT_MESSAGE, meta={"agent_type": message.agent_name}),
-                            content_text,
+                            message.text,
                             Boundary.close(BoundaryType.AGENT_MESSAGE),
                         ]
                     )

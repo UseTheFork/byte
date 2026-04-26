@@ -126,7 +126,9 @@ class BaseAgentNode(BaseNode):
         agent_state = {**state}
 
         agent_state["assembled_user_message"] = prompt_assembler.assemble_user_message(**user_prompt_state)
-        agent_state["refreshed_context"] = prompt_assembler.assemble_refreshed_context(state)
+        agent_state["refreshed_context_state"] = prompt_assembler.generate_refreshed_context_state(state)
+
+        agent_state["pending_agent_state"] = prompt_assembler.generate_pending_agent_state(state)
 
         if state.get("errors", None) is not None:
             agent_state["errors"] = await self._gather_errors(agent_state)
