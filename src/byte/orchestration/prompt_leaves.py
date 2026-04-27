@@ -34,16 +34,6 @@ def preamble() -> str:
     return list_to_multiline_text(lines)
 
 
-def epilogue() -> str:
-    lines = [
-        Section.start(SectionType.RESUME_FORMAT),
-        "",
-        f"> *Before continuing, reference the {Section.ref(SectionType.RESPONSE_FORMAT)} section. Determine which step of that format you are currently at, then continue execution from that point.*",
-        Section.end(),
-    ]
-    return list_to_multiline_text(lines)
-
-
 def core_mandates(has_tools: bool = False) -> str:
     lines = [Boundary.open(BoundaryType.CORE_MANDATES)]
 

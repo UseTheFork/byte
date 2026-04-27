@@ -44,10 +44,10 @@ coder_user_template = [
     Section.start(SectionType.TASK),
     "Your task has THREE phases:",
     "",
-    "PHASE 1: Create a clear, step-by-step plan for implementing the requested changes.",
-    "PHASE 2: Use available tools to apply the changes.",
-    f"Between each tool call you **MUST** reference the user message containing `{SectionType.PROJECT_STATE}` - this is always updated to reflect the current state of the project. Use it to continue executing your step-by-step plan from Phase 1.",
-    "PHASE 3: Provide a summary of what was changed.",
+    "- PHASE 1: Create a clear, step-by-step plan for implementing the requested changes.",
+    "- PHASE 2: Use available tools to apply the changes.",
+    # f"Between each tool call you **MUST** reference the user message containing `{SectionType.PROJECT_STATE}` - this is always updated to reflect the current state of the project. Use it to continue executing your step-by-step plan.",
+    "- PHASE 3: Provide a summary of what was changed.",
     Section.end(),
     "",
     Section.start(SectionType.RESPONSE_FORMAT),
@@ -92,7 +92,7 @@ coder_user_template = [
     "{operating_principles}",
     "",
     Section.important(
-        f"All tool operations are applied immediately and are reflected in the nest User message containing {SectionType.PROJECT_STATE}."
+        f"All tool operations are applied immediately and are reflected in the next user message containing {SectionType.PROJECT_STATE} #id-dhd88-asx-4857."
     ),
 ]
 

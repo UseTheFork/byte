@@ -8,7 +8,7 @@ from langchain_core.messages import BaseMessage
 from byte.conventions import ConventionContextService
 from byte.files import FileService
 from byte.git import CommitService
-from byte.orchestration import BaseState, OrchestrationEvents, epilogue
+from byte.orchestration import BaseState, OrchestrationEvents
 from byte.support import Boundary, BoundaryType, Section, SectionType
 from byte.support.mixins import Bootable, Eventable
 from byte.support.utils import list_to_multiline_text
@@ -396,6 +396,7 @@ class PromptAssembler(Bootable, Eventable):
                 "constraints": self._gather_constraints(state),
                 "available_conventions": self.gather_available_conventions(state),
                 "reinforcement": self._gather_reinforcement(),
+                "user_request": self._complete_user_request(state.get("user_request", "")),
             }
         )
 
@@ -427,6 +428,7 @@ class PromptAssembler(Bootable, Eventable):
                 "constraints_context": results_dict["constraints"],
                 "available_conventions": results_dict["available_conventions"],
                 "operating_principles": results_dict["reinforcement"],
+                "user_request": results_dict["user_request"],
             }
         )
 
@@ -438,7 +440,6 @@ class PromptAssembler(Bootable, Eventable):
                 }
             )
 
-        user_prompt_state["user_request"] = self._complete_user_request(state.get("user_request", ""))
         self.prompt_state = user_prompt_state
 
         return user_prompt_state
@@ -476,7 +477,9 @@ class PromptAssembler(Bootable, Eventable):
         refreshed_context_message = list_to_multiline_text(
             [
                 Section.start(SectionType.PROJECT_STATE),
-                "Below is the current state of the project. It includes all your previous tool calls that have been masked for brevity.",
+                "#id-dhd88-asx-4857",
+                "",
+                "Below is the current state of the project. It includes all your changes as a result of previous tool calls that have been masked for brevity.",
                 "",
                 Section.important("You MUST trust this information as the current state of the files etc."),
                 "",
@@ -484,8 +487,27 @@ class PromptAssembler(Bootable, Eventable):
                 "",
                 Section.end(),
                 "",
-                epilogue(),
+                self.epilogue(),
             ]
         )
 
         return [HumanMessage(content=refreshed_context_message)]
+
+    def epilogue(self) -> str:
+        history_messages = self.prompt_state.get("history_messages", [])
+
+        lines = [
+            Section.start(SectionType.RESUME_FORMAT),
+            "",
+        ]
+
+        if not history_messages:
+            lines.append("> **Remember**: This is your first response so you are starting at the FIRST step.")
+        else:
+            lines.extend(
+                [
+                    f"> **Remember**: This is a followup response. Make sure to consider the {Section.ref(SectionType.RESPONSE_FORMAT)} section and plan accordingly."
+                ]
+            )
+
+        return list_to_multiline_text(lines)
