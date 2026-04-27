@@ -164,9 +164,16 @@ class BaseAgentNode(BaseNode):
         # Bind tools if provided
         if self.get_tools() is not None and len(self.get_tools()) > 0:
             if force_tool_choice:
-                model = model.bind_tools(self.get_tools(), tool_choice=force_tool_choice)
+                model = model.bind_tools(
+                    self.get_tools(),
+                    # strict=True,
+                    tool_choice=force_tool_choice,
+                )
             else:
-                model = model.bind_tools(self.get_tools())
+                model = model.bind_tools(
+                    self.get_tools(),
+                    # strict=True,
+                )
 
         # Assemble the chain
         runnable = self.get_prompt() | model

@@ -1,4 +1,4 @@
-from typing import Annotated, Any, Optional, override
+from typing import Annotated, Any, Optional
 
 from langchain.tools import InjectedToolArg
 from langchain_core.tools import ArgsSchema
@@ -10,6 +10,7 @@ from byte.tools import BaseTool, ToolResult
 from byte.tui import InteractionService, Messages
 
 
+# AI: how should I refractore this ai?
 class GitCommitToolInput(BaseModel):
     """Input for GitCommitTool"""
 
@@ -41,7 +42,6 @@ class GitCommitTool(BaseTool):
     )
     args_schema: ArgsSchema = GitCommitToolInput
 
-    @override
     async def _arun(
         self,
         type: str = "",
