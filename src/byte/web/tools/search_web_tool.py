@@ -1,26 +1,22 @@
-from typing import Any, override
+from typing import Annotated, Any, Optional, override
 
-from git import TYPE_CHECKING
+from langchain.tools import InjectedToolArg
 from langchain_core.tools import ArgsSchema
+from pydantic import BaseModel, Field
 
+from byte import Application
 from byte.tools import BaseTool, ToolResult
 from byte.web import ChromiumService
 
-if TYPE_CHECKING:
-    from byte import Application
 
-search_web_schema = {
-    "type": "object",
-    "properties": {
-        "query": {"type": "string", "description": "The search query string used to find relevant web pages."},
-        "max_results": {
-            "type": "int",
-            "description": "The maximum number of search results to return. Defaults to 5 if not specified.",
-            "default": 5,
-        },
-    },
-    "required": ["query"],
-}
+class SearchWebToolInput(BaseModel):
+    """Input for SearchWebTool"""
+
+    query: str = Field(description="The search query string used to find relevant web pages.")
+    max_results: Optional[int] = Field(
+        default=5, description="The maximum number of search results to return. Defaults to 5 if not specified."
+    )
+    app: Annotated[Any | None, InjectedToolArg]
 
 
 class SearchWebTool(BaseTool):
@@ -28,15 +24,14 @@ class SearchWebTool(BaseTool):
     description: str = (
         "Searches the web for information matching the given query and returns relevant page content as markdown."
     )
-    args_schema: ArgsSchema | None = search_web_schema
+    args_schema: ArgsSchema = SearchWebToolInput
 
     @override
     async def _arun(
         self,
+        app: Application,
         query: str = "",
-        **kwargs: Any,
     ) -> ToolResult:
-        app: Application = kwargs.get("app")  # ty:ignore[invalid-assignment]
 
         chromium_service = app.make(ChromiumService)
         markdown_content = await chromium_service.do_search(query)

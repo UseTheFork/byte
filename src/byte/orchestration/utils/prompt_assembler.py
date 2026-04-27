@@ -438,7 +438,7 @@ class PromptAssembler(Bootable, Eventable):
                 }
             )
 
-        user_prompt_state["user_request"] = state.get("user_request", "")
+        user_prompt_state["user_request"] = self._complete_user_request(state.get("user_request", ""))
         self.prompt_state = user_prompt_state
 
         return user_prompt_state

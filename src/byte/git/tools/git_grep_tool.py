@@ -1,6 +1,7 @@
-from typing import override
+from typing import Annotated, Any, Optional, Type, override
 
-from langchain_core.tools import ArgsSchema
+from langchain.tools import InjectedToolArg
+from pydantic import BaseModel, Field
 
 from byte.git import GitService
 from byte.support import Boundary, BoundaryType, Section, SectionType
@@ -8,20 +9,15 @@ from byte.support.utils import list_to_multiline_text
 from byte.tools import BaseTool, ToolResult
 from byte.tui import InteractionService
 
-git_grep_schema = {
-    "type": "object",
-    "properties": {
-        "pattern": {
-            "type": "string",
-            "description": "The search pattern to look for in tracked files (supports regex).",
-        },
-        "file_pattern": {
-            "type": "string",
-            "description": "Optional glob pattern to limit the search to specific files (e.g., '*.py' for Python files only).",
-        },
-    },
-    "required": ["pattern"],
-}
+
+class GitGrepToolInput(BaseModel):
+    """Input for ReplaceFileTool"""
+
+    pattern: str = Field(description="The search pattern to look for in tracked files (supports regex).")
+    file_pattern: Optional[str] = Field(
+        description="Optional glob pattern to limit the search to specific files (e.g., '*.py' for Python files only)."
+    )
+    app: Annotated[Any | None, InjectedToolArg]
 
 
 MAX_RESULT_LENGTH = 10000
@@ -35,7 +31,7 @@ class GitGrepTool(BaseTool):
             f"BEFORE using this tool you MUST check the provided {Boundary.open(BoundaryType.FILE)} in {Section.ref(SectionType.PROJECT_STATE)}.",
         ]
     )
-    args_schema: ArgsSchema = git_grep_schema
+    args_schema: Type[GitGrepToolInput] = GitGrepToolInput
 
     @override
     async def _arun(

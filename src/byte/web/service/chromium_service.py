@@ -117,7 +117,9 @@ class ChromiumService(Service):
             tab = await browser.start()
 
             self.emit_tui(Messages.Status("loading", f"Searching for {query}..."))
-            await tab.go_to(f"https://www.google.com/search?q={query}")
+
+            # AI: in the below url encode the `query` AI!
+            await tab.go_to(f"https://www.google.com/search?hl=en&q={query}")
 
             self.emit_tui(Messages.Status("loading", "Extracting content..."))
             html_content = await tab.execute_script("return document.documentElement.outerHTML")

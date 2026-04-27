@@ -26,13 +26,7 @@ from byte.web import SearchWebTool
 
 ask_user_template = [
     "{modified_messages}",
-    Section.start(SectionType.USER_INPUT),
-    "```text",
     "{user_request}",
-    "```",
-    "",
-    "You **MUST** consider the user input before proceeding (if not empty).",
-    Section.end(),
     "",
     Section.start(SectionType.OPERATING_CONSTRAINTS),
     "- Always use best practices when coding",

@@ -26,13 +26,8 @@ from byte.support.utils import extract_content_from_message, list_to_multiline_t
 
 coder_user_template = [
     "{modified_messages}",
-    Section.start(SectionType.USER_INPUT),
-    "```",
     "{user_request}",
-    "```",
     "",
-    "You **MUST** consider the user input before proceeding (if not empty).",
-    Section.end(),
     Section.start(SectionType.OPERATING_CONSTRAINTS),
     "- Analyze the user's request and the provided file context",
     "- If the request is ambiguous, ask clarifying questions",
@@ -171,15 +166,6 @@ class CoderAgentNode(BaseAgentNode):
         agent_state, config = await self.generate_agent_state(state, config)
         runnable = self.create_runnable()
         record_response_service = self.app.make(RecordResponseService)
-
-        # Extract the last CoderPlanAgentMessage from scratch_messages
-        last_coder_plan_message = None
-        for msg in reversed(state.get("scratch_messages", [])):
-            if isinstance(msg, ByteAIMessage.CoderPlanAgentMessage):
-                last_coder_plan_message = msg
-                break
-
-        agent_state["coder_plan_agent_request"] = last_coder_plan_message.content if last_coder_plan_message else ""
 
         result = await runnable.ainvoke(agent_state, config=config)
         self.app.dispatch_task(

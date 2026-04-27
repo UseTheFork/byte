@@ -1,38 +1,30 @@
-from typing import Any, override
+from typing import Annotated, Any, Optional, override
 
+from langchain.tools import InjectedToolArg
 from langchain_core.tools import ArgsSchema
+from pydantic import BaseModel, Field
 
 from byte.git import GitService
 from byte.tools import BaseTool, ToolResult
 
-git_log_schema = {
-    "type": "object",
-    "properties": {
-        "max_count": {
-            "type": "integer",
-            "description": "Limit the number of commits returned. Defaults to 20.",
-            "default": 20,
-        },
-        "since": {
-            "type": "string",
-            "description": "Show commits more recent than a specific date (e.g., '2 weeks ago', '2024-01-01').",
-        },
-        "until": {
-            "type": "string",
-            "description": "Show commits older than a specific date (e.g., '2024-06-01').",
-        },
-        "file_path": {
-            "type": "string",
-            "description": "Limit the log to commits that affected the specified file or directory path.",
-        },
-        "oneline": {
-            "type": "boolean",
-            "description": "If true, output each commit as a single line (hash + subject). Defaults to true.",
-            "default": True,
-        },
-    },
-    "required": [],
-}
+
+class GitLogToolInput(BaseModel):
+    """Input for GitLogTool"""
+
+    max_count: int = Field(default=20, description="Limit the number of commits returned. Defaults to 20.")
+    since: Optional[str] = Field(
+        description="Show commits more recent than a specific date (e.g., '2 weeks ago', '2024-01-01').",
+    )
+    until: Optional[str] = Field(
+        description="Show commits older than a specific date (e.g., '2024-06-01').",
+    )
+    file_path: Optional[str] = Field(
+        description="Limit the log to commits that affected the specified file or directory path.",
+    )
+    oneline: bool = Field(
+        default=True, description="If true, output each commit as a single line (hash + subject). Defaults to true."
+    )
+    app: Annotated[Any | None, InjectedToolArg]
 
 
 class GitLogTool(BaseTool):
@@ -42,7 +34,7 @@ class GitLogTool(BaseTool):
         "Use max_count to limit results, author/since/until to filter commits, "
         "branch to target a specific ref, and file_path to scope to a specific file or directory."
     )
-    args_schema: ArgsSchema = git_log_schema
+    args_schema: ArgsSchema = GitLogToolInput
 
     @override
     async def _arun(

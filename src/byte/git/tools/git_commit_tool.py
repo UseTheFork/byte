@@ -1,43 +1,37 @@
-from typing import Any, override
+from typing import Annotated, Any, Optional, override
 
+from langchain.tools import InjectedToolArg
 from langchain_core.tools import ArgsSchema
+from pydantic import BaseModel, Field
 
 from byte.git import CommitService, GitService
 from byte.git.schemas import CommitMessage
 from byte.tools import BaseTool, ToolResult
 from byte.tui import InteractionService, Messages
 
-git_commit_schema = {
-    "type": "object",
-    "properties": {
-        "type": {
-            "type": "string",
-            "description": "The commit type. Refer to the <rules type='Allowed Commit Types'> section for valid types and their descriptions.",
-        },
-        "commit_message": {
-            "type": "string",
-            "description": "The description part of the commit message only (without the type prefix). Refer to the <rules type='Commit Description Guidelines'> section for formatting requirements.",
-        },
-        "scope": {
-            "type": "string",
-            "description": "OPTIONAL scope providing additional contextual information. Refer to the <rules type='Allowed Commit Scopes'> section for valid scope values.",
-        },
-        "breaking_change": {
-            "type": "boolean",
-            "description": "Flag indicating whether this commit introduces a breaking change.",
-            "default": False,
-        },
-        "breaking_change_message": {
-            "type": "string",
-            "description": "REQUIRED if breaking_change is True AND the commit_message isn't sufficiently informative. Describes the breaking change.",
-        },
-        "body": {
-            "type": "string",
-            "description": "OPTIONAL body with motivation for the change and contrast with previous behavior. Only needed if the commit_message isn't sufficiently informative.",
-        },
-    },
-    "required": ["type", "commit_message"],
-}
+
+class GitCommitToolInput(BaseModel):
+    """Input for GitCommitTool"""
+
+    type: str = Field(
+        description="The commit type. Refer to the <rules type='Allowed Commit Types'> section for valid types and their descriptions."
+    )
+    commit_message: str = Field(
+        description="The description part of the commit message only (without the type prefix). Refer to the <rules type='Commit Description Guidelines'> section for formatting requirements."
+    )
+    scope: Optional[str] = Field(
+        description="OPTIONAL scope providing additional contextual information. Refer to the <rules type='Allowed Commit Scopes'> section for valid scope values.",
+    )
+    breaking_change: bool = Field(
+        default=False, description="Flag indicating whether this commit introduces a breaking change."
+    )
+    breaking_change_message: Optional[str] = Field(
+        description="REQUIRED if breaking_change is True AND the commit_message isn't sufficiently informative. Describes the breaking change.",
+    )
+    body: Optional[str] = Field(
+        description="OPTIONAL body with motivation for the change and contrast with previous behavior. Only needed if the commit_message isn't sufficiently informative.",
+    )
+    app: Annotated[Any | None, InjectedToolArg]
 
 
 class GitCommitTool(BaseTool):
@@ -45,7 +39,7 @@ class GitCommitTool(BaseTool):
     description: str = (
         "Create a git commit with the provided commit message details following conventional commit standards."
     )
-    args_schema: ArgsSchema = git_commit_schema
+    args_schema: ArgsSchema = GitCommitToolInput
 
     @override
     async def _arun(
