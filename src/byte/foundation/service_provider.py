@@ -6,10 +6,10 @@ from byte.tui import ByteTUI
 
 
 class FoundationServiceProvider(ServiceProvider):
-    """ """
+    """Service provider for core foundation services including TUI, event bus, and task management."""
 
     def register(self) -> None:
-        """ """
+        """Register core foundation singletons into the application container."""
 
         self.app.singleton(ByteTUI)
 

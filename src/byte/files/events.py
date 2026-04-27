@@ -16,8 +16,7 @@ class FileEvents:
 
     @dataclass
     class FileChanged(Event):
-        # TODO: Doc String here.
-        """"""
+        """Event emitted when a file in context is changed."""
 
         file_path: str
         change_type: str

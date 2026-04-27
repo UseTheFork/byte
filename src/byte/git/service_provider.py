@@ -15,7 +15,7 @@ class GitServiceProvider(ServiceProvider):
     """
 
     def tools(self) -> List[Type[BaseTool]]:
-        """"""
+        """Returns the list of git-related tools available to the agent."""
         return [
             GitGrepTool,
             GitCommitTool,

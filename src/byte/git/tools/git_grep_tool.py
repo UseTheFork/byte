@@ -7,7 +7,6 @@ from byte.git import GitService
 from byte.support import Boundary, BoundaryType, Section, SectionType
 from byte.support.utils import list_to_multiline_text
 from byte.tools import BaseTool, ToolResult
-from byte.tui import InteractionService
 
 
 class GitGrepToolInput(BaseModel):
@@ -44,40 +43,32 @@ class GitGrepTool(BaseTool):
             raise RuntimeError("Application instance is required but was not provided")
 
         git_service = app.make(GitService)
-        interaction_service = app.make(InteractionService)
 
-        file_pattern_msg = f" in files matching '{file_pattern}'" if file_pattern else " in all tracked files"
-        if await interaction_service.confirm(
-            f"Search for pattern '{pattern}'{file_pattern_msg}?",
-            True,
-        ):
+        try:
+            repo = await git_service.get_repo()
+
+            # Build git grep command arguments
+            grep_args = ["-n", "--heading", "--break", pattern]
+
+            # Add file pattern if provided
+            if file_pattern:
+                grep_args.append("--")
+                grep_args.append(file_pattern)
+
+            # Execute git grep
             try:
-                repo = await git_service.get_repo()
+                result = repo.git.grep(*grep_args)
+                if not result:
+                    return ToolResult(result=f"No matches found for pattern: {pattern}")
+                if len(result) > MAX_RESULT_LENGTH:
+                    result = result[:MAX_RESULT_LENGTH] + "\n... [results truncated]"
+                return ToolResult(result=result)
+            except Exception as grep_error:
+                # Git grep returns non-zero exit code when no matches found
+                error_msg = str(grep_error)
+                if "did not match any file(s) known to git" in error_msg or "no matches" in error_msg.lower():
+                    return ToolResult(result=f"No matches found for pattern: {pattern}")
+                raise
 
-                # Build git grep command arguments
-                grep_args = ["-n", "--heading", "--break", pattern]
-
-                # Add file pattern if provided
-                if file_pattern:
-                    grep_args.append("--")
-                    grep_args.append(file_pattern)
-
-                # Execute git grep
-                try:
-                    result = repo.git.grep(*grep_args)
-                    if not result:
-                        return ToolResult(result=f"No matches found for pattern: {pattern}")
-                    if len(result) > MAX_RESULT_LENGTH:
-                        result = result[:MAX_RESULT_LENGTH] + "\n... [results truncated]"
-                    return ToolResult(result=result)
-                except Exception as grep_error:
-                    # Git grep returns non-zero exit code when no matches found
-                    error_msg = str(grep_error)
-                    if "did not match any file(s) known to git" in error_msg or "no matches" in error_msg.lower():
-                        return ToolResult(result=f"No matches found for pattern: {pattern}")
-                    raise
-
-            except Exception as e:
-                return ToolResult(result=f"Error executing git grep for pattern '{pattern}': {e!s}")
-
-        return ToolResult(result="User declined the tool call.")
+        except Exception as e:
+            return ToolResult(result=f"Error executing git grep for pattern '{pattern}': {e!s}")
