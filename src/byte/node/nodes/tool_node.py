@@ -1,11 +1,9 @@
 import json
 
-from langchain_core.runnables import RunnableConfig
-from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.node import BaseNode
-from byte.orchestration import AssistantContextSchema, BaseState
+from byte.orchestration import BaseState
 from byte.support.utils import get_last_message
 from byte.tools import ToolMessage, ToolRegistryService
 from byte.tools.exceptions import ToolException, ToolNotFoundException
@@ -23,7 +21,8 @@ class ToolNode(BaseNode):
         )
 
     async def __call__(
-        self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
+        self,
+        state: BaseState,
     ) -> Command[str]:
         message = get_last_message(state["scratch_messages"])
 
@@ -32,25 +31,20 @@ class ToolNode(BaseNode):
 
         tool_registry_service = self.app.make(ToolRegistryService)
 
-        # Build a mapping of tool names to tool instances
-
-        # TODO: we should make this truily async with a gather
+        # TODO: we should make this truly async with a gather
 
         for tool_call in message.tool_calls:
-            #
             try:
                 tool = tool_registry_service.get_tool(tool_call["name"])
                 if not tool:
                     raise ToolNotFoundException(
                         f"Error: Tool '{tool_call['name']}' is not available or does not exist."
                     )
-                    continue
 
                 tool_result = await tool.invoke(
                     args=tool_call["args"],
                     tool_call_id=tool_call["id"],
                 )
-                self.app["log"].info(tool_result)
 
                 tool_message = ToolMessage(
                     content=json.dumps(tool_result.result),
@@ -80,6 +74,6 @@ class ToolNode(BaseNode):
             state,
             {
                 "scratch_messages": outputs,
-                **merged_extra,  # only included if not empty
+                **merged_extra,
             },
         )
