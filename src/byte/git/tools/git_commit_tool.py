@@ -10,7 +10,6 @@ from byte.tools import BaseTool, ToolResult
 from byte.tui import InteractionService, Messages
 
 
-# AI: how should I refractore this ai?
 class GitCommitToolInput(BaseModel):
     """Input for GitCommitTool"""
 
