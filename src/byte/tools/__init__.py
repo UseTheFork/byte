@@ -4,6 +4,7 @@ from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
     from byte.tools.base_tool import BaseTool
+    from byte.tools.exceptions import ToolException, ToolNotFoundException
     from byte.tools.schemas import ToolResult
     from byte.tools.service.tool_registry_service import ToolRegistryService
     from byte.tools.service_provider import ToolsServiceProvider
@@ -11,7 +12,9 @@ if TYPE_CHECKING:
 
 __all__ = (
     "BaseTool",
+    "ToolException",
     "ToolMessage",
+    "ToolNotFoundException",
     "ToolRegistryService",
     "ToolResult",
     "ToolsServiceProvider",
@@ -20,7 +23,9 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "BaseTool": "base_tool",
+    "ToolException": "exceptions",
     "ToolMessage": "tool_message",
+    "ToolNotFoundException": "exceptions",
     "ToolRegistryService": "service.tool_registry_service",
     "ToolResult": "schemas",
     "ToolsServiceProvider": "service_provider",

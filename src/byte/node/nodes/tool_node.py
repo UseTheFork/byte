@@ -1,14 +1,12 @@
 import json
 
-from langchain_core.runnables import RunnableConfig
-from langgraph.runtime import Runtime
 from langgraph.types import Command
-from pydantic import ValidationError
 
 from byte.node import BaseNode
-from byte.orchestration import AssistantContextSchema, BaseState
+from byte.orchestration import BaseState
 from byte.support.utils import get_last_message
-from byte.tools import ToolMessage, ToolRegistryService, ToolResult
+from byte.tools import ToolMessage, ToolRegistryService
+from byte.tools.exceptions import ToolException, ToolNotFoundException
 from byte.tui import Messages
 
 
@@ -23,7 +21,8 @@ class ToolNode(BaseNode):
         )
 
     async def __call__(
-        self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
+        self,
+        state: BaseState,
     ) -> Command[str]:
         message = get_last_message(state["scratch_messages"])
 
@@ -31,66 +30,39 @@ class ToolNode(BaseNode):
         merged_extra = {}
 
         tool_registry_service = self.app.make(ToolRegistryService)
-        tools = tool_registry_service.get_all_tools()
 
-        # Check if tools are available
-        if not tools:
-            return self.route_back(state, {"scratch_messages": []})
-
-        # Build a mapping of tool names to tool instances
-        tools_by_name = {tool.__class__.__name__: tool for tool in tools}
+        # TODO: we should make this truly async with a gather
 
         for tool_call in message.tool_calls:
-            if tool_call["name"] not in tools_by_name:
-                tool_message = ToolMessage(
-                    status="error",
-                    content=f"Error: Tool '{tool_call['name']}' is not available or does not exist.\n\nInput Args:\n\n```json{json.dumps(tool_call['args'])}```",
-                    name=tool_call["name"],
-                    tool_call_id=tool_call["id"],
-                )
-
-                self._update_tui(tool_message)
-                outputs.append(tool_message)
-                continue
-
             try:
-                tool_result = await tools_by_name[tool_call["name"]].ainvoke(
-                    {
-                        **tool_call["args"],
-                        "app": self.app,
-                    },
-                )
-            except ValidationError as err:
-                tool_message = ToolMessage(
-                    status="error",
-                    content=f"Error: Input validation Failed {err}\n\nInput Args:\n\n```json{json.dumps(tool_call['args'])}```\n\nDont wrap tool calls in args_schema",
-                    name=tool_call["name"],
+                tool = tool_registry_service.get_tool(tool_call["name"])
+                if not tool:
+                    raise ToolNotFoundException(
+                        f"Error: Tool '{tool_call['name']}' is not available or does not exist."
+                    )
+
+                tool_result = await tool.invoke(
+                    args=tool_call["args"],
                     tool_call_id=tool_call["id"],
                 )
 
-                self._update_tui(tool_message)
-                outputs.append(tool_message)
-                continue
-
-            # Handle ToolResult wrapper
-            if isinstance(tool_result, ToolResult):
                 tool_message = ToolMessage(
                     content=json.dumps(tool_result.result),
                     name=tool_call["name"],
                     tool_call_id=tool_call["id"],
                 )
 
+                # TODO: This prob needs to have a deep merge.
+                if tool_result.extra:
+                    merged_extra.update(tool_result.extra)
+
                 self._update_tui(tool_message)
                 outputs.append(tool_message)
 
-                # TODO: This prob needs to have a deep merge.
-                if tool_result.extra:
-                    # merge extras
-                    merged_extra.update(tool_result.extra)
-
-            else:
+            except ToolException as err:
                 tool_message = ToolMessage(
-                    content=json.dumps(tool_result),
+                    status="error",
+                    content=str(err),
                     name=tool_call["name"],
                     tool_call_id=tool_call["id"],
                 )
@@ -102,6 +74,6 @@ class ToolNode(BaseNode):
             state,
             {
                 "scratch_messages": outputs,
-                **merged_extra,  # only included if not empty
+                **merged_extra,
             },
         )

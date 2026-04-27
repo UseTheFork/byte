@@ -110,8 +110,6 @@ class CommitService(Service, UserInteractive):
 
         # Only handle breaking changes if enabled in config
         if git_config.enable_breaking_changes and commit_message.breaking_change:
-            console = self.app["console"]
-
             # Display commit message parts for context
             context_parts = [
                 f"Type: {commit_message.type}",
@@ -128,8 +126,6 @@ class CommitService(Service, UserInteractive):
 
             # if hasattr(commit_message, "files") and commit_message.files:
             #     context_parts.append(f"Files: {', '.join(commit_message.files)}")
-
-            console.print_panel("\n".join(context_parts), title="Commit Details")
 
             confirmed = await self.prompt_for_confirmation(
                 "This commit is marked as a breaking change. Confirm?", default=True

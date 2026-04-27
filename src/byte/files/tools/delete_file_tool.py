@@ -1,27 +1,27 @@
-from typing import Annotated, Any, Type, override
-
-from langchain.tools import InjectedToolArg
-from pydantic import BaseModel, Field
+from typing import override
 
 from byte import Application
 from byte.files import ToolFileService
 from byte.tools import BaseTool, ToolResult
-
-
-class DeleteFileToolInput(BaseModel):
-    """Input for DeleteFileTool"""
-
-    file_path: str = Field(description="The EXACT Path to file located in `<file>`. Use the `source` variable.")
-    app: Annotated[Any | None, InjectedToolArg]
+from byte.tools.exceptions import ToolRunException
 
 
 class DeleteFileTool(BaseTool):
-    name: str = "DeleteFileTool"
+    name: str = "delete_file"
     description: str = "Delete a file."
-    args_schema: Type[DeleteFileToolInput] = DeleteFileToolInput
+    input_schema = {
+        "type": "object",
+        "properties": {
+            "path": {
+                "type": "string",
+                "description": "The EXACT Path to file located in `<file>`. Use the `source` variable.",
+            },
+        },
+        "required": ["path"],
+    }
 
     @override
-    async def _arun(
+    async def run(
         self,
         app: Application,
         file_path: str = "",
@@ -39,7 +39,4 @@ class DeleteFileTool(BaseTool):
             )
 
         except Exception as e:
-            return ToolResult(
-                success=False,
-                result=f"Error editing file: {e!s}",
-            )
+            raise ToolRunException(f"Error deleting file: {e!s}") from e

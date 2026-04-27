@@ -1,43 +1,36 @@
-from typing import Annotated, Any, override
+from typing import override
 
-from langchain.tools import InjectedToolArg
-from langchain_core.tools import ArgsSchema
-from pydantic import BaseModel, Field
-
-from byte import Application
 from byte.files import ToolFileService
 from byte.tools import BaseTool, ToolResult
-
-
-class EditFileToolInput(BaseModel):
-    """Input for EditFileTool"""
-
-    file_path: str = Field(
-        description="The EXACT Path to a `editable` file located in `<file>`. Use the `source` variable."
-    )
-    search_string: str = Field(
-        description="The EXACT string to search for. UNIQUENESS: search_string MUST uniquely identify target instance. Include 3-5 lines context BEFORE and AFTER change point, Include exact whitespace, indentation, surrounding code, If text appears multiple times, add more context to make it unique."
-    )
-    replace_string: str = Field(description="The string to replace the `search_string` with.")
-    app: Annotated[Any | None, InjectedToolArg]
+from byte.tools.exceptions import ToolRunException
 
 
 class EditFileTool(BaseTool):
-    name: str = "EditFileTool"
+    name: str = "edit_file"
     description: str = """Edit a file by replacing a specific string. The search_string must match exactly character for character.\n\n > **Critical **: The tool is extremely literal. Text must match **EXACTLY**"""
-    args_schema: ArgsSchema = EditFileToolInput
+    input_schema = {
+        "type": "object",
+        "properties": {
+            "file_path": {
+                "type": "string",
+                "description": "The EXACT Path to a `editable` file located in `<file>`. Use the `source` variable.",
+            },
+            "search_string": {"type": "string", "description": "The exact string to find and replace"},
+            "replace_string": {"type": "string", "description": "The string to replace with"},
+        },
+        "required": ["file_path", "search_string", "replace_string"],
+    }
 
     @override
-    async def _arun(
+    async def run(
         self,
-        app: Application,
         file_path: str = "",
         search_string: str = "",
         replace_string: str = "",
     ) -> ToolResult:
 
         try:
-            tool_file_service = app.make(ToolFileService)
+            tool_file_service = self.app.make(ToolFileService)
 
             result = await tool_file_service.edit_file(file_path, search_string, replace_string)
 
@@ -49,7 +42,4 @@ class EditFileTool(BaseTool):
             )
 
         except Exception as e:
-            return ToolResult(
-                success=False,
-                result=f"Error editing file: {e!s}",
-            )
+            raise ToolRunException(f"Error editing file: {e!s}") from e

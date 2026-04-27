@@ -82,8 +82,7 @@ class ServiceProvider(ABC):
         tool_registry_service = self.app.make(ToolRegistryService)
 
         for tool_class in tools:
-            tool = self.app.make(tool_class)
-            tool_registry_service.register_tool(tool)
+            tool_registry_service.register_tool(tool_class)
 
     def set_application(self, app: Application):
         """Set the container instance for providers that need container access.

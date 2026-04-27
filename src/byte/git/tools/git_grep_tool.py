@@ -1,48 +1,45 @@
-from typing import Annotated, Any, Optional, Type, override
-
-from langchain.tools import InjectedToolArg
-from pydantic import BaseModel, Field
+from typing import override
 
 from byte.git import GitService
 from byte.support import Boundary, BoundaryType, Section, SectionType
 from byte.support.utils import list_to_multiline_text
 from byte.tools import BaseTool, ToolResult
-
-
-class GitGrepToolInput(BaseModel):
-    """Input for ReplaceFileTool"""
-
-    pattern: str = Field(description="The search pattern to look for in tracked files (supports regex).")
-    file_pattern: Optional[str] = Field(
-        description="Optional glob pattern to limit the search to specific files (e.g., '*.py' for Python files only)."
-    )
-    app: Annotated[Any | None, InjectedToolArg]
-
+from byte.tools.exceptions import ToolRunException
 
 MAX_RESULT_LENGTH = 10000
 
 
 class GitGrepTool(BaseTool):
-    name: str = "GitGrepTool"
+    name: str = "git_grep"
     description: str = list_to_multiline_text(
         [
             "Search for a pattern in tracked files using git grep. This tool searches through all files tracked by git for the specified pattern. It's useful for finding where specific code, functions, or text appears in the codebase.",
             f"BEFORE using this tool you MUST check the provided {Boundary.open(BoundaryType.FILE)} in {Section.ref(SectionType.PROJECT_STATE)}.",
         ]
     )
-    args_schema: Type[GitGrepToolInput] = GitGrepToolInput
+    input_schema = {
+        "type": "object",
+        "properties": {
+            "pattern": {
+                "type": "string",
+                "description": "The search pattern to look for in tracked files (supports regex).",
+            },
+            "file_pattern": {
+                "type": "string",
+                "description": "Optional glob pattern to limit the search to specific files (e.g., '*.py' for Python files only).",
+            },
+        },
+        "required": ["pattern"],
+    }
 
     @override
-    async def _arun(
+    async def run(
         self,
         pattern: str = "",
         file_pattern: str = "",
-        app=None,
     ) -> ToolResult:
-        if app is None:
-            raise RuntimeError("Application instance is required but was not provided")
 
-        git_service = app.make(GitService)
+        git_service = self.app.make(GitService)
 
         try:
             repo = await git_service.get_repo()
@@ -71,4 +68,4 @@ class GitGrepTool(BaseTool):
                 raise
 
         except Exception as e:
-            return ToolResult(result=f"Error executing git grep for pattern '{pattern}': {e!s}")
+            raise ToolRunException(f"Error executing git grep for pattern '{pattern}': {e!s}") from e
