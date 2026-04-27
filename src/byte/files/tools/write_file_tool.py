@@ -1,36 +1,31 @@
-from typing import Annotated, Any, Type, override
+from typing import override
 
-from langchain.tools import InjectedToolArg
-from pydantic import BaseModel, Field
-
-from byte import Application
 from byte.files import ToolFileService
 from byte.tools import BaseTool, ToolResult
-
-
-class WriteFileToolInput(BaseModel):
-    """Input for WriteFileTool"""
-
-    file_path: str = Field(description="The EXACT Path to the file.")
-    content: str = Field(description="Content to write to the file.")
-    app: Annotated[Any | None, InjectedToolArg]
+from byte.tools.exceptions import ToolRunException
 
 
 class WriteFileTool(BaseTool):
-    name: str = "WriteFileTool"
+    name: str = "write_file"
     description: str = "Write content to a file. Creates parent directories if needed."
-    args_schema: Type[WriteFileToolInput] = WriteFileToolInput
+    input_schema = {
+        "type": "object",
+        "properties": {
+            "path": {"type": "string", "description": "The EXACT Path to the file."},
+            "content": {"type": "string", "description": "Content to write to the file"},
+        },
+        "required": ["path", "content"],
+    }
 
     @override
-    async def _arun(
+    async def run(
         self,
-        app: Application,
         file_path: str = "",
         content: str = "",
     ) -> ToolResult:
 
         try:
-            tool_file_service = app.make(ToolFileService)
+            tool_file_service = self.app.make(ToolFileService)
             result = await tool_file_service.write_file(file_path, content)
 
             return ToolResult(
@@ -41,7 +36,4 @@ class WriteFileTool(BaseTool):
             )
 
         except Exception as e:
-            return ToolResult(
-                success=False,
-                result=f"Error writing file: {e!s}",
-            )
+            raise ToolRunException(f"Error writing file: {e!s}") from e

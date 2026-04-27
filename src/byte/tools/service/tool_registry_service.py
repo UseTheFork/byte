@@ -1,30 +1,37 @@
-from typing import TYPE_CHECKING, Dict, List, Optional
-
-from langchain_core.tools.base import BaseTool
+from typing import Dict, Optional, Type
 
 from byte.support import Service
-
-if TYPE_CHECKING:
-    pass
+from byte.tools.base_tool import BaseTool
 
 
-# TODO: Clean up / Doc strings
 class ToolRegistryService(Service):
-    """Central registry for"""
+    """Central registry for tool discovery and instantiation.
+
+    Manages tool registration and provides lookup services for resolving
+    tools by name. Tools are stored as classes and instantiated via the
+    application container on retrieval.
+    """
 
     def boot(self):
         # Separate namespaces for different command types
-        self._tools: Dict[str, BaseTool] = {}
+        self._tools: Dict[str, Type[BaseTool]] = {}
 
-    def register_tool(self, tool: BaseTool):
-        """R"""
+    def register_tool(self, tool: Type[BaseTool]):
+        """Register a tool class by its name.
+
+        Usage: `registry.register_tool(EditFileTool)`
+        """
         self._tools[tool.name] = tool
 
     def get_tool(self, name: str) -> Optional[BaseTool]:
-        """Retrieve a registered"""
-        return self._tools.get(name)
+        """Retrieve and instantiate a registered tool by name.
 
-    def get_all_tools(self) -> List[BaseTool]:
-        """Retrieve all tools"""
-        all_tools = list(self._tools.values())
-        return all_tools
+        Returns:
+            An instantiated BaseTool if found, otherwise None.
+
+        Usage: `tool = registry.get_tool("edit_file")`
+        """
+        tool_class = self._tools.get(name)
+        if tool_class is None:
+            return None
+        return self.app.make(tool_class)

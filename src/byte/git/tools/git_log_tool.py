@@ -1,57 +1,57 @@
-from typing import Annotated, Any, Optional, override
-
-from langchain.tools import InjectedToolArg
-from langchain_core.tools import ArgsSchema
-from pydantic import BaseModel, Field
+from typing import override
 
 from byte.git import GitService
 from byte.tools import BaseTool, ToolResult
-
-
-class GitLogToolInput(BaseModel):
-    """Input for GitLogTool"""
-
-    max_count: int = Field(default=20, description="Limit the number of commits returned. Defaults to 20.")
-    since: Optional[str] = Field(
-        description="Show commits more recent than a specific date (e.g., '2 weeks ago', '2024-01-01').",
-    )
-    until: Optional[str] = Field(
-        description="Show commits older than a specific date (e.g., '2024-06-01').",
-    )
-    file_path: Optional[str] = Field(
-        description="Limit the log to commits that affected the specified file or directory path.",
-    )
-    oneline: bool = Field(
-        default=True, description="If true, output each commit as a single line (hash + subject). Defaults to true."
-    )
-    app: Annotated[Any | None, InjectedToolArg]
+from byte.tools.exceptions import ToolRunException
 
 
 class GitLogTool(BaseTool):
-    name: str = "GitLogTool"
+    name: str = "git_log"
     description: str = (
         "Retrieve the git commit log with optional filters. "
         "Use max_count to limit results, author/since/until to filter commits, "
         "branch to target a specific ref, and file_path to scope to a specific file or directory."
     )
-    args_schema: ArgsSchema = GitLogToolInput
+    input_schema = {
+        "type": "object",
+        "properties": {
+            "max_count": {
+                "type": "integer",
+                "description": "Limit the number of commits returned. Defaults to 20.",
+                "default": 20,
+            },
+            "since": {
+                "type": "string",
+                "description": "Show commits more recent than a specific date (e.g., '2 weeks ago', '2024-01-01').",
+            },
+            "until": {
+                "type": "string",
+                "description": "Show commits older than a specific date (e.g., '2024-06-01').",
+            },
+            "file_path": {
+                "type": "string",
+                "description": "Limit the log to commits that affected the specified file or directory path.",
+            },
+            "oneline": {
+                "type": "boolean",
+                "description": "If true, output each commit as a single line (hash + subject). Defaults to true.",
+                "default": True,
+            },
+        },
+        "required": [],
+    }
 
     @override
-    async def _arun(
+    async def run(
         self,
         max_count: int = 20,
         since: str | None = None,
         until: str | None = None,
         file_path: str | None = None,
         oneline: bool = True,
-        **kwargs: Any,
     ) -> ToolResult:
-        app = kwargs.get("app")
 
-        if app is None:
-            raise RuntimeError("Application instance is required but was not provided")
-
-        git_service = app.make(GitService)
+        git_service = self.app.make(GitService)
 
         try:
             repo = await git_service.get_repo()
@@ -76,4 +76,4 @@ class GitLogTool(BaseTool):
             return ToolResult(result=result or "No commits found matching the given criteria.")
 
         except Exception as e:
-            return ToolResult(result=f"Error retrieving git log: {e!s}")
+            raise ToolRunException(f"Error retrieving git log: {e!s}") from e
