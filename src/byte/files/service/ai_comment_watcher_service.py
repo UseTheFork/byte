@@ -267,7 +267,6 @@ class AICommentWatcherService(Service):
                 ),
             )
 
-    # AI?
     async def add_reinforcement_hook(
         self, payload: OrchestrationEvents.GatherReinforcement
     ) -> OrchestrationEvents.GatherReinforcement:

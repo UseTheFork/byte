@@ -1,14 +1,14 @@
 from typing import override
 
-from byte.files import FileContext, FileMode
-from byte.support import Boundary, BoundaryType
-from byte.support.utils import list_to_multiline_text
+from byte.files import FileMode, FileService
 from byte.tools import BaseTool, ToolResult
 
 
 class ReadFilesTool(BaseTool):
     name: str = "read_files"
-    description: str = "Read the contents of one or more files from the project."
+    description: str = (
+        "Add one or more files to the Project State section so their contents become available in context."
+    )
     input_schema = {
         "type": "object",
         "properties": {
@@ -27,29 +27,17 @@ class ReadFilesTool(BaseTool):
         file_paths: list[str] = [],
     ) -> ToolResult:
 
-        final_content = []
+        file_service = self.app.make(FileService)
+        added = []
 
         for file_path in file_paths:
-            file_context = FileContext(
-                path=self.app.path(file_path),
-                mode=FileMode.READ_ONLY,
-                root_path=self.app.path(),
+            if await file_service.add_file(file_path, FileMode.READ_ONLY):
+                added.append(file_path)
+
+        if not added:
+            return ToolResult(
+                result="No files were added. Files may not exist in the project or are already in context."
             )
 
-            content = file_context.get_content()
-            if content is not None:
-                language = file_context.language
-                final_content.append(
-                    list_to_multiline_text(
-                        [
-                            Boundary.open(
-                                BoundaryType.FILE,
-                                meta={"source": file_context.relative_path, "language": language},
-                            ),
-                            f"{content}",
-                            Boundary.close(BoundaryType.FILE),
-                        ]
-                    )
-                )
-
-        return ToolResult(result="\n\n".join(final_content))
+        files_list = "\n".join(f"- `{f}`" for f in added)
+        return ToolResult(result=f"The following files have been added to the Project State section:\n{files_list}")

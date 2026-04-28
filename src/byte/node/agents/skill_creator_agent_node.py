@@ -6,6 +6,8 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
+from byte.files.tools.list_files_tool import ListFilesTool
+from byte.files.tools.read_files_tool import ReadFilesTool
 from byte.git.tools.git_grep_tool import GitGrepTool
 from byte.llm import LLMService, ModelSchema
 from byte.node import (
@@ -92,7 +94,7 @@ skill_orchestrator_template = [
         f"All tool operations are applied immediately and are reflected in the next user message containing {SectionType.PROJECT_STATE} #id-dhd88-asx-4857."
     ),
 ]
-# AI:
+
 skill_orchestrator_prompt = ChatPromptTemplate.from_messages(
     [
         (
@@ -115,7 +117,7 @@ skill_orchestrator_prompt = ChatPromptTemplate.from_messages(
 )
 
 
-class SkillOrchestratorAgentNode(BaseAgentNode):
+class SkillCreatorAgentNode(BaseAgentNode):
     def boot(
         self,
         goto: Type[BaseNode] = EndNode,
@@ -144,6 +146,8 @@ class SkillOrchestratorAgentNode(BaseAgentNode):
             UserSelectTool,
             UserInputTextTool,
             UserConfirmTool,
+            ListFilesTool,
+            ReadFilesTool,
         ]
 
     async def __call__(
