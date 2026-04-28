@@ -31,12 +31,12 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "AskCommand": "command.ask_command",
-    "CoderCommand": "command.coder_command",
     "AskWorkflow": "workflows.ask_workflow",
     "BaseWorkflow": "workflows.base",
+    "CoderCommand": "command.coder_command",
     "CoderWorkflow": "workflows.coder_workflow",
-    "CreateSkillWorkflow": "workflows.create_skill_workflow",
     "CommitWorkflow": "workflows.commit_workflow",
+    "CreateSkillWorkflow": "workflows.create_skill_workflow",
     "WorkflowService": "service.workflow_service",
     "WorkflowServiceProvider": "service_provider",
     # keep-sorted end

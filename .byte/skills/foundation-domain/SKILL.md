@@ -3,7 +3,6 @@ name: foundation-domain
 description: Coding guidance for the foundation domain. Use when working within src/byte/foundation/ or when other domains need to interact with the foundation layer (container, application, paths, config, environment, service providers, task management).
 ---
 
-
 # Foundation Domain Guide
 
 The foundation domain (`src/byte/foundation/`) is the core infrastructure layer of the Byte application. It provides the DI container, application lifecycle, path management, environment detection, exception hierarchy, and task management.
@@ -48,6 +47,7 @@ config = self.app["config"]                # Resolves by string key (shorthand)
 ```
 
 **Lifetime rules:**
+
 - **Services** → always `singleton` (stateful, shared)
 - **Nodes** → always `bind` / transient (stateless, per-execution)
 - **Agents** → always `singleton` (contain compiled graphs)
@@ -59,22 +59,23 @@ config = self.app["config"]                # Resolves by string key (shorthand)
 
 These string keys are registered during bootstrap and are always available after the kernel bootstraps:
 
-| Key | Type | Description |
-|---|---|---|
-| `"app"` | `Application` | The application instance itself |
-| `"config"` | `ByteConfig` | Parsed application configuration (Pydantic model) |
-| `"env"` | `str` | Current environment name (`"development"`, `"production"`, `"testing"`) |
-| `"args"` | `Repository` | Parsed CLI arguments (raw, flags, options, positional) |
-| `"version"` | `str` | Application version from package metadata |
-| `"path"` | `Path` | Git repository root (alias for `"path.root"`) |
-| `"path.root"` | `Path` | Git repository root |
-| `"path.app"` | `Path` | Byte package installation directory |
-| `"path.config"` | `Path` | `.byte/` directory |
-| `"path.cache"` | `Path` | `.byte/cache/` directory |
-| `"path.conventions"` | `Path` | `.byte/conventions/` directory |
-| `"path.session_context"` | `Path` | `.byte/session_context/` directory |
+| Key                      | Type          | Description                                                             |
+| ------------------------ | ------------- | ----------------------------------------------------------------------- |
+| `"app"`                  | `Application` | The application instance itself                                         |
+| `"config"`               | `ByteConfig`  | Parsed application configuration (Pydantic model)                       |
+| `"env"`                  | `str`         | Current environment name (`"development"`, `"production"`, `"testing"`) |
+| `"args"`                 | `Repository`  | Parsed CLI arguments (raw, flags, options, positional)                  |
+| `"version"`              | `str`         | Application version from package metadata                               |
+| `"path"`                 | `Path`        | Git repository root (alias for `"path.root"`)                           |
+| `"path.root"`            | `Path`        | Git repository root                                                     |
+| `"path.app"`             | `Path`        | Byte package installation directory                                     |
+| `"path.config"`          | `Path`        | `.byte/` directory                                                      |
+| `"path.cache"`           | `Path`        | `.byte/cache/` directory                                                |
+| `"path.conventions"`     | `Path`        | `.byte/conventions/` directory                                          |
+| `"path.session_context"` | `Path`        | `.byte/session_context/` directory                                      |
 
 Access via bracket syntax:
+
 ```python
 config = self.app["config"]
 root = self.app["path.root"]
@@ -95,16 +96,19 @@ The container also provides typed overloads for `__getitem__` so type checkers c
 - **TUI access** — `app.tui()` resolves `ByteTUI`, `app.emit_tui(message)` posts messages to the TUI conversation panel.
 
 **Creating an application:**
+
 ```python
 from byte.foundation import Application
 
 app = Application.configure(base_path=Path.cwd(), providers=[...]).create()
 ```
+
 This uses the `ApplicationBuilder` fluent pattern: `with_kernels()` → `with_providers(providers)` → `create()`.
 
 ### Service Providers
 
 The `FoundationServiceProvider` registers the core singletons:
+
 - `ByteTUI` — Terminal UI
 - `EventBus` — Event-driven communication bus
 - `TaskManager` — Background async task management (eagerly instantiated via `make()`)
@@ -157,6 +161,7 @@ await task_manager.shutdown()
 ### Environment Detection
 
 The `EnvironmentDetector` resolves the environment with this priority:
+
 1. CLI argument `--env <value>`
 2. `BYTE_ENV` environment variable
 3. Config callback (from `config.app.env`)
@@ -172,9 +177,9 @@ The `EnvironmentDetector` resolves the environment with this priority:
 ### Imports
 
 Always import foundation types from the domain root:
+
 ```python
 from byte.foundation import Application, Container, Kernel, TaskManager, ByteException
 ```
 
 The `__init__.py` uses lazy dynamic imports via `_dynamic_imports` and `import_attr`. When adding new public exports to the foundation domain, add entries to both `__all__`, `_dynamic_imports`, and the `TYPE_CHECKING` block.
-

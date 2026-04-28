@@ -25,10 +25,10 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
-    "SkillCommand": "command.skill_command",
     "CreateSkillTool": "tools.create_skill_tool",
     "LoadSkillTool": "tools.load_skill_tool",
     "Skill": "schemas",
+    "SkillCommand": "command.skill_command",
     "SkillLoaderService": "service.skill_loader_service",
     "SkillTrackerService": "service.skill_tracker_service",
     "SkillsServiceProvider": "service_provider",
