@@ -2,7 +2,7 @@ from argparse import Namespace
 
 from rich.columns import Columns
 
-from byte.cli import ByteArgumentParser, Command
+from byte import ByteArgumentParser, Command
 from byte.files import FileMode, FileService
 
 

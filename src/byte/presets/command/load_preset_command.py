@@ -2,10 +2,10 @@ from argparse import Namespace
 from typing import List
 
 from byte.analytics import AgentAnalyticsService
-from byte.cli import ByteArgumentParser, Command, PromptToolkitService
 from byte.conventions import ConventionContextService
 from byte.files import FileMode, FileService
 from byte.memory import MemoryService
+from byte.tui import ByteArgumentParser, Command, PromptToolkitService
 
 
 class LoadPresetCommand(Command):

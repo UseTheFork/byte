@@ -1,6 +1,6 @@
 from argparse import Namespace
 
-from byte.cli import ByteArgumentParser, Command
+from byte import ByteArgumentParser, Command
 
 
 class ExitCommand(Command):

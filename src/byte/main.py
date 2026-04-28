@@ -2,15 +2,14 @@ import asyncio
 import sys
 from pathlib import Path
 
+import uvloop
 from pydantic import ValidationError
 
-from byte.agent import AgentServiceProvider
 from byte.analytics import AnalyticsProvider
-from byte.cli import CLIServiceProvider
-from byte.clipboard import ClipboardServiceProvider
-from byte.code_operations import PromptFormatProvider
+from byte.command import CommandServiceProvider
 from byte.conventions.service_provider import ConventionsServiceProvider
 from byte.development import DevelopmentServiceProvider
+from byte.event import EventsServiceProvider
 from byte.files import FileServiceProvider
 from byte.foundation import Application
 from byte.git import GitServiceProvider
@@ -19,29 +18,35 @@ from byte.lint import LintServiceProvider
 from byte.llm import LLMServiceProvider
 from byte.lsp import LSPServiceProvider
 from byte.memory import MemoryServiceProvider
-from byte.presets import PresetsProvider
+from byte.node import NodeServiceProvider
+from byte.skills.service_provider import SkillsServiceProvider
 from byte.system import SystemServiceProvider
+from byte.tools import ToolsServiceProvider
+from byte.tui import TUIServiceProvider
 from byte.web import WebServiceProvider
+from byte.workflow import WorkflowServiceProvider
 
 PROVIDERS = [
-    CLIServiceProvider,
+    EventsServiceProvider,
+    CommandServiceProvider,
+    ToolsServiceProvider,
+    GitServiceProvider,
+    SkillsServiceProvider,
     MemoryServiceProvider,
     KnowledgeServiceProvider,
     FileServiceProvider,
     ConventionsServiceProvider,
-    # ToolsServiceProvider,
     LLMServiceProvider,
-    GitServiceProvider,
     LintServiceProvider,
-    AgentServiceProvider,
+    NodeServiceProvider,
+    WorkflowServiceProvider,
     LSPServiceProvider,
     AnalyticsProvider,
-    PromptFormatProvider,
     WebServiceProvider,
-    PresetsProvider,
-    ClipboardServiceProvider,
+    # PresetsProvider,
     DevelopmentServiceProvider,
     SystemServiceProvider,
+    TUIServiceProvider,
 ]
 
 
@@ -54,6 +59,7 @@ def cli():
     except ValidationError:
         raise
 
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     asyncio.run(application.handle_command(sys.argv))
 
 

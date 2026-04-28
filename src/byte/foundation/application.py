@@ -3,11 +3,13 @@ from pathlib import Path
 from typing import Callable, Optional, TypeVar
 
 from git import InvalidGitRepositoryError, Repo
+from textual.message import Message
 
 from byte import ServiceProvider, TaskManager
-from byte.foundation import Console, Container, FoundationServiceProvider, Kernel
+from byte.foundation import Container, FoundationServiceProvider, Kernel
 from byte.foundation.bootstrap import RegisterProviders
 from byte.logging import LogService, LogServiceProvider
+from byte.tui import ByteTUI
 
 T = TypeVar("T")
 
@@ -37,7 +39,6 @@ class Application(Container):
 
         Usage: Called internally during application initialization to bind log and console services.
         """
-        self.instance("console", self.console())
 
         return self
 
@@ -149,6 +150,8 @@ class Application(Container):
             callback(self)
 
         providers = RegisterProviders._merge
+
+        # TODO: Use gather here?
         for provider in providers:
             provider_instance = self.make(provider)
             await self.boot_provider(provider_instance)
@@ -191,12 +194,9 @@ class Application(Container):
         """
         return self.make(LogService)
 
-    def console(self) -> Console:
-        """Get the Console service instance from the container.
-
-        Usage: `app.console()` -> returns Console instance for terminal output
-        """
-        return self.make(Console)
+    def tui(self) -> ByteTUI:
+        """ """
+        return self.make(ByteTUI)
 
     def path(self, path: str = "") -> Path:
         """
@@ -284,6 +284,19 @@ class Application(Container):
             The full path to the conventions directory or subdirectory.
         """
         base = self.config_path("conventions")
+        return self.join_paths(base, path)
+
+    def skills_path(self, path: str = "") -> Path:
+        """
+        Get the path to the skills directory.
+
+        Args:
+            path: Optional path to append to the skills directory.
+
+        Returns:
+            The full path to the skills directory or subdirectory.
+        """
+        base = self.config_path("skills")
         return self.join_paths(base, path)
 
     def is_development(self) -> bool:
@@ -403,24 +416,35 @@ class Application(Container):
 
         Usage: `await app.run()` -> starts interactive session until KeyboardInterrupt
         """
-        from byte.cli import PromptToolkitService
+        from byte.tui import TUIManagerService
 
-        input_service = self.make(PromptToolkitService)
-        while True:
-            try:
-                await input_service.execute()
-            except KeyboardInterrupt:
-                break
-            # except Exception as e:
-            # TODO: I think this can be moved to the general Exception handler.
-            # log.exception(e)
-            # console = self.app["console"]
-            # console.print_error_panel(
-            #     str(e),
-            #     title="Exception",
-            # )
-            # return 2
+        try:
+            tui = self.make(TUIManagerService)
+
+            await tui.run_async()
+        except Exception:
+            return 2
+
         return 1
+
+        # from byte.cli import PromptToolkitService
+
+        # input_service = self.make(PromptToolkitService)
+        # while True:
+        #     try:
+        #         await input_service.execute()
+        #     except KeyboardInterrupt:
+        #         break
+        #     # except Exception as e:
+        #     # TODO: I think this can be moved to the general Exception handler.
+        #     # log.exception(e)
+        #     # console = self.app["console"]
+        #     # console.print_error_panel(
+        #     #     str(e),
+        #     #     title="Exception",
+        #     # )
+        #     # return 2
+        # return 1
 
     def terminate(self) -> None:
         """Terminate the application."""
@@ -455,6 +479,9 @@ class Application(Container):
         if hasattr(provider, "register_commands") and callable(provider.register_commands):
             provider.register_commands()
 
+        if hasattr(provider, "register_tools") and callable(provider.register_tools):
+            provider.register_tools()
+
         return provider
 
     def dispatch_task(self, coro):
@@ -464,3 +491,15 @@ class Application(Container):
         """
         task_manager = self.make(TaskManager)
         return task_manager.dispatch_task(coro)
+
+    # TODO: Docs strings
+    def emit_tui(self, payload: Message):
+        """ """
+        if hasattr(payload, "panel_id"):
+            from byte.tui import TUIManagerService
+
+            tui_manager_service = self.make(TUIManagerService)
+            payload.panel_id = tui_manager_service.get_panel_id()  # ty:ignore[invalid-assignment]
+
+        byte_tui = self.tui()
+        byte_tui.conversation.post_message(payload)

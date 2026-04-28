@@ -3,7 +3,7 @@ from __future__ import annotations
 import html
 
 from byte import Service
-from byte.agent import BaseState
+from byte.orchestration import BaseState
 from byte.parsing import ConventionParsingService
 from byte.support import ArrayStore, Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text

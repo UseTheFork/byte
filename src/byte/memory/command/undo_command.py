@@ -4,8 +4,7 @@ from langchain_core.messages import HumanMessage
 from langgraph.graph.message import RemoveMessage
 from langgraph.graph.state import RunnableConfig
 
-from byte.agent import CoderAgent
-from byte.cli import ByteArgumentParser, Command
+from byte import ByteArgumentParser, Command
 from byte.memory import MemoryService
 
 
@@ -37,6 +36,7 @@ class UndoCommand(Command):
         memory_service = self.app.make(MemoryService)
         console = self.app["console"]
 
+        # TODO: this is all wrong.
         # It dosent matter if we use CoderAgent or AskAgent here since they use the same BaseState.
         coder_agent = self.app.make(CoderAgent)
         coder_agent_graph = await coder_agent.get_graph()

@@ -10,7 +10,9 @@ if TYPE_CHECKING:
     from byte.git.service.commit_service import CommitService
     from byte.git.service.git_service import GitService
     from byte.git.service_provider import GitServiceProvider
-    from byte.git.tools import git_grep
+    from byte.git.tools.git_commit_tool import GitCommitTool
+    from byte.git.tools.git_grep_tool import GitGrepTool
+    from byte.git.tools.git_log_tool import GitLogTool
     from byte.git.validators.commit_validator import CommitValidator
 
 __all__ = (
@@ -20,9 +22,11 @@ __all__ = (
     "CommitPlan",
     "CommitService",
     "CommitValidator",
+    "GitCommitTool",
+    "GitGrepTool",
+    "GitLogTool",
     "GitService",
     "GitServiceProvider",
-    "git_grep",
 )
 
 _dynamic_imports = {
@@ -33,9 +37,11 @@ _dynamic_imports = {
     "CommitPlan": "schemas",
     "CommitService": "service.commit_service",
     "CommitValidator": "validators.commit_validator",
+    "GitCommitTool": "tools.git_commit_tool",
+    "GitGrepTool": "tools.git_grep_tool",
+    "GitLogTool": "tools.git_log_tool",
     "GitService": "service.git_service",
     "GitServiceProvider": "service_provider",
-    "git_grep": "tools",
     # keep-sorted end
 }
 

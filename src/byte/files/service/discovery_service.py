@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from typing import List, Optional, Set
 
@@ -25,26 +24,18 @@ class FileDiscoveryService(Service):
         return is_ignored
 
     def _scan_project_files(self) -> None:
-        """Recursively scan project directory and cache all non-ignored files.
+        """Scan project files via GitService, naturally respecting .gitignore."""
+        from byte.git import GitService
 
-        Builds an in-memory index of project files for fast lookups and
-        completions, filtering out ignored files and directories.
-        """
-        if not self.app["path"] or not self.app["path"].exists():
+        git_service = self.app.make(GitService)
+        root = self.app["path"]
+        if not root:
             return
 
-        for root, dirs, files in os.walk(self.app["path"]):
-            root_path = Path(root)
-
-            # Filter directories to avoid scanning ignored ones
-            dirs[:] = [d for d in dirs if not self._is_ignored(root_path / d)]
-
-            # Add non-ignored files to our cache
-            for file in files:
-                file_path = root_path / file
-                if not self._is_ignored(file_path) and file_path.is_file():
-                    self.app["log"].debug(f"Discovered file: {file_path}")
-                    self._all_files.add(file_path)
+        for path in git_service.get_tracked_files():
+            full_path = root / path
+            if full_path.is_file():
+                self._all_files.add(full_path)
 
     def boot(self) -> None:
         """Initialize file discovery by scanning project with ignore patterns."""

@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from byte.support.mixins.conditionable import Conditionable
     from byte.support.mixins.configurable import Configurable
     from byte.support.mixins.eventable import Eventable
+    from byte.support.mixins.notifiable import Notifiable
     from byte.support.mixins.user_interactive import UserInteractive
 
 __all__ = (
@@ -16,6 +17,7 @@ __all__ = (
     "Conditionable",
     "Configurable",
     "Eventable",
+    "Notifiable",
     "UserInteractive",
 )
 
@@ -25,6 +27,7 @@ _dynamic_imports = {
     "Conditionable": "conditionable",
     "Configurable": "configurable",
     "Eventable": "eventable",
+    "Notifiable": "notifiable",
     "UserInteractive": "user_interactive",
     # keep-sorted end
 }

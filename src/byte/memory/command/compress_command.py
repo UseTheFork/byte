@@ -1,13 +1,13 @@
 from argparse import Namespace
 from typing import cast
 
+from byte.agent import Agent, AgentServiceProvider, AssistantNode, BaseState
 from langchain_core.runnables import RunnableConfig
 
-from byte.agent import Agent, AgentServiceProvider, AssistantNode, BaseState
-from byte.cli import ByteArgumentParser, Command, InputCancelledError
 from byte.memory import MemoryService
 from byte.support import Str
 from byte.support.mixins import UserInteractive
+from byte.tui import ByteArgumentParser, Command, InputCancelledError
 
 
 class CompressCommand(Command, UserInteractive):

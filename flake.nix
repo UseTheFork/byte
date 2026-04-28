@@ -60,7 +60,7 @@
           perSystem =
             { pkgs, lib, ... }:
             let
-              python = pkgs.python312;
+              python = pkgs.python314;
 
               # Create Python package set with uv2nix overlays
               pythonSet =

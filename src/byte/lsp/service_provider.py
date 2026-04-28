@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Type
 
-from byte import EventBus, EventType, Payload, Service, ServiceProvider, TaskManager
-from byte.cli import Command
+from byte import Command, EventBus, Service, ServiceProvider, TaskManager
 from byte.lsp import LSPService
+from byte.system import SystemEvents
 
 if TYPE_CHECKING:
     from byte.foundation import Application
@@ -34,19 +34,16 @@ class LSPServiceProvider(ServiceProvider):
             event_bus = self.app.make(EventBus)
 
             event_bus.on(
-                EventType.POST_BOOT.value,
+                SystemEvents.PostBoot,
                 self.boot_messages,
             )
 
-    async def boot_messages(self, payload: Payload) -> Payload:
+    async def boot_messages(self, payload: SystemEvents.PostBoot) -> SystemEvents.PostBoot:
         task_manager = self.app.make(TaskManager)
 
         running_count = sum(1 for name in task_manager._tasks.keys() if name.startswith("lsp_server_"))
 
-        messages = payload.get("messages", [])
-        messages.append(f"[muted]LSP servers running:[/muted] [primary]{running_count}[/primary]")
-
-        payload.set("messages", messages)
+        payload.messages.append(f"[text-muted]LSP servers running:[/text-muted] [$primary]{running_count}[/$primary]")
 
         return payload
 

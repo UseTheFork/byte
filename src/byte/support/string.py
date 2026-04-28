@@ -291,3 +291,17 @@ class Str:
         # Remove leading/trailing separators
         text = text.strip(separator)
         return text
+
+    @staticmethod
+    def snake_to_title(value: str) -> str:
+        """Convert a snake_case string to Title Case format.
+
+        Args:
+            value: The snake_case string to convert.
+
+        Returns:
+            The string in Title Case format.
+
+        Usage: `Str.snake_to_title("base_agent_node")` -> "Base Agent Node"
+        """
+        return value.replace("_", " ").title()

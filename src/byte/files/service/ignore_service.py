@@ -30,20 +30,12 @@ class FileIgnoreService(Service):
                 try:
                     with open(gitignore_path, encoding="utf-8") as f:
                         patterns.extend(line.strip() for line in f if line.strip() and not line.startswith("#"))
-                except (OSError, UnicodeDecodeError):
+                except OSError, UnicodeDecodeError:
                     # Gracefully handle unreadable gitignore files
                     pass
 
             # Load ignore patterns from configuration
             patterns.extend(self.app["config"].files.ignore)
-
-        # Log all patterns being used for debugging
-        if patterns:
-            self.app["log"].debug(f"Loaded {len(patterns)} ignore patterns:")
-            for pattern in patterns:
-                self.app["log"].debug(f"  - {pattern}")
-        else:
-            self.app["log"].debug("No ignore patterns loaded")
 
         self._gitignore_spec = pathspec.PathSpec.from_lines("gitignore", patterns)
 

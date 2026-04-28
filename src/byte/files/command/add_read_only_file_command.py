@@ -1,8 +1,9 @@
 from argparse import ArgumentParser, Namespace
 from typing import List
 
-from byte.cli import Command
+from byte import Command
 from byte.files import FileMode, FileService
+from byte.tui import Messages
 
 
 class ReadOnlyCommand(Command):
@@ -28,8 +29,10 @@ class ReadOnlyCommand(Command):
         return parser
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
-        """Add specified file to context with editable permissions."""
-        console = self.app["console"]
+        """Add specified file to context with read-only permissions."""
+
+        self.emit_tui(Messages.CommandExecutionStarted())
+        self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         file_path = args.file_path
 
@@ -37,9 +40,14 @@ class ReadOnlyCommand(Command):
         result = await file_service.add_file(file_path, FileMode.READ_ONLY)
 
         if not result:
-            console.print(
-                f"[error]Failed to add {file_path} (file not found, not readable, or is already in context)[/error]"
+            await self.notify_error(
+                f"Failed to add {file_path} (file not found, not readable, or is already in context)"
             )
+        else:
+            await self.notify_success(f"Added {file_path} to context")
+            await file_service.notify_file_stats()
+
+        self.emit_tui(Messages.CommandExecutionCompleted())
 
     async def get_completions(self, text: str) -> List[str]:
         """Provide intelligent file path completions from project discovery.

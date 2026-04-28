@@ -1,6 +1,6 @@
 from typing import List, Type
 
-from byte import Command, EventBus, EventType, Service, ServiceProvider
+from byte import Command, EventBus, Service, ServiceProvider
 from byte.knowledge import (
     CLIContextDisplayService,
     ContextAddFileCommand,
@@ -11,6 +11,7 @@ from byte.knowledge import (
     WebCommand,
 )
 from byte.knowledge.command.context_add_command import ContextAddCommand
+from byte.orchestration import OrchestrationEvents
 
 
 class KnowledgeServiceProvider(ServiceProvider):
@@ -47,15 +48,10 @@ class KnowledgeServiceProvider(ServiceProvider):
         event_bus = self.app.make(EventBus)
         session_context_service = self.app.make(SessionContextService)
 
-        cli_context_display_service = self.app.make(CLIContextDisplayService)
+        # cli_context_display_service = self.app.make(CLIContextDisplayService)
 
         # Register listener that calls list_in_context_files before each prompt
         event_bus.on(
-            EventType.GATHER_PROJECT_CONTEXT.value,
+            OrchestrationEvents.GatherProjectContext,
             session_context_service.add_session_context_hook,
-        )
-
-        event_bus.on(
-            EventType.PRE_PROMPT_TOOLKIT.value,
-            cli_context_display_service.display_context_panel_hook,
         )

@@ -1,10 +1,6 @@
-from datetime import datetime
-
 from langchain_core.runnables import Runnable
 from langgraph.graph.state import RunnableConfig
-from langgraph.runtime import Runtime
 
-from byte.agent import AssistantContextSchema
 from byte.support import Service
 
 
@@ -20,7 +16,7 @@ class RecordResponseService(Service):
         self,
         agent_state,
         runnable: Runnable,
-        runtime: Runtime[AssistantContextSchema],
+        agent_name: str,
         config: RunnableConfig,
     ):
         """Write assistant response to a cache file.
@@ -37,12 +33,12 @@ class RecordResponseService(Service):
 
         Usage: `file_path = await service.cache_response(result, runtime.context)`
         """
-        if not self.app.is_development():
-            return None
 
-        agent_name = runtime.context.agent
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        cache_file = self.app.cache_path(f"development/{agent_name}_{timestamp}.md")
+        # if self.app.is_development():
+        #     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        #     cache_file = self.app.cache_path(f"development/{agent_name}_{timestamp}.md")
+        # else:
+        cache_file = self.app.cache_path(f"development/{agent_name}.md")
 
         # Ensure cache directory exists
         cache_file.parent.mkdir(parents=True, exist_ok=True)
@@ -56,7 +52,8 @@ class RecordResponseService(Service):
         for message in messages:
             message_type = type(message).__name__
             content_parts.append(f"======== {message_type} ========")
-            content_parts.append(str(message.content))
+            # TODO: The below should check if its a dict and if it is use json dumps to make it pretty etc.
+            content_parts.append(str(message.text))
             content_parts.append("")
 
         content = "\n".join(content_parts)

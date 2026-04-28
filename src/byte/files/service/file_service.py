@@ -3,12 +3,11 @@ from os import PathLike
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-from rich.columns import Columns
-
-from byte import EventType, Payload, Service
-from byte.files import FileContext, FileDiscoveryService, FileMode
+from byte import Service
+from byte.files import FileContext, FileDiscoveryService, FileEvents, FileMode
 from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
+from byte.tui import Messages
 
 
 class FileService(Service):
@@ -27,16 +26,26 @@ class FileService(Service):
     async def _notify_file_added(self, file_path: str, mode: FileMode):
         """Notify system that a file was added to context"""
 
-        payload = Payload(
-            event_type=EventType.FILE_ADDED,
-            data={
-                "file_path": file_path,
-                "mode": mode.value,
-                "action": "context_added",
-            },
+        await self.emit(
+            FileEvents.FileAdded(
+                file_path=file_path,
+                mode=mode.value,
+            ),
         )
 
-        await self.emit(payload)
+    async def notify_file_stats(self):
+        """Notify system that a file was added or removed from context"""
+
+        # Count editable and read-only files in context
+        editable_count = sum(1 for f in self._context_files.values() if f.mode == FileMode.EDITABLE)
+        read_only_count = sum(1 for f in self._context_files.values() if f.mode == FileMode.READ_ONLY)
+
+        self.emit_tui(
+            Messages.UpdateFiles(
+                editable=editable_count,
+                read_only=read_only_count,
+            ),
+        )
 
     async def add_file(self, path: Union[str, PathLike], mode: FileMode) -> bool:
         """Add a file to the active context for AI awareness.
@@ -203,21 +212,6 @@ class FileService(Service):
         path_obj = Path(path).resolve()
         return self._context_files.get(str(path_obj))
 
-    # TODO: Doc String
-    async def _emit_file_context_event(self, file: str, type, content: str) -> str:
-        """ """
-        payload = Payload(
-            event_type=EventType.GENERATE_FILE_CONTEXT,
-            data={
-                "file": file,
-                "type": type,
-                "content": content,
-            },
-        )
-
-        payload = await self.emit(payload)
-        return payload.get("content", content)
-
     async def generate_context_prompt(self) -> tuple[list[str], list[str]]:
         """Generate structured file lists for read-only and editable files.
 
@@ -244,7 +238,6 @@ class FileService(Service):
             for file_ctx in sorted(read_only, key=lambda f: f.relative_path):
                 content = file_ctx.get_content()
                 if content is not None:
-                    content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.READ_ONLY, content)
                     language = file_ctx.language
                     opening = Boundary.open(
                         BoundaryType.FILE,
@@ -266,7 +259,6 @@ class FileService(Service):
             for file_ctx in sorted(editable, key=lambda f: f.relative_path):
                 content = file_ctx.get_content()
                 if content is not None:
-                    content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.EDITABLE, content)
                     language = file_ctx.language
                     opening = Boundary.open(
                         BoundaryType.FILE,
@@ -423,49 +415,49 @@ class FileService(Service):
         path_obj = Path(path).resolve()
         return str(path_obj) in self._context_files
 
-    async def list_in_context_files_hook(self, payload: Payload):
-        """Display current editable files before each prompt.
+    # async def list_in_context_files_hook(self, payload: Payload):
+    #     """Display current editable files before each prompt.
 
-        Provides visual feedback about which files the AI can modify,
-        helping users understand the current context state.
-        """
+    #     Provides visual feedback about which files the AI can modify,
+    #     helping users understand the current context state.
+    #     """
 
-        console = self.app["console"]
+    #     console = self.app["console"]
 
-        info_panel = payload.get("info_panel", [])
+    #     info_panel = payload.get("info_panel", [])
 
-        read_only_panel = None
+    #     read_only_panel = None
 
-        file_service = self.app.make(FileService)
-        readonly_files = file_service.list_files(FileMode.READ_ONLY)
-        if readonly_files:
-            file_names = [f"[text]{f.relative_path}[/text]" for f in readonly_files]
-            read_only_panel = console.panel(
-                Columns(file_names, equal=True, expand=True),
-                title=f"Read-only Files ({len(readonly_files)})",
-            )
+    #     file_service = self.app.make(FileService)
+    #     readonly_files = file_service.list_files(FileMode.READ_ONLY)
+    #     if readonly_files:
+    #         file_names = [f"[text]{f.relative_path}[/text]" for f in readonly_files]
+    #         read_only_panel = console.panel(
+    #             Columns(file_names, equal=True, expand=True),
+    #             title=f"Read-only Files ({len(readonly_files)})",
+    #         )
 
-        editable_panel = None
-        editable_files = file_service.list_files(FileMode.EDITABLE)
-        if editable_files:
-            file_names = [f"[text]{f.relative_path}[/text]" for f in editable_files]
-            editable_panel = console.panel(
-                Columns(file_names, equal=True, expand=True),
-                title=f"Editable Files ({len(editable_files)})",
-            )
+    #     editable_panel = None
+    #     editable_files = file_service.list_files(FileMode.EDITABLE)
+    #     if editable_files:
+    #         file_names = [f"[text]{f.relative_path}[/text]" for f in editable_files]
+    #         editable_panel = console.panel(
+    #             Columns(file_names, equal=True, expand=True),
+    #             title=f"Editable Files ({len(editable_files)})",
+    #         )
 
-        # Create columns layout with both panels if they exist
-        panels_to_show = []
-        if read_only_panel:
-            panels_to_show.append(read_only_panel)
-        if editable_panel:
-            panels_to_show.append(editable_panel)
+    #     # Create columns layout with both panels if they exist
+    #     panels_to_show = []
+    #     if read_only_panel:
+    #         panels_to_show.append(read_only_panel)
+    #     if editable_panel:
+    #         panels_to_show.append(editable_panel)
 
-        if panels_to_show:
-            columns_panel = Columns(panels_to_show, equal=True, expand=True)
-            info_panel.append(columns_panel)
+    #     if panels_to_show:
+    #         columns_panel = Columns(panels_to_show, equal=True, expand=True)
+    #         info_panel.append(columns_panel)
 
-        return payload.set("info_panel", info_panel)
+    #     return payload.set("info_panel", info_panel)
 
     async def generate_context_prompt_with_line_numbers(self) -> tuple[list[str], list[str]]:
         """Generate structured file lists with line numbers for read-only and editable files.
@@ -493,10 +485,9 @@ class FileService(Service):
             for file_ctx in sorted(read_only, key=lambda f: f.relative_path):
                 content = file_ctx.get_content()
                 if content is not None:
-                    content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.READ_ONLY, content)
                     # Add line numbers to content
                     lines = content.splitlines()
-                    numbered_lines = [f"{i:4d} | {line}" for i, line in enumerate(lines)]
+                    numbered_lines = [f"{i:6d} | {line}" for i, line in enumerate(lines)]
                     numbered_content = "\n".join(numbered_lines)
                     language = file_ctx.language
                     opening = Boundary.open(
@@ -510,10 +501,9 @@ class FileService(Service):
             for file_ctx in sorted(editable, key=lambda f: f.relative_path):
                 content = file_ctx.get_content()
                 if content is not None:
-                    content = await self._emit_file_context_event(file_ctx.relative_path, FileMode.EDITABLE, content)
                     # Add line numbers to content
                     lines = content.splitlines()
-                    numbered_lines = [f"{i + 1:4d} | {line}" for i, line in enumerate(lines)]
+                    numbered_lines = [f"{i + 1:6d} | {line}" for i, line in enumerate(lines)]
                     numbered_content = "\n".join(numbered_lines)
                     language = file_ctx.language
                     opening = Boundary.open(

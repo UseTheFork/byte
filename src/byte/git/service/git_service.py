@@ -3,13 +3,14 @@ from pathlib import Path
 from typing import List
 
 import git
-from git.exc import InvalidGitRepositoryError
+from git import InvalidGitRepositoryError
 
 from byte import Service
-from byte.support.mixins import UserInteractive
+from byte.support.mixins import Notifiable, UserInteractive
+from byte.tui import Messages
 
 
-class GitService(Service, UserInteractive):
+class GitService(Service, UserInteractive, Notifiable):
     """Domain service for git repository operations and file tracking.
 
     Provides utilities for discovering changed files, repository status,
@@ -27,7 +28,7 @@ class GitService(Service, UserInteractive):
                 f"Not a git repository: {self.app['path.root']}. Please run 'git init' or navigate to a git repository."
             )
 
-    async def get_repo(self):
+    async def get_repo(self) -> git.Repo:
         """Get the git repository instance, ensuring service is booted.
 
         Usage: `repo = await git_service.get_repo()` -> git.Repo instance
@@ -74,7 +75,6 @@ class GitService(Service, UserInteractive):
 
         Usage: `await git_service.commit("feat: add new feature")` -> creates commit with message
         """
-        console = self.app["console"]
 
         continue_commit = True
 
@@ -88,9 +88,13 @@ class GitService(Service, UserInteractive):
                 commit_hash = commit.hexsha[:6]
 
                 # Display success panel
-                console.print_success_panel(
-                    f"({commit_hash}) {commit_message}",
-                    title="Commit Created",
+                # TODO: Should we flash this?
+                self.emit_tui(
+                    Messages.CreatePanel(
+                        f"({commit_hash}) {commit_message}",
+                        title="Commit Created",
+                        border_style="success",
+                    )
                 )
 
                 # Exit loop on successful commit
@@ -98,7 +102,13 @@ class GitService(Service, UserInteractive):
 
             except Exception as e:
                 # Display error panel if commit fails
-                console.print_error_panel(f"Failed to create commit: {e!s}", title="Commit Failed")
+                self.emit_tui(
+                    Messages.CreatePanel(
+                        f"Failed to create commit: {e!s}",
+                        title="Commit Failed",
+                        border_style="error",
+                    )
+                )
 
                 # Prompt user to retry with staging
                 retry = await self.prompt_for_confirmation("Stage changes and try again?", default=True)
@@ -126,7 +136,7 @@ class GitService(Service, UserInteractive):
 
         Usage: Called internally during commit process to handle unstaged files
         """
-        console = self.app["console"]
+
         unstaged_changes = self._repo.index.diff(None)  # None compares working tree to index
         untracked_files = self._repo.untracked_files
 
@@ -136,19 +146,21 @@ class GitService(Service, UserInteractive):
                 change_type = (
                     "modified" if change.change_type == "M" else "new" if change.change_type == "A" else "deleted"
                 )
-                file_list.append(f"  • {change.a_path} ({change_type})")
+                file_list.append(f" - {change.a_path} ({change_type})")
 
             for untracked in untracked_files:  # Add this loop
-                file_list.append(f"  • {untracked} (new)")
+                file_list.append(f" - {untracked} (new)")
 
             files_display = "\n".join(file_list)
 
             total_changes = len(unstaged_changes) + len(untracked_files)
 
-            console.print_panel(
-                f"Found {len(unstaged_changes)} unstaged changes and {len(untracked_files)} untracked changes:\n\n{files_display}",
-                title="[warning]Unstaged Changes[/warning]",
-                border_style="warning",
+            self.emit_tui(
+                Messages.CreatePanel(
+                    f"Found {len(unstaged_changes)} unstaged changes and {len(untracked_files)} untracked changes:\n\n{files_display}",
+                    title="Unstaged Changes",
+                    border_style="warning",
+                )
             )
 
             if not force:
@@ -159,7 +171,7 @@ class GitService(Service, UserInteractive):
             if user_input:
                 # Add all unstaged changes
                 self._repo.git.add("--all")
-                console.print_success(f"Added {total_changes} changes to commit")
+                await self.notify_success(f"Added {total_changes} changes to commit")
 
     async def reset(self, file_path: str | None = None) -> None:
         """Unstage files from the git index.
@@ -279,3 +291,12 @@ class GitService(Service, UserInteractive):
             )
 
         return diff_data
+
+    def get_tracked_files(self) -> List[Path]:
+        """Get all files tracked by git plus untracked files not ignored by .gitignore.
+
+        Usage: `files = git_service.get_tracked_files()` -> all tracked and untracked non-ignored files
+        """
+        tracked = self._repo.git.ls_files().splitlines()
+        untracked = self._repo.untracked_files
+        return [Path(f) for f in tracked] + [Path(f) for f in untracked]

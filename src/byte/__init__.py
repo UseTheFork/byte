@@ -5,22 +5,24 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
-    from byte.cli import Command
+    from byte.command import ByteArgumentParser, Command, CommandRegistryService
     from byte.context import get_application, make
-    from byte.foundation import Application, Console, EventBus, EventType, Payload, TaskManager
+    from byte.event import Event, EventBus
+    from byte.foundation import Application, Console, TaskManager
     from byte.logging import LogService
     from byte.support import Service, ServiceProvider
     from byte.support.utils import dd, dump
 
 __all__ = (
     "Application",
+    "ByteArgumentParser",
     "Command",
+    "CommandRegistryService",
     "Console",
+    "Event",
     "EventBus",
-    "EventType",
     "Log",
     "LogService",
-    "Payload",
     "Service",
     "ServiceProvider",
     "TaskManager",
@@ -33,12 +35,13 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "Application": "foundation",
-    "Command": "cli",
+    "ByteArgumentParser": "command",
+    "Command": "command",
+    "CommandRegistryService": "command",
     "Console": "foundation",
-    "EventBus": "foundation",
-    "EventType": "foundation",
+    "Event": "event",
+    "EventBus": "event",
     "LogService": "logging",
-    "Payload": "foundation",
     "Service": "support",
     "ServiceProvider": "support",
     "TaskManager": "foundation",

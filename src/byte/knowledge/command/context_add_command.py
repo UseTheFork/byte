@@ -1,7 +1,8 @@
 from argparse import Namespace
 from urllib.parse import urlparse
 
-from byte.cli import ByteArgumentParser, Command
+from byte import ByteArgumentParser, Command
+from byte.tui import Messages
 
 
 class ContextAddCommand(Command):
@@ -37,6 +38,8 @@ class ContextAddCommand(Command):
         from byte.knowledge.command.context_add_file_command import ContextAddFileCommand
         from byte.knowledge.command.web_command import WebCommand
 
+        self.emit_tui(Messages.CommandExecutionStarted())
+
         target = args.target
 
         # Detect if target is a URL
@@ -53,3 +56,5 @@ class ContextAddCommand(Command):
             file_command = self.app.make(ContextAddFileCommand)
             file_args = Namespace(file_path=target)
             await file_command.execute(file_args, raw_args)
+
+        self.emit_tui(Messages.CommandExecutionCompleted())

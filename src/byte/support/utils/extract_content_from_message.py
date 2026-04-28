@@ -10,4 +10,4 @@ def extract_content_from_message(message) -> str:
     elif isinstance(message.content, list) and message.content:
         return message.content[0].get("text", "")
 
-    raise ValueError(f"Unable to extract content from message: {type(message.content)}")
+    return ""

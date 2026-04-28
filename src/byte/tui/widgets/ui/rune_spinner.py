@@ -1,0 +1,97 @@
+from rich.console import RenderResult
+from rich.spinner import Spinner
+from textual.content import Content
+from textual.widgets import Static
+
+
+# Credits To https://github.com/charmbracelet/crush/blob/main/internal/tui/components/anim/anim.go
+class RichRuneSpinner(Spinner):
+    """A custom spinner that animates random runes with theme-based colors.
+
+    Extends Rich's Spinner to display cycling random characters with gradient colors
+    based on the console's theme primary and secondary colors.
+    Usage: `spinner = RichRuneSpinner(size=8)`
+    """
+
+    def __init__(
+        self,
+        *,
+        speed: float = 1.0,
+        size: int = 8,
+        colors: list[str] | None = None,
+    ) -> None:
+        """Initialize the animated spinner.
+
+        Args:
+                name: Base spinner name (used for timing)
+                text: Text to display next to spinner
+                style: Style override (optional)
+                speed: Animation speed multiplier
+                size: Number of animated characters to display
+        """
+        super().__init__("dots", "", style=None, speed=speed)
+        self.size = size
+        self.runes = list("0123456789abcdefABCDEF~!@#$%^&*()+=_")
+        self.colors = colors if colors is not None else ["$primary", "$secondary", "$primary-text", "$secondary-text"]
+
+    def render(self, time: float) -> RenderResult:  # ty:ignore[invalid-method-override]
+        """Render the animated spinner with cycling runes.
+
+        Args:
+                time: Current time in seconds
+
+        Returns:
+                Text object with animated runes and optional text
+        """
+        if self.start_time is None:
+            self.start_time = time
+
+        # Calculate frame based on time and speed
+        elapsed = (time - self.start_time) * self.speed
+        frame_no = int(elapsed * 25)  # 25 fps for rune cycling
+
+        # Generate animated runes
+        animated_chars = []
+        for i in range(self.size):
+            # Use frame and position to seed randomness for consistent animation
+            seed = (frame_no + i) * 31  # Prime number for better distribution
+            rune_index = seed % len(self.runes)
+            char = self.runes[rune_index]
+
+            # Randomly pick color using the same seeding approach for consistency
+            color_seed = (frame_no + i) * 37  # Different prime for color selection
+            color_index = color_seed % len(self.colors)
+            color = self.colors[color_index]
+            animated_chars.append(f"[{color}]{char}[/]")
+
+        spinner_text = "".join(animated_chars)
+
+        return Content.from_markup(spinner_text)  # ty:ignore[invalid-return-type]
+
+
+# Credits To https://github.com/charmbracelet/crush/blob/main/internal/tui/components/anim/anim.go
+class RuneSpinner(Static):
+    def __init__(
+        self,
+        size: int = 8,
+        *,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+        disabled: bool = False,
+    ) -> None:
+        """ """
+        super().__init__(
+            name=name,
+            id=id,
+            classes=classes,
+            disabled=disabled,
+        )
+        self._spinner = RichRuneSpinner(size=size)
+        self.styles.max_width = size
+
+    def on_mount(self) -> None:
+        self.update_render = self.set_interval(1 / 60, self.update_spinner)
+
+    def update_spinner(self) -> None:
+        self.update(self._spinner)

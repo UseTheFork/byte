@@ -1,16 +1,8 @@
-from typing import Any
+from typing import cast
 
-from langchain.chat_models import BaseChatModel, init_chat_model
-
-from byte import Payload, Service
-from byte.foundation.exceptions import ByteConfigException
-from byte.llm import (
-    ModelBehavior,
-    ModelConstraints,
-    ModelSchema,
-    ReinforcementMode,
-)
-from byte.support import Yaml
+from byte import Service
+from byte.llm import LLMRegistryService, ModelSchema
+from byte.orchestration import OrchestrationEvents
 
 
 class LLMService(Service):
@@ -22,90 +14,36 @@ class LLMService(Service):
     Usage: `service = LLMService(app)` -> provider-specific implementation
     """
 
-    def _configure_model_schema(self, model_id: str, model_type: str) -> ModelSchema:
-        """Configure a ModelSchema from models_data.yaml.
-
-        Args:
-            model_id: The model identifier (e.g., "claude-sonnet-4-5")
-            model_type: Either "main" or "weak"
-
-        Returns:
-            Configured ModelSchema instance
-
-        Raises:
-            ByteConfigException: If model not found in models_data
-        """
-        if model_id not in self.models_data:
-            raise ByteConfigException(f"Model '{model_id}' not found in models_data.yaml")
-
-        model_data = self.models_data[model_id]
-        provider = model_data["provider"]
-
-        extra_params = {"temperature": 0.1}
-
-        if model_type == "weak":
-            config_params = self.app["config"].llm.main_model.extra_params
-        else:
-            config_params = self.app["config"].llm.weak_model.extra_params
-
-        combined_params = {**extra_params, **config_params}
-
-        # Add provider-specific params
-        if provider == "openai":
-            combined_params["stream_usage"] = True
-
-        # Build ModelConstraints from YAML data
-        constraints = ModelConstraints(
-            max_input_tokens=model_data["limit"]["context"],
-            max_output_tokens=model_data["limit"]["output"],
-            input_cost_per_token=model_data["cost"]["input"],
-            output_cost_per_token=model_data["cost"]["output"],
-            input_cost_per_token_cached=model_data["cost"]["cache_read"],
-        )
-
-        # Build ModelBehavior with provider and type-specific settings
-        reinforcement_mode = ReinforcementMode.NONE
-        if provider == "anthropic" and model_type == "main":
-            reinforcement_mode = ReinforcementMode.EAGER
-
-        behavior = ModelBehavior(reinforcement_mode=reinforcement_mode)
-
-        return ModelSchema(
-            provider=provider,
-            model=model_id,
-            constraints=constraints,
-            behavior=behavior,
-            extra_params=combined_params,
-        )
-
     def boot(self) -> None:
         """Configure LLM service with model settings based on global configuration."""
+        self.llm_registry = self.app.make(LLMRegistryService)
 
-        # Load models data from YAML
-        models_data_path = self.app.app_path("llm/resources/models_data.yaml")
-        self.models_data = Yaml.load_as_dict(models_data_path)
+    def get_model(self, agent_id: str, **kwargs) -> tuple[ModelSchema, dict]:
+        """Get a model schema and merged parameters for initialization.
 
-        # Get configured models
-        main_model_id = self.app["config"].llm.main_model.model
-        weak_model_id = self.app["config"].llm.weak_model.model
+        Returns a tuple of (model_schema, merged_params) instead of a compiled model,
+        allowing callers to customize initialization as needed.
 
-        # Verify main_model exists in models_data
-        if main_model_id not in self.models_data:
-            raise ByteConfigException(f"Main model '{main_model_id}' not found in models_data.yaml")
+        Args:
+            model_id: The configuration key (e.g., "ask", "coder", "commit")
+            **kwargs: Additional parameters to merge with model configuration
 
-        # Verify weak_model exists in models_data
-        if weak_model_id not in self.models_data:
-            raise ByteConfigException(f"Weak model '{weak_model_id}' not found in models_data.yaml")
+        Returns:
+            Tuple of (ModelSchema, dict) containing model configuration and merged parameters
+        """
 
-        # Configure model schemas
-        self._main_schema = self._configure_model_schema(main_model_id, "main")
-        self._weak_schema = self._configure_model_schema(weak_model_id, "weak")
+        # Use getattr to dynamically access the config attribute
+        model_config = getattr(self.app["config"].llm, agent_id, None)
+        if model_config is None:
+            raise ValueError(f"Model configuration not found for: {agent_id}")
 
-    def get_model(self, model_type: str = "main", **kwargs) -> Any:
-        """Get a model instance with lazy initialization and caching."""
+        model_id_from_config = model_config.model
 
-        # Select model schema
-        model_schema = self._main_schema if model_type == "main" else self._weak_schema
+        model_schema = cast(ModelSchema, self.llm_registry.get_model(model_id_from_config))
+        model_schema.provider = str(model_config.provider)
+        if model_schema is None:
+            raise ValueError(f"Unknown configuration: {agent_id}")
+
         params_dict = model_schema.extra_params
 
         # Merge all parameters, with later dictionaries taking precedence
@@ -114,24 +52,11 @@ class LLMService(Service):
             **kwargs,
         }
 
-        compiled_agent = init_chat_model(f"{model_schema.provider}:{model_schema.model}", **merged_params)
-        return compiled_agent
+        return (model_schema, merged_params)
 
-    def get_main_model(self) -> BaseChatModel:
-        """Convenience method for accessing the primary model.
-
-        Usage: `main_model = service.get_main_model()` -> high-capability model
-        """
-        return self.get_model("main")
-
-    def get_weak_model(self) -> BaseChatModel:
-        """Convenience method for accessing the secondary model.
-
-        Usage: `weak_model = service.get_weak_model()` -> faster/cheaper model
-        """
-        return self.get_model("weak")
-
-    async def add_reinforcement_hook(self, payload: Payload) -> Payload:
+    async def add_reinforcement_hook(
+        self, payload: OrchestrationEvents.GatherReinforcement
+    ) -> OrchestrationEvents.GatherReinforcement:
         """Add reinforcement messages based on model's reinforcement mode.
 
         Checks the reinforcement mode of the model being used and adds
@@ -139,16 +64,11 @@ class LLMService(Service):
 
         Usage: `payload = await service.add_reinforcement_hook(payload)`
         """
-        # TODO: should we also check what agent this is?
-        mode = payload.get("mode", "main")
-
-        # Select model schema based on mode
-        model_schema = self._main_schema if mode == "main" else self._weak_schema
 
         reinforcement = []
 
         # Check reinforcement mode and add messages accordingly
-        if model_schema.behavior.reinforcement_mode.value == "eager":
+        if payload.provider in ["anthropic", "openai"]:
             # Add strong reinforcement for eager mode
             reinforcement.extend(
                 [
@@ -158,7 +78,7 @@ class LLMService(Service):
                 ]
             )
 
-        elif model_schema.behavior.reinforcement_mode.value == "lazy":
+        elif payload.provider in ["google"]:
             # Add gentle reinforcement for lazy mode
             reinforcement.extend(
                 [
@@ -169,8 +89,6 @@ class LLMService(Service):
             )
 
         # Get existing list and extend with reinforcement messages
-        reinforcement_list = payload.get("reinforcement", [])
-        reinforcement_list.extend(reinforcement)
-        payload.set("reinforcement", reinforcement_list)
+        payload.reinforcement.extend(reinforcement)
 
         return payload

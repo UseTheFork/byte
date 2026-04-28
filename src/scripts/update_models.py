@@ -48,8 +48,10 @@ def main():
     response = requests.get(API_URL)
     data = response.json()
 
-    providers = ["anthropic", "openai", "google"]
+    providers = ["anthropic", "openai", "google", "mistral"]
     models_resource = {}
+
+    # TODO: Need to update `mistral` to `mistralai`
 
     for provider in providers:
         if provider not in data:

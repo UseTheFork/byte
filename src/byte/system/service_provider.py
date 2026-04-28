@@ -1,8 +1,18 @@
 from typing import List, Type
 
-from byte import Command, EventBus, EventType, Payload, Service, ServiceProvider
+from langchain.tools import BaseTool
+
+from byte import Command, EventBus, Service, ServiceProvider
 from byte.memory import UndoCommand
-from byte.system import ExitCommand, SystemContextService
+from byte.orchestration import OrchestrationEvents
+from byte.system import (
+    ExitCommand,
+    SystemContextService,
+    UserConfirmOrInputTool,
+    UserConfirmTool,
+    UserInputTextTool,
+    UserSelectTool,
+)
 
 
 class SystemServiceProvider(ServiceProvider):
@@ -12,6 +22,15 @@ class SystemServiceProvider(ServiceProvider):
     through the command registry for user interaction via slash commands.
     Usage: Register with container to enable /exit and /help commands
     """
+
+    def tools(self) -> List[Type[BaseTool]]:
+        """"""
+        return [
+            UserConfirmOrInputTool,
+            UserConfirmTool,
+            UserInputTextTool,
+            UserSelectTool,
+        ]
 
     def commands(self) -> List[Type[Command]]:
         return [
@@ -35,25 +54,25 @@ class SystemServiceProvider(ServiceProvider):
         system_context_service = self.app.make(SystemContextService)
 
         event_bus.on(
-            EventType.GATHER_PROJECT_CONTEXT.value,
+            OrchestrationEvents.GatherReinforcement,
             system_context_service.add_system_context,
         )
 
-        # Emit our post boot message to gather all needed info.
-        payload = await event_bus.emit(
-            payload=Payload(
-                event_type=EventType.POST_BOOT,
-                data={
-                    "messages": [],
-                },
-            )
-        )
+        # # Emit our post boot message to gather all needed info.
+        # payload = await event_bus.emit(
+        #     payload=Payload(
+        #         event_type=EventType.POST_BOOT,
+        #         data={
+        #             "messages": [],
+        #         },
+        #     )
+        # )
 
-        console = self.app["console"]
-        messages = payload.get("messages", [])
+        # console = self.app["console"]
+        # messages = payload.get("messages", [])
 
-        # Join all message strings into a single string with newlines
-        panel_content = "\n".join(messages)
+        # # Join all message strings into a single string with newlines
+        # panel_content = "\n".join(messages)
 
-        # Display the assembled messages inside a panel
-        console.print_panel(panel_content, border_style="primary")
+        # # Display the assembled messages inside a panel
+        # console.print_panel(panel_content, border_style="primary")

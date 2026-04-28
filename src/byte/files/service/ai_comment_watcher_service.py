@@ -1,13 +1,22 @@
 import re
+from enum import Enum
 from pathlib import Path
 from typing import List, Optional
 
-from byte import Payload, Service
-from byte.agent import AskAgent, CoderAgent
-from byte.cli import PromptToolkitService
-from byte.code_operations.schemas import AICommentType
-from byte.files import FileMode, FileService
+from byte import Service
+from byte.files import FileEvents, FileMode, FileService
+from byte.orchestration import OrchestrationEvents
 from byte.support.utils import list_to_multiline_text
+from byte.tui import Messages, TUIManagerService
+
+
+class AICommentType(str, Enum):
+    """Type of ai comment operation."""
+
+    AI = "AI"
+
+    def __str__(self):
+        return self.value
 
 
 class AICommentWatcherService(Service):
@@ -18,20 +27,12 @@ class AICommentWatcherService(Service):
     Usage: Automatically started during boot if watch.enable is True
     """
 
-    def _subscribe_to_file_events(self) -> None:
-        """Subscribe to file change events to scan for AI comments."""
-        # This will be called by event bus when files change
-        pass
-
     def boot(self) -> None:
         """Initialize AI comment watcher."""
         if not self.app["config"].files.watch.enable:
             return
 
         self.file_service = self.app.make(FileService)
-
-        # Subscribe to file change events from FileWatcherService
-        self._subscribe_to_file_events()
 
     def _extract_comment_lines(self, content: str) -> List[str]:
         """Extract comment blocks from content.
@@ -140,7 +141,12 @@ class AICommentWatcherService(Service):
 
     async def _auto_add_file_to_context(self, file_path: Path, mode: FileMode = FileMode.EDITABLE) -> bool:
         """Automatically add file to context when AI comment is detected."""
-        return await self.file_service.add_file(file_path, mode)
+
+        result = await self.file_service.add_file(file_path, mode)
+        if result:
+            await self.file_service.notify_file_stats()
+
+        return result
 
     async def _handle_file_modified(self, file_path: Path) -> bool:
         """Handle file modification by scanning for AI comments."""
@@ -157,13 +163,13 @@ class AICommentWatcherService(Service):
                 return auto_add_result or bool(ai_result.get("action_type"))
 
             return False
-        except (FileNotFoundError, PermissionError, UnicodeDecodeError):
+        except FileNotFoundError, PermissionError, UnicodeDecodeError:
             return False
 
-    async def handle_file_change(self, payload: Payload) -> Payload:
+    async def handle_file_change(self, payload: FileEvents.FileChanged) -> FileEvents.FileChanged:
         """Handle file change events by scanning for AI comments."""
-        file_path = payload.get("file_path")
-        change_type = payload.get("change_type")
+        file_path = payload.file_path
+        change_type = payload.change_type
 
         if not file_path or change_type == "deleted":
             return payload
@@ -172,8 +178,7 @@ class AICommentWatcherService(Service):
         result = await self._handle_file_modified(file_path)
 
         if result:
-            prompt_toolkit_service = self.app.make(PromptToolkitService)
-            await prompt_toolkit_service.interrupt()
+            await self.emit_user_request()
 
         return payload
 
@@ -233,10 +238,9 @@ class AICommentWatcherService(Service):
                     [
                         f'I\'ve written task instructions in code comments marked with "{AICommentType.AI.value}:" or "{AICommentType.AI.value}!" in the following files:',
                         f"{ai_instruction}",
-                        "",
                     ]
                 ),
-                "agent_type": CoderAgent,
+                "agent_type": "/coder",
             }
         elif action_type == "?":
             # Question - modify prompt to answer the question
@@ -247,32 +251,31 @@ class AICommentWatcherService(Service):
                         f"{ai_instruction}",
                     ]
                 ),
-                "agent_type": AskAgent,
+                "agent_type": "/ask",
             }
         else:
             return None
 
-    async def modify_user_request_hook(self, payload: Payload) -> Payload:
-        interrupted = payload.get("interrupted", False)
-        user_input = payload.get("user_input", "")
-        if interrupted and user_input is None:
-            # Scan context files for AI comments
-            ai_result = await self.scan_context_files_for_ai_comments()
+    async def emit_user_request(self):
+        ai_result = await self.scan_context_files_for_ai_comments()
 
-            if ai_result:
-                payload.set("user_input", ai_result["prompt"])
-                payload.set("interrupted", False)
-                payload.set("active_agent", ai_result["agent_type"])
+        if ai_result:
+            self.emit_tui(
+                Messages.UserInputSubmitted(
+                    body=f"{ai_result['agent_type']} " + str(ai_result["prompt"]),
+                    interrupted=True,
+                ),
+            )
 
-        return payload
+    async def add_reinforcement_hook(
+        self, payload: OrchestrationEvents.GatherReinforcement
+    ) -> OrchestrationEvents.GatherReinforcement:
+        tui_manager_service = self.app.make(TUIManagerService)
+        if tui_manager_service.is_interrupted():
+            active_agent = payload.agent
+            reinforcement_list = payload.reinforcement
 
-    async def add_reinforcement_hook(self, payload: Payload) -> Payload:
-        prompt_toolkit_service = self.app.make(PromptToolkitService)
-        if prompt_toolkit_service.is_interrupted():
-            active_agent = payload.get("agent", None)
-            reinforcement_list = payload.get("reinforcement", [])
-
-            if active_agent == "AskAgent":
+            if active_agent == "ask_agent_node":
                 reinforcement_list.extend(
                     [
                         "",
@@ -283,7 +286,7 @@ class AICommentWatcherService(Service):
                     ]
                 )
 
-            if active_agent == "CoderAgent":
+            if active_agent == "coder_agent_node":
                 reinforcement_list.extend(
                     [
                         "",
@@ -293,7 +296,5 @@ class AICommentWatcherService(Service):
                         'After successfully implementing all changes, remove the "AI:" comment markers from the code.',
                     ]
                 )
-
-            payload.set("reinforcement", reinforcement_list)
 
         return payload

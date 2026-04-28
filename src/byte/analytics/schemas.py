@@ -28,8 +28,7 @@ class LastMessageUsage:
 
 @dataclass
 class UsageAnalytics:
-    """Complete analytics tracking for all models and sessions."""
+    """Complete analytics tracking by provider."""
 
     last: LastMessageUsage = field(default_factory=LastMessageUsage)
-    main: ModelUsage = field(default_factory=ModelUsage)
-    weak: ModelUsage = field(default_factory=ModelUsage)
+    by_model: dict = field(default_factory=dict)

@@ -6,10 +6,8 @@ from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
     from byte.foundation.application import Application
-    from byte.foundation.console.console import Console
     from byte.foundation.console.kernel import Kernel
     from byte.foundation.container import Container
-    from byte.foundation.event_bus import EventBus, EventType, Payload
     from byte.foundation.exceptions import ByteException
     from byte.foundation.service_provider import FoundationServiceProvider
     from byte.foundation.task_manager import TaskManager
@@ -17,13 +15,9 @@ if TYPE_CHECKING:
 __all__ = (
     "Application",
     "ByteException",
-    "Console",
     "Container",
-    "EventBus",
-    "EventType",
     "FoundationServiceProvider",
     "Kernel",
-    "Payload",
     "TaskManager",
 )
 
@@ -31,13 +25,9 @@ _dynamic_imports = {
     # keep-sorted start
     "Application": "application",
     "ByteException": "exceptions",
-    "Console": "console.console",
     "Container": "container",
-    "EventBus": "event_bus",
-    "EventType": "event_bus",
     "FoundationServiceProvider": "service_provider",
     "Kernel": "console.kernel",
-    "Payload": "event_bus",
     "TaskManager": "task_manager",
     # keep-sorted end
 }

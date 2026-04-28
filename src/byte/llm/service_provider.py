@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from byte import EventBus, EventType, Payload, ServiceProvider
+from byte import EventBus, ServiceProvider
 from byte.llm import LLMService
+from byte.orchestration import OrchestrationEvents
 
 
 class LLMServiceProvider(ServiceProvider):
@@ -25,25 +26,6 @@ class LLMServiceProvider(ServiceProvider):
 
         # Register listener that calls list_in_context_files before each prompt
         event_bus.on(
-            EventType.GATHER_REINFORCEMENT.value,
+            OrchestrationEvents.GatherReinforcement,
             llm_service.add_reinforcement_hook,
         )
-
-        event_bus.on(
-            EventType.POST_BOOT.value,
-            self.boot_messages,
-        )
-
-    async def boot_messages(self, payload: Payload) -> Payload:
-        llm_service = self.app.make(LLMService)
-        # Display active model configuration for user awareness
-        main_model = f"{llm_service._main_schema.provider}:{llm_service._main_schema.model}"
-        weak_model = f"{llm_service._weak_schema.provider}:{llm_service._weak_schema.model}"
-
-        messages = payload.get("messages", [])
-        messages.append(f"[muted]Main model:[/muted] [primary]{main_model}[/primary]")
-        messages.append(f"[muted]Weak model:[/muted] [primary]{weak_model}[/primary]")
-
-        payload.set("messages", messages)
-
-        return payload

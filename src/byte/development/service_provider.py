@@ -1,8 +1,9 @@
 from typing import List, Type
 
+from byte import EventBus
 from byte.development import RecordResponseService
-from byte.foundation import EventBus, EventType, Payload
 from byte.support import Service, ServiceProvider
+from byte.system import SystemEvents
 
 
 class DevelopmentServiceProvider(ServiceProvider):
@@ -16,21 +17,17 @@ class DevelopmentServiceProvider(ServiceProvider):
         event_bus = self.app.make(EventBus)
 
         event_bus.on(
-            EventType.POST_BOOT.value,
+            SystemEvents.PostBoot,
             self.boot_messages,
         )
 
-    async def boot_messages(self, payload: Payload) -> Payload:
+    async def boot_messages(self, event: SystemEvents.PostBoot) -> SystemEvents.PostBoot:
         if self.app.is_development():
-            messages = payload.get("messages", [])
+            event.messages.append("")
+            event.messages.append("[$primary]Debug Info:[/$primary]")
+            event.messages.append("Paths")
+            event.messages.append(f"[$text-muted]Start:[/$text-muted] [$primary]{self.app['path']}[/$primary]")
+            event.messages.append(f"[$text-muted]Root:[/$text-muted] [$primary]{self.app['path.root']}[/$primary]")
+            event.messages.append(f"[$text-muted]Config:[/$text-muted] [$primary]{self.app['path.config']}[/$primary]")
 
-            messages.append("")
-            messages.append("[primary]Debug Info:[/primary]")
-            messages.append("Paths")
-            messages.append(f"[muted]Start:[/muted] [primary]{self.app['path']}[/primary]")
-            messages.append(f"[muted]Root:[/muted] [primary]{self.app['path.root']}[/primary]")
-            messages.append(f"[muted]Config:[/muted] [primary]{self.app['path.config']}[/primary]")
-
-            payload.set("messages", messages)
-
-        return payload
+        return event

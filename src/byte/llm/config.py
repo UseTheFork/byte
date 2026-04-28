@@ -6,8 +6,8 @@ from pydantic import BaseModel, Field
 class LLMModelConfig(BaseModel):
     """Configuration for a specific LLM model."""
 
-    provider: str = Field(default="", description="The model provider to use")
     model: str = Field(default="", description="The model identifier to use")
+    provider: str = Field(default="", description="The models provider to use")
     extra_params: Dict[str, Any] = Field(
         default_factory=dict, description="Additional parameters to pass to the model initialization"
     )
@@ -16,5 +16,8 @@ class LLMModelConfig(BaseModel):
 class LLMConfig(BaseModel):
     """LLM domain configuration with provider-specific settings."""
 
-    main_model: LLMModelConfig = LLMModelConfig()
-    weak_model: LLMModelConfig = LLMModelConfig()
+    ask_agent_node: LLMModelConfig = LLMModelConfig()
+    coder_agent_node: LLMModelConfig = LLMModelConfig()
+    skill_creator_agent_node: LLMModelConfig = LLMModelConfig()
+    coder_plan_agent_node: LLMModelConfig = LLMModelConfig()
+    commit_agent_node: LLMModelConfig = LLMModelConfig()

@@ -1,10 +1,10 @@
 from argparse import Namespace
 
-from byte.agent import AgentService, CoderAgent, CommitAgent, CommitPlanAgent
-from byte.cli import ByteArgumentParser, Command, InputCancelledError
+from byte import ByteArgumentParser, Command
 from byte.git import GitService
 from byte.git.service.commit_service import CommitService
-from byte.lint import LintConfigException, LintService
+from byte.tui import InputCancelledError, Messages
+from byte.workflow import CommitWorkflow, WorkflowService
 
 
 class CommitCommand(Command):
@@ -45,51 +45,28 @@ class CommitCommand(Command):
         Usage: Called automatically when user types `/commit`
         """
 
+        self.emit_tui(Messages.CommandExecutionStarted())
+        self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
         try:
-            console = self.app["console"]
             await self.git_service.stage_changes()
 
             # Validate staged changes exist to prevent empty commits
 
             diff = await self.git_service.get_diff()
             if not diff:
-                console.print_warning("No staged changes to commit.")
+                await self.notify_warning("No staged changes to commit.")
                 return
 
-            try:
-                lint_service = self.app.make(LintService)
-                lint_commands = await lint_service()
+            commit_workflow = self.app.make(CommitWorkflow)
 
-                do_fix, failed_commands = await lint_service.display_results_summary(lint_commands)
-                if do_fix:
-                    joined_lint_errors = lint_service.format_lint_errors(failed_commands)
-                    agent_service = self.app.make(AgentService)
-                    await agent_service.execute_agent(joined_lint_errors, CoderAgent)
-            except LintConfigException:
-                pass
+            workflow_service = self.app.make(WorkflowService)
+            request = await self.commit_service.build_commit_prompt()
 
-            # Stage the changes again if anything changed via the lint.
-            await self.git_service.stage_changes()
-
-            prompt = await self.commit_service.build_commit_prompt()
-
-            commit_type = await self.prompt_for_select(
-                "What type of commit would you like to generate?",
-                choices=["Commit Plan", "Single Commit", "Cancel"],
-                default="Commit Plan",
+            await workflow_service.execute(
+                commit_workflow, {"user_request": "commit", "touched_files": request["touched_files"]}
             )
 
-            if commit_type == "Commit Plan":
-                commit_agent = self.app.make(CommitPlanAgent)
-                commit_result = await commit_agent.execute(request=prompt, display_mode="thinking")
-                await self.commit_service.process_commit_plan(commit_result["data"]["result"]["extracted_content"])
-            elif commit_type == "Single Commit":
-                commit_agent = self.app.make(CommitAgent)
-                commit_result = await commit_agent.execute(request=prompt, display_mode="thinking")
-                formatted_message = await self.commit_service.format_conventional_commit(
-                    commit_result["data"]["result"]["extracted_content"]
-                )
-                await self.git_service.commit(formatted_message)
-
         except InputCancelledError:
-            return
+            pass
+
+        self.emit_tui(Messages.CommandExecutionCompleted())

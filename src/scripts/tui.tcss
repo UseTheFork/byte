@@ -1,0 +1,489 @@
+
+# #####
+# Text Alignment
+# #####
+
+.text-left {text-align: left;}
+.text-start {text-align: start;}
+.text-center {text-align: center;}
+.text-right {text-align: right;}
+.text-end {text-align: end;}
+.text-justify {text-align: justify;}
+
+# #####
+# Margins
+# #####
+
+.m-0 {margin: 0;}
+.mx-0 {margin-left: 0; margin-right: 0;}
+.my-0 {margin-top: 0; margin-bottom: 0;}
+.mt-0 {margin-top: 0;}
+.mb-0 {margin-bottom: 0;}
+.ml-0 {margin-left: 0;}
+.mr-0 {margin-right: 0;}
+.m-1 {margin: 1;}
+.mx-1 {margin-left: 1; margin-right: 1;}
+.my-1 {margin-top: 1; margin-bottom: 1;}
+.mt-1 {margin-top: 1;}
+.mb-1 {margin-bottom: 1;}
+.ml-1 {margin-left: 1;}
+.mr-1 {margin-right: 1;}
+.m-2 {margin: 2;}
+.mx-2 {margin-left: 2; margin-right: 2;}
+.my-2 {margin-top: 2; margin-bottom: 2;}
+.mt-2 {margin-top: 2;}
+.mb-2 {margin-bottom: 2;}
+.ml-2 {margin-left: 2;}
+.mr-2 {margin-right: 2;}
+.m-3 {margin: 3;}
+.mx-3 {margin-left: 3; margin-right: 3;}
+.my-3 {margin-top: 3; margin-bottom: 3;}
+.mt-3 {margin-top: 3;}
+.mb-3 {margin-bottom: 3;}
+.ml-3 {margin-left: 3;}
+.mr-3 {margin-right: 3;}
+.m-4 {margin: 4;}
+.mx-4 {margin-left: 4; margin-right: 4;}
+.my-4 {margin-top: 4; margin-bottom: 4;}
+.mt-4 {margin-top: 4;}
+.mb-4 {margin-bottom: 4;}
+.ml-4 {margin-left: 4;}
+.mr-4 {margin-right: 4;}
+.m-5 {margin: 5;}
+.mx-5 {margin-left: 5; margin-right: 5;}
+.my-5 {margin-top: 5; margin-bottom: 5;}
+.mt-5 {margin-top: 5;}
+.mb-5 {margin-bottom: 5;}
+.ml-5 {margin-left: 5;}
+.mr-5 {margin-right: 5;}
+
+# #####
+# Padding
+# #####
+
+.p-0 {padding: 0;}
+.px-0 {padding-left: 0; padding-right: 0;}
+.py-0 {padding-top: 0; padding-bottom: 0;}
+.pt-0 {padding-top: 0;}
+.pb-0 {padding-bottom: 0;}
+.pl-0 {padding-left: 0;}
+.pr-0 {padding-right: 0;}
+.p-1 {padding: 1;}
+.px-1 {padding-left: 1; padding-right: 1;}
+.py-1 {padding-top: 1; padding-bottom: 1;}
+.pt-1 {padding-top: 1;}
+.pb-1 {padding-bottom: 1;}
+.pl-1 {padding-left: 1;}
+.pr-1 {padding-right: 1;}
+.p-2 {padding: 2;}
+.px-2 {padding-left: 2; padding-right: 2;}
+.py-2 {padding-top: 2; padding-bottom: 2;}
+.pt-2 {padding-top: 2;}
+.pb-2 {padding-bottom: 2;}
+.pl-2 {padding-left: 2;}
+.pr-2 {padding-right: 2;}
+.p-3 {padding: 3;}
+.px-3 {padding-left: 3; padding-right: 3;}
+.py-3 {padding-top: 3; padding-bottom: 3;}
+.pt-3 {padding-top: 3;}
+.pb-3 {padding-bottom: 3;}
+.pl-3 {padding-left: 3;}
+.pr-3 {padding-right: 3;}
+.p-4 {padding: 4;}
+.px-4 {padding-left: 4; padding-right: 4;}
+.py-4 {padding-top: 4; padding-bottom: 4;}
+.pt-4 {padding-top: 4;}
+.pb-4 {padding-bottom: 4;}
+.pl-4 {padding-left: 4;}
+.pr-4 {padding-right: 4;}
+.p-5 {padding: 5;}
+.px-5 {padding-left: 5; padding-right: 5;}
+.py-5 {padding-top: 5; padding-bottom: 5;}
+.pt-5 {padding-top: 5;}
+.pb-5 {padding-bottom: 5;}
+.pl-5 {padding-left: 5;}
+.pr-5 {padding-right: 5;}
+
+# #####
+# Dimensions
+# #####
+
+.h-0 {height: 0;}
+.w-0 {width: 0;}
+.h-1 {height: 1;}
+.w-1 {width: 1;}
+.h-2 {height: 2;}
+.w-2 {width: 2;}
+.h-3 {height: 3;}
+.w-3 {width: 3;}
+.h-4 {height: 4;}
+.w-4 {width: 4;}
+.h-5 {height: 5;}
+.w-5 {width: 5;}
+.w-auto {width: auto;}
+.h-auto {height: auto;}
+.w-full {width: 100%;}
+.h-full {height: 100%;}
+
+# #####
+# Text Colors
+# #####
+
+.text-primary {color: $text-primary;}
+.text-secondary {color: $text-secondary;}
+.text-accent {color: $text-accent;}
+
+# #####
+# Backgrounds
+# #####
+
+.bg-primary {background: $primary;}
+.bg-secondary {background: $secondary;}
+.bg-accent {background: $accent;}
+.bg-background {background: $background;}
+
+# #####
+# Borders
+# #####
+
+.border-ascii-primary {border: ascii $primary;}
+.border-l-ascii-primary {border-left: ascii $primary;}
+.border-r-ascii-primary {border-right: ascii $primary;}
+.border-t-ascii-primary {border-top: ascii $primary;}
+.border-b-ascii-primary {border-bottom: ascii $primary;}
+.border-x-ascii-primary {border-left: ascii $primary; border-right: ascii $primary;}
+.border-y-ascii-primary {border-top: ascii $primary; border-bottom: ascii $primary;}
+.border-blank-primary {border: blank $primary;}
+.border-l-blank-primary {border-left: blank $primary;}
+.border-r-blank-primary {border-right: blank $primary;}
+.border-t-blank-primary {border-top: blank $primary;}
+.border-b-blank-primary {border-bottom: blank $primary;}
+.border-x-blank-primary {border-left: blank $primary; border-right: blank $primary;}
+.border-y-blank-primary {border-top: blank $primary; border-bottom: blank $primary;}
+.border-dashed-primary {border: dashed $primary;}
+.border-l-dashed-primary {border-left: dashed $primary;}
+.border-r-dashed-primary {border-right: dashed $primary;}
+.border-t-dashed-primary {border-top: dashed $primary;}
+.border-b-dashed-primary {border-bottom: dashed $primary;}
+.border-x-dashed-primary {border-left: dashed $primary; border-right: dashed $primary;}
+.border-y-dashed-primary {border-top: dashed $primary; border-bottom: dashed $primary;}
+.border-double-primary {border: double $primary;}
+.border-l-double-primary {border-left: double $primary;}
+.border-r-double-primary {border-right: double $primary;}
+.border-t-double-primary {border-top: double $primary;}
+.border-b-double-primary {border-bottom: double $primary;}
+.border-x-double-primary {border-left: double $primary; border-right: double $primary;}
+.border-y-double-primary {border-top: double $primary; border-bottom: double $primary;}
+.border-heavy-primary {border: heavy $primary;}
+.border-l-heavy-primary {border-left: heavy $primary;}
+.border-r-heavy-primary {border-right: heavy $primary;}
+.border-t-heavy-primary {border-top: heavy $primary;}
+.border-b-heavy-primary {border-bottom: heavy $primary;}
+.border-x-heavy-primary {border-left: heavy $primary; border-right: heavy $primary;}
+.border-y-heavy-primary {border-top: heavy $primary; border-bottom: heavy $primary;}
+.border-hidden-primary {border: hidden $primary;}
+.border-l-hidden-primary {border-left: hidden $primary;}
+.border-r-hidden-primary {border-right: hidden $primary;}
+.border-t-hidden-primary {border-top: hidden $primary;}
+.border-b-hidden-primary {border-bottom: hidden $primary;}
+.border-x-hidden-primary {border-left: hidden $primary; border-right: hidden $primary;}
+.border-y-hidden-primary {border-top: hidden $primary; border-bottom: hidden $primary;}
+.border-hkey-primary {border: hkey $primary;}
+.border-l-hkey-primary {border-left: hkey $primary;}
+.border-r-hkey-primary {border-right: hkey $primary;}
+.border-t-hkey-primary {border-top: hkey $primary;}
+.border-b-hkey-primary {border-bottom: hkey $primary;}
+.border-x-hkey-primary {border-left: hkey $primary; border-right: hkey $primary;}
+.border-y-hkey-primary {border-top: hkey $primary; border-bottom: hkey $primary;}
+.border-inner-primary {border: inner $primary;}
+.border-l-inner-primary {border-left: inner $primary;}
+.border-r-inner-primary {border-right: inner $primary;}
+.border-t-inner-primary {border-top: inner $primary;}
+.border-b-inner-primary {border-bottom: inner $primary;}
+.border-x-inner-primary {border-left: inner $primary; border-right: inner $primary;}
+.border-y-inner-primary {border-top: inner $primary; border-bottom: inner $primary;}
+.border-none-primary {border: none $primary;}
+.border-l-none-primary {border-left: none $primary;}
+.border-r-none-primary {border-right: none $primary;}
+.border-t-none-primary {border-top: none $primary;}
+.border-b-none-primary {border-bottom: none $primary;}
+.border-x-none-primary {border-left: none $primary; border-right: none $primary;}
+.border-y-none-primary {border-top: none $primary; border-bottom: none $primary;}
+.border-outer-primary {border: outer $primary;}
+.border-l-outer-primary {border-left: outer $primary;}
+.border-r-outer-primary {border-right: outer $primary;}
+.border-t-outer-primary {border-top: outer $primary;}
+.border-b-outer-primary {border-bottom: outer $primary;}
+.border-x-outer-primary {border-left: outer $primary; border-right: outer $primary;}
+.border-y-outer-primary {border-top: outer $primary; border-bottom: outer $primary;}
+.border-round-primary {border: round $primary;}
+.border-l-round-primary {border-left: round $primary;}
+.border-r-round-primary {border-right: round $primary;}
+.border-t-round-primary {border-top: round $primary;}
+.border-b-round-primary {border-bottom: round $primary;}
+.border-x-round-primary {border-left: round $primary; border-right: round $primary;}
+.border-y-round-primary {border-top: round $primary; border-bottom: round $primary;}
+.border-solid-primary {border: solid $primary;}
+.border-l-solid-primary {border-left: solid $primary;}
+.border-r-solid-primary {border-right: solid $primary;}
+.border-t-solid-primary {border-top: solid $primary;}
+.border-b-solid-primary {border-bottom: solid $primary;}
+.border-x-solid-primary {border-left: solid $primary; border-right: solid $primary;}
+.border-y-solid-primary {border-top: solid $primary; border-bottom: solid $primary;}
+.border-tall-primary {border: tall $primary;}
+.border-l-tall-primary {border-left: tall $primary;}
+.border-r-tall-primary {border-right: tall $primary;}
+.border-t-tall-primary {border-top: tall $primary;}
+.border-b-tall-primary {border-bottom: tall $primary;}
+.border-x-tall-primary {border-left: tall $primary; border-right: tall $primary;}
+.border-y-tall-primary {border-top: tall $primary; border-bottom: tall $primary;}
+.border-vkey-primary {border: vkey $primary;}
+.border-l-vkey-primary {border-left: vkey $primary;}
+.border-r-vkey-primary {border-right: vkey $primary;}
+.border-t-vkey-primary {border-top: vkey $primary;}
+.border-b-vkey-primary {border-bottom: vkey $primary;}
+.border-x-vkey-primary {border-left: vkey $primary; border-right: vkey $primary;}
+.border-y-vkey-primary {border-top: vkey $primary; border-bottom: vkey $primary;}
+.border-wide-primary {border: wide $primary;}
+.border-l-wide-primary {border-left: wide $primary;}
+.border-r-wide-primary {border-right: wide $primary;}
+.border-t-wide-primary {border-top: wide $primary;}
+.border-b-wide-primary {border-bottom: wide $primary;}
+.border-x-wide-primary {border-left: wide $primary; border-right: wide $primary;}
+.border-y-wide-primary {border-top: wide $primary; border-bottom: wide $primary;}
+.border-ascii-secondary {border: ascii $secondary;}
+.border-l-ascii-secondary {border-left: ascii $secondary;}
+.border-r-ascii-secondary {border-right: ascii $secondary;}
+.border-t-ascii-secondary {border-top: ascii $secondary;}
+.border-b-ascii-secondary {border-bottom: ascii $secondary;}
+.border-x-ascii-secondary {border-left: ascii $secondary; border-right: ascii $secondary;}
+.border-y-ascii-secondary {border-top: ascii $secondary; border-bottom: ascii $secondary;}
+.border-blank-secondary {border: blank $secondary;}
+.border-l-blank-secondary {border-left: blank $secondary;}
+.border-r-blank-secondary {border-right: blank $secondary;}
+.border-t-blank-secondary {border-top: blank $secondary;}
+.border-b-blank-secondary {border-bottom: blank $secondary;}
+.border-x-blank-secondary {border-left: blank $secondary; border-right: blank $secondary;}
+.border-y-blank-secondary {border-top: blank $secondary; border-bottom: blank $secondary;}
+.border-dashed-secondary {border: dashed $secondary;}
+.border-l-dashed-secondary {border-left: dashed $secondary;}
+.border-r-dashed-secondary {border-right: dashed $secondary;}
+.border-t-dashed-secondary {border-top: dashed $secondary;}
+.border-b-dashed-secondary {border-bottom: dashed $secondary;}
+.border-x-dashed-secondary {border-left: dashed $secondary; border-right: dashed $secondary;}
+.border-y-dashed-secondary {border-top: dashed $secondary; border-bottom: dashed $secondary;}
+.border-double-secondary {border: double $secondary;}
+.border-l-double-secondary {border-left: double $secondary;}
+.border-r-double-secondary {border-right: double $secondary;}
+.border-t-double-secondary {border-top: double $secondary;}
+.border-b-double-secondary {border-bottom: double $secondary;}
+.border-x-double-secondary {border-left: double $secondary; border-right: double $secondary;}
+.border-y-double-secondary {border-top: double $secondary; border-bottom: double $secondary;}
+.border-heavy-secondary {border: heavy $secondary;}
+.border-l-heavy-secondary {border-left: heavy $secondary;}
+.border-r-heavy-secondary {border-right: heavy $secondary;}
+.border-t-heavy-secondary {border-top: heavy $secondary;}
+.border-b-heavy-secondary {border-bottom: heavy $secondary;}
+.border-x-heavy-secondary {border-left: heavy $secondary; border-right: heavy $secondary;}
+.border-y-heavy-secondary {border-top: heavy $secondary; border-bottom: heavy $secondary;}
+.border-hidden-secondary {border: hidden $secondary;}
+.border-l-hidden-secondary {border-left: hidden $secondary;}
+.border-r-hidden-secondary {border-right: hidden $secondary;}
+.border-t-hidden-secondary {border-top: hidden $secondary;}
+.border-b-hidden-secondary {border-bottom: hidden $secondary;}
+.border-x-hidden-secondary {border-left: hidden $secondary; border-right: hidden $secondary;}
+.border-y-hidden-secondary {border-top: hidden $secondary; border-bottom: hidden $secondary;}
+.border-hkey-secondary {border: hkey $secondary;}
+.border-l-hkey-secondary {border-left: hkey $secondary;}
+.border-r-hkey-secondary {border-right: hkey $secondary;}
+.border-t-hkey-secondary {border-top: hkey $secondary;}
+.border-b-hkey-secondary {border-bottom: hkey $secondary;}
+.border-x-hkey-secondary {border-left: hkey $secondary; border-right: hkey $secondary;}
+.border-y-hkey-secondary {border-top: hkey $secondary; border-bottom: hkey $secondary;}
+.border-inner-secondary {border: inner $secondary;}
+.border-l-inner-secondary {border-left: inner $secondary;}
+.border-r-inner-secondary {border-right: inner $secondary;}
+.border-t-inner-secondary {border-top: inner $secondary;}
+.border-b-inner-secondary {border-bottom: inner $secondary;}
+.border-x-inner-secondary {border-left: inner $secondary; border-right: inner $secondary;}
+.border-y-inner-secondary {border-top: inner $secondary; border-bottom: inner $secondary;}
+.border-none-secondary {border: none $secondary;}
+.border-l-none-secondary {border-left: none $secondary;}
+.border-r-none-secondary {border-right: none $secondary;}
+.border-t-none-secondary {border-top: none $secondary;}
+.border-b-none-secondary {border-bottom: none $secondary;}
+.border-x-none-secondary {border-left: none $secondary; border-right: none $secondary;}
+.border-y-none-secondary {border-top: none $secondary; border-bottom: none $secondary;}
+.border-outer-secondary {border: outer $secondary;}
+.border-l-outer-secondary {border-left: outer $secondary;}
+.border-r-outer-secondary {border-right: outer $secondary;}
+.border-t-outer-secondary {border-top: outer $secondary;}
+.border-b-outer-secondary {border-bottom: outer $secondary;}
+.border-x-outer-secondary {border-left: outer $secondary; border-right: outer $secondary;}
+.border-y-outer-secondary {border-top: outer $secondary; border-bottom: outer $secondary;}
+.border-round-secondary {border: round $secondary;}
+.border-l-round-secondary {border-left: round $secondary;}
+.border-r-round-secondary {border-right: round $secondary;}
+.border-t-round-secondary {border-top: round $secondary;}
+.border-b-round-secondary {border-bottom: round $secondary;}
+.border-x-round-secondary {border-left: round $secondary; border-right: round $secondary;}
+.border-y-round-secondary {border-top: round $secondary; border-bottom: round $secondary;}
+.border-solid-secondary {border: solid $secondary;}
+.border-l-solid-secondary {border-left: solid $secondary;}
+.border-r-solid-secondary {border-right: solid $secondary;}
+.border-t-solid-secondary {border-top: solid $secondary;}
+.border-b-solid-secondary {border-bottom: solid $secondary;}
+.border-x-solid-secondary {border-left: solid $secondary; border-right: solid $secondary;}
+.border-y-solid-secondary {border-top: solid $secondary; border-bottom: solid $secondary;}
+.border-tall-secondary {border: tall $secondary;}
+.border-l-tall-secondary {border-left: tall $secondary;}
+.border-r-tall-secondary {border-right: tall $secondary;}
+.border-t-tall-secondary {border-top: tall $secondary;}
+.border-b-tall-secondary {border-bottom: tall $secondary;}
+.border-x-tall-secondary {border-left: tall $secondary; border-right: tall $secondary;}
+.border-y-tall-secondary {border-top: tall $secondary; border-bottom: tall $secondary;}
+.border-vkey-secondary {border: vkey $secondary;}
+.border-l-vkey-secondary {border-left: vkey $secondary;}
+.border-r-vkey-secondary {border-right: vkey $secondary;}
+.border-t-vkey-secondary {border-top: vkey $secondary;}
+.border-b-vkey-secondary {border-bottom: vkey $secondary;}
+.border-x-vkey-secondary {border-left: vkey $secondary; border-right: vkey $secondary;}
+.border-y-vkey-secondary {border-top: vkey $secondary; border-bottom: vkey $secondary;}
+.border-wide-secondary {border: wide $secondary;}
+.border-l-wide-secondary {border-left: wide $secondary;}
+.border-r-wide-secondary {border-right: wide $secondary;}
+.border-t-wide-secondary {border-top: wide $secondary;}
+.border-b-wide-secondary {border-bottom: wide $secondary;}
+.border-x-wide-secondary {border-left: wide $secondary; border-right: wide $secondary;}
+.border-y-wide-secondary {border-top: wide $secondary; border-bottom: wide $secondary;}
+.border-ascii-accent {border: ascii $accent;}
+.border-l-ascii-accent {border-left: ascii $accent;}
+.border-r-ascii-accent {border-right: ascii $accent;}
+.border-t-ascii-accent {border-top: ascii $accent;}
+.border-b-ascii-accent {border-bottom: ascii $accent;}
+.border-x-ascii-accent {border-left: ascii $accent; border-right: ascii $accent;}
+.border-y-ascii-accent {border-top: ascii $accent; border-bottom: ascii $accent;}
+.border-blank-accent {border: blank $accent;}
+.border-l-blank-accent {border-left: blank $accent;}
+.border-r-blank-accent {border-right: blank $accent;}
+.border-t-blank-accent {border-top: blank $accent;}
+.border-b-blank-accent {border-bottom: blank $accent;}
+.border-x-blank-accent {border-left: blank $accent; border-right: blank $accent;}
+.border-y-blank-accent {border-top: blank $accent; border-bottom: blank $accent;}
+.border-dashed-accent {border: dashed $accent;}
+.border-l-dashed-accent {border-left: dashed $accent;}
+.border-r-dashed-accent {border-right: dashed $accent;}
+.border-t-dashed-accent {border-top: dashed $accent;}
+.border-b-dashed-accent {border-bottom: dashed $accent;}
+.border-x-dashed-accent {border-left: dashed $accent; border-right: dashed $accent;}
+.border-y-dashed-accent {border-top: dashed $accent; border-bottom: dashed $accent;}
+.border-double-accent {border: double $accent;}
+.border-l-double-accent {border-left: double $accent;}
+.border-r-double-accent {border-right: double $accent;}
+.border-t-double-accent {border-top: double $accent;}
+.border-b-double-accent {border-bottom: double $accent;}
+.border-x-double-accent {border-left: double $accent; border-right: double $accent;}
+.border-y-double-accent {border-top: double $accent; border-bottom: double $accent;}
+.border-heavy-accent {border: heavy $accent;}
+.border-l-heavy-accent {border-left: heavy $accent;}
+.border-r-heavy-accent {border-right: heavy $accent;}
+.border-t-heavy-accent {border-top: heavy $accent;}
+.border-b-heavy-accent {border-bottom: heavy $accent;}
+.border-x-heavy-accent {border-left: heavy $accent; border-right: heavy $accent;}
+.border-y-heavy-accent {border-top: heavy $accent; border-bottom: heavy $accent;}
+.border-hidden-accent {border: hidden $accent;}
+.border-l-hidden-accent {border-left: hidden $accent;}
+.border-r-hidden-accent {border-right: hidden $accent;}
+.border-t-hidden-accent {border-top: hidden $accent;}
+.border-b-hidden-accent {border-bottom: hidden $accent;}
+.border-x-hidden-accent {border-left: hidden $accent; border-right: hidden $accent;}
+.border-y-hidden-accent {border-top: hidden $accent; border-bottom: hidden $accent;}
+.border-hkey-accent {border: hkey $accent;}
+.border-l-hkey-accent {border-left: hkey $accent;}
+.border-r-hkey-accent {border-right: hkey $accent;}
+.border-t-hkey-accent {border-top: hkey $accent;}
+.border-b-hkey-accent {border-bottom: hkey $accent;}
+.border-x-hkey-accent {border-left: hkey $accent; border-right: hkey $accent;}
+.border-y-hkey-accent {border-top: hkey $accent; border-bottom: hkey $accent;}
+.border-inner-accent {border: inner $accent;}
+.border-l-inner-accent {border-left: inner $accent;}
+.border-r-inner-accent {border-right: inner $accent;}
+.border-t-inner-accent {border-top: inner $accent;}
+.border-b-inner-accent {border-bottom: inner $accent;}
+.border-x-inner-accent {border-left: inner $accent; border-right: inner $accent;}
+.border-y-inner-accent {border-top: inner $accent; border-bottom: inner $accent;}
+.border-none-accent {border: none $accent;}
+.border-l-none-accent {border-left: none $accent;}
+.border-r-none-accent {border-right: none $accent;}
+.border-t-none-accent {border-top: none $accent;}
+.border-b-none-accent {border-bottom: none $accent;}
+.border-x-none-accent {border-left: none $accent; border-right: none $accent;}
+.border-y-none-accent {border-top: none $accent; border-bottom: none $accent;}
+.border-outer-accent {border: outer $accent;}
+.border-l-outer-accent {border-left: outer $accent;}
+.border-r-outer-accent {border-right: outer $accent;}
+.border-t-outer-accent {border-top: outer $accent;}
+.border-b-outer-accent {border-bottom: outer $accent;}
+.border-x-outer-accent {border-left: outer $accent; border-right: outer $accent;}
+.border-y-outer-accent {border-top: outer $accent; border-bottom: outer $accent;}
+.border-round-accent {border: round $accent;}
+.border-l-round-accent {border-left: round $accent;}
+.border-r-round-accent {border-right: round $accent;}
+.border-t-round-accent {border-top: round $accent;}
+.border-b-round-accent {border-bottom: round $accent;}
+.border-x-round-accent {border-left: round $accent; border-right: round $accent;}
+.border-y-round-accent {border-top: round $accent; border-bottom: round $accent;}
+.border-solid-accent {border: solid $accent;}
+.border-l-solid-accent {border-left: solid $accent;}
+.border-r-solid-accent {border-right: solid $accent;}
+.border-t-solid-accent {border-top: solid $accent;}
+.border-b-solid-accent {border-bottom: solid $accent;}
+.border-x-solid-accent {border-left: solid $accent; border-right: solid $accent;}
+.border-y-solid-accent {border-top: solid $accent; border-bottom: solid $accent;}
+.border-tall-accent {border: tall $accent;}
+.border-l-tall-accent {border-left: tall $accent;}
+.border-r-tall-accent {border-right: tall $accent;}
+.border-t-tall-accent {border-top: tall $accent;}
+.border-b-tall-accent {border-bottom: tall $accent;}
+.border-x-tall-accent {border-left: tall $accent; border-right: tall $accent;}
+.border-y-tall-accent {border-top: tall $accent; border-bottom: tall $accent;}
+.border-vkey-accent {border: vkey $accent;}
+.border-l-vkey-accent {border-left: vkey $accent;}
+.border-r-vkey-accent {border-right: vkey $accent;}
+.border-t-vkey-accent {border-top: vkey $accent;}
+.border-b-vkey-accent {border-bottom: vkey $accent;}
+.border-x-vkey-accent {border-left: vkey $accent; border-right: vkey $accent;}
+.border-y-vkey-accent {border-top: vkey $accent; border-bottom: vkey $accent;}
+.border-wide-accent {border: wide $accent;}
+.border-l-wide-accent {border-left: wide $accent;}
+.border-r-wide-accent {border-right: wide $accent;}
+.border-t-wide-accent {border-top: wide $accent;}
+.border-b-wide-accent {border-bottom: wide $accent;}
+.border-x-wide-accent {border-left: wide $accent; border-right: wide $accent;}
+.border-y-wide-accent {border-top: wide $accent; border-bottom: wide $accent;}
+
+# #####
+# Dock
+# #####
+
+.dock-top {dock: top;}
+.dock-right {dock: right;}
+.dock-bottom {dock: bottom;}
+.dock-left {dock: left;}
+
+# #####
+# Visibility
+# #####
+
+.visible {visibility: visible;}
+.hidden {visibility: hidden;}
+
+# #####
+# Text Styles
+# #####
+
+.bold {text-style: bold;}
+.italic {text-style: italic;}
+.reverse {text-style: reverse;}
+.underline {text-style: underline;}
+.strike {text-style: strike;}

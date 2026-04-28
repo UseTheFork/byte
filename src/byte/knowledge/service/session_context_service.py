@@ -1,9 +1,11 @@
 from typing import Optional
 
-from byte import Payload, Service
+from byte import Service
 from byte.knowledge import SessionContextModel
+from byte.orchestration import OrchestrationEvents
 from byte.support import ArrayStore, Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
+from byte.tui import Messages
 
 
 class SessionContextService(Service):
@@ -22,15 +24,25 @@ class SessionContextService(Service):
         """
         self.session_context = ArrayStore()
 
-    def add_context(self, model: SessionContextModel) -> "SessionContextService":
+    def notify_context_stats(self):
+        """Notify system that a context file was added or removed from context"""
+
+        self.emit_tui(
+            Messages.UpdateContext(
+                len(self.session_context.all().keys()),
+            ),
+        )
+
+    def add_context(self, model: SessionContextModel) -> SessionContextService:
         """Add a context item to the session store.
 
         Usage: `service.add_context(SessionContextModel(type="file", key="style_guide", content="Follow PEP 8..."))`
         """
         self.session_context.add(model.key, model)
+        self.notify_context_stats()
         return self
 
-    def remove_context(self, key: str) -> "SessionContextService":
+    def remove_context(self, key: str) -> SessionContextService:
         """Remove a context item from the session store.
 
         Usage: `service.remove_context("old_convention")`
@@ -39,6 +51,7 @@ class SessionContextService(Service):
         if model:
             model.delete()
         self.session_context.remove(key)
+        self.notify_context_stats()
         return self
 
     def get_context(self, key: str) -> Optional[SessionContextModel]:
@@ -48,7 +61,7 @@ class SessionContextService(Service):
         """
         return self.session_context.get(key, None)
 
-    def clear_context(self) -> "SessionContextService":
+    def clear_context(self) -> SessionContextService:
         """Clear all context items from the session store.
 
         Usage: `service.clear_context()`
@@ -56,6 +69,7 @@ class SessionContextService(Service):
         for _, model in self.session_context.all().items():
             model.delete()
         self.session_context.set({})
+        self.notify_context_stats()
         return self
 
     def get_all_context(self) -> dict[str, SessionContextModel]:
@@ -65,7 +79,9 @@ class SessionContextService(Service):
         """
         return self.session_context.all()
 
-    async def add_session_context_hook(self, payload: Payload) -> Payload:
+    async def add_session_context_hook(
+        self, payload: OrchestrationEvents.GatherProjectContext
+    ) -> OrchestrationEvents.GatherProjectContext:
         """Inject session context into the prompt state.
 
         Aggregates all stored context items and adds them to the
@@ -90,8 +106,6 @@ class SessionContextService(Service):
                 )
 
             # Get existing list and extend with formatted contexts
-            session_docs_list = payload.get("session_docs", [])
-            session_docs_list.extend(formatted_contexts)
-            payload.set("session_docs", session_docs_list)
+            payload.session_docs.extend(formatted_contexts)
 
         return payload
