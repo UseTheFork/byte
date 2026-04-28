@@ -45,8 +45,6 @@ ask_user_template = [
     "- Focus on actionable findings, not exhaustive documentation",
     Section.end(),
     "",
-    "{project_hierarchy}",
-    "{project_information_and_context}",
     "{operating_principles}",
 ]
 

@@ -1,3 +1,4 @@
+import re
 from typing import override
 
 from byte.skills import SkillLoaderService
@@ -13,10 +14,12 @@ class CreateSkillTool(BaseTool):
             "name": {
                 "type": "string",
                 "description": "The unique name of the skill (used as the directory name and skill identifier).",
+                "maxLength": 64,
             },
             "description": {
                 "type": "string",
                 "description": "A short description of what the skill does.",
+                "maxLength": 1024,
             },
             "instructions": {
                 "type": "string",
@@ -28,6 +31,13 @@ class CreateSkillTool(BaseTool):
 
     @override
     async def run(self, name: str, description: str, instructions: str) -> ToolResult:
+        # Normalize the skill name: lowercase, replace invalid chars with hyphens,
+        # collapse consecutive hyphens, strip leading/trailing hyphens
+        name = name.lower()
+        name = re.sub(r"[^a-z0-9]+", "-", name)
+        name = re.sub(r"-+", "-", name)
+        name = name.strip("-")
+
         skill_file_path = self.app.skills_path(f"{name}/SKILL.md")
         skill_file_path.parent.mkdir(parents=True, exist_ok=True)
 

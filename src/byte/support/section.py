@@ -9,6 +9,8 @@ class SectionType(StrEnum):
     ROLE = "Role"
 
     PROJECT_STATE = "Project State"
+    PROJECT_ENVIRONMENT = "Project Environment"
+
     CONVERSATION_HISTORY = "Conversation History"
     USER_INPUT = "User Input"
     SKILLS = "Skills"

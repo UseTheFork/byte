@@ -1,5 +1,6 @@
 import asyncio
 import re
+from datetime import datetime
 from typing import TYPE_CHECKING, TypeVar
 
 from langchain.messages import AIMessage, HumanMessage
@@ -103,6 +104,20 @@ class PromptAssembler(Bootable, Eventable):
             "```",
             "",
             "You **MUST** consider the user input before proceeding (if not empty).",
+            Section.end(),
+        ]
+
+        return list_to_multiline_text(message_parts)
+
+    async def _generate_project_environment(self) -> str:
+        """ """
+        root_path = self.app.root_path()
+
+        # TODO: https://github.com/charmbracelet/crush/blob/64c47cbbb3f0825432876786fb72737089732f55/internal/agent/templates/coder.md.tpl
+        message_parts = [
+            Section.start(SectionType.PROJECT_ENVIRONMENT),
+            f"Working directory: {root_path}",
+            f"Today's date: {datetime.now().strftime('%Y-%m-%d')}",
             Section.end(),
         ]
 
@@ -459,6 +474,7 @@ class PromptAssembler(Bootable, Eventable):
         # Always executed tasks
         tasks.update(
             {
+                "project_environment": self._generate_project_environment(state),
                 "modified_messages": self._gather_modified_messages(state),
                 "commit_guidelines": self._gather_commit_guidelines(),
                 "constraints": self._gather_constraints(state),
@@ -549,6 +565,7 @@ class PromptAssembler(Bootable, Eventable):
         refreshed_context_message = list_to_multiline_text(
             [
                 self.prompt_state["loaded_skills"],
+                self.prompt_state["project_environment"],
                 Section.start(SectionType.PROJECT_STATE),
                 "#id-dhd88-asx-4857",
                 "",
