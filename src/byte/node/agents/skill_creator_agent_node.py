@@ -42,6 +42,7 @@ skill_orchestrator_template = [
     "",
     "- PHASE 1: Capture Intent — Understand what the skill should do, when it should trigger, and what the expected output looks like.",
     "- PHASE 2: Interview — Ask about edge cases, input/output formats, and any dependencies. Come prepared with context.",
+    f"    - Use the `{UserInputTextTool.name}`, `{UserSelectTool.name}` or the `{UserConfirmTool.name}` tools to do this.",
     "- PHASE 3: Create the Skill — Use the available tools to create the skill with a clear name, description, and instructions.",
     Section.end(),
     "",

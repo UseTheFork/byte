@@ -18,5 +18,6 @@ class LLMConfig(BaseModel):
 
     ask_agent_node: LLMModelConfig = LLMModelConfig()
     coder_agent_node: LLMModelConfig = LLMModelConfig()
+    skill_creator_agent_node: LLMModelConfig = LLMModelConfig()
     coder_plan_agent_node: LLMModelConfig = LLMModelConfig()
     commit_agent_node: LLMModelConfig = LLMModelConfig()

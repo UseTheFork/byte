@@ -20,9 +20,9 @@ from byte.orchestration import (
     BaseState,
     preamble,
 )
+from byte.skills.tools.load_skill_tool import LoadSkillTool
 from byte.support import Section, SectionType, Str
 from byte.support.utils import extract_content_from_message, list_to_multiline_text
-from byte.web import SearchWebTool
 
 ask_user_template = [
     "{modified_messages}",
@@ -110,7 +110,7 @@ class AskAgentNode(BaseAgentNode):
         return ask_enforcement
 
     def get_tools(self):
-        return [GitGrepTool, SearchWebTool]
+        return [GitGrepTool, LoadSkillTool]
 
     async def __call__(
         self,

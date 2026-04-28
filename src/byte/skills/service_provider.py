@@ -2,8 +2,8 @@ from typing import List, Type
 
 from langchain.tools import BaseTool
 
-from byte import Service, ServiceProvider
-from byte.skills import CreateSkillTool, LoadSkillTool, SkillLoaderService, SkillTrackerService
+from byte import Command, Service, ServiceProvider
+from byte.skills import CreateSkillTool, LoadSkillTool, SkillCommand, SkillLoaderService, SkillTrackerService
 
 
 class SkillsServiceProvider(ServiceProvider):
@@ -16,7 +16,15 @@ class SkillsServiceProvider(ServiceProvider):
     """
 
     def tools(self) -> List[Type[BaseTool]]:
-        return [CreateSkillTool, LoadSkillTool]
+        return [
+            CreateSkillTool,
+            LoadSkillTool,
+        ]
+
+    def commands(self) -> List[Type[Command]]:
+        return [
+            SkillCommand,
+        ]
 
     def services(self) -> List[Type[Service]]:
         return [SkillLoaderService, SkillTrackerService]

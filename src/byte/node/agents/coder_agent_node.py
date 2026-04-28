@@ -21,6 +21,7 @@ from byte.node import (
 from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
 from byte.orchestration import AssistantContextSchema, BaseState, preamble
+from byte.skills.tools.load_skill_tool import LoadSkillTool
 from byte.support import Boundary, BoundaryType, Section, SectionType, Str
 from byte.support.utils import extract_content_from_message, list_to_multiline_text
 
@@ -150,6 +151,7 @@ class CoderAgentNode(BaseAgentNode):
             WriteFileTool,
             DeleteFileTool,
             ReplaceFileTool,
+            LoadSkillTool,
         ]
 
     async def __call__(

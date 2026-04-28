@@ -474,7 +474,7 @@ class PromptAssembler(Bootable, Eventable):
         # Always executed tasks
         tasks.update(
             {
-                "project_environment": self._generate_project_environment(state),
+                "project_environment": self._generate_project_environment(),
                 "modified_messages": self._gather_modified_messages(state),
                 "commit_guidelines": self._gather_commit_guidelines(),
                 "constraints": self._gather_constraints(state),
@@ -509,6 +509,7 @@ class PromptAssembler(Bootable, Eventable):
 
         user_prompt_state.update(
             {
+                "project_environment": results_dict["project_environment"],
                 "modified_messages": results_dict["modified_messages"],
                 "commit_guidelines": results_dict["commit_guidelines"],
                 "constraints_context": results_dict["constraints"],
