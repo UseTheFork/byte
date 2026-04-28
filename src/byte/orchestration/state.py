@@ -36,11 +36,7 @@ class BaseState(TypedDict):
 
     masked_messages: list[AnyMessage]
 
-    agent: str
-
     errors: Annotated[str | None, replace_str]
-
-    extracted_content: str | dict | None
 
     # These are specific to Coder
     touched_files: list[str]

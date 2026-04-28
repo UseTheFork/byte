@@ -65,7 +65,7 @@ commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
             ),
         ),
         ("user", "{assembled_user_message}"),
-        ("placeholder", "{pending_agent_state}"),
+        ("placeholder", "{scratch_messages}"),
         ("placeholder", "{refreshed_context_state}"),
         ("placeholder", "{errors}"),
     ]
