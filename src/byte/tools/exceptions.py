@@ -21,7 +21,7 @@ class ToolValidationException(ToolException):
     pass
 
 
-class ToolRunException(ByteException):
+class ToolRunException(ToolException):
     """Raised when an error occurs during tool execution."""
 
     pass

@@ -1,8 +1,11 @@
+import asyncio
+import random
 from typing import List, Type
 
 from bs4 import BeautifulSoup
 from pydoll.browser.chromium import Chrome
 from pydoll.browser.options import ChromiumOptions
+from pydoll.constants import By
 
 from byte import Service
 from byte.tui import Messages
@@ -117,9 +120,40 @@ class ChromiumService(Service):
             tab = await browser.start()
 
             self.emit_tui(Messages.Status("loading", f"Searching for {query}..."))
+            await tab.go_to("https://www.google.com/")
 
-            # AI: in the below url encode the `query` AI!
-            await tab.go_to(f"https://www.google.com/search?hl=en&q={query}")
+            search_box = await tab.find(tag_name="textarea", name="q")
+            self.app["log"].info(search_box)
+            await search_box.click(
+                x_offset=random.randint(-5, 5),
+                y_offset=random.randint(-5, 5),
+            )
+            await asyncio.sleep(random.uniform(0.2, 0.5))
+            await search_box.type_text(query, humanize=True)
+
+            # Click submit with realistic parameters
+            submit_button = await tab.find(tag_name="input", type="submit")
+            self.app["log"].info(submit_button)
+
+            await asyncio.sleep(random.uniform(0.5, 1.5))
+
+            await submit_button.click(
+                x_offset=random.randint(-8, 8),
+                y_offset=random.randint(-5, 5),
+                hold_time=random.uniform(0.1, 0.2),
+            )
+
+            await asyncio.sleep(random.uniform(1.5, 2.5))
+            html_content = await tab.execute_script("return document.documentElement.outerHTML")
+            self.app["log"].info(html_content)
+
+            dynamic_element = await tab.find_or_wait_element(
+                By.ID,
+                "search",
+                timeout=10,
+            )
+
+            self.app["log"].info(dynamic_element)
 
             self.emit_tui(Messages.Status("loading", "Extracting content..."))
             html_content = await tab.execute_script("return document.documentElement.outerHTML")
