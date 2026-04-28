@@ -22,6 +22,8 @@ if TYPE_CHECKING:
     from byte.files.service_provider import FileServiceProvider
     from byte.files.tools.delete_file_tool import DeleteFileTool
     from byte.files.tools.edit_file_tool import EditFileTool
+    from byte.files.tools.list_files_tool import ListFilesTool
+    from byte.files.tools.read_files_tool import ReadFilesTool
     from byte.files.tools.replace_file_tool import ReplaceFileTool
     from byte.files.tools.write_file_tool import WriteFileTool
 
@@ -40,6 +42,8 @@ __all__ = (
     "FileServiceProvider",
     "FileWatcherService",
     "ListFilesCommand",
+    "ListFilesTool",
+    "ReadFilesTool",
     "ReadOnlyCommand",
     "ReloadFilesCommand",
     "ReplaceFileTool",
@@ -64,6 +68,8 @@ _dynamic_imports = {
     "FileServiceProvider": "service_provider",
     "FileWatcherService": "service.watcher_service",
     "ListFilesCommand": "command.list_files_command",
+    "ListFilesTool": "tools.list_files_tool",
+    "ReadFilesTool": "tools.read_files_tool",
     "ReadOnlyCommand": "command.add_read_only_file_command",
     "ReloadFilesCommand": "command.reload_files_command",
     "ReplaceFileTool": "tools.replace_file_tool",

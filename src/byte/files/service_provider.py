@@ -15,6 +15,8 @@ from byte.files import (
     FileService,
     FileWatcherService,
     ListFilesCommand,
+    ListFilesTool,
+    ReadFilesTool,
     ReadOnlyCommand,
     ReloadFilesCommand,
     ReplaceFileTool,
@@ -56,6 +58,8 @@ class FileServiceProvider(ServiceProvider):
             WriteFileTool,
             DeleteFileTool,
             ReplaceFileTool,
+            ReadFilesTool,
+            ListFilesTool,
         ]
 
     async def boot(self):
