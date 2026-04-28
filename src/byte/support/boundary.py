@@ -10,10 +10,13 @@ class BoundaryType(StrEnum):
 
     ERROR = "error"
 
-    # conventions
+    # genaric
     NAME = "name"
     DESCRIPTION = "description"
     LOCATION = "location"
+    TYPE = "type"
+
+    # conventions
     AVAILABLE_CONVENTIONS = "available_conventions"
     CONVENTION = "convention"
     # / conventions
@@ -27,6 +30,10 @@ class BoundaryType(StrEnum):
 
     PROJECT_HIERARCHY = "project_hierarchy"
     CONSTRAINTS = "constraints"
+
+    # Skills
+    AVAILABLE_SKILLS = "available_skills"
+    SKILL = "skill"
 
     # Operating Constraints
 

@@ -12,12 +12,12 @@ class DeleteFileTool(BaseTool):
     input_schema = {
         "type": "object",
         "properties": {
-            "path": {
+            "file_path": {
                 "type": "string",
                 "description": "The EXACT Path to file located in `<file>`. Use the `source` variable.",
             },
         },
-        "required": ["path"],
+        "required": ["file_path"],
     }
 
     @override

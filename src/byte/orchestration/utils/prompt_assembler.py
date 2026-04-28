@@ -9,6 +9,7 @@ from byte.conventions import ConventionContextService
 from byte.files import FileService
 from byte.git import CommitService
 from byte.orchestration import BaseState, OrchestrationEvents
+from byte.skills import LoadSkillTool, SkillLoaderService, SkillTrackerService
 from byte.support import Boundary, BoundaryType, Section, SectionType
 from byte.support.mixins import Bootable, Eventable
 from byte.support.utils import list_to_multiline_text
@@ -104,6 +105,73 @@ class PromptAssembler(Bootable, Eventable):
             "You **MUST** consider the user input before proceeding (if not empty).",
             Section.end(),
         ]
+
+        return list_to_multiline_text(message_parts)
+
+    async def _generate_available_skills(self) -> str:
+        """ """
+        skill_tracker_service = self.app.make(SkillTrackerService)
+        skill_loader_service = self.app.make(SkillLoaderService)
+
+        # Get only the skills that haven't been loaded yet
+        unloaded_names = skill_tracker_service.get_unloaded_names()
+        unloaded_skills = {name: skill for name, skill in skill_loader_service.skills.items() if name in unloaded_names}
+
+        skills_xml = skill_loader_service.skills_to_prompt_xml(unloaded_skills)
+
+        if not skills_xml:
+            return ""
+
+        message_parts = [
+            Section.start(SectionType.AVALIABLE_SKILLS),
+            "```",
+            skills_xml,
+            "```",
+            Section.sub_heading("Skills Usage", 2),
+            f"The `{Boundary.open(BoundaryType.DESCRIPTION)}` of each skill is a TRIGGER — it tells you *when* a skill applies. It is NOT a specification of what the skill does or how to do it. The procedure, scripts, commands, references, and required flags live only in the SKILL.md body. You do not know what a skill actually does until you have read its SKILL.md.",
+            "",
+            "MANDATORY activation flow:",
+            f"1. Scan `{Boundary.open(BoundaryType.AVAILABLE_SKILLS)}` against the current user task.",
+            f"2. If any skill's `{Boundary.open(BoundaryType.DESCRIPTION)}` matches, call the `{LoadSkillTool.name}` with its `{Boundary.open(BoundaryType.NAME)}` EXACTLY as shown — before any other tool call that performs the task.",
+            "3. Read the entire SKILL.md and follow its instructions.",
+            "4. Only then execute the task, using the skill's prescribed commands/tools.",
+            "",
+            "Do NOT skip step 2 because you think you already know how to do the task. Do NOT infer a skill's behavior from its name or description. If you find yourself about to run `edit`, or any task-doing tool for a skill-eligible request without having just viewed the SKILL.md, stop and load the skill first.",
+            Section.end(),
+        ]
+
+        return list_to_multiline_text(message_parts)
+
+    async def _generate_loaded_skills(self) -> str:
+        """Generate prompt content containing the instructions of loaded skills."""
+        skill_tracker_service = self.app.make(SkillTrackerService)
+        skill_loader_service = self.app.make(SkillLoaderService)
+
+        loaded_names = skill_tracker_service.loaded_names()
+        if not loaded_names:
+            return ""
+
+        message_parts = [
+            Section.start(SectionType.SKILLS),
+        ]
+
+        for name in loaded_names:
+            skill = skill_loader_service.get_skill(name)
+            if skill is None:
+                continue
+            message_parts.extend(
+                [
+                    Boundary.open(BoundaryType.SKILL, meta={"name": name}),
+                    skill.instructions,
+                    Boundary.close(BoundaryType.SKILL),
+                    "",
+                ]
+            )
+
+        if not message_parts:
+            return ""
+
+        message_parts.extend(Section.end())
 
         return list_to_multiline_text(message_parts)
 
@@ -395,6 +463,8 @@ class PromptAssembler(Bootable, Eventable):
                 "commit_guidelines": self._gather_commit_guidelines(),
                 "constraints": self._gather_constraints(state),
                 "available_conventions": self.gather_available_conventions(state),
+                "available_skills": self._generate_available_skills(),
+                "loaded_skills": self._generate_loaded_skills(),
                 "reinforcement": self._gather_reinforcement(),
                 "user_request": self._complete_user_request(state.get("user_request", "")),
             }
@@ -426,6 +496,8 @@ class PromptAssembler(Bootable, Eventable):
                 "modified_messages": results_dict["modified_messages"],
                 "commit_guidelines": results_dict["commit_guidelines"],
                 "constraints_context": results_dict["constraints"],
+                "available_skills": results_dict["available_skills"],
+                "loaded_skills": results_dict["loaded_skills"],
                 "available_conventions": results_dict["available_conventions"],
                 "operating_principles": results_dict["reinforcement"],
                 "user_request": results_dict["user_request"],
@@ -476,6 +548,7 @@ class PromptAssembler(Bootable, Eventable):
         """ """
         refreshed_context_message = list_to_multiline_text(
             [
+                self.prompt_state["loaded_skills"],
                 Section.start(SectionType.PROJECT_STATE),
                 "#id-dhd88-asx-4857",
                 "",

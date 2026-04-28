@@ -11,13 +11,13 @@ class ReplaceFileTool(BaseTool):
     input_schema = {
         "type": "object",
         "properties": {
-            "path": {
+            "file_path": {
                 "type": "string",
                 "description": "The EXACT Path to file located in `<file>`. Use the `source` variable.",
             },
             "content": {"type": "string", "description": "Content to replace the file with"},
         },
-        "required": ["path", "content"],
+        "required": ["file_path", "content"],
     }
 
     @override

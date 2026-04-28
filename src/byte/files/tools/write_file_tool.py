@@ -11,10 +11,10 @@ class WriteFileTool(BaseTool):
     input_schema = {
         "type": "object",
         "properties": {
-            "path": {"type": "string", "description": "The EXACT Path to the file."},
+            "file_path": {"type": "string", "description": "The EXACT Path to the file."},
             "content": {"type": "string", "description": "Content to write to the file"},
         },
-        "required": ["path", "content"],
+        "required": ["file_path", "content"],
     }
 
     @override

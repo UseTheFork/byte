@@ -11,6 +11,8 @@ class SectionType(StrEnum):
     PROJECT_STATE = "Project State"
     CONVERSATION_HISTORY = "Conversation History"
     USER_INPUT = "User Input"
+    SKILLS = "Skills"
+    AVALIABLE_SKILLS = "Avaliable Skills"
     TASK = "Task"
 
     OPERATING_CONSTRAINTS = "Operating Constraints"

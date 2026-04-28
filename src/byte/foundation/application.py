@@ -150,6 +150,8 @@ class Application(Container):
             callback(self)
 
         providers = RegisterProviders._merge
+
+        # TODO: Use gather here?
         for provider in providers:
             provider_instance = self.make(provider)
             await self.boot_provider(provider_instance)
@@ -282,6 +284,19 @@ class Application(Container):
             The full path to the conventions directory or subdirectory.
         """
         base = self.config_path("conventions")
+        return self.join_paths(base, path)
+
+    def skills_path(self, path: str = "") -> Path:
+        """
+        Get the path to the skills directory.
+
+        Args:
+            path: Optional path to append to the skills directory.
+
+        Returns:
+            The full path to the skills directory or subdirectory.
+        """
+        base = self.config_path("skills")
         return self.join_paths(base, path)
 
     def is_development(self) -> bool:

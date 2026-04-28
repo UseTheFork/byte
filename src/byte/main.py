@@ -19,6 +19,7 @@ from byte.llm import LLMServiceProvider
 from byte.lsp import LSPServiceProvider
 from byte.memory import MemoryServiceProvider
 from byte.node import NodeServiceProvider
+from byte.skills.service_provider import SkillsServiceProvider
 from byte.system import SystemServiceProvider
 from byte.tools import ToolsServiceProvider
 from byte.tui import TUIServiceProvider
@@ -30,6 +31,7 @@ PROVIDERS = [
     CommandServiceProvider,
     ToolsServiceProvider,
     GitServiceProvider,
+    SkillsServiceProvider,
     MemoryServiceProvider,
     KnowledgeServiceProvider,
     FileServiceProvider,
