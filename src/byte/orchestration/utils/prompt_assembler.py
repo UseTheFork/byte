@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, TypeVar
 from langchain.messages import AIMessage, HumanMessage
 from langchain_core.messages import BaseMessage
 
-from byte.conventions import ConventionContextService
 from byte.files import FileService
 from byte.git import CommitService
 from byte.orchestration import BaseState, OrchestrationEvents
@@ -371,11 +370,6 @@ class PromptAssembler(Bootable, Eventable):
 
         return ""
 
-    async def gather_available_conventions(self, state: BaseState) -> str:
-        """ """
-        convention_context_service = self.app.make(ConventionContextService)
-        return await convention_context_service.get_available_conventions(state)
-
     async def _gather_project_context(self) -> str:
         """Gather project context including conventions and session documents.
 
@@ -478,7 +472,6 @@ class PromptAssembler(Bootable, Eventable):
                 "modified_messages": self._gather_modified_messages(state),
                 "commit_guidelines": self._gather_commit_guidelines(),
                 "constraints": self._gather_constraints(state),
-                "available_conventions": self.gather_available_conventions(state),
                 "available_skills": self._generate_available_skills(),
                 "loaded_skills": self._generate_loaded_skills(),
                 "reinforcement": self._gather_reinforcement(),
@@ -515,7 +508,6 @@ class PromptAssembler(Bootable, Eventable):
                 "constraints_context": results_dict["constraints"],
                 "available_skills": results_dict["available_skills"],
                 "loaded_skills": results_dict["loaded_skills"],
-                "available_conventions": results_dict["available_conventions"],
                 "operating_principles": results_dict["reinforcement"],
                 "user_request": results_dict["user_request"],
             }

@@ -6,6 +6,7 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
+from byte.files import ListFilesTool, ReadFilesTool
 from byte.git import GitGrepTool
 from byte.llm import LLMService, ModelSchema
 from byte.node import (
@@ -23,6 +24,8 @@ from byte.orchestration import (
 from byte.skills.tools.load_skill_tool import LoadSkillTool
 from byte.support import Section, SectionType, Str
 from byte.support.utils import extract_content_from_message, list_to_multiline_text
+from byte.system import UserSelectTool
+from byte.web import SearchWebTool
 
 ask_user_template = [
     "{modified_messages}",
@@ -110,7 +113,14 @@ class AskAgentNode(BaseAgentNode):
         return ask_enforcement
 
     def get_tools(self):
-        return [GitGrepTool, LoadSkillTool]
+        return [
+            GitGrepTool,
+            LoadSkillTool,
+            UserSelectTool,
+            ListFilesTool,
+            ReadFilesTool,
+            SearchWebTool,
+        ]
 
     async def __call__(
         self,

@@ -1,20 +1,17 @@
-import asyncio
-import random
 from typing import List, Type
 
 from bs4 import BeautifulSoup
 from pydoll.browser.chromium import Chrome
 from pydoll.browser.options import ChromiumOptions
-from pydoll.constants import By
 
 from byte import Service
 from byte.tui import Messages
 from byte.web.exceptions import WebNotEnabledException
 from byte.web.parser.base import BaseWebParser
+from byte.web.parser.duckduckgo_lite_parser import DuckDuckGoLiteParser
 from byte.web.parser.generic_parser import GenericParser
 from byte.web.parser.gitbook_parser import GitBookParser
 from byte.web.parser.github_parser import GitHubParser
-from byte.web.parser.google_search_parser import GoogleSearchParser
 from byte.web.parser.mkdocs_parser import MkDocsParser
 from byte.web.parser.raw_content_parser import RawContentParser
 from byte.web.parser.sphinx_parser import SphinxParser
@@ -120,40 +117,7 @@ class ChromiumService(Service):
             tab = await browser.start()
 
             self.emit_tui(Messages.Status("loading", f"Searching for {query}..."))
-            await tab.go_to("https://www.google.com/")
-
-            search_box = await tab.find(tag_name="textarea", name="q")
-            self.app["log"].info(search_box)
-            await search_box.click(
-                x_offset=random.randint(-5, 5),
-                y_offset=random.randint(-5, 5),
-            )
-            await asyncio.sleep(random.uniform(0.2, 0.5))
-            await search_box.type_text(query, humanize=True)
-
-            # Click submit with realistic parameters
-            submit_button = await tab.find(tag_name="input", type="submit")
-            self.app["log"].info(submit_button)
-
-            await asyncio.sleep(random.uniform(0.5, 1.5))
-
-            await submit_button.click(
-                x_offset=random.randint(-8, 8),
-                y_offset=random.randint(-5, 5),
-                hold_time=random.uniform(0.1, 0.2),
-            )
-
-            await asyncio.sleep(random.uniform(1.5, 2.5))
-            html_content = await tab.execute_script("return document.documentElement.outerHTML")
-            self.app["log"].info(html_content)
-
-            dynamic_element = await tab.find_or_wait_element(
-                By.ID,
-                "search",
-                timeout=10,
-            )
-
-            self.app["log"].info(dynamic_element)
+            await tab.go_to("https://lite.duckduckgo.com/lite/?q={query}")
 
             self.emit_tui(Messages.Status("loading", "Extracting content..."))
             html_content = await tab.execute_script("return document.documentElement.outerHTML")
@@ -169,20 +133,14 @@ class ChromiumService(Service):
             # Try to find a suitable parser for this content
             text_content = ""
 
-            parser = self.app.make(GoogleSearchParser)
+            parser = self.app.make(DuckDuckGoLiteParser)
             self.emit_tui(Messages.Status("loading", f"Parsing with {parser.__class__.__name__}..."))
             self.app["log"].info(f"Parsing with {parser.__class__.__name__}...")
 
-            # Extract content element
-            element = parser.extract_content_element(soup)
-            if element is not None:
-                # Apply cleaning pipeline
-                cleaner = self.app.make(ContentCleaner)
-                config = parser.get_cleaning_config()
-                text_content = cleaner.apply_pipeline(element, **config)
+            text_content = parser.parse(soup)
 
-                if text_content.strip():
-                    self.app["log"].info(f"Parsed successfully with {parser.__class__.__name__}...")
+            if text_content.strip():
+                self.app["log"].info(f"Parsed successfully with {parser.__class__.__name__}...")
 
             self.emit_tui(Messages.Status())
             return text_content
