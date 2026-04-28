@@ -6,9 +6,7 @@ from byte.tools import BaseTool, ToolResult
 
 class CreateSkillTool(BaseTool):
     name: str = "create_skill"
-    description: str = (
-        "Use this tool to create a new skill. Call this when you want to create a reusable skill with a name, description, and instructions."
-    )
+    description: str = "Use this tool to create a new skill. Call this when you want to create a reusable skill with a name, description, and instructions."
     input_schema = {
         "type": "object",
         "properties": {
@@ -33,7 +31,7 @@ class CreateSkillTool(BaseTool):
         skill_file_path = self.app.skills_path(f"{name}/SKILL.md")
         skill_file_path.parent.mkdir(parents=True, exist_ok=True)
 
-        content = f'---\nname: {name}\ndescription: {description}\n---\n\n{instructions}\n'
+        content = f"---\nname: {name}\ndescription: {description}\n---\n\n{instructions}\n"
         skill_file_path.write_text(content, encoding="utf-8")
 
         skill_loader_service = self.app.make(SkillLoaderService)
