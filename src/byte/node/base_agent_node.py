@@ -43,7 +43,7 @@ class BaseAgentNode(BaseNode):
     def get_enforcement(self) -> List[str]:
         return []
 
-    def get_tools(self):
+    def get_tools(self, state: BaseState):
         return []
 
     def filter_message_history(self, messages: List[BaseMessage]) -> List[BaseMessage]:
@@ -156,7 +156,7 @@ class BaseAgentNode(BaseNode):
 
         return (agent_state, config)
 
-    def create_runnable(self, force_tool_choice: str | None = None) -> Runnable:
+    def create_runnable(self, state: BaseState, force_tool_choice: str | None = None) -> Runnable:
         """Create the runnable chain from context configuration.
 
         Assembles the prompt and model based on the mode (main or weak AI).
@@ -179,8 +179,8 @@ class BaseAgentNode(BaseNode):
         )
 
         # Bind tools if provided
-        if self.get_tools() is not None and len(self.get_tools()) > 0:
-            tool_schemas = [tool.tool_schema() for tool in self.get_tools()]
+        if self.get_tools(state) is not None and len(self.get_tools(state)) > 0:
+            tool_schemas = [tool.tool_schema() for tool in self.get_tools(state)]
             if force_tool_choice:
                 model = model.bind_tools(tool_schemas, tool_choice=force_tool_choice)
             else:

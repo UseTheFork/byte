@@ -552,6 +552,7 @@ class PromptAssembler(Bootable, Eventable):
             "",
         ]
 
+        # TODO: Should we consider plan here ?
         if not history_messages:
             lines.append("> **Remember**: This is your first response so you are starting at the FIRST step.")
         else:

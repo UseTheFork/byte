@@ -23,7 +23,7 @@ from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
 from byte.orchestration import AssistantContextSchema, BaseState, preamble
 from byte.skills.tools.load_skill_tool import LoadSkillTool
-from byte.support import Boundary, BoundaryType, Section, SectionType, Str
+from byte.support import Boundary, BoundaryType, Section, SectionType, State, Str
 from byte.support.utils import extract_content_from_message, list_to_multiline_text
 
 coder_user_template = [
@@ -154,17 +154,26 @@ class CoderAgentNode(BaseAgentNode):
     def get_user_template(self):
         return coder_user_template
 
-    def get_tools(self):
-        return [
-            CreatePlanTool,
-            CompleteStepTool,
-            CompleteTurnTool,
-            EditFileTool,
-            WriteFileTool,
-            DeleteFileTool,
-            ReplaceFileTool,
-            LoadSkillTool,
-        ]
+    def get_tools(self, state: BaseState):
+        # Depending on the state we modify the returned tools.
+        base_tools = []
+
+        if not State.has_plan(state):
+            base_tools.append(CreatePlanTool)
+        else:
+            base_tools.extend(
+                [
+                    CompleteStepTool,
+                    CompleteTurnTool,
+                    EditFileTool,
+                    WriteFileTool,
+                    DeleteFileTool,
+                    ReplaceFileTool,
+                    LoadSkillTool,
+                ]
+            )
+
+        return base_tools
 
     async def __call__(
         self,
@@ -175,7 +184,7 @@ class CoderAgentNode(BaseAgentNode):
     ) -> Command[Literal["routing_node"]]:
 
         agent_state, config = await self.generate_agent_state(state, config)
-        runnable = self.create_runnable()
+        runnable = self.create_runnable(state)
         record_response_service = self.app.make(RecordResponseService)
 
         result = await runnable.ainvoke(agent_state, config=config)

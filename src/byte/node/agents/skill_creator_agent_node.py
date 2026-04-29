@@ -137,7 +137,7 @@ class SkillCreatorAgentNode(BaseAgentNode):
     def get_user_template(self):
         return skill_orchestrator_template
 
-    def get_tools(self):
+    def get_tools(self, state: BaseState):
         return [
             CreateSkillTool,
             GitGrepTool,
@@ -157,7 +157,7 @@ class SkillCreatorAgentNode(BaseAgentNode):
     ) -> Command[Literal["routing_node"]]:
 
         agent_state, config = await self.generate_agent_state(state, config)
-        runnable = self.create_runnable()
+        runnable = self.create_runnable(state)
         record_response_service = self.app.make(RecordResponseService)
 
         result = await runnable.ainvoke(agent_state, config=config)

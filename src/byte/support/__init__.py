@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from byte.support.section import Section, SectionType
     from byte.support.service import Service
     from byte.support.service_provider import ServiceProvider
+    from byte.support.state import State
     from byte.support.string import Str
     from byte.support.yaml import Yaml
 
@@ -25,6 +26,7 @@ __all__ = (
     "SectionType",
     "Service",
     "ServiceProvider",
+    "State",
     "Str",
     "Yaml",
 )
@@ -40,6 +42,7 @@ _dynamic_imports = {
     "SectionType": "section",
     "Service": "service",
     "ServiceProvider": "service_provider",
+    "State": "state",
     "Str": "string",
     "Yaml": "yaml",
     # keep-sorted end

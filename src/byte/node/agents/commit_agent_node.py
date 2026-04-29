@@ -18,7 +18,7 @@ from byte.node import (
 from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
 from byte.orchestration import AssistantContextSchema, BaseState, preamble
-from byte.support import Boundary, BoundaryType, Section, SectionType, Str
+from byte.support import Boundary, BoundaryType, Section, SectionType, State, Str
 from byte.support.utils import list_to_multiline_text
 
 # Conventional commit message generation prompt
@@ -40,6 +40,17 @@ commit_user_template = [
     Section.important("You MUST follow the commit guidelines provided in the Rules section below."),
     "Read and apply ALL rules for commit types, scopes, and description formatting.",
     Section.end(),
+    Section.start(SectionType.COMMUNICATION_STYLE),
+    "- ALWAYS think and respond in the same spoken language the prompt was written in.",
+    "- Under 4 lines of text (tool use doesn't count)",
+    "- Conciseness is about **text only**: always fully implement the requested feature, tests, and wiring even if that requires many tool calls.",
+    """- No preamble ("Here's...", "I'll...")""",
+    """- No postamble ("Let me know...", "Hope this helps...")""",
+    "- No emojis ever",
+    "- No explanations unless user asks",
+    "- Never send acknowledgement-only responses; after receiving new context or instructions, immediately continue the task or state the concrete next action you will take.",
+    "- Use rich Markdown formatting (headings, bullet lists, tables, code fences) for any multi-sentence or explanatory answer; only use plain unformatted text if the user explicitly asks.",
+    Section.end(),
     "{commit_guidelines}",
     "",
     Section.start(SectionType.WORKFLOW),
@@ -57,10 +68,10 @@ commit_user_template = [
     "- Updated foo() to handle edge case",
     Boundary.close(BoundaryType.AGENT_MESSAGE),
     Boundary.open(BoundaryType.TOOL_CALL),
-    f'{GitCommitTool.name}(message="fix(foo): handle edge case in foo()")',
+    f"{GitCommitTool.name}([removed for brevity])",
     Boundary.close(BoundaryType.TOOL_CALL),
     Boundary.open(BoundaryType.TOOL_CALL),
-    f"{CompleteTurnTool.name}()",
+    f"{CompleteTurnTool.name}([removed for brevity])",
     Boundary.close(BoundaryType.TOOL_CALL),
     Boundary.close(BoundaryType.EXAMPLE),
     "```",
@@ -120,8 +131,11 @@ class CommitAgentNode(BaseAgentNode):
     def get_user_template(self):
         return commit_user_template
 
-    def get_tools(self):
-        return [GitCommitTool, CompleteTurnTool]
+    def get_tools(self, state: BaseState):
+        if not State.tool_was_called(state, GitCommitTool.name):
+            return [GitCommitTool]
+        else:
+            return [CompleteTurnTool]
 
     def filter_message_history(self, messages: List[BaseMessage]) -> List[BaseMessage]:
         last_index = next(
@@ -141,7 +155,7 @@ class CommitAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        runnable = self.create_runnable()
+        runnable = self.create_runnable(state)
 
         commit_service = self.app.make(CommitService)
         request = await commit_service.build_commit_prompt()

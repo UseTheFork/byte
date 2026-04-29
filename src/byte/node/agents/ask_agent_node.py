@@ -112,7 +112,7 @@ class AskAgentNode(BaseAgentNode):
     def get_enforcement(self):
         return ask_enforcement
 
-    def get_tools(self):
+    def get_tools(self, state: BaseState):
         return [
             GitGrepTool,
             LoadSkillTool,
@@ -130,7 +130,7 @@ class AskAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        runnable = self.create_runnable()
+        runnable = self.create_runnable(state)
 
         agent_state, config = await self.generate_agent_state(state, config)
         record_response_service = self.app.make(RecordResponseService)
