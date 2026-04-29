@@ -3,6 +3,7 @@ from typing import List, Type
 from byte import Command, Service, ServiceProvider
 from byte.memory import (
     ClearCommand,
+    CompleteSimpleTurnTool,
     CompleteStepTool,
     CompleteTurnTool,
     CreatePlanTool,
@@ -25,6 +26,7 @@ class MemoryServiceProvider(ServiceProvider):
         return [
             CreatePlanTool,
             CompleteStepTool,
+            CompleteSimpleTurnTool,
             CompleteTurnTool,
         ]
 

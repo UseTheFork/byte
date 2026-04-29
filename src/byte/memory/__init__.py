@@ -30,10 +30,10 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "ClearCommand": "command.clear_command",
+    "CompleteSimpleTurnTool": "tools.complete_simple_turn_tool",
     "CompleteStepTool": "tools.complete_step_tool",
     "CompleteTurnTool": "tools.complete_turn_tool",
     "CreatePlanTool": "tools.create_plan_tool",
-    "CompleteSimpleTurnTool": "tools.complete_simple_turn_tool",
     "MemoryService": "service.memory_service",
     "MemoryServiceProvider": "service_provider",
     "ResetCommand": "command.reset_command",
