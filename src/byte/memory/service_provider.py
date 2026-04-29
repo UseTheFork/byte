@@ -29,7 +29,12 @@ class MemoryServiceProvider(ServiceProvider):
         ]
 
     def services(self) -> List[Type[Service]]:
-        return [MemoryService]
+        return [
+            MemoryService,
+        ]
 
     def commands(self) -> List[Type[Command]]:
-        return [ClearCommand, ResetCommand]
+        return [
+            ClearCommand,
+            ResetCommand,
+        ]

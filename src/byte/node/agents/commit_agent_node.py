@@ -9,7 +9,7 @@ from langgraph.types import Command
 from byte.development import RecordResponseService
 from byte.git import CommitService, GitCommitTool
 from byte.llm import LLMService, ModelSchema
-from byte.memory import CompleteTurnTool
+from byte.memory import CompleteSimpleTurnTool
 from byte.node import (
     BaseAgentNode,
     BaseNode,
@@ -58,7 +58,7 @@ commit_user_template = [
     "",
     "1. Start with a SHORT analysis of the changes in list format.",
     f"2. Call the `{GitCommitTool.name}` tool ONCE.",
-    f"3. If the `{GitCommitTool.name}` call is successful, use the `{CompleteTurnTool.name}`",
+    f"3. If the `{GitCommitTool.name}` call is successful, use the `{CompleteSimpleTurnTool.name}`",
     Section.end(),
     Section.sub_heading("Example Workflow", 2),
     "```",
@@ -71,7 +71,7 @@ commit_user_template = [
     f"{GitCommitTool.name}([removed for brevity])",
     Boundary.close(BoundaryType.TOOL_CALL),
     Boundary.open(BoundaryType.TOOL_CALL),
-    f"{CompleteTurnTool.name}([removed for brevity])",
+    f"{CompleteSimpleTurnTool.name}([removed for brevity])",
     Boundary.close(BoundaryType.TOOL_CALL),
     Boundary.close(BoundaryType.EXAMPLE),
     "```",
@@ -135,7 +135,7 @@ class CommitAgentNode(BaseAgentNode):
         if not State.tool_was_called(state, GitCommitTool.name):
             return [GitCommitTool]
         else:
-            return [CompleteTurnTool]
+            return [CompleteSimpleTurnTool]
 
     def filter_message_history(self, messages: List[BaseMessage]) -> List[BaseMessage]:
         last_index = next(

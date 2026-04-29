@@ -10,12 +10,14 @@ if TYPE_CHECKING:
     from byte.memory.command.undo_command import UndoCommand
     from byte.memory.service.memory_service import MemoryService
     from byte.memory.service_provider import MemoryServiceProvider
+    from byte.memory.tools.complete_simple_turn_tool import CompleteSimpleTurnTool
     from byte.memory.tools.complete_step_tool import CompleteStepTool
     from byte.memory.tools.complete_turn_tool import CompleteTurnTool
     from byte.memory.tools.create_plan_tool import CreatePlanTool
 
 __all__ = (
     "ClearCommand",
+    "CompleteSimpleTurnTool",
     "CompleteStepTool",
     "CompleteTurnTool",
     "CreatePlanTool",
@@ -31,6 +33,7 @@ _dynamic_imports = {
     "CompleteStepTool": "tools.complete_step_tool",
     "CompleteTurnTool": "tools.complete_turn_tool",
     "CreatePlanTool": "tools.create_plan_tool",
+    "CompleteSimpleTurnTool": "tools.complete_simple_turn_tool",
     "MemoryService": "service.memory_service",
     "MemoryServiceProvider": "service_provider",
     "ResetCommand": "command.reset_command",
