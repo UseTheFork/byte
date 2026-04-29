@@ -133,7 +133,14 @@ class PromptAssembler(Bootable, Eventable):
         skills_xml = skill_loader_service.skills_to_prompt_xml(unloaded_skills)
 
         if not skills_xml:
-            return ""
+            return list_to_multiline_text(
+                [
+                    Section.start(SectionType.AVALIABLE_SKILLS),
+                    "```",
+                    "NO skills avaliable.",
+                    "```",
+                ]
+            )
 
         message_parts = [
             Section.start(SectionType.AVALIABLE_SKILLS),
