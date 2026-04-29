@@ -130,9 +130,6 @@ class ChromiumService(Service):
                 "html.parser",
             )
 
-            # Try to find a suitable parser for this content
-            text_content = ""
-
             parser = self.app.make(DuckDuckGoLiteParser)
             self.emit_tui(Messages.Status("loading", f"Parsing with {parser.__class__.__name__}..."))
             self.app["log"].info(f"Parsing with {parser.__class__.__name__}...")

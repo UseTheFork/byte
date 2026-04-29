@@ -9,6 +9,7 @@ class SectionType(StrEnum):
     ROLE = "Role"
 
     PROJECT_STATE = "Project State"
+    REFERENCE_MATERIALS = "Refrence Materials"
     PROJECT_ENVIRONMENT = "Project Environment"
 
     CONVERSATION_HISTORY = "Conversation History"
@@ -19,6 +20,9 @@ class SectionType(StrEnum):
 
     OPERATING_CONSTRAINTS = "Operating Constraints"
     OPERATING_PRINCIPLES = "Operating Principles"
+
+    COMMUNICATION_STYLE = "Communication Style"
+    WORKFLOW = "Workflow"
 
     RESPONSE_FORMAT = "Response Format"
     RESUME_FORMAT = "Resuming The Conversation"

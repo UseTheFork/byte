@@ -380,7 +380,10 @@ class PromptAssembler(Bootable, Eventable):
 
         project_context = await self.emit(OrchestrationEvents.GatherProjectContext())
 
-        project_information_and_context = []
+        project_information_and_context = [
+            Section.start(SectionType.REFERENCE_MATERIALS),
+            "",
+        ]
         conventions = project_context.conventions
         if conventions:
             conventions = "\n\n".join(conventions)
@@ -403,17 +406,7 @@ class PromptAssembler(Bootable, Eventable):
                 ]
             )
 
-        system_context = project_context.system_context
-        if system_context:
-            system_info_content = "\n".join(system_context)
-            project_information_and_context.extend(
-                [
-                    "# ",
-                    Boundary.open(BoundaryType.CONTEXT, meta={"type": "system"}),
-                    f"{system_info_content}",
-                    Boundary.close(BoundaryType.CONTEXT),
-                ]
-            )
+        project_information_and_context.append(Section.end())
 
         return list_to_multiline_text(project_information_and_context)
 
@@ -422,12 +415,6 @@ class PromptAssembler(Bootable, Eventable):
 
         # Create dictionary to map task names to their coroutines
         tasks = {}
-
-        # Add conditional tasks
-        if state.get("metadata", {}).prompt_settings.has_project_information_and_context:
-            tasks["project_context"] = self._gather_project_context()
-        if state.get("metadata", {}).prompt_settings.has_project_hierarchy:
-            tasks["project_hierarchy"] = self._gather_project_hierarchy()
 
         # Always executed tasks
         tasks.update(
@@ -439,6 +426,7 @@ class PromptAssembler(Bootable, Eventable):
                 "available_skills": self._generate_available_skills(),
                 "loaded_skills": self._generate_loaded_skills(),
                 "reinforcement": self._gather_reinforcement(),
+                "project_context": self._gather_project_context(),
                 "user_request": self._complete_user_request(state.get("user_request", "")),
             }
         )
@@ -457,12 +445,6 @@ class PromptAssembler(Bootable, Eventable):
         # Map results back to their keys
         results_dict = dict(zip(tasks.keys(), results))
 
-        # Build the state dictionary
-        if "project_context" in results_dict:
-            user_prompt_state["project_information_and_context"] = results_dict["project_context"]
-        if "project_hierarchy" in results_dict:
-            user_prompt_state["project_hierarchy"] = results_dict["project_hierarchy"]
-
         user_prompt_state.update(
             {
                 "project_environment": results_dict["project_environment"],
@@ -472,6 +454,7 @@ class PromptAssembler(Bootable, Eventable):
                 "available_skills": results_dict["available_skills"],
                 "loaded_skills": results_dict["loaded_skills"],
                 "operating_principles": results_dict["reinforcement"],
+                "project_context": results_dict["project_context"],
                 "user_request": results_dict["user_request"],
             }
         )
@@ -520,6 +503,7 @@ class PromptAssembler(Bootable, Eventable):
         refreshed_context_message = list_to_multiline_text(
             [
                 self.prompt_state["loaded_skills"],
+                self.prompt_state["project_context"],
                 self.prompt_state["project_environment"],
                 Section.start(SectionType.PROJECT_STATE),
                 "#id-dhd88-asx-4857",
