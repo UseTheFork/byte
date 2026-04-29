@@ -155,7 +155,7 @@ class CommitAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        runnable = self.create_runnable(state)
+        runnable = self.create_runnable(state, "any")
 
         commit_service = self.app.make(CommitService)
         request = await commit_service.build_commit_prompt()

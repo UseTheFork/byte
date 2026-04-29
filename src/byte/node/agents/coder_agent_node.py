@@ -184,7 +184,7 @@ class CoderAgentNode(BaseAgentNode):
     ) -> Command[Literal["routing_node"]]:
 
         agent_state, config = await self.generate_agent_state(state, config)
-        runnable = self.create_runnable(state)
+        runnable = self.create_runnable(state, "any")
         record_response_service = self.app.make(RecordResponseService)
 
         result = await runnable.ainvoke(agent_state, config=config)
