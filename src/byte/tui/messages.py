@@ -121,6 +121,9 @@ class Messages:
         tokens_received: int
         message_cost: float
         session_cost: float
+
+    @dataclass
+    class UpdateMemory(Message):
         memory_percent: float
 
     @dataclass

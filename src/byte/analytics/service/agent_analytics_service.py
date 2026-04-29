@@ -77,26 +77,12 @@ class AgentAnalyticsService(Service):
                     self.usage.last.input * self.get_cost_per_token(model_data.constraints.input_cost_per_token)
                 ) + (self.usage.last.output * self.get_cost_per_token(model_data.constraints.output_cost_per_token))
 
-        # Calculate memory_percent as average of averages across all models
-        memory_percent = 0.0
-        if self.usage.by_model:
-            model_percentages = []
-            for model_id, usage in self.usage.by_model.items():
-                model_data = llm_registry.get_model(model_id)
-                if model_data and model_data.constraints.max_input_tokens > 0:
-                    model_percent = (usage.context / model_data.constraints.max_input_tokens) * 100
-                    model_percentages.append(model_percent)
-
-            if model_percentages:
-                memory_percent = sum(model_percentages) / len(model_percentages)
-
         self.emit_tui(
             Messages.UpdateAnalytics(
                 tokens_sent=self.usage.last.input,
                 tokens_received=self.usage.last.output,
                 message_cost=last_message_cost,
                 session_cost=session_cost,
-                memory_percent=memory_percent,
             )
         )
 

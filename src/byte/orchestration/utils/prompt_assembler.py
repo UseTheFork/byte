@@ -3,7 +3,7 @@ import re
 from datetime import datetime
 from typing import TYPE_CHECKING, TypeVar
 
-from langchain.messages import AIMessage, HumanMessage
+from langchain.messages import HumanMessage
 from langchain_core.messages import BaseMessage
 
 from byte.files import FileService
@@ -13,7 +13,6 @@ from byte.skills import LoadSkillTool, SkillLoaderService, SkillTrackerService
 from byte.support import Boundary, BoundaryType, Section, SectionType
 from byte.support.mixins import Bootable, Eventable
 from byte.support.utils import list_to_multiline_text
-from byte.tools import ToolMessage
 
 if TYPE_CHECKING:
     from byte.node import BaseAgentNode
@@ -261,7 +260,7 @@ class PromptAssembler(Bootable, Eventable):
 
         return list_to_multiline_text(masked_messages)
 
-    async def _gather_file_context(self, with_line_numbers=False) -> str:
+    async def _gather_file_context(self) -> str:
         """Gather file context including read-only and editable files.
 
         Emits GATHER_FILE_CONTEXT event and formats the response into
@@ -274,10 +273,7 @@ class PromptAssembler(Bootable, Eventable):
         """
         file_service = self.app.make(FileService)
 
-        if with_line_numbers:
-            read_only_files, editable_files = await file_service.generate_context_prompt_with_line_numbers()
-        else:
-            read_only_files, editable_files = await file_service.generate_context_prompt()
+        read_only_files, editable_files = await file_service.generate_context_prompt_with_line_numbers()
 
         file_context_content = []
 
@@ -421,38 +417,6 @@ class PromptAssembler(Bootable, Eventable):
 
         return list_to_multiline_text(project_information_and_context)
 
-    def generate_pending_agent_state(self, state: BaseState) -> list[BaseMessage]:
-
-        masked_messages = []
-        messages = state["scratch_messages"]
-
-        if not messages:
-            masked_messages.append("Please provide any additional context I may need for this task.")
-
-        for message in messages:
-            if isinstance(message, AIMessage):
-                masked_messages.extend(
-                    [
-                        "",
-                        Boundary.open(BoundaryType.AGENT_MESSAGE),
-                        f"{message.text}",
-                        Boundary.close(BoundaryType.AGENT_MESSAGE),
-                        "",
-                    ]
-                )
-            elif isinstance(message, ToolMessage):
-                masked_messages.extend(
-                    [
-                        "",
-                        Boundary.open(BoundaryType.TOOL_CALL, meta={"tool": str(message.name)}),
-                        f"{message.text}",
-                        Boundary.close(BoundaryType.TOOL_CALL),
-                        "",
-                    ]
-                )
-
-        return [AIMessage(content=list_to_multiline_text(masked_messages))]
-
     async def generate_state(self, state: BaseState, extra: dict | None = {}) -> dict:
         user_prompt_state = {**state, **(extra or {})}
 
@@ -484,7 +448,6 @@ class PromptAssembler(Bootable, Eventable):
             tasks.update(
                 {
                     "file_context": self._gather_file_context(),
-                    "file_context_with_line_numbers": self._gather_file_context(True),
                 }
             )
 
@@ -517,7 +480,6 @@ class PromptAssembler(Bootable, Eventable):
             user_prompt_state.update(
                 {
                     "file_context": results_dict["file_context"],
-                    "file_context_with_line_numbers": results_dict["file_context_with_line_numbers"],
                 }
             )
 
@@ -566,7 +528,7 @@ class PromptAssembler(Bootable, Eventable):
                 "",
                 Section.important("You MUST trust this information as the current state of the files etc."),
                 "",
-                self.prompt_state["file_context_with_line_numbers"],
+                self.prompt_state["file_context"],
                 "",
                 Section.end(),
                 "",

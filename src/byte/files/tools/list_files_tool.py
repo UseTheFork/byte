@@ -37,6 +37,6 @@ class ListFilesTool(BaseTool):
         if not filtered:
             result = "No files found."
         else:
-            result = "\n".join(filtered)
+            result = "\n".join(f"- {f}" for f in filtered)
 
         return ToolResult(result=result)

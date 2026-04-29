@@ -313,6 +313,10 @@ class Conversation(Widget):
         """
         self.query_one(Analytics).update_analytics(event)
 
+    @on(Messages.UpdateMemory)
+    async def memory(self, event: Messages.UpdateMemory) -> None:
+        self.query_one(Analytics).update_memory(event)
+
     @on(Messages.UpdateFiles)
     async def update_files(self, event: Messages.UpdateFiles) -> None:
         """Update file counts display with current context statistics.

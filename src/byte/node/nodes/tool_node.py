@@ -1,5 +1,3 @@
-import json
-
 from langgraph.types import Command
 
 from byte.node import BaseNode
@@ -47,7 +45,7 @@ class ToolNode(BaseNode):
                 )
 
                 tool_message = ToolMessage(
-                    content=json.dumps(tool_result.result),
+                    content=tool_result.result,
                     name=tool_call["name"],
                     tool_call_id=tool_call["id"],
                 )

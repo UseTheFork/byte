@@ -16,6 +16,7 @@ from byte.node import (
 from byte.node.messages import BaseAIMessage
 from byte.orchestration import BaseState, PromptAssembler
 from byte.support import Str
+from byte.tui import Messages
 
 
 class BaseAgentNode(BaseNode):
@@ -128,12 +129,28 @@ class BaseAgentNode(BaseNode):
         agent_state["assembled_user_message"] = prompt_assembler.assemble_user_message(**user_prompt_state)
         agent_state["refreshed_context_state"] = prompt_assembler.generate_refreshed_context_state(state)
 
-        agent_state["pending_agent_state"] = prompt_assembler.generate_pending_agent_state(state)
-
         if state.get("errors", None) is not None:
             agent_state["errors"] = await self._gather_errors(agent_state)
         else:
             agent_state["errors"] = []
+
+        max_tokens = 150_000
+
+        assembled_user_message_tokens = len(agent_state["assembled_user_message"]) / 4
+
+        refreshed_context_state_tokens = sum(len(m.text) / 4 for m in agent_state["refreshed_context_state"])
+
+        scratch_messages = state.get("scratch_messages", [])
+        scratch_messages_tokens = sum(len(m.text) / 4 for m in scratch_messages)
+
+        total_tokens = assembled_user_message_tokens + refreshed_context_state_tokens + scratch_messages_tokens
+        memory_percent = (total_tokens / max_tokens) * 100
+
+        self.app.emit_tui(
+            Messages.UpdateMemory(
+                memory_percent=memory_percent,
+            )
+        )
 
         config = payload.config
 
