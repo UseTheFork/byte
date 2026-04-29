@@ -29,11 +29,30 @@ class ListFilesTool(BaseTool):
         project_files = await file_service.get_project_files()
 
         if path:
-            # normalized the path to not have a trailing slash
             normalized = path.rstrip("/")
-            filtered = [f for f in project_files if f.startswith(normalized + "/") or f == normalized]
+            prefix = normalized + "/"
+            entries: set[str] = set()
+            for f in project_files:
+                if f == normalized:
+                    entries.add(f)
+                elif f.startswith(prefix):
+                    remainder = f[len(prefix) :]
+                    # Only the immediate child (file or first directory segment)
+                    top = remainder.split("/")[0]
+                    if "/" in remainder:
+                        entries.add(prefix + top + "/")
+                    else:
+                        entries.add(prefix + top)
+            filtered = sorted(entries)
         else:
-            filtered = project_files
+            entries = set()
+            for f in project_files:
+                top = f.split("/")[0]
+                if "/" in f:
+                    entries.add(top + "/")
+                else:
+                    entries.add(top)
+            filtered = sorted(entries)
 
         if not filtered:
             result = "No files found."
@@ -45,3 +64,14 @@ class ListFilesTool(BaseTool):
     @classmethod
     def format_tool_message(cls, result: ToolResult) -> str:
         return result.result.get("content", "")
+
+    @classmethod
+    def format_tui_message(cls, result: ToolResult) -> str:
+        content = result.result.get("content", "")
+        lines = content.splitlines()
+        max_lines = 20
+        if len(lines) > max_lines:
+            truncated = lines[:max_lines]
+            truncated.append(f"... ({len(lines) - max_lines} more)")
+            return "\n".join(truncated)
+        return content

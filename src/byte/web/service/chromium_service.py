@@ -1,4 +1,5 @@
 from typing import List, Type
+from urllib.parse import quote, unquote
 
 from bs4 import BeautifulSoup
 from pydoll.browser.chromium import Chrome
@@ -8,7 +9,6 @@ from byte import Service
 from byte.tui import Messages
 from byte.web.exceptions import WebNotEnabledException
 from byte.web.parser.base import BaseWebParser
-from byte.web.parser.duckduckgo_lite_parser import DuckDuckGoLiteParser
 from byte.web.parser.generic_parser import GenericParser
 from byte.web.parser.gitbook_parser import GitBookParser
 from byte.web.parser.github_parser import GitHubParser
@@ -117,27 +117,56 @@ class ChromiumService(Service):
             tab = await browser.start()
 
             self.emit_tui(Messages.Status("loading", f"Searching for {query}..."))
-            await tab.go_to("https://lite.duckduckgo.com/lite/?q={query}")
+            await tab.go_to(f"https://lite.duckduckgo.com/lite/?q={quote(query)}")
 
             self.emit_tui(Messages.Status("loading", "Extracting content..."))
             html_content = await tab.execute_script("return document.documentElement.outerHTML")
 
-            self.emit_tui(Messages.Status("loading", "Converting to markdown..."))
+            self.emit_tui(Messages.Status("loading", "Parsing results..."))
             html_content = html_content.get("result", {}).get("result", {}).get("value", "")
 
-            soup = BeautifulSoup(
-                html_content,
-                "html.parser",
-            )
+            soup = BeautifulSoup(html_content, "html.parser")
 
-            parser = self.app.make(DuckDuckGoLiteParser)
-            self.emit_tui(Messages.Status("loading", f"Parsing with {parser.__class__.__name__}..."))
-            self.app["log"].info(f"Parsing with {parser.__class__.__name__}...")
+            results = []
+            current: dict | None = None
+            position = 0
 
-            text_content = parser.parse(soup)
+            for tag in soup.find_all(["a", "td"]):
+                if tag.name == "a" and "result-link" in tag.get("class", []):
+                    if current and current.get("link"):
+                        results.append(current)
+                    raw_href = tag.get("href", "")
+                    if raw_href.startswith("//duckduckgo.com/l/?uddg="):
+                        encoded = raw_href.split("uddg=", 1)[1]
+                        if "&" in encoded:
+                            encoded = encoded[: encoded.index("&")]
+                        raw_href = unquote(encoded)
+                    position += 1
+                    current = {
+                        "title": tag.get_text(strip=True),
+                        "link": raw_href,
+                        "snippet": "",
+                        "position": position,
+                    }
+                elif tag.name == "td" and "result-snippet" in tag.get("class", []) and current is not None:
+                    current["snippet"] = tag.get_text(strip=True)
 
-            if text_content.strip():
-                self.app["log"].info(f"Parsed successfully with {parser.__class__.__name__}...")
+            if current and current.get("link"):
+                results.append(current)
+
+            if not results:
+                self.emit_tui(Messages.Status())
+                return "No results found. Try rephrasing your search."
+
+            lines = [f"Found {len(results)} search results:\n"]
+            for result in results:
+                lines.append(
+                    f"{result['position']}. {result['title']}\n"
+                    f"   URL: {result['link']}\n"
+                    f"   Summary: {result['snippet']}\n"
+                )
+
+            text_content = "\n".join(lines)
 
             self.emit_tui(Messages.Status())
             return text_content

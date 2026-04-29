@@ -152,6 +152,7 @@ class Analytics(containers.VerticalGroup):
         self.tokens_used = (
             f"Tokens: {self.humanizer(event.tokens_sent)} sent, {self.humanizer(event.tokens_received)} received"
         )
+        self.cost = f"Cost: ${event.message_cost:.2f} message, ${event.session_cost:.2f} session."
 
     def update_memory(self, event) -> None:
 

@@ -30,7 +30,7 @@ class ToolFileService(Service):
         file_context = file_service.get_file_context(resolved_file_path)
 
         if file_context and file_context.mode == FileMode.READ_ONLY:
-            raise Exception(f"Cannot edit read-only file '{path}'.")
+            raise Exception(f"Cannot edit read-only file `{path}`.")
 
         # Check if file is outside project
         project_root = Path(self.app.root_path())
@@ -38,7 +38,7 @@ class ToolFileService(Service):
         try:
             resolved_file_path.resolve().relative_to(project_root.resolve())
         except ValueError:
-            raise Exception(f"File is outside project root: {file_path}.")
+            raise Exception(f"File is outside project root: `{file_path}`.")
 
         return resolved_file_path
 
@@ -47,7 +47,7 @@ class ToolFileService(Service):
             full_path = self._prepare_file_path(path)
 
             if not full_path.exists():
-                raise Exception(f"Error: File '{path}' does not exist")
+                raise Exception(f"Error: File `{path}` does not exist")
 
             content = full_path.read_text(encoding="utf-8")
 
@@ -66,7 +66,7 @@ class ToolFileService(Service):
             new_content = content.replace(old_string, new_string, 1)
             full_path.write_text(new_content, encoding="utf-8")
 
-            return f"Successfully edited '{path}'"
+            return f"Successfully edited `{path}`"
         except Exception as e:
             self.emit_tui(
                 Messages.CreatePanel(
@@ -92,14 +92,14 @@ class ToolFileService(Service):
             interaction_service = self.app.make(InteractionService)
 
             if await interaction_service.confirm(
-                f"Write to file '{path}'?",
+                f"Write to file `{path}`?",
                 True,
             ):
                 # Create parent directories if they don't exist
                 full_path.parent.mkdir(parents=True, exist_ok=True)
 
                 full_path.write_text(content, encoding="utf-8")
-                return f"Successfully wrote {len(content)} characters to '{path}'"
+                return f"Successfully wrote {len(content)} characters to `{path}`"
             else:
                 raise Exception("User declined request to write file.")
 
@@ -128,14 +128,14 @@ class ToolFileService(Service):
             interaction_service = self.app.make(InteractionService)
 
             if not full_path.exists():
-                raise Exception(f"Error: File '{path}' does not exist")
+                raise Exception(f"Error: File `{path}` does not exist")
 
             if await interaction_service.confirm(
-                f"Replace all content in '{path}'?",
+                f"Replace all content in `{path}`?",
                 True,
             ):
                 full_path.write_text(content, encoding="utf-8")
-                return f"Successfully replaced content in '{path}'"
+                return f"Successfully replaced content in `{path}`"
             else:
                 raise Exception("User declined request to replace file.")
 
@@ -169,10 +169,10 @@ class ToolFileService(Service):
             resolved_file_path = self._prepare_file_path(path)
 
             if not resolved_file_path.exists():
-                raise Exception(f"Error: File '{path}' does not exist")
+                raise Exception(f"Error: File `{path}` does not exist")
 
             if await interaction_service.confirm(
-                f"Delete '{path}'?",
+                f"Delete `{path}`?",
                 True,
             ):
                 resolved_file_path.unlink()
@@ -181,7 +181,7 @@ class ToolFileService(Service):
                 await file_discovery_service.remove_file(resolved_file_path)
                 await file_service.remove_file(str(resolved_file_path))
 
-                return f"Successfully deleted '{path}'"
+                return f"Successfully deleted `{path}`"
             else:
                 raise Exception("User declined request to delete file.")
 
