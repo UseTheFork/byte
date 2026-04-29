@@ -37,6 +37,7 @@ class UserSelectTool(BaseTool):
         self,
         question: str = "",
         choices: list[dict[str, Any]] | None = None,
+        **kwargs,
     ) -> ToolResult:
 
         answer_options = [
@@ -52,4 +53,8 @@ class UserSelectTool(BaseTool):
 
         selected = await interaction_service.select(question, answer_options)
 
-        return ToolResult(result=f"User selected: {selected.label} ({selected.value})")
+        return ToolResult(result={"content": f"User selected: {selected.label} ({selected.value})"})
+
+    @classmethod
+    def format_tool_message(cls, result: ToolResult) -> str:
+        return result.result.get("content", "")

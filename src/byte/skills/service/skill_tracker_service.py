@@ -32,7 +32,7 @@ class SkillTrackerService(Service):
         """
         self._active_names = skills
 
-    def mark_loaded(self, name: str) -> None:
+    def mark_loaded(self, name: str) -> bool:
         """Mark a skill as having been loaded during this session.
 
         Only marks as loaded if the skill is in the active set. Silently
@@ -41,10 +41,15 @@ class SkillTrackerService(Service):
         Args:
             name: The skill name to mark as loaded
 
+        Returns:
+            True if the skill was marked as loaded, False otherwise
+
         Usage: `service.mark_loaded("code-reviewer")`
         """
         if name in self._active_names:
             self._loaded.add(name)
+            return True
+        return False
 
     def is_loaded(self, name: str) -> bool:
         """Return whether a skill has been loaded during this session.

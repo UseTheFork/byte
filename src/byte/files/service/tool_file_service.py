@@ -149,7 +149,7 @@ class ToolFileService(Service):
             )
             raise e
 
-    async def delete_file(self, path: str):
+    async def delete_file(self, path: str) -> str:
         """Apply the delete operation to the file system.
 
         Deletes the file and removes it from both the file discovery service
@@ -180,6 +180,8 @@ class ToolFileService(Service):
                 # Remove the deleted file from context
                 await file_discovery_service.remove_file(resolved_file_path)
                 await file_service.remove_file(str(resolved_file_path))
+
+                return f"Successfully deleted '{path}'"
             else:
                 raise Exception("User declined request to delete file.")
 

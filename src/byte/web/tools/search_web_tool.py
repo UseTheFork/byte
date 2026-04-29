@@ -29,6 +29,7 @@ class SearchWebTool(BaseTool):
     async def run(
         self,
         query: str = "",
+        **kwargs,
     ) -> ToolResult:
 
         chromium_service = self.app.make(ChromiumService)
@@ -36,4 +37,8 @@ class SearchWebTool(BaseTool):
 
         self.app["log"].info(markdown_content)
 
-        return ToolResult(result=markdown_content)
+        return ToolResult(result={"content": markdown_content})
+
+    @classmethod
+    def format_tool_message(cls, result: ToolResult) -> str:
+        return result.result.get("content", "")

@@ -22,10 +22,15 @@ class UserInputTextTool(BaseTool):
     async def run(
         self,
         question: str = "",
+        **kwargs,
     ) -> ToolResult:
 
         interaction_service = self.app.make(InteractionService)
 
         text = await interaction_service.input_text(question)
 
-        return ToolResult(result=text)
+        return ToolResult(result={"content": text})
+
+    @classmethod
+    def format_tool_message(cls, result: ToolResult) -> str:
+        return result.result.get("content", "")

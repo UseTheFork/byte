@@ -52,6 +52,7 @@ class GitCommitTool(BaseTool):
         scope: str | None = None,
         breaking_change_message: str | None = None,
         body: str | None = None,
+        **kwargs,
     ) -> ToolResult:
 
         git_service = self.app.make(GitService)
@@ -82,16 +83,21 @@ class GitCommitTool(BaseTool):
         )
 
         if not confirmed:
-            return ToolResult(result=str(change))
+            return ToolResult(result={"content": str(change)})
 
         if confirmed:
             try:
                 formatted_message = await commit_service.format_conventional_commit(commit)
                 await git_service.commit(formatted_message)
 
-                return ToolResult(result=f"Successfully created commit: {formatted_message}")
+                return ToolResult(result={"content": f"Successfully created commit: {formatted_message}"})
 
             except Exception as e:
                 raise ToolRunException(f"Error creating git commit: {e!s}") from e
 
         return ToolResult(result="User declined the tool call.")
+
+    @classmethod
+    def format_tool_message(cls, result: ToolResult) -> str:
+        # Successfully created commit:
+        return result.result.get("content", "")

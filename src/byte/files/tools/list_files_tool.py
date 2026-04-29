@@ -22,6 +22,7 @@ class ListFilesTool(BaseTool):
     async def run(
         self,
         path: Optional[str] = None,
+        **kwargs,
     ) -> ToolResult:
 
         file_service = self.app.make(FileService)
@@ -39,4 +40,8 @@ class ListFilesTool(BaseTool):
         else:
             result = "\n".join(f"- {f}" for f in filtered)
 
-        return ToolResult(result=result)
+        return ToolResult(result={"content": result})
+
+    @classmethod
+    def format_tool_message(cls, result: ToolResult) -> str:
+        return result.result.get("content", "")

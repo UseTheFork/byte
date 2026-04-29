@@ -41,6 +41,10 @@ class GitLogTool(BaseTool):
         "required": [],
     }
 
+    @classmethod
+    def format_tool_message(cls, result: ToolResult) -> str:
+        return result.result.get("content", "")
+
     @override
     async def run(
         self,
@@ -49,6 +53,7 @@ class GitLogTool(BaseTool):
         until: str | None = None,
         file_path: str | None = None,
         oneline: bool = True,
+        **kwargs,
     ) -> ToolResult:
 
         git_service = self.app.make(GitService)
@@ -73,7 +78,7 @@ class GitLogTool(BaseTool):
 
             result = repo.git.log(*log_args)
 
-            return ToolResult(result=result or "No commits found matching the given criteria.")
+            return ToolResult(result={"content": result or "No commits found matching the given criteria."})
 
         except Exception as e:
             raise ToolRunException(f"Error retrieving git log: {e!s}") from e

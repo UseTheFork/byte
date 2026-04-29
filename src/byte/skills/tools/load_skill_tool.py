@@ -21,7 +21,16 @@ class LoadSkillTool(BaseTool):
     }
 
     @override
-    async def run(self, skill_name: str) -> ToolResult:
+    async def run(
+        self,
+        skill_name: str,
+        **kwargs,
+    ) -> ToolResult:
         skill_tracker_service = self.app.make(SkillTrackerService)
-        skill_tracker_service.mark_loaded(skill_name)
-        return ToolResult(result=f"Skill '{skill_name}' loaded.")
+        loaded = skill_tracker_service.mark_loaded(skill_name)
+        content = f"Skill '{skill_name}' loaded." if loaded else f"Skill '{skill_name}' not found."
+        return ToolResult(result={"content": content})
+
+    @classmethod
+    def format_tool_message(cls, result: ToolResult) -> str:
+        return result.result.get("content", "")

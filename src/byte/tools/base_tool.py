@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
+from byte.orchestration import BaseState
 from byte.support.mixins.bootable import Bootable
 from byte.tools.exceptions import ToolException, ToolRunException, ToolValidationException
 from byte.tools.schemas import ToolResult
@@ -21,6 +22,7 @@ class BaseTool(ABC, Bootable):
     async def invoke(
         self,
         args: dict,
+        state: BaseState,
         tool_call_id: str,
     ) -> ToolResult:
 
@@ -32,7 +34,7 @@ class BaseTool(ABC, Bootable):
             raise ToolValidationException(f"Missing required argument(s): {', '.join(missing)}")
 
         try:
-            return await self.run(**args)
+            return await self.run(**args, state=state)
         except ToolException:
             self.app["log"].exception("Oops")
             raise
@@ -47,3 +49,21 @@ class BaseTool(ABC, Bootable):
             "description": cls.description,
             "input_schema": cls.input_schema,
         }
+
+    @classmethod
+    def format_tui_message(cls, result: ToolResult) -> str:
+        """Format the tool result for display in the TUI.
+
+        Override this method to customize how a tool's result is presented.
+        """
+        return cls.format_tool_message(result)
+
+    @classmethod
+    @abstractmethod
+    def format_tool_message(cls, result: ToolResult) -> str:
+        """Format the tool result as a tool message returned to the LLM.
+
+        Override this method to customize the message content sent back to the model.
+        By default returns the raw result string.
+        """
+        ...

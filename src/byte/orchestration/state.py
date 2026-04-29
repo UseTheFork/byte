@@ -1,8 +1,20 @@
-from typing import Annotated, TypedDict
+from typing import Annotated, Literal, TypedDict
 
 from langgraph.graph.message import AnyMessage, add_messages
 
 from byte.orchestration import ConstraintSchema, MetadataSchema, add_constraints, replace_str, update_metadata
+
+
+class PlanStep(TypedDict):
+    """ """
+
+    id: str
+    content: str
+    note: str | None
+    status: Literal["pending", "in_progress", "completed"] | None
+    order: int
+    created_at: str
+    updated_at: str
 
 
 class RoutingState(TypedDict):
@@ -40,6 +52,8 @@ class BaseState(TypedDict):
 
     # These are specific to Coder
     touched_files: list[str]
+
+    plan: list[PlanStep] | None
 
     routing: RoutingState
 

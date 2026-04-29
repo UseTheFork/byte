@@ -25,6 +25,7 @@ class ReadFilesTool(BaseTool):
     async def run(
         self,
         file_paths: list[str] = [],
+        **kwargs,
     ) -> ToolResult:
 
         file_service = self.app.make(FileService)
@@ -36,8 +37,14 @@ class ReadFilesTool(BaseTool):
 
         if not added:
             return ToolResult(
-                result="No files were added. Files may not exist in the project or are already in context."
+                result={"content": "No files were added. Files may not exist in the project or are already in context."}
             )
 
         files_list = "\n".join(f"- `{f}`" for f in added)
-        return ToolResult(result=f"The following files have been added to the Project State section:\n{files_list}")
+        return ToolResult(
+            result={"content": f"The following files have been added to the Project State section:\n{files_list}"}
+        )
+
+    @classmethod
+    def format_tool_message(cls, result: ToolResult) -> str:
+        return result.result.get("content", "")

@@ -74,4 +74,6 @@ class ResetCommand(Command):
             # Notify success
             await self.notify_success("Conversation and file context completely reset")
 
+        self.emit_tui(Messages.Clear())
+
         self.emit_tui(Messages.CommandExecutionCompleted())

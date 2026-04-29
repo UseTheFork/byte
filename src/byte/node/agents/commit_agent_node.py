@@ -9,6 +9,7 @@ from langgraph.types import Command
 from byte.development import RecordResponseService
 from byte.git import CommitService, GitCommitTool
 from byte.llm import LLMService, ModelSchema
+from byte.memory import CompleteTurnTool
 from byte.node import (
     BaseAgentNode,
     BaseNode,
@@ -17,7 +18,7 @@ from byte.node import (
 from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
 from byte.orchestration import AssistantContextSchema, BaseState, preamble
-from byte.support import Section, SectionType, Str
+from byte.support import Boundary, BoundaryType, Section, SectionType, Str
 from byte.support.utils import list_to_multiline_text
 
 # Conventional commit message generation prompt
@@ -41,13 +42,29 @@ commit_user_template = [
     Section.end(),
     "{commit_guidelines}",
     "",
-    Section.start(SectionType.RESPONSE_FORMAT),
+    Section.start(SectionType.WORKFLOW),
     "Format your response as follows:",
     "",
     "1. Start with a SHORT analysis of the changes in list format.",
-    "2. Call the `git_commit` tool ONCE.",
-    "3. If the tool call is successful, end your turn with no further output.",
+    f"2. Call the `{GitCommitTool.name}` tool ONCE.",
+    f"3. If the `{GitCommitTool.name}` call is successful, use the `{CompleteTurnTool.name}`",
     Section.end(),
+    Section.sub_heading("Example Workflow", 2),
+    "```",
+    Boundary.open(BoundaryType.EXAMPLE),
+    Boundary.open(BoundaryType.AGENT_MESSAGE),
+    "Analysis of changes:",
+    "- Updated foo() to handle edge case",
+    Boundary.close(BoundaryType.AGENT_MESSAGE),
+    Boundary.open(BoundaryType.TOOL_CALL),
+    f'{GitCommitTool.name}(message="fix(foo): handle edge case in foo()")',
+    Boundary.close(BoundaryType.TOOL_CALL),
+    Boundary.open(BoundaryType.TOOL_CALL),
+    f"{CompleteTurnTool.name}()",
+    Boundary.close(BoundaryType.TOOL_CALL),
+    Boundary.close(BoundaryType.EXAMPLE),
+    "```",
+    "",
 ]
 
 commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
@@ -104,7 +121,7 @@ class CommitAgentNode(BaseAgentNode):
         return commit_user_template
 
     def get_tools(self):
-        return [GitCommitTool]
+        return [GitCommitTool, CompleteTurnTool]
 
     def filter_message_history(self, messages: List[BaseMessage]) -> List[BaseMessage]:
         last_index = next(

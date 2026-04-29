@@ -34,8 +34,8 @@ class StartNode(BaseNode):
             # We always remove scratch no matter what.
             "scratch_messages": [RemoveMessage(id=REMOVE_ALL_MESSAGES)],
             "masked_messages": [],
+            "todos": [],
             "touched_files": state.get("touched_files") or [],
-            "extracted_content": None,
             "errors": None,
             "metadata": MetadataSchema(
                 iteration=0,

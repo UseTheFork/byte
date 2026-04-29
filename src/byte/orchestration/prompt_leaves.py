@@ -30,6 +30,7 @@ def preamble() -> str:
         f"- `{Boundary.open(BoundaryType.AGENT_MESSAGE)}` - The agent_message tag wraps a response produced by an agent. Attributes include `agent_type` (the name of the agent that produced the message).",
         f"- `{Boundary.open(BoundaryType.TOOL_CALL)}` - The tool_call tag wraps a summary of a tool invocation performed by an agent, including the tool name and its execution status.",
         f"- `{Boundary.open(BoundaryType.USER_MESSAGE)}` - The user_message tag wraps the user's request as it appears in the conversation history.",
+        Section.end(),
     ]
     return list_to_multiline_text(lines)
 

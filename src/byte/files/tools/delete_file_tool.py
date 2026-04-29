@@ -25,6 +25,7 @@ class DeleteFileTool(BaseTool):
         self,
         app: Application,
         file_path: str = "",
+        **kwargs,
     ) -> ToolResult:
 
         try:
@@ -32,7 +33,7 @@ class DeleteFileTool(BaseTool):
             result = await tool_file_service.delete_file(file_path)
 
             return ToolResult(
-                result=result,
+                result={"content": result},
                 extra={
                     "touched_files": [file_path],
                 },
@@ -40,3 +41,7 @@ class DeleteFileTool(BaseTool):
 
         except Exception as e:
             raise ToolRunException(f"Error deleting file: {e!s}") from e
+
+    @classmethod
+    def format_tool_message(cls, result: ToolResult) -> str:
+        return result.result.get("content", "")

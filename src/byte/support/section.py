@@ -9,7 +9,7 @@ class SectionType(StrEnum):
     ROLE = "Role"
 
     PROJECT_STATE = "Project State"
-    REFERENCE_MATERIALS = "Refrence Materials"
+    REFERENCE_MATERIALS = "Reference Materials"
     PROJECT_ENVIRONMENT = "Project Environment"
 
     CONVERSATION_HISTORY = "Conversation History"
@@ -28,6 +28,8 @@ class SectionType(StrEnum):
     RESUME_FORMAT = "Resuming The Conversation"
 
     EXAMPLES = "Examples"
+
+    PLAN = "Plan"
 
 
 class Section:

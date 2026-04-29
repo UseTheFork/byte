@@ -410,6 +410,26 @@ class PromptAssembler(Bootable, Eventable):
 
         return list_to_multiline_text(project_information_and_context)
 
+    async def _generate_plan_section(self, state: BaseState) -> str:
+        plan = state.get("plan")
+        if not plan:
+            return ""
+
+        rows = "\n".join(
+            f"| {step['id']} | {step['content']} | {step.get('note') or ''} | {step['status']} |"
+            for step in sorted(plan, key=lambda s: s["order"])
+        )
+
+        message_parts = [
+            Section.start(SectionType.PLAN),
+            "| # | Task | Note | Status |",
+            "|---|------|------|--------|",
+            rows,
+            Section.end(),
+        ]
+
+        return list_to_multiline_text(message_parts)
+
     async def generate_state(self, state: BaseState, extra: dict | None = {}) -> dict:
         user_prompt_state = {**state, **(extra or {})}
 
@@ -428,6 +448,7 @@ class PromptAssembler(Bootable, Eventable):
                 "reinforcement": self._gather_reinforcement(),
                 "project_context": self._gather_project_context(),
                 "user_request": self._complete_user_request(state.get("user_request", "")),
+                "plan": self._generate_plan_section(state),
             }
         )
 
@@ -456,6 +477,7 @@ class PromptAssembler(Bootable, Eventable):
                 "operating_principles": results_dict["reinforcement"],
                 "project_context": results_dict["project_context"],
                 "user_request": results_dict["user_request"],
+                "plan": results_dict["plan"],
             }
         )
 
@@ -515,7 +537,7 @@ class PromptAssembler(Bootable, Eventable):
                 self.prompt_state["file_context"],
                 "",
                 Section.end(),
-                "",
+                self.prompt_state["plan"],
                 self.epilogue(),
             ]
         )
@@ -535,7 +557,7 @@ class PromptAssembler(Bootable, Eventable):
         else:
             lines.extend(
                 [
-                    f"> **Remember**: This is a followup response. Make sure to consider the {Section.ref(SectionType.RESPONSE_FORMAT)} section and plan accordingly."
+                    f"> **Remember**: This is a followup response. Make sure to consider the {Section.ref(SectionType.WORKFLOW)} section and plan accordingly."
                 ]
             )
 

@@ -27,6 +27,7 @@ class EditFileTool(BaseTool):
         file_path: str = "",
         search_string: str = "",
         replace_string: str = "",
+        **kwargs,
     ) -> ToolResult:
 
         try:
@@ -35,7 +36,7 @@ class EditFileTool(BaseTool):
             result = await tool_file_service.edit_file(file_path, search_string, replace_string)
 
             return ToolResult(
-                result=result,
+                result={"content": result},
                 extra={
                     "touched_files": [file_path],
                 },
@@ -43,3 +44,7 @@ class EditFileTool(BaseTool):
 
         except Exception as e:
             raise ToolRunException(f"Error editing file: {e!s}") from e
+
+    @classmethod
+    def format_tool_message(cls, result: ToolResult) -> str:
+        return result.result.get("content", "")

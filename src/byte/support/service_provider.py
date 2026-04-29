@@ -7,11 +7,10 @@ from byte import CommandRegistryService
 from byte.tools import ToolRegistryService
 
 if TYPE_CHECKING:
-    from langchain_core.tools.base import BaseTool
-
     from byte import Command
     from byte.foundation import Application
     from byte.support import Service
+    from byte.tools import BaseTool
 
 
 class ServiceProvider(ABC):

@@ -5,5 +5,5 @@ class ToolResult(BaseModel):
     """ """
 
     success: bool = True
-    result: str
+    result: dict
     extra: dict = Field(default_factory=dict)

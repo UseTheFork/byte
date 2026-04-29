@@ -1,7 +1,15 @@
 from typing import List, Type
 
 from byte import Command, Service, ServiceProvider
-from byte.memory import ClearCommand, MemoryService, ResetCommand
+from byte.memory import (
+    ClearCommand,
+    CompleteStepTool,
+    CompleteTurnTool,
+    CreatePlanTool,
+    MemoryService,
+    ResetCommand,
+)
+from byte.tools import BaseTool
 
 
 class MemoryServiceProvider(ServiceProvider):
@@ -12,6 +20,13 @@ class MemoryServiceProvider(ServiceProvider):
     management for the AI agent system.
     Usage: Register with container to enable conversation memory
     """
+
+    def tools(self) -> List[Type[BaseTool]]:
+        return [
+            CreatePlanTool,
+            CompleteStepTool,
+            CompleteTurnTool,
+        ]
 
     def services(self) -> List[Type[Service]]:
         return [MemoryService]

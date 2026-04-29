@@ -22,6 +22,7 @@ class UserConfirmTool(BaseTool):
     async def run(
         self,
         question: str = "",
+        **kwargs,
     ) -> ToolResult:
 
         interaction_service = self.app.make(InteractionService)
@@ -29,6 +30,10 @@ class UserConfirmTool(BaseTool):
         confirmed = await interaction_service.confirm(question, True)
 
         if confirmed:
-            return ToolResult(result="User confirmed yes.")
+            return ToolResult(result={"content": "User confirmed yes."})
 
-        return ToolResult(result="User declined with no.")
+        return ToolResult(result={"content": "User declined with no."})
+
+    @classmethod
+    def format_tool_message(cls, result: ToolResult) -> str:
+        return result.result.get("content", "")

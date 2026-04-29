@@ -25,6 +25,7 @@ class ReplaceFileTool(BaseTool):
         self,
         file_path: str = "",
         content: str = "",
+        **kwargs,
     ) -> ToolResult:
 
         try:
@@ -32,7 +33,7 @@ class ReplaceFileTool(BaseTool):
             result = await tool_file_service.replace_file(file_path, content)
 
             return ToolResult(
-                result=result,
+                result={"content": result},
                 extra={
                     "touched_files": [file_path],
                 },
@@ -40,3 +41,7 @@ class ReplaceFileTool(BaseTool):
 
         except Exception as e:
             raise ToolRunException(f"Error replacing file: {e!s}") from e
+
+    @classmethod
+    def format_tool_message(cls, result: ToolResult) -> str:
+        return result.result.get("content", "")

@@ -32,11 +32,16 @@ class GitGrepTool(BaseTool):
         "required": ["pattern"],
     }
 
+    @classmethod
+    def format_tool_message(cls, result: ToolResult) -> str:
+        return result.result.get("content", "")
+
     @override
     async def run(
         self,
         pattern: str = "",
         file_pattern: str = "",
+        **kwargs,
     ) -> ToolResult:
 
         git_service = self.app.make(GitService)
@@ -56,7 +61,7 @@ class GitGrepTool(BaseTool):
             try:
                 result = repo.git.grep(*grep_args)
                 if not result:
-                    return ToolResult(result=f"No matches found for pattern: {pattern}")
+                    return ToolResult(result={"content": f"No matches found for pattern: {pattern}"})
                 if len(result) > MAX_RESULT_LENGTH:
                     result = result[:MAX_RESULT_LENGTH] + "\n... [results truncated]"
                 return ToolResult(result=result)
@@ -64,7 +69,7 @@ class GitGrepTool(BaseTool):
                 # Git grep returns non-zero exit code when no matches found
                 error_msg = str(grep_error)
                 if "did not match any file(s) known to git" in error_msg or "no matches" in error_msg.lower():
-                    return ToolResult(result=f"No matches found for pattern: {pattern}")
+                    return ToolResult(result={"content": f"No matches found for pattern: {pattern}"})
                 raise
 
         except Exception as e:

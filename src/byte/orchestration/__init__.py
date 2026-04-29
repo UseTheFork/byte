@@ -7,7 +7,7 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.orchestration.events import OrchestrationEvents
     from byte.orchestration.exceptions import ByteAgentException, DummyNodeReachedException
-    from byte.orchestration.prompt_leaves import core_mandates, epilogue, preamble
+    from byte.orchestration.prompt_leaves import core_mandates, preamble
     from byte.orchestration.reducers import add_constraints, replace_list, replace_str, update_metadata
     from byte.orchestration.schemas import (
         AgentConfigBoolSchema,
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
         PromptSettingsSchema,
         TokenUsageSchema,
     )
-    from byte.orchestration.state import BaseState, RoutingState
+    from byte.orchestration.state import BaseState, PlanStep, RoutingState
     from byte.orchestration.utils.graph_builder import GraphBuilder
     from byte.orchestration.utils.prompt_assembler import PromptAssembler
     from byte.orchestration.validators.base import ValidationError, Validator
@@ -39,6 +39,7 @@ __all__ = (
     "MaxLinesValidator",
     "MetadataSchema",
     "OrchestrationEvents",
+    "PlanStep",
     "PromptAssembler",
     "PromptSettingsSchema",
     "RoutingState",
@@ -62,6 +63,7 @@ _dynamic_imports = {
     "AgentConfigStringSchema": "schemas",
     "AssistantContextSchema": "schemas",
     "BaseState": "state",
+    "PlanStep": "state",
     "ByteAgentException": "exceptions",
     "ConstraintSchema": "schemas",
     "DummyNodeReachedException": "exceptions",

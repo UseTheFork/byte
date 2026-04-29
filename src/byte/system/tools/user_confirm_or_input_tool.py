@@ -1,10 +1,7 @@
-from typing import TYPE_CHECKING, override
+from typing import override
 
 from byte.tools import BaseTool, ToolResult
 from byte.tui import InteractionService
-
-if TYPE_CHECKING:
-    pass
 
 
 class UserConfirmOrInputTool(BaseTool):
@@ -38,6 +35,7 @@ class UserConfirmOrInputTool(BaseTool):
         confirm_message: str = "",
         input_message: str = "",
         default_confirm: bool = True,
+        **kwargs,
     ) -> ToolResult:
 
         interaction_service = self.app.make(InteractionService)
@@ -47,6 +45,10 @@ class UserConfirmOrInputTool(BaseTool):
         )
 
         if confirmed:
-            return ToolResult(result="User confirmed yes.")
+            return ToolResult(result={"content": "User confirmed yes."})
 
-        return ToolResult(result=f"User declined and provided input: {text_input}")
+        return ToolResult(result={"content": f"User declined and provided input: {text_input}"})
+
+    @classmethod
+    def format_tool_message(cls, result: ToolResult) -> str:
+        return result.result.get("content", "")
