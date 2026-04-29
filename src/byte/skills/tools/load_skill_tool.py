@@ -1,6 +1,7 @@
 from typing import override
 
 from byte.skills import SkillTrackerService
+from byte.support import Boundary, BoundaryType, Section, SectionType
 from byte.tools import BaseTool, ToolResult
 
 
@@ -14,7 +15,7 @@ class LoadSkillTool(BaseTool):
         "properties": {
             "skill_name": {
                 "type": "string",
-                "description": "The name of the skill to mark as loaded.",
+                "description": f"The name of the skill to load. This must be from the {Section.ref(SectionType.AVALIABLE_SKILLS)} and is labeled by `{Boundary.open(BoundaryType.NAME)}`",
             },
         },
         "required": ["skill_name"],

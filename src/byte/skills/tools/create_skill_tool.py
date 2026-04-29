@@ -47,4 +47,8 @@ class CreateSkillTool(BaseTool):
         skill_loader_service = self.app.make(SkillLoaderService)
         skill_loader_service.reload()
 
-        return ToolResult(result=f"Skill '{name}' created at {skill_file_path}.")
+        return ToolResult(result={"content": f"Skill '{name}' created at {skill_file_path}."})
+
+    @classmethod
+    def format_tool_message(cls, result: ToolResult) -> str:
+        return result.result.get("content", "")

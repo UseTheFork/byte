@@ -29,15 +29,47 @@ class EndNode(BaseNode):
             None,
         )
 
-        content = complete_turn_message.content if complete_turn_message else ""
+        if complete_turn_message:
+            content = complete_turn_message.content
 
-        return list_to_multiline_text(
-            [
-                Boundary.open(BoundaryType.AGENT_MESSAGE, meta={"agent_type": agent_name}),
-                content,
-                Boundary.close(BoundaryType.AGENT_MESSAGE),
-            ]
-        )
+            return list_to_multiline_text(
+                [
+                    Boundary.open(BoundaryType.AGENT_MESSAGE, meta={"agent_type": agent_name}),
+                    content,
+                    Boundary.close(BoundaryType.AGENT_MESSAGE),
+                ]
+            )
+
+        message_parts = []
+
+        for message in scratch_messages:
+            if isinstance(message, BaseAIMessage):
+                # Extract text content from AIMessage
+                content_text = message.text
+
+                if not message.mask:
+                    content_text = list_to_multiline_text(
+                        [
+                            Boundary.open(BoundaryType.AGENT_MESSAGE, meta={"agent_type": message.agent_name}),
+                            content_text,
+                            Boundary.close(BoundaryType.AGENT_MESSAGE),
+                        ]
+                    )
+
+                message_parts.append(content_text)
+            # elif isinstance(message, ToolMessage):
+            #     # Add tool execution summary
+            #     tool_name = getattr(message, "name", "unknown tool")
+            #     tool_status = getattr(message, "status", "unknown")
+            #     content_text = list_to_multiline_text(
+            #         [
+            #             Boundary.open(BoundaryType.TOOL_CALL),
+            #             f"Called {tool_name} applied with status {tool_status}",
+            #             Boundary.close(BoundaryType.TOOL_CALL),
+            #         ]
+            #     )
+
+        return list_to_multiline_text(message_parts)
 
     async def __call__(
         self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
