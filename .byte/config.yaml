@@ -70,7 +70,7 @@ cli:
   ui_theme: mocha
   syntax_theme: github-dark
 lsp:
-  enable: false
+  enable: true
   timeout: 30
   servers:
     python:

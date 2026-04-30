@@ -1,7 +1,5 @@
 from typing import List, Type
 
-from langchain.tools import BaseTool
-
 from byte import Command, EventBus, Service, ServiceProvider
 from byte.files import (
     AddFileCommand,
@@ -26,6 +24,7 @@ from byte.files import (
 )
 from byte.orchestration import OrchestrationEvents
 from byte.system import SystemEvents
+from byte.tools import BaseTool
 
 
 class FileServiceProvider(ServiceProvider):

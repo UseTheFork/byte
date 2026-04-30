@@ -26,9 +26,10 @@ if TYPE_CHECKING:
     from byte.lsp.service.lsp_client import LSPClient
     from byte.lsp.service.lsp_service import LSPService
     from byte.lsp.service_provider import LSPServiceProvider
-    from byte.lsp.tools.find_references import find_references
-    from byte.lsp.tools.get_definition import get_definition
-    from byte.lsp.tools.get_hover_info import get_hover_info
+    from byte.lsp.tools.find_references import FindReferencesTool
+    from byte.lsp.tools.get_definition import GetDefinitionTool
+    from byte.lsp.tools.get_hover_info import GetHoverInfoTool
+
 
 __all__ = (
     "CompletionItem",
@@ -36,6 +37,9 @@ __all__ = (
     "CustomServerConfig",
     "Diagnostic",
     "DiagnosticSeverity",
+    "FindReferencesTool",
+    "GetDefinitionTool",
+    "GetHoverInfoTool",
     "HoverResult",
     "LSPClient",
     "LSPConfig",
@@ -49,9 +53,6 @@ __all__ = (
     "PresetServerConfig",
     "Range",
     "TextDocumentIdentifier",
-    "find_references",
-    "get_definition",
-    "get_hover_info",
 )
 
 _dynamic_imports = {
@@ -74,9 +75,9 @@ _dynamic_imports = {
     "PresetServerConfig": "config",
     "Range": "schemas",
     "TextDocumentIdentifier": "schemas",
-    "find_references": "tools.find_references",
-    "get_definition": "tools.get_definition",
-    "get_hover_info": "tools.get_hover_info",
+    "FindReferencesTool": "tools.find_references",
+    "GetDefinitionTool": "tools.get_definition",
+    "GetHoverInfoTool": "tools.get_hover_info",
     # keep-sorted end
 }
 

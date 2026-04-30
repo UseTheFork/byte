@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Type
 
-from byte import Command, EventBus, Service, ServiceProvider, TaskManager
-from byte.lsp import LSPService
-from byte.system import SystemEvents
+from byte import Command, Service, ServiceProvider
+from byte.lsp import FindReferencesTool, GetDefinitionTool, GetHoverInfoTool, LSPService
+from byte.tools import BaseTool
 
 if TYPE_CHECKING:
     from byte.foundation import Application
@@ -18,6 +18,13 @@ class LSPServiceProvider(ServiceProvider):
     Usage: Register with container to enable LSP functionality
     """
 
+    def tools(self) -> List[Type[BaseTool]]:
+        return [
+            GetHoverInfoTool,
+            GetDefinitionTool,
+            FindReferencesTool,
+        ]
+
     def services(self) -> List[Type[Service]]:
         """Return list of LSP services to register."""
         return [LSPService]
@@ -25,27 +32,6 @@ class LSPServiceProvider(ServiceProvider):
     def commands(self) -> List[Type[Command]]:
         """Return list of LSP commands to register."""
         return []
-
-    async def boot(self):
-        config = self.app["config"]
-        if config.lsp.enable:
-            # Boots the LSPs and starts them in the background.
-            self.app.make(LSPService)
-            event_bus = self.app.make(EventBus)
-
-            event_bus.on(
-                SystemEvents.PostBoot,
-                self.boot_messages,
-            )
-
-    async def boot_messages(self, payload: SystemEvents.PostBoot) -> SystemEvents.PostBoot:
-        task_manager = self.app.make(TaskManager)
-
-        running_count = sum(1 for name in task_manager._tasks.keys() if name.startswith("lsp_server_"))
-
-        payload.messages.append(f"[text-muted]LSP servers running:[/text-muted] [$primary]{running_count}[/$primary]")
-
-        return payload
 
     async def shutdown(self, app: Application) -> None:
         """Shutdown all LSP servers gracefully."""

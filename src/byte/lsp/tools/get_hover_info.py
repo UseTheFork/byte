@@ -1,44 +1,58 @@
 from pathlib import Path
+from typing import override
 
-from langchain_core.tools import tool
-
-from byte.context import make
 from byte.lsp import LSPService
+from byte.tools import BaseTool, ToolResult
 
 
-@tool(parse_docstring=True)
-async def get_hover_info(file_path: str, line: int, character: int) -> str:
-    """Get hover information for a symbol at a specific position in a file.
+class GetHoverInfoTool(BaseTool):
+    name: str = "get_hover_info"
+    description: str = "Get hover information for a symbol at a specific position in a file. Uses the Language Server Protocol to retrieve documentation, type information, and other details about code symbols."
+    input_schema = {
+        "type": "object",
+        "properties": {
+            "file_path": {
+                "type": "string",
+                "description": "The path to the file (relative or absolute)",
+            },
+            "line": {
+                "type": "integer",
+                "description": "The line number (one-based, as shown in editors)",
+            },
+            "character": {
+                "type": "integer",
+                "description": "The character position on the line (zero-based)",
+            },
+        },
+        "required": ["file_path", "line", "character"],
+    }
 
-    This tool uses the Language Server Protocol to retrieve documentation,
-    type information, and other details about code symbols when you hover
-    over them in an editor.
+    @override
+    async def run(
+        self,
+        file_path: str = "",
+        line: int = 0,
+        character: int = 0,
+        **kwargs,
+    ) -> ToolResult:
+        lsp_service = self.app.make(LSPService)
 
-    Args:
-            file_path: The path to the file (relative or absolute)
-            line: The line number (one-based, as shown in editors)
-            character: The character position on the line (zero-based)
+        path_obj = Path(file_path).resolve()
 
-    Returns:
-            Hover information as a string, or an error message if unavailable
-    """
-    lsp_service = make(LSPService)
+        if not path_obj.exists():
+            return ToolResult(result={"content": f"Error: File '{file_path}' does not exist"})
 
-    # Convert string path to Path object
-    path_obj = Path(file_path).resolve()
+        try:
+            hover_result = await lsp_service.get_hover(path_obj, line, character)
 
-    # Check if file exists
-    if not path_obj.exists():
-        return f"Error: File '{file_path}' does not exist"
+            if hover_result:
+                return ToolResult(result={"content": hover_result.contents})
+            else:
+                return ToolResult(result={"content": f"No hover information available at {file_path}:{line}:{character}"})
 
-    # Get hover information
-    try:
-        hover_result = await lsp_service.get_hover(path_obj, line, character)
+        except Exception as e:
+            return ToolResult(result={"content": f"Error getting hover information: {e!s}"})
 
-        if hover_result:
-            return hover_result.contents
-        else:
-            return f"No hover information available at {file_path}:{line}:{character}"
-
-    except Exception as e:
-        return f"Error getting hover information: {e!s}"
+    @classmethod
+    def format_tool_message(cls, result: ToolResult) -> str:
+        return result.result.get("content", "")

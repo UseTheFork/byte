@@ -1,102 +1,109 @@
 from pathlib import Path
-from typing import List
+from typing import List, override
 
-from langchain_core.tools import tool
-
-from byte.context import make
 from byte.lsp import Location, LSPService
+from byte.tools import BaseTool, ToolResult
 
 
-@tool(parse_docstring=True)
-async def get_definition(file_path: str, line: int, character: int) -> str:
-    """Get the definition location(s) for a symbol at a specific position in a file.
+class GetDefinitionTool(BaseTool):
+    name: str = "get_definition"
+    description: str = "Get the definition location(s) for a symbol at a specific position in a file. Uses the Language Server Protocol to find where a symbol is defined."
+    input_schema = {
+        "type": "object",
+        "properties": {
+            "file_path": {
+                "type": "string",
+                "description": "The path to the file (relative or absolute)",
+            },
+            "line": {
+                "type": "integer",
+                "description": "The line number (one-based, as shown in editors)",
+            },
+            "character": {
+                "type": "integer",
+                "description": "The character position on the line (zero-based)",
+            },
+        },
+        "required": ["file_path", "line", "character"],
+    }
 
-    This tool uses the Language Server Protocol to find where a symbol is defined.
-    It can return multiple locations if the symbol has multiple definitions.
+    @override
+    async def run(
+        self,
+        file_path: str = "",
+        line: int = 0,
+        character: int = 0,
+        **kwargs,
+    ) -> ToolResult:
+        lsp_service = self.app.make(LSPService)
 
-    Args:
-            file_path: The path to the file (relative or absolute)
-            line: The line number (one-based, as shown in editors)
-            character: The character position on the line (zero-based)
+        path_obj = Path(file_path).resolve()
 
-    Returns:
-            Definition information with file paths and ranges, or an error message if unavailable
-    """
-    lsp_service = make(LSPService)
+        if not path_obj.exists():
+            return ToolResult(result={"content": f"Error: File '{file_path}' does not exist"})
 
-    # Convert string path to Path object
-    path_obj = Path(file_path).resolve()
+        try:
+            locations: List[Location] = await lsp_service.goto_definition(path_obj, line, character)
 
-    # Check if file exists
-    if not path_obj.exists():
-        return f"Error: File '{file_path}' does not exist"
+            if not locations:
+                return ToolResult(result={"content": f"No definition found at {file_path}:{line}:{character}"})
 
-    # Get definition locations
-    try:
-        locations: List[Location] = await lsp_service.goto_definition(path_obj, line, character)
+            results = []
+            for loc in locations:
+                file_uri = loc.uri.removeprefix("file://")
 
-        if not locations:
-            return f"No definition found at {file_path}:{line}:{character}"
+                try:
+                    definition_path = Path(file_uri)
+                    if definition_path.exists():
+                        content = definition_path.read_text(encoding="utf-8")
+                        lines = content.splitlines()
 
-        # Format results similar to the Go example
-        results = []
-        for loc in locations:
-            # Extract file path from URI
-            file_uri = loc.uri
-            file_uri = file_uri.removeprefix("file://")  # Remove 'file://' prefix
+                        start_line = loc.range.start.line
+                        end_line = loc.range.end.line
 
-            # Read the file content to show the definition
-            try:
-                definition_path = Path(file_uri)
-                if definition_path.exists():
-                    content = definition_path.read_text(encoding="utf-8")
-                    lines = content.splitlines()
+                        context_start = max(0, start_line - 2)
+                        context_end = min(len(lines), end_line + 3)
+                        definition_lines = lines[context_start:context_end]
 
-                    # Extract the relevant lines for the definition
-                    start_line = loc.range.start.line
-                    end_line = loc.range.end.line
+                        numbered_lines = []
+                        for i, line_content in enumerate(definition_lines, start=context_start + 1):
+                            numbered_lines.append(f"{i:4d} | {line_content}")
 
-                    # Get a few lines of context
-                    context_start = max(0, start_line - 2)
-                    context_end = min(len(lines), end_line + 3)
-                    definition_lines = lines[context_start:context_end]
+                        definition_text = "\n".join(numbered_lines)
 
-                    # Add line numbers
-                    numbered_lines = []
-                    for i, line_content in enumerate(definition_lines, start=context_start + 1):
-                        numbered_lines.append(f"{i:4d} | {line_content}")
-
-                    definition_text = "\n".join(numbered_lines)
-
+                        result = (
+                            f"---\n\n"
+                            f"File: {file_uri}\n"
+                            f"Range: L{start_line + 1}:C{loc.range.start.character + 1} - "
+                            f"L{end_line + 1}:C{loc.range.end.character + 1}\n\n"
+                            f"{definition_text}\n"
+                        )
+                        results.append(result)
+                    else:
+                        start_line = loc.range.start.line
+                        end_line = loc.range.end.line
+                        result = (
+                            f"---\n\n"
+                            f"File: {file_uri}\n"
+                            f"Range: L{start_line + 1}:C{loc.range.start.character + 1} - "
+                            f"L{end_line + 1}:C{loc.range.end.character + 1}\n"
+                        )
+                        results.append(result)
+                except Exception as e:
                     result = (
                         f"---\n\n"
                         f"File: {file_uri}\n"
-                        f"Range: L{start_line + 1}:C{loc.range.start.character + 1} - "
-                        f"L{end_line + 1}:C{loc.range.end.character + 1}\n\n"
-                        f"{definition_text}\n"
+                        f"Range: L{loc.range.start.line + 1}:C{loc.range.start.character + 1} - "
+                        f"L{loc.range.end.line + 1}:C{loc.range.end.character + 1}\n"
+                        f"Error reading file: {e!s}\n"
                     )
                     results.append(result)
-                else:
-                    # File doesn't exist locally, just show location
-                    result = (
-                        f"---\n\n"
-                        f"File: {file_uri}\n"
-                        f"Range: L{start_line + 1}:C{loc.range.start.character + 1} - "
-                        f"L{end_line + 1}:C{loc.range.end.character + 1}\n"
-                    )
-                    results.append(result)
-            except Exception as e:
-                # If we can't read the file, just show the location
-                result = (
-                    f"---\n\n"
-                    f"File: {file_uri}\n"
-                    f"Range: L{loc.range.start.line + 1}:C{loc.range.start.character + 1} - "
-                    f"L{loc.range.end.line + 1}:C{loc.range.end.character + 1}\n"
-                    f"Error reading file: {e!s}\n"
-                )
-                results.append(result)
 
-        return "\n".join(results)
+            return ToolResult(result={"content": "\n".join(results)})
 
-    except Exception as e:
-        return f"Error getting definition: {e!s}"
+        except Exception as e:
+            return ToolResult(result={"content": f"Error getting definition: {e!s}"})
+
+    @classmethod
+    def format_tool_message(cls, result: ToolResult) -> str:
+        return result.result.get("content", "")
