@@ -165,8 +165,8 @@ class ToolResult(Widget, can_focus=False):
 
 
 class ToolArgsCollapsible(Collapsible):
-    ToolArgsCollapsible = """
-    Collapsible {
+    DEFAULT_CSS = """
+    ToolArgsCollapsible {
             width: 1fr;
             height: auto;
             background: transparent;
@@ -180,6 +180,7 @@ class ToolArgsCollapsible(Collapsible):
             &.-collapsed > Contents {
                 display: none;   
             }
+    }
     """
 
 
