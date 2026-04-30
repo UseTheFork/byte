@@ -36,7 +36,7 @@ class PromptTextArea(TextArea):
             "enter",
             "submit",
             "Send",
-            key_display="\u23ce ",
+            # key_display="\u23ce ",
             priority=True,
             tooltip="Send the prompt to the agent",
         ),
@@ -44,7 +44,7 @@ class PromptTextArea(TextArea):
             "ctrl+j,shift+enter",
             "newline",
             "Line",
-            key_display="\u21e7 + \u23ce ",
+            # key_display="\u21e7 + \u23ce ",
             tooltip="Insert a new line character",
         ),
         Binding(

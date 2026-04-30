@@ -2,10 +2,9 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from langchain_core.runnables import RunnableConfig
-from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte.orchestration import AssistantContextSchema, BaseState
+from byte.orchestration import BaseState
 from byte.support import Str
 from byte.support.mixins import Bootable, Eventable
 
@@ -45,7 +44,6 @@ class BaseNode(ABC, Bootable, Eventable):
         self,
         state: BaseState,
         *,
-        runtime: Runtime[AssistantContextSchema],
         config: RunnableConfig,
     ) -> Any:
         """Execute the node logic. Must be implemented by subclasses."""

@@ -159,6 +159,9 @@ class CoderAgentNode(BaseAgentNode):
         # Depending on the state we modify the returned tools.
         base_tools = []
 
+        self.app["log"].info(state)
+        self.app["log"].info(State.has_plan(state))
+
         if not State.has_plan(state):
             base_tools.append(CreatePlanTool)
         else:
