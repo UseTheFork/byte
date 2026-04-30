@@ -58,7 +58,7 @@ class Linting(VerticalGroup):
         self,
         name: str | None = None,
         id: str | None = None,
-        classes: str = "border-round-secondary",
+        classes: str = "border-top-round-secondary",
         disabled: bool = False,
     ) -> None:
         super().__init__(
@@ -134,12 +134,12 @@ class Linting(VerticalGroup):
 
         # Update status label with results
         label = self.query_one(Label)
-        self.remove_class("border-round-secondary")
+        self.remove_class("border-top-round-secondary")
         if success:
-            self.add_class("border-round-success")
+            self.add_class("border-top-round-success")
             label.update(f"Linting complete: {total_files} files processed, no errors")
         else:
-            self.add_class("border-round-error")
+            self.add_class("border-top-round-error")
             label.update(f"Linting complete: {failed_files}/{total_files} files with errors")
 
     def display_results(self, content: str) -> None:

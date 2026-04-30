@@ -80,6 +80,11 @@
 .border-round-warning {border: round $warning;}
 .border-round-success {border: round $success;}
 
+.border-top-round-secondary {border-top: round $secondary;}
+.border-top-round-error {border-top: round $error;}
+.border-top-round-warning {border-top: round $warning;}
+.border-top-round-success {border-top: round $success;}
+
 # #####
 # Margins
 # #####
