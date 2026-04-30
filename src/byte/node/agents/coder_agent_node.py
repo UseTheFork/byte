@@ -2,7 +2,6 @@ from typing import Literal, Type
 
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
-from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
@@ -21,12 +20,12 @@ from byte.node import (
 )
 from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
-from byte.orchestration import AssistantContextSchema, BaseState, preamble
+from byte.orchestration import BaseState
 from byte.skills.tools.load_skill_tool import LoadSkillTool
 from byte.support import Boundary, BoundaryType, Section, SectionType, State, Str
-from byte.support.utils import extract_content_from_message, list_to_multiline_text
+from byte.support.utils import extract_content_from_message
 
-coder_user_template = [
+user_template = [
     "{modified_messages}",
     "{user_request}",
     "",
@@ -100,28 +99,26 @@ coder_user_template = [
     "{operating_principles}",
     "",
     Section.important(
-        f"All tool operations are applied immediately and are reflected in the next user message containing {SectionType.PROJECT_STATE} #id-dhd88-asx-4857."
+        f"All tool operations are applied immediately and are reflected in the next user message containing {SectionType.PROJECT_STATE}."
     ),
 ]
 
-coder_prompt = ChatPromptTemplate.from_messages(
+
+system_template = [
+    "{preamble}",
+    Section.start(SectionType.ROLE),
+    "Act as an expert software developer.",
+    Section.end(),
+    "{available_skills}",
+]
+
+
+prompt = ChatPromptTemplate.from_messages(
     [
-        (
-            "system",
-            list_to_multiline_text(
-                [
-                    preamble(),
-                    Section.start(SectionType.ROLE),
-                    "Act as an expert software developer.",
-                    Section.end(),
-                    "{available_skills}",
-                ]
-            ),
-        ),
-        ("user", "{assembled_user_message}"),
+        ("system", "{system_message}"),
+        ("user", "{user_message}"),
         ("placeholder", "{scratch_messages}"),
-        ("placeholder", "{refreshed_context_state}"),
-        ("placeholder", "{errors}"),
+        ("user", "{context_message}"),
     ]
 )
 
@@ -150,10 +147,13 @@ class CoderAgentNode(BaseAgentNode):
         return llm_service.get_model(self.name)
 
     def get_prompt(self):
-        return coder_prompt
+        return prompt
 
     def get_user_template(self):
-        return coder_user_template
+        return user_template
+
+    def get_system_template(self):
+        return system_template
 
     def get_tools(self, state: BaseState):
         # Depending on the state we modify the returned tools.
@@ -180,7 +180,6 @@ class CoderAgentNode(BaseAgentNode):
         self,
         state: BaseState,
         *,
-        runtime: Runtime[AssistantContextSchema],
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 

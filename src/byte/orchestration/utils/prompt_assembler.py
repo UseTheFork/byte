@@ -3,7 +3,6 @@ import re
 from datetime import datetime
 from typing import TYPE_CHECKING, TypeVar
 
-from langchain.messages import HumanMessage
 from langchain_core.messages import BaseMessage
 
 from byte.files import FileService
@@ -38,11 +37,17 @@ class PromptAssembler(Bootable, Eventable):
             raise ValueError("agent_node is required and cannot be empty")
 
         self.agent_node = agent_node
-        template = agent_node.get_user_template()
-        if template is None or len(template) == 0:
+        user_template = agent_node.get_user_template()
+        if user_template is None or len(user_template) == 0:
             raise ValueError("user template is required and cannot be empty")
 
-        self.template = template
+        self.user_template = user_template
+
+        system_template = agent_node.get_system_template()
+        if system_template is None or len(system_template) == 0:
+            raise ValueError("system template is required and cannot be empty")
+
+        self.system_template = system_template
 
         model_schema, _ = self.agent_node.get_model()
         self.model_schema = model_schema
@@ -417,6 +422,38 @@ class PromptAssembler(Bootable, Eventable):
 
         return list_to_multiline_text(project_information_and_context)
 
+    async def _generate_preamble(self) -> str:
+        lines = [
+            Section.start(SectionType.INTRODUCTION),
+            "You are Byte, a CLI agent specializing in software engineering tasks. Your primary goal is to help users safely and effectively.",
+            "",
+            "Conversations are always structured in a consistent format:",
+            "- **System Prompt** — Sets your role, identity, and core behavioral guidelines.",
+            "- **User Message** — Contains the conversation history, the current user request, task instructions, response format, and other relevant context. Sections are clearly labelled with `# Section: FOO [section-foo]` headings.",
+            "- **Agent Message** — A summarized representation of your previous responses and tool calls, modified for brevity.",
+            f"- **User Message ({SectionType.PROJECT_STATE})** — An automatically generated message containing the most up-to-date state of all relevant files and system context. This message is regenerated after **every** tool call to reflect the latest changes.",
+            "",
+            "The instructions provided by the user are ALWAYS split up into sections. Sections always start with `# Section: `.",
+            f"- `{SectionType.USER_INPUT}` - Contains the users request. Pay close attention to this section.",
+            f"- `{SectionType.ROLE}` - Contains information about your specific role as part of the users request.",
+            f"- `{SectionType.RESPONSE_FORMAT}` - How you should structure your response format.",
+            f"- `{SectionType.TASK}` - This section includes the task the user would like you to complete.",
+            "",
+            "To make parsing the user content simpler sections use XML tags. XML tags may include additional attributes that relate directly with the content they are surrounding. For example:",
+            f"`{Boundary.open(BoundaryType.FILE, meta={'source': 'foo/bar.py', 'language': 'py', 'mode': 'read-only'})}`",
+            "The example is a file tag with attributes representing the mode of the file (if you can edit the file), the source (the path), and its language.",
+            "",
+            "Here is a guide for XML tags you will encounter.",
+            f"- `{Boundary.open(BoundaryType.FILE)}` - The file tag wraps file content provided for context. Attributes include `source` (the file path), `language` (the programming language), and `mode` (either `read-only` or `editable`, indicating whether you can modify the file).",
+            f"- `{Boundary.open(BoundaryType.SESSION_CONTEXT)}` - The session_context tag wraps supplementary context documents added by the user for the current session. Attributes include `type` (the source type, e.g. `file`, `web`, or `agent`) and `key` (a unique identifier for the context item).",
+            f"- `{Boundary.open(BoundaryType.EXAMPLE)}` - The example tag wraps example content blocks used to demonstrate expected input, output, or behaviour. Use the enclosed content as a reference for formatting or structure.",
+            f"- `{Boundary.open(BoundaryType.AGENT_MESSAGE)}` - The agent_message tag wraps a response produced by an agent. Attributes include `agent_type` (the name of the agent that produced the message).",
+            f"- `{Boundary.open(BoundaryType.TOOL_CALL)}` - The tool_call tag wraps a summary of a tool invocation performed by an agent, including the tool name and its execution status.",
+            f"- `{Boundary.open(BoundaryType.USER_MESSAGE)}` - The user_message tag wraps the user's request as it appears in the conversation history.",
+            Section.end(),
+        ]
+        return list_to_multiline_text(lines)
+
     async def _generate_plan_section(self, state: BaseState) -> str:
         plan = state.get("plan")
         if not plan:
@@ -438,7 +475,7 @@ class PromptAssembler(Bootable, Eventable):
         return list_to_multiline_text(message_parts)
 
     async def generate_state(self, state: BaseState, extra: dict | None = {}) -> dict:
-        user_prompt_state = {**state, **(extra or {})}
+        prompt_state = {**state, **(extra or {})}
 
         # Create dictionary to map task names to their coroutines
         tasks = {}
@@ -456,6 +493,7 @@ class PromptAssembler(Bootable, Eventable):
                 "project_context": self._gather_project_context(),
                 "user_request": self._complete_user_request(state.get("user_request", "")),
                 "plan": self._generate_plan_section(state),
+                "preamble": self._generate_preamble(),
             }
         )
 
@@ -473,7 +511,7 @@ class PromptAssembler(Bootable, Eventable):
         # Map results back to their keys
         results_dict = dict(zip(tasks.keys(), results))
 
-        user_prompt_state.update(
+        prompt_state.update(
             {
                 "project_environment": results_dict["project_environment"],
                 "modified_messages": results_dict["modified_messages"],
@@ -485,49 +523,59 @@ class PromptAssembler(Bootable, Eventable):
                 "project_context": results_dict["project_context"],
                 "user_request": results_dict["user_request"],
                 "plan": results_dict["plan"],
+                "preamble": results_dict["preamble"],
             }
         )
 
         if "file_context" in results_dict:
-            user_prompt_state.update(
+            prompt_state.update(
                 {
                     "file_context": results_dict["file_context"],
                 }
             )
 
-        self.prompt_state = user_prompt_state
+        self.prompt_state = prompt_state
 
-        return user_prompt_state
+        return prompt_state
 
-    def assemble_user_message(self, **replacements) -> str:
+    async def generate_messages(self) -> dict:
+        # TODO: We should make this async gather
+        return {
+            "system_message": self.assemble_message(self.agent_node.get_system_template()),
+            "user_message": self.assemble_message(self.agent_node.get_user_template()),
+            "scratch_messages": self.generate_scratch_state(),
+            "context_message": self.generate_refreshed_context_state(),
+        }
+
+    def assemble_message(self, template: list[str]) -> str:
         """Replace {placeholder} tokens in template with provided values.
 
         Automatically removes lines containing only placeholders that don't have corresponding values.
         Placeholders are expected to be on their own line with nothing else.
 
-        Usage: `assembler.assemble(name="World", age=30)`
+        Usage: `assembler.assemble_system_message(name="World", age=30)`
         """
 
         result_lines = []
         placeholder_pattern = r"^\{([^}]+)\}$"
 
-        for line in self.template:
+        for line in template:
             match = re.match(placeholder_pattern, line)
             if match:
                 # Line contains only a placeholder
                 key = match.group(1)
-                if key in replacements:
+                if key in self.prompt_state:
                     # Replace with the value
-                    value = replacements[key]
+                    value = self.prompt_state[key]
                     result_lines.append(value if isinstance(value, str) else str(value))
-                # If key not in replacements, skip this line (remove it)
+                # If key not in prompt_state, skip this line (remove it)
             else:
                 # Not a placeholder line, keep as-is
                 result_lines.append(line)
 
         return list_to_multiline_text(result_lines)
 
-    def generate_refreshed_context_state(self, state: BaseState) -> list[BaseMessage]:
+    def generate_refreshed_context_state(self) -> str:
         """ """
         refreshed_context_message = list_to_multiline_text(
             [
@@ -535,8 +583,6 @@ class PromptAssembler(Bootable, Eventable):
                 self.prompt_state["project_context"],
                 self.prompt_state["project_environment"],
                 Section.start(SectionType.PROJECT_STATE),
-                "#id-dhd88-asx-4857",
-                "",
                 "Below is the current state of the project. It includes all your changes as a result of previous tool calls that have been masked for brevity.",
                 "",
                 Section.important("You MUST trust this information as the current state of the files etc."),
@@ -549,7 +595,12 @@ class PromptAssembler(Bootable, Eventable):
             ]
         )
 
-        return [HumanMessage(content=refreshed_context_message)]
+        return refreshed_context_message
+
+    def generate_scratch_state(self) -> list[BaseMessage]:
+        """ """
+
+        return self.prompt_state.get("scratch_messages", [])
 
     def epilogue(self) -> str:
         history_messages = self.prompt_state.get("history_messages", [])

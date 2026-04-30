@@ -2,7 +2,6 @@ from typing import Literal, Type
 
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
-from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
@@ -17,16 +16,14 @@ from byte.node import (
 from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
 from byte.orchestration import (
-    AssistantContextSchema,
     BaseState,
-    preamble,
 )
 from byte.support import Section, SectionType, Str
-from byte.support.utils import extract_content_from_message, list_to_multiline_text
+from byte.support.utils import extract_content_from_message
 from byte.system import UserSelectTool
 from byte.web import SearchWebTool
 
-ask_user_template = [
+user_template = [
     "{modified_messages}",
     "{user_request}",
     "",
@@ -50,30 +47,29 @@ ask_user_template = [
     "{operating_principles}",
 ]
 
-ask_prompt = ChatPromptTemplate.from_messages(
-    [
-        (
-            "system",
-            list_to_multiline_text(
-                [
-                    preamble(),
-                    Section.start(SectionType.ROLE),
-                    "Act as an expert software developer.",
-                    Section.end(),
-                ]
-            ),
-        ),
-        ("user", "{assembled_user_message}"),
-        ("placeholder", "{scratch_messages}"),
-        ("placeholder", "{refreshed_context_state}"),
-        ("placeholder", "{errors}"),
-    ]
-)
+
+system_template = [
+    "{preamble}",
+    Section.start(SectionType.ROLE),
+    "Act as an expert software developer.",
+    Section.end(),
+    "{available_skills}",
+]
 
 ask_enforcement = [
     "- NEVER use XML-style tags in your responses (e.g., <file>, <search>, <replace>). These are for internal parsing only.",
     "- DO NOT provide full code implementations unless explicitly requested. Describe the changes needed first.",
 ]
+
+
+prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", "{system_message}"),
+        ("user", "{user_message}"),
+        ("placeholder", "{scratch_messages}"),
+        ("user", "{context_message}"),
+    ]
+)
 
 
 class AskAgentNode(BaseAgentNode):
@@ -102,10 +98,13 @@ class AskAgentNode(BaseAgentNode):
         return llm_service.get_model(self.name)
 
     def get_prompt(self):
-        return ask_prompt
+        return prompt
 
     def get_user_template(self):
-        return ask_user_template
+        return user_template
+
+    def get_system_template(self):
+        return system_template
 
     def get_enforcement(self):
         return ask_enforcement
@@ -123,7 +122,6 @@ class AskAgentNode(BaseAgentNode):
         self,
         state: BaseState,
         *,
-        runtime: Runtime[AssistantContextSchema],
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 

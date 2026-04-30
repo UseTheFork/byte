@@ -2,7 +2,6 @@ from typing import Literal, Type
 
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
-from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
@@ -17,15 +16,15 @@ from byte.node import (
 )
 from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
-from byte.orchestration import AssistantContextSchema, BaseState, preamble
+from byte.orchestration import BaseState
 from byte.skills.tools.create_skill_tool import CreateSkillTool
 from byte.support import Boundary, BoundaryType, Section, SectionType, Str
-from byte.support.utils import extract_content_from_message, list_to_multiline_text
+from byte.support.utils import extract_content_from_message
 from byte.system.tools.user_confirm_tool import UserConfirmTool
 from byte.system.tools.user_input_text_tool import UserInputTextTool
 from byte.system.tools.user_select_tool import UserSelectTool
 
-skill_orchestrator_template = [
+user_template = [
     "{modified_messages}",
     "{user_request}",
     "",
@@ -89,28 +88,24 @@ skill_orchestrator_template = [
     "{operating_principles}",
     "",
     Section.important(
-        f"All tool operations are applied immediately and are reflected in the next user message containing {SectionType.PROJECT_STATE} #id-dhd88-asx-4857."
+        f"All tool operations are applied immediately and are reflected in the next user message containing {SectionType.PROJECT_STATE}."
     ),
 ]
 
-skill_orchestrator_prompt = ChatPromptTemplate.from_messages(
+system_template = [
+    "{preamble}",
+    Section.start(SectionType.ROLE),
+    "Act as an expert skill creator. Your job is to help users design and create skills by understanding their intent, asking the right questions, and producing clear, well-structured skill definitions.",
+    Section.end(),
+    "{available_skills}",
+]
+
+prompt = ChatPromptTemplate.from_messages(
     [
-        (
-            "system",
-            list_to_multiline_text(
-                [
-                    preamble(),
-                    "",
-                    Section.start(SectionType.ROLE),
-                    "Act as an expert skill creator. Your job is to help users design and create skills by understanding their intent, asking the right questions, and producing clear, well-structured skill definitions.",
-                    Section.end(),
-                ]
-            ),
-        ),
-        ("user", "{assembled_user_message}"),
+        ("system", "{system_message}"),
+        ("user", "{user_message}"),
         ("placeholder", "{scratch_messages}"),
-        ("placeholder", "{refreshed_context_state}"),
-        ("placeholder", "{errors}"),
+        ("user", "{context_message}"),
     ]
 )
 
@@ -132,10 +127,13 @@ class SkillCreatorAgentNode(BaseAgentNode):
         return llm_service.get_model(self.name)
 
     def get_prompt(self):
-        return skill_orchestrator_prompt
+        return prompt
 
     def get_user_template(self):
-        return skill_orchestrator_template
+        return user_template
+
+    def get_system_template(self):
+        return system_template
 
     def get_tools(self, state: BaseState):
         return [
@@ -152,7 +150,6 @@ class SkillCreatorAgentNode(BaseAgentNode):
         self,
         state: BaseState,
         *,
-        runtime: Runtime[AssistantContextSchema],
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 

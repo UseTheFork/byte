@@ -3,7 +3,6 @@ from typing import List, Literal, Type
 from langchain_core.messages import BaseMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
-from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
@@ -17,15 +16,14 @@ from byte.node import (
 )
 from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
-from byte.orchestration import AssistantContextSchema, BaseState, preamble
+from byte.orchestration import BaseState
 from byte.support import Boundary, BoundaryType, Section, SectionType, State, Str
-from byte.support.utils import list_to_multiline_text
 
 # Conventional commit message generation prompt
 # Adapted from Aider: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/prompts.py#L8
 # Conventional Commits specification: https://www.conventionalcommits.org/en/v1.0.0/#summary
 
-commit_user_template = [
+user_template = [
     Section.sub_heading("Git Diffs", 2),
     "{git_diffs}",
     "",
@@ -78,24 +76,21 @@ commit_user_template = [
     "",
 ]
 
-commit_prompt: ChatPromptTemplate = ChatPromptTemplate.from_messages(
+
+system_template = [
+    "{preamble}",
+    Section.start(SectionType.ROLE),
+    "You are an expert software engineer that generates organized Git commits based on the provided user input.",
+    Section.end(),
+    "{available_skills}",
+]
+
+prompt = ChatPromptTemplate.from_messages(
     [
-        (
-            "system",
-            list_to_multiline_text(
-                [
-                    preamble(),
-                    "",
-                    Section.start(SectionType.ROLE),
-                    "You are an expert software engineer that generates organized Git commits based on the provided user input.",
-                    Section.end(),
-                ]
-            ),
-        ),
-        ("user", "{assembled_user_message}"),
+        ("system", "{system_message}"),
+        ("user", "{user_message}"),
         ("placeholder", "{scratch_messages}"),
-        ("placeholder", "{refreshed_context_state}"),
-        ("placeholder", "{errors}"),
+        ("user", "{context_message}"),
     ]
 )
 
@@ -126,10 +121,13 @@ class CommitAgentNode(BaseAgentNode):
         return llm_service.get_model(self.name)
 
     def get_prompt(self):
-        return commit_prompt
+        return prompt
 
     def get_user_template(self):
-        return commit_user_template
+        return user_template
+
+    def get_system_template(self):
+        return system_template
 
     def get_tools(self, state: BaseState):
         if not State.tool_was_called(state, GitCommitTool.name):
@@ -151,7 +149,6 @@ class CommitAgentNode(BaseAgentNode):
         self,
         state: BaseState,
         *,
-        runtime: Runtime[AssistantContextSchema],
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 

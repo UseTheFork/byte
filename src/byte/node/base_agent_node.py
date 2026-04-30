@@ -57,7 +57,12 @@ class BaseAgentNode(BaseNode):
         template, which defines how user requests are formatted in prompts.
         Usage: Override in subclass to provide domain-specific user message formatting
         """
-        pass
+        ...
+
+    @abstractmethod
+    def get_system_template(self) -> List[str]:
+        """ """
+        ...
 
     @abstractmethod
     def get_prompt(self) -> ChatPromptTemplate:
@@ -67,12 +72,12 @@ class BaseAgentNode(BaseNode):
         which defines the overall prompt structure including system and user messages.
         Usage: Override in subclass to provide domain-specific prompt templates
         """
-        pass
+        ...
 
     @abstractmethod
     def get_model(self) -> tuple[ModelSchema, dict]:
         """ """
-        pass
+        ...
 
     async def _gather_errors(self, state) -> list[HumanMessage]:
         """Gather error messages from state for re-prompting the assistant.
@@ -114,20 +119,17 @@ class BaseAgentNode(BaseNode):
         """
         # Create a new assembler
         prompt_assembler = self.app.make(PromptAssembler, agent_node=self)
-        user_prompt_state = await prompt_assembler.generate_state(state, extra)
+        prompt_state = await prompt_assembler.generate_state(state, extra)
 
         payload = await self.emit(
             NodeEvents.PreAssistantNode(
-                state=user_prompt_state,
+                state=prompt_state,
                 config=config,
             )
         )
-        user_prompt_state = payload.state
+        prompt_state = payload.state
 
-        agent_state = {**state}
-
-        agent_state["assembled_user_message"] = prompt_assembler.assemble_user_message(**user_prompt_state)
-        agent_state["refreshed_context_state"] = prompt_assembler.generate_refreshed_context_state(state)
+        agent_state = await prompt_assembler.generate_messages()
 
         if state.get("errors", None) is not None:
             agent_state["errors"] = await self._gather_errors(agent_state)
@@ -136,14 +138,20 @@ class BaseAgentNode(BaseNode):
 
         max_tokens = 150_000
 
-        assembled_user_message_tokens = len(agent_state["assembled_user_message"]) / 4
+        assembled_user_message_tokens = len(agent_state["user_message"]) / 4
+        assembled_system_message_tokens = len(agent_state["system_message"]) / 4
 
-        refreshed_context_state_tokens = sum(len(m.text) / 4 for m in agent_state["refreshed_context_state"])
+        refreshed_context_state_tokens = len(agent_state["context_message"]) / 4
 
         scratch_messages = state.get("scratch_messages", [])
         scratch_messages_tokens = sum(len(m.text) / 4 for m in scratch_messages)
 
-        total_tokens = assembled_user_message_tokens + refreshed_context_state_tokens + scratch_messages_tokens
+        total_tokens = (
+            assembled_user_message_tokens
+            + assembled_system_message_tokens
+            + refreshed_context_state_tokens
+            + scratch_messages_tokens
+        )
         memory_percent = (total_tokens / max_tokens) * 100
 
         self.app.emit_tui(
