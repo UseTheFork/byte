@@ -64,7 +64,7 @@ class GitGrepTool(BaseTool):
                     return ToolResult(result={"content": f"No matches found for pattern: {pattern}"})
                 if len(result) > MAX_RESULT_LENGTH:
                     result = result[:MAX_RESULT_LENGTH] + "\n... [results truncated]"
-                return ToolResult(result=result)
+                return ToolResult(result={"content": result})
             except Exception as grep_error:
                 # Git grep returns non-zero exit code when no matches found
                 error_msg = str(grep_error)

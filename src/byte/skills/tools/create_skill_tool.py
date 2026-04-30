@@ -30,7 +30,13 @@ class CreateSkillTool(BaseTool):
     }
 
     @override
-    async def run(self, name: str, description: str, instructions: str) -> ToolResult:
+    async def run(
+        self,
+        name: str,
+        description: str,
+        instructions: str,
+        **kwargs,
+    ) -> ToolResult:
         # Normalize the skill name: lowercase, replace invalid chars with hyphens,
         # collapse consecutive hyphens, strip leading/trailing hyphens
         name = name.lower()
