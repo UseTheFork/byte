@@ -10,6 +10,8 @@ from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Collapsible
 
+from byte.tui.constants import ANGLE_DOWN, ANGLE_RIGHT
+
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
 
@@ -51,8 +53,6 @@ class ToolArgs(Widget, can_focus=False):
             parsed = loads(self.raw_args, OBJ)
         except Exception:
             parsed = None
-
-        self.app.byte["log"].info(self.raw_args)
 
         # Build the output text
         output = Text("")
@@ -165,7 +165,22 @@ class ToolResult(Widget, can_focus=False):
 
 
 class ToolArgsCollapsible(Collapsible):
-    pass
+    ToolArgsCollapsible = """
+    Collapsible {
+            width: 1fr;
+            height: auto;
+            background: transparent;
+            border-top: hkey $background;
+            padding-bottom: 1;
+
+            &:focus-within {
+                background-tint: $foreground 5%;
+            }
+
+            &.-collapsed > Contents {
+                display: none;   
+            }
+    """
 
 
 class ToolCall(Widget, can_focus=False):
@@ -200,7 +215,9 @@ class ToolCall(Widget, can_focus=False):
         self.border_title = f" {self.tool_name}() "
 
     def compose(self) -> ComposeResult:
-        with ToolArgsCollapsible(title="Arguments", collapsed=False):
+        with ToolArgsCollapsible(
+            title="Arguments", collapsed=False, collapsed_symbol=ANGLE_RIGHT, expanded_symbol=ANGLE_DOWN
+        ):
             yield ToolArgs()
         yield ToolResult()
 

@@ -2,6 +2,7 @@
 SQUARE_OUTLINE = "\u25fb"  # ◻
 SQUARE_FILLED = "\u25fc"  # ◼
 ANGLE_RIGHT = "\u276f"  # ❯  # noqa: RUF003
+ANGLE_DOWN = "\u2304"  # ⌄
 WORD_JOINER = "\u2060"  # word joiner
 
 SPACE = "\u0020"  #   SPACE
