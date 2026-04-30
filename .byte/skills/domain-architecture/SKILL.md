@@ -12,9 +12,11 @@ This skill documents the standard domain architecture patterns, conventions, and
 There are two categories of top-level packages in `src/byte/`:
 
 ### Standard Domains
+
 Standard domains follow the full service provider pattern. They have a `service_provider.py` and register services, commands, tools, and event listeners through the two-phase lifecycle. Examples: `git`, `files`, `llm`, `knowledge`, `tools`, `workflow`, `command`, `event`, `node`.
 
 ### Infrastructure / Support Layers
+
 Infrastructure layers provide shared utilities, base classes, or cross-cutting concerns. They do **not** have a service provider and are consumed by standard domains as dependencies. Examples: `orchestration`, `support`, `logging`, `parsing`, `config`.
 
 When working in the codebase, identify which category a package falls into before making changes. Standard domains follow the patterns below; infrastructure layers have their own conventions.
@@ -53,12 +55,14 @@ src/byte/<domain>/
 The **entry point** for every standard domain. Extends `ServiceProvider` (from `byte.support.service_provider`). Responsible for declaring and wiring all domain components through a two-phase lifecycle:
 
 **Phase 1 — Registration** (called during `app.register()`):
+
 - `services()` → Return list of `Service` classes (auto-registered as singletons)
 - `commands()` → Return list of `Command` classes (auto-registered as transient/bind)
 - `tools()` → Return list of `BaseTool` classes (auto-registered with `ToolRegistryService`)
 - `register()` → Optional override for custom bindings (e.g., `self.app.bind(...)`, `self.app.singleton(...)`)
 
 **Phase 2 — Boot** (called after ALL providers are registered):
+
 - `boot()` → Wire cross-service dependencies, register event listeners, start background tasks
 
 ```python
@@ -82,6 +86,7 @@ class MyDomainServiceProvider(ServiceProvider):
 ```
 
 **Key rules:**
+
 - Never instantiate services in `register()` or `services()`/`commands()`/`tools()` — only declare types
 - In `boot()`, you can safely resolve other domains' services via `self.app.make()`
 - Services returned by `services()` are automatically registered as **singletons**
@@ -106,6 +111,7 @@ class MyService(Service):
 ```
 
 **Key rules:**
+
 - Services are **singletons** — one shared instance per container
 - Use `boot()` for initialization that requires the container (resolving dependencies, reading config)
 - Access the container via `self.app`
@@ -143,6 +149,7 @@ class MyCommand(Command):
 ```
 
 **Key rules:**
+
 - Commands are **transient** — new instance per invocation
 - The `name` property defines the slash command name (e.g., `"commit"` → `/commit`)
 - Use `boot()` to resolve service dependencies from the container
@@ -181,6 +188,7 @@ class MyTool(BaseTool):
 ```
 
 **Key rules:**
+
 - Tools define `name`, `description`, and `input_schema` as class attributes
 - `input_schema` follows JSON Schema format
 - Implement `run()` for the tool logic — receives kwargs matching the input schema
@@ -200,6 +208,7 @@ class MyDomainConfig(BaseModel):
 ```
 
 **Key rules:**
+
 - Always use `Field(...)` with `default` and `description`
 - Keep config flat or use nested `BaseModel` subclasses for grouping
 - Access in services/commands via `self.app["config"].my_domain`
@@ -256,6 +265,7 @@ class MyDomainEvents:
 ```
 
 **Key rules:**
+
 - Always use a namespace class (e.g., `FileEvents`, `SystemEvents`, `OrchestrationEvents`)
 - Events are `@dataclass` classes extending `Event`
 - Event listeners are registered in the service provider's `boot()` method via `EventBus.on()`
@@ -268,6 +278,7 @@ class MyDomainEvents:
 Each domain's `__init__.py` defines the public API — the classes other domains are allowed to import. Use lazy dynamic imports via `_dynamic_imports` and `import_attr` for performance.
 
 **Key rules:**
+
 - Export all public classes (services, commands, tools, events, models, config) from the domain root
 - Other domains import from the domain root: `from byte.git import GitService, CommitCommand`
 - Add entries to `__all__`, `_dynamic_imports`, and the `TYPE_CHECKING` block when adding new exports
@@ -277,6 +288,7 @@ Each domain's `__init__.py` defines the public API — the classes other domains
 ## Cross-Domain Communication
 
 **Rules:**
+
 - **Always resolve via the container** — use `self.app.make(ServiceClass)` to get services from other domains
 - **Use the EventBus** for decoupled communication — emit events and register listeners
 - **Never import implementation details across domains** — only import from a domain's public `__init__.py`
@@ -300,4 +312,3 @@ Each domain's `__init__.py` defines the public API — the classes other domains
 5. Register the service provider with the application (in `Application.configure()` providers list)
 6. Declare services/commands/tools in the service provider's `services()`, `commands()`, `tools()` methods
 7. Wire cross-domain dependencies and event listeners in `boot()`
-
