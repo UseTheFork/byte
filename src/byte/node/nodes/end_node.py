@@ -5,6 +5,7 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
+from byte.memory import CompleteSimpleTurnTool, CompleteStepTool
 from byte.node import BaseNode, NodeEvents
 from byte.node.messages import BaseAIMessage
 from byte.orchestration import AssistantContextSchema, BaseState
@@ -25,7 +26,16 @@ class EndNode(BaseNode):
         agent_name = last_ai_message.agent_name if last_ai_message else "unknown"
 
         complete_turn_message = next(
-            (m for m in reversed(scratch_messages) if isinstance(m, ToolMessage) and m.name == "complete_turn"),
+            (
+                m
+                for m in reversed(scratch_messages)
+                if isinstance(m, ToolMessage)
+                and m.name
+                in [
+                    CompleteStepTool.name,
+                    CompleteSimpleTurnTool.name,
+                ]
+            ),
             None,
         )
 

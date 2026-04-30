@@ -1,5 +1,6 @@
 from langgraph.types import Command
 
+from byte.memory import CompleteSimpleTurnTool, CompleteStepTool
 from byte.node import BaseNode
 from byte.orchestration import BaseState
 from byte.support.utils import get_last_message
@@ -81,7 +82,14 @@ class ToolNode(BaseNode):
         update = {"scratch_messages": outputs, **merged_extra}
 
         # Final single route_back after ALL tools
-        if any(tc["name"] == "complete_turn" for tc in message.tool_calls):
+        if any(
+            tc["name"]
+            in [
+                CompleteStepTool.name,
+                CompleteSimpleTurnTool.name,
+            ]
+            for tc in message.tool_calls
+        ):
             return self.route_to("end_node", update)
 
         return self.route_back(state, update)

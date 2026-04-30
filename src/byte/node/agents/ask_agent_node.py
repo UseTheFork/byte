@@ -21,7 +21,6 @@ from byte.orchestration import (
     BaseState,
     preamble,
 )
-from byte.skills.tools.load_skill_tool import LoadSkillTool
 from byte.support import Section, SectionType, Str
 from byte.support.utils import extract_content_from_message, list_to_multiline_text
 from byte.system import UserSelectTool
@@ -58,7 +57,6 @@ ask_prompt = ChatPromptTemplate.from_messages(
             list_to_multiline_text(
                 [
                     preamble(),
-                    "",
                     Section.start(SectionType.ROLE),
                     "Act as an expert software developer.",
                     Section.end(),
@@ -115,7 +113,6 @@ class AskAgentNode(BaseAgentNode):
     def get_tools(self, state: BaseState):
         return [
             GitGrepTool,
-            LoadSkillTool,
             UserSelectTool,
             ListFilesTool,
             ReadFilesTool,

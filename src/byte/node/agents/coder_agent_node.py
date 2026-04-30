@@ -114,6 +114,7 @@ coder_prompt = ChatPromptTemplate.from_messages(
                     Section.start(SectionType.ROLE),
                     "Act as an expert software developer.",
                     Section.end(),
+                    "{available_skills}",
                 ]
             ),
         ),
