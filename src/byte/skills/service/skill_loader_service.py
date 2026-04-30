@@ -46,7 +46,7 @@ class SkillLoaderService(Service):
 
         Usage: `for name, skill in service.skills.items(): ...`
         """
-        return self._skills
+        return {name: skill for name, skill in self._skills.items() if skill.active}
 
     def get_skill(self, name: str) -> Optional[Skill]:
         """Return a skill by name, or None if not found.

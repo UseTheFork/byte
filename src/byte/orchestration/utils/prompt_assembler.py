@@ -8,7 +8,7 @@ from langchain_core.messages import BaseMessage
 from byte.files import FileService
 from byte.git import CommitService
 from byte.orchestration import BaseState, OrchestrationEvents
-from byte.skills import LoadSkillTool, SkillLoaderService, SkillTrackerService
+from byte.skills import LoadSkillTool, SkillLoaderService
 from byte.support import Boundary, BoundaryType, Section, SectionType
 from byte.support.mixins import Bootable, Eventable
 from byte.support.utils import list_to_multiline_text
@@ -128,14 +128,9 @@ class PromptAssembler(Bootable, Eventable):
 
     async def _generate_available_skills(self) -> str:
         """ """
-        skill_tracker_service = self.app.make(SkillTrackerService)
         skill_loader_service = self.app.make(SkillLoaderService)
 
-        # Get only the skills that haven't been loaded yet
-        unloaded_names = skill_tracker_service.get_unloaded_names()
-        unloaded_skills = {name: skill for name, skill in skill_loader_service.skills.items() if name in unloaded_names}
-
-        skills_xml = skill_loader_service.skills_to_prompt_xml(unloaded_skills)
+        skills_xml = skill_loader_service.skills_to_prompt_xml(skill_loader_service.skills)
 
         if not skills_xml:
             return list_to_multiline_text(
@@ -169,21 +164,17 @@ class PromptAssembler(Bootable, Eventable):
 
     async def _generate_loaded_skills(self) -> str:
         """Generate prompt content containing the instructions of loaded skills."""
-        skill_tracker_service = self.app.make(SkillTrackerService)
         skill_loader_service = self.app.make(SkillLoaderService)
 
-        loaded_names = skill_tracker_service.loaded_names()
-        if not loaded_names:
+        loaded_skills = {name: skill for name, skill in skill_loader_service._skills.items() if not skill.active}
+        if not loaded_skills:
             return ""
 
         message_parts = [
             Section.start(SectionType.SKILLS),
         ]
 
-        for name in loaded_names:
-            skill = skill_loader_service.get_skill(name)
-            if skill is None:
-                continue
+        for name, skill in loaded_skills.items():
             message_parts.extend(
                 [
                     Boundary.open(BoundaryType.SKILL, meta={"name": name}),
@@ -192,9 +183,6 @@ class PromptAssembler(Bootable, Eventable):
                     "",
                 ]
             )
-
-        if not message_parts:
-            return ""
 
         message_parts.extend(Section.end())
 

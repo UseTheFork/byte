@@ -1,6 +1,5 @@
 from typing import override
 
-from byte import Application
 from byte.files import ToolFileService
 from byte.tools import BaseTool, ToolResult
 from byte.tools.exceptions import ToolRunException
@@ -23,13 +22,12 @@ class DeleteFileTool(BaseTool):
     @override
     async def run(
         self,
-        app: Application,
         file_path: str = "",
         **kwargs,
     ) -> ToolResult:
 
         try:
-            tool_file_service = app.make(ToolFileService)
+            tool_file_service = self.app.make(ToolFileService)
             result = await tool_file_service.delete_file(file_path)
 
             return ToolResult(

@@ -1,6 +1,6 @@
 from typing import override
 
-from byte.skills import SkillTrackerService
+from byte.skills import SkillLoaderService
 from byte.support import Boundary, BoundaryType, Section, SectionType
 from byte.tools import BaseTool, ToolResult
 
@@ -27,10 +27,12 @@ class LoadSkillTool(BaseTool):
         skill_name: str,
         **kwargs,
     ) -> ToolResult:
-        skill_tracker_service = self.app.make(SkillTrackerService)
-        loaded = skill_tracker_service.mark_loaded(skill_name)
-        content = f"Skill '{skill_name}' loaded." if loaded else f"Skill '{skill_name}' not found."
-        return ToolResult(result={"content": content})
+        skill_loader_service = self.app.make(SkillLoaderService)
+        skill = skill_loader_service.get_skill(skill_name)
+        if skill is None:
+            return ToolResult(result={"content": f"Skill '{skill_name}' not found."})
+        skill.active = False
+        return ToolResult(result={"content": f"Skill '{skill_name}' loaded."})
 
     @classmethod
     def format_tool_message(cls, result: ToolResult) -> str:

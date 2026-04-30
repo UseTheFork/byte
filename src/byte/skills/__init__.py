@@ -8,7 +8,6 @@ if TYPE_CHECKING:
     from byte.skills.command.skill_command import SkillCommand
     from byte.skills.schemas import Skill
     from byte.skills.service.skill_loader_service import SkillLoaderService
-    from byte.skills.service.skill_tracker_service import SkillTrackerService
     from byte.skills.service_provider import SkillsServiceProvider
     from byte.skills.tools.create_skill_tool import CreateSkillTool
     from byte.skills.tools.load_skill_tool import LoadSkillTool
@@ -19,7 +18,6 @@ __all__ = (
     "Skill",
     "SkillCommand",
     "SkillLoaderService",
-    "SkillTrackerService",
     "SkillsServiceProvider",
 )
 
@@ -30,7 +28,6 @@ _dynamic_imports = {
     "Skill": "schemas",
     "SkillCommand": "command.skill_command",
     "SkillLoaderService": "service.skill_loader_service",
-    "SkillTrackerService": "service.skill_tracker_service",
     "SkillsServiceProvider": "service_provider",
     # keep-sorted end
 }
