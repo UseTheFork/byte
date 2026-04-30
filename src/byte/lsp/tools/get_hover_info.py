@@ -48,7 +48,9 @@ class GetHoverInfoTool(BaseTool):
             if hover_result:
                 return ToolResult(result={"content": hover_result.contents})
             else:
-                return ToolResult(result={"content": f"No hover information available at {file_path}:{line}:{character}"})
+                return ToolResult(
+                    result={"content": f"No hover information available at {file_path}:{line}:{character}"}
+                )
 
         except Exception as e:
             return ToolResult(result={"content": f"Error getting hover information: {e!s}"})

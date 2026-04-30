@@ -62,6 +62,9 @@ _dynamic_imports = {
     "CustomServerConfig": "config",
     "Diagnostic": "schemas",
     "DiagnosticSeverity": "schemas",
+    "FindReferencesTool": "tools.find_references",
+    "GetDefinitionTool": "tools.get_definition",
+    "GetHoverInfoTool": "tools.get_hover_info",
     "HoverResult": "schemas",
     "LSPClient": "service.lsp_client",
     "LSPConfig": "config",
@@ -75,9 +78,6 @@ _dynamic_imports = {
     "PresetServerConfig": "config",
     "Range": "schemas",
     "TextDocumentIdentifier": "schemas",
-    "FindReferencesTool": "tools.find_references",
-    "GetDefinitionTool": "tools.get_definition",
-    "GetHoverInfoTool": "tools.get_hover_info",
     # keep-sorted end
 }
 

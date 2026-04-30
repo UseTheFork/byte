@@ -10,6 +10,7 @@ This skill documents the full process for creating a new agent node in the Byte 
 ## Overview
 
 An agent node is an LLM-powered node in the LangGraph workflow. Each agent has:
+
 - A **prompt** (system + user templates assembled into a `ChatPromptTemplate`)
 - A **model** (resolved via `LLMService`)
 - **Tools** (optional, bound to the model at runtime)
@@ -48,6 +49,7 @@ from byte.support.utils import extract_content_from_message
 ```
 
 Add additional imports for:
+
 - **Tools** the agent will use (e.g., `from byte.files import EditFileTool`)
 - **`Boundary` / `BoundaryType`** if the prompt includes example blocks (`from byte.support import Boundary, BoundaryType`)
 - **`State`** if tools are conditionally included based on state (`from byte.support import State`)
@@ -149,18 +151,18 @@ class MyNewAgentNode(BaseAgentNode):
 
 #### Key method details
 
-| Method | Purpose |
-|---|---|
-| `boot(goto)` | Sets routing target. `goto` is a `BaseNode` subclass, converted to snake_case via `Str.class_to_snake_case()`. Default is `EndNode`. |
-| `message_type` | Property returning the `ByteAIMessage` inner class for this agent. Used by `route_tool_calls()` to cast results. |
-| `get_model()` | Resolves the model via `LLMService.get_model(self.name)`. The `self.name` is auto-derived from the class name (snake_case). |
-| `get_prompt()` | Returns the module-level `prompt` variable. |
-| `get_user_template()` | Returns the module-level `user_template` variable. |
-| `get_system_template()` | Returns the module-level `system_template` variable. |
-| `get_tools(state)` | Returns a list of **tool classes** (not instances). Can be conditional based on `state`. Return `[]` if no tools are needed. |
-| `get_enforcement()` | Optional. Returns a `list[str]` of enforcement rules appended to the prompt. Default returns `[]`. |
-| `filter_message_history(messages)` | Optional. Override to filter scratch messages before they reach the LLM. Default returns all messages unmodified. |
-| `__call__(state, config)` | Main execution. Always returns `Command[Literal["routing_node"]]`. |
+| Method                             | Purpose                                                                                                                              |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `boot(goto)`                       | Sets routing target. `goto` is a `BaseNode` subclass, converted to snake_case via `Str.class_to_snake_case()`. Default is `EndNode`. |
+| `message_type`                     | Property returning the `ByteAIMessage` inner class for this agent. Used by `route_tool_calls()` to cast results.                     |
+| `get_model()`                      | Resolves the model via `LLMService.get_model(self.name)`. The `self.name` is auto-derived from the class name (snake_case).          |
+| `get_prompt()`                     | Returns the module-level `prompt` variable.                                                                                          |
+| `get_user_template()`              | Returns the module-level `user_template` variable.                                                                                   |
+| `get_system_template()`            | Returns the module-level `system_template` variable.                                                                                 |
+| `get_tools(state)`                 | Returns a list of **tool classes** (not instances). Can be conditional based on `state`. Return `[]` if no tools are needed.         |
+| `get_enforcement()`                | Optional. Returns a `list[str]` of enforcement rules appended to the prompt. Default returns `[]`.                                   |
+| `filter_message_history(messages)` | Optional. Override to filter scratch messages before they reach the LLM. Default returns all messages unmodified.                    |
+| `__call__(state, config)`          | Main execution. Always returns `Command[Literal["routing_node"]]`.                                                                   |
 
 #### `__call__` pattern
 
@@ -282,13 +284,13 @@ The `goto` parameter in `add_node` is passed to the agent's `boot()` method and 
 
 ## Naming Conventions
 
-| Item | Convention | Example |
-|---|---|---|
-| File name | `<name>_agent_node.py` | `review_agent_node.py` |
-| Class name | `<Name>AgentNode` | `ReviewAgentNode` |
-| Message class | `<Name>AgentMessage` | `ReviewAgentMessage` |
-| `agent_name` field | Human-readable title | `"Review Agent"` |
-| Container name (auto) | `<name>_agent_node` (snake_case of class) | `review_agent_node` |
+| Item                  | Convention                                | Example                |
+| --------------------- | ----------------------------------------- | ---------------------- |
+| File name             | `<name>_agent_node.py`                    | `review_agent_node.py` |
+| Class name            | `<Name>AgentNode`                         | `ReviewAgentNode`      |
+| Message class         | `<Name>AgentMessage`                      | `ReviewAgentMessage`   |
+| `agent_name` field    | Human-readable title                      | `"Review Agent"`       |
+| Container name (auto) | `<name>_agent_node` (snake_case of class) | `review_agent_node`    |
 
 ---
 
