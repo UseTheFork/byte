@@ -17,28 +17,28 @@ if TYPE_CHECKING:
 class Linting(VerticalGroup):
     """A widget that displays linting progress and results."""
 
-    BORDER_TITLE = "Lint"
+    BORDER_TITLE = " Lint "
 
     DEFAULT_CSS = """
     Linting {
         height: auto;
         background: transparent;
-        
+
         & HorizontalGroup {
             height: 1;
             & RuneSpinner {
                 width: 2;
             }
-            
+
             & ProgressBar {
                 width: 1fr;
             }
         }
-        
+
         & ProgressBar {
             height: 1;
         }
-        
+
         & Label {
             height: auto;
             width: 100%;

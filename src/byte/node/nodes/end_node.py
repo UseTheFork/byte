@@ -5,7 +5,8 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte.memory import CompleteSimpleTurnTool, CompleteStepTool
+from byte.memory import CompleteSimpleTurnTool
+from byte.memory.tools.complete_turn_tool import CompleteTurnTool
 from byte.node import BaseNode, NodeEvents
 from byte.node.messages import BaseAIMessage
 from byte.orchestration import AssistantContextSchema, BaseState
@@ -32,7 +33,7 @@ class EndNode(BaseNode):
                 if isinstance(m, ToolMessage)
                 and m.name
                 in [
-                    CompleteStepTool.name,
+                    CompleteTurnTool.name,
                     CompleteSimpleTurnTool.name,
                 ]
             ),

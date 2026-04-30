@@ -1,6 +1,7 @@
 from langgraph.types import Command
 
-from byte.memory import CompleteSimpleTurnTool, CompleteStepTool
+from byte.memory import CompleteSimpleTurnTool
+from byte.memory.tools.complete_turn_tool import CompleteTurnTool
 from byte.node import BaseNode
 from byte.orchestration import BaseState
 from byte.support.utils import get_last_message
@@ -85,7 +86,7 @@ class ToolNode(BaseNode):
         if any(
             tc["name"]
             in [
-                CompleteStepTool.name,
+                CompleteTurnTool.name,
                 CompleteSimpleTurnTool.name,
             ]
             for tc in message.tool_calls
