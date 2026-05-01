@@ -11,7 +11,7 @@ from byte.files import (
     ReplaceFileTool,
     WriteFileTool,
 )
-from byte.files.tools.read_files_tool import ReadFilesTool
+from byte.files.tools.add_files_tool import AddFilesTool
 from byte.llm import LLMService, ModelSchema
 from byte.memory import CompleteStepTool, CompleteTurnTool, CreatePlanTool
 from byte.node import (
@@ -171,7 +171,7 @@ class CoderAgentNode(BaseAgentNode):
                     WriteFileTool,
                     DeleteFileTool,
                     ReplaceFileTool,
-                    ReadFilesTool,
+                    AddFilesTool,
                 ]
             )
 

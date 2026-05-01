@@ -3,6 +3,7 @@ from typing import List, Type
 from byte import Command, EventBus, Service, ServiceProvider
 from byte.files import (
     AddFileCommand,
+    AddFilesTool,
     AICommentWatcherService,
     DeleteFileTool,
     DropFileCommand,
@@ -14,7 +15,6 @@ from byte.files import (
     FileWatcherService,
     ListFilesCommand,
     ListFilesTool,
-    ReadFilesTool,
     ReadOnlyCommand,
     ReloadFilesCommand,
     ReplaceFileTool,
@@ -57,7 +57,7 @@ class FileServiceProvider(ServiceProvider):
             WriteFileTool,
             DeleteFileTool,
             ReplaceFileTool,
-            ReadFilesTool,
+            AddFilesTool,
             ListFilesTool,
         ]
 

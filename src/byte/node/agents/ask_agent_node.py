@@ -5,7 +5,7 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
-from byte.files import ListFilesTool, ReadFilesTool
+from byte.files import AddFilesTool, ListFilesTool
 from byte.git import GitGrepTool
 from byte.llm import LLMService, ModelSchema
 from byte.node import (
@@ -114,7 +114,7 @@ class AskAgentNode(BaseAgentNode):
             GitGrepTool,
             UserSelectTool,
             ListFilesTool,
-            ReadFilesTool,
+            AddFilesTool,
             SearchWebTool,
         ]
 

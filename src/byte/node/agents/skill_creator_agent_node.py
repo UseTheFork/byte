@@ -5,8 +5,8 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
+from byte.files.tools.add_files_tool import AddFilesTool
 from byte.files.tools.list_files_tool import ListFilesTool
-from byte.files.tools.read_files_tool import ReadFilesTool
 from byte.git.tools.git_grep_tool import GitGrepTool
 from byte.llm import LLMService, ModelSchema
 from byte.lsp import FindReferencesTool, GetDefinitionTool, GetHoverInfoTool
@@ -145,7 +145,7 @@ class SkillCreatorAgentNode(BaseAgentNode):
             UserInputTextTool,
             UserConfirmTool,
             ListFilesTool,
-            ReadFilesTool,
+            AddFilesTool,
         ]
 
         config = self.app["config"]
