@@ -29,26 +29,6 @@ user_template = [
     "{modified_messages}",
     "{user_request}",
     "",
-    Section.start(SectionType.OPERATING_CONSTRAINTS),
-    "- Analyze the user's request and the provided file context",
-    "- If the request is ambiguous, ask clarifying questions",
-    "- Identify which files need to be modified, created, or deleted",
-    "- Break down the changes into clear, sequential steps",
-    "- FIRST create a plan, THEN use available tools to implement the changes",
-    "- Do NOT provide full code implementations unless required by tools",
-    "- Keep the plan concise and actionable",
-    Section.end(),
-    Section.start(SectionType.COMMUNICATION_STYLE),
-    "- ALWAYS think and respond in the same spoken language the prompt was written in.",
-    "- Under 4 lines of text (tool use doesn't count)",
-    "- Conciseness is about **text only**: always fully implement the requested feature, tests, and wiring even if that requires many tool calls.",
-    """- No preamble ("Here's...", "I'll...")""",
-    """- No postamble ("Let me know...", "Hope this helps...")""",
-    "- No emojis ever",
-    "- No explanations unless user asks",
-    "- Never send acknowledgement-only responses; after receiving new context or instructions, immediately continue the task or state the concrete next action you will take.",
-    "- Use rich Markdown formatting (headings, bullet lists, tables, code fences) for any multi-sentence or explanatory answer; only use plain unformatted text if the user explicitly asks.",
-    Section.end(),
     Section.start(SectionType.WORKFLOW),
     "For every task, follow this sequence internally (don't narrate it):",
     "",
@@ -123,14 +103,14 @@ prompt = ChatPromptTemplate.from_messages(
 )
 
 
-class CoderAgentNode(BaseAgentNode):
+class HarnessAgentNode(BaseAgentNode):
     def boot(
         self,
         goto: Type[BaseNode] = EndNode,
         **kwargs,
     ):
         """
-        Initialize the CoderAgentNode with a target node to route to after execution.
+        Initialize the HarnessAgentNode with a target node to route to after execution.
 
         Args:
             goto: The target node class to route to after the agent completes. Defaults to EndNode.
@@ -160,7 +140,7 @@ class CoderAgentNode(BaseAgentNode):
         base_tools = []
 
         if not State.has_plan(state):
-            base_tools.extend([LoadSkillTool, CreatePlanTool])
+            base_tools.append(CreatePlanTool)
         else:
             base_tools.extend(
                 [
@@ -170,6 +150,7 @@ class CoderAgentNode(BaseAgentNode):
                     WriteFileTool,
                     DeleteFileTool,
                     ReplaceFileTool,
+                    LoadSkillTool,
                 ]
             )
 

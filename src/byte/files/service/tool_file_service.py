@@ -8,6 +8,11 @@ from byte.tui import InteractionService, Messages
 class ToolFileService(Service):
     """ """
 
+    def boot(self, **kwargs) -> None:
+        """Initialize file service and ensure discovery service is ready."""
+        self.file_discovery_service = self.app.make(FileDiscoveryService)
+        self.file_service = self.app.make(FileService)
+
     def _prepare_file_path(self, path: str) -> Path:
         """Validate file path exists and is not read-only.
 
@@ -99,6 +104,10 @@ class ToolFileService(Service):
                 full_path.parent.mkdir(parents=True, exist_ok=True)
 
                 full_path.write_text(content, encoding="utf-8")
+
+                await self.file_discovery_service.add_file(full_path)
+                await self.file_service.add_file(str(full_path), FileMode.EDITABLE)
+
                 return f"Successfully wrote {len(content)} characters to `{path}`"
             else:
                 raise Exception("User declined request to write file.")
@@ -162,9 +171,6 @@ class ToolFileService(Service):
         Usage: `status, error = block.apply()` -> (BlockStatus.APPLIED, "") or (BlockStatus.INVALID, "error message")
         """
         try:
-            file_discovery_service = self.app.make(FileDiscoveryService)
-            file_service = self.app.make(FileService)
-
             interaction_service = self.app.make(InteractionService)
             resolved_file_path = self._prepare_file_path(path)
 
@@ -178,8 +184,8 @@ class ToolFileService(Service):
                 resolved_file_path.unlink()
 
                 # Remove the deleted file from context
-                await file_discovery_service.remove_file(resolved_file_path)
-                await file_service.remove_file(str(resolved_file_path))
+                await self.file_discovery_service.remove_file(resolved_file_path)
+                await self.file_service.remove_file(str(resolved_file_path))
 
                 return f"Successfully deleted `{path}`"
             else:
