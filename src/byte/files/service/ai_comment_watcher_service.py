@@ -219,13 +219,12 @@ class AICommentWatcherService(Service):
                 file_path = single_comment.get("file_path")
 
                 ai_instruction.append(f" - {file_path}")
-                # ai_instruction.append("### Comments")
 
-                # # Extract instruction from the comment text
-                # for comment in single_comment.get("comments", []):
-                #     # Remove comment markers and extract instruction
-                #     clean_comment = comment.strip().lstrip("/#-;").strip()
-                #     ai_instruction.append(f"{clean_comment.strip()}\n")
+                # Extract instruction from the comment text
+                for comment in single_comment.get("comments", []):
+                    # Remove comment markers and extract instruction
+                    clean_comment = comment.strip().lstrip("/#-;").strip()
+                    ai_instruction.append(f"   > {clean_comment.strip()}")
 
         ai_instruction = "\n".join(ai_instruction)
 

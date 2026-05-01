@@ -56,6 +56,7 @@ _dynamic_imports = {
     # keep-sorted start
     "AICommentWatcherService": "service.ai_comment_watcher_service",
     "AddFileCommand": "command.add_file_command",
+    "AddFilesTool": "tools.add_files_tool",
     "DeleteFileTool": "tools.delete_file_tool",
     "DropFileCommand": "command.drop_file_command",
     "EditFileTool": "tools.edit_file_tool",
@@ -69,7 +70,6 @@ _dynamic_imports = {
     "FileWatcherService": "service.watcher_service",
     "ListFilesCommand": "command.list_files_command",
     "ListFilesTool": "tools.list_files_tool",
-    "AddFilesTool": "tools.add_files_tool",
     "ReadOnlyCommand": "command.add_read_only_file_command",
     "ReloadFilesCommand": "command.reload_files_command",
     "ReplaceFileTool": "tools.replace_file_tool",
