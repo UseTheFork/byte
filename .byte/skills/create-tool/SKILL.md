@@ -3,7 +3,6 @@ name: create-tool
 description: Documents the full process for creating a new LLM-invokable tool in the Byte project. Use this skill when creating, modifying, or understanding tools that extend BaseTool.
 ---
 
-
 # Create Tool Guide
 
 This skill documents the full process for creating a new LLM-invokable tool in the Byte project. Tools live in domain-specific `tools/` directories and extend `BaseTool`.
@@ -109,11 +108,11 @@ class MyNewTool(BaseTool):
 
 #### Key Methods
 
-| Method                | Type        | Required | Description                                                                                           |
-| --------------------- | ----------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `run(**kwargs)`       | `async`     | **Yes**  | Core execution logic. Receives kwargs matching `input_schema` properties, plus `state` and `**kwargs`. |
-| `format_tool_message` | `classmethod` | **Yes**  | Formats `ToolResult` into a string message sent back to the LLM.                                      |
-| `format_tui_message`  | `classmethod` | No       | Formats `ToolResult` for display in the TUI. Defaults to calling `format_tool_message()`.             |
+| Method                | Type          | Required | Description                                                                                            |
+| --------------------- | ------------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `run(**kwargs)`       | `async`       | **Yes**  | Core execution logic. Receives kwargs matching `input_schema` properties, plus `state` and `**kwargs`. |
+| `format_tool_message` | `classmethod` | **Yes**  | Formats `ToolResult` into a string message sent back to the LLM.                                       |
+| `format_tui_message`  | `classmethod` | No       | Formats `ToolResult` for display in the TUI. Defaults to calling `format_tool_message()`.              |
 
 ---
 
@@ -183,11 +182,11 @@ class ToolResult(BaseModel):
     extra: dict = Field(default_factory=dict)
 ```
 
-| Field     | Type   | Default          | Description                                                                                                  |
-| --------- | ------ | ---------------- | ------------------------------------------------------------------------------------------------------------ |
-| `success` | `bool` | `True`           | Whether the tool execution succeeded. Set to `False` for logical failures (not exceptions).                  |
-| `result`  | `dict` | (required)       | The tool's output data. By convention, use `{"content": "..."}` for text results.                            |
-| `extra`   | `dict` | `{}` (empty)     | Extra data merged directly into the graph state update. Use this to pass data back into the workflow state.   |
+| Field     | Type   | Default      | Description                                                                                                 |
+| --------- | ------ | ------------ | ----------------------------------------------------------------------------------------------------------- |
+| `success` | `bool` | `True`       | Whether the tool execution succeeded. Set to `False` for logical failures (not exceptions).                 |
+| `result`  | `dict` | (required)   | The tool's output data. By convention, use `{"content": "..."}` for text results.                           |
+| `extra`   | `dict` | `{}` (empty) | Extra data merged directly into the graph state update. Use this to pass data back into the workflow state. |
 
 ### Using `extra` to Update Graph State
 
@@ -344,12 +343,12 @@ _dynamic_imports = {
 
 ## Naming Conventions
 
-| Item            | Convention                   | Example                   |
-| --------------- | ---------------------------- | ------------------------- |
-| File name       | `<name>_tool.py`             | `search_web_tool.py`      |
-| Class name      | `<Name>Tool`                 | `SearchWebTool`           |
-| `name` field    | `snake_case` string          | `"search_web"`            |
-| Tool directory  | `src/byte/<domain>/tools/`   | `src/byte/web/tools/`     |
+| Item           | Convention                 | Example               |
+| -------------- | -------------------------- | --------------------- |
+| File name      | `<name>_tool.py`           | `search_web_tool.py`  |
+| Class name     | `<Name>Tool`               | `SearchWebTool`       |
+| `name` field   | `snake_case` string        | `"search_web"`        |
+| Tool directory | `src/byte/<domain>/tools/` | `src/byte/web/tools/` |
 
 ---
 
@@ -441,4 +440,3 @@ class CreatePlanTool(BaseTool):
             extra={"plan": plan},  # Merged into graph state by ToolNode
         )
 ```
-
