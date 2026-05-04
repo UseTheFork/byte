@@ -8,7 +8,6 @@ from byte.files.tools.add_files_tool import AddFilesTool
 from byte.files.tools.list_files_tool import ListFilesTool
 from byte.git.tools.git_grep_tool import GitGrepTool
 from byte.llm import LLMService, ModelSchema
-from byte.lsp import FindReferencesTool, GetDefinitionTool, GetHoverInfoTool
 from byte.node import (
     BaseAgentNode,
     BaseNode,
@@ -133,16 +132,6 @@ class SkillCreatorAgentNode(BaseAgentNode):
             ListFilesTool,
             AddFilesTool,
         ]
-
-        config = self.app["config"]
-        if config.lsp.enable:
-            base_tools.extend(
-                [
-                    FindReferencesTool,
-                    GetDefinitionTool,
-                    GetHoverInfoTool,
-                ]
-            )
 
         return base_tools
 
