@@ -44,18 +44,7 @@ class ToolRegistryService(Service):
         return self.app.make(tool_class)
 
     def tools_to_prompt_xml(self, tools: Optional[dict[str, Type[BaseTool]]] = None) -> str:
-        """Format a dict of skills as XML for injection into a system prompt.
-
-        Args:
-            skills: Skills to format. Defaults to the current active skills dict.
-
-        Returns:
-            An XML string wrapped in ``<available_skills>`` tags, or an empty
-            string if there are no skills to render.
-
-        Usage: `xml = service.skills_to_prompt_xml()`
-        Usage: `xml = service.skills_to_prompt_xml(my_skills)`
-        """
+        """Format a dict of tools as XML for injection into a prompt."""
         if tools is None:
             tools = self._tools
 
@@ -64,11 +53,12 @@ class ToolRegistryService(Service):
 
         lines: list[str] = [Boundary.open(BoundaryType.AVAILABLE_TOOLS)]
         for tool in tools.values():
-            lines.append(f"  {Boundary.open(BoundaryType.SKILL)}")
+            lines.append(f"  {Boundary.open(BoundaryType.TOOL)}")
             lines.append(f"    {Boundary.open(BoundaryType.NAME)}{tool.name}{Boundary.close(BoundaryType.NAME)}")
             lines.append(
                 f"    {Boundary.open(BoundaryType.DESCRIPTION)}{tool.description}{Boundary.close(BoundaryType.DESCRIPTION)}"
             )
+            lines.append(f"  {Boundary.close(BoundaryType.TOOL)}")
         lines.append(Boundary.close(BoundaryType.AVAILABLE_TOOLS))
 
         return "\n".join(lines)

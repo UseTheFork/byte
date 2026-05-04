@@ -32,6 +32,7 @@ class BoundaryType(StrEnum):
     CONSTRAINTS = "constraints"
 
     AVAILABLE_TOOLS = "available_tools"
+    TOOL = "tool"
 
     # Skills
     AVAILABLE_SKILLS = "available_skills"
