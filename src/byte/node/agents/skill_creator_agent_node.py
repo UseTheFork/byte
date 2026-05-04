@@ -89,7 +89,7 @@ user_template = [
     "{operating_principles}",
     "",
     Section.important(
-        f"All tool operations are applied immediately and are reflected in the next user message containing {SectionType.PROJECT_STATE}."
+        f"All tool operations are applied immediately and are reflected in the next user message containing {SectionType.PROJECT_FILES}."
     ),
 ]
 
@@ -126,9 +126,6 @@ class SkillCreatorAgentNode(BaseAgentNode):
     def get_model(self) -> tuple[ModelSchema, dict]:
         llm_service = self.app.make(LLMService)
         return llm_service.get_model(self.name)
-
-    def get_prompt(self):
-        return prompt
 
     def get_user_template(self):
         return user_template

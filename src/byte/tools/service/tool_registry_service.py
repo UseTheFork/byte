@@ -1,6 +1,6 @@
 from typing import Dict, Optional, Type
 
-from byte.support import Service
+from byte.support import Boundary, BoundaryType, Service
 from byte.tools.base_tool import BaseTool
 
 
@@ -23,6 +23,13 @@ class ToolRegistryService(Service):
         """
         self._tools[tool.name] = tool
 
+    def has_tool(self, name: str) -> bool:
+        """Check if a tool is registered by name.
+
+        Usage: `registry.has_tool("edit_file")`
+        """
+        return name in self._tools
+
     def get_tool(self, name: str) -> Optional[BaseTool]:
         """Retrieve and instantiate a registered tool by name.
 
@@ -35,3 +42,33 @@ class ToolRegistryService(Service):
         if tool_class is None:
             return None
         return self.app.make(tool_class)
+
+    def tools_to_prompt_xml(self, tools: Optional[dict[str, Type[BaseTool]]] = None) -> str:
+        """Format a dict of skills as XML for injection into a system prompt.
+
+        Args:
+            skills: Skills to format. Defaults to the current active skills dict.
+
+        Returns:
+            An XML string wrapped in ``<available_skills>`` tags, or an empty
+            string if there are no skills to render.
+
+        Usage: `xml = service.skills_to_prompt_xml()`
+        Usage: `xml = service.skills_to_prompt_xml(my_skills)`
+        """
+        if tools is None:
+            tools = self._tools
+
+        if not tools:
+            return ""
+
+        lines: list[str] = [Boundary.open(BoundaryType.AVAILABLE_TOOLS)]
+        for tool in tools.values():
+            lines.append(f"  {Boundary.open(BoundaryType.SKILL)}")
+            lines.append(f"    {Boundary.open(BoundaryType.NAME)}{tool.name}{Boundary.close(BoundaryType.NAME)}")
+            lines.append(
+                f"    {Boundary.open(BoundaryType.DESCRIPTION)}{tool.description}{Boundary.close(BoundaryType.DESCRIPTION)}"
+            )
+        lines.append(Boundary.close(BoundaryType.AVAILABLE_TOOLS))
+
+        return "\n".join(lines)

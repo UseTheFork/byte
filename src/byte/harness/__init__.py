@@ -6,11 +6,14 @@ from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
     from byte.harness.service_provider import HarnessServiceProvider
+    from byte.harness.tools.bootstrap_agent_tool import BootstrapAgentTool
 
-__all__ = ("HarnessServiceProvider",)
+
+__all__ = ("BootstrapAgentTool", "HarnessServiceProvider")
 
 _dynamic_imports = {
     # keep-sorted start
+    "BootstrapAgentTool": "tools.bootstrap_agent_tool",
     "HarnessServiceProvider": "service_provider",
     # keep-sorted end
 }

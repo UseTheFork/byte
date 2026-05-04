@@ -5,6 +5,17 @@ from langgraph.graph.message import AnyMessage, add_messages
 from byte.orchestration import ConstraintSchema, MetadataSchema, add_constraints, replace_str, update_metadata
 
 
+class HarnessState(TypedDict):
+    """State passed to a harnessed agent, constraining its skills, tools, and prompt.
+
+    Usage: Populated by the HarnessAgentNode before spawning an ExecutorAgentNode.
+    """
+
+    skills: list[str]
+    tools: list[str]
+    prompt: str | None
+
+
 class PlanStep(TypedDict):
     """ """
 
@@ -32,6 +43,8 @@ class BaseState(TypedDict):
 
     Usage: `state = BaseState(messages=[], agent="CoderAgent")`
     """
+
+    harness: HarnessState | None
 
     # Persistent conversation history from memory store
     history_messages: Annotated[list[AnyMessage], add_messages]

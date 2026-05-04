@@ -1,6 +1,5 @@
 from typing import Literal, Type
 
-from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
@@ -17,6 +16,7 @@ from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
 from byte.orchestration import (
     BaseState,
+    Leaves,
 )
 from byte.support import Section, SectionType, Str
 from byte.support.utils import extract_content_from_message
@@ -24,8 +24,8 @@ from byte.system import UserSelectTool
 from byte.web import SearchWebTool
 
 user_template = [
-    "{modified_messages}",
-    "{user_request}",
+    Leaves.ConversationHistory(),
+    Leaves.UserRequest(),
     "",
     Section.start(SectionType.OPERATING_CONSTRAINTS),
     "- Always use best practices when coding",
@@ -44,32 +44,27 @@ user_template = [
     "- Focus on actionable findings, not exhaustive documentation",
     Section.end(),
     "",
-    "{operating_principles}",
+    Leaves.OperatingPrinciples(),
 ]
 
 
 system_template = [
-    "{preamble}",
-    Section.start(SectionType.ROLE),
-    "Act as an expert software developer.",
-    Section.end(),
-    "{available_skills}",
+    Leaves.Preamble(role="Act as an expert software developer."),
+    Leaves.SkillsAvailable(),
 ]
 
-ask_enforcement = [
-    "- NEVER use XML-style tags in your responses (e.g., <file>, <search>, <replace>). These are for internal parsing only.",
-    "- DO NOT provide full code implementations unless explicitly requested. Describe the changes needed first.",
+context_template = [
+    Leaves.SkillsLoaded(),
+    Leaves.ReferenceMaterials(),
+    Leaves.ProjectEnvironment(),
+    Leaves.FileContext(),
+    Leaves.Epilogue(
+        enforcements=[
+            "- NEVER use XML-style tags in your responses (e.g., <file>, <search>, <replace>). These are for internal parsing only.",
+            "- DO NOT provide full code implementations unless explicitly requested. Describe the changes needed first.",
+        ]
+    ),
 ]
-
-
-prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", "{system_message}"),
-        ("user", "{user_message}"),
-        ("placeholder", "{scratch_messages}"),
-        ("user", "{context_message}"),
-    ]
-)
 
 
 class AskAgentNode(BaseAgentNode):
@@ -97,17 +92,14 @@ class AskAgentNode(BaseAgentNode):
         llm_service = self.app.make(LLMService)
         return llm_service.get_model(self.name)
 
-    def get_prompt(self):
-        return prompt
-
     def get_user_template(self):
         return user_template
 
     def get_system_template(self):
         return system_template
 
-    def get_enforcement(self):
-        return ask_enforcement
+    def get_context_template(self):
+        return context_template
 
     def get_tools(self, state: BaseState):
         return [

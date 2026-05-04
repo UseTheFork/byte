@@ -79,9 +79,6 @@ class ResearchAgentNode(BaseAgentNode):
         llm_service = self.app.make(LLMService)
         return llm_service.get_model(self.name)
 
-    def get_prompt(self):
-        return prompt
-
     def get_user_template(self):
         return user_template
 

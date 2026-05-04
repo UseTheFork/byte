@@ -1,7 +1,6 @@
 from typing import List, Literal, Type
 
 from langchain_core.messages import BaseMessage
-from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
@@ -16,7 +15,7 @@ from byte.node import (
 )
 from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
-from byte.orchestration import BaseState
+from byte.orchestration import BaseState, Leaves
 from byte.support import Boundary, BoundaryType, Section, SectionType, State, Str
 
 # Conventional commit message generation prompt
@@ -25,12 +24,12 @@ from byte.support import Boundary, BoundaryType, Section, SectionType, State, St
 
 user_template = [
     Section.sub_heading("Git Diffs", 2),
-    "{git_diffs}",
-    "",
+    "```{git_diffs}",
+    "```",
     Section.important("You **MUST** consider the above git diffs before proceeding (if not empty)."),
-    "",
-    "{modified_messages}",
-    "",
+    Section.end(),
+    Leaves.ConversationHistory(),
+    Leaves.CommitHistory(),
     Section.start(SectionType.TASK),
     "You are an expert software engineer that generates concise, Git commit messages based on the provided diffs.",
     "Review the provided context and diffs which are about to be committed to a git repo.",
@@ -40,16 +39,14 @@ user_template = [
     Section.end(),
     Section.start(SectionType.COMMUNICATION_STYLE),
     "- ALWAYS think and respond in the same spoken language the prompt was written in.",
-    "- Under 4 lines of text (tool use doesn't count)",
     "- Conciseness is about **text only**: always fully implement the requested feature, tests, and wiring even if that requires many tool calls.",
     """- No preamble ("Here's...", "I'll...")""",
     """- No postamble ("Let me know...", "Hope this helps...")""",
     "- No emojis ever",
     "- No explanations unless user asks",
     "- Never send acknowledgement-only responses; after receiving new context or instructions, immediately continue the task or state the concrete next action you will take.",
-    "- Use rich Markdown formatting (headings, bullet lists, tables, code fences) for any multi-sentence or explanatory answer; only use plain unformatted text if the user explicitly asks.",
     Section.end(),
-    "{commit_guidelines}",
+    Leaves.CommitGuidelines(),
     "",
     Section.start(SectionType.WORKFLOW),
     "Format your response as follows:",
@@ -78,21 +75,11 @@ user_template = [
 
 
 system_template = [
-    "{preamble}",
+    Leaves.Preamble(),
     Section.start(SectionType.ROLE),
     "You are an expert software engineer that generates organized Git commits based on the provided user input.",
     Section.end(),
-    "{available_skills}",
 ]
-
-prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", "{system_message}"),
-        ("user", "{user_message}"),
-        ("placeholder", "{scratch_messages}"),
-        ("user", "{context_message}"),
-    ]
-)
 
 
 class CommitAgentNode(BaseAgentNode):
@@ -119,9 +106,6 @@ class CommitAgentNode(BaseAgentNode):
     def get_model(self) -> tuple[ModelSchema, dict]:
         llm_service = self.app.make(LLMService)
         return llm_service.get_model(self.name)
-
-    def get_prompt(self):
-        return prompt
 
     def get_user_template(self):
         return user_template

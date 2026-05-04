@@ -11,7 +11,6 @@ from langgraph.types import Command
 from byte.llm import ModelSchema
 from byte.node import (
     BaseNode,
-    NodeEvents,
 )
 from byte.node.messages import BaseAIMessage
 from byte.orchestration import BaseState, PromptAssembler
@@ -40,9 +39,6 @@ class BaseAgentNode(BaseNode):
         """
         pass
 
-    def get_enforcement(self) -> List[str]:
-        return []
-
     def get_tools(self, state: BaseState):
         return []
 
@@ -64,15 +60,19 @@ class BaseAgentNode(BaseNode):
         """ """
         ...
 
-    @abstractmethod
-    def get_prompt(self) -> ChatPromptTemplate:
-        """Get the ChatPromptTemplate for this agent.
+    def get_context_template(self) -> List[str] | None:
+        """ """
+        return None
 
-        Must be implemented by subclasses to return their specific ChatPromptTemplate,
-        which defines the overall prompt structure including system and user messages.
-        Usage: Override in subclass to provide domain-specific prompt templates
-        """
-        ...
+    def get_prompt(self) -> ChatPromptTemplate:
+        return ChatPromptTemplate.from_messages(
+            [
+                ("system", "{system_message}"),
+                ("user", "{user_message}"),
+                ("placeholder", "{scratch_messages}"),
+                ("placeholder", "{context_message}"),
+            ]
+        )
 
     @abstractmethod
     def get_model(self) -> tuple[ModelSchema, dict]:
@@ -100,7 +100,7 @@ class BaseAgentNode(BaseNode):
 
         return [HumanMessage(errors)]
 
-    async def generate_agent_state(self, state: BaseState, config, extra: dict | None = {}) -> tuple:
+    async def generate_agent_state(self, state: BaseState, config, extra: dict = {}) -> tuple:
         """Generate the agent state for the assistant node invocation.
 
         Assembles the user prompt from the state and context, emits a pre-assistant event
@@ -117,17 +117,9 @@ class BaseAgentNode(BaseNode):
 
         Usage: `agent_state, config = await self._generate_agent_state(state, config, runtime.context)`
         """
-        # Create a new assembler
-        prompt_assembler = self.app.make(PromptAssembler, agent_node=self)
-        prompt_state = await prompt_assembler.generate_state(state, extra)
 
-        payload = await self.emit(
-            NodeEvents.PreAssistantNode(
-                state=prompt_state,
-                config=config,
-            )
-        )
-        prompt_state = payload.state
+        # Create a new assembler
+        prompt_assembler = self.app.make(PromptAssembler, agent_node=self, state=state)
 
         agent_state = await prompt_assembler.generate_messages()
 
@@ -136,12 +128,23 @@ class BaseAgentNode(BaseNode):
         else:
             agent_state["errors"] = []
 
+        # Convert the agent_state to messages and replace vars with state + extra as needed
+        # agent_state["user_message"] = [HumanMessage(agent_state["user_message"]).]
+        merged = {**state, **extra}
+        agent_state["user_message"] = ChatPromptTemplate.from_template(agent_state["user_message"]).format(**merged)
+
+        merged = {**state, **extra}
+        agent_state["system_message"] = ChatPromptTemplate.from_template(agent_state["system_message"]).format(**merged)
+
         max_tokens = 150_000
 
         assembled_user_message_tokens = len(agent_state["user_message"]) / 4
         assembled_system_message_tokens = len(agent_state["system_message"]) / 4
 
-        refreshed_context_state_tokens = len(agent_state["context_message"]) / 4
+        if agent_state["context_message"]:
+            refreshed_context_state_tokens = len(agent_state["context_message"]) / 4
+        else:
+            refreshed_context_state_tokens = 0
 
         scratch_messages = state.get("scratch_messages", [])
         scratch_messages_tokens = sum(len(m.text) / 4 for m in scratch_messages)
@@ -160,7 +163,7 @@ class BaseAgentNode(BaseNode):
             )
         )
 
-        config = payload.config
+        # config = payload.config
 
         return (agent_state, config)
 

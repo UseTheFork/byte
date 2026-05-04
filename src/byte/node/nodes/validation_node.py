@@ -2,12 +2,11 @@ from typing import Literal, Type
 
 from langchain_core.messages import HumanMessage
 from langgraph.graph.state import RunnableConfig
-from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.node import BaseNode
 from byte.node.nodes import EndNode
-from byte.orchestration import AssistantContextSchema, BaseState, ValidationError, Validator
+from byte.orchestration import BaseState, ValidationError, Validator
 from byte.support import Str
 from byte.support.mixins import UserInteractive
 from byte.tui import Messages
@@ -40,7 +39,9 @@ class ValidationNode(BaseNode, UserInteractive):
         self.goto = Str.class_to_snake_case(goto)
 
     async def __call__(
-        self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
+        self,
+        state: BaseState,
+        config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
         """Execute validation checks on the last assistant message.
 

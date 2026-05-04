@@ -1,6 +1,5 @@
 from typing import Literal, Type
 
-from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
@@ -21,14 +20,14 @@ from byte.node import (
 )
 from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
-from byte.orchestration import BaseState
+from byte.orchestration import BaseState, Leaves
 from byte.skills.tools.load_skill_tool import LoadSkillTool
 from byte.support import Boundary, BoundaryType, Section, SectionType, State, Str
 from byte.support.utils import extract_content_from_message
 
 user_template = [
-    "{modified_messages}",
-    "{user_request}",
+    Leaves.ConversationHistory(),
+    Leaves.UserRequest(),
     "",
     Section.start(SectionType.OPERATING_CONSTRAINTS),
     "- Analyze the user's request and the provided file context",
@@ -97,31 +96,25 @@ user_template = [
     "```",
     "",
     Section.end(),
-    "{operating_principles}",
     "",
     Section.important(
-        f"All tool operations are applied immediately and are reflected in the next user message containing {SectionType.PROJECT_STATE}."
+        f"All tool operations are applied immediately and are reflected in the next user message containing {SectionType.PROJECT_FILES}."
     ),
 ]
 
-
 system_template = [
-    "{preamble}",
-    Section.start(SectionType.ROLE),
-    "Act as an expert software developer.",
-    Section.end(),
-    "{available_skills}",
+    Leaves.Preamble(role="Act as an expert software developer."),
+    Leaves.SkillsAvailable(),
+    Leaves.OperatingPrinciples(),
 ]
 
-
-prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", "{system_message}"),
-        ("user", "{user_message}"),
-        ("placeholder", "{scratch_messages}"),
-        ("user", "{context_message}"),
-    ]
-)
+context_template = [
+    Leaves.SkillsLoaded(),
+    Leaves.ReferenceMaterials(),
+    Leaves.ProjectEnvironment(),
+    Leaves.FileContext(),
+    Leaves.Epilogue(),
+]
 
 
 class CoderAgentNode(BaseAgentNode):
@@ -147,14 +140,14 @@ class CoderAgentNode(BaseAgentNode):
         llm_service = self.app.make(LLMService)
         return llm_service.get_model(self.name)
 
-    def get_prompt(self):
-        return prompt
-
     def get_user_template(self):
         return user_template
 
     def get_system_template(self):
         return system_template
+
+    def get_context_template(self):
+        return context_template
 
     def get_tools(self, state: BaseState):
         # Depending on the state we modify the returned tools.

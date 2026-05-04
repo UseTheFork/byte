@@ -24,4 +24,5 @@ class Skill:
     skill_file_path: Path
     builtin: bool = False
     version: Optional[str] = None
+    allowed_tools: Optional[list[str]] = None
     active: bool = True

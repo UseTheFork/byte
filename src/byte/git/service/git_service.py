@@ -300,3 +300,31 @@ class GitService(Service, UserInteractive, Notifiable):
         tracked = self._repo.git.ls_files().splitlines()
         untracked = self._repo.untracked_files
         return [Path(f) for f in tracked] + [Path(f) for f in untracked]
+
+    async def get_recent_commits(self, count: int = 5) -> List[dict]:
+        """Get the last X commits from the repository.
+
+        Args:
+                count: Number of recent commits to retrieve (default: 5)
+
+        Returns:
+                List of dictionaries containing commit information
+
+        Usage: `commits = await git_service.get_recent_commits(5)` -> last 5 commits
+        """
+        self.ensure_booted()
+
+        commits = []
+        for commit in self._repo.iter_commits(max_count=count):
+            commits.append(
+                {
+                    "hash": commit.hexsha,
+                    "short_hash": commit.hexsha[:7],
+                    "message": commit.message.strip(),
+                    "author": str(commit.author),
+                    "date": commit.committed_datetime.isoformat(),
+                    "files": list(commit.stats.files.keys()),
+                }
+            )
+
+        return commits

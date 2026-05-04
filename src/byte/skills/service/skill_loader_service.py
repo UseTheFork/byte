@@ -46,7 +46,7 @@ class SkillLoaderService(Service):
 
         Usage: `for name, skill in service.skills.items(): ...`
         """
-        return {name: skill for name, skill in self._skills.items() if skill.active}
+        return {name: skill for name, skill in self._skills.items()}
 
     def get_skill(self, name: str) -> Optional[Skill]:
         """Return a skill by name, or None if not found.
@@ -171,6 +171,14 @@ class SkillLoaderService(Service):
         if version is not None and not isinstance(version, str):
             version = str(version)
 
+        metadata = frontmatter.get("metadata")
+        allowed_tools = None
+        if isinstance(metadata, dict):
+            allowed_tools = metadata.get("allowed-tools")
+            if allowed_tools is not None and not isinstance(allowed_tools, list):
+                self.app["log"].warning(f"'allowed-tools' in metadata of {skill_file} is not a list, ignoring")
+                allowed_tools = None
+
         return Skill(
             name=name.strip(),
             description=description.strip(),
@@ -178,6 +186,7 @@ class SkillLoaderService(Service):
             path=skill_file.parent,
             skill_file_path=skill_file,
             builtin=builtin,
+            allowed_tools=allowed_tools,
             version=version.strip() if isinstance(version, str) else None,
         )
 

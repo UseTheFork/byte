@@ -8,14 +8,17 @@ class SectionType(StrEnum):
 
     ROLE = "Role"
 
-    PROJECT_STATE = "Project State"
+    PROJECT_FILES = "Project Files"
     REFERENCE_MATERIALS = "Reference Materials"
     PROJECT_ENVIRONMENT = "Project Environment"
+
+    COMMIT_HISTORY = "Commit History"
 
     CONVERSATION_HISTORY = "Conversation History"
     USER_INPUT = "User Input"
     SKILLS = "Skills"
     AVALIABLE_SKILLS = "Avaliable Skills"
+    AVALIABLE_TOOLS = "Avaliable Tools"
     TASK = "Task"
 
     OPERATING_CONSTRAINTS = "Operating Constraints"

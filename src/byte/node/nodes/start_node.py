@@ -7,6 +7,7 @@ from langgraph.types import Command
 
 from byte.node import BaseNode
 from byte.orchestration import BaseState, MetadataSchema
+from byte.orchestration.state import HarnessState
 from byte.support import Str
 
 
@@ -33,6 +34,11 @@ class StartNode(BaseNode):
             "touched_files": state.get("touched_files") or [],
             "plan": None,
             "errors": None,
+            "harness": HarnessState(
+                skills=[],
+                tools=[],
+                prompt=None,
+            ),
             "metadata": MetadataSchema(
                 iteration=0,
                 erase_history=False,

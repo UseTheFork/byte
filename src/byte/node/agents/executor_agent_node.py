@@ -1,11 +1,15 @@
 from typing import Literal, Type
 
-from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
-from byte.harness import BootstrapAgentTool
+from byte.files import (
+    DeleteFileTool,
+    EditFileTool,
+    ReplaceFileTool,
+    WriteFileTool,
+)
 from byte.llm import LLMService, ModelSchema
 from byte.memory import CompleteStepTool, CompleteTurnTool, CreatePlanTool
 from byte.node import (
@@ -16,17 +20,9 @@ from byte.node import (
 from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
 from byte.orchestration import BaseState
-from byte.support import Section, SectionType, Str
+from byte.skills.tools.load_skill_tool import LoadSkillTool
+from byte.support import Boundary, BoundaryType, Section, SectionType, State, Str
 from byte.support.utils import extract_content_from_message
-
-system_template = [
-    "{preamble}",
-    Section.start(SectionType.ROLE),
-    "Act as an expert software developer.",
-    Section.end(),
-    "{all_skills}",
-    "{all_tools}",
-]
 
 user_template = [
     "{modified_messages}",
@@ -41,6 +37,43 @@ user_template = [
     f"    Once you complete a step use the `{CompleteStepTool.name}` tool to mark it complete.",
     "- PHASE 3: Provide a summary of what was changed.",
     "",
+    "- For longer tasks, send brief progress updates (under 10 words) BUT IMMEDIATELY CONTINUE WORKING - progress updates are not stopping points",
+    Section.sub_heading("Example Workflow", 2),
+    "```",
+    Boundary.open(BoundaryType.EXAMPLE),
+    Boundary.open(BoundaryType.AGENT_MESSAGE),
+    "Creating plan for the requested changes.",
+    Boundary.close(BoundaryType.AGENT_MESSAGE),
+    Boundary.open(BoundaryType.TOOL_CALL),
+    f'{CreatePlanTool.name}(steps=[{{"order": 1, "content": "Remove the old function."}}, {{"order": 2, "content": "Add a new helper function."}}])',
+    Boundary.close(BoundaryType.TOOL_CALL),
+    Boundary.open(BoundaryType.AGENT_MESSAGE),
+    "Removing old function now.",
+    Boundary.close(BoundaryType.AGENT_MESSAGE),
+    Boundary.open(BoundaryType.TOOL_CALL),
+    f"{EditFileTool.name}([removed for brevity])",
+    Boundary.close(BoundaryType.TOOL_CALL),
+    Boundary.open(BoundaryType.TOOL_CALL),
+    f'{CompleteStepTool.name}(step_id="1")',
+    Boundary.close(BoundaryType.TOOL_CALL),
+    Boundary.open(BoundaryType.AGENT_MESSAGE),
+    "Adding new helper function.",
+    Boundary.close(BoundaryType.AGENT_MESSAGE),
+    Boundary.open(BoundaryType.TOOL_CALL),
+    f"{EditFileTool.name}([removed for brevity])",
+    Boundary.close(BoundaryType.TOOL_CALL),
+    Boundary.open(BoundaryType.TOOL_CALL),
+    f'{CompleteStepTool.name}(step_id="2")',
+    Boundary.close(BoundaryType.TOOL_CALL),
+    Boundary.open(BoundaryType.AGENT_MESSAGE),
+    f"All steps complete. Calling `{CompleteTurnTool.name}` to finalize.",
+    Boundary.close(BoundaryType.AGENT_MESSAGE),
+    Boundary.open(BoundaryType.TOOL_CALL),
+    f'{CompleteTurnTool.name}(summary="Removed old function and added new helper function.", key_points=[])',
+    Boundary.close(BoundaryType.TOOL_CALL),
+    Boundary.close(BoundaryType.EXAMPLE),
+    "```",
+    "",
     Section.end(),
     "{operating_principles}",
     "",
@@ -50,17 +83,16 @@ user_template = [
 ]
 
 
-prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", "{system_message}"),
-        ("user", "{user_message}"),
-        ("placeholder", "{scratch_messages}"),
-        ("user", "{context_message}"),
-    ]
-)
+system_template = [
+    "{preamble}",
+    Section.start(SectionType.ROLE),
+    "Act as an expert software developer.",
+    Section.end(),
+    "{available_skills}",
+]
 
 
-class HarnessAgentNode(BaseAgentNode):
+class ExecutorAgentNode(BaseAgentNode):
     def boot(
         self,
         goto: Type[BaseNode] = EndNode,
@@ -93,13 +125,20 @@ class HarnessAgentNode(BaseAgentNode):
         # Depending on the state we modify the returned tools.
         base_tools = []
 
-        base_tools.extend(
-            [
-                BootstrapAgentTool,
-                CompleteStepTool,
-                CompleteTurnTool,
-            ]
-        )
+        if not State.has_plan(state):
+            base_tools.append(CreatePlanTool)
+        else:
+            base_tools.extend(
+                [
+                    CompleteStepTool,
+                    CompleteTurnTool,
+                    EditFileTool,
+                    WriteFileTool,
+                    DeleteFileTool,
+                    ReplaceFileTool,
+                    LoadSkillTool,
+                ]
+            )
 
         return base_tools
 

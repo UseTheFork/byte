@@ -14,7 +14,7 @@ class GitGrepTool(BaseTool):
     description: str = list_to_multiline_text(
         [
             "Search for a pattern in tracked files using git grep. This tool searches through all files tracked by git for the specified pattern. It's useful for finding where specific code, functions, or text appears in the codebase.",
-            f"BEFORE using this tool you MUST check the provided {Boundary.open(BoundaryType.FILE)} in {Section.ref(SectionType.PROJECT_STATE)}.",
+            f"BEFORE using this tool you MUST check the provided {Boundary.open(BoundaryType.FILE)} in {Section.ref(SectionType.PROJECT_FILES)}.",
         ]
     )
     input_schema = {

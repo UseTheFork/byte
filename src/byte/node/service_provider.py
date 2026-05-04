@@ -5,8 +5,7 @@ from byte.node import (
     BaseAgentNode,
     BaseNode,
 )
-from byte.node.agents import AskAgentNode, CoderAgentNode, CommitAgentNode
-from byte.node.agents.skill_creator_agent_node import SkillCreatorAgentNode
+from byte.node.agents import AskAgentNode, CoderAgentNode, CommitAgentNode, HarnessAgentNode, SkillCreatorAgentNode
 from byte.node.nodes import (
     EndNode,
     ExtractNode,
@@ -27,6 +26,7 @@ class NodeServiceProvider(ServiceProvider):
             AskAgentNode,
             CoderAgentNode,
             CommitAgentNode,
+            HarnessAgentNode,
             SkillCreatorAgentNode,
             # keep-sorted end
         ]

@@ -31,6 +31,8 @@ class BoundaryType(StrEnum):
     PROJECT_HIERARCHY = "project_hierarchy"
     CONSTRAINTS = "constraints"
 
+    AVAILABLE_TOOLS = "available_tools"
+
     # Skills
     AVAILABLE_SKILLS = "available_skills"
     SKILL = "skill"
