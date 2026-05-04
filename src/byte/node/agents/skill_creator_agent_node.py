@@ -1,6 +1,5 @@
 from typing import Literal, Type
 
-from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
@@ -17,7 +16,7 @@ from byte.node import (
 )
 from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
-from byte.orchestration import BaseState
+from byte.orchestration import BaseState, Leaves
 from byte.skills.tools.create_skill_tool import CreateSkillTool
 from byte.support import Boundary, BoundaryType, Section, SectionType, Str
 from byte.support.utils import extract_content_from_message
@@ -26,9 +25,8 @@ from byte.system.tools.user_input_text_tool import UserInputTextTool
 from byte.system.tools.user_select_tool import UserSelectTool
 
 user_template = [
-    "{modified_messages}",
-    "{user_request}",
-    "",
+    Leaves.ConversationHistory(),
+    Leaves.UserRequest(),
     Section.start(SectionType.OPERATING_CONSTRAINTS),
     "- Understand what the user wants the skill to do before writing anything",
     "- If the request is ambiguous, ask clarifying questions about intent, expected output, and when the skill should trigger",
@@ -36,7 +34,6 @@ user_template = [
     "- FIRST gather the necessary information, THEN use available tools to create the skill",
     "- Keep skill instructions clear, concise, and actionable",
     Section.end(),
-    "",
     Section.start(SectionType.TASK),
     "Your task is to help the user create a new skill. Follow these phases:",
     "",
@@ -45,7 +42,6 @@ user_template = [
     f"    - Use the `{UserInputTextTool.name}`, `{UserSelectTool.name}` or the `{UserConfirmTool.name}` tools to do this.",
     "- PHASE 3: Create the Skill — Use the available tools to create the skill with a clear name, description, and instructions.",
     Section.end(),
-    "",
     Section.start(SectionType.RESPONSE_FORMAT),
     "Structure your responses as follows:",
     "",
@@ -65,9 +61,7 @@ user_template = [
     "**Summary** - SHORT, CONCISE bulleted list of what was created",
     "```",
     Section.end(),
-    "",
     Section.start(SectionType.EXAMPLES),
-    "",
     "```",
     Boundary.open(BoundaryType.EXAMPLE),
     "## Understanding",
@@ -85,30 +79,15 @@ user_template = [
     "```",
     "",
     Section.end(),
-    "",
-    "{operating_principles}",
-    "",
-    Section.important(
-        f"All tool operations are applied immediately and are reflected in the next user message containing {SectionType.PROJECT_FILES}."
-    ),
 ]
 
 system_template = [
-    "{preamble}",
-    Section.start(SectionType.ROLE),
-    "Act as an expert skill creator. Your job is to help users design and create skills by understanding their intent, asking the right questions, and producing clear, well-structured skill definitions.",
-    Section.end(),
-    "{available_skills}",
+    Leaves.Preamble(
+        role="Act as an expert skill creator. Your job is to help users design and create skills by understanding their intent, asking the right questions, and producing clear, well-structured skill definitions."
+    ),
+    Leaves.SkillsAvailable(),
+    Leaves.OperatingPrinciples(),
 ]
-
-prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", "{system_message}"),
-        ("user", "{user_message}"),
-        ("placeholder", "{scratch_messages}"),
-        ("user", "{context_message}"),
-    ]
-)
 
 
 class SkillCreatorAgentNode(BaseAgentNode):
@@ -132,6 +111,16 @@ class SkillCreatorAgentNode(BaseAgentNode):
 
     def get_system_template(self):
         return system_template
+
+    def get_context_template(self):
+        return [
+            Leaves.SkillsLoaded(),
+            Leaves.ToolsLoaded(),
+            Leaves.ReferenceMaterials(),
+            Leaves.ProjectEnvironment(),
+            Leaves.FileContext(),
+            Leaves.Epilogue(),
+        ]
 
     def get_tools(self, state: BaseState):
 

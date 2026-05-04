@@ -24,7 +24,8 @@ from byte.support import Boundary, BoundaryType, Section, SectionType, State, St
 
 user_template = [
     Section.sub_heading("Git Diffs", 2),
-    "```{git_diffs}",
+    "```",
+    "{git_diffs}",
     "```",
     Section.important("You **MUST** consider the above git diffs before proceeding (if not empty)."),
     Section.end(),
@@ -112,6 +113,12 @@ class CommitAgentNode(BaseAgentNode):
 
     def get_system_template(self):
         return system_template
+
+    def get_context_template(self):
+        return [
+            Leaves.ToolsLoaded(),
+            Leaves.Epilogue(),
+        ]
 
     def get_tools(self, state: BaseState):
         if not State.tool_was_called(state, GitCommitTool.name):

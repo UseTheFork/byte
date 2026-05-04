@@ -1,7 +1,8 @@
 import asyncio
+import re
 from typing import TYPE_CHECKING, TypeVar
 
-from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_core.messages import BaseMessage
 
 from byte.llm import ModelSchema
 from byte.orchestration import BaseState, Leaf
@@ -27,7 +28,7 @@ class PromptAssembler(Bootable, Eventable):
     Usage: `prompt = assembler.assemble(name="World", age=30)`
     """
 
-    def boot(self, agent_node: BaseAgentNode | None, state: BaseState, **kwargs):
+    def boot(self, agent_node: BaseAgentNode | None, state: BaseState, extra: dict = {}, **kwargs):
 
         if agent_node is None:
             raise ValueError("agent_node is required and cannot be empty")
@@ -52,6 +53,9 @@ class PromptAssembler(Bootable, Eventable):
 
         self.prompt_state = state
 
+        # TODO: this needs to be done better.
+        self.merged_state = {**state, **extra}
+
     def get_app(self) -> Application:
         return self.app
 
@@ -68,10 +72,8 @@ class PromptAssembler(Bootable, Eventable):
         templates = {
             "system_message": self.agent_node.get_system_template(),
             "user_message": self.agent_node.get_user_template(),
+            "context_message": self.agent_node.get_context_template(),
         }
-
-        if self.agent_node.get_context_template() is not None:
-            templates["context_message"] = self.agent_node.get_context_template()
 
         # Collect all leaves across all templates
         leaf_tasks: list[tuple[str, int, Leaf]] = []  # (template_key, index, leaf)
@@ -90,13 +92,9 @@ class PromptAssembler(Bootable, Eventable):
         for (key, idx, _), result in zip(leaf_tasks, assembled):
             built[key][idx] = result
 
-        system_message = list_to_multiline_text(built["system_message"])
-        user_message = list_to_multiline_text(built["user_message"])
-
-        if self.agent_node.get_context_template() is not None:
-            context_message = [HumanMessage(list_to_multiline_text(built["context_message"]))]
-        else:
-            context_message = []
+        system_message = self.assemble_message(built["system_message"])
+        user_message = self.assemble_message(built["user_message"])
+        context_message = self.assemble_message(built["context_message"])
 
         return {
             "system_message": system_message,
@@ -105,36 +103,33 @@ class PromptAssembler(Bootable, Eventable):
             "scratch_messages": self.generate_scratch_state(),
         }
 
-    # async def generate_messages(self) -> dict:
-    #     # TODO: We should make this async gather
-    #     return {
-    #         "system_message": self.assemble_message(self.agent_node.get_system_template()),
-    #         "user_message": self.assemble_message(self.agent_node.get_user_template()),
-    #         "scratch_messages": self.generate_scratch_state(),
-    #         "context_message": self.generate_refreshed_context_state(),
-    #     }
+    def assemble_message(self, template: list[str]) -> str:
+        """Replace {placeholder} tokens in template with provided values.
 
-    # def generate_refreshed_context_state(self) -> str:
-    #     """ """
-    #     refreshed_context_message = list_to_multiline_text(
-    #         [
-    #             self.prompt_state["loaded_skills"],
-    #             self.prompt_state["project_context"],
-    #             self.prompt_state["project_environment"],
-    #             Section.start(SectionType.PROJECT_FILES),
-    #             "Below is the current state of the project. It includes all your changes as a result of previous tool calls that have been masked for brevity.",
-    #             "",
-    #             Section.important("You MUST trust this information as the current state of the files etc."),
-    #             "",
-    #             self.prompt_state["file_context"],
-    #             "",
-    #             Section.end(),
-    #             self.prompt_state["plan"],
-    #             self.epilogue(),
-    #         ]
-    #     )
+        Automatically removes lines containing only placeholders that don't have corresponding values.
+        Placeholders are expected to be on their own line with nothing else.
 
-    #     return refreshed_context_message
+        Usage: `assembler.assemble_system_message(name="World", age=30)`
+        """
+
+        result_lines = []
+        placeholder_pattern = r"^\{([^}]+)\}$"
+
+        for line in template:
+            match = re.match(placeholder_pattern, line)
+            if match:
+                # Line contains only a placeholder
+                key = match.group(1)
+                if key in self.merged_state:
+                    # Replace with the value
+                    value = self.merged_state[key]
+                    result_lines.append(value if isinstance(value, str) else str(value))
+                # If key not in prompt_state, skip this line (remove it)
+            else:
+                # Not a placeholder line, keep as-is
+                result_lines.append(line)
+
+        return list_to_multiline_text(result_lines)
 
     def generate_scratch_state(self) -> list[BaseMessage]:
         """ """

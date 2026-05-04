@@ -60,9 +60,10 @@ class BaseAgentNode(BaseNode):
         """ """
         ...
 
-    def get_context_template(self) -> List[str] | None:
+    @abstractmethod
+    def get_context_template(self) -> List[str]:
         """ """
-        return None
+        ...
 
     def get_prompt(self) -> ChatPromptTemplate:
         return ChatPromptTemplate.from_messages(
@@ -70,7 +71,7 @@ class BaseAgentNode(BaseNode):
                 ("system", "{system_message}"),
                 ("user", "{user_message}"),
                 ("placeholder", "{scratch_messages}"),
-                ("placeholder", "{context_message}"),
+                ("user", "{context_message}"),
             ]
         )
 
@@ -119,7 +120,7 @@ class BaseAgentNode(BaseNode):
         """
 
         # Create a new assembler
-        prompt_assembler = self.app.make(PromptAssembler, agent_node=self, state=state)
+        prompt_assembler = self.app.make(PromptAssembler, agent_node=self, state=state, extra=extra)
 
         agent_state = await prompt_assembler.generate_messages()
 
@@ -128,23 +129,11 @@ class BaseAgentNode(BaseNode):
         else:
             agent_state["errors"] = []
 
-        # Convert the agent_state to messages and replace vars with state + extra as needed
-        # agent_state["user_message"] = [HumanMessage(agent_state["user_message"]).]
-        merged = {**state, **extra}
-        agent_state["user_message"] = ChatPromptTemplate.from_template(agent_state["user_message"]).format(**merged)
-
-        merged = {**state, **extra}
-        agent_state["system_message"] = ChatPromptTemplate.from_template(agent_state["system_message"]).format(**merged)
-
         max_tokens = 150_000
 
         assembled_user_message_tokens = len(agent_state["user_message"]) / 4
         assembled_system_message_tokens = len(agent_state["system_message"]) / 4
-
-        if agent_state["context_message"]:
-            refreshed_context_state_tokens = len(agent_state["context_message"]) / 4
-        else:
-            refreshed_context_state_tokens = 0
+        refreshed_context_state_tokens = len(agent_state["context_message"]) / 4
 
         scratch_messages = state.get("scratch_messages", [])
         scratch_messages_tokens = sum(len(m.text) / 4 for m in scratch_messages)

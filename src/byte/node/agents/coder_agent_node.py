@@ -28,7 +28,6 @@ from byte.support.utils import extract_content_from_message
 user_template = [
     Leaves.ConversationHistory(),
     Leaves.UserRequest(),
-    "",
     Section.start(SectionType.OPERATING_CONSTRAINTS),
     "- Analyze the user's request and the provided file context",
     "- If the request is ambiguous, ask clarifying questions",
@@ -108,14 +107,6 @@ system_template = [
     Leaves.OperatingPrinciples(),
 ]
 
-context_template = [
-    Leaves.SkillsLoaded(),
-    Leaves.ReferenceMaterials(),
-    Leaves.ProjectEnvironment(),
-    Leaves.FileContext(),
-    Leaves.Epilogue(),
-]
-
 
 class CoderAgentNode(BaseAgentNode):
     def boot(
@@ -147,7 +138,13 @@ class CoderAgentNode(BaseAgentNode):
         return system_template
 
     def get_context_template(self):
-        return context_template
+        return [
+            Leaves.SkillsLoaded(),
+            Leaves.ReferenceMaterials(),
+            Leaves.ProjectEnvironment(),
+            Leaves.FileContext(),
+            Leaves.Epilogue(),
+        ]
 
     def get_tools(self, state: BaseState):
         # Depending on the state we modify the returned tools.

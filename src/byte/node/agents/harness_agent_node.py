@@ -1,6 +1,5 @@
 from typing import Literal, Type
 
-from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
@@ -15,7 +14,7 @@ from byte.node import (
 )
 from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
-from byte.orchestration import BaseState
+from byte.orchestration import BaseState, Leaves
 from byte.support import Section, SectionType, Str
 from byte.support.utils import extract_content_from_message
 
@@ -50,16 +49,6 @@ user_template = [
 ]
 
 
-prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", "{system_message}"),
-        ("user", "{user_message}"),
-        ("placeholder", "{scratch_messages}"),
-        ("user", "{context_message}"),
-    ]
-)
-
-
 class HarnessAgentNode(BaseAgentNode):
     def boot(
         self,
@@ -88,6 +77,16 @@ class HarnessAgentNode(BaseAgentNode):
 
     def get_system_template(self):
         return system_template
+
+    def get_context_template(self):
+        return [
+            Leaves.SkillsLoaded(),
+            Leaves.ToolsLoaded(),
+            Leaves.ReferenceMaterials(),
+            Leaves.ProjectEnvironment(),
+            Leaves.FileContext(),
+            Leaves.Epilogue(),
+        ]
 
     def get_tools(self, state: BaseState):
         # Depending on the state we modify the returned tools.

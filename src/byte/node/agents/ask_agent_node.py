@@ -53,19 +53,6 @@ system_template = [
     Leaves.SkillsAvailable(),
 ]
 
-context_template = [
-    Leaves.SkillsLoaded(),
-    Leaves.ReferenceMaterials(),
-    Leaves.ProjectEnvironment(),
-    Leaves.FileContext(),
-    Leaves.Epilogue(
-        enforcements=[
-            "- NEVER use XML-style tags in your responses (e.g., <file>, <search>, <replace>). These are for internal parsing only.",
-            "- DO NOT provide full code implementations unless explicitly requested. Describe the changes needed first.",
-        ]
-    ),
-]
-
 
 class AskAgentNode(BaseAgentNode):
     def boot(
@@ -99,7 +86,19 @@ class AskAgentNode(BaseAgentNode):
         return system_template
 
     def get_context_template(self):
-        return context_template
+        return [
+            Leaves.SkillsLoaded(),
+            Leaves.ToolsLoaded(),
+            Leaves.ReferenceMaterials(),
+            Leaves.ProjectEnvironment(),
+            Leaves.FileContext(),
+            Leaves.Epilogue(
+                enforcements=[
+                    "- NEVER use XML-style tags in your responses (e.g., <file>, <search>, <replace>). These are for internal parsing only.",
+                    "- DO NOT provide full code implementations unless explicitly requested. Describe the changes needed first.",
+                ]
+            ),
+        ]
 
     def get_tools(self, state: BaseState):
         return [
