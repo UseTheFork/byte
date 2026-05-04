@@ -12,7 +12,7 @@ from byte.files import (
 )
 from byte.files.tools.add_files_tool import AddFilesTool
 from byte.llm import LLMService, ModelSchema
-from byte.memory import CompleteSimpleTurnTool
+from byte.memory import CompleteStepTool, CompleteTurnTool, CreatePlanTool
 from byte.node import (
     BaseAgentNode,
     BaseNode,
@@ -21,7 +21,8 @@ from byte.node import (
 from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
 from byte.orchestration import BaseState, Leaves
-from byte.support import Boundary, BoundaryType, Section, SectionType, Str
+from byte.skills.tools.load_skill_tool import LoadSkillTool
+from byte.support import Boundary, BoundaryType, Section, SectionType, State, Str
 from byte.support.utils import extract_content_from_message
 
 user_template = [
@@ -51,7 +52,9 @@ user_template = [
     "For every task, follow this sequence internally (don't narrate it):",
     "",
     "- PHASE 1: Create a clear, step-by-step plan for implementing the requested changes.",
+    f"    You MUST use the `{CreatePlanTool.name}` tool for this.",
     "- PHASE 2: Use available tools to apply the changes.",
+    f"    Once you complete a step use the `{CompleteStepTool.name}` tool to mark it complete.",
     "- PHASE 3: Provide a summary of what was changed.",
     "",
     "- For longer tasks, send brief progress updates (under 10 words) BUT IMMEDIATELY CONTINUE WORKING - progress updates are not stopping points",
@@ -59,17 +62,19 @@ user_template = [
     "```",
     Boundary.open(BoundaryType.EXAMPLE),
     Boundary.open(BoundaryType.AGENT_MESSAGE),
-    Section.sub_heading("Plan", 2),
-    "To make this change we need to modify `main.py`:",
-    "",
-    "1. Remove the old function.",
-    "2. Add a new helper function.",
+    "Creating plan for the requested changes.",
     Boundary.close(BoundaryType.AGENT_MESSAGE),
+    Boundary.open(BoundaryType.TOOL_CALL),
+    f'{CreatePlanTool.name}(steps=[{{"order": 1, "content": "Remove the old function."}}, {{"order": 2, "content": "Add a new helper function."}}])',
+    Boundary.close(BoundaryType.TOOL_CALL),
     Boundary.open(BoundaryType.AGENT_MESSAGE),
     "Removing old function now.",
     Boundary.close(BoundaryType.AGENT_MESSAGE),
     Boundary.open(BoundaryType.TOOL_CALL),
     f"{EditFileTool.name}([removed for brevity])",
+    Boundary.close(BoundaryType.TOOL_CALL),
+    Boundary.open(BoundaryType.TOOL_CALL),
+    f'{CompleteStepTool.name}(step_id="1")',
     Boundary.close(BoundaryType.TOOL_CALL),
     Boundary.open(BoundaryType.AGENT_MESSAGE),
     "Adding new helper function.",
@@ -77,11 +82,14 @@ user_template = [
     Boundary.open(BoundaryType.TOOL_CALL),
     f"{EditFileTool.name}([removed for brevity])",
     Boundary.close(BoundaryType.TOOL_CALL),
+    Boundary.open(BoundaryType.TOOL_CALL),
+    f'{CompleteStepTool.name}(step_id="2")',
+    Boundary.close(BoundaryType.TOOL_CALL),
     Boundary.open(BoundaryType.AGENT_MESSAGE),
-    f"All steps complete. Calling `{CompleteSimpleTurnTool.name}` to finalize.",
+    f"All steps complete. Calling `{CompleteTurnTool.name}` to finalize.",
     Boundary.close(BoundaryType.AGENT_MESSAGE),
     Boundary.open(BoundaryType.TOOL_CALL),
-    f'{CompleteSimpleTurnTool.name}(summary="Removed old function and added new helper function.")',
+    f'{CompleteTurnTool.name}(summary="Removed old function and added new helper function.", key_points=[])',
     Boundary.close(BoundaryType.TOOL_CALL),
     Boundary.close(BoundaryType.EXAMPLE),
     "```",
@@ -132,7 +140,6 @@ class CoderAgentNode(BaseAgentNode):
     def get_context_template(self):
         return [
             Leaves.SkillsLoaded(),
-            Leaves.ToolsLoaded(),
             Leaves.ReferenceMaterials(),
             Leaves.ProjectEnvironment(),
             Leaves.FileContext(),
@@ -143,16 +150,20 @@ class CoderAgentNode(BaseAgentNode):
         # Depending on the state we modify the returned tools.
         base_tools = []
 
-        base_tools.extend(
-            [
-                EditFileTool,
-                WriteFileTool,
-                DeleteFileTool,
-                ReplaceFileTool,
-                AddFilesTool,
-                CompleteSimpleTurnTool,
-            ]
-        )
+        if not State.has_plan(state):
+            base_tools.extend([LoadSkillTool, CreatePlanTool])
+        else:
+            base_tools.extend(
+                [
+                    CompleteStepTool,
+                    CompleteTurnTool,
+                    EditFileTool,
+                    WriteFileTool,
+                    DeleteFileTool,
+                    ReplaceFileTool,
+                    AddFilesTool,
+                ]
+            )
 
         return base_tools
 
