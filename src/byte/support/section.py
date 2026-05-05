@@ -8,9 +8,9 @@ class SectionType(StrEnum):
 
     ROLE = "Role"
 
-    PROJECT_FILES = "Project Files"
+    PROJECT_FILES = "Workspace Files"
     REFERENCE_MATERIALS = "Reference Materials"
-    PROJECT_ENVIRONMENT = "Project Environment"
+    PROJECT_ENVIRONMENT = "Workspace Environment"
 
     COMMIT_HISTORY = "Commit History"
 

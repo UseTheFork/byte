@@ -29,7 +29,7 @@ class FileContext(Leaf):
                 [
                     Section.start(SectionType.PROJECT_FILES),
                     "",
-                    "Below is the current file state of the project. It includes all your changes as a result of previous tool calls that have been masked for brevity."
+                    "Below is the current file state of the workspace. It includes all your changes as a result of previous tool calls that have been masked for brevity."
                     "",
                     Section.important("You MUST trust this information as the current state of the files etc."),
                     "",

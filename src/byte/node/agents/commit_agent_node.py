@@ -1,6 +1,5 @@
-from typing import List, Literal, Type
+from typing import Literal, Type
 
-from langchain_core.messages import BaseMessage
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
@@ -11,11 +10,9 @@ from byte.memory import CompleteSimpleTurnTool
 from byte.node import (
     BaseAgentNode,
     BaseNode,
-    ByteAIMessage,
 )
-from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
-from byte.orchestration import BaseState, Leaves
+from byte.orchestration import AIMessage, BaseState, Leaves
 from byte.support import Boundary, BoundaryType, Section, SectionType, State, Str
 
 # Conventional commit message generation prompt
@@ -100,10 +97,6 @@ class CommitAgentNode(BaseAgentNode):
 
         self.goto = Str.class_to_snake_case(goto)
 
-    @property
-    def message_type(self) -> Type[BaseAIMessage]:
-        return ByteAIMessage.CommitAgentMessage
-
     def get_model(self) -> tuple[ModelSchema, dict]:
         llm_service = self.app.make(LLMService)
         return llm_service.get_model(self.name)
@@ -125,16 +118,6 @@ class CommitAgentNode(BaseAgentNode):
             return [GitCommitTool]
         else:
             return [CompleteSimpleTurnTool]
-
-    def filter_message_history(self, messages: List[BaseMessage]) -> List[BaseMessage]:
-        last_index = next(
-            (i for i in range(len(messages) - 1, -1, -1) if isinstance(messages[i], self.message_type)),
-            None,
-        )
-        if last_index is not None:
-            messages = messages[last_index:]
-
-        return messages
 
     async def __call__(
         self,
@@ -160,4 +143,4 @@ class CommitAgentNode(BaseAgentNode):
         if route_tool_call is not None:
             return route_tool_call
 
-        return self.route_to(self.goto, {"scratch_messages": ByteAIMessage.CommitAgentMessage(content=result.text)})
+        return self.route_to(self.goto, {"scratch_messages": AIMessage(content=result.text, agent_name=self.name)})

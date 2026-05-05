@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List, Type, cast
+from typing import List
 
 from langchain.chat_models import init_chat_model
 from langchain.messages import HumanMessage
@@ -12,8 +12,8 @@ from byte.llm import ModelSchema
 from byte.node import (
     BaseNode,
 )
-from byte.node.messages import BaseAIMessage
 from byte.orchestration import BaseState, PromptAssembler
+from byte.orchestration.messages import AIMessage
 from byte.support import Str
 from byte.tui import Messages
 
@@ -28,16 +28,6 @@ class BaseAgentNode(BaseNode):
     def human_name(self) -> str:
         """Human readable agent name"""
         return Str.snake_to_title(self.name).replace("Agent Node", "").strip()
-
-    @property
-    @abstractmethod
-    def message_type(self) -> Type[BaseAIMessage]:
-        """The ByteAIMessage subclass to cast this agent's messages to.
-
-        Must be implemented by subclasses to return their specific message type.
-        Usage: Override in subclass to return e.g. `ByteAIMessage.CoderAgentMessage`
-        """
-        pass
 
     def get_tools(self, state: BaseState):
         return []
@@ -204,7 +194,7 @@ class BaseAgentNode(BaseNode):
             Command routing to "tool_node" with the cast result in scratch_messages
         """
         if result.tool_calls and len(result.tool_calls) > 0:
-            result = cast(self.message_type, result)  # ty:ignore[invalid-type-form]
+            result = AIMessage.from_langchain(result, agent_name=self.name)
             return self.route_to(
                 "tool_node",
                 {

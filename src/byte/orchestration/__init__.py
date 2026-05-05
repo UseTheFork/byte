@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from byte.orchestration.exceptions import ByteAgentException, DummyNodeReachedException
     from byte.orchestration.leaves.leaf import Leaf
     from byte.orchestration.leaves.leaves import Leaves
+    from byte.orchestration.messages import AIMessage
     from byte.orchestration.prompt_leaves import core_mandates
     from byte.orchestration.reducers import add_constraints, replace_list, replace_str, update_metadata
     from byte.orchestration.schemas import (
@@ -29,6 +30,7 @@ if TYPE_CHECKING:
     from byte.orchestration.validators.user_confirm_validator import UserConfirmValidator
 
 __all__ = (
+    "AIMessage",
     "AgentConfigBoolSchema",
     "AgentConfigSchema",
     "AgentConfigStringSchema",
@@ -60,6 +62,7 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
+    "AIMessage": "messages",
     "AgentConfigBoolSchema": "schemas",
     "AgentConfigSchema": "schemas",
     "AgentConfigStringSchema": "schemas",

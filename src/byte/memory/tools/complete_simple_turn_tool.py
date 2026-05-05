@@ -20,6 +20,7 @@ class CompleteSimpleTurnTool(BaseTool):
         },
         "required": ["summary"],
     }
+    terminates_turn = True
 
     @classmethod
     def format_tool_message(cls, result: ToolResult) -> str:

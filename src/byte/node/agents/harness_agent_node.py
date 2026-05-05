@@ -10,11 +10,9 @@ from byte.memory import CompleteStepTool, CompleteTurnTool, CreatePlanTool
 from byte.node import (
     BaseAgentNode,
     BaseNode,
-    ByteAIMessage,
 )
-from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
-from byte.orchestration import BaseState, Leaves
+from byte.orchestration import AIMessage, BaseState, Leaves
 from byte.support import Section, SectionType, Str
 from byte.support.utils import extract_content_from_message
 
@@ -63,10 +61,6 @@ class HarnessAgentNode(BaseAgentNode):
             **kwargs: Additional keyword arguments passed to the parent class.
         """
         self.goto = Str.class_to_snake_case(goto)
-
-    @property
-    def message_type(self) -> Type[BaseAIMessage]:
-        return ByteAIMessage.CoderAgentMessage
 
     def get_model(self) -> tuple[ModelSchema, dict]:
         llm_service = self.app.make(LLMService)
@@ -123,4 +117,4 @@ class HarnessAgentNode(BaseAgentNode):
             return route_tool_call
 
         msg = extract_content_from_message(result)
-        return self.route_to(self.goto, {"scratch_messages": ByteAIMessage.CoderAgentMessage(content=msg)})
+        return self.route_to(self.goto, {"scratch_messages": AIMessage(content=msg, agent_name=self.name)})

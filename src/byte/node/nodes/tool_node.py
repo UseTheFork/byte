@@ -1,7 +1,5 @@
 from langgraph.types import Command
 
-from byte.memory import CompleteSimpleTurnTool
-from byte.memory.tools.complete_turn_tool import CompleteTurnTool
 from byte.node import BaseNode
 from byte.orchestration import BaseState
 from byte.support.utils import get_last_message
@@ -84,11 +82,7 @@ class ToolNode(BaseNode):
 
         # Final single route_back after ALL tools
         if any(
-            tc["name"]
-            in [
-                CompleteTurnTool.name,
-                CompleteSimpleTurnTool.name,
-            ]
+            (tool := self.tool_registry_service.get_tool(tc["name"])) and tool.terminates_turn
             for tc in message.tool_calls
         ):
             return self.route_to("end_node", update)

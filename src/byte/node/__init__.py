@@ -8,13 +8,11 @@ if TYPE_CHECKING:
     from byte.node.base_agent_node import BaseAgentNode
     from byte.node.base_node import BaseNode
     from byte.node.events import NodeEvents
-    from byte.node.messages import ByteAIMessage
     from byte.node.service_provider import NodeServiceProvider
 
 __all__ = (
     "BaseAgentNode",
     "BaseNode",
-    "ByteAIMessage",
     "NodeEvents",
     "NodeServiceProvider",
 )
@@ -23,7 +21,6 @@ _dynamic_imports = {
     # keep-sorted start
     "BaseAgentNode": "base_agent_node",
     "BaseNode": "base_node",
-    "ByteAIMessage": "messages",
     "NodeEvents": "events",
     "NodeServiceProvider": "service_provider",
     # keep-sorted end

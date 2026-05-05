@@ -222,6 +222,11 @@ class LintService(Service, UserInteractive):
 
 
         """
+        # Filter out deleted/missing files - only lint files that exist on disk
+        changed_files = [f for f in changed_files if f.exists()]
+
+        if not changed_files:
+            return []
 
         git_service: GitService = self.app.make(GitService)
 

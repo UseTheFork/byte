@@ -1,6 +1,6 @@
 from typing import Literal
 
-from langchain.messages import AIMessage, HumanMessage, ToolMessage
+from langchain.messages import HumanMessage, ToolMessage
 from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
@@ -8,8 +8,8 @@ from langgraph.types import Command
 from byte.memory import CompleteSimpleTurnTool
 from byte.memory.tools.complete_turn_tool import CompleteTurnTool
 from byte.node import BaseNode, NodeEvents
-from byte.node.messages import BaseAIMessage
 from byte.orchestration import AssistantContextSchema, BaseState
+from byte.orchestration.messages import AIMessage
 from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 
@@ -23,7 +23,7 @@ class EndNode(BaseNode):
 
     def _generate_final_message(self, scratch_messages: list) -> str:
         """Generate a final message from the complete_turn tool message."""
-        last_ai_message = next((m for m in reversed(scratch_messages) if isinstance(m, BaseAIMessage)), None)
+        last_ai_message = next((m for m in reversed(scratch_messages) if isinstance(m, AIMessage)), None)
         agent_name = last_ai_message.agent_name if last_ai_message else "unknown"
 
         complete_turn_message = next(
@@ -54,7 +54,7 @@ class EndNode(BaseNode):
         message_parts = []
 
         for message in scratch_messages:
-            if isinstance(message, BaseAIMessage):
+            if isinstance(message, AIMessage):
                 # Extract text content from AIMessage
                 content_text = message.text
 

@@ -11,11 +11,10 @@ from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
     BaseNode,
-    ByteAIMessage,
 )
-from byte.node.messages import BaseAIMessage
 from byte.node.nodes import EndNode
 from byte.orchestration import BaseState
+from byte.orchestration.messages import AIMessage
 from byte.support import Section, SectionType, Str
 from byte.support.utils import extract_content_from_message
 from byte.web import SearchWebTool
@@ -71,10 +70,6 @@ class ResearchAgentNode(BaseAgentNode):
     ):
         self.goto = Str.class_to_snake_case(goto)
 
-    @property
-    def message_type(self) -> Type[BaseAIMessage]:
-        return ByteAIMessage.AskAgentMessage
-
     def get_model(self) -> tuple[ModelSchema, dict]:
         llm_service = self.app.make(LLMService)
         return llm_service.get_model(self.name)
@@ -128,4 +123,4 @@ class ResearchAgentNode(BaseAgentNode):
             return route_tool_call
 
         msg = extract_content_from_message(result)
-        return self.route_to(self.goto, {"scratch_messages": ByteAIMessage.AskAgentMessage(content=msg)})
+        return self.route_to(self.goto, {"scratch_messages": AIMessage(content=msg, agent_name=self.name)})

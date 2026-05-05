@@ -15,6 +15,7 @@ class BaseTool(ABC, Bootable):
     description: str
     input_schema: dict[str, Any]
     harness_invocable: bool = True
+    terminates_turn: bool = False
 
     @abstractmethod
     async def run(self, *args: Any, **kwargs: Any) -> ToolResult:
