@@ -33,6 +33,7 @@ class SectionType(StrEnum):
     EXAMPLES = "Examples"
 
     PLAN = "Plan"
+    RULES = "Rules"
 
 
 class Section:

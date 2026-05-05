@@ -1,14 +1,22 @@
 from typing import override
 
 from byte.files import FileMode, FileService
+from byte.support import Section, SectionType
+from byte.support.utils import list_to_multiline_text
 from byte.tools import BaseTool, ToolResult
 
 
 class AddFilesTool(BaseTool):
     name: str = "add_files"
-    description: str = (
-        "Add one or more files to the Project State section so their contents become available in context. "
-        "Only use this tool with known file paths. Check Project State first to see if the file is already loaded."
+    description: str = list_to_multiline_text(
+        [
+            f"Add one or more files to the {Section.ref(SectionType.PROJECT_FILES)} section so their contents become available in context.",
+            Section.start(SectionType.RULES),
+            f" - YOU MUST check the {Section.ref(SectionType.PROJECT_FILES)}",
+            " - Only use this tool with known file paths.",
+            " - Use only when the file content is not already available in the prompt or known state.",
+            " - DO NOT use this tool to reread files included verbatim in the current message.",
+        ]
     )
     input_schema = {
         "type": "object",

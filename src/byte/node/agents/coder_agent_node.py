@@ -93,12 +93,6 @@ user_template = [
     ),
 ]
 
-system_template = [
-    Leaves.Preamble(role="Act as an expert software developer."),
-    Leaves.SkillsAvailable(),
-    Leaves.OperatingPrinciples(),
-]
-
 
 class CoderAgentNode(BaseAgentNode):
     def boot(
@@ -127,7 +121,11 @@ class CoderAgentNode(BaseAgentNode):
         return user_template
 
     def get_system_template(self):
-        return system_template
+        return [
+            Leaves.Preamble(role="Act as an expert software developer."),
+            Leaves.SkillsAvailable(),
+            Leaves.OperatingPrinciples(),
+        ]
 
     def get_context_template(self):
         return [
@@ -164,7 +162,7 @@ class CoderAgentNode(BaseAgentNode):
     ) -> Command[Literal["routing_node"]]:
 
         agent_state, config = await self.generate_agent_state(state, config)
-        runnable = self.create_runnable(state, "any")
+        runnable = self.create_runnable(state)
         record_response_service = self.app.make(RecordResponseService)
 
         result = await runnable.ainvoke(agent_state, config=config)
