@@ -21,71 +21,6 @@ from byte.system.tools.user_confirm_tool import UserConfirmTool
 from byte.system.tools.user_input_text_tool import UserInputTextTool
 from byte.system.tools.user_select_tool import UserSelectTool
 
-user_template = [
-    Leaves.ConversationHistory(),
-    Leaves.UserRequest(),
-    Section.start(SectionType.OPERATING_CONSTRAINTS),
-    "- Understand what the user wants the skill to do before writing anything",
-    "- If the request is ambiguous, ask clarifying questions about intent, expected output, and when the skill should trigger",
-    "- Capture the skill's name, description, and instructions before creating it",
-    "- FIRST gather the necessary information, THEN use available tools to create the skill",
-    "- Keep skill instructions clear, concise, and actionable",
-    Section.end(),
-    Section.start(SectionType.TASK),
-    "Your task is to help the user create a new skill. Follow these phases:",
-    "",
-    "- PHASE 1: Capture Intent — Understand what the skill should do, when it should trigger, and what the expected output looks like.",
-    "- PHASE 2: Interview — Ask about edge cases, input/output formats, and any dependencies. Come prepared with context.",
-    f"    - Use the `{UserInputTextTool.name}`, `{UserSelectTool.name}` or the `{UserConfirmTool.name}` tools to do this.",
-    "- PHASE 3: Create the Skill — Use the available tools to create the skill with a clear name, description, and instructions.",
-    Section.end(),
-    Section.start(SectionType.RESPONSE_FORMAT),
-    "Structure your responses as follows:",
-    "",
-    "```md",
-    "## Understanding",
-    "Summarise what the skill will do and when it should trigger.",
-    "",
-    "## Clarifying Questions (if needed)",
-    "List any questions before proceeding.",
-    "",
-    "## Skill Details",
-    "- **Name**: skill-name",
-    "- **Description**: When to trigger and what it does.",
-    "- **Instructions**: Step-by-step instructions the skill will follow.",
-    "",
-    "## Summary",
-    "**Summary** - SHORT, CONCISE bulleted list of what was created",
-    "```",
-    Section.end(),
-    Section.start(SectionType.EXAMPLES),
-    "```",
-    Boundary.open(BoundaryType.EXAMPLE),
-    "## Understanding",
-    "This skill will format raw CSV data into a structured markdown table whenever the user shares tabular data and asks for a clean output.",
-    "",
-    "## Skill Details",
-    "- **Name**: csv-to-markdown",
-    "- **Description**: Converts raw CSV data into a formatted markdown table. Use this skill whenever the user shares CSV data or asks for a table.",
-    "- **Instructions**: Read the CSV input, parse headers and rows, and output a properly formatted markdown table.",
-    "",
-    "## Summary",
-    "- Created `csv-to-markdown` skill",
-    "- Skill triggers when the user shares CSV data or requests a table",
-    Boundary.close(BoundaryType.EXAMPLE),
-    "```",
-    "",
-    Section.end(),
-]
-
-system_template = [
-    Leaves.Preamble(
-        role="Act as an expert skill creator. Your job is to help users design and create skills by understanding their intent, asking the right questions, and producing clear, well-structured skill definitions."
-    ),
-    Leaves.SkillsAvailable(),
-    Leaves.OperatingPrinciples(),
-]
-
 
 class SkillCreatorAgentNode(BaseAgentNode):
     def boot(
@@ -100,10 +35,71 @@ class SkillCreatorAgentNode(BaseAgentNode):
         return llm_service.get_model(self.name)
 
     def get_user_template(self):
-        return user_template
+        return [
+            Leaves.ConversationHistory(),
+            Leaves.UserRequest(),
+        ]
 
     def get_system_template(self):
-        return system_template
+        return [
+            Leaves.Preamble(
+                role="Act as an expert skill creator. Your job is to help users design and create skills by understanding their intent, asking the right questions, and producing clear, well-structured skill definitions."
+            ),
+            Leaves.SkillsAvailable(),
+            Leaves.OperatingPrinciples(),
+            Section.start(SectionType.OPERATING_CONSTRAINTS),
+            "- Understand what the user wants the skill to do before writing anything",
+            "- If the request is ambiguous, ask clarifying questions about intent, expected output, and when the skill should trigger",
+            "- Capture the skill's name, description, and instructions before creating it",
+            "- FIRST gather the necessary information, THEN use available tools to create the skill",
+            "- Keep skill instructions clear, concise, and actionable",
+            Section.end(),
+            Section.start(SectionType.TASK),
+            "Your task is to help the user create a new skill. Follow these phases:",
+            "",
+            "- PHASE 1: Capture Intent — Understand what the skill should do, when it should trigger, and what the expected output looks like.",
+            "- PHASE 2: Interview — Ask about edge cases, input/output formats, and any dependencies. Come prepared with context.",
+            f"    - Use the `{UserInputTextTool.name}`, `{UserSelectTool.name}` or the `{UserConfirmTool.name}` tools to do this.",
+            "- PHASE 3: Create the Skill — Use the available tools to create the skill with a clear name, description, and instructions.",
+            Section.end(),
+            Section.start(SectionType.RESPONSE_FORMAT),
+            "Structure your responses as follows:",
+            "",
+            "```md",
+            "## Understanding",
+            "Summarise what the skill will do and when it should trigger.",
+            "",
+            "## Clarifying Questions (if needed)",
+            "List any questions before proceeding.",
+            "",
+            "## Skill Details",
+            "- **Name**: skill-name",
+            "- **Description**: When to trigger and what it does.",
+            "- **Instructions**: Step-by-step instructions the skill will follow.",
+            "",
+            "## Summary",
+            "**Summary** - SHORT, CONCISE bulleted list of what was created",
+            "```",
+            Section.end(),
+            Section.start(SectionType.EXAMPLES),
+            "```",
+            Boundary.open(BoundaryType.EXAMPLE),
+            "## Understanding",
+            "This skill will format raw CSV data into a structured markdown table whenever the user shares tabular data and asks for a clean output.",
+            "",
+            "## Skill Details",
+            "- **Name**: csv-to-markdown",
+            "- **Description**: Converts raw CSV data into a formatted markdown table. Use this skill whenever the user shares CSV data or asks for a table.",
+            "- **Instructions**: Read the CSV input, parse headers and rows, and output a properly formatted markdown table.",
+            "",
+            "## Summary",
+            "- Created `csv-to-markdown` skill",
+            "- Skill triggers when the user shares CSV data or requests a table",
+            Boundary.close(BoundaryType.EXAMPLE),
+            "```",
+            "",
+            Section.end(),
+        ]
 
     def get_context_template(self):
         return [

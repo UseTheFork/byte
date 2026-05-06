@@ -64,5 +64,3 @@ class AddFilesTool(BaseTool):
         files: list[dict] = result.result.get("files", [])
         rows = [f"| `{f['file']}` | {f['status']} |" for f in files]
         return "| File | Status |\n|------|--------|\n" + "\n".join(rows)
-
-

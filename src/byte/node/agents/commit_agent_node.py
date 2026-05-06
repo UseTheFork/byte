@@ -19,66 +19,6 @@ from byte.support import Boundary, BoundaryType, Section, SectionType, State, St
 # Adapted from Aider: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/prompts.py#L8
 # Conventional Commits specification: https://www.conventionalcommits.org/en/v1.0.0/#summary
 
-user_template = [
-    Section.sub_heading("Git Diffs", 2),
-    "```",
-    "{git_diffs}",
-    "```",
-    Section.important("You **MUST** consider the above git diffs before proceeding (if not empty)."),
-    Section.end(),
-    Leaves.ConversationHistory(),
-    Leaves.CommitHistory(),
-    Section.start(SectionType.TASK),
-    "You are an expert software engineer that generates concise, Git commit messages based on the provided diffs.",
-    "Review the provided context and diffs which are about to be committed to a git repo.",
-    "Review the diffs carefully.",
-    Section.important("You MUST follow the commit guidelines provided in the Rules section below."),
-    "Read and apply ALL rules for commit types, scopes, and description formatting.",
-    Section.end(),
-    Section.start(SectionType.COMMUNICATION_STYLE),
-    "- ALWAYS think and respond in the same spoken language the prompt was written in.",
-    "- Conciseness is about **text only**: always fully implement the requested feature, tests, and wiring even if that requires many tool calls.",
-    """- No preamble ("Here's...", "I'll...")""",
-    """- No postamble ("Let me know...", "Hope this helps...")""",
-    "- No emojis ever",
-    "- No explanations unless user asks",
-    "- Never send acknowledgement-only responses; after receiving new context or instructions, immediately continue the task or state the concrete next action you will take.",
-    Section.end(),
-    Leaves.CommitGuidelines(),
-    "",
-    Section.start(SectionType.WORKFLOW),
-    "Format your response as follows:",
-    "",
-    "1. Start with a SHORT analysis of the changes in list format.",
-    f"2. Call the `{GitCommitTool.name}` tool ONCE.",
-    f"3. If the `{GitCommitTool.name}` call is successful, use the `{CompleteSimpleTurnTool.name}`",
-    Section.end(),
-    Section.sub_heading("Example Workflow", 2),
-    "```",
-    Boundary.open(BoundaryType.EXAMPLE),
-    Boundary.open(BoundaryType.AGENT_MESSAGE),
-    "Analysis of changes:",
-    "- Updated foo() to handle edge case",
-    Boundary.close(BoundaryType.AGENT_MESSAGE),
-    Boundary.open(BoundaryType.TOOL_CALL),
-    f"{GitCommitTool.name}([removed for brevity])",
-    Boundary.close(BoundaryType.TOOL_CALL),
-    Boundary.open(BoundaryType.TOOL_CALL),
-    f"{CompleteSimpleTurnTool.name}([removed for brevity])",
-    Boundary.close(BoundaryType.TOOL_CALL),
-    Boundary.close(BoundaryType.EXAMPLE),
-    "```",
-    "",
-]
-
-
-system_template = [
-    Leaves.Preamble(),
-    Section.start(SectionType.ROLE),
-    "You are an expert software engineer that generates organized Git commits based on the provided user input.",
-    Section.end(),
-]
-
 
 class CommitAgentNode(BaseAgentNode):
     def boot(
@@ -102,10 +42,64 @@ class CommitAgentNode(BaseAgentNode):
         return llm_service.get_model(self.name)
 
     def get_user_template(self):
-        return user_template
+        return [
+            Section.sub_heading("Git Diffs", 2),
+            "```",
+            "{git_diffs}",
+            "```",
+            Section.important("You **MUST** consider the above git diffs before proceeding (if not empty)."),
+            Section.end(),
+            Leaves.ConversationHistory(),
+            Leaves.CommitHistory(),
+            "",
+        ]
 
     def get_system_template(self):
-        return system_template
+        return [
+            Leaves.Preamble(
+                "You are an expert software engineer that generates organized Git commits based on the provided user input."
+            ),
+            Section.start(SectionType.TASK),
+            "You are an expert software engineer that generates concise, Git commit messages based on the provided diffs.",
+            "Review the provided context and diffs which are about to be committed to a git repo.",
+            "Review the diffs carefully.",
+            Section.important("You MUST follow the commit guidelines provided in the Rules section below."),
+            "Read and apply ALL rules for commit types, scopes, and description formatting.",
+            Section.end(),
+            Section.start(SectionType.COMMUNICATION_STYLE),
+            "- ALWAYS think and respond in the same spoken language the prompt was written in.",
+            "- Conciseness is about **text only**: always fully implement the requested feature, tests, and wiring even if that requires many tool calls.",
+            """- No preamble ("Here's...", "I'll...")""",
+            """- No postamble ("Let me know...", "Hope this helps...")""",
+            "- No emojis ever",
+            "- No explanations unless user asks",
+            "- Never send acknowledgement-only responses; after receiving new context or instructions, immediately continue the task or state the concrete next action you will take.",
+            Section.end(),
+            Leaves.CommitGuidelines(),
+            "",
+            Section.start(SectionType.WORKFLOW),
+            "Format your response as follows:",
+            "",
+            "1. Start with a SHORT analysis of the changes in list format.",
+            f"2. Call the `{GitCommitTool.name}` tool ONCE.",
+            f"3. If the `{GitCommitTool.name}` call is successful, use the `{CompleteSimpleTurnTool.name}`",
+            Section.end(),
+            Section.sub_heading("Example Workflow", 2),
+            "```",
+            Boundary.open(BoundaryType.EXAMPLE),
+            Boundary.open(BoundaryType.AGENT_MESSAGE),
+            "Analysis of changes:",
+            "- Updated foo() to handle edge case",
+            Boundary.close(BoundaryType.AGENT_MESSAGE),
+            Boundary.open(BoundaryType.TOOL_CALL),
+            f"{GitCommitTool.name}([removed for brevity])",
+            Boundary.close(BoundaryType.TOOL_CALL),
+            Boundary.open(BoundaryType.TOOL_CALL),
+            f"{CompleteSimpleTurnTool.name}([removed for brevity])",
+            Boundary.close(BoundaryType.TOOL_CALL),
+            Boundary.close(BoundaryType.EXAMPLE),
+            "```",
+        ]
 
     def get_context_template(self):
         return [
