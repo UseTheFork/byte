@@ -1,16 +1,34 @@
-"""Knowledge domain commands for context management."""
-
 from typing import TYPE_CHECKING
 
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
-    pass
+    from byte.constitution.models import (
+        Constitution,
+        ConstitutionMeta,
+        ConstitutionPrinciple,
+        ConstitutionSection,
+    )
+    from byte.constitution.service.constitution_service import ConstitutionService
+    from byte.constitution.service_provider import ConstitutionServiceProvider
 
-__all__ = ()
+__all__ = (
+    "Constitution",
+    "ConstitutionMeta",
+    "ConstitutionPrinciple",
+    "ConstitutionSection",
+    "ConstitutionService",
+    "ConstitutionServiceProvider",
+)
 
 _dynamic_imports = {
     # keep-sorted start
+    "Constitution": "models",
+    "ConstitutionMeta": "models",
+    "ConstitutionPrinciple": "models",
+    "ConstitutionSection": "models",
+    "ConstitutionService": "service.constitution_service",
+    "ConstitutionServiceProvider": "service_provider",
     # keep-sorted end
 }
 
