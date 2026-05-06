@@ -2,7 +2,6 @@ from typing import List, Type
 
 from byte import Command, EventBus, Service, ServiceProvider
 from byte.knowledge import (
-    CLIContextDisplayService,
     ContextAddFileCommand,
     ContextDropCommand,
     ContextListCommand,
@@ -26,7 +25,6 @@ class KnowledgeServiceProvider(ServiceProvider):
     def services(self) -> List[Type[Service]]:
         return [
             SessionContextService,
-            CLIContextDisplayService,
         ]
 
     def commands(self) -> List[Type[Command]]:
@@ -47,8 +45,6 @@ class KnowledgeServiceProvider(ServiceProvider):
         # Set up event listener for PRE_PROMPT_TOOLKIT
         event_bus = self.app.make(EventBus)
         session_context_service = self.app.make(SessionContextService)
-
-        # cli_context_display_service = self.app.make(CLIContextDisplayService)
 
         # Register listener that calls list_in_context_files before each prompt
         event_bus.on(
