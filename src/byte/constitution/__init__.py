@@ -5,6 +5,8 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.constitution.models import (
         Constitution,
+        ConstitutionGovernanceRule,
+        ConstitutionItem,
         ConstitutionMeta,
         ConstitutionPrinciple,
         ConstitutionSection,
@@ -14,6 +16,8 @@ if TYPE_CHECKING:
 
 __all__ = (
     "Constitution",
+    "ConstitutionGovernanceRule",
+    "ConstitutionItem",
     "ConstitutionMeta",
     "ConstitutionPrinciple",
     "ConstitutionSection",
@@ -24,6 +28,8 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "Constitution": "models",
+    "ConstitutionGovernanceRule": "models",
+    "ConstitutionItem": "models",
     "ConstitutionMeta": "models",
     "ConstitutionPrinciple": "models",
     "ConstitutionSection": "models",

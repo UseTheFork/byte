@@ -17,4 +17,3 @@ class ConstitutionServiceProvider(ServiceProvider):
     async def boot(self) -> None:
         """Boot the constitution service."""
         self.app.make(ConstitutionService)
-
