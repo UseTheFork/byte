@@ -35,6 +35,4 @@ class AddGovernanceRuleTool(BaseTool):
         except (RuntimeError, ValueError) as exc:
             raise ToolRunException(str(exc)) from exc
 
-        return ToolResult(
-            result={"message": f"Added governance rule '{rule.name}' to the constitution."}
-        )
+        return ToolResult(result={"message": f"Added governance rule '{rule.name}' to the constitution."})

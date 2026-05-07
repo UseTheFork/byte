@@ -39,6 +39,4 @@ class AddSectionItemTool(BaseTool):
         except (RuntimeError, ValueError) as exc:
             raise ToolRunException(str(exc)) from exc
 
-        return ToolResult(
-            result={"message": f"Added item '{item.name}' to section '{section_name}'."}
-        )
+        return ToolResult(result={"message": f"Added item '{item.name}' to section '{section_name}'."})

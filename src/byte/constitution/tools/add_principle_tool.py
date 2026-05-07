@@ -38,6 +38,4 @@ class AddPrincipleTool(BaseTool):
         except (RuntimeError, ValueError) as exc:
             raise ToolRunException(str(exc)) from exc
 
-        return ToolResult(
-            result={"message": f"Added principle '{principle.name}' to the constitution."}
-        )
+        return ToolResult(result={"message": f"Added principle '{principle.name}' to the constitution."})
