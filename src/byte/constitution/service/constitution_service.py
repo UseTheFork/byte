@@ -142,6 +142,18 @@ class ConstitutionService(Service):
         )
 
     # ------------------------------------------------------------------
+    # Internal guards
+    # ------------------------------------------------------------------
+
+    def _require_constitution(self) -> None:
+        """Raise RuntimeError if no constitution is currently loaded.
+
+        Usage: `self._require_constitution()`
+        """
+        if self._constitution is None:
+            raise RuntimeError("No constitution is loaded. Call reload() first.")
+
+    # ------------------------------------------------------------------
     # Principles
     # ------------------------------------------------------------------
 
@@ -324,18 +336,6 @@ class ConstitutionService(Service):
             raise ValueError(f"Governance rule '{name}' (slug: '{slug}') not found.")
         del self._constitution.governance[slug]
         self._save(self._constitution)
-
-    # ------------------------------------------------------------------
-    # Internal guards
-    # ------------------------------------------------------------------
-
-    def _require_constitution(self) -> None:
-        """Raise RuntimeError if no constitution is currently loaded.
-
-        Usage: `self._require_constitution()`
-        """
-        if self._constitution is None:
-            raise RuntimeError("No constitution is loaded. Call reload() first.")
 
     def reload(self) -> None:
         """Re-read the constitution JSON file from disk.

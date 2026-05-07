@@ -13,8 +13,22 @@ if TYPE_CHECKING:
     )
     from byte.constitution.service.constitution_service import ConstitutionService
     from byte.constitution.service_provider import ConstitutionServiceProvider
+    from byte.constitution.tools import (
+        AddGovernanceRuleTool,
+        AddPrincipleTool,
+        AddSectionItemTool,
+        AddSectionTool,
+        DeleteGovernanceRuleTool,
+        DeletePrincipleTool,
+        DeleteSectionItemTool,
+        DeleteSectionTool,
+    )
 
 __all__ = (
+    "AddGovernanceRuleTool",
+    "AddPrincipleTool",
+    "AddSectionItemTool",
+    "AddSectionTool",
     "Constitution",
     "ConstitutionGovernanceRule",
     "ConstitutionItem",
@@ -23,10 +37,18 @@ __all__ = (
     "ConstitutionSection",
     "ConstitutionService",
     "ConstitutionServiceProvider",
+    "DeleteGovernanceRuleTool",
+    "DeletePrincipleTool",
+    "DeleteSectionItemTool",
+    "DeleteSectionTool",
 )
 
 _dynamic_imports = {
     # keep-sorted start
+    "AddGovernanceRuleTool": "tools",
+    "AddPrincipleTool": "tools",
+    "AddSectionItemTool": "tools",
+    "AddSectionTool": "tools",
     "Constitution": "models",
     "ConstitutionGovernanceRule": "models",
     "ConstitutionItem": "models",
@@ -35,6 +57,10 @@ _dynamic_imports = {
     "ConstitutionSection": "models",
     "ConstitutionService": "service.constitution_service",
     "ConstitutionServiceProvider": "service_provider",
+    "DeleteGovernanceRuleTool": "tools",
+    "DeletePrincipleTool": "tools",
+    "DeleteSectionItemTool": "tools",
+    "DeleteSectionTool": "tools",
     # keep-sorted end
 }
 
