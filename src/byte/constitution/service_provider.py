@@ -1,7 +1,7 @@
 from typing import List, Type
 
 from byte import Command, Service, ServiceProvider
-from byte.constitution import InitializeCommand
+from byte.constitution import ConstitutionCommand, InitializeCommand
 from byte.constitution.service.constitution_service import ConstitutionService
 from byte.constitution.tools import (
     AddGovernanceRuleTool,
@@ -27,6 +27,7 @@ class ConstitutionServiceProvider(ServiceProvider):
     def commands(self) -> List[Type[Command]]:
         return [
             InitializeCommand,
+            ConstitutionCommand,
         ]
 
     def tools(self) -> List[Type[BaseTool]]:

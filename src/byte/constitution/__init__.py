@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.constitution.command.constitution_command import ConstitutionCommand
     from byte.constitution.command.initialize_command import InitializeCommand
     from byte.constitution.models import (
         Constitution,
@@ -32,6 +33,7 @@ __all__ = (
     "AddSectionItemTool",
     "AddSectionTool",
     "Constitution",
+    "ConstitutionCommand",
     "ConstitutionGovernanceRule",
     "ConstitutionItem",
     "ConstitutionMeta",
@@ -49,6 +51,7 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
+    "ConstitutionCommand": "command.constitution_command",
     "AddGovernanceRuleTool": "tools",
     "AddPrincipleTool": "tools",
     "AddSectionItemTool": "tools",

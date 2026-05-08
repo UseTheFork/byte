@@ -21,12 +21,12 @@
       "description": "All Python code MUST comply with the project's ruff configuration (target `py314`, line-length 120, space indentation), ssort import ordering, and 4-space indentation as defined in `.editorconfig`. Pre-commit hooks MUST pass before any code is committed. Type hints MUST be used for all public function signatures. Files MUST use LF line endings and UTF-8 encoding. Rationale: Automated enforcement eliminates style debates and maintains codebase consistency."
     },
     {
-      "name": "VI. Semantic Versioning Discipline",
-      "description": "All releases MUST follow semantic versioning enforced via `python-semantic-release` with conventional commit messages. MAJOR bumps for breaking changes, MINOR for new features (`feat`), PATCH for fixes (`fix`, `perf`). Commit messages MUST conform to the Conventional Commits specification with the allowed tags: feat, fix, perf, build, chore, ci, docs, style, refactor, ops, test. Rationale: Predictable versioning communicates change impact to consumers and enables automated release workflows."
+      "name": "VI. Test-Backed Confidence",
+      "description": "New domain functionality MUST include corresponding test coverage under `src/tests/`. Tests MUST be runnable via `uv run pytest` and MUST use `pytest-asyncio` for async code. External HTTP interactions MUST be recorded using VCR cassettes (`pytest-recording`) to ensure deterministic CI. Test utilities MUST use `pytest-mock` rather than `unittest.mock`. Coverage reports MUST be generated on every test run. Rationale: Regression prevention, deterministic CI, and confidence in refactoring."
     },
     {
-      "name": "VII. Test-Backed Confidence",
-      "description": "New domain functionality MUST include corresponding test coverage under `src/tests/`. Tests MUST be runnable via `uv run pytest` and MUST use `pytest-asyncio` for async code. External HTTP interactions MUST be recorded using VCR cassettes (`pytest-recording`) to ensure deterministic CI. Test utilities MUST use `pytest-mock` rather than `unittest.mock`. Coverage reports MUST be generated on every test run. Rationale: Regression prevention, deterministic CI, and confidence in refactoring."
+      "name": "VII. Don't Repeat Yourself (DRY)",
+      "description": "All code MUST avoid unnecessary duplication of logic, configuration, and data definitions. Shared behavior MUST be extracted into reusable services, utilities, or base classes and resolved through the application container or established import patterns. When identical or near-identical logic exists in more than one location, it MUST be consolidated into a single authoritative source. Duplication in test fixtures, schema definitions, and prompt templates MUST be reduced through shared factories, constants, or helper modules. Rationale: Eliminating redundancy reduces maintenance burden, minimizes divergence bugs, and ensures that changes propagate consistently from a single source of truth."
     }
   ],
   "governance": [
@@ -48,7 +48,7 @@
     }
   ],
   "meta": {
-    "version": "1.0.0",
+    "version": "2.0.0",
     "ratified": "2026-05-08",
     "last_amended": "2026-05-08"
   },

@@ -103,34 +103,42 @@ class ConstitutionService(Service):
         assert self._constitution
         return self._constitution
 
-    def get_constitution_for_path(self, path: str | Path) -> Constitution | None:
-        """Return a filtered Constitution containing only sections relevant to *path*.
+    def get_constitution_for_path(self, paths: list[str | Path] | None = None) -> Constitution:
+        """Return a filtered Constitution containing only sections relevant to *paths*.
 
         Sections without ``applies_to`` (global) are always included.
         Sections with ``applies_to`` are included only when at least one glob
-        pattern matches *path*.  Principles, governance rules, and metadata are
-        always returned unchanged.
+        pattern matches any of the given paths.  Principles, governance rules,
+        and metadata are always returned unchanged.
+
+        When *paths* is ``None`` the constitution is returned as-is with all
+        sections included.
 
         Args:
-            path: File path to match against section ``applies_to`` patterns.
+            paths: One or more file paths to match against section ``applies_to``
+                   patterns, or ``None`` to return the full constitution.
 
         Returns:
             A new Constitution instance with filtered sections, or None if no
             constitution is loaded.
 
-        Usage: `c = service.get_constitution_for_path("src/byte/node/agents/foo.py")`
+        Usage:
+            `c = service.get_constitution_for_path(None)`
+            `c = service.get_constitution_for_path(["src/byte/node/agents/foo.py", "src/byte/other.py"])`
         """
-        if self._constitution is None:
-            return None
+        assert self._constitution
 
-        str_path = str(path)
+        if paths is None:
+            return self._constitution
+
+        str_paths = [str(p) for p in paths]
         filtered_sections: dict[str, ConstitutionSection] = {}
 
         for key, section in self._constitution.sections.items():
             if not section.applies_to:
                 # Global section — always include
                 filtered_sections[key] = section
-            elif any(fnmatch.fnmatch(str_path, pattern) for pattern in section.applies_to):
+            elif any(fnmatch.fnmatch(str_path, pattern) for str_path in str_paths for pattern in section.applies_to):
                 filtered_sections[key] = section
 
         return Constitution(

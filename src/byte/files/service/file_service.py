@@ -415,50 +415,6 @@ class FileService(Service):
         path_obj = Path(path).resolve()
         return str(path_obj) in self._context_files
 
-    # async def list_in_context_files_hook(self, payload: Payload):
-    #     """Display current editable files before each prompt.
-
-    #     Provides visual feedback about which files the AI can modify,
-    #     helping users understand the current context state.
-    #     """
-
-    #     console = self.app["console"]
-
-    #     info_panel = payload.get("info_panel", [])
-
-    #     read_only_panel = None
-
-    #     file_service = self.app.make(FileService)
-    #     readonly_files = file_service.list_files(FileMode.READ_ONLY)
-    #     if readonly_files:
-    #         file_names = [f"[text]{f.relative_path}[/text]" for f in readonly_files]
-    #         read_only_panel = console.panel(
-    #             Columns(file_names, equal=True, expand=True),
-    #             title=f"Read-only Files ({len(readonly_files)})",
-    #         )
-
-    #     editable_panel = None
-    #     editable_files = file_service.list_files(FileMode.EDITABLE)
-    #     if editable_files:
-    #         file_names = [f"[text]{f.relative_path}[/text]" for f in editable_files]
-    #         editable_panel = console.panel(
-    #             Columns(file_names, equal=True, expand=True),
-    #             title=f"Editable Files ({len(editable_files)})",
-    #         )
-
-    #     # Create columns layout with both panels if they exist
-    #     panels_to_show = []
-    #     if read_only_panel:
-    #         panels_to_show.append(read_only_panel)
-    #     if editable_panel:
-    #         panels_to_show.append(editable_panel)
-
-    #     if panels_to_show:
-    #         columns_panel = Columns(panels_to_show, equal=True, expand=True)
-    #         info_panel.append(columns_panel)
-
-    #     return payload.set("info_panel", info_panel)
-
     async def generate_context_prompt_with_line_numbers(self) -> tuple[list[str], list[str]]:
         """Generate structured file lists with line numbers for read-only and editable files.
 
