@@ -8,6 +8,7 @@ from byte.memory import (
     CompleteTurnTool,
     CreatePlanTool,
     MemoryService,
+    ProceedToNextStepTool,
     ResetCommand,
 )
 from byte.tools import BaseTool
@@ -28,6 +29,7 @@ class MemoryServiceProvider(ServiceProvider):
             CompleteStepTool,
             CompleteSimpleTurnTool,
             CompleteTurnTool,
+            ProceedToNextStepTool,
         ]
 
     def services(self) -> List[Type[Service]]:

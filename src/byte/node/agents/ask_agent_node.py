@@ -18,36 +18,6 @@ from byte.support.utils import extract_content_from_message
 from byte.system import UserSelectTool
 from byte.web import SearchWebTool
 
-user_template = [
-    Leaves.ConversationHistory(),
-    Leaves.UserRequest(),
-    "",
-    Section.start(SectionType.OPERATING_CONSTRAINTS),
-    "- Always use best practices when coding",
-    "- Respect and use existing conventions, libraries, etc that are already present in the code base",
-    "- Take requests for changes to the supplied code",
-    "- If the request is ambiguous, ask questions",
-    "- Keep changes simple don't build more then what is asked for",
-    "- Never use XML-style tags in your responses (e.g., <file>, <search>, <replace>). These are for internal parsing only.",
-    "- Do not provide full code implementations unless explicitly requested. Describe the changes needed first.",
-    Section.end(),
-    "",
-    Section.start(SectionType.RESPONSE_FORMAT),
-    "- Use clear, concise explanations",
-    "- Format code with proper syntax highlighting",
-    "- Provide context for suggested changes",
-    "- Focus on actionable findings, not exhaustive documentation",
-    Section.end(),
-    "",
-    Leaves.OperatingPrinciples(),
-]
-
-
-system_template = [
-    Leaves.Preamble(role="Act as an expert software developer."),
-    Leaves.SkillsAvailable(),
-]
-
 
 class AskAgentNode(BaseAgentNode):
     def boot(
@@ -71,10 +41,35 @@ class AskAgentNode(BaseAgentNode):
         return llm_service.get_model(self.name)
 
     def get_user_template(self):
-        return user_template
+        return [
+            Leaves.ConversationHistory(),
+            Leaves.UserRequest(),
+        ]
 
     def get_system_template(self):
-        return system_template
+        return [
+            Leaves.Preamble(role="Act as an expert software developer."),
+            Leaves.SkillsAvailable(),
+            "",
+            Section.start(SectionType.OPERATING_CONSTRAINTS),
+            "- Always use best practices when coding",
+            "- Respect and use existing conventions, libraries, etc that are already present in the code base",
+            "- Take requests for changes to the supplied code",
+            "- If the request is ambiguous, ask questions",
+            "- Keep changes simple don't build more then what is asked for",
+            "- Never use XML-style tags in your responses (e.g., <file>, <search>, <replace>). These are for internal parsing only.",
+            "- Do not provide full code implementations unless explicitly requested. Describe the changes needed first.",
+            Section.end(),
+            "",
+            Section.start(SectionType.RESPONSE_FORMAT),
+            "- Use clear, concise explanations",
+            "- Format code with proper syntax highlighting",
+            "- Provide context for suggested changes",
+            "- Focus on actionable findings, not exhaustive documentation",
+            Section.end(),
+            "",
+            Leaves.OperatingPrinciples(),
+        ]
 
     def get_context_template(self):
         return [

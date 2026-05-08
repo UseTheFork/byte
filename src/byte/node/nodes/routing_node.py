@@ -20,6 +20,7 @@ class RoutingNode(BaseNode):
             "tool_node",
             "validation_node",
             "commit_agent_node",
+            "constitution_agent_node",
             "coder_agent_node",
             "skill_creator_agent_node",
             "ask_agent_node",

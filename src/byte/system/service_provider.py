@@ -1,7 +1,5 @@
 from typing import List, Type
 
-from langchain.tools import BaseTool
-
 from byte import Command, EventBus, Service, ServiceProvider
 from byte.memory import UndoCommand
 from byte.orchestration import OrchestrationEvents
@@ -13,6 +11,7 @@ from byte.system import (
     UserInputTextTool,
     UserSelectTool,
 )
+from byte.tools import BaseTool
 
 
 class SystemServiceProvider(ServiceProvider):

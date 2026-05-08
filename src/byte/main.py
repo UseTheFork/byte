@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from byte.analytics import AnalyticsProvider
 from byte.command import CommandServiceProvider
+from byte.constitution import ConstitutionServiceProvider
 from byte.development import DevelopmentServiceProvider
 from byte.event import EventsServiceProvider
 from byte.files import FileServiceProvider
@@ -31,6 +32,7 @@ PROVIDERS = [
     ToolsServiceProvider,
     GitServiceProvider,
     SkillsServiceProvider,
+    ConstitutionServiceProvider,
     MemoryServiceProvider,
     KnowledgeServiceProvider,
     FileServiceProvider,

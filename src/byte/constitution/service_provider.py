@@ -1,6 +1,7 @@
 from typing import List, Type
 
-from byte import Service, ServiceProvider
+from byte import Command, Service, ServiceProvider
+from byte.constitution import InitializeCommand
 from byte.constitution.service.constitution_service import ConstitutionService
 from byte.constitution.tools import (
     AddGovernanceRuleTool,
@@ -11,6 +12,7 @@ from byte.constitution.tools import (
     DeletePrincipleTool,
     DeleteSectionItemTool,
     DeleteSectionTool,
+    UpdateMetaTool,
 )
 from byte.tools import BaseTool
 
@@ -22,6 +24,11 @@ class ConstitutionServiceProvider(ServiceProvider):
     constitution from ``.byte/constitution.json`` on startup.
     """
 
+    def commands(self) -> List[Type[Command]]:
+        return [
+            InitializeCommand,
+        ]
+
     def tools(self) -> List[Type[BaseTool]]:
         return [
             AddPrincipleTool,
@@ -32,6 +39,7 @@ class ConstitutionServiceProvider(ServiceProvider):
             DeleteSectionItemTool,
             AddGovernanceRuleTool,
             DeleteGovernanceRuleTool,
+            UpdateMetaTool,
         ]
 
     def services(self) -> List[Type[Service]]:

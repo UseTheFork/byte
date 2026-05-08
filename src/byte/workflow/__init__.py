@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from byte.workflow.workflows.base import BaseWorkflow
     from byte.workflow.workflows.coder_workflow import CoderWorkflow
     from byte.workflow.workflows.commit_workflow import CommitWorkflow
+    from byte.workflow.workflows.constitution_workflow import ConstitutionWorkflow
     from byte.workflow.workflows.create_skill_workflow import CreateSkillWorkflow
 
 
@@ -23,6 +24,7 @@ __all__ = (
     "CoderCommand",
     "CoderWorkflow",
     "CommitWorkflow",
+    "ConstitutionWorkflow",
     "CreateSkillWorkflow",
     "WorkflowService",
     "WorkflowServiceProvider",
@@ -36,6 +38,7 @@ _dynamic_imports = {
     "CoderCommand": "command.coder_command",
     "CoderWorkflow": "workflows.coder_workflow",
     "CommitWorkflow": "workflows.commit_workflow",
+    "ConstitutionWorkflow": "workflows.constitution_workflow",
     "CreateSkillWorkflow": "workflows.create_skill_workflow",
     "WorkflowService": "service.workflow_service",
     "WorkflowServiceProvider": "service_provider",

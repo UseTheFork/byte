@@ -15,6 +15,8 @@ class SectionType(StrEnum):
     COMMIT_HISTORY = "Commit History"
 
     CONVERSATION_HISTORY = "Conversation History"
+
+    CONSTITUTION = "Constitution"
     USER_INPUT = "User Input"
     SKILLS = "Skills"
     AVALIABLE_SKILLS = "Avaliable Skills"
@@ -66,12 +68,22 @@ class Section:
     def sub_heading(
         title: str,
         level: int,
+        ref: bool = False,
     ) -> str:
 
         if level not in (2, 3, 4):
             raise ValueError(f"level must be 2, 3, or 4, got {level}")
 
+        if ref:
+            anchor = title.lower().replace(" ", "-")
+            return f"{'#' * level} {title} [{title}](#{anchor})"
+
         return f"{'#' * level} {title}"
+
+    @staticmethod
+    def sub_heading_ref(title: str) -> str:
+        anchor = title.lower().replace(" ", "-")
+        return f"[{title}](#{anchor})"
 
     @staticmethod
     def end() -> str:

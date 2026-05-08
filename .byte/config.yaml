@@ -5,6 +5,9 @@ llm:
   ask_agent_node:
     model: claude-opus-4-6
     provider: anthropic
+  constitution_agent_node:
+    model: claude-opus-4-6
+    provider: anthropic
   coder_agent_node:
     model: claude-sonnet-4-6
     provider: anthropic

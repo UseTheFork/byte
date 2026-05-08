@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from byte.constitution.tools.delete_principle_tool import DeletePrincipleTool
     from byte.constitution.tools.delete_section_item_tool import DeleteSectionItemTool
     from byte.constitution.tools.delete_section_tool import DeleteSectionTool
+    from byte.constitution.tools.update_meta_tool import UpdateMetaTool
 
 __all__ = (
     "AddGovernanceRuleTool",
@@ -21,6 +22,7 @@ __all__ = (
     "DeletePrincipleTool",
     "DeleteSectionItemTool",
     "DeleteSectionTool",
+    "UpdateMetaTool",
 )
 
 _dynamic_imports = {
@@ -33,6 +35,7 @@ _dynamic_imports = {
     "DeletePrincipleTool": "delete_principle_tool",
     "DeleteSectionItemTool": "delete_section_item_tool",
     "DeleteSectionTool": "delete_section_tool",
+    "UpdateMetaTool": "update_meta_tool",
     # keep-sorted end
 }
 

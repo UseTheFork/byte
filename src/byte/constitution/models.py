@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 
+from byte.support import Section, SectionType
 from byte.support.string import Str
 from byte.support.utils import list_to_multiline_text
 
@@ -75,7 +76,6 @@ class Constitution:
         sections:  additional named sections keyed by section name (e.g. "Security Requirements")
     """
 
-    project_name: str
     principles: dict[str, ConstitutionPrinciple]
     governance: dict[str, ConstitutionGovernanceRule]
     meta: ConstitutionMeta
@@ -87,7 +87,6 @@ class Constitution:
 
     def to_dict(self) -> dict:
         return {
-            "project_name": self.project_name,
             "principles": [{"name": p.name, "description": p.description} for p in self.principles.values()],
             "governance": [{"name": r.name, "content": r.content} for r in self.governance.values()],
             "meta": {
@@ -117,37 +116,37 @@ class Constitution:
         lines: list[str] = []
 
         # Title
-        lines.append(f"# {self.project_name} Constitution")
+        lines.append(Section.ref(SectionType.CONSTITUTION))
         lines.append("")
 
         # Core Principles
-        lines.append("## Core Principles")
+        lines.append(Section.sub_heading("Core Principles", 2, True))
         lines.append("")
         for principle in self.principles.values():
-            lines.append(f"### {principle.name}")
+            lines.append(Section.sub_heading(principle.name, 3, True))
             lines.append("")
             lines.append(principle.description)
             lines.append("")
 
         # Additional sections (each may be scoped to specific file patterns)
         for section in self.sections.values():
-            lines.append(f"## {section.name}")
+            lines.append(Section.sub_heading(section.name, 2, True))
             lines.append("")
             if section.applies_to:
                 scopes = ", ".join(f"`{p}`" for p in section.applies_to)
                 lines.append(f"*Applies to: {scopes}*")
                 lines.append("")
             for item in section.items.values():
-                lines.append(f"### {item.name}")
+                lines.append(Section.sub_heading(item.name, 3, True))
                 lines.append("")
                 lines.append(item.content)
                 lines.append("")
 
         # Governance
-        lines.append("## Governance")
+        lines.append(Section.sub_heading("Governance", 2, True))
         lines.append("")
         for rule in self.governance.values():
-            lines.append(f"### {rule.name}")
+            lines.append(Section.sub_heading(rule.name, 3, True))
             lines.append("")
             lines.append(rule.content)
             lines.append("")
@@ -194,7 +193,6 @@ class Constitution:
             last_amended=raw_meta.get("last_amended", ""),
         )
         return cls(
-            project_name=data.get("project_name", ""),
             principles=principles,
             governance=governance,
             meta=meta,

@@ -1,5 +1,6 @@
 from byte.orchestration.leaves.commit_guidelines import CommitGuidelines as _CommitGuidelines
 from byte.orchestration.leaves.commit_history import CommitHistory as _CommitHistory
+from byte.orchestration.leaves.constitution import Constitution as _Constitution
 from byte.orchestration.leaves.constraints import Constraints as _Constraints
 from byte.orchestration.leaves.conversation_history import ConversationHistory as _ConversationHistory
 from byte.orchestration.leaves.epilogue import Epilogue as _Epilogue
@@ -39,3 +40,4 @@ class Leaves:
     OperatingPrinciples = _OperatingPrinciples
     CommitHistory = _CommitHistory
     ToolsLoaded = _ToolsLoaded
+    Constitution = _Constitution

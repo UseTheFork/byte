@@ -96,7 +96,7 @@ class ConstitutionService(Service):
     # Getters
     # ------------------------------------------------------------------
 
-    def get_constitution(self) -> Constitution | None:
+    def get_constitution(self) -> Constitution:
         """Return the currently loaded Constitution, or None if not loaded.
 
         Usage: `c = service.get_constitution()`
@@ -336,6 +336,39 @@ class ConstitutionService(Service):
             raise ValueError(f"Governance rule '{name}' (slug: '{slug}') not found.")
         del self._constitution.governance[slug]
         self._save(self._constitution)
+
+    # ------------------------------------------------------------------
+    # Meta
+    # ------------------------------------------------------------------
+
+    def update_meta(
+        self,
+        ratification_date: str | None = None,
+        last_amended_date: str | None = None,
+        version: str | None = None,
+    ) -> ConstitutionMeta:
+        """Update constitution metadata fields and persist.
+
+        Args:
+            ratification_date: New RATIFICATION_DATE value (ISO 8601). Omit to keep current.
+            last_amended_date: New LAST_AMENDED_DATE value (ISO 8601). Omit to keep current.
+            version:           New CONSTITUTION_VERSION string. Omit to keep current.
+
+        Raises:
+            RuntimeError: If no constitution is loaded.
+
+        Usage: `meta = service.update_meta(version="1.1.0", last_amended_date="2026-05-08")`
+        """
+        self._require_constitution()
+        meta = self._constitution.meta
+        if ratification_date is not None:
+            meta.ratified = ratification_date
+        if last_amended_date is not None:
+            meta.last_amended = last_amended_date
+        if version is not None:
+            meta.version = version
+        self._save(self._constitution)
+        return meta
 
     def reload(self) -> None:
         """Re-read the constitution JSON file from disk.
