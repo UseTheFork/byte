@@ -35,10 +35,10 @@ _dynamic_imports = {
     "CompleteSimpleTurnTool": "tools.complete_simple_turn_tool",
     "CompleteStepTool": "tools.complete_step_tool",
     "CompleteTurnTool": "tools.complete_turn_tool",
-    "ProceedToNextStepTool": "tools.proceed_to_next_step_tool",
     "CreatePlanTool": "tools.create_plan_tool",
     "MemoryService": "service.memory_service",
     "MemoryServiceProvider": "service_provider",
+    "ProceedToNextStepTool": "tools.proceed_to_next_step_tool",
     "ResetCommand": "command.reset_command",
     "UndoCommand": "command.undo_command",
     # keep-sorted end

@@ -26,10 +26,10 @@ _dynamic_imports = {
     "AskAgentNode": "ask_agent_node",
     "CoderAgentNode": "coder_agent_node",
     "CommitAgentNode": "commit_agent_node",
+    "ConstitutionAgentNode": "constitution_agent_node",
     "ExecutorAgentNode": "executor_agent_node",
     "HarnessAgentNode": "harness_agent_node",
     "SkillCreatorAgentNode": "skill_creator_agent_node",
-    "ConstitutionAgentNode": "constitution_agent_node",
     # keep-sorted end
 }
 

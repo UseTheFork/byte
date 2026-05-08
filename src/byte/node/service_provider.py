@@ -33,9 +33,9 @@ class NodeServiceProvider(ServiceProvider):
             AskAgentNode,
             CoderAgentNode,
             CommitAgentNode,
+            ConstitutionAgentNode,
             HarnessAgentNode,
             SkillCreatorAgentNode,
-            ConstitutionAgentNode,
             # keep-sorted end
         ]
 

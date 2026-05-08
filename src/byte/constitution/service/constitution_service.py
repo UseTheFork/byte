@@ -75,7 +75,6 @@ class ConstitutionService(Service):
             content="Constitution supersedes all other practices. Amendments require documentation and approval.",
         )
         return Constitution(
-            project_name="Untitled Constitution",
             principles={Str.slugify(example.name): example},
             governance={Str.slugify(default_rule.name): default_rule},
             meta=ConstitutionMeta(version="0.1.0", ratified=today, last_amended=today),
@@ -101,6 +100,7 @@ class ConstitutionService(Service):
 
         Usage: `c = service.get_constitution()`
         """
+        assert self._constitution
         return self._constitution
 
     def get_constitution_for_path(self, path: str | Path) -> Constitution | None:
@@ -134,24 +134,11 @@ class ConstitutionService(Service):
                 filtered_sections[key] = section
 
         return Constitution(
-            project_name=self._constitution.project_name,
             principles=self._constitution.principles,
             governance=self._constitution.governance,
             meta=self._constitution.meta,
             sections=filtered_sections,
         )
-
-    # ------------------------------------------------------------------
-    # Internal guards
-    # ------------------------------------------------------------------
-
-    def _require_constitution(self) -> None:
-        """Raise RuntimeError if no constitution is currently loaded.
-
-        Usage: `self._require_constitution()`
-        """
-        if self._constitution is None:
-            raise RuntimeError("No constitution is loaded. Call reload() first.")
 
     # ------------------------------------------------------------------
     # Principles
@@ -169,7 +156,8 @@ class ConstitutionService(Service):
 
         Usage: `service.add_principle("I. Library-First", "Every feature starts as a library.")`
         """
-        self._require_constitution()
+
+        assert self._constitution
         slug = Str.slugify(name)
         if slug in self._constitution.principles:
             raise ValueError(f"Principle with slug '{slug}' already exists.")
@@ -189,7 +177,7 @@ class ConstitutionService(Service):
 
         Usage: `service.delete_principle("I. Library-First")`
         """
-        self._require_constitution()
+        assert self._constitution
         slug = Str.slugify(name)
         if slug not in self._constitution.principles:
             raise ValueError(f"Principle '{name}' (slug: '{slug}') not found.")
@@ -212,7 +200,7 @@ class ConstitutionService(Service):
 
         Usage: `service.add_section("Security Requirements", applies_to=["src/byte/node/**"])`
         """
-        self._require_constitution()
+        assert self._constitution
         slug = Str.slugify(name)
         if slug in self._constitution.sections:
             raise ValueError(f"Section with slug '{slug}' already exists.")
@@ -232,7 +220,7 @@ class ConstitutionService(Service):
 
         Usage: `service.delete_section("Security Requirements")`
         """
-        self._require_constitution()
+        assert self._constitution
         slug = Str.slugify(name)
         if slug not in self._constitution.sections:
             raise ValueError(f"Section '{name}' (slug: '{slug}') not found.")
@@ -257,7 +245,7 @@ class ConstitutionService(Service):
 
         Usage: `service.add_section_item("Security Requirements", "Secret Management", "All secrets in env vars.")`
         """
-        self._require_constitution()
+        assert self._constitution
         section_slug = Str.slugify(section_name)
         if section_slug not in self._constitution.sections:
             raise ValueError(f"Section '{section_name}' (slug: '{section_slug}') not found.")
@@ -283,7 +271,7 @@ class ConstitutionService(Service):
 
         Usage: `service.delete_section_item("Security Requirements", "Secret Management")`
         """
-        self._require_constitution()
+        assert self._constitution
         section_slug = Str.slugify(section_name)
         if section_slug not in self._constitution.sections:
             raise ValueError(f"Section '{section_name}' (slug: '{section_slug}') not found.")
@@ -310,7 +298,7 @@ class ConstitutionService(Service):
 
         Usage: `service.add_governance_rule("Supremacy", "Constitution supersedes all other practices.")`
         """
-        self._require_constitution()
+        assert self._constitution
         slug = Str.slugify(name)
         if slug in self._constitution.governance:
             raise ValueError(f"Governance rule with slug '{slug}' already exists.")
@@ -330,7 +318,7 @@ class ConstitutionService(Service):
 
         Usage: `service.delete_governance_rule("Supremacy")`
         """
-        self._require_constitution()
+        assert self._constitution
         slug = Str.slugify(name)
         if slug not in self._constitution.governance:
             raise ValueError(f"Governance rule '{name}' (slug: '{slug}') not found.")
@@ -359,7 +347,7 @@ class ConstitutionService(Service):
 
         Usage: `meta = service.update_meta(version="1.1.0", last_amended_date="2026-05-08")`
         """
-        self._require_constitution()
+        assert self._constitution
         meta = self._constitution.meta
         if ratification_date is not None:
             meta.ratified = ratification_date
@@ -393,9 +381,7 @@ class ConstitutionService(Service):
             data = json.loads(raw)
             self._constitution = Constitution.from_dict(data)
             self.app["log"].debug(
-                f"ConstitutionService: loaded constitution "
-                f"'{self._constitution.project_name}' "
-                f"v{self._constitution.meta.version} from {path}"
+                f"ConstitutionService: loaded constitution v{self._constitution.meta.version} from {path}"
             )
         except (OSError, json.JSONDecodeError) as exc:
             self.app["log"].warning(f"ConstitutionService: failed to load constitution from {path}: {exc}")

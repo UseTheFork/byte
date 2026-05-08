@@ -49,7 +49,6 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
-    "InitializeCommand": "command.initialize_command",
     "AddGovernanceRuleTool": "tools",
     "AddPrincipleTool": "tools",
     "AddSectionItemTool": "tools",
@@ -66,6 +65,7 @@ _dynamic_imports = {
     "DeletePrincipleTool": "tools",
     "DeleteSectionItemTool": "tools",
     "DeleteSectionTool": "tools",
+    "InitializeCommand": "command.initialize_command",
     "UpdateMetaTool": "tools",
     # keep-sorted end
 }
