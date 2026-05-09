@@ -23,9 +23,9 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "AgentHarnessWorkflow": "workflows.agent_harness_workflow",
-    "HarnessAgentNode": "agents.harness_agent_node",
-    "ExecutorAgentNode": "agents.executor_agent_node",
     "BootstrapAgentTool": "tools.bootstrap_agent_tool",
+    "ExecutorAgentNode": "agents.executor_agent_node",
+    "HarnessAgentNode": "agents.harness_agent_node",
     "HarnessServiceProvider": "service_provider",
     # keep-sorted end
 }

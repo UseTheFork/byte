@@ -55,13 +55,12 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
-    "ConstitutionWorkflow": "workflows.constitution_workflow",
-    "ConstitutionAgentNode": "agents.constitution_agent_node",
     "AddGovernanceRuleTool": "tools",
     "AddPrincipleTool": "tools",
     "AddSectionItemTool": "tools",
     "AddSectionTool": "tools",
     "Constitution": "models",
+    "ConstitutionAgentNode": "agents.constitution_agent_node",
     "ConstitutionCommand": "command.constitution_command",
     "ConstitutionGovernanceRule": "models",
     "ConstitutionItem": "models",
@@ -70,6 +69,7 @@ _dynamic_imports = {
     "ConstitutionSection": "models",
     "ConstitutionService": "service.constitution_service",
     "ConstitutionServiceProvider": "service_provider",
+    "ConstitutionWorkflow": "workflows.constitution_workflow",
     "DeleteGovernanceRuleTool": "tools",
     "DeletePrincipleTool": "tools",
     "DeleteSectionItemTool": "tools",

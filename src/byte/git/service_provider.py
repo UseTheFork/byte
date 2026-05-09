@@ -35,8 +35,8 @@ class GitServiceProvider(ServiceProvider):
         """Returns the list of git-related tools available to the agent."""
         return [
             # keep-sorted start
-            GitGrepTool,
             GitCommitTool,
+            GitGrepTool,
             GitLogTool,
             # keep-sorted end
         ]
@@ -44,8 +44,8 @@ class GitServiceProvider(ServiceProvider):
     def services(self) -> List[Type[Service]]:
         return [
             # keep-sorted start
-            GitService,
             CommitService,
+            GitService,
             # keep-sorted end
         ]
 

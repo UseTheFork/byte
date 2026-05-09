@@ -35,7 +35,6 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
-    "CommitWorkflow": "workflows.commit_workflow",
     "CommitAgentNode": "agents.commit_agent_node",
     "CommitCommand": "command.commit_command",
     "CommitGroup": "schemas",
@@ -43,6 +42,7 @@ _dynamic_imports = {
     "CommitPlan": "schemas",
     "CommitService": "service.commit_service",
     "CommitValidator": "validators.commit_validator",
+    "CommitWorkflow": "workflows.commit_workflow",
     "GitCommitTool": "tools.git_commit_tool",
     "GitGrepTool": "tools.git_grep_tool",
     "GitLogTool": "tools.git_log_tool",

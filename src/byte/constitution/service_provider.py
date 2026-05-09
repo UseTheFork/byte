@@ -36,8 +36,8 @@ class ConstitutionServiceProvider(ServiceProvider):
     def commands(self) -> List[Type[Command]]:
         return [
             # keep-sorted start
-            InitializeCommand,
             ConstitutionCommand,
+            InitializeCommand,
             # keep-sorted end
         ]
 
@@ -51,14 +51,14 @@ class ConstitutionServiceProvider(ServiceProvider):
     def tools(self) -> List[Type[BaseTool]]:
         return [
             # keep-sorted start
-            AddPrincipleTool,
-            DeletePrincipleTool,
-            AddSectionTool,
-            DeleteSectionTool,
-            AddSectionItemTool,
-            DeleteSectionItemTool,
             AddGovernanceRuleTool,
+            AddPrincipleTool,
+            AddSectionItemTool,
+            AddSectionTool,
             DeleteGovernanceRuleTool,
+            DeletePrincipleTool,
+            DeleteSectionItemTool,
+            DeleteSectionTool,
             UpdateMetaTool,
             # keep-sorted end
         ]

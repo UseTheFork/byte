@@ -27,14 +27,14 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
-    "CreateSkillWorkflow": "workflows.create_skill_workflow",
     "CreateSkillTool": "tools.create_skill_tool",
+    "CreateSkillWorkflow": "workflows.create_skill_workflow",
     "LoadSkillTool": "tools.load_skill_tool",
     "Skill": "schemas",
     "SkillCommand": "command.skill_command",
+    "SkillCreatorAgentNode": "agents.skill_creator_agent_node",
     "SkillLoaderService": "service.skill_loader_service",
     "SkillsServiceProvider": "service_provider",
-    "SkillCreatorAgentNode": "agents.skill_creator_agent_node",
     # keep-sorted end
 }
 

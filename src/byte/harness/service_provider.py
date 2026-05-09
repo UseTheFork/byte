@@ -11,8 +11,8 @@ class HarnessServiceProvider(ServiceProvider):
     def agents(self) -> List[Type[BaseAgentNode]]:
         return [
             # keep-sorted start
-            HarnessAgentNode,
             ExecutorAgentNode,
+            HarnessAgentNode,
             # keep-sorted end
         ]
 
