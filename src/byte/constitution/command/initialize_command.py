@@ -2,8 +2,9 @@ import argparse
 from argparse import Namespace
 
 from byte import ByteArgumentParser, Command
+from byte.constitution import ConstitutionWorkflow
 from byte.tui import Messages
-from byte.workflow import ConstitutionWorkflow, WorkflowService
+from byte.workflow import WorkflowService
 
 
 class InitializeCommand(Command):

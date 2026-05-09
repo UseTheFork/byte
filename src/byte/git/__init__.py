@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.git.agents.commit_agent_node import CommitAgentNode
     from byte.git.command.commit_command import CommitCommand
     from byte.git.schemas import CommitGroup, CommitMessage, CommitPlan
     from byte.git.service.commit_service import CommitService
@@ -14,14 +15,17 @@ if TYPE_CHECKING:
     from byte.git.tools.git_grep_tool import GitGrepTool
     from byte.git.tools.git_log_tool import GitLogTool
     from byte.git.validators.commit_validator import CommitValidator
+    from byte.git.workflows.commit_workflow import CommitWorkflow
 
 __all__ = (
+    "CommitAgentNode",
     "CommitCommand",
     "CommitGroup",
     "CommitMessage",
     "CommitPlan",
     "CommitService",
     "CommitValidator",
+    "CommitWorkflow",
     "GitCommitTool",
     "GitGrepTool",
     "GitLogTool",
@@ -31,6 +35,8 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
+    "CommitWorkflow": "workflows.commit_workflow",
+    "CommitAgentNode": "agents.commit_agent_node",
     "CommitCommand": "command.commit_command",
     "CommitGroup": "schemas",
     "CommitMessage": "schemas",

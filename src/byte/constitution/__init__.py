@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.constitution.agents.constitution_agent_node import ConstitutionAgentNode
     from byte.constitution.command.constitution_command import ConstitutionCommand
     from byte.constitution.command.initialize_command import InitializeCommand
     from byte.constitution.models import (
@@ -26,6 +27,7 @@ if TYPE_CHECKING:
         DeleteSectionTool,
         UpdateMetaTool,
     )
+    from byte.constitution.workflows.constitution_workflow import ConstitutionWorkflow
 
 __all__ = (
     "AddGovernanceRuleTool",
@@ -33,6 +35,7 @@ __all__ = (
     "AddSectionItemTool",
     "AddSectionTool",
     "Constitution",
+    "ConstitutionAgentNode",
     "ConstitutionCommand",
     "ConstitutionGovernanceRule",
     "ConstitutionItem",
@@ -41,6 +44,7 @@ __all__ = (
     "ConstitutionSection",
     "ConstitutionService",
     "ConstitutionServiceProvider",
+    "ConstitutionWorkflow",
     "DeleteGovernanceRuleTool",
     "DeletePrincipleTool",
     "DeleteSectionItemTool",
@@ -51,12 +55,14 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
-    "ConstitutionCommand": "command.constitution_command",
+    "ConstitutionWorkflow": "workflows.constitution_workflow",
+    "ConstitutionAgentNode": "agents.constitution_agent_node",
     "AddGovernanceRuleTool": "tools",
     "AddPrincipleTool": "tools",
     "AddSectionItemTool": "tools",
     "AddSectionTool": "tools",
     "Constitution": "models",
+    "ConstitutionCommand": "command.constitution_command",
     "ConstitutionGovernanceRule": "models",
     "ConstitutionItem": "models",
     "ConstitutionMeta": "models",

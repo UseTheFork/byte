@@ -1,20 +1,19 @@
-from byte.node.agents import ExecutorAgentNode, HarnessAgentNode
+from byte.constitution import ConstitutionAgentNode
 from byte.node.nodes import ToolNode
 from byte.orchestration import GraphBuilder
 from byte.workflow import BaseWorkflow
 
 
-class AgentHarnessWorkflow(BaseWorkflow):
+class ConstitutionWorkflow(BaseWorkflow):
     """ """
 
     async def build(self):
         """ """
 
-        graph = GraphBuilder(self.app, start_node=HarnessAgentNode)
+        graph = GraphBuilder(self.app, start_node=ConstitutionAgentNode)
 
         # Add nodes
-        graph.add_node(HarnessAgentNode, goto=ExecutorAgentNode)
-        graph.add_node(ExecutorAgentNode)
+        graph.add_node(ConstitutionAgentNode)
         graph.add_node(ToolNode)
 
         # Compile graph with memory and configuration

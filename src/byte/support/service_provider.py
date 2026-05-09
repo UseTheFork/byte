@@ -1,14 +1,15 @@
-from __future__ import annotations
-
 from abc import ABC
 from typing import TYPE_CHECKING, List, Type
 
 from byte import CommandRegistryService
+from byte.support import Str
 from byte.tools import ToolRegistryService
+from byte.workflow import BaseWorkflow
 
 if TYPE_CHECKING:
     from byte import Command
     from byte.foundation import Application
+    from byte.node import BaseAgentNode
     from byte.support import Service
     from byte.tools import BaseTool
 
@@ -48,6 +49,23 @@ class ServiceProvider(ABC):
             self.app.singleton(service_class)
 
     # TODO: Doc Strings
+    def agents(self) -> List[Type[BaseAgentNode]]:
+        """"""
+        return []
+
+    # TODO: Doc Strings
+    def register_agents(self):
+        """"""
+        agents = self.agents()
+        if not agents:
+            return
+
+        for agent_class in agents:
+            self.app.bind(agent_class)
+            agent_string = Str.class_to_snake_case(agent_class.__name__)
+            self.app.nodes[agent_string] = agent_class
+
+    # TODO: Doc Strings
     def commands(self) -> List[Type[Command]]:
         """"""
         return []
@@ -82,6 +100,21 @@ class ServiceProvider(ABC):
 
         for tool_class in tools:
             tool_registry_service.register_tool(tool_class)
+
+    # TODO: Doc Strings
+    def workflows(self) -> List[Type[BaseWorkflow]]:
+        """"""
+        return []
+
+    # TODO: Doc Strings
+    def register_workflows(self):
+        """"""
+        workflows = self.workflows()
+        if not workflows:
+            return
+
+        for workflow_class in workflows:
+            self.app.singleton(workflow_class)
 
     def set_application(self, app: Application):
         """Set the container instance for providers that need container access.

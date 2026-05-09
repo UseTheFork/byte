@@ -5,30 +5,36 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
+    from byte.skills.agents.skill_creator_agent_node import SkillCreatorAgentNode
     from byte.skills.command.skill_command import SkillCommand
     from byte.skills.schemas import Skill
     from byte.skills.service.skill_loader_service import SkillLoaderService
     from byte.skills.service_provider import SkillsServiceProvider
     from byte.skills.tools.create_skill_tool import CreateSkillTool
     from byte.skills.tools.load_skill_tool import LoadSkillTool
+    from byte.skills.workflows.create_skill_workflow import CreateSkillWorkflow
 
 __all__ = (
     "CreateSkillTool",
+    "CreateSkillWorkflow",
     "LoadSkillTool",
     "Skill",
     "SkillCommand",
+    "SkillCreatorAgentNode",
     "SkillLoaderService",
     "SkillsServiceProvider",
 )
 
 _dynamic_imports = {
     # keep-sorted start
+    "CreateSkillWorkflow": "workflows.create_skill_workflow",
     "CreateSkillTool": "tools.create_skill_tool",
     "LoadSkillTool": "tools.load_skill_tool",
     "Skill": "schemas",
     "SkillCommand": "command.skill_command",
     "SkillLoaderService": "service.skill_loader_service",
     "SkillsServiceProvider": "service_provider",
+    "SkillCreatorAgentNode": "agents.skill_creator_agent_node",
     # keep-sorted end
 }
 

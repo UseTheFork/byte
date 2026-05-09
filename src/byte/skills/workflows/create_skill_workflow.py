@@ -1,6 +1,6 @@
-from byte.node.agents.skill_creator_agent_node import SkillCreatorAgentNode
 from byte.node.nodes import ToolNode
 from byte.orchestration import GraphBuilder
+from byte.skills import SkillCreatorAgentNode
 from byte.workflow import BaseWorkflow
 
 

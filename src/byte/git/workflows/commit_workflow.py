@@ -1,4 +1,4 @@
-from byte.node.agents import CommitAgentNode
+from byte.git import CommitAgentNode
 from byte.node.nodes import LintNode, ToolNode
 from byte.orchestration import GraphBuilder
 from byte.workflow import BaseWorkflow

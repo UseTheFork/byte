@@ -7,7 +7,6 @@ from byte.workflow import (
     BaseWorkflow,
     CoderCommand,
     CoderWorkflow,
-    ConstitutionWorkflow,
     WorkflowService,
 )
 
@@ -17,7 +16,9 @@ class WorkflowServiceProvider(ServiceProvider):
 
     def services(self) -> List[Type[Service]]:
         return [
+            # keep-sorted start
             WorkflowService,
+            # keep-sorted end
         ]
 
     def workflows(self) -> List[Type[BaseWorkflow]]:
@@ -25,7 +26,6 @@ class WorkflowServiceProvider(ServiceProvider):
             # keep-sorted start
             AskWorkflow,
             CoderWorkflow,
-            ConstitutionWorkflow,
             # keep-sorted end
         ]
 
@@ -36,7 +36,3 @@ class WorkflowServiceProvider(ServiceProvider):
             CoderCommand,
             # keep-sorted end
         ]
-
-    def register(self) -> None:
-        for workflow_class in self.workflows():
-            self.app.singleton(workflow_class)

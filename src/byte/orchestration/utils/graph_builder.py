@@ -45,17 +45,12 @@ class GraphBuilder:
         from byte.node import NodeServiceProvider
 
         node_service_provider = self.app.make(NodeServiceProvider)
-        node_classes = {}
+        node_classes = self.app.nodes
 
         # Get nodes from the service provider
         for node_class in node_service_provider.nodes():
             node_string = Str.class_to_snake_case(node_class.__name__)
             node_classes[node_string] = node_class
-
-        # Get agents from the service provider
-        for agent_class in node_service_provider.agents():
-            agent_string = Str.class_to_snake_case(agent_class.__name__)
-            node_classes[agent_string] = agent_class
 
         return node_classes
 

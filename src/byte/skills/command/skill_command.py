@@ -2,8 +2,9 @@ import argparse
 from argparse import Namespace
 
 from byte import ByteArgumentParser, Command
+from byte.skills import CreateSkillWorkflow
 from byte.tui import Messages
-from byte.workflow import CreateSkillWorkflow, WorkflowService
+from byte.workflow import WorkflowService
 
 
 class SkillCommand(Command):

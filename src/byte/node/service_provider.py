@@ -8,10 +8,6 @@ from byte.node import (
 from byte.node.agents import (
     AskAgentNode,
     CoderAgentNode,
-    CommitAgentNode,
-    ConstitutionAgentNode,
-    HarnessAgentNode,
-    SkillCreatorAgentNode,
 )
 from byte.node.nodes import (
     EndNode,
@@ -32,10 +28,6 @@ class NodeServiceProvider(ServiceProvider):
             # keep-sorted start
             AskAgentNode,
             CoderAgentNode,
-            CommitAgentNode,
-            ConstitutionAgentNode,
-            HarnessAgentNode,
-            SkillCreatorAgentNode,
             # keep-sorted end
         ]
 
@@ -56,6 +48,3 @@ class NodeServiceProvider(ServiceProvider):
         # Create all Nodes
         for node_class in self.nodes():
             self.app.bind(node_class)
-
-        for agent_class in self.agents():
-            self.app.bind(agent_class)
