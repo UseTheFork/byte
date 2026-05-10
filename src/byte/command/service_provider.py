@@ -6,4 +6,8 @@ class CommandServiceProvider(ServiceProvider):
     """Service provider for Command system."""
 
     def services(self):
-        return [CommandRegistryService]
+        return [
+            # keep-sorted start
+            CommandRegistryService,
+            # keep-sorted end
+        ]

@@ -1,6 +1,4 @@
-from typing import List, Type
-
-from byte import Command, Service, ServiceProvider
+from byte import ServiceProvider
 from byte.lint import LintCommand, LintService
 
 
@@ -13,8 +11,8 @@ class LintServiceProvider(ServiceProvider):
     Usage: Register with container to enable `/lint` command and lint service
     """
 
-    def services(self) -> List[Type[Service]]:
+    def services(self):
         return [LintService]
 
-    def commands(self) -> List[Type[Command]]:
+    def commands(self):
         return [LintCommand]

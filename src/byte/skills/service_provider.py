@@ -1,7 +1,4 @@
-from typing import List, Type
-
-from byte import Command, Service, ServiceProvider
-from byte.node import BaseAgentNode
+from byte import ServiceProvider
 from byte.skills import (
     CreateSkillTool,
     CreateSkillWorkflow,
@@ -10,8 +7,6 @@ from byte.skills import (
     SkillCreatorAgentNode,
     SkillLoaderService,
 )
-from byte.tools import BaseTool
-from byte.workflow import BaseWorkflow
 
 
 class SkillsServiceProvider(ServiceProvider):
@@ -23,14 +18,14 @@ class SkillsServiceProvider(ServiceProvider):
     Usage: Register with container to enable skill tracking
     """
 
-    def agents(self) -> List[Type[BaseAgentNode]]:
+    def agents(self):
         return [
             # keep-sorted start
             SkillCreatorAgentNode,
             # keep-sorted end
         ]
 
-    def tools(self) -> List[Type[BaseTool]]:
+    def tools(self):
         return [
             # keep-sorted start
             CreateSkillTool,
@@ -38,17 +33,21 @@ class SkillsServiceProvider(ServiceProvider):
             # keep-sorted end
         ]
 
-    def commands(self) -> List[Type[Command]]:
+    def commands(self):
         return [
             # keep-sorted start
             SkillCommand,
             # keep-sorted end
         ]
 
-    def services(self) -> List[Type[Service]]:
-        return [SkillLoaderService]
+    def services(self):
+        return [
+            # keep-sorted start
+            SkillLoaderService,
+            # keep-sorted end
+        ]
 
-    def workflows(self) -> List[Type[BaseWorkflow]]:
+    def workflows(self):
         return [
             # keep-sorted start
             CreateSkillWorkflow,

@@ -1,6 +1,4 @@
-from typing import List, Type
-
-from byte import Command, Service, ServiceProvider
+from byte import ServiceProvider
 from byte.constitution import ConstitutionAgentNode, ConstitutionCommand, ConstitutionWorkflow, InitializeCommand
 from byte.constitution.service.constitution_service import ConstitutionService
 from byte.constitution.tools import (
@@ -14,9 +12,6 @@ from byte.constitution.tools import (
     DeleteSectionTool,
     UpdateMetaTool,
 )
-from byte.node import BaseAgentNode
-from byte.tools import BaseTool
-from byte.workflow import BaseWorkflow
 
 
 class ConstitutionServiceProvider(ServiceProvider):
@@ -26,14 +21,14 @@ class ConstitutionServiceProvider(ServiceProvider):
     constitution from ``.byte/constitution.json`` on startup.
     """
 
-    def agents(self) -> List[Type[BaseAgentNode]]:
+    def agents(self):
         return [
             # keep-sorted start
             ConstitutionAgentNode,
             # keep-sorted end
         ]
 
-    def commands(self) -> List[Type[Command]]:
+    def commands(self):
         return [
             # keep-sorted start
             ConstitutionCommand,
@@ -41,14 +36,14 @@ class ConstitutionServiceProvider(ServiceProvider):
             # keep-sorted end
         ]
 
-    def workflows(self) -> List[Type[BaseWorkflow]]:
+    def workflows(self):
         return [
             # keep-sorted start
             ConstitutionWorkflow,
             # keep-sorted end
         ]
 
-    def tools(self) -> List[Type[BaseTool]]:
+    def tools(self):
         return [
             # keep-sorted start
             AddGovernanceRuleTool,
@@ -63,11 +58,11 @@ class ConstitutionServiceProvider(ServiceProvider):
             # keep-sorted end
         ]
 
-    def services(self) -> List[Type[Service]]:
+    def services(self):
         return [
             ConstitutionService,
         ]
 
-    async def boot(self) -> None:
+    async def boot(self):
         """Boot the constitution service."""
         self.app.make(ConstitutionService)

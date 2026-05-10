@@ -14,7 +14,7 @@ class LLMServiceProvider(ServiceProvider):
     Usage: Register with container to enable AI functionality throughout app
     """
 
-    async def boot(self) -> None:
+    async def boot(self):
         """Boot LLM services and display configuration information.
 
         Shows user which models are active for transparency and debugging,

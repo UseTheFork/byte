@@ -1,6 +1,4 @@
-from typing import List, Type
-
-from byte import Command, Service, ServiceProvider
+from byte import ServiceProvider
 from byte.memory import (
     ClearCommand,
     CompleteSimpleTurnTool,
@@ -11,7 +9,6 @@ from byte.memory import (
     ProceedToNextStepTool,
     ResetCommand,
 )
-from byte.tools import BaseTool
 
 
 class MemoryServiceProvider(ServiceProvider):
@@ -23,22 +20,28 @@ class MemoryServiceProvider(ServiceProvider):
     Usage: Register with container to enable conversation memory
     """
 
-    def tools(self) -> List[Type[BaseTool]]:
+    def tools(self):
         return [
+            # keep-sorted start
             CreatePlanTool,
             CompleteStepTool,
             CompleteSimpleTurnTool,
             CompleteTurnTool,
             ProceedToNextStepTool,
+            # keep-sorted end
         ]
 
-    def services(self) -> List[Type[Service]]:
+    def services(self):
         return [
+            # keep-sorted start
             MemoryService,
+            # keep-sorted end
         ]
 
-    def commands(self) -> List[Type[Command]]:
+    def commands(self):
         return [
+            # keep-sorted start
             ClearCommand,
             ResetCommand,
+            # keep-sorted end
         ]

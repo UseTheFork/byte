@@ -10,7 +10,11 @@ class DevelopmentServiceProvider(ServiceProvider):
     """"""
 
     def services(self) -> List[Type[Service]]:
-        return [RecordResponseService]
+        return [
+            # keep-sorted start
+            RecordResponseService,
+            # keep-sorted end
+        ]
 
     async def boot(self):
         """Boot UI services."""

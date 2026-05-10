@@ -1,6 +1,4 @@
-from typing import List, Type
-
-from byte import Service, ServiceProvider
+from byte import ServiceProvider
 from byte.analytics import AgentAnalyticsService
 
 
@@ -13,5 +11,9 @@ class AnalyticsProvider(ServiceProvider):
     Usage: Register with container to enable analytics tracking and display
     """
 
-    def services(self) -> List[Type[Service]]:
-        return [AgentAnalyticsService]
+    def services(self):
+        return [
+            # keep-sorted start
+            AgentAnalyticsService,
+            # keep-sorted end
+        ]

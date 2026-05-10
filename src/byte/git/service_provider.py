@@ -1,6 +1,4 @@
-from typing import List, Type
-
-from byte import Command, Service, ServiceProvider
+from byte import ServiceProvider
 from byte.git import (
     CommitAgentNode,
     CommitCommand,
@@ -11,9 +9,6 @@ from byte.git import (
     GitLogTool,
     GitService,
 )
-from byte.node import BaseAgentNode
-from byte.tools import BaseTool
-from byte.workflow import BaseWorkflow
 
 
 class GitServiceProvider(ServiceProvider):
@@ -24,14 +19,14 @@ class GitServiceProvider(ServiceProvider):
     Usage: Register with container to enable git service access
     """
 
-    def agents(self) -> List[Type[BaseAgentNode]]:
+    def agents(self):
         return [
             # keep-sorted start
             CommitAgentNode,
             # keep-sorted end
         ]
 
-    def tools(self) -> List[Type[BaseTool]]:
+    def tools(self):
         """Returns the list of git-related tools available to the agent."""
         return [
             # keep-sorted start
@@ -41,7 +36,7 @@ class GitServiceProvider(ServiceProvider):
             # keep-sorted end
         ]
 
-    def services(self) -> List[Type[Service]]:
+    def services(self):
         return [
             # keep-sorted start
             CommitService,
@@ -49,14 +44,14 @@ class GitServiceProvider(ServiceProvider):
             # keep-sorted end
         ]
 
-    def commands(self) -> List[Type[Command]]:
+    def commands(self):
         return [
             # keep-sorted start
             CommitCommand,
             # keep-sorted end
         ]
 
-    def workflows(self) -> List[Type[BaseWorkflow]]:
+    def workflows(self):
         return [
             # keep-sorted start
             CommitWorkflow,

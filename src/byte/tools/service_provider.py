@@ -12,4 +12,8 @@ class ToolsServiceProvider(ServiceProvider):
     """
 
     def services(self):
-        return [ToolRegistryService]
+        return [
+            # keep-sorted start
+            ToolRegistryService
+            # keep-sorted end
+        ]

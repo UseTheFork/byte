@@ -1,10 +1,4 @@
-from typing import List, Type
-
 from byte import ServiceProvider
-from byte.node import (
-    BaseAgentNode,
-    BaseNode,
-)
 from byte.node.agents import (
     AskAgentNode,
     CoderAgentNode,
@@ -23,7 +17,7 @@ from byte.node.nodes import (
 class NodeServiceProvider(ServiceProvider):
     """ """
 
-    def agents(self) -> List[Type[BaseAgentNode]]:
+    def agents(self):
         return [
             # keep-sorted start
             AskAgentNode,
@@ -31,7 +25,7 @@ class NodeServiceProvider(ServiceProvider):
             # keep-sorted end
         ]
 
-    def nodes(self) -> List[Type[BaseNode]]:
+    def nodes(self):
         return [
             # keep-sorted start
             EndNode,

@@ -1,6 +1,4 @@
-from typing import List, Type
-
-from byte import Command, EventBus, Service, ServiceProvider
+from byte import EventBus, ServiceProvider
 from byte.knowledge import (
     ContextAddFileCommand,
     ContextDropCommand,
@@ -22,18 +20,22 @@ class KnowledgeServiceProvider(ServiceProvider):
     Usage: Register with container to enable long-term knowledge storage
     """
 
-    def services(self) -> List[Type[Service]]:
+    def services(self):
         return [
+            # keep-sorted start
             SessionContextService,
+            # keep-sorted end
         ]
 
-    def commands(self) -> List[Type[Command]]:
+    def commands(self):
         return [
+            # keep-sorted start
             WebCommand,
             ContextListCommand,
             ContextDropCommand,
             ContextAddFileCommand,
             ContextAddCommand,
+            # keep-sorted end
         ]
 
     def register(self):

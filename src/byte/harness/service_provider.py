@@ -1,14 +1,9 @@
-from typing import List, Type
-
 from byte.harness import AgentHarnessWorkflow, BootstrapAgentTool, ExecutorAgentNode, HarnessAgentNode
-from byte.node import BaseAgentNode
 from byte.support import ServiceProvider
-from byte.tools import BaseTool
-from byte.workflow import BaseWorkflow
 
 
 class HarnessServiceProvider(ServiceProvider):
-    def agents(self) -> List[Type[BaseAgentNode]]:
+    def agents(self):
         return [
             # keep-sorted start
             ExecutorAgentNode,
@@ -16,14 +11,14 @@ class HarnessServiceProvider(ServiceProvider):
             # keep-sorted end
         ]
 
-    def tools(self) -> List[Type[BaseTool]]:
+    def tools(self):
         return [
             # keep-sorted start
             BootstrapAgentTool,
             # keep-sorted end
         ]
 
-    def workflows(self) -> List[Type[BaseWorkflow]]:
+    def workflows(self):
         return [
             # keep-sorted start
             AgentHarnessWorkflow,

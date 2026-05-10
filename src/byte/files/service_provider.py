@@ -1,6 +1,4 @@
-from typing import List, Type
-
-from byte import Command, EventBus, Service, ServiceProvider
+from byte import EventBus, ServiceProvider
 from byte.files import (
     AddFileCommand,
     AddFilesTool,
@@ -24,41 +22,46 @@ from byte.files import (
 )
 from byte.orchestration import OrchestrationEvents
 from byte.system import SystemEvents
-from byte.tools import BaseTool
 
 
 class FileServiceProvider(ServiceProvider):
     """Service provider for simplified file functionality with project discovery."""
 
-    def services(self) -> List[Type[Service]]:
+    def services(self):
         return [
+            # keep-sorted start
             FileIgnoreService,
             FileDiscoveryService,
             FileService,
             FileWatcherService,
             AICommentWatcherService,
             ToolFileService,
+            # keep-sorted end
         ]
 
-    def commands(self) -> List[Type[Command]]:
+    def commands(self):
         return [
+            # keep-sorted start
             ListFilesCommand,
             AddFileCommand,
             ReadOnlyCommand,
             DropFileCommand,
             SwitchModeCommand,
             ReloadFilesCommand,
+            # keep-sorted end
         ]
 
-    def tools(self) -> List[Type[BaseTool]]:
+    def tools(self):
         """"""
         return [
+            # keep-sorted start
             EditFileTool,
             WriteFileTool,
             DeleteFileTool,
             ReplaceFileTool,
             AddFilesTool,
             ListFilesTool,
+            # keep-sorted end
         ]
 
     async def boot(self):

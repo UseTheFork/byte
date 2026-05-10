@@ -1,6 +1,4 @@
-from typing import List, Type
-
-from byte import Command, EventBus, Service, ServiceProvider
+from byte import EventBus, ServiceProvider
 from byte.memory import UndoCommand
 from byte.orchestration import OrchestrationEvents
 from byte.system import (
@@ -11,7 +9,6 @@ from byte.system import (
     UserInputTextTool,
     UserSelectTool,
 )
-from byte.tools import BaseTool
 
 
 class SystemServiceProvider(ServiceProvider):
@@ -22,25 +19,31 @@ class SystemServiceProvider(ServiceProvider):
     Usage: Register with container to enable /exit and /help commands
     """
 
-    def tools(self) -> List[Type[BaseTool]]:
+    def tools(self):
         """"""
         return [
+            # keep-sorted start
             UserConfirmOrInputTool,
             UserConfirmTool,
             UserInputTextTool,
             UserSelectTool,
+            # keep-sorted end
         ]
 
-    def commands(self) -> List[Type[Command]]:
+    def commands(self):
         return [
+            # keep-sorted start
             ExitCommand,
             UndoCommand,
+            # keep-sorted end
         ]
 
-    def services(self) -> List[Type[Service]]:
+    def services(self):
         return [
+            # keep-sorted start
             SystemContextService,
             # ConfigWriterService,
+            # keep-sorted end
         ]
 
     async def boot(self) -> None:

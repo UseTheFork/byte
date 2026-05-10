@@ -8,8 +8,10 @@ class TUIServiceProvider(ServiceProvider):
 
     def services(self):
         return [
+            # keep-sorted start
             TUIManagerService,
             PromptHistoryService,
+            # keep-sorted end
         ]
 
     async def boot(self):
