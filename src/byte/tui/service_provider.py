@@ -9,8 +9,8 @@ class TUIServiceProvider(ServiceProvider):
     def services(self):
         return [
             # keep-sorted start
-            TUIManagerService,
             PromptHistoryService,
+            TUIManagerService,
             # keep-sorted end
         ]
 

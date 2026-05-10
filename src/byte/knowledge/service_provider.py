@@ -30,11 +30,11 @@ class KnowledgeServiceProvider(ServiceProvider):
     def commands(self):
         return [
             # keep-sorted start
-            WebCommand,
-            ContextListCommand,
-            ContextDropCommand,
-            ContextAddFileCommand,
             ContextAddCommand,
+            ContextAddFileCommand,
+            ContextDropCommand,
+            ContextListCommand,
+            WebCommand,
             # keep-sorted end
         ]
 

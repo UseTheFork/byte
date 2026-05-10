@@ -30,11 +30,11 @@ class FileServiceProvider(ServiceProvider):
     def services(self):
         return [
             # keep-sorted start
-            FileIgnoreService,
+            AICommentWatcherService,
             FileDiscoveryService,
+            FileIgnoreService,
             FileService,
             FileWatcherService,
-            AICommentWatcherService,
             ToolFileService,
             # keep-sorted end
         ]
@@ -42,12 +42,12 @@ class FileServiceProvider(ServiceProvider):
     def commands(self):
         return [
             # keep-sorted start
-            ListFilesCommand,
             AddFileCommand,
-            ReadOnlyCommand,
             DropFileCommand,
-            SwitchModeCommand,
+            ListFilesCommand,
+            ReadOnlyCommand,
             ReloadFilesCommand,
+            SwitchModeCommand,
             # keep-sorted end
         ]
 
@@ -55,12 +55,12 @@ class FileServiceProvider(ServiceProvider):
         """"""
         return [
             # keep-sorted start
-            EditFileTool,
-            WriteFileTool,
-            DeleteFileTool,
-            ReplaceFileTool,
             AddFilesTool,
+            DeleteFileTool,
+            EditFileTool,
             ListFilesTool,
+            ReplaceFileTool,
+            WriteFileTool,
             # keep-sorted end
         ]
 

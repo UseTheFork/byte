@@ -23,10 +23,10 @@ class MemoryServiceProvider(ServiceProvider):
     def tools(self):
         return [
             # keep-sorted start
-            CreatePlanTool,
-            CompleteStepTool,
             CompleteSimpleTurnTool,
+            CompleteStepTool,
             CompleteTurnTool,
+            CreatePlanTool,
             ProceedToNextStepTool,
             # keep-sorted end
         ]
