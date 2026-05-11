@@ -50,16 +50,17 @@ class AskAgentNode(BaseAgentNode):
         return [
             Leaves.Preamble(role="Act as an expert software developer."),
             Leaves.SkillsAvailable(),
-            "",
-            Section.start(SectionType.OPERATING_CONSTRAINTS),
-            "- Always use best practices when coding",
-            "- Respect and use existing conventions, libraries, etc that are already present in the code base",
-            "- Take requests for changes to the supplied code",
-            "- If the request is ambiguous, ask questions",
-            "- Keep changes simple don't build more then what is asked for",
-            "- Never use XML-style tags in your responses (e.g., <file>, <search>, <replace>). These are for internal parsing only.",
-            "- Do not provide full code implementations unless explicitly requested. Describe the changes needed first.",
-            Section.end(),
+            Leaves.CommunicationStyle(),
+            Leaves.WorkflowConstraints(
+                [
+                    "- Always use best practices when coding",
+                    "- Respect and use existing conventions, libraries, etc that are already present in the code base",
+                    "- Take requests for changes to the supplied code",
+                    "- If the request is ambiguous, ask questions",
+                    "- Keep changes simple don't build more then what is asked for",
+                    "- Do not provide full code implementations unless explicitly requested. Describe the changes needed first.",
+                ]
+            ),
             "",
             Section.start(SectionType.RESPONSE_FORMAT),
             "- Use clear, concise explanations",
@@ -110,7 +111,11 @@ class AskAgentNode(BaseAgentNode):
         self.app.dispatch_task(
             record_response_service.record_response(agent_state, runnable, self.name, config),
         )
-        result = await runnable.ainvoke(agent_state, config=config)
+        result = await runnable.ainvoke(
+            agent_state,
+            config=config,
+            cache_control={"type": "ephemeral"},
+        )
 
         route_tool_call = self.route_tool_calls(result)
         if route_tool_call is not None:

@@ -1,5 +1,6 @@
 from byte.orchestration.leaves.commit_guidelines import CommitGuidelines as _CommitGuidelines
 from byte.orchestration.leaves.commit_history import CommitHistory as _CommitHistory
+from byte.orchestration.leaves.communication_style import CommunicationStyle as _CommunicationStyle
 from byte.orchestration.leaves.constitution import Constitution as _Constitution
 from byte.orchestration.leaves.constraints import Constraints as _Constraints
 from byte.orchestration.leaves.conversation_history import ConversationHistory as _ConversationHistory
@@ -18,6 +19,7 @@ from byte.orchestration.leaves.skills_loaded import SkillsLoaded as _SkillsLoade
 from byte.orchestration.leaves.tools_all import ToolsAll as _ToolsAll
 from byte.orchestration.leaves.tools_loaded import ToolsLoaded as _ToolsLoaded
 from byte.orchestration.leaves.user_request import UserRequest as _UserRequest
+from byte.orchestration.leaves.workflow_constraints import WorkflowConstraints as _WorkflowConstraints
 
 
 class Leaves:
@@ -41,3 +43,5 @@ class Leaves:
     CommitHistory = _CommitHistory
     ToolsLoaded = _ToolsLoaded
     Constitution = _Constitution
+    WorkflowConstraints = _WorkflowConstraints
+    CommunicationStyle = _CommunicationStyle

@@ -142,7 +142,11 @@ class ConstitutionAgentNode(BaseAgentNode):
         self.app.dispatch_task(
             record_response_service.record_response(agent_state, runnable, self.name, config),
         )
-        result = await runnable.ainvoke(agent_state, config=config)
+        result = await runnable.ainvoke(
+            agent_state,
+            config=config,
+            cache_control={"type": "ephemeral"},
+        )
 
         route_tool_call = self.route_tool_calls(result)
         if route_tool_call is not None:

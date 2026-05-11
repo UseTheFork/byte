@@ -47,14 +47,16 @@ class SkillCreatorAgentNode(BaseAgentNode):
             ),
             Leaves.SkillsAvailable(),
             Leaves.OperatingPrinciples(),
-            Section.start(SectionType.OPERATING_CONSTRAINTS),
-            "- Understand what the user wants the skill to do before writing anything",
-            "- If the request is ambiguous, ask clarifying questions about intent, expected output, and when the skill should trigger",
-            "- Capture the skill's name, description, and instructions before creating it",
-            "- FIRST gather the necessary information, THEN use available tools to create the skill",
-            "- Keep skill instructions clear, concise, and actionable",
-            Section.end(),
-            Section.start(SectionType.TASK),
+            Leaves.WorkflowConstraints(
+                [
+                    "- Understand what the user wants the skill to do before writing anything",
+                    "- If the request is ambiguous, ask clarifying questions about intent, expected output, and when the skill should trigger",
+                    "- Capture the skill's name, description, and instructions before creating it",
+                    "- FIRST gather the necessary information, THEN use available tools to create the skill",
+                    "- Keep skill instructions clear, concise, and actionable",
+                ]
+            ),
+            Section.start(SectionType.WORKFLOW),
             "Your task is to help the user create a new skill. Follow these phases:",
             "",
             "- PHASE 1: Capture Intent — Understand what the skill should do, when it should trigger, and what the expected output looks like.",
@@ -136,7 +138,11 @@ class SkillCreatorAgentNode(BaseAgentNode):
         runnable = self.create_runnable(state)
         record_response_service = self.app.make(RecordResponseService)
 
-        result = await runnable.ainvoke(agent_state, config=config)
+        result = await runnable.ainvoke(
+            agent_state,
+            config=config,
+            cache_control={"type": "ephemeral"},
+        )
         self.app.dispatch_task(
             record_response_service.record_response(agent_state, runnable, self.name, config),
         )

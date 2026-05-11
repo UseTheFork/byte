@@ -23,11 +23,12 @@ class SectionType(StrEnum):
     AVALIABLE_TOOLS = "Avaliable Tools"
     TASK = "Task"
 
-    OPERATING_CONSTRAINTS = "Operating Constraints"
     OPERATING_PRINCIPLES = "Operating Principles"
 
     COMMUNICATION_STYLE = "Communication Style"
+
     WORKFLOW = "Workflow"
+    WORKFLOW_CONSTRAINTS = "Workflow Constraints"
 
     RESPONSE_FORMAT = "Response Format"
     RESUME_FORMAT = "Resuming The Conversation"

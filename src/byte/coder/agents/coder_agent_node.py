@@ -46,34 +46,34 @@ class CoderAgentNode(BaseAgentNode):
             Leaves.ConversationHistory(),
             Leaves.UserRequest(),
             Section.important(
-                f"All tool operations are applied immediately and are reflected in the next user message containing {SectionType.PROJECT_FILES}."
+                f"All tool operations are applied immediately and are reflected in the next user message containing {Section.ref(SectionType.PROJECT_FILES)}."
             ),
         ]
 
     def get_system_template(self):
         return [
             Leaves.Preamble(role="Act as an expert software developer."),
+            Leaves.Constitution(),
             Leaves.SkillsAvailable(),
-            Section.start(SectionType.OPERATING_CONSTRAINTS),
-            "- Analyze the user's request and the provided file context",
-            "- If the request is ambiguous, ask clarifying questions",
-            "- Identify which files need to be modified, created, or deleted",
-            "- Break down the changes into clear, sequential steps",
-            "- FIRST create a plan, THEN use available tools to implement the changes",
-            "- Do NOT provide full code implementations unless required by tools",
-            "- Keep the plan concise and actionable",
-            Section.end(),
-            Section.start(SectionType.COMMUNICATION_STYLE),
-            "- ALWAYS think and respond in the same spoken language the prompt was written in.",
-            "- Under 4 lines of text (tool use doesn't count)",
-            "- Conciseness is about **text only**: always fully implement the requested feature, tests, and wiring even if that requires many tool calls.",
-            """- No preamble ("Here's...", "I'll...")""",
-            """- No postamble ("Let me know...", "Hope this helps...")""",
-            "- No emojis ever",
-            "- No explanations unless user asks",
-            "- Never send acknowledgement-only responses; after receiving new context or instructions, immediately continue the task or state the concrete next action you will take.",
-            "- Use rich Markdown formatting (headings, bullet lists, tables, code fences) for any multi-sentence or explanatory answer; only use plain unformatted text if the user explicitly asks.",
-            Section.end(),
+            Leaves.CommunicationStyle(
+                [
+                    "- Under 4 lines of text (tool use and the step-by-step plan section doesn't count)",
+                    "- Conciseness is about **text only**: always fully implement the requested feature, tests, and wiring even if that requires many tool calls.",
+                    "- No explanations unless user asks",
+                    "- Never send acknowledgement-only responses; after receiving new context or instructions, immediately continue the task or state the concrete next action you will take.",
+                ]
+            ),
+            Leaves.WorkflowConstraints(
+                [
+                    "- Analyze the user's request and the provided file context",
+                    "- If the request is ambiguous, ask clarifying questions",
+                    "- Identify which files need to be modified, created, or deleted",
+                    "- Break down the changes into clear, sequential steps",
+                    "- FIRST create a plan, THEN use available tools to implement the changes",
+                    "- Do NOT provide full code implementations unless required by tools",
+                    "- Keep the plan concise and actionable",
+                ]
+            ),
             Section.start(SectionType.WORKFLOW),
             "For every task, follow this sequence internally (don't narrate it):",
             "",
@@ -154,7 +154,11 @@ class CoderAgentNode(BaseAgentNode):
         runnable = self.create_runnable(state)
         record_response_service = self.app.make(RecordResponseService)
 
-        result = await runnable.ainvoke(agent_state, config=config)
+        result = await runnable.ainvoke(
+            agent_state,
+            config=config,
+            cache_control={"type": "ephemeral"},
+        )
         self.app.dispatch_task(
             record_response_service.record_response(agent_state, runnable, self.name, config),
         )
