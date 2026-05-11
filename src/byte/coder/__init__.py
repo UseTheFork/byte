@@ -18,9 +18,9 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
-    "CoderServiceProvider": "service_provider",
-    "CoderCommand": "commands.coder_command",
     "CoderAgentNode": "agents.coder_agent_node",
+    "CoderCommand": "commands.coder_command",
+    "CoderServiceProvider": "service_provider",
     "CoderWorkflow": "workflows.coder_workflow",
     # keep-sorted end
 }

@@ -24,8 +24,8 @@ _dynamic_imports = {
     "BaseAgentNode": "base_agent_node",
     "BaseNode": "base_node",
     "NodeEvents": "events",
-    "NodeServiceProvider": "service_provider",
     "NodeRegistry": "node_registry",
+    "NodeServiceProvider": "service_provider",
     # keep-sorted end
 }
 
