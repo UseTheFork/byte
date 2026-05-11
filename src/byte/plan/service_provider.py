@@ -6,9 +6,9 @@ class PlanServiceProvider(ServiceProvider):
     def tools(self):
         return [
             # keep-sorted start
-            CreatePlanTool,
             CompletePlanStepTool,
             CompleteTurnTool,
             ConfirmCompletePlanStepTool,
+            CreatePlanTool,
             # keep-sorted end
         ]

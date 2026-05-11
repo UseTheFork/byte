@@ -14,6 +14,7 @@ AgentType = Annotated[Type[BaseAgentNode], TypeSerializer]
 
 class PlanStep(BaseModel):
     """Represents a single step within a plan, tracking its content, status, and associated tools or skills."""
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     id: str

@@ -22,12 +22,12 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
-    "PlanStep": "models",
-    "CompleteTurnTool": "tools.complete_turn_tool",
-    "PlanServiceProvider": "service_provider",
-    "CreatePlanTool": "tools.create_plan_tool",
     "CompletePlanStepTool": "tools.complete_plan_step_tool",
+    "CompleteTurnTool": "tools.complete_turn_tool",
     "ConfirmCompletePlanStepTool": "tools.confirm_complete_plan_step_tool",
+    "CreatePlanTool": "tools.create_plan_tool",
+    "PlanServiceProvider": "service_provider",
+    "PlanStep": "models",
     # keep-sorted end
 }
 
