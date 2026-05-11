@@ -2,11 +2,7 @@ from byte import ServiceProvider
 from byte.memory import (
     ClearCommand,
     CompleteSimpleTurnTool,
-    CompleteStepTool,
-    CompleteTurnTool,
-    CreatePlanTool,
     MemoryService,
-    ProceedToNextStepTool,
     ResetCommand,
 )
 
@@ -24,10 +20,6 @@ class MemoryServiceProvider(ServiceProvider):
         return [
             # keep-sorted start
             CompleteSimpleTurnTool,
-            CompleteStepTool,
-            CompleteTurnTool,
-            CreatePlanTool,
-            ProceedToNextStepTool,
             # keep-sorted end
         ]
 

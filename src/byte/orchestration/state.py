@@ -1,8 +1,9 @@
-from typing import Annotated, Literal, TypedDict
+from typing import Annotated, TypedDict
 
 from langgraph.graph.message import AnyMessage, add_messages
 
 from byte.orchestration import ConstraintSchema, MetadataSchema, add_constraints, replace_str, update_metadata
+from byte.plan import PlanStep
 
 
 class HarnessState(TypedDict):
@@ -14,18 +15,6 @@ class HarnessState(TypedDict):
     skills: list[str]
     tools: list[str]
     prompt: str | None
-
-
-class PlanStep(TypedDict):
-    """ """
-
-    id: str
-    content: str
-    note: str | None
-    status: Literal["pending", "in_progress", "completed"] | None
-    order: int
-    created_at: str
-    updated_at: str
 
 
 class RoutingState(TypedDict):

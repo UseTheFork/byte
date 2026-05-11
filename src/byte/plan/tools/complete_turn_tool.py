@@ -60,9 +60,9 @@ class CompleteTurnTool(BaseTool):
     ) -> ToolResult:
 
         if state is not None and state.get("plan", []):
-            incomplete = [step for step in state["plan"] if step.get("status") != "completed"]
+            incomplete = [step for step in state["plan"] if step.status != "completed"]
             if incomplete:
-                incomplete_ids = ", ".join(step["id"] for step in incomplete)
+                incomplete_ids = ", ".join(step.id for step in incomplete)
                 raise ToolException(
                     "Cannot complete turn: there are incomplete plan steps. "
                     "All plan steps must be marked as completed before calling complete_turn. "

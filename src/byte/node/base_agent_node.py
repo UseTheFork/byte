@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List
+from typing import TYPE_CHECKING, List
 
 from langchain.chat_models import init_chat_model
 from langchain.messages import HumanMessage
@@ -12,10 +12,15 @@ from byte.llm import ModelSchema
 from byte.node import (
     BaseNode,
 )
-from byte.orchestration import BaseState, PromptAssembler
+from byte.orchestration import PromptAssembler
 from byte.orchestration.messages import AIMessage
 from byte.support import Str
+from byte.tools import ToolRegistryService
 from byte.tui import Messages
+
+if TYPE_CHECKING:
+    from byte.orchestration import BaseState
+    from byte.plan import PlanStep
 
 
 class BaseAgentNode(BaseNode):
@@ -147,20 +152,6 @@ class BaseAgentNode(BaseNode):
         return (agent_state, config)
 
     def create_runnable(self, state: BaseState, tool_choice: dict[str, str] | str | None = None) -> Runnable:
-        """Create the runnable chain from context configuration.
-
-        Assembles the prompt and model based on the mode (main or weak AI).
-        If tools are provided, binds them to the model with parallel execution disabled.
-
-        Args:
-                context: The assistant context containing prompt, models, mode, and tools
-
-        Returns:
-                Runnable chain ready for invocation
-
-        Usage: `runnable = self._create_runnable(model, runtime.context)`
-        """
-
         model_schema, merged_params = self.get_model()
         model = init_chat_model(
             model_schema.model,
@@ -168,18 +159,47 @@ class BaseAgentNode(BaseNode):
             **merged_params,
         )
 
-        # Bind tools if provided
-        if self.get_tools(state) is not None and len(self.get_tools(state)) > 0:
-            tool_schemas = [tool.tool_schema() for tool in self.get_tools(state)]
-            if tool_choice:
-                model = model.bind_tools(tool_schemas, tool_choice=tool_choice)
+        tool_schemas = []
+        tool_registry_service = self.app.make(ToolRegistryService)
+
+        plan: list[PlanStep] = state.get("plan") or []
+
+        # Find the first pending step (if any)
+        pending_step = next((s for s in plan if s.status == "pending"), None)
+
+        if pending_step is not None:
+            # Append the required completion tool
+            if pending_step.completion_mode == "auto":
+                completion_tool = tool_registry_service.get_tool("complete_plan_step")
             else:
-                model = model.bind_tools(tool_schemas)
+                completion_tool = tool_registry_service.get_tool("confirm_complete_plan_step")
 
-        # Assemble the chain
-        runnable = self.get_prompt() | model
+            tool_schemas.append(completion_tool.tool_schema())
 
-        return runnable
+            # Append any step-specific tools
+            if pending_step.tools:
+                for tool_class in pending_step.tools:
+                    tool = tool_registry_service.get_tool(tool_class.name)
+                    tool_schemas.append(tool.tool_schema())
+
+        else:
+            # No pending steps remain; if plan exists and all are completed/blocked, allow complete_turn
+            if plan and all(s.status in ("completed", "blocked") for s in plan):
+                complete_turn_tool = tool_registry_service.get_tool("complete_turn")
+                tool_schemas.append(complete_turn_tool.tool_schema())
+
+        # Bind agent-level tools if provided
+        agent_tools = self.get_tools(state)
+        if agent_tools:
+            tool_schemas.extend(tool.tool_schema() for tool in agent_tools)
+
+        # Bind tool schemas to the model
+        if tool_choice:
+            model = model.bind_tools(tool_schemas, tool_choice=tool_choice)
+        else:
+            model = model.bind_tools(tool_schemas)
+
+        return self.get_prompt() | model
 
     def route_tool_calls(self, result) -> Command | None:
         """Route to the tool node when the model returns tool calls.

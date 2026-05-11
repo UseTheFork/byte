@@ -16,7 +16,7 @@ class ToolsLoaded(Leaf):
     async def assemble(self, prompt_assembler: PromptAssembler) -> str:
 
         tool_registry_service = prompt_assembler.get_app().make(ToolRegistryService)
-        tools = prompt_assembler.get_agent_node().get_tools(prompt_assembler.get_state())
+        tools = prompt_assembler.get_tools()
 
         harness_tools = {tool.name: tool for tool in tools}
         tools_xml = tool_registry_service.tools_to_prompt_xml(harness_tools)

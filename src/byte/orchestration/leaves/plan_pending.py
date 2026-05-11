@@ -20,14 +20,18 @@ class PlanPending(Leaf):
             "",
         ]
 
-        for step in sorted(plan, key=lambda s: s["order"]):
-            note = step.get("note") or ""
-            status = step["status"]
-            lines = [f"- [{step['id']}] ({status}) {step['content']}"]
+        for step in sorted(plan, key=lambda s: s.order):
+            note = step.note or []
+            status = step.status
+
+            lines = [
+                f"# [{step.id}] ({status})",
+                f"{step.content}",
+            ]
             if note:
-                lines.append(f"  note: {note}")
+                lines.extend(note)
+
             message_parts.extend(lines)
 
         message_parts.append(Section.end())
-
         return list_to_multiline_text(message_parts)

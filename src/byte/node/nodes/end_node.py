@@ -6,10 +6,10 @@ from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.memory import CompleteSimpleTurnTool
-from byte.memory.tools.complete_turn_tool import CompleteTurnTool
 from byte.node import BaseNode, NodeEvents
 from byte.orchestration import AssistantContextSchema, BaseState
 from byte.orchestration.messages import AIMessage
+from byte.plan.tools.complete_turn_tool import CompleteTurnTool
 from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 
@@ -96,6 +96,8 @@ class EndNode(BaseNode):
         # This is where we promote `scratch_messages` to `history_messages`
         update_dict = {
             **state,
+            # Clear the plan assuming its been completed.
+            "plan": [],
             # We always want to erase the current user request
             "user_request": "",
         }

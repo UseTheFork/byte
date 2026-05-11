@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from byte.orchestration import BaseState
 from byte.support.mixins.bootable import Bootable
 from byte.tools.exceptions import ToolException, ToolRunException, ToolValidationException
 from byte.tools.schemas import ToolResult
+
+if TYPE_CHECKING:
+    from byte.orchestration import BaseState
 
 
 class BaseTool(ABC, Bootable):

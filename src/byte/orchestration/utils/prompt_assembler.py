@@ -1,17 +1,21 @@
 import asyncio
 import re
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, List, Type, TypeVar
 
 from langchain_core.messages import BaseMessage
 
 from byte.llm import ModelSchema
-from byte.orchestration import BaseState, Leaf
+from byte.orchestration import Leaf
 from byte.support.mixins import Bootable, Eventable
 from byte.support.utils import list_to_multiline_text
+from byte.tools.service.tool_registry_service import ToolRegistryService
 
 if TYPE_CHECKING:
     from byte import Application
     from byte.node import BaseAgentNode
+    from byte.orchestration import BaseState
+    from byte.plan import PlanStep
+    from byte.tools import BaseTool
 
 T = TypeVar("T")
 
@@ -67,6 +71,45 @@ class PromptAssembler(Bootable, Eventable):
 
     def get_model_schema(self) -> ModelSchema:
         return self.model_schema
+
+    def get_tools(self) -> List[Type[BaseTool]]:
+        tool_schemas = []
+        tool_registry_service = self.app.make(ToolRegistryService)
+
+        plan: list[PlanStep] = self.merged_state.get("plan") or []
+
+        # Find the first pending step (if any)
+        pending_step = next((s for s in plan if s.status == "pending"), None)
+
+        if pending_step is not None:
+            # Append the required completion tool
+            if pending_step.completion_mode == "auto":
+                completion_tool = tool_registry_service.get_tool("complete_plan_step")
+            else:
+                completion_tool = tool_registry_service.get_tool("confirm_complete_plan_step")
+
+            tool_schemas.append(completion_tool)
+
+            # Append any step-specific tools
+            if pending_step.tools:
+                for tool_class in pending_step.tools:
+                    tool = tool_registry_service.get_tool(tool_class.name)
+                    tool_schemas.append(tool)
+
+        else:
+            # No pending steps remain; if plan exists and all are completed/blocked, allow complete_turn
+            if plan and all(s.status in ("completed", "blocked") for s in plan):
+                complete_turn_tool = tool_registry_service.get_tool("complete_turn")
+                tool_schemas.append(complete_turn_tool)
+
+        # Bind agent-level tools if provided
+        agent_tools = self.get_agent_node().get_tools(self.merged_state)
+        if agent_tools:
+            tool_schemas.extend(agent_tools)
+
+        self.app["log"].info(tool_schemas)
+
+        return tool_schemas
 
     async def generate_messages(self) -> dict:
         templates = {

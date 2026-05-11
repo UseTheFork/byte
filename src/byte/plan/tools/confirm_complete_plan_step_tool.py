@@ -1,14 +1,17 @@
 from datetime import UTC, datetime
 from typing import override
 
-from byte.orchestration import BaseState, PlanStep
+from byte.orchestration import BaseState
+from byte.plan.models import PlanStep
 from byte.tools import BaseTool, ToolResult
 from byte.tools.exceptions import ToolRunException
+from byte.tui.service.interactions_service import InteractionService
 
 
-class CompleteStepTool(BaseTool):
-    name: str = "complete_step"
+class ConfirmCompletePlanStepTool(BaseTool):
+    name: str = "confirm_complete_plan_step"
     description: str = (
+        "Ask the user to confirm before proceeding to the next step."
         "Mark a step in the current plan as completed. Use the step's id to identify which step to complete."
     )
     input_schema = {
@@ -18,8 +21,14 @@ class CompleteStepTool(BaseTool):
                 "type": "string",
                 "description": "The id of the plan step to mark as completed.",
             },
+            "status": {
+                "type": "string",
+                "enum": ["blocked", "completed"],
+                "description": "The status to set on the step. Defaults to 'completed'.",
+                "default": "completed",
+            },
         },
-        "required": ["step_id"],
+        "required": ["step_id", "status"],
     }
 
     @classmethod
@@ -27,11 +36,18 @@ class CompleteStepTool(BaseTool):
         return result.result.get("content", "")
 
     @override
-    async def run(self, step_id: str, state: BaseState, **kwargs) -> ToolResult:
+    async def run(self, step_id: str, status: str, state: BaseState, **kwargs) -> ToolResult:
         plan: list[PlanStep] | None = state.get("plan")
 
         if not plan:
             raise ToolRunException("No active plan found in state.")
+
+        interaction_service = self.app.make(InteractionService)
+        confirmed = await interaction_service.confirm("Proceed to the next step?", default=True)
+
+        # TODO: Should this be an exception?
+        if not confirmed:
+            return ToolResult(result={"content": "User declined. Not proceeding to the next step."})
 
         updated_plan: list[PlanStep] = []
         found = False
@@ -42,13 +58,11 @@ class CompleteStepTool(BaseTool):
                 found = True
                 updated_plan.append(
                     PlanStep(
-                        id=step["id"],
-                        order=step["order"],
-                        content=step["content"],
-                        note=step.get("note"),
-                        status="completed",
-                        created_at=step["created_at"],
-                        updated_at=now,
+                        **{
+                            **step,
+                            "status": status,
+                            "updated_at": now,
+                        }
                     )
                 )
             else:

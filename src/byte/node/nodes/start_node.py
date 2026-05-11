@@ -32,7 +32,7 @@ class StartNode(BaseNode):
             "masked_messages": [],
             "todos": [],
             "touched_files": state.get("touched_files") or [],
-            "plan": None,
+            "plan": state.get("plan") or [],
             "errors": None,
             "harness": HarnessState(
                 skills=[],

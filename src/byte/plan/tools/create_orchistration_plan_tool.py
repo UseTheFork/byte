@@ -1,7 +1,6 @@
-from datetime import UTC, datetime
 from typing import List, override
 
-from byte.orchestration import PlanStep
+from byte.plan.models import PlanStep
 from byte.tools import BaseTool, ToolResult
 
 
@@ -49,7 +48,6 @@ class CreatePlanTool(BaseTool):
     @override
     async def run(self, steps: List[dict], **kwargs) -> ToolResult:
 
-        now = datetime.now(UTC).isoformat()
         parsed_steps: List[PlanStep] = [
             PlanStep(
                 id=str(step["order"]),
@@ -57,8 +55,6 @@ class CreatePlanTool(BaseTool):
                 content=step["content"],
                 note=step.get("note"),
                 status="pending",
-                created_at=now,
-                updated_at=now,
             )
             for step in steps
         ]

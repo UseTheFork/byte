@@ -1,12 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from langchain_core.runnables import RunnableConfig
 from langgraph.types import Command
 
-from byte.orchestration import BaseState
 from byte.support import Str
 from byte.support.mixins import Bootable, Eventable
+
+if TYPE_CHECKING:
+    from byte.orchestration import BaseState
 
 
 class BaseNode(ABC, Bootable, Eventable):

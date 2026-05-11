@@ -4,6 +4,7 @@ from byte.support import Boundary, BoundaryType, Service
 from byte.tools.base_tool import BaseTool
 
 
+# TODO: This needs to be converted to a registry
 class ToolRegistryService(Service):
     """Central registry for tool discovery and instantiation.
 
