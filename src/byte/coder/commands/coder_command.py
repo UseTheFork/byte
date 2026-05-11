@@ -2,8 +2,9 @@ import argparse
 from argparse import Namespace
 
 from byte import ByteArgumentParser, Command
+from byte.coder import CoderWorkflow
 from byte.tui import Messages
-from byte.workflow import CoderWorkflow, WorkflowService
+from byte.workflow import WorkflowService
 
 
 # TODO: need to add docs

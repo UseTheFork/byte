@@ -1,11 +1,12 @@
 from argparse import Namespace
 
 from byte import ByteArgumentParser, Command
+from byte.coder import CoderWorkflow
 from byte.config import ByteConfigException
 from byte.git import GitService
 from byte.lint import LintService
 from byte.tui import Messages
-from byte.workflow import CoderWorkflow, WorkflowService
+from byte.workflow import WorkflowService
 
 
 class LintCommand(Command):

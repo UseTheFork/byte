@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Type, TypeVar
 
 from langgraph.graph import StateGraph
 
-from byte.node import BaseNode
+from byte.node import BaseNode, NodeRegistry
 from byte.node.nodes import DummyNode, EndNode, RoutingNode, StartNode
 from byte.orchestration import (
     AssistantContextSchema,
@@ -35,24 +35,15 @@ class GraphBuilder:
     def discover_node_classes(self) -> dict[str, Type]:
         """Discover all classes that extend the base Node class.
 
-        Uses the NodeServiceProvider to get all registered node and agent classes.
-
         Returns:
             Dictionary mapping node class names to their types
 
         Usage: Called internally during GraphBuilder initialization
         """
-        from byte.node import NodeServiceProvider
 
-        node_service_provider = self.app.make(NodeServiceProvider)
-        node_classes = self.app.nodes
+        node_registry = self.app.make(NodeRegistry)
 
-        # Get nodes from the service provider
-        for node_class in node_service_provider.nodes():
-            node_string = Str.class_to_snake_case(node_class.__name__)
-            node_classes[node_string] = node_class
-
-        return node_classes
+        return node_registry.all()
 
     def add_node(self, node: Type[BaseNode], **kwargs):
         """Add a node to the graph builder.

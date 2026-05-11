@@ -49,9 +49,6 @@ class Application(Container):
         self._booting_callbacks = []
         self._booted_callbacks = []
 
-        # TODO: Should this be somewhere else?
-        self.nodes = {}
-
         if base_path:
             self.set_base_path(base_path)
 
@@ -484,6 +481,9 @@ class Application(Container):
 
         if hasattr(provider, "register_tools") and callable(provider.register_tools):
             provider.register_tools()
+
+        if hasattr(provider, "register_nodes") and callable(provider.register_nodes):
+            provider.register_nodes()
 
         if hasattr(provider, "register_agents") and callable(provider.register_agents):
             provider.register_agents()

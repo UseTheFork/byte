@@ -1,4 +1,5 @@
 import asyncio
+import uuid
 
 from byte.support.mixins.bootable import Bootable
 
@@ -18,7 +19,6 @@ class TaskManager(Bootable):
 
     def start_task(self, name: str, coro):
         """Start a named background task"""
-        import asyncio
 
         if name in self._tasks:
             self._tasks[name].cancel()
@@ -36,7 +36,6 @@ class TaskManager(Bootable):
 
     def dispatch_task(self, coro):
         """Dispatch a fire-and-forget background task with auto-generated name"""
-        import uuid
 
         name = f"task_{uuid.uuid4().hex[:8]}"
         return self.start_task(name, coro)

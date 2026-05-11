@@ -6,6 +6,8 @@ import uvloop
 from pydantic import ValidationError
 
 from byte.analytics import AnalyticsProvider
+from byte.ask import AskServiceProvider
+from byte.coder import CoderServiceProvider
 from byte.command import CommandServiceProvider
 from byte.constitution import ConstitutionServiceProvider
 from byte.development import DevelopmentServiceProvider
@@ -33,6 +35,8 @@ PROVIDERS = [
     GitServiceProvider,
     SkillsServiceProvider,
     ConstitutionServiceProvider,
+    AskServiceProvider,
+    CoderServiceProvider,
     MemoryServiceProvider,
     KnowledgeServiceProvider,
     FileServiceProvider,

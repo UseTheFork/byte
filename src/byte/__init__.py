@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from byte.command import ByteArgumentParser, Command, CommandRegistryService
     from byte.context import get_application, make
     from byte.event import Event, EventBus
-    from byte.foundation import Application, Console, TaskManager
+    from byte.foundation import Application, TaskManager
     from byte.logging import LogService
     from byte.support import Service, ServiceProvider
     from byte.support.utils import dd, dump
@@ -18,7 +18,6 @@ __all__ = (
     "ByteArgumentParser",
     "Command",
     "CommandRegistryService",
-    "Console",
     "Event",
     "EventBus",
     "Log",

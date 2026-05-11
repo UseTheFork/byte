@@ -1,7 +1,6 @@
-from __future__ import annotations
-
 from byte import EventBus, ServiceProvider
 from byte.foundation import TaskManager
+from byte.node import NodeRegistry
 from byte.tui import ByteTUI
 
 
@@ -12,6 +11,8 @@ class FoundationServiceProvider(ServiceProvider):
         """Register core foundation singletons into the application container."""
 
         self.app.singleton(ByteTUI)
+
+        self.app.singleton(NodeRegistry)
 
         self.app.singleton(EventBus)
 

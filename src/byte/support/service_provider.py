@@ -2,7 +2,7 @@ from abc import ABC
 from typing import TYPE_CHECKING, List, Type
 
 from byte import CommandRegistryService
-from byte.support import Str
+from byte.node import BaseNode, NodeRegistry
 from byte.tools import ToolRegistryService
 from byte.workflow import BaseWorkflow
 
@@ -60,10 +60,29 @@ class ServiceProvider(ABC):
         if not agents:
             return
 
+        node_registry = self.app.make(NodeRegistry)
+
         for agent_class in agents:
             self.app.bind(agent_class)
-            agent_string = Str.class_to_snake_case(agent_class.__name__)
-            self.app.nodes[agent_string] = agent_class
+            node_registry.register(agent_class)
+
+    # TODO: Doc Strings
+    def nodes(self) -> List[Type[BaseNode]]:
+        """"""
+        return []
+
+    # TODO: Doc Strings
+    def register_nodes(self):
+        """"""
+        nodes = self.nodes()
+        if not nodes:
+            return
+
+        node_registry = self.app.make(NodeRegistry)
+
+        for node_class in nodes:
+            self.app.bind(node_class)
+            node_registry.register(node_class)
 
     # TODO: Doc Strings
     def commands(self) -> List[Type[Command]]:
@@ -114,7 +133,7 @@ class ServiceProvider(ABC):
             return
 
         for workflow_class in workflows:
-            self.app.singleton(workflow_class)
+            self.app.bind(workflow_class)
 
     def set_application(self, app: Application):
         """Set the container instance for providers that need container access.
