@@ -10,7 +10,7 @@ class CoderWorkflow(BaseWorkflow):
     async def build(self):
         """ """
 
-        graph = GraphBuilder(self.app, start_node=CoderAgentNode)
+        graph = self.app.make(GraphBuilder, start_node=CoderAgentNode)
 
         # Add nodes
         graph.add_node(CoderAgentNode, goto=LintNode)

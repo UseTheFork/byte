@@ -10,7 +10,7 @@ class CommitWorkflow(BaseWorkflow):
     async def build(self):
         """ """
 
-        graph = GraphBuilder(self.app, start_node=LintNode)
+        graph = self.app.make(GraphBuilder, start_node=LintNode)
 
         # Add nodes
         graph.add_node(LintNode, goto=CommitAgentNode)

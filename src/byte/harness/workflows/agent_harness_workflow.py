@@ -10,7 +10,7 @@ class AgentHarnessWorkflow(BaseWorkflow):
     async def build(self):
         """ """
 
-        graph = GraphBuilder(self.app, start_node=HarnessAgentNode)
+        graph = self.app.make(GraphBuilder, start_node=HarnessAgentNode)
 
         # Add nodes
         graph.add_node(HarnessAgentNode, goto=ExecutorAgentNode)

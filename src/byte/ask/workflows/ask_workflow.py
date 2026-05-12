@@ -10,7 +10,7 @@ class AskWorkflow(BaseWorkflow):
     async def build(self):
         """ """
 
-        graph = GraphBuilder(self.app, start_node=AskAgentNode)
+        graph = self.app.make(GraphBuilder, start_node=AskAgentNode)
 
         # Add nodes
         graph.add_node(AskAgentNode, goto=EndNode)

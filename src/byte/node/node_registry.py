@@ -1,15 +1,16 @@
 from typing import TYPE_CHECKING, Dict, Type
 
 from byte.support import Str
+from byte.support.mixins import Bootable
 
 if TYPE_CHECKING:
     from byte.node import BaseNode
 
 
-class NodeRegistry:
+class NodeRegistry(Bootable):
     """ """
 
-    def __init__(self, *args, **kwargs):
+    def boot(self, *args, **kwargs) -> None:
         self._nodes: Dict[str, Type[BaseNode]] = {}
 
     def register(self, node: Type[BaseNode]):
@@ -19,4 +20,4 @@ class NodeRegistry:
 
     def all(self):
         """ """
-        return self._nodes
+        return dict(self._nodes)

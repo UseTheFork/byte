@@ -10,7 +10,7 @@ class ConstitutionWorkflow(BaseWorkflow):
     async def build(self):
         """ """
 
-        graph = GraphBuilder(self.app, start_node=ConstitutionAgentNode)
+        graph = self.app.make(GraphBuilder, start_node=ConstitutionAgentNode)
 
         # Add nodes
         graph.add_node(ConstitutionAgentNode)

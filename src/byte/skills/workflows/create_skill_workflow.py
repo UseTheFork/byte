@@ -10,7 +10,7 @@ class CreateSkillWorkflow(BaseWorkflow):
     async def build(self):
         """ """
 
-        graph = GraphBuilder(self.app, start_node=SkillCreatorAgentNode)
+        graph = self.app.make(GraphBuilder, start_node=SkillCreatorAgentNode)
 
         # Add nodes
         graph.add_node(SkillCreatorAgentNode)
