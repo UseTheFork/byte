@@ -56,7 +56,13 @@ class ToolNode(BaseNode):
                 )
 
                 tool_message = ToolMessage(
-                    content=tool.format_tool_message(tool_result),
+                    content=[
+                        {
+                            "type": "text",
+                            "text": tool.format_tool_message(tool_result),
+                            "cache_control": {"type": "ephemeral"},
+                        }
+                    ],
                     name=tool_call["name"],
                     tool_call_id=tool_call["id"],
                 )
@@ -71,7 +77,13 @@ class ToolNode(BaseNode):
             except ToolException as err:
                 tool_message = ToolMessage(
                     status="error",
-                    content=str(err),
+                    content=[
+                        {
+                            "type": "text",
+                            "text": str(err),
+                            "cache_control": {"type": "ephemeral"},
+                        }
+                    ],
                     name=tool_call["name"],
                     tool_call_id=tool_call["id"],
                 )

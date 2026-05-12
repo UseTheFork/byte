@@ -42,6 +42,7 @@ class WorkflowService(Service):
 
         Usage: `await self._track_token_usage(usage_metadata_callback.usage_metadata)`
         """
+        self.app["log"].info(usage_metadata)
         if usage_metadata:
             # Get the first (and typically only) model's usage data
             model_id = next(iter(usage_metadata.keys()))
