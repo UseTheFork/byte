@@ -28,30 +28,30 @@ from byte.orchestration.leaves.workflow_constraints import WorkflowConstraints a
 
 class Leaves:
     # keep-sorted start
-    Preamble = _Preamble
-    FileContext = _FileContext
-    SkillsLoaded = _SkillsLoaded
-    SkillsAvailable = _SkillsAvailable
-    SkillsAll = _SkillsAll
-    ToolsAll = _ToolsAll
-    UserRequest = _UserRequest
-    ProjectEnvironment = _ProjectEnvironment
-    PlanPending = _PlanPending
     CommitGuidelines = _CommitGuidelines
-    ProjectHierarchy = _ProjectHierarchy
-    ConversationHistory = _ConversationHistory
-    Reinforcement = _Reinforcement
-    ReferenceMaterials = _ReferenceMaterials
-    Epilogue = _Epilogue
-    Constraints = _Constraints
-    OperatingPrinciples = _OperatingPrinciples
     CommitHistory = _CommitHistory
-    ToolsLoaded = _ToolsLoaded
-    Constitution = _Constitution
-    WorkflowConstraints = _WorkflowConstraints
     CommunicationStyle = _CommunicationStyle
+    Constitution = _Constitution
+    Constraints = _Constraints
+    ConversationHistory = _ConversationHistory
+    Epilogue = _Epilogue
+    FileContext = _FileContext
+    MessageContext = _MessageContext
+    MessageScratch = _MessageScratch
     MessageSystem = _MessageSystem
     MessageUser = _MessageUser
-    MessageScratch = _MessageScratch
-    MessageContext = _MessageContext
+    OperatingPrinciples = _OperatingPrinciples
+    PlanPending = _PlanPending
+    Preamble = _Preamble
+    ProjectEnvironment = _ProjectEnvironment
+    ProjectHierarchy = _ProjectHierarchy
+    ReferenceMaterials = _ReferenceMaterials
+    Reinforcement = _Reinforcement
+    SkillsAll = _SkillsAll
+    SkillsAvailable = _SkillsAvailable
+    SkillsLoaded = _SkillsLoaded
+    ToolsAll = _ToolsAll
+    ToolsLoaded = _ToolsLoaded
+    UserRequest = _UserRequest
+    WorkflowConstraints = _WorkflowConstraints
     # keep-sorted end
