@@ -62,12 +62,12 @@ class CoderCommand(Command):
             ),
         ]
 
-        ask_workflow = self.app.make(CoderWorkflow)
+        coder_workflow = self.app.make(CoderWorkflow)
 
         self.emit_tui(Messages.CommandExecutionStarted())
         self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         workflow_service = self.app.make(WorkflowService)
-        await workflow_service.execute(ask_workflow, {"user_request": raw_args, "plan": plan})
+        await workflow_service.execute(coder_workflow, {"user_request": raw_args, "plan": plan})
 
         self.emit_tui(Messages.CommandExecutionCompleted())

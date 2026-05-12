@@ -42,8 +42,6 @@ class GraphBuilder:
         """
 
         node_registry = self.app.make(NodeRegistry)
-        self.app["log"].info(node_registry)
-        self.app["log"].info(node_registry.all())
 
         return node_registry.all()
 

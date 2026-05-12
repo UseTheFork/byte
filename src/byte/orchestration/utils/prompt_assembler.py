@@ -112,8 +112,6 @@ class PromptAssembler(Bootable, Eventable):
         if agent_tools:
             tool_schemas.extend(agent_tools)
 
-        self.app["log"].info(tool_schemas)
-
         return tool_schemas
 
     async def generate_messages(self) -> dict:

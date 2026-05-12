@@ -16,6 +16,10 @@ class MessageUser(Leaf):
 
         return HumanMessage(
             content=[
-                {"type": "text", "text": user_message},
+                {
+                    "type": "text",
+                    "text": user_message,
+                    "cache_control": {"type": "ephemeral"},
+                },
             ]
         )

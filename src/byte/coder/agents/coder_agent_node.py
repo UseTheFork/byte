@@ -97,7 +97,6 @@ class CoderAgentNode(BaseAgentNode):
         result = await runnable.ainvoke(
             prompt,
             config=config,
-            cache_control={"type": "ephemeral"},
         )
         self.app.dispatch_task(
             record_response_service.record_response(agent_state, runnable, self.name, config),

@@ -78,7 +78,6 @@ class ConstitutionAgentNode(BaseAgentNode):
         result = await runnable.ainvoke(
             prompt,
             config=config,
-            cache_control={"type": "ephemeral"},
         )
 
         route_tool_call = self.route_tool_calls(result)

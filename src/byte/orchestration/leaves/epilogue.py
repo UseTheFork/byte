@@ -23,6 +23,19 @@ class Epilogue(Leaf):
         # TODO: Should we consider plan here ?
         if not history_messages:
             lines.append("> **Remember**: This is your first response so you are starting at the FIRST step.")
+
+        plan = prompt_assembler.get_state().get("plan")
+        if plan:
+            current_step = next(
+                (s for s in sorted(plan, key=lambda s: s.order) if s.status in ("pending", "in_progress")),
+                None,
+            )
+            if current_step:
+                lines.append(
+                    f"> **Current Step**: [{current_step.id}] ({current_step.status}) — {current_step.content}"
+                )
+                if current_step.note:
+                    lines.extend([f">   - {note}" for note in current_step.note])
         else:
             lines.extend(
                 [
