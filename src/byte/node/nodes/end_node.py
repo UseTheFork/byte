@@ -41,12 +41,12 @@ class EndNode(BaseNode):
         )
 
         if complete_turn_message:
-            content = complete_turn_message.content
+            content_text = complete_turn_message.text
 
             return list_to_multiline_text(
                 [
                     Boundary.open(BoundaryType.AGENT_MESSAGE, meta={"agent_type": agent_name}),
-                    content,
+                    content_text,
                     Boundary.close(BoundaryType.AGENT_MESSAGE),
                 ]
             )

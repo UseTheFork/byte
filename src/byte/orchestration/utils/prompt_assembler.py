@@ -57,6 +57,8 @@ class PromptAssembler(Bootable, Eventable):
 
         self.prompt_state = state
 
+        self.assembled_state = {}
+
         # TODO: this needs to be done better.
         self.merged_state = {**state, **extra}
 
@@ -71,6 +73,9 @@ class PromptAssembler(Bootable, Eventable):
 
     def get_model_schema(self) -> ModelSchema:
         return self.model_schema
+
+    def get_assembled_state(self) -> dict:
+        return self.assembled_state
 
     def get_tools(self) -> List[Type[BaseTool]]:
         tool_schemas = []
@@ -139,12 +144,13 @@ class PromptAssembler(Bootable, Eventable):
         user_message = self.assemble_message(built["user_message"])
         context_message = self.assemble_message(built["context_message"])
 
-        return {
+        self.assembled_state = {
             "system_message": system_message,
             "user_message": user_message,
             "context_message": context_message,
-            "scratch_messages": self.generate_scratch_state(),
         }
+
+        return self.assembled_state
 
     def assemble_message(self, template: list[str]) -> str:
         """Replace {placeholder} tokens in template with provided values.

@@ -60,7 +60,6 @@ class ToolNode(BaseNode):
                         {
                             "type": "text",
                             "text": tool.format_tool_message(tool_result),
-                            "cache_control": {"type": "ephemeral"},
                         }
                     ],
                     name=tool_call["name"],
@@ -81,7 +80,6 @@ class ToolNode(BaseNode):
                         {
                             "type": "text",
                             "text": str(err),
-                            "cache_control": {"type": "ephemeral"},
                         }
                     ],
                     name=tool_call["name"],

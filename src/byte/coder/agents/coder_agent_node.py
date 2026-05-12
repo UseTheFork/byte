@@ -88,12 +88,14 @@ class CoderAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        agent_state, config = await self.generate_agent_state(state, config)
-        runnable = self.create_runnable(state, tool_choice="any")
+        agent_state, config, prompt_assembler = await self.generate_agent_state(state, config)
+        runnable = self.create_runnable(prompt_assembler, tool_choice="any")
+        prompt = await self.generate_prompt(prompt_assembler)
         record_response_service = self.app.make(RecordResponseService)
 
+        # TODO: I think `cache_control` should not be here.
         result = await runnable.ainvoke(
-            agent_state,
+            prompt,
             config=config,
             cache_control={"type": "ephemeral"},
         )

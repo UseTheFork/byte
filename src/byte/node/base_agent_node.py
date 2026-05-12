@@ -1,10 +1,10 @@
+import asyncio
 from abc import abstractmethod
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Sequence
 
 from langchain.chat_models import init_chat_model
 from langchain.messages import HumanMessage
 from langchain_core.messages import BaseMessage
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable
 from langgraph.types import Command
 
@@ -12,14 +12,14 @@ from byte.llm import ModelSchema
 from byte.node import (
     BaseNode,
 )
-from byte.orchestration import PromptAssembler
+from byte.orchestration import Leaves, PromptAssembler
 from byte.orchestration.messages import AIMessage
 from byte.support import Str
 from byte.tools import ToolRegistryService
 from byte.tui import Messages
 
 if TYPE_CHECKING:
-    from byte.orchestration import BaseState
+    from byte.orchestration import BaseState, Leaf
     from byte.plan import PlanStep
 
 
@@ -60,15 +60,13 @@ class BaseAgentNode(BaseNode):
         """ """
         ...
 
-    def get_prompt(self) -> ChatPromptTemplate:
-        return ChatPromptTemplate.from_messages(
-            [
-                ("system", "{system_message}"),
-                ("user", "{user_message}"),
-                ("placeholder", "{scratch_messages}"),
-                ("user", "{context_message}"),
-            ]
-        )
+    def get_prompt(self, current_state: dict) -> List[Leaf]:
+        return [
+            Leaves.MessageSystem(),
+            Leaves.MessageUser(),
+            Leaves.MessageScratch(),
+            Leaves.MessageContext(),
+        ]
 
     @abstractmethod
     def get_model(self) -> tuple[ModelSchema, dict]:
@@ -95,6 +93,37 @@ class BaseAgentNode(BaseNode):
             return []
 
         return [HumanMessage(errors)]
+
+    async def generate_prompt(self, prompt_assembler: PromptAssembler) -> List[BaseMessage]:
+        leaves = self.get_prompt(prompt_assembler.get_assembled_state())
+
+        # Run leaves concurrently (results preserve input order)
+        results = await asyncio.gather(*(leaf.assemble(prompt_assembler) for leaf in leaves))
+
+        messages: List[BaseMessage] = []
+
+        for result in results:
+            if result is None:
+                continue
+
+            # Leaf returns a single message
+            if isinstance(result, BaseMessage):
+                messages.append(result)
+                continue
+
+            # Leaf returns multiple messages (e.g., scratch/history)
+            if isinstance(result, Sequence) and not isinstance(result, (str, bytes)):
+                for item in result:
+                    if not isinstance(item, BaseMessage):
+                        raise TypeError(f"Leaf returned a sequence containing non-BaseMessage item: {type(item)}")
+                    messages.append(item)
+                continue
+
+            raise TypeError(
+                f"Leaf returned unsupported type: {type(result)}. Expected BaseMessage or Sequence[BaseMessage]."
+            )
+
+        return messages
 
     async def generate_agent_state(self, state: BaseState, config, extra: dict = {}) -> tuple:
         """Generate the agent state for the assistant node invocation.
@@ -147,11 +176,12 @@ class BaseAgentNode(BaseNode):
             )
         )
 
-        # config = payload.config
+        # TODO: make this better
+        return (agent_state, config, prompt_assembler)
 
-        return (agent_state, config)
-
-    def create_runnable(self, state: BaseState, tool_choice: dict[str, str] | str | None = None) -> Runnable:
+    def create_runnable(
+        self, prompt_assembler: PromptAssembler, tool_choice: dict[str, str] | str | None = None
+    ) -> Runnable:
         model_schema, merged_params = self.get_model()
         model = init_chat_model(
             model_schema.model,
@@ -162,7 +192,7 @@ class BaseAgentNode(BaseNode):
         tool_schemas = []
         tool_registry_service = self.app.make(ToolRegistryService)
 
-        plan: list[PlanStep] = state.get("plan") or []
+        plan: list[PlanStep] = prompt_assembler.get_state().get("plan") or []
 
         # Find the first pending step (if any)
         pending_step = next((s for s in plan if s.status == "pending"), None)
@@ -189,7 +219,7 @@ class BaseAgentNode(BaseNode):
                 tool_schemas.append(complete_turn_tool.tool_schema())
 
         # Bind agent-level tools if provided
-        agent_tools = self.get_tools(state)
+        agent_tools = self.get_tools(prompt_assembler.get_state())
         if agent_tools:
             tool_schemas.extend(tool.tool_schema() for tool in agent_tools)
 
@@ -199,7 +229,7 @@ class BaseAgentNode(BaseNode):
         else:
             model = model.bind_tools(tool_schemas)
 
-        return self.get_prompt() | model
+        return model
 
     def route_tool_calls(self, result) -> Command | None:
         """Route to the tool node when the model returns tool calls.

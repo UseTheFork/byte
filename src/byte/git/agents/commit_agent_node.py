@@ -120,15 +120,16 @@ class CommitAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        runnable = self.create_runnable(state, "any")
-
         commit_service = self.app.make(CommitService)
         request = await commit_service.build_commit_prompt()
 
-        agent_state, config = await self.generate_agent_state(state, config, request)
+        agent_state, config, prompt_assembler = await self.generate_agent_state(state, config, request)
+        runnable = self.create_runnable(prompt_assembler, "any")
+        prompt = await self.generate_prompt(prompt_assembler)
+
         record_response_service = self.app.make(RecordResponseService)
 
-        result = await runnable.ainvoke(agent_state, config=config)
+        result = await runnable.ainvoke(prompt, config=config)
         self.app.dispatch_task(
             record_response_service.record_response(agent_state, runnable, self.name, config),
         )
