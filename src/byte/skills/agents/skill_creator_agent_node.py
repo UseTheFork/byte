@@ -4,9 +4,6 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
-from byte.files.tools.add_files_tool import AddFilesTool
-from byte.files.tools.list_files_tool import ListFilesTool
-from byte.git.tools.git_grep_tool import GitGrepTool
 from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
@@ -14,7 +11,6 @@ from byte.node import (
 )
 from byte.node.nodes import EndNode
 from byte.orchestration import AIMessage, BaseState, Leaves
-from byte.skills.tools.create_skill_tool import CreateSkillTool
 from byte.support import Boundary, BoundaryType, Section, SectionType, Str
 from byte.support.utils import extract_content_from_message
 from byte.system.tools.user_confirm_tool import UserConfirmTool
@@ -38,6 +34,10 @@ class SkillCreatorAgentNode(BaseAgentNode):
         return [
             Leaves.ConversationHistory(),
             Leaves.UserRequest(),
+            Section.important(
+                f"All tool operations are applied immediately and are reflected in the next user message containing {Section.ref(SectionType.PROJECT_FILES)}."
+            ),
+            Leaves.PlanPending(),
         ]
 
     def get_system_template(self):
@@ -113,20 +113,6 @@ class SkillCreatorAgentNode(BaseAgentNode):
             Leaves.Epilogue(),
         ]
 
-    def get_tools(self, state: BaseState):
-
-        base_tools = [
-            CreateSkillTool,
-            GitGrepTool,
-            UserSelectTool,
-            UserInputTextTool,
-            UserConfirmTool,
-            ListFilesTool,
-            AddFilesTool,
-        ]
-
-        return base_tools
-
     async def __call__(
         self,
         state: BaseState,
@@ -134,10 +120,9 @@ class SkillCreatorAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        agent_state, config, prompt_assembler = await self.generate_agent_state(state, config)
-        runnable = self.create_runnable(prompt_assembler)
+        _, config, prompt_assembler = await self.generate_agent_state(state, config)
+        runnable = self.create_runnable(prompt_assembler, tool_choice="any")
         prompt = await self.generate_prompt(prompt_assembler)
-
         record_response_service = self.app.make(RecordResponseService)
 
         result = await runnable.ainvoke(
@@ -145,7 +130,7 @@ class SkillCreatorAgentNode(BaseAgentNode):
             config=config,
         )
         self.app.dispatch_task(
-            record_response_service.record_response(agent_state, runnable, self.name, config),
+            record_response_service.record_response(prompt, self.name, config),
         )
 
         route_tool_call = self.route_tool_calls(result)

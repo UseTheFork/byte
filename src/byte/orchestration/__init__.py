@@ -9,6 +9,8 @@ if TYPE_CHECKING:
     from byte.orchestration.exceptions import ByteAgentException, DummyNodeReachedException
     from byte.orchestration.leaves.leaf import Leaf
     from byte.orchestration.leaves.leaves import Leaves
+    from byte.orchestration.message_fragments.message_fragment import MessageFragment
+    from byte.orchestration.message_fragments.message_fragments import MessageFragments
     from byte.orchestration.messages import AIMessage
     from byte.orchestration.prompt_leaves import core_mandates
     from byte.orchestration.reducers import add_constraints, replace_list, replace_str, update_metadata
@@ -22,7 +24,7 @@ if TYPE_CHECKING:
         PromptSettingsSchema,
         TokenUsageSchema,
     )
-    from byte.orchestration.state import BaseState, PlanStep, RoutingState
+    from byte.orchestration.state import BaseState, RoutingState
     from byte.orchestration.utils.graph_builder import GraphBuilder
     from byte.orchestration.utils.prompt_assembler import PromptAssembler
     from byte.orchestration.validators.base import ValidationError, Validator
@@ -43,9 +45,10 @@ __all__ = (
     "Leaf",
     "Leaves",
     "MaxLinesValidator",
+    "MessageFragment",
+    "MessageFragments",
     "MetadataSchema",
     "OrchestrationEvents",
-    "PlanStep",
     "PromptAssembler",
     "PromptSettingsSchema",
     "RoutingState",
@@ -75,9 +78,10 @@ _dynamic_imports = {
     "Leaf": "leaves.leaf",
     "Leaves": "leaves.leaves",
     "MaxLinesValidator": "validators.max_lines",
+    "MessageFragment": "message_fragments.message_fragment",
+    "MessageFragments": "message_fragments.message_fragments",
     "MetadataSchema": "schemas",
     "OrchestrationEvents": "events",
-    "PlanStep": "state",
     "PromptAssembler": "utils.prompt_assembler",
     "PromptSettingsSchema": "schemas",
     "RoutingState": "state",

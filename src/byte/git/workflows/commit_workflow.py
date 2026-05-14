@@ -7,6 +7,9 @@ from byte.workflow import BaseWorkflow
 class CommitWorkflow(BaseWorkflow):
     """ """
 
+    def get_plan(self):
+        return None
+
     async def build(self):
         """ """
 

@@ -6,10 +6,6 @@ from byte.orchestration.leaves.constraints import Constraints as _Constraints
 from byte.orchestration.leaves.conversation_history import ConversationHistory as _ConversationHistory
 from byte.orchestration.leaves.epilogue import Epilogue as _Epilogue
 from byte.orchestration.leaves.file_context import FileContext as _FileContext
-from byte.orchestration.leaves.message_context import MessageContext as _MessageContext
-from byte.orchestration.leaves.message_scratch import MessageScratch as _MessageScratch
-from byte.orchestration.leaves.message_system import MessageSystem as _MessageSystem
-from byte.orchestration.leaves.message_user import MessageUser as _MessageUser
 from byte.orchestration.leaves.operating_principles import OperatingPrinciples as _OperatingPrinciples
 from byte.orchestration.leaves.plan_pending import PlanPending as _PlanPending
 from byte.orchestration.leaves.preamble import Preamble as _Preamble
@@ -36,10 +32,6 @@ class Leaves:
     ConversationHistory = _ConversationHistory
     Epilogue = _Epilogue
     FileContext = _FileContext
-    MessageContext = _MessageContext
-    MessageScratch = _MessageScratch
-    MessageSystem = _MessageSystem
-    MessageUser = _MessageUser
     OperatingPrinciples = _OperatingPrinciples
     PlanPending = _PlanPending
     Preamble = _Preamble

@@ -3,6 +3,7 @@ from byte.constitution import (
     AddPrincipleTool,
     AddSectionItemTool,
     ConstitutionAgentNode,
+    ConstitutionWorkflow,
     DeleteGovernanceRuleTool,
     DeletePrincipleTool,
     DeleteSectionItemTool,
@@ -17,10 +18,9 @@ from byte.plan import ConfirmCompletePlanStepTool
 from byte.plan.models import PlanStep
 from byte.support.section import Section, SectionType
 from byte.system import UserSelectTool
-from byte.workflow import BaseWorkflow
 
 
-class ConstitutionWorkflow(BaseWorkflow):
+class InitializeWorkflow(ConstitutionWorkflow):
     """ """
 
     def get_plan(self):

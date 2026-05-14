@@ -28,6 +28,7 @@ if TYPE_CHECKING:
         UpdateMetaTool,
     )
     from byte.constitution.workflows.constitution_workflow import ConstitutionWorkflow
+    from byte.constitution.workflows.initialize_workflow import InitializeWorkflow
 
 __all__ = (
     "AddGovernanceRuleTool",
@@ -50,6 +51,7 @@ __all__ = (
     "DeleteSectionItemTool",
     "DeleteSectionTool",
     "InitializeCommand",
+    "InitializeWorkflow",
     "UpdateMetaTool",
 )
 
@@ -75,6 +77,7 @@ _dynamic_imports = {
     "DeleteSectionItemTool": "tools",
     "DeleteSectionTool": "tools",
     "InitializeCommand": "command.initialize_command",
+    "InitializeWorkflow": "workflows.initialize_workflow",
     "UpdateMetaTool": "tools",
     # keep-sorted end
 }

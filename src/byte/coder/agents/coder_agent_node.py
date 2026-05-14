@@ -41,6 +41,7 @@ class CoderAgentNode(BaseAgentNode):
             Section.important(
                 f"All tool operations are applied immediately and are reflected in the next user message containing {Section.ref(SectionType.PROJECT_FILES)}."
             ),
+            Leaves.PlanPending(),
         ]
 
     def get_system_template(self):
@@ -62,7 +63,6 @@ class CoderAgentNode(BaseAgentNode):
                     "- If the request is ambiguous, ask clarifying questions",
                     "- Identify which files need to be modified, created, or deleted",
                     "- Break down the changes into clear, sequential steps",
-                    "- FIRST create a plan, THEN use available tools to implement the changes",
                     "- Do NOT provide full code implementations unless required by tools",
                     "- Keep the plan concise and actionable",
                 ]
@@ -77,7 +77,6 @@ class CoderAgentNode(BaseAgentNode):
             Leaves.ReferenceMaterials(),
             Leaves.ProjectEnvironment(),
             Leaves.FileContext(),
-            Leaves.PlanPending(),
             Leaves.Epilogue(),
         ]
 
@@ -88,18 +87,17 @@ class CoderAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        agent_state, config, prompt_assembler = await self.generate_agent_state(state, config)
+        _, config, prompt_assembler = await self.generate_agent_state(state, config)
         runnable = self.create_runnable(prompt_assembler, tool_choice="any")
         prompt = await self.generate_prompt(prompt_assembler)
         record_response_service = self.app.make(RecordResponseService)
 
-        # TODO: I think `cache_control` should not be here.
         result = await runnable.ainvoke(
             prompt,
             config=config,
         )
         self.app.dispatch_task(
-            record_response_service.record_response(agent_state, runnable, self.name, config),
+            record_response_service.record_response(prompt, self.name, config),
         )
 
         route_tool_call = self.route_tool_calls(result)

@@ -131,7 +131,7 @@ class CommitAgentNode(BaseAgentNode):
 
         result = await runnable.ainvoke(prompt, config=config)
         self.app.dispatch_task(
-            record_response_service.record_response(agent_state, runnable, self.name, config),
+            record_response_service.record_response(prompt, self.name, config),
         )
 
         route_tool_call = self.route_tool_calls(result)

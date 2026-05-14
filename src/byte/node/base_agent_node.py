@@ -12,14 +12,14 @@ from byte.llm import ModelSchema
 from byte.node import (
     BaseNode,
 )
-from byte.orchestration import Leaves, PromptAssembler
+from byte.orchestration import MessageFragment, MessageFragments, PromptAssembler
 from byte.orchestration.messages import AIMessage
 from byte.support import Str
 from byte.tools import ToolRegistryService
 from byte.tui import Messages
 
 if TYPE_CHECKING:
-    from byte.orchestration import BaseState, Leaf
+    from byte.orchestration import BaseState
     from byte.plan import PlanStep
 
 
@@ -60,12 +60,12 @@ class BaseAgentNode(BaseNode):
         """ """
         ...
 
-    def get_prompt(self, current_state: dict) -> List[Leaf]:
+    def get_prompt(self, current_state: dict) -> List[MessageFragment]:
         return [
-            Leaves.MessageSystem(),
-            Leaves.MessageUser(),
-            Leaves.MessageScratch(),
-            Leaves.MessageContext(),
+            MessageFragments.System(),
+            MessageFragments.User(),
+            MessageFragments.Scratch(),
+            MessageFragments.Context(),
         ]
 
     @abstractmethod
@@ -95,10 +95,12 @@ class BaseAgentNode(BaseNode):
         return [HumanMessage(errors)]
 
     async def generate_prompt(self, prompt_assembler: PromptAssembler) -> List[BaseMessage]:
-        leaves = self.get_prompt(prompt_assembler.get_assembled_state())
+        message_fragments = self.get_prompt(prompt_assembler.get_assembled_state())
 
         # Run leaves concurrently (results preserve input order)
-        results = await asyncio.gather(*(leaf.assemble(prompt_assembler) for leaf in leaves))
+        results = await asyncio.gather(
+            *(message_fragment.assemble(prompt_assembler) for message_fragment in message_fragments)
+        )
 
         messages: List[BaseMessage] = []
 
@@ -106,21 +108,23 @@ class BaseAgentNode(BaseNode):
             if result is None:
                 continue
 
-            # Leaf returns a single message
+            # MessageFragment returns a single message
             if isinstance(result, BaseMessage):
                 messages.append(result)
                 continue
 
-            # Leaf returns multiple messages (e.g., scratch/history)
+            # MessageFragment returns multiple messages (e.g., scratch/history)
             if isinstance(result, Sequence) and not isinstance(result, (str, bytes)):
                 for item in result:
                     if not isinstance(item, BaseMessage):
-                        raise TypeError(f"Leaf returned a sequence containing non-BaseMessage item: {type(item)}")
+                        raise TypeError(
+                            f"MessageFragment returned a sequence containing non-BaseMessage item: {type(item)}"
+                        )
                     messages.append(item)
                 continue
 
             raise TypeError(
-                f"Leaf returned unsupported type: {type(result)}. Expected BaseMessage or Sequence[BaseMessage]."
+                f"MessageFragment returned unsupported type: {type(result)}. Expected BaseMessage or Sequence[BaseMessage]."
             )
 
         return messages
@@ -204,19 +208,19 @@ class BaseAgentNode(BaseNode):
             else:
                 completion_tool = tool_registry_service.get_tool("confirm_complete_plan_step")
 
-            tool_schemas.append(completion_tool.tool_schema())
+            tool_schemas.append(completion_tool.tool_schema())  # ty:ignore[unresolved-attribute]
 
             # Append any step-specific tools
             if pending_step.tools:
                 for tool_class in pending_step.tools:
                     tool = tool_registry_service.get_tool(tool_class.name)
-                    tool_schemas.append(tool.tool_schema())
+                    tool_schemas.append(tool.tool_schema())  # ty:ignore[unresolved-attribute]
 
         else:
             # No pending steps remain; if plan exists and all are completed/blocked, allow complete_turn
             if plan and all(s.status in ("completed", "blocked") for s in plan):
                 complete_turn_tool = tool_registry_service.get_tool("complete_turn")
-                tool_schemas.append(complete_turn_tool.tool_schema())
+                tool_schemas.append(complete_turn_tool.tool_schema())  # ty:ignore[unresolved-attribute]
 
         # Bind agent-level tools if provided
         agent_tools = self.get_tools(prompt_assembler.get_state())

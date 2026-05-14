@@ -1,5 +1,11 @@
 from byte import ServiceProvider
-from byte.constitution import ConstitutionAgentNode, ConstitutionCommand, ConstitutionWorkflow, InitializeCommand
+from byte.constitution import (
+    ConstitutionAgentNode,
+    ConstitutionCommand,
+    ConstitutionWorkflow,
+    InitializeCommand,
+    InitializeWorkflow,
+)
 from byte.constitution.service.constitution_service import ConstitutionService
 from byte.constitution.tools import (
     AddGovernanceRuleTool,
@@ -40,6 +46,7 @@ class ConstitutionServiceProvider(ServiceProvider):
         return [
             # keep-sorted start
             ConstitutionWorkflow,
+            InitializeWorkflow,
             # keep-sorted end
         ]
 

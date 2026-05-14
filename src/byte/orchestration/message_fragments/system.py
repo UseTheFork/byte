@@ -2,13 +2,13 @@ from typing import TYPE_CHECKING, override
 
 from langchain_core.messages import SystemMessage
 
-from byte.orchestration import Leaf
+from byte.orchestration import MessageFragment
 
 if TYPE_CHECKING:
     from byte.orchestration import PromptAssembler
 
 
-class MessageSystem(Leaf):
+class System(MessageFragment):
     @override
     async def assemble(self, prompt_assembler: PromptAssembler) -> SystemMessage:
 

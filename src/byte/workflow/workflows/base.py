@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 
@@ -8,11 +8,17 @@ from byte.orchestration import BaseState
 from byte.support.mixins import Bootable, Configurable, Eventable
 from byte.tui import TUIManagerService
 
+if TYPE_CHECKING:
+    from byte.plan import PlanStep
+
 
 class BaseWorkflow(ABC, Bootable, Eventable, Configurable):
     """ """
 
     _graph: Optional[CompiledStateGraph] = None
+
+    @abstractmethod
+    def get_plan(self) -> List[PlanStep] | None: ...
 
     @abstractmethod
     async def build(self) -> CompiledStateGraph:

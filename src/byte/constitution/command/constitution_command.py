@@ -30,15 +30,18 @@ class ConstitutionCommand(Command):
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """ """
 
-        ask_workflow = self.app.make(ConstitutionWorkflow)
+        constitution_workflow = self.app.make(ConstitutionWorkflow)
 
         self.emit_tui(Messages.CommandExecutionStarted())
         self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         workflow_service = self.app.make(WorkflowService)
         await workflow_service.execute(
-            ask_workflow,
-            {"user_request": raw_args},
+            constitution_workflow,
+            {
+                "user_request": raw_args,
+                "plan": constitution_workflow.get_plan(),
+            },
         )
 
         self.emit_tui(Messages.CommandExecutionCompleted())

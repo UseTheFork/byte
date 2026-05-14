@@ -1,4 +1,6 @@
-from langchain_core.runnables import Runnable
+from typing import List
+
+from langchain_core.messages import BaseMessage
 from langgraph.graph.state import RunnableConfig
 
 from byte.support import Service
@@ -14,8 +16,7 @@ class RecordResponseService(Service):
 
     async def record_response(
         self,
-        agent_state,
-        runnable: Runnable,
+        messages: List[BaseMessage],
         agent_name: str,
         config: RunnableConfig,
     ):
@@ -42,11 +43,6 @@ class RecordResponseService(Service):
 
         # Ensure cache directory exists
         cache_file.parent.mkdir(parents=True, exist_ok=True)
-
-        template = runnable.get_prompts(config)
-        prompt_value = await template[0].ainvoke(agent_state)
-
-        messages = prompt_value.to_messages()
 
         content_parts = []
         for message in messages:
