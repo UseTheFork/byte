@@ -103,14 +103,14 @@ class AskAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        agent_state, config, prompt_assembler = await self.generate_agent_state(state, config)
+        config, prompt_assembler = await self.generate_agent_state(state, config)
         prompt = await self.generate_prompt(prompt_assembler)
         runnable = self.create_runnable(prompt_assembler)
 
         record_response_service = self.app.make(RecordResponseService)
 
         self.app.dispatch_task(
-            record_response_service.record_response(agent_state, runnable, self.name, config),
+            record_response_service.record_response(prompt, self.name, config),
         )
         result = await runnable.ainvoke(
             prompt,
