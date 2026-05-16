@@ -33,6 +33,7 @@ class Leaves:
     ConversationHistory = _ConversationHistory
     Epilogue = _Epilogue
     FileContext = _FileContext
+    GitDiffs = _GitDiffs
     OperatingPrinciples = _OperatingPrinciples
     Preamble = _Preamble
     ProjectEnvironment = _ProjectEnvironment
@@ -47,5 +48,4 @@ class Leaves:
     UserRequest = _UserRequest
     WorkflowConstraints = _WorkflowConstraints
     WorkflowPending = _WorkflowPending
-    GitDiffs = _GitDiffs
     # keep-sorted end

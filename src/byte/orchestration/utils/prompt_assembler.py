@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, List, Type, TypeVar
 from langchain_core.messages import BaseMessage
 
 from byte.llm import ModelSchema
-from byte.orchestration import Leaf
+from byte.orchestration import Leaf, PhaseUtils
 from byte.support.mixins import Bootable, Eventable
 from byte.support.utils import list_to_multiline_text
 from byte.tools.service.tool_registry_service import ToolRegistryService
@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from byte import Application
     from byte.node import BaseAgentNode
     from byte.orchestration import BaseState
-    from byte.plan import PlanStep
     from byte.tools import BaseTool
 
 T = TypeVar("T")
@@ -81,29 +80,27 @@ class PromptAssembler(Bootable, Eventable):
         tool_schemas = []
         tool_registry_service = self.app.make(ToolRegistryService)
 
-        plan: list[PlanStep] = self.merged_state.get("plan") or []
-
         # Find the first pending step (if any)
-        pending_step = next((s for s in plan if s.status == "pending"), None)
+        pending_phase = PhaseUtils.get_pending_phase(self.prompt_state)
 
-        if pending_step is not None:
-            # Append the required completion tool
-            if pending_step.completion_mode == "auto":
-                completion_tool = tool_registry_service.get_tool("complete_plan_step")
-            else:
-                completion_tool = tool_registry_service.get_tool("confirm_complete_plan_step")
+        if pending_phase is not None:
+            # # Append the required completion tool
+            # if pending_phase.completion_mode == "auto":
+            #     completion_tool = tool_registry_service.get_tool("complete_plan_step")
+            # else:
+            #     completion_tool = tool_registry_service.get_tool("confirm_complete_plan_step")
 
-            tool_schemas.append(completion_tool)
+            # tool_schemas.append(completion_tool)
 
             # Append any step-specific tools
-            if pending_step.tools:
-                for tool_class in pending_step.tools:
+            if pending_phase.tools:
+                for tool_class in pending_phase.tools:
                     tool = tool_registry_service.get_tool(tool_class.name)
                     tool_schemas.append(tool)
 
         else:
             # No pending steps remain; if plan exists and all are completed/blocked, allow complete_turn
-            if plan and all(s.status in ("completed", "blocked") for s in plan):
+            if PhaseUtils.is_workflow_complete(self.prompt_state):
                 complete_turn_tool = tool_registry_service.get_tool("complete_turn")
                 tool_schemas.append(complete_turn_tool)
 
