@@ -6,6 +6,7 @@ from byte.orchestration.leaves.constraints import Constraints as _Constraints
 from byte.orchestration.leaves.conversation_history import ConversationHistory as _ConversationHistory
 from byte.orchestration.leaves.epilogue import Epilogue as _Epilogue
 from byte.orchestration.leaves.file_context import FileContext as _FileContext
+from byte.orchestration.leaves.git_diffs import GitDiffs as _GitDiffs
 from byte.orchestration.leaves.operating_principles import OperatingPrinciples as _OperatingPrinciples
 from byte.orchestration.leaves.preamble import Preamble as _Preamble
 from byte.orchestration.leaves.project_environment import ProjectEnvironment as _ProjectEnvironment
@@ -46,4 +47,5 @@ class Leaves:
     UserRequest = _UserRequest
     WorkflowConstraints = _WorkflowConstraints
     WorkflowPending = _WorkflowPending
+    GitDiffs = _GitDiffs
     # keep-sorted end

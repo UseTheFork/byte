@@ -42,12 +42,7 @@ class CommitAgentNode(BaseAgentNode):
 
     def get_user_template(self):
         return [
-            Section.sub_heading("Git Diffs", 2),
-            "```",
-            "{git_diffs}",
-            "```",
-            Section.important("You **MUST** consider the above git diffs before proceeding (if not empty)."),
-            Section.end(),
+            Leaves.GitDiffs(),
             Leaves.ConversationHistory(),
             Leaves.CommitHistory(),
             "",

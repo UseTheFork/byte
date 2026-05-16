@@ -26,7 +26,9 @@ class CreateAnalysisTool(BaseTool):
                 },
             },
         },
-        "required": ["summary", "observations"],
+        "required": [
+            "summary",
+        ],
         "additionalProperties": False,
     }
 
