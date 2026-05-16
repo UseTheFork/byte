@@ -120,7 +120,7 @@ class SkillCreatorAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        _, config, prompt_assembler = await self.generate_agent_state(state, config)
+        prompt_assembler = await self.generate_agent_state(state, config)
         runnable = self.create_runnable(prompt_assembler, tool_choice="any")
         prompt = await self.generate_prompt(prompt_assembler)
         record_response_service = self.app.make(RecordResponseService)

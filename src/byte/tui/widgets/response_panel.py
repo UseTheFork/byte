@@ -145,7 +145,7 @@ class ResponsePanel(VerticalGroup):
         """
         linting = Linting()
         await self.mount(linting)
-        linting.start_linting(event.total_commands)
+        await linting.start_linting(event.total_commands)
         self.current_linting = linting
         return linting
 
@@ -158,7 +158,7 @@ class ResponsePanel(VerticalGroup):
             total: Total number of files
         """
         if self.current_linting is not None:
-            self.current_linting.update_progress(current_file, completed, total)
+            await self.current_linting.update_progress(current_file, completed, total)
 
     async def complete_linting(self, total_files: int, failed_files: int, success: bool) -> None:
         """Complete the linting operation on the current Linting widget.
@@ -169,7 +169,7 @@ class ResponsePanel(VerticalGroup):
             success: Whether all lints passed (no errors)
         """
         if self.current_linting is not None:
-            self.current_linting.complete_linting(total_files, failed_files, success)
+            await self.current_linting.complete_linting(total_files, failed_files, success)
 
     async def complete_toolcall(self, event: Messages.ToolCall):
         try:

@@ -261,7 +261,7 @@ class Conversation(Widget):
         """Handle lint results display."""
         response_panel = await self.get_or_create_response_panel(event.panel_id)
         if response_panel.current_linting is not None:
-            response_panel.current_linting.display_results(event.content)
+            await response_panel.current_linting.display_results(event.content)
         self.scroll_to_latest_message()
 
     @on(Messages.Status)

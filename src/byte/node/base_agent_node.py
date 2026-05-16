@@ -129,7 +129,7 @@ class BaseAgentNode(BaseNode):
 
         return messages
 
-    async def generate_agent_state(self, state: BaseState, config, extra: dict = {}) -> tuple:
+    async def generate_agent_state(self, state: BaseState, config, extra: dict = {}) -> PromptAssembler:
         """Generate the agent state for the assistant node invocation.
 
         Assembles the user prompt from the state and context, emits a pre-assistant event
@@ -181,7 +181,7 @@ class BaseAgentNode(BaseNode):
         )
 
         # TODO: make this better
-        return (agent_state, config, prompt_assembler)
+        return prompt_assembler
 
     def create_runnable(
         self, prompt_assembler: PromptAssembler, tool_choice: dict[str, str] | str | None = None
