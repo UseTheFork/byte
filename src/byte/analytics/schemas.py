@@ -6,6 +6,8 @@ class TokenCount:
     """Token usage counts for input and output."""
 
     input: int = 0
+    input_cache_read: int = 0
+    input_cache_creation: int = 0
     output: int = 0
 
 
@@ -23,6 +25,8 @@ class LastMessageUsage:
 
     input: int = 0
     output: int = 0
+    input_cache_read: int = 0
+    input_cache_creation: int = 0
     type: str = ""
 
 

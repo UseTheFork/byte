@@ -109,5 +109,7 @@ class TokenUsageSchema:
     """
 
     input_tokens: int = 0
+    input_token_cache_read: int = 0
+    input_token_cache_creation: int = 0
     output_tokens: int = 0
     total_tokens: int = 0
