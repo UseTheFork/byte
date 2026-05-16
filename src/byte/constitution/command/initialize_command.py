@@ -5,8 +5,8 @@ from byte import ByteArgumentParser, Command
 from byte.constitution import (
     InitializeWorkflow,
 )
+from byte.orchestration import WorkflowService
 from byte.tui import Messages
-from byte.workflow import WorkflowService
 
 
 class InitializeCommand(Command):
@@ -42,7 +42,7 @@ class InitializeCommand(Command):
             initialize_workflow,
             {
                 "user_request": f"We are initializing the project and need the constition created.\n{raw_args}",
-                "plan": initialize_workflow.get_plan(),
+                "workflow_phases": initialize_workflow.get_phases(),
             },
         )
 

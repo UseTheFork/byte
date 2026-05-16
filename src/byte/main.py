@@ -21,38 +21,40 @@ from byte.llm import LLMServiceProvider
 from byte.lsp import LSPServiceProvider
 from byte.memory import MemoryServiceProvider
 from byte.node import NodeServiceProvider
+from byte.orchestration import OrchestrationServiceProvider
 from byte.plan import PlanServiceProvider
 from byte.skills import SkillsServiceProvider
 from byte.system import SystemServiceProvider
 from byte.tools import ToolsServiceProvider
 from byte.tui import TUIServiceProvider
 from byte.web import WebServiceProvider
-from byte.workflow import WorkflowServiceProvider
 
 PROVIDERS = [
     EventsServiceProvider,
     ToolsServiceProvider,
     CommandServiceProvider,
     GitServiceProvider,
-    PlanServiceProvider,
-    SkillsServiceProvider,
-    ConstitutionServiceProvider,
+    OrchestrationServiceProvider,
+    # keep-sorted start
+    AnalyticsProvider,
     AskServiceProvider,
     CoderServiceProvider,
-    MemoryServiceProvider,
-    KnowledgeServiceProvider,
-    FileServiceProvider,
-    LLMServiceProvider,
-    LintServiceProvider,
-    NodeServiceProvider,
-    WorkflowServiceProvider,
-    LSPServiceProvider,
-    AnalyticsProvider,
-    WebServiceProvider,
+    ConstitutionServiceProvider,
     # PresetsProvider,
     DevelopmentServiceProvider,
+    FileServiceProvider,
+    KnowledgeServiceProvider,
+    LLMServiceProvider,
+    LSPServiceProvider,
+    LintServiceProvider,
+    MemoryServiceProvider,
+    NodeServiceProvider,
+    PlanServiceProvider,
+    SkillsServiceProvider,
     SystemServiceProvider,
     TUIServiceProvider,
+    WebServiceProvider,
+    # keep-sorted end
 ]
 
 
@@ -60,12 +62,12 @@ def cli():
     """Byte CLI Assistant"""
 
     try:
-        application = Application.configure(Path.cwd(), PROVIDERS).create()
+        application = Application.configure(Path.cwd(), PROVIDERS).create()  # ty:ignore[invalid-argument-type]
 
     except ValidationError:
         raise
 
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())  # ty:ignore[deprecated]
     asyncio.run(application.handle_command(sys.argv))
 
 

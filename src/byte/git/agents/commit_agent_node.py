@@ -4,16 +4,15 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
-from byte.git import CommitService, GitCommitTool
+from byte.git import CommitService
 from byte.llm import LLMService, ModelSchema
-from byte.memory import CompleteSimpleTurnTool
 from byte.node import (
     BaseAgentNode,
     BaseNode,
 )
 from byte.node.nodes import EndNode
 from byte.orchestration import AIMessage, BaseState, Leaves
-from byte.support import Boundary, BoundaryType, Section, SectionType, State, Str
+from byte.support import Section, SectionType, Str
 
 # Conventional commit message generation prompt
 # Adapted from Aider: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/prompts.py#L8
@@ -76,42 +75,14 @@ class CommitAgentNode(BaseAgentNode):
             "- Never send acknowledgement-only responses; after receiving new context or instructions, immediately continue the task or state the concrete next action you will take.",
             Section.end(),
             Leaves.CommitGuidelines(),
-            "",
-            Section.start(SectionType.WORKFLOW),
-            "Format your response as follows:",
-            "",
-            "1. Start with a SHORT analysis of the changes in list format.",
-            f"2. Call the `{GitCommitTool.name}` tool ONCE.",
-            f"3. If the `{GitCommitTool.name}` call is successful, use the `{CompleteSimpleTurnTool.name}`",
-            Section.end(),
-            Section.sub_heading("Example Workflow", 2),
-            "```",
-            Boundary.open(BoundaryType.EXAMPLE),
-            Boundary.open(BoundaryType.AGENT_MESSAGE),
-            "Analysis of changes:",
-            "- Updated foo() to handle edge case",
-            Boundary.close(BoundaryType.AGENT_MESSAGE),
-            Boundary.open(BoundaryType.TOOL_CALL),
-            f"{GitCommitTool.name}([removed for brevity])",
-            Boundary.close(BoundaryType.TOOL_CALL),
-            Boundary.open(BoundaryType.TOOL_CALL),
-            f"{CompleteSimpleTurnTool.name}([removed for brevity])",
-            Boundary.close(BoundaryType.TOOL_CALL),
-            Boundary.close(BoundaryType.EXAMPLE),
-            "```",
         ]
 
     def get_context_template(self):
         return [
             Leaves.ToolsLoaded(),
+            Leaves.WorkflowPending(),
             Leaves.Epilogue(),
         ]
-
-    def get_tools(self, state: BaseState):
-        if not State.tool_was_called(state, GitCommitTool.name):
-            return [GitCommitTool]
-        else:
-            return [CompleteSimpleTurnTool]
 
     async def __call__(
         self,

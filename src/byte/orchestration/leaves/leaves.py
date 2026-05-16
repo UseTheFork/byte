@@ -7,7 +7,6 @@ from byte.orchestration.leaves.conversation_history import ConversationHistory a
 from byte.orchestration.leaves.epilogue import Epilogue as _Epilogue
 from byte.orchestration.leaves.file_context import FileContext as _FileContext
 from byte.orchestration.leaves.operating_principles import OperatingPrinciples as _OperatingPrinciples
-from byte.orchestration.leaves.plan_pending import PlanPending as _PlanPending
 from byte.orchestration.leaves.preamble import Preamble as _Preamble
 from byte.orchestration.leaves.project_environment import ProjectEnvironment as _ProjectEnvironment
 from byte.orchestration.leaves.project_hierarchy import ProjectHierarchy as _ProjectHierarchy
@@ -20,6 +19,7 @@ from byte.orchestration.leaves.tools_all import ToolsAll as _ToolsAll
 from byte.orchestration.leaves.tools_loaded import ToolsLoaded as _ToolsLoaded
 from byte.orchestration.leaves.user_request import UserRequest as _UserRequest
 from byte.orchestration.leaves.workflow_constraints import WorkflowConstraints as _WorkflowConstraints
+from byte.orchestration.leaves.workflow_pending import WorkflowPending as _WorkflowPending
 
 
 class Leaves:
@@ -33,7 +33,6 @@ class Leaves:
     Epilogue = _Epilogue
     FileContext = _FileContext
     OperatingPrinciples = _OperatingPrinciples
-    PlanPending = _PlanPending
     Preamble = _Preamble
     ProjectEnvironment = _ProjectEnvironment
     ProjectHierarchy = _ProjectHierarchy
@@ -46,4 +45,5 @@ class Leaves:
     ToolsLoaded = _ToolsLoaded
     UserRequest = _UserRequest
     WorkflowConstraints = _WorkflowConstraints
+    WorkflowPending = _WorkflowPending
     # keep-sorted end

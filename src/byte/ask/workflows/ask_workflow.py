@@ -1,13 +1,12 @@
 from byte.ask import AskAgentNode
 from byte.node.nodes import EndNode, ToolNode
-from byte.orchestration import GraphBuilder
-from byte.workflow import BaseWorkflow
+from byte.orchestration import BaseWorkflow, GraphBuilder
 
 
 class AskWorkflow(BaseWorkflow):
     """ """
 
-    def get_plan(self):
+    def get_phases(self):
         return None
 
     async def build(self):

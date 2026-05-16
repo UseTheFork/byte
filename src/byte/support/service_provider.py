@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING, List, Type
 
 from byte import CommandRegistryService
 from byte.node import BaseNode, NodeRegistry
+from byte.orchestration import BaseWorkflow
 from byte.tools import ToolRegistryService
-from byte.workflow import BaseWorkflow
 
 if TYPE_CHECKING:
     from byte import Command

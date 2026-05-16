@@ -6,10 +6,9 @@ from langchain_core.callbacks import get_usage_metadata_callback
 
 from byte import Service
 from byte.analytics import AgentAnalyticsService
-from byte.orchestration import TokenUsageSchema
+from byte.orchestration import BaseWorkflow, TokenUsageSchema
 from byte.support import Str
 from byte.tui import Messages, Status
-from byte.workflow import BaseWorkflow
 
 
 class WorkflowService(Service):

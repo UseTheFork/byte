@@ -1,7 +1,8 @@
+from langchain_core.runnables import RunnableConfig
 from langgraph.types import Command
 
 from byte.node import BaseNode
-from byte.orchestration import BaseState
+from byte.orchestration import BaseState, PhaseUtils
 from byte.support.utils import get_last_message
 from byte.tools import ToolMessage, ToolRegistryService
 from byte.tools.exceptions import ToolException, ToolNotFoundException
@@ -33,14 +34,20 @@ class ToolNode(BaseNode):
     async def __call__(
         self,
         state: BaseState,
+        *,
+        config: RunnableConfig,
     ) -> Command[str]:
         message = get_last_message(state["scratch_messages"])
 
         outputs = []
+        workflow_phases = {}
         merged_extra = {}
 
-        # TODO: we should make this truly async with a gather
+        is_workflow_agent = PhaseUtils.is_workflow_agent(state)
+        if is_workflow_agent:
+            workflow_phases = state["workflow_phases"]
 
+        # TODO: we should make this truly async with a gather
         for tool_call in message.tool_calls:
             try:
                 tool = self.tool_registry_service.get_tool(tool_call["name"])
@@ -73,6 +80,10 @@ class ToolNode(BaseNode):
                 self._update_tui(tool_message, tool_result)
                 outputs.append(tool_message)
 
+                # If we are in a workflow we also need to update the state of the phase
+                if is_workflow_agent:
+                    workflow_phases = PhaseUtils.update_phase_with_tool_args(tool_call["args"], workflow_phases)
+
             except ToolException as err:
                 tool_message = ToolMessage(
                     status="error",
@@ -88,7 +99,7 @@ class ToolNode(BaseNode):
                 self._update_tui(tool_message)
                 outputs.append(tool_message)
 
-        update = {"scratch_messages": outputs, **merged_extra}
+        update = {"scratch_messages": outputs, "workflow_phases": workflow_phases, **merged_extra}
 
         # Final single route_back after ALL tools
         if any(

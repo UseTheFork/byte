@@ -2,23 +2,21 @@ from byte.files.tools.add_files_tool import AddFilesTool
 from byte.files.tools.list_files_tool import ListFilesTool
 from byte.git.tools.git_grep_tool import GitGrepTool
 from byte.node.nodes import ToolNode
-from byte.orchestration import GraphBuilder
-from byte.plan import CompletePlanStepTool, CreatePlanTool, PlanStep
+from byte.orchestration import BaseWorkflow, CreatePlanTool, GraphBuilder, PhaseModel
+from byte.plan import CompletePlanStepTool
 from byte.skills import SkillCreatorAgentNode
 from byte.skills.tools.create_skill_tool import CreateSkillTool
 from byte.system.tools.user_confirm_tool import UserConfirmTool
 from byte.system.tools.user_select_tool import UserSelectTool
-from byte.workflow import BaseWorkflow
 
 
 class CreateSkillWorkflow(BaseWorkflow):
     """ """
 
-    def get_plan(self):
+    def get_phases(self):
         return [
-            PlanStep(
+            PhaseModel(
                 id="1",
-                order=1,
                 content="Capture intent — understand what the skill should do, when it triggers, and what the expected output looks like.",
                 note=[
                     f"When possible use the `{CreatePlanTool.name}` tool in parallel with the `{CompletePlanStepTool.name}` tool",
@@ -34,9 +32,8 @@ class CreateSkillWorkflow(BaseWorkflow):
                     GitGrepTool,
                 ],
             ),
-            PlanStep(
+            PhaseModel(
                 id="2",
-                order=2,
                 content="Create the skill — use available tools to create the skill with a clear name, description, and instructions.",
                 agent=SkillCreatorAgentNode,
                 tools=[

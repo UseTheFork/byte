@@ -3,8 +3,8 @@ from argparse import Namespace
 
 from byte import ByteArgumentParser, Command
 from byte.constitution import ConstitutionWorkflow
+from byte.orchestration import WorkflowService
 from byte.tui import Messages
-from byte.workflow import WorkflowService
 
 
 class ConstitutionCommand(Command):
@@ -40,7 +40,7 @@ class ConstitutionCommand(Command):
             constitution_workflow,
             {
                 "user_request": raw_args,
-                "plan": constitution_workflow.get_plan(),
+                "workflow_phases": constitution_workflow.get_phases(),
             },
         )
 

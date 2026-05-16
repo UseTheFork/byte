@@ -56,7 +56,7 @@ class ConstitutionAgentNode(BaseAgentNode):
             Leaves.ReferenceMaterials(),
             Leaves.ProjectEnvironment(),
             Leaves.FileContext(),
-            Leaves.PlanPending(),
+            Leaves.WorkflowPending(),
             Leaves.Epilogue(),
         ]
 
@@ -67,13 +67,13 @@ class ConstitutionAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        agent_state, config, prompt_assembler = await self.generate_agent_state(state, config)
+        prompt_assembler = await self.generate_agent_state(state, config)
         runnable = self.create_runnable(prompt_assembler)
         prompt = await self.generate_prompt(prompt_assembler)
         record_response_service = self.app.make(RecordResponseService)
 
         self.app.dispatch_task(
-            record_response_service.record_response(agent_state, runnable, self.name, config),
+            record_response_service.record_response(prompt, self.name, config),
         )
         result = await runnable.ainvoke(
             prompt,

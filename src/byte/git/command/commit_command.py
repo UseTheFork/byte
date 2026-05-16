@@ -3,8 +3,8 @@ from argparse import Namespace
 from byte import ByteArgumentParser, Command
 from byte.git import CommitWorkflow, GitService
 from byte.git.service.commit_service import CommitService
+from byte.orchestration import PhaseUtils, WorkflowService
 from byte.tui import InputCancelledError, Messages
-from byte.workflow import WorkflowService
 
 
 class CommitCommand(Command):
@@ -62,8 +62,15 @@ class CommitCommand(Command):
             workflow_service = self.app.make(WorkflowService)
             request = await self.commit_service.build_commit_prompt()
 
+            workflow_phases = PhaseUtils.to_phase_dict(commit_workflow.get_phases())
+
             await workflow_service.execute(
-                commit_workflow, {"user_request": "commit", "touched_files": request["touched_files"]}
+                commit_workflow,
+                {
+                    "user_request": "commit",
+                    "touched_files": request["touched_files"],
+                    "workflow_phases": workflow_phases,
+                },
             )
 
         except InputCancelledError:

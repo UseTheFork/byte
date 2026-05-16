@@ -1,8 +1,7 @@
 from datetime import UTC, datetime
 from typing import override
 
-from byte.orchestration import BaseState
-from byte.plan.models import PlanStep
+from byte.orchestration import BaseState, PhaseModel
 from byte.tools import BaseTool, ToolResult
 from byte.tools.exceptions import ToolRunException
 
@@ -34,12 +33,12 @@ class CompletePlanStepTool(BaseTool):
 
     @override
     async def run(self, step_id: str, status: str, state: BaseState, **kwargs) -> ToolResult:
-        plan: list[PlanStep] | None = state.get("plan")
+        plan: list[PhaseModel] | None = state.get("plan")
 
         if not plan:
             raise ToolRunException("No active plan found in state.")
 
-        updated_plan: list[PlanStep] = []
+        updated_plan: list[PhaseModel] = []
         found = False
         now = datetime.now(UTC).isoformat()
 

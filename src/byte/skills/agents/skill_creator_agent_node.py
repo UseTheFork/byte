@@ -37,7 +37,6 @@ class SkillCreatorAgentNode(BaseAgentNode):
             Section.important(
                 f"All tool operations are applied immediately and are reflected in the next user message containing {Section.ref(SectionType.PROJECT_FILES)}."
             ),
-            Leaves.PlanPending(),
         ]
 
     def get_system_template(self):
@@ -110,6 +109,7 @@ class SkillCreatorAgentNode(BaseAgentNode):
             Leaves.ReferenceMaterials(),
             Leaves.ProjectEnvironment(),
             Leaves.FileContext(),
+            Leaves.WorkflowPending(),
             Leaves.Epilogue(),
         ]
 

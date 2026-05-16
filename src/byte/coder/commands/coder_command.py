@@ -3,8 +3,8 @@ from argparse import Namespace
 
 from byte import ByteArgumentParser, Command
 from byte.coder import CoderWorkflow
+from byte.orchestration import PhaseUtils, WorkflowService
 from byte.tui import Messages
-from byte.workflow import WorkflowService
 
 
 # TODO: need to add docs
@@ -37,6 +37,7 @@ class CoderCommand(Command):
         self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         workflow_service = self.app.make(WorkflowService)
-        await workflow_service.execute(coder_workflow, {"user_request": raw_args, "plan": coder_workflow.get_plan()})
+        workflow_phases = PhaseUtils.to_phase_dict(coder_workflow.get_phases())
+        await workflow_service.execute(coder_workflow, {"user_request": raw_args, "workflow_phases": workflow_phases})
 
         self.emit_tui(Messages.CommandExecutionCompleted())

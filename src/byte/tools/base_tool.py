@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Dict
 
 from byte.support.mixins.bootable import Bootable
 from byte.tools.exceptions import ToolException, ToolRunException, ToolValidationException
@@ -15,7 +15,7 @@ class BaseTool(ABC, Bootable):
 
     name: str
     description: str
-    input_schema: dict[str, Any]
+    input_schema: Dict[str, Any]
     harness_invocable: bool = True
     terminates_turn: bool = False
 
@@ -25,7 +25,7 @@ class BaseTool(ABC, Bootable):
 
     async def invoke(
         self,
-        args: dict,
+        args: Dict,
         state: BaseState,
         tool_call_id: str,
     ) -> ToolResult:
@@ -47,7 +47,7 @@ class BaseTool(ABC, Bootable):
             raise ToolRunException(str(e)) from e
 
     @classmethod
-    def tool_schema(cls) -> dict[str, Any]:
+    def tool_schema(cls) -> Dict[str, Any]:
         return {
             "name": cls.name,
             "description": cls.description,
