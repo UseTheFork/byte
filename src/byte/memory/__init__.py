@@ -10,7 +10,6 @@ if TYPE_CHECKING:
     from byte.memory.command.undo_command import UndoCommand
     from byte.memory.service.memory_service import MemoryService
     from byte.memory.service_provider import MemoryServiceProvider
-    from byte.memory.tools.complete_simple_turn_tool import CompleteSimpleTurnTool
 
 
 __all__ = (
@@ -25,7 +24,6 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "ClearCommand": "command.clear_command",
-    "CompleteSimpleTurnTool": "tools.complete_simple_turn_tool",
     "MemoryService": "service.memory_service",
     "MemoryServiceProvider": "service_provider",
     "ResetCommand": "command.reset_command",

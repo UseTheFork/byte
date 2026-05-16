@@ -1,6 +1,6 @@
 from byte.git import CommitAgentNode, GitCommitTool
 from byte.node.nodes import LintNode, ToolNode
-from byte.orchestration import BaseWorkflow, CreateAnalysisTool, GraphBuilder, PhaseModel
+from byte.orchestration import BaseWorkflow, CompleteTurnTool, CreateAnalysisTool, GraphBuilder, PhaseModel
 
 
 class CommitWorkflow(BaseWorkflow):
@@ -26,6 +26,13 @@ class CommitWorkflow(BaseWorkflow):
                     GitCommitTool,
                 ],
                 agent=CommitAgentNode,
+            ),
+            PhaseModel(
+                id="3",
+                content="Complete the turn with a short summary of the work done during this turn. DO NOT include `key_points`",
+                tools=[
+                    CompleteTurnTool,
+                ],
             ),
         ]
 

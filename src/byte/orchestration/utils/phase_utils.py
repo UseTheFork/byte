@@ -30,7 +30,7 @@ class PhaseUtils:
             properties["phase_status"] = {
                 "type": "string",
                 "enum": ["pending", "in_progress", "blocked", "completed"],
-                "description": "The status to set on the phase.",
+                "description": "The status to set on the phase. If a phase requires multiple tool calls or edits use `in_progress`. `completed` should only be used on the final tool call for the phase you are working on.",
             }
 
         for field in ("phase_id", "phase_status"):
@@ -53,7 +53,9 @@ class PhaseUtils:
     def get_pending_phase(state: BaseState) -> PhaseModel | None:
         """ """
         workflow_phases = state.get("workflow_phases") or {}
-        pending_phase = next((phase for phase in workflow_phases.values() if phase.status == "pending"), None)
+        pending_phase = next(
+            (phase for phase in workflow_phases.values() if phase.status in ("pending", "in_progress")), None
+        )
 
         return pending_phase
 

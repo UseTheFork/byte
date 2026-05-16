@@ -12,7 +12,7 @@ from byte.constitution import (
 from byte.files import AddFilesTool, ListFilesTool
 from byte.git import GitGrepTool
 from byte.node.nodes import ToolNode
-from byte.orchestration import BaseWorkflow, GraphBuilder, PhaseModel
+from byte.orchestration import BaseWorkflow, CompleteTurnTool, GraphBuilder, PhaseModel
 from byte.plan import ConfirmCompletePlanStepTool
 from byte.support.section import Section, SectionType
 from byte.system import UserSelectTool
@@ -96,6 +96,13 @@ class ConstitutionWorkflow(BaseWorkflow):
                     DeleteSectionItemTool,
                     DeleteSectionTool,
                     UpdateMetaTool,
+                ],
+            ),
+            PhaseModel(
+                id="6",
+                content="Complete the turn with a short summary of the work done during this turn. DO NOT include `key_points`",
+                tools=[
+                    CompleteTurnTool,
                 ],
             ),
         ]

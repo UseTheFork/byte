@@ -6,7 +6,7 @@ from byte.files import (
     WriteFileTool,
 )
 from byte.node.nodes import LintNode, ToolNode
-from byte.orchestration import BaseWorkflow, CreatePlanTool, GraphBuilder, PhaseModel
+from byte.orchestration import BaseWorkflow, CompleteTurnTool, CreatePlanTool, GraphBuilder, PhaseModel
 
 
 class CoderWorkflow(BaseWorkflow):
@@ -32,6 +32,13 @@ class CoderWorkflow(BaseWorkflow):
                     ReplaceFileTool,
                 ],
                 agent=CoderAgentNode,
+            ),
+            PhaseModel(
+                id="3",
+                content="Complete the turn with a short summary of the work done during this turn. DO NOT include `key_points`",
+                tools=[
+                    CompleteTurnTool,
+                ],
             ),
         ]
 

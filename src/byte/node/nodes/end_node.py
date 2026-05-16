@@ -5,11 +5,9 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte.memory import CompleteSimpleTurnTool
 from byte.node import BaseNode, NodeEvents
-from byte.orchestration import AssistantContextSchema, BaseState
+from byte.orchestration import AssistantContextSchema, BaseState, CompleteSimpleTurnTool, CompleteTurnTool
 from byte.orchestration.messages import AIMessage
-from byte.plan.tools.complete_turn_tool import CompleteTurnTool
 from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
 

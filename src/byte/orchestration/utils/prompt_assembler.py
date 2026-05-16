@@ -84,25 +84,11 @@ class PromptAssembler(Bootable, Eventable):
         pending_phase = PhaseUtils.get_pending_phase(self.prompt_state)
 
         if pending_phase is not None:
-            # # Append the required completion tool
-            # if pending_phase.completion_mode == "auto":
-            #     completion_tool = tool_registry_service.get_tool("complete_plan_step")
-            # else:
-            #     completion_tool = tool_registry_service.get_tool("confirm_complete_plan_step")
-
-            # tool_schemas.append(completion_tool)
-
             # Append any step-specific tools
             if pending_phase.tools:
                 for tool_class in pending_phase.tools:
                     tool = tool_registry_service.get_tool(tool_class.name)
                     tool_schemas.append(tool)
-
-        else:
-            # No pending steps remain; if plan exists and all are completed/blocked, allow complete_turn
-            if PhaseUtils.is_workflow_complete(self.prompt_state):
-                complete_turn_tool = tool_registry_service.get_tool("complete_turn")
-                tool_schemas.append(complete_turn_tool)
 
         # Bind agent-level tools if provided
         agent_tools = self.get_agent_node().get_tools(self.merged_state)

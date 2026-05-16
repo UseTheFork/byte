@@ -5,13 +5,11 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.plan.service_provider import PlanServiceProvider
     from byte.plan.tools.complete_plan_step_tool import CompletePlanStepTool
-    from byte.plan.tools.complete_turn_tool import CompleteTurnTool
     from byte.plan.tools.confirm_complete_plan_step_tool import ConfirmCompletePlanStepTool
 
 
 __all__ = (
     "CompletePlanStepTool",
-    "CompleteTurnTool",
     "ConfirmCompletePlanStepTool",
     "PlanServiceProvider",
 )
@@ -19,7 +17,6 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "CompletePlanStepTool": "tools.complete_plan_step_tool",
-    "CompleteTurnTool": "tools.complete_turn_tool",
     "ConfirmCompletePlanStepTool": "tools.confirm_complete_plan_step_tool",
     "PlanServiceProvider": "service_provider",
     # keep-sorted end

@@ -1,5 +1,7 @@
 from byte import ServiceProvider
 from byte.orchestration import (
+    CompleteSimpleTurnTool,
+    CompleteTurnTool,
     CreateAnalysisTool,
     CreatePlanTool,
     WorkflowService,
@@ -13,7 +15,8 @@ class OrchestrationServiceProvider(ServiceProvider):
         return [
             # keep-sorted start
             # CompletePlanStepTool,
-            # CompleteTurnTool,
+            CompleteSimpleTurnTool,
+            CompleteTurnTool,
             CreateAnalysisTool,
             CreatePlanTool,
             # keep-sorted end

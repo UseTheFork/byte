@@ -29,6 +29,8 @@ if TYPE_CHECKING:
     from byte.orchestration.service_provider import OrchestrationServiceProvider
     from byte.orchestration.services.workflow_service import WorkflowService
     from byte.orchestration.state import BaseState, RoutingState
+    from byte.orchestration.tools.complete_simple_turn_tool import CompleteSimpleTurnTool
+    from byte.orchestration.tools.complete_turn_tool import CompleteTurnTool
     from byte.orchestration.tools.create_analysis_tool import CreateAnalysisTool
     from byte.orchestration.tools.create_plan_tool import CreatePlanTool
     from byte.orchestration.utils.graph_builder import GraphBuilder
@@ -48,6 +50,8 @@ __all__ = (
     "BaseState",
     "BaseWorkflow",
     "ByteAgentException",
+    "CompleteSimpleTurnTool",
+    "CompleteTurnTool",
     "ConstraintSchema",
     "CreateAnalysisTool",
     "CreatePlanTool",
@@ -78,6 +82,7 @@ __all__ = (
     "update_metadata",
 )
 
+
 _dynamic_imports = {
     # keep-sorted start
     "AIMessage": "messages",
@@ -88,6 +93,8 @@ _dynamic_imports = {
     "BaseState": "state",
     "BaseWorkflow": "base_workflow",
     "ByteAgentException": "exceptions",
+    "CompleteSimpleTurnTool": "tools.complete_simple_turn_tool",
+    "CompleteTurnTool": "tools.complete_turn_tool",
     "ConstraintSchema": "schemas",
     "CreateAnalysisTool": "tools.create_analysis_tool",
     "CreatePlanTool": "tools.create_plan_tool",
