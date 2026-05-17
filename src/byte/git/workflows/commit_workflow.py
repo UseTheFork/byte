@@ -18,7 +18,7 @@ class CommitWorkflow(BaseWorkflow):
             ),
             PhaseModel(
                 id="2",
-                content=f"Use the `{GitCommitTool.name}` tool.",
+                content=f"Use the `{GitCommitTool.name}` tool EXACTLY ONE TIME.",
                 note=[
                     f"   - The `{GitCommitTool.name}` only becomes available once the first phase is completed.",
                 ],
