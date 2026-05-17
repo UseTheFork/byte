@@ -157,7 +157,12 @@ class Constitution:
             f"**Ratified**: {self.meta.ratified} | "
             f"**Last Amended**: {self.meta.last_amended}"
         )
-
+        lines.extend(
+            [
+                "",
+                "---",
+            ]
+        )
         return list_to_multiline_text(lines)
 
     @classmethod

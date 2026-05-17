@@ -10,7 +10,10 @@ class CommitWorkflow(BaseWorkflow):
         return [
             PhaseModel(
                 id="1",
-                content="Start with a SHORT analysis of the changes in list format.",
+                content="Start with a SHORT analysis of the changes in list format. ",
+                note=[
+                    f"   - DO NOT include `observations` when using the `{CreateAnalysisTool.name}` tool.",
+                ],
                 agent=CommitAgentNode,
                 tools=[
                     CreateAnalysisTool,
@@ -19,9 +22,6 @@ class CommitWorkflow(BaseWorkflow):
             PhaseModel(
                 id="2",
                 content=f"Use the `{GitCommitTool.name}` tool EXACTLY ONE TIME.",
-                note=[
-                    f"   - The `{GitCommitTool.name}` only becomes available once the first phase is completed.",
-                ],
                 tools=[
                     GitCommitTool,
                 ],

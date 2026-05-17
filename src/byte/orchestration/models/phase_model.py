@@ -33,6 +33,16 @@ class PhaseModel(BaseModel):
     updated_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
 
     def to_pending_md(self) -> str:
+        note_block = (
+            [
+                Section.sub_heading("Notes", 3),
+                list_to_multiline_text(self.note),
+                "",
+            ]
+            if self.note
+            else []
+        )
+
         return list_to_multiline_text(
             [
                 Section.sub_heading(f"phase-{self.id}", 2, True),
@@ -41,6 +51,7 @@ class PhaseModel(BaseModel):
                 "",
                 self.content,
                 "",
+                *note_block,
                 Section.end(),
             ]
         )

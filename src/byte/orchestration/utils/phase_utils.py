@@ -72,6 +72,11 @@ class PhaseUtils:
     def is_workflow_complete(state: BaseState) -> bool:
         """ """
         workflow_phases = state.get("workflow_phases") or {}
+
+        # If this is not a workflow agent then we return true regardless
+        if not PhaseUtils.is_workflow_agent(state):
+            return True
+
         # TODO: add a enum for the status
         if workflow_phases and all(phase.status in ("completed", "blocked") for phase in workflow_phases.values()):
             return True

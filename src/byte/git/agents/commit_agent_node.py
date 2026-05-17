@@ -1,5 +1,6 @@
 from typing import Literal, Type
 
+from langchain.messages import HumanMessage
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
@@ -11,7 +12,7 @@ from byte.node import (
     BaseNode,
 )
 from byte.node.nodes import EndNode
-from byte.orchestration import AIMessage, BaseState, Leaves
+from byte.orchestration import BaseState, Leaves, PhaseUtils
 from byte.support import Section, SectionType, Str
 
 # Conventional commit message generation prompt
@@ -95,13 +96,24 @@ class CommitAgentNode(BaseAgentNode):
 
         record_response_service = self.app.make(RecordResponseService)
 
-        result = await runnable.ainvoke(prompt, config=config)
-        self.app.dispatch_task(
-            record_response_service.record_response(prompt, self.name, config),
-        )
+        while True:
+            result = await runnable.ainvoke(prompt, config=config)
+            self.app.dispatch_task(
+                record_response_service.record_response(prompt, self.name, config),  # ty:ignore[invalid-argument-type]
+            )
 
-        route_tool_call = self.route_tool_calls(result)
-        if route_tool_call is not None:
-            return route_tool_call
+            route_tool_call = self.route_tool_calls(result)
+            if route_tool_call is not None:
+                return route_tool_call
 
-        return self.route_to(self.goto, {"scratch_messages": AIMessage(content=result.text, agent_name=self.name)})
+            if not PhaseUtils.is_workflow_complete(prompt_assembler.get_state()):
+                prompt = prompt.append(  # ty:ignore[unresolved-attribute]
+                    HumanMessage(
+                        content=[
+                            {
+                                "type": "text",
+                                "text": "The workflow has incomplete phases, use the provided tools to complete the workflow.",
+                            },
+                        ]
+                    )
+                )
