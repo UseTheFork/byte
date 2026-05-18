@@ -6,10 +6,9 @@ from langchain_core.callbacks import get_usage_metadata_callback
 
 from byte import Service
 from byte.analytics import AgentAnalyticsService
-from byte.orchestration import TokenUsageSchema
+from byte.orchestration import BaseWorkflow, TokenUsageSchema
 from byte.support import Str
 from byte.tui import Messages, Status
-from byte.workflow import BaseWorkflow
 
 
 class WorkflowService(Service):
@@ -50,6 +49,8 @@ class WorkflowService(Service):
 
             usage = TokenUsageSchema(
                 input_tokens=model_usage.get("input_tokens", 0),
+                input_token_cache_read=model_usage.get("input_token_details", {}).get("cache_read", 0),
+                input_token_cache_creation=model_usage.get("input_token_details", {}).get("cache_creation", 0),
                 output_tokens=model_usage.get("output_tokens", 0),
                 total_tokens=model_usage.get("total_tokens", 0),
             )

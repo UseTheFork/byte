@@ -5,8 +5,8 @@ from byte import ByteArgumentParser, Command
 from byte.constitution import (
     InitializeWorkflow,
 )
+from byte.orchestration import PhaseUtils, WorkflowService
 from byte.tui import Messages
-from byte.workflow import WorkflowService
 
 
 class InitializeCommand(Command):
@@ -38,11 +38,13 @@ class InitializeCommand(Command):
         self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         workflow_service = self.app.make(WorkflowService)
+        workflow_phases = PhaseUtils.to_phase_dict(initialize_workflow.get_phases())
+
         await workflow_service.execute(
             initialize_workflow,
             {
                 "user_request": f"We are initializing the project and need the constition created.\n{raw_args}",
-                "plan": initialize_workflow.get_plan(),
+                "workflow_phases": workflow_phases,
             },
         )
 

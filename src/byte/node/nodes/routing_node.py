@@ -1,18 +1,19 @@
 from typing import Literal
 
 from langgraph.graph.state import RunnableConfig
-from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.node import BaseNode
-from byte.orchestration import AssistantContextSchema, BaseState
-from byte.workflow import WorkflowService
+from byte.orchestration import BaseState, WorkflowService
 
 
 # This is here to control the below Literal and be able to have all possible nodes in one place.
 class RoutingNode(BaseNode):
     async def __call__(
-        self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
+        self,
+        state: BaseState,
+        *,
+        config: RunnableConfig,
     ) -> Command[
         Literal[
             "lint_node",

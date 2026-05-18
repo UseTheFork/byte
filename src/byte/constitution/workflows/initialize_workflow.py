@@ -13,9 +13,8 @@ from byte.constitution import (
 from byte.files import AddFilesTool, ListFilesTool
 from byte.git import GitGrepTool
 from byte.node.nodes import ToolNode
-from byte.orchestration import GraphBuilder
+from byte.orchestration import GraphBuilder, PhaseModel
 from byte.plan import ConfirmCompletePlanStepTool
-from byte.plan.models import PlanStep
 from byte.support.section import Section, SectionType
 from byte.system import UserSelectTool
 
@@ -23,11 +22,10 @@ from byte.system import UserSelectTool
 class InitializeWorkflow(ConstitutionWorkflow):
     """ """
 
-    def get_plan(self):
+    def get_phases(self):
         return [
-            PlanStep(
+            PhaseModel(
                 id="1",
-                order=1,
                 content=f"Consider the existing constitution at {Section.ref(SectionType.CONSTITUTION)}",
                 note=[
                     Section.important(
@@ -36,9 +34,8 @@ class InitializeWorkflow(ConstitutionWorkflow):
                 ],
                 agent=ConstitutionAgentNode,
             ),
-            PlanStep(
+            PhaseModel(
                 id="2",
-                order=2,
                 content="Collect/derive values for placeholders:",
                 note=[
                     "   - If user input (conversation) supplies a value, use it.",
@@ -58,9 +55,8 @@ class InitializeWorkflow(ConstitutionWorkflow):
                 ],
                 agent=ConstitutionAgentNode,
             ),
-            PlanStep(
+            PhaseModel(
                 id="3",
-                order=3,
                 content="Draft the updated constitution content:",
                 note=[
                     "   - Replace every placeholder with concrete text (no bracketed tokens left except intentionally retained template slots that the project has chosen not to define yet - explicitly justify any left).",
@@ -78,9 +74,8 @@ class InitializeWorkflow(ConstitutionWorkflow):
                 agent=ConstitutionAgentNode,
                 completion_mode="confirm",
             ),
-            PlanStep(
+            PhaseModel(
                 id="4",
-                order=4,
                 content="Validation before final output:",
                 note=[
                     "   - No remaining unexplained bracket tokens.",
@@ -89,9 +84,8 @@ class InitializeWorkflow(ConstitutionWorkflow):
                 ],
                 agent=ConstitutionAgentNode,
             ),
-            PlanStep(
+            PhaseModel(
                 id="5",
-                order=5,
                 content="Write the completed constitution using the provided tools.",
                 agent=ConstitutionAgentNode,
                 tools=[

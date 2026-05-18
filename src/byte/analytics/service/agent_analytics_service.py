@@ -32,8 +32,13 @@ class AgentAnalyticsService(Service):
 
             # Update provider's usage
             self.usage.by_model[model_id].total.input += token_usage.input_tokens
+            self.usage.by_model[model_id].total.input_cache_read += token_usage.input_token_cache_read
+            self.usage.by_model[model_id].total.input_cache_creation += token_usage.input_token_cache_creation
             self.usage.by_model[model_id].total.output += token_usage.output_tokens
+
             self.usage.last.input = token_usage.input_tokens
+            self.usage.last.input_cache_read = token_usage.input_token_cache_read
+            self.usage.last.input_cache_creation = token_usage.input_token_cache_creation
             self.usage.last.output = token_usage.output_tokens
             self.usage.last.type = model_id
 
@@ -53,6 +58,8 @@ class AgentAnalyticsService(Service):
         """
 
         llm_registry = self.app.make(LLMRegistryService)
+
+        # TODO: add in cache costs and send it to the related panel.
 
         # Calculate session cost across all models
         session_cost = 0.0

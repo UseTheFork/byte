@@ -5,8 +5,8 @@ from byte.coder import CoderWorkflow
 from byte.config import ByteConfigException
 from byte.git import GitService
 from byte.lint import LintService
+from byte.orchestration import WorkflowService
 from byte.tui import Messages
-from byte.workflow import WorkflowService
 
 
 class LintCommand(Command):

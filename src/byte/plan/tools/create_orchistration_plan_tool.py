@@ -1,6 +1,6 @@
 from typing import List, override
 
-from byte.plan.models import PlanStep
+from byte.orchestration import PhaseModel
 from byte.tools import BaseTool, ToolResult
 
 
@@ -48,10 +48,9 @@ class CreatePlanTool(BaseTool):
     @override
     async def run(self, steps: List[dict], **kwargs) -> ToolResult:
 
-        parsed_steps: List[PlanStep] = [
-            PlanStep(
+        parsed_steps: List[PhaseModel] = [
+            PhaseModel(
                 id=str(step["order"]),
-                order=step["order"],
                 content=step["content"],
                 note=step.get("note"),
                 status="pending",

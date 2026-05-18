@@ -29,14 +29,25 @@ def import_attr(
     if module_name == "__module__" or module_name is None:
         try:
             result = import_module(f".{attr_name}", package=package)
-        except ModuleNotFoundError:
-            msg = f"module '{package!r}' has no attribute {attr_name!r}"
+        except ModuleNotFoundError as err:
+            target = f"{package}.{attr_name}"
+            if err.name and err.name == target:
+                msg = f"module '{package}' has no attribute '{attr_name}'"
+            else:
+                msg = f"Failed to import '{attr_name}' from '{package}': transitive import error — {err}"
             raise AttributeError(msg) from None
+
     else:
         try:
             module = import_module(f".{module_name}", package=package)
         except ModuleNotFoundError as err:
-            msg = f"module '{package!r}.{module_name!r}' not found ({err})"
+            target = f"{package}.{module_name}"
+            # If the missing module IS the one we tried to import, it's a direct failure.
+            # Otherwise it's a transitive dependency that failed during import.
+            if err.name and err.name == target:
+                msg = f"module '{target}' not found"
+            else:
+                msg = f"Failed to import '{attr_name}' from '{target}': transitive import error — {err}"
             raise ImportError(msg) from None
         result = getattr(module, attr_name)
     return result

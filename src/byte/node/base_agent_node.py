@@ -12,7 +12,7 @@ from byte.llm import ModelSchema
 from byte.node import (
     BaseNode,
 )
-from byte.orchestration import MessageFragment, MessageFragments, PromptAssembler
+from byte.orchestration import MessageFragment, MessageFragments, PhaseUtils, PromptAssembler
 from byte.orchestration.messages import AIMessage
 from byte.support import Str
 from byte.tools import ToolRegistryService
@@ -20,7 +20,6 @@ from byte.tui import Messages
 
 if TYPE_CHECKING:
     from byte.orchestration import BaseState
-    from byte.plan import PlanStep
 
 
 class BaseAgentNode(BaseNode):
@@ -129,7 +128,7 @@ class BaseAgentNode(BaseNode):
 
         return messages
 
-    async def generate_agent_state(self, state: BaseState, config, extra: dict = {}) -> tuple:
+    async def generate_agent_state(self, state: BaseState, config, extra: dict = {}) -> PromptAssembler:
         """Generate the agent state for the assistant node invocation.
 
         Assembles the user prompt from the state and context, emits a pre-assistant event
@@ -181,7 +180,7 @@ class BaseAgentNode(BaseNode):
         )
 
         # TODO: make this better
-        return (agent_state, config, prompt_assembler)
+        return prompt_assembler
 
     def create_runnable(
         self, prompt_assembler: PromptAssembler, tool_choice: dict[str, str] | str | None = None
@@ -196,36 +195,45 @@ class BaseAgentNode(BaseNode):
         tool_schemas = []
         tool_registry_service = self.app.make(ToolRegistryService)
 
-        plan: list[PlanStep] = prompt_assembler.get_state().get("plan") or []
-
+        is_workflow_agent = PhaseUtils.is_workflow_agent(prompt_assembler.get_state())
         # Find the first pending step (if any)
-        pending_step = next((s for s in plan if s.status == "pending"), None)
+        pending_phase = PhaseUtils.get_pending_phase(prompt_assembler.get_state())
 
-        if pending_step is not None:
+        if pending_phase is not None:
             # Append the required completion tool
-            if pending_step.completion_mode == "auto":
-                completion_tool = tool_registry_service.get_tool("complete_plan_step")
-            else:
-                completion_tool = tool_registry_service.get_tool("confirm_complete_plan_step")
+            # if pending_phase.completion_mode == "auto":
+            #     completion_tool = tool_registry_service.get_tool("complete_plan_step")
+            # else:
+            #     completion_tool = tool_registry_service.get_tool("confirm_complete_plan_step")
 
-            tool_schemas.append(completion_tool.tool_schema())  # ty:ignore[unresolved-attribute]
+            # tool_schemas.append(completion_tool.tool_schema())
 
             # Append any step-specific tools
-            if pending_step.tools:
-                for tool_class in pending_step.tools:
+            if pending_phase.tools:
+                for tool_class in pending_phase.tools:
                     tool = tool_registry_service.get_tool(tool_class.name)
-                    tool_schemas.append(tool.tool_schema())  # ty:ignore[unresolved-attribute]
+                    self.app["log"].info(tool_class.name)
+                    assert tool
+                    tool_schema = PhaseUtils.inject_phase_input_schema_args(tool.tool_schema())
+                    tool_schemas.append(tool_schema)
 
         else:
-            # No pending steps remain; if plan exists and all are completed/blocked, allow complete_turn
-            if plan and all(s.status in ("completed", "blocked") for s in plan):
+            # No pending steps remain; if workflow_phases exists and all are completed/blocked, allow complete_turn
+            if PhaseUtils.is_workflow_complete(prompt_assembler.get_state()):
                 complete_turn_tool = tool_registry_service.get_tool("complete_turn")
-                tool_schemas.append(complete_turn_tool.tool_schema())  # ty:ignore[unresolved-attribute]
+                assert complete_turn_tool
+                tool_schemas.append(complete_turn_tool.tool_schema())
 
         # Bind agent-level tools if provided
         agent_tools = self.get_tools(prompt_assembler.get_state())
         if agent_tools:
-            tool_schemas.extend(tool.tool_schema() for tool in agent_tools)
+            for tool in agent_tools:
+                tool_schema = tool.tool_schema()
+                if is_workflow_agent:
+                    tool_schema = PhaseUtils.inject_phase_input_schema_args(tool.tool_schema())
+                tool_schemas.append(tool_schema)
+
+        self.app["log"].info(tool_schemas)
 
         # Bind tool schemas to the model
         if tool_choice:

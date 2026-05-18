@@ -44,7 +44,7 @@ class ConversationScreen(Screen[None]):
     ]
 
     def action_cancel_request(self) -> None:
-        from byte.workflow import WorkflowService
+        from byte.orchestration import WorkflowService
 
         workflow_service = self.app.byte.make(WorkflowService)
         workflow_service.cancel()

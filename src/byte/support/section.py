@@ -28,6 +28,7 @@ class SectionType(StrEnum):
     COMMUNICATION_STYLE = "Communication Style"
 
     WORKFLOW = "Workflow"
+    WORKFLOW_PHASES = "Workflow Phases"
     WORKFLOW_CONSTRAINTS = "Workflow Constraints"
 
     RESPONSE_FORMAT = "Response Format"

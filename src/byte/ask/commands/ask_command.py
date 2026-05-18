@@ -3,8 +3,8 @@ from argparse import Namespace
 
 from byte import ByteArgumentParser, Command
 from byte.ask import AskWorkflow
+from byte.orchestration import WorkflowService
 from byte.tui import Messages
-from byte.workflow import WorkflowService
 
 
 class AskCommand(Command):

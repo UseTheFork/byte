@@ -1,6 +1,8 @@
 import fnmatch
-import json
+import re
 from pathlib import Path
+
+import yaml
 
 from byte import Service
 from byte.constitution.models import (
@@ -13,12 +15,28 @@ from byte.constitution.models import (
 )
 from byte.support.string import Str
 
+FRONTMATTER_PATTERN = re.compile(r"^---[\r\n]+(.*?)[\r\n]+---", re.DOTALL | re.MULTILINE)
+
 
 class ConstitutionService(Service):
     """Service for loading and managing the project constitution.
 
-    The constitution is persisted as a JSON file at
-    ``app.config_path("constitution.json")`` and is loaded on boot.
+    The constitution is persisted as a directory of Markdown files with YAML
+    frontmatter at ``app.config_path("constitution/")``.
+
+    Layout::
+
+        .byte/constitution/
+            constitution.md          # frontmatter: version, ratified, last_amended
+            principles/
+                <slug>.md            # frontmatter: name; body: description
+            governance/
+                <slug>.md            # frontmatter: name; body: content
+            sections/
+                <slug>/
+                    section.md       # frontmatter: name, applies_to (list)
+                    items/
+                        <slug>.md    # frontmatter: name; body: content
 
     Usage:
         service = app.make(ConstitutionService)
@@ -32,7 +50,7 @@ class ConstitutionService(Service):
         Usage: called automatically when the service provider boots.
         """
         self._constitution: Constitution | None = None
-        self._constitution_path: Path = self.app.config_path("constitution.json")
+        self._constitution_path: Path = self.app.config_path("constitution")
         self.reload()
 
     # ------------------------------------------------------------------
@@ -49,7 +67,7 @@ class ConstitutionService(Service):
 
     @property
     def constitution_path(self) -> Path:
-        """Return the path to the constitution JSON file.
+        """Return the path to the constitution directory.
 
         Usage: `path = service.constitution_path`
         """
@@ -64,7 +82,6 @@ class ConstitutionService(Service):
 
         Usage: `c = self._create_blank()`
         """
-
         today = __import__("datetime").date.today().isoformat()
         example = ConstitutionPrinciple(
             name="I. Example Principle",
@@ -80,23 +97,139 @@ class ConstitutionService(Service):
             meta=ConstitutionMeta(version="0.1.0", ratified=today, last_amended=today),
         )
 
-    def _save(self, constitution: Constitution) -> None:
-        """Persist *constitution* to disk as JSON.
+    # ------------------------------------------------------------------
+    # Serialisation helpers
+    # ------------------------------------------------------------------
 
-        Creates parent directories if they do not exist.
+    @staticmethod
+    def _render_md(frontmatter: dict, body: str = "") -> str:
+        """Render a Markdown file with YAML frontmatter.
+
+        Args:
+            frontmatter: Mapping to serialise as YAML between ``---`` fences.
+            body:        Optional Markdown body appended after the closing fence.
+
+        Returns:
+            Complete file content string.
+        """
+        fm = yaml.dump(frontmatter, default_flow_style=False, allow_unicode=True).rstrip()
+        parts = [f"---\n{fm}\n---"]
+        if body:
+            parts.append(body.strip())
+        return "\n".join(parts) + "\n"
+
+    @staticmethod
+    def _parse_md(text: str) -> tuple[dict, str]:
+        """Parse a Markdown file into (frontmatter dict, body string).
+
+        Args:
+            text: Raw file content.
+
+        Returns:
+            ``(frontmatter, body)`` where *frontmatter* is an empty dict when
+            no YAML block is found and *body* is the remaining content after the
+            closing ``---``.
+        """
+        match = FRONTMATTER_PATTERN.match(text)
+        if not match:
+            return {}, text.strip()
+        fm = yaml.safe_load(match.group(1)) or {}
+        body = text[match.end() :].strip()
+        return fm, body
+
+    def _save(self, constitution: Constitution) -> None:
+        """Persist *constitution* to disk as a directory of Markdown files.
+
+        Creates all required directories and files, removing stale slugs that
+        no longer exist in the in-memory model.
 
         Usage: `self._save(constitution)`
         """
-        path = self._constitution_path
-        path.write_text(json.dumps(constitution.to_dict(), indent=2), encoding="utf-8")
-        self.app["log"].debug(f"ConstitutionService: saved constitution to {path}")
+        root = self._constitution_path
+        root.mkdir(parents=True, exist_ok=True)
+
+        # --- constitution.md (meta) ---
+        meta_file = root / "constitution.md"
+        meta_file.write_text(
+            self._render_md(
+                {
+                    "version": constitution.meta.version,
+                    "ratified": constitution.meta.ratified,
+                    "last_amended": constitution.meta.last_amended,
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        # --- principles/ ---
+        principles_dir = root / "principles"
+        principles_dir.mkdir(exist_ok=True)
+        active_principle_files: set[Path] = set()
+        for slug, p in constitution.principles.items():
+            f = principles_dir / f"{slug}.md"
+            f.write_text(self._render_md({"name": p.name}, p.description), encoding="utf-8")
+            active_principle_files.add(f)
+        # Remove stale files
+        for existing in principles_dir.glob("*.md"):
+            if existing not in active_principle_files:
+                existing.unlink()
+
+        # --- governance/ ---
+        governance_dir = root / "governance"
+        governance_dir.mkdir(exist_ok=True)
+        active_governance_files: set[Path] = set()
+        for slug, r in constitution.governance.items():
+            f = governance_dir / f"{slug}.md"
+            f.write_text(self._render_md({"name": r.name}, r.content), encoding="utf-8")
+            active_governance_files.add(f)
+        for existing in governance_dir.glob("*.md"):
+            if existing not in active_governance_files:
+                existing.unlink()
+
+        # --- sections/ ---
+        sections_dir = root / "sections"
+        sections_dir.mkdir(exist_ok=True)
+        active_section_dirs: set[Path] = set()
+        for slug, section in constitution.sections.items():
+            section_dir = sections_dir / slug
+            section_dir.mkdir(exist_ok=True)
+            active_section_dirs.add(section_dir)
+
+            # section.md
+            section_fm: dict = {"name": section.name}
+            if section.applies_to:
+                section_fm["applies_to"] = section.applies_to
+            section_file = section_dir / "section.md"
+            section_file.write_text(self._render_md(section_fm), encoding="utf-8")
+
+            # items/
+            items_dir = section_dir / "items"
+            items_dir.mkdir(exist_ok=True)
+            active_item_files: set[Path] = set()
+            for item_slug, item in section.items.items():
+                f = items_dir / f"{item_slug}.md"
+                f.write_text(self._render_md({"name": item.name}, item.content), encoding="utf-8")
+                active_item_files.add(f)
+            for existing in items_dir.glob("*.md"):
+                if existing not in active_item_files:
+                    existing.unlink()
+
+        # Remove stale section directories
+        if sections_dir.exists():
+            for existing_dir in [d for d in sections_dir.iterdir() if d.is_dir()]:
+                if existing_dir not in active_section_dirs:
+                    import shutil
+
+                    shutil.rmtree(existing_dir)
+
+        self.app["log"].debug(f"ConstitutionService: saved constitution to {root}")
 
     # ------------------------------------------------------------------
     # Getters
     # ------------------------------------------------------------------
 
     def get_constitution(self) -> Constitution:
-        """Return the currently loaded Constitution, or None if not loaded.
+        """Return the currently loaded Constitution.
 
         Usage: `c = service.get_constitution()`
         """
@@ -136,7 +269,6 @@ class ConstitutionService(Service):
 
         for key, section in self._constitution.sections.items():
             if not section.applies_to:
-                # Global section — always include
                 filtered_sections[key] = section
             elif any(fnmatch.fnmatch(str_path, pattern) for str_path in str_paths for pattern in section.applies_to):
                 filtered_sections[key] = section
@@ -164,7 +296,6 @@ class ConstitutionService(Service):
 
         Usage: `service.add_principle("I. Library-First", "Every feature starts as a library.")`
         """
-
         assert self._constitution
         slug = Str.slugify(name)
         if slug in self._constitution.principles:
@@ -190,6 +321,9 @@ class ConstitutionService(Service):
         if slug not in self._constitution.principles:
             raise ValueError(f"Principle '{name}' (slug: '{slug}') not found.")
         del self._constitution.principles[slug]
+        principle_file = self._constitution_path / "principles" / f"{slug}.md"
+        if principle_file.exists():
+            principle_file.unlink()
         self._save(self._constitution)
 
     # ------------------------------------------------------------------
@@ -366,31 +500,121 @@ class ConstitutionService(Service):
         self._save(self._constitution)
         return meta
 
-    def reload(self) -> None:
-        """Re-read the constitution JSON file from disk.
+    # ------------------------------------------------------------------
+    # Directory loader
+    # ------------------------------------------------------------------
 
-        Silently sets ``self._constitution`` to None if the file does not
-        exist yet; logs a warning if the file exists but cannot be parsed.
+    def _load_from_directory(self, root: Path) -> Constitution:
+        """Parse the constitution from a directory of Markdown files.
+
+        Args:
+            root: The constitution root directory (e.g. ``.byte/constitution``).
+
+        Returns:
+            A fully populated Constitution instance.
+        """
+        # --- meta ---
+        meta_file = root / "constitution.md"
+        meta = ConstitutionMeta(version="0.1.0", ratified="", last_amended="")
+        if meta_file.exists():
+            fm, _ = self._parse_md(meta_file.read_text(encoding="utf-8"))
+            meta = ConstitutionMeta(
+                version=str(fm.get("version", "0.1.0")),
+                ratified=str(fm.get("ratified", "")),
+                last_amended=str(fm.get("last_amended", "")),
+            )
+
+        # --- principles ---
+        principles: dict[str, ConstitutionPrinciple] = {}
+        principles_dir = root / "principles"
+        if principles_dir.is_dir():
+            for f in sorted(principles_dir.glob("*.md")):
+                fm, body = self._parse_md(f.read_text(encoding="utf-8"))
+                name = fm.get("name")
+                if not name:
+                    self.app["log"].warning(f"ConstitutionService: missing 'name' in {f}, skipping")
+                    continue
+                slug = f.stem
+                principles[slug] = ConstitutionPrinciple(name=str(name), description=body)
+
+        # --- governance ---
+        governance: dict[str, ConstitutionGovernanceRule] = {}
+        governance_dir = root / "governance"
+        if governance_dir.is_dir():
+            for f in sorted(governance_dir.glob("*.md")):
+                fm, body = self._parse_md(f.read_text(encoding="utf-8"))
+                name = fm.get("name")
+                if not name:
+                    self.app["log"].warning(f"ConstitutionService: missing 'name' in {f}, skipping")
+                    continue
+                slug = f.stem
+                governance[slug] = ConstitutionGovernanceRule(name=str(name), content=body)
+
+        # --- sections ---
+        sections: dict[str, ConstitutionSection] = {}
+        sections_dir = root / "sections"
+        if sections_dir.is_dir():
+            for section_dir in sorted(d for d in sections_dir.iterdir() if d.is_dir()):
+                section_file = section_dir / "section.md"
+                if not section_file.exists():
+                    self.app["log"].warning(
+                        f"ConstitutionService: section directory {section_dir} missing section.md, skipping"
+                    )
+                    continue
+                fm, _ = self._parse_md(section_file.read_text(encoding="utf-8"))
+                name = fm.get("name")
+                if not name:
+                    self.app["log"].warning(f"ConstitutionService: missing 'name' in {section_file}, skipping")
+                    continue
+                applies_to = fm.get("applies_to") or None
+                if applies_to is not None and not isinstance(applies_to, list):
+                    applies_to = [str(applies_to)]
+
+                items: dict[str, ConstitutionItem] = {}
+                items_dir = section_dir / "items"
+                if items_dir.is_dir():
+                    for item_file in sorted(items_dir.glob("*.md")):
+                        ifm, ibody = self._parse_md(item_file.read_text(encoding="utf-8"))
+                        iname = ifm.get("name")
+                        if not iname:
+                            self.app["log"].warning(f"ConstitutionService: missing 'name' in {item_file}, skipping")
+                            continue
+                        item_slug = item_file.stem
+                        items[item_slug] = ConstitutionItem(name=str(iname), content=ibody)
+
+                slug = section_dir.name
+                sections[slug] = ConstitutionSection(name=str(name), items=items, applies_to=applies_to)
+
+        return Constitution(
+            principles=principles,
+            governance=governance,
+            meta=meta,
+            sections=sections,
+        )
+
+    def reload(self) -> None:
+        """Re-read the constitution directory from disk.
+
+        Silently creates a blank constitution if the directory does not exist yet;
+        logs a warning if individual files cannot be parsed.
 
         Usage: `service.reload()`
         """
-        path = self._constitution_path
+        root = self._constitution_path
 
-        if not path.exists():
+        if not root.exists():
             self.app["log"].debug(
-                f"ConstitutionService: no constitution file found at {path}, creating blank constitution"
+                f"ConstitutionService: no constitution directory found at {root}, creating blank constitution"
             )
             self._constitution = self._create_blank()
             self._save(self._constitution)
             return
 
         try:
-            raw = path.read_text(encoding="utf-8")
-            data = json.loads(raw)
-            self._constitution = Constitution.from_dict(data)
+            self._constitution = self._load_from_directory(root)
             self.app["log"].debug(
-                f"ConstitutionService: loaded constitution v{self._constitution.meta.version} from {path}"
+                f"ConstitutionService: loaded constitution v{self._constitution.meta.version} from {root}"
             )
-        except (OSError, json.JSONDecodeError) as exc:
-            self.app["log"].warning(f"ConstitutionService: failed to load constitution from {path}: {exc}")
+        except Exception as exc:
+            self.app["log"].warning(f"ConstitutionService: failed to load constitution from {root}: {exc}")
             self._constitution = None

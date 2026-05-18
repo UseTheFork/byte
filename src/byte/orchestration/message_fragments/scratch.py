@@ -34,5 +34,4 @@ class Scratch(MessageFragment):
                 rebuilt.append(msg)
         scratch_state = rebuilt
 
-        prompt_assembler.get_app()["log"].info(scratch_state)
         return scratch_state

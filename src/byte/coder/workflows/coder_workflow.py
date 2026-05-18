@@ -6,31 +6,24 @@ from byte.files import (
     WriteFileTool,
 )
 from byte.node.nodes import LintNode, ToolNode
-from byte.orchestration import GraphBuilder
-from byte.plan import CompletePlanStepTool, CreatePlanTool, PlanStep
-from byte.workflow import BaseWorkflow
+from byte.orchestration import BaseWorkflow, CompleteTurnTool, CreatePlanTool, GraphBuilder, PhaseModel
 
 
 class CoderWorkflow(BaseWorkflow):
     """ """
 
-    def get_plan(self):
+    def get_phases(self):
         return [
-            PlanStep(
+            PhaseModel(
                 id="1",
-                order=1,
                 content="Create a clear, step-by-step plan for implementing the requested changes.",
-                note=[
-                    f"When possible use the `{CreatePlanTool.name}` tool in parallel with the `{CompletePlanStepTool.name}` tool"
-                ],
                 agent=CoderAgentNode,
                 tools=[
                     CreatePlanTool,
                 ],
             ),
-            PlanStep(
+            PhaseModel(
                 id="2",
-                order=2,
                 content="Use available tools to apply the changes to complete the step-by-step plan",
                 tools=[
                     EditFileTool,
@@ -39,6 +32,13 @@ class CoderWorkflow(BaseWorkflow):
                     ReplaceFileTool,
                 ],
                 agent=CoderAgentNode,
+            ),
+            PhaseModel(
+                id="3",
+                content="Complete the turn with a short summary of the work done during this turn. DO NOT include `key_points`",
+                tools=[
+                    CompleteTurnTool,
+                ],
             ),
         ]
 

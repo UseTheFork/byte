@@ -9,7 +9,7 @@ from byte.support.mixins import Bootable, Configurable, Eventable
 from byte.tui import TUIManagerService
 
 if TYPE_CHECKING:
-    from byte.plan import PlanStep
+    from byte.orchestration import PhaseModel
 
 
 class BaseWorkflow(ABC, Bootable, Eventable, Configurable):
@@ -18,7 +18,7 @@ class BaseWorkflow(ABC, Bootable, Eventable, Configurable):
     _graph: Optional[CompiledStateGraph] = None
 
     @abstractmethod
-    def get_plan(self) -> List[PlanStep] | None: ...
+    def get_phases(self) -> List[PhaseModel] | None: ...
 
     @abstractmethod
     async def build(self) -> CompiledStateGraph:

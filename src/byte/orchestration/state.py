@@ -1,9 +1,15 @@
-from typing import Annotated, TypedDict
+from typing import Annotated, Dict, TypedDict
 
 from langgraph.graph.message import AnyMessage, add_messages
 
-from byte.orchestration import ConstraintSchema, MetadataSchema, add_constraints, replace_str, update_metadata
-from byte.plan import PlanStep
+from byte.orchestration import (
+    ConstraintSchema,
+    MetadataSchema,
+    PhaseModel,
+    add_constraints,
+    replace_str,
+    update_metadata,
+)
 
 
 class HarnessState(TypedDict):
@@ -55,7 +61,7 @@ class BaseState(TypedDict):
     # These are specific to Coder
     touched_files: list[str]
 
-    plan: list[PlanStep] | None
+    workflow_phases: Dict[str, PhaseModel] | None
 
     routing: RoutingState
 

@@ -1,7 +1,6 @@
 from byte import ServiceProvider
 from byte.memory import (
     ClearCommand,
-    CompleteSimpleTurnTool,
     MemoryService,
     ResetCommand,
 )
@@ -15,13 +14,6 @@ class MemoryServiceProvider(ServiceProvider):
     management for the AI agent system.
     Usage: Register with container to enable conversation memory
     """
-
-    def tools(self):
-        return [
-            # keep-sorted start
-            CompleteSimpleTurnTool,
-            # keep-sorted end
-        ]
 
     def services(self):
         return [

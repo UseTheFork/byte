@@ -1,10 +1,7 @@
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import Dict, Optional
 
 from byte.llm import ModelConstraints, ModelSchema
 from byte.support import Service, Yaml
-
-if TYPE_CHECKING:
-    pass
 
 
 class LLMRegistryService(Service):
@@ -22,8 +19,9 @@ class LLMRegistryService(Service):
                 max_input_tokens=model_data["limit"]["context"],
                 max_output_tokens=model_data["limit"]["output"],
                 input_cost_per_token=model_data["cost"]["input"],
+                cache_write_input_token_cost=model_data["cost"]["cache_write"],
+                cache_read_input_token_cost=model_data["cost"]["cache_read"],
                 output_cost_per_token=model_data["cost"]["output"],
-                input_cost_per_token_cached=model_data["cost"]["cache_read"],
             )
             model = ModelSchema(
                 model=model_id,

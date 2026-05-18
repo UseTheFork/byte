@@ -1,5 +1,5 @@
 from byte import ServiceProvider
-from byte.plan import CompletePlanStepTool, CompleteTurnTool, ConfirmCompletePlanStepTool, CreatePlanTool
+from byte.plan import CompletePlanStepTool, ConfirmCompletePlanStepTool
 
 
 class PlanServiceProvider(ServiceProvider):
@@ -7,8 +7,6 @@ class PlanServiceProvider(ServiceProvider):
         return [
             # keep-sorted start
             CompletePlanStepTool,
-            CompleteTurnTool,
             ConfirmCompletePlanStepTool,
-            CreatePlanTool,
             # keep-sorted end
         ]

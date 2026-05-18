@@ -1,7 +1,6 @@
 from byte.harness import ExecutorAgentNode, HarnessAgentNode
 from byte.node.nodes import ToolNode
-from byte.orchestration import GraphBuilder
-from byte.workflow import BaseWorkflow
+from byte.orchestration import BaseWorkflow, GraphBuilder
 
 
 class AgentHarnessWorkflow(BaseWorkflow):

@@ -1,19 +1,19 @@
 from typing import Literal, Type
 
+from langchain.messages import HumanMessage
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
-from byte.git import CommitService, GitCommitTool
+from byte.git import CommitService
 from byte.llm import LLMService, ModelSchema
-from byte.memory import CompleteSimpleTurnTool
 from byte.node import (
     BaseAgentNode,
     BaseNode,
 )
 from byte.node.nodes import EndNode
-from byte.orchestration import AIMessage, BaseState, Leaves
-from byte.support import Boundary, BoundaryType, Section, SectionType, State, Str
+from byte.orchestration import BaseState, Leaves, PhaseUtils
+from byte.support import Section, SectionType, Str
 
 # Conventional commit message generation prompt
 # Adapted from Aider: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/prompts.py#L8
@@ -43,12 +43,7 @@ class CommitAgentNode(BaseAgentNode):
 
     def get_user_template(self):
         return [
-            Section.sub_heading("Git Diffs", 2),
-            "```",
-            "{git_diffs}",
-            "```",
-            Section.important("You **MUST** consider the above git diffs before proceeding (if not empty)."),
-            Section.end(),
+            Leaves.GitDiffs(),
             Leaves.ConversationHistory(),
             Leaves.CommitHistory(),
             "",
@@ -76,42 +71,14 @@ class CommitAgentNode(BaseAgentNode):
             "- Never send acknowledgement-only responses; after receiving new context or instructions, immediately continue the task or state the concrete next action you will take.",
             Section.end(),
             Leaves.CommitGuidelines(),
-            "",
-            Section.start(SectionType.WORKFLOW),
-            "Format your response as follows:",
-            "",
-            "1. Start with a SHORT analysis of the changes in list format.",
-            f"2. Call the `{GitCommitTool.name}` tool ONCE.",
-            f"3. If the `{GitCommitTool.name}` call is successful, use the `{CompleteSimpleTurnTool.name}`",
-            Section.end(),
-            Section.sub_heading("Example Workflow", 2),
-            "```",
-            Boundary.open(BoundaryType.EXAMPLE),
-            Boundary.open(BoundaryType.AGENT_MESSAGE),
-            "Analysis of changes:",
-            "- Updated foo() to handle edge case",
-            Boundary.close(BoundaryType.AGENT_MESSAGE),
-            Boundary.open(BoundaryType.TOOL_CALL),
-            f"{GitCommitTool.name}([removed for brevity])",
-            Boundary.close(BoundaryType.TOOL_CALL),
-            Boundary.open(BoundaryType.TOOL_CALL),
-            f"{CompleteSimpleTurnTool.name}([removed for brevity])",
-            Boundary.close(BoundaryType.TOOL_CALL),
-            Boundary.close(BoundaryType.EXAMPLE),
-            "```",
         ]
 
     def get_context_template(self):
         return [
             Leaves.ToolsLoaded(),
+            Leaves.WorkflowPending(),
             Leaves.Epilogue(),
         ]
-
-    def get_tools(self, state: BaseState):
-        if not State.tool_was_called(state, GitCommitTool.name):
-            return [GitCommitTool]
-        else:
-            return [CompleteSimpleTurnTool]
 
     async def __call__(
         self,
@@ -123,19 +90,30 @@ class CommitAgentNode(BaseAgentNode):
         commit_service = self.app.make(CommitService)
         request = await commit_service.build_commit_prompt()
 
-        agent_state, config, prompt_assembler = await self.generate_agent_state(state, config, request)
+        prompt_assembler = await self.generate_agent_state(state, config, request)
         runnable = self.create_runnable(prompt_assembler, "any")
         prompt = await self.generate_prompt(prompt_assembler)
 
         record_response_service = self.app.make(RecordResponseService)
 
-        result = await runnable.ainvoke(prompt, config=config)
-        self.app.dispatch_task(
-            record_response_service.record_response(prompt, self.name, config),
-        )
+        while True:
+            result = await runnable.ainvoke(prompt, config=config)
+            self.app.dispatch_task(
+                record_response_service.record_response(prompt, self.name, config),  # ty:ignore[invalid-argument-type]
+            )
 
-        route_tool_call = self.route_tool_calls(result)
-        if route_tool_call is not None:
-            return route_tool_call
+            route_tool_call = self.route_tool_calls(result)
+            if route_tool_call is not None:
+                return route_tool_call
 
-        return self.route_to(self.goto, {"scratch_messages": AIMessage(content=result.text, agent_name=self.name)})
+            if not PhaseUtils.is_workflow_complete(prompt_assembler.get_state()):
+                prompt = prompt.append(  # ty:ignore[unresolved-attribute]
+                    HumanMessage(
+                        content=[
+                            {
+                                "type": "text",
+                                "text": "The workflow has incomplete phases, use the provided tools to complete the workflow.",
+                            },
+                        ]
+                    )
+                )

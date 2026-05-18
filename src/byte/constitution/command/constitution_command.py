@@ -3,8 +3,8 @@ from argparse import Namespace
 
 from byte import ByteArgumentParser, Command
 from byte.constitution import ConstitutionWorkflow
+from byte.orchestration import PhaseUtils, WorkflowService
 from byte.tui import Messages
-from byte.workflow import WorkflowService
 
 
 class ConstitutionCommand(Command):
@@ -36,11 +36,13 @@ class ConstitutionCommand(Command):
         self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         workflow_service = self.app.make(WorkflowService)
+        workflow_phases = PhaseUtils.to_phase_dict(constitution_workflow.get_phases())
+
         await workflow_service.execute(
             constitution_workflow,
             {
                 "user_request": raw_args,
-                "plan": constitution_workflow.get_plan(),
+                "workflow_phases": workflow_phases,
             },
         )
 

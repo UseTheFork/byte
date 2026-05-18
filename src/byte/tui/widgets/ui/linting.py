@@ -43,6 +43,12 @@ class Linting(VerticalGroup):
             height: auto;
             width: 100%;
         }
+
+        & Markdown {
+            height: auto;
+            width: 100%;
+            display: none;
+        }
     }
     """
 
@@ -73,9 +79,9 @@ class Linting(VerticalGroup):
             yield RuneSpinner(2)
             yield ProgressBar(total=100)
         yield Label("")
-        yield Markdown("", classes="hidden", id="lint-results")
+        yield Markdown("", id="lint-results")
 
-    def start_linting(self, total_commands: int) -> None:
+    async def start_linting(self, total_commands: int) -> None:
         """Start linting operation.
 
         Args:
@@ -93,7 +99,7 @@ class Linting(VerticalGroup):
         label = self.query_one(Label)
         label.update(f"Running {total_commands} lint commands...")
 
-    def update_progress(self, current_file: str, completed: int, total: int) -> None:
+    async def update_progress(self, current_file: str, completed: int, total: int) -> None:
         """Update linting progress.
 
         Args:
@@ -113,7 +119,7 @@ class Linting(VerticalGroup):
         label = self.query_one(Label)
         label.update(f"Linting: {current_file} ({completed}/{total})")
 
-    def complete_linting(self, total_files: int, failed_files: int, success: bool) -> None:
+    async def complete_linting(self, total_files: int, failed_files: int, success: bool) -> None:
         """Complete linting operation.
 
         Args:
@@ -142,12 +148,17 @@ class Linting(VerticalGroup):
             self.add_class("border-top-round-error")
             label.update(f"Linting complete: {failed_files}/{total_files} files with errors")
 
-    def display_results(self, content: str) -> None:
+        self.refresh(layout=True)
+
+    async def display_results(self, content: str) -> None:
         """Display lint results in the markdown widget.
 
         Args:
             content: Formatted markdown content with lint results
         """
         results_widget = self.query_one("#lint-results", Markdown)
-        results_widget.update(content)
-        results_widget.remove_class("hidden")
+        await results_widget.update(content)
+        results_widget.styles.display = "block"
+        results_widget.refresh(layout=True)
+
+        self.refresh(layout=True)

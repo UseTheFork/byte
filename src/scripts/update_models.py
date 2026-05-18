@@ -32,6 +32,7 @@ def extract_model_info(model_data: dict, provider: str) -> dict | None:
             "input": cost.get("input", 0),
             "output": cost.get("output", 0),
             "cache_read": cost.get("cache_read", 0),
+            "cache_write": cost.get("cache_write", 0),
         },
         "limit": {
             "context": limit.get("context", 0),

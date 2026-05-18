@@ -1,10 +1,10 @@
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Dict
 
 from pydantic import BaseModel, Field
 
 
-class ReinforcementMode(str, Enum):
+class ReinforcementMode(StrEnum):
     """Strategy for adding reinforcement messages to model prompts.
 
     Controls whether and how strongly to reinforce instructions to ensure
@@ -30,7 +30,7 @@ class ModelConstraints(BaseModel):
     input_cost_per_token: float = 0
     output_cost_per_token: float = 0
 
-    input_cost_per_token_cached: float = 0
+    cache_write_input_token_cost: float = 0
     cache_read_input_token_cost: float = 0
 
 

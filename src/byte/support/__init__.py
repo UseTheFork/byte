@@ -8,7 +8,6 @@ if TYPE_CHECKING:
     from byte.support.boundary import Boundary, BoundaryType
     from byte.support.boundary_extractor import BoundaryExtractor
     from byte.support.concerns.array_store import ArrayStore
-    from byte.support.fuzzy_search import FuzzySearch
     from byte.support.section import Section, SectionType
     from byte.support.service import Service
     from byte.support.service_provider import ServiceProvider
@@ -21,7 +20,6 @@ __all__ = (
     "Boundary",
     "BoundaryExtractor",
     "BoundaryType",
-    "FuzzySearch",
     "Section",
     "SectionType",
     "Service",
@@ -37,7 +35,6 @@ _dynamic_imports = {
     "Boundary": "boundary",
     "BoundaryExtractor": "boundary_extractor",
     "BoundaryType": "boundary",
-    "FuzzySearch": "fuzzy_search",
     "Section": "section",
     "SectionType": "section",
     "Service": "service",
