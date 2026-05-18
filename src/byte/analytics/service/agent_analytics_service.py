@@ -59,8 +59,6 @@ class AgentAnalyticsService(Service):
 
         llm_registry = self.app.make(LLMRegistryService)
 
-        # TODO: add in cache costs and send it to the related panel.
-
         # Calculate session cost across all models
         session_cost = 0.0
         for model_id, usage in self.usage.by_model.items():
@@ -68,10 +66,13 @@ class AgentAnalyticsService(Service):
             model_data = llm_registry.get_model(model_id)
 
             if model_data:
-                # Use the model's constraints to calculate costs
+                c = model_data.constraints
                 model_cost = (
-                    usage.total.input * self.get_cost_per_token(model_data.constraints.input_cost_per_token)
-                ) + (usage.total.output * self.get_cost_per_token(model_data.constraints.output_cost_per_token))
+                    usage.total.input_cache_read * c.cache_read_input_token_cost
+                    + usage.total.input_cache_creation * c.cache_write_input_token_cost
+                    + (usage.total.input - usage.total.input_cache_read) * c.input_cost_per_token
+                    + usage.total.output * c.output_cost_per_token
+                ) / 1000000
                 session_cost += model_cost
 
         # Calculate last message cost based on model
@@ -80,9 +81,13 @@ class AgentAnalyticsService(Service):
             model_data = llm_registry.get_model(self.usage.last.type)
 
             if model_data:
+                c = model_data.constraints
                 last_message_cost = (
-                    self.usage.last.input * self.get_cost_per_token(model_data.constraints.input_cost_per_token)
-                ) + (self.usage.last.output * self.get_cost_per_token(model_data.constraints.output_cost_per_token))
+                    self.usage.last.input_cache_read * c.cache_read_input_token_cost
+                    + self.usage.last.input_cache_creation * c.cache_write_input_token_cost
+                    + (self.usage.last.input - self.usage.last.input_cache_read) * c.input_cost_per_token
+                    + self.usage.last.output * c.output_cost_per_token
+                ) / 1000000
 
         self.emit_tui(
             Messages.UpdateAnalytics(
