@@ -91,7 +91,7 @@ class CommitAgentNode(BaseAgentNode):
         request = await commit_service.build_commit_prompt()
 
         prompt_assembler = await self.generate_agent_state(state, config, request)
-        runnable = self.create_runnable(prompt_assembler, "any")
+        runnable = self.create_runnable(prompt_assembler)
         prompt = await self.generate_prompt(prompt_assembler)
 
         record_response_service = self.app.make(RecordResponseService)

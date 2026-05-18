@@ -118,6 +118,3 @@ class CoderAgentNode(BaseAgentNode):
                         )
                     ]
                 )
-
-        # msg = extract_content_from_message(result)
-        # return self.route_to(self.goto, {"scratch_messages": AIMessage(content=msg, agent_name=self.name)})
