@@ -103,11 +103,7 @@ class AskAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-<<<<<<< HEAD
-        config, prompt_assembler = await self.generate_agent_state(state, config)
-=======
         prompt_assembler = await self.generate_agent_state(state, config)
->>>>>>> 169a212d82347a602936686e2f55a04e68935914
         prompt = await self.generate_prompt(prompt_assembler)
         runnable = self.create_runnable(prompt_assembler)
 
