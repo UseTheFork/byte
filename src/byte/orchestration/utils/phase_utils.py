@@ -17,25 +17,30 @@ class PhaseUtils:
         if not tool_schema:
             return {}
 
-        properties = tool_schema["input_schema"]["properties"]
+        existing_properties = tool_schema["input_schema"]["properties"]
         required = tool_schema["input_schema"].setdefault("required", [])
 
-        if "phase_id" not in properties:
-            properties["phase_id"] = {
+        new_properties: Dict[str, Any] = {}
+
+        if "phase_id" not in existing_properties:
+            new_properties["phase_id"] = {
                 "type": "string",
                 "description": "The id of the phase that this tool call is for. (Example: `phase-1`, `phase-2`)",
             }
 
-        if "phase_status" not in properties:
-            properties["phase_status"] = {
+        if "phase_status" not in existing_properties:
+            new_properties["phase_status"] = {
                 "type": "string",
                 "enum": ["pending", "in_progress", "blocked", "completed"],
                 "description": "The status to set on the phase. If a phase requires multiple tool calls or edits use `in_progress`. `completed` should only be used on the final tool call for the phase you are working on.",
             }
 
+        new_properties.update(existing_properties)
+        tool_schema["input_schema"]["properties"] = new_properties
+
         for field in ("phase_id", "phase_status"):
             if field not in required:
-                required.append(field)
+                required.insert(0, field)
 
         return tool_schema
 

@@ -40,5 +40,5 @@ class CreateAnalysisTool(BaseTool):
         return f"Analysis recorded.\n\nSummary: {summary}\n\nObservations:\n{observations_text}"
 
     @override
-    async def run(self, summary: str, observations: List[str], **kwargs) -> ToolResult:
+    async def run(self, summary: str, observations: List[str] = [], **kwargs) -> ToolResult:
         return ToolResult(result={"summary": summary, "observations": observations})
