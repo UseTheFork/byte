@@ -19,7 +19,6 @@ class RoutingNode(BaseNode):
             "lint_node",
             "end_node",
             "tool_node",
-            "validation_node",
             "commit_agent_node",
             "constitution_agent_node",
             "coder_agent_node",

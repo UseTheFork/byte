@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from byte.git.tools.git_commit_tool import GitCommitTool
     from byte.git.tools.git_grep_tool import GitGrepTool
     from byte.git.tools.git_log_tool import GitLogTool
-    from byte.git.validators.commit_validator import CommitValidator
     from byte.git.workflows.commit_workflow import CommitWorkflow
 
 __all__ = (
@@ -24,7 +23,6 @@ __all__ = (
     "CommitMessage",
     "CommitPlan",
     "CommitService",
-    "CommitValidator",
     "CommitWorkflow",
     "GitCommitTool",
     "GitGrepTool",
@@ -41,7 +39,6 @@ _dynamic_imports = {
     "CommitMessage": "schemas",
     "CommitPlan": "schemas",
     "CommitService": "service.commit_service",
-    "CommitValidator": "validators.commit_validator",
     "CommitWorkflow": "workflows.commit_workflow",
     "GitCommitTool": "tools.git_commit_tool",
     "GitGrepTool": "tools.git_grep_tool",
