@@ -5,12 +5,14 @@ from partial_json_parser import OBJ, loads
 from rich.console import RenderableType
 from rich.markdown import Markdown
 from rich.text import Text
+from textual import on
 from textual.app import ComposeResult
 from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Collapsible
 
 from byte.tui.constants import ANGLE_DOWN, ANGLE_RIGHT
+from byte.tui.messages import Messages
 
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
@@ -59,6 +61,11 @@ class ToolArgs(Widget, can_focus=False):
 
         # If we have a valid parsed dictionary, display its contents
         if parsed is not None and isinstance(parsed, dict) and parsed:
+            phase_id = parsed.get("phase_id")
+            phase_status = parsed.get("phase_status")
+            if phase_id or phase_status:
+                self.post_message(Messages.PhaseUpdated(phase_id, phase_status))
+
             for key, value in parsed.items():
                 output.append(f"\n╰─ {key}: {value}")
         elif self.raw_args:
@@ -178,7 +185,7 @@ class ToolArgsCollapsible(Collapsible):
             }
 
             &.-collapsed > Contents {
-                display: none;   
+                display: none;
             }
     }
     """
@@ -194,6 +201,7 @@ class ToolCall(Widget, can_focus=False):
         height: auto;
         background: transparent;
         border-top: round $secondary;
+        border-bottom: round $secondary;
         margin-bottom: 1;
     }
     """
@@ -215,12 +223,24 @@ class ToolCall(Widget, can_focus=False):
         self.tool_name = tool_name
         self.border_title = f" {self.tool_name}() "
 
+        # label.border_subtitle = "Textual Rocks"
+
     def compose(self) -> ComposeResult:
         with ToolArgsCollapsible(
             title="Arguments", collapsed=False, collapsed_symbol=ANGLE_RIGHT, expanded_symbol=ANGLE_DOWN
         ):
             yield ToolArgs()
         yield ToolResult()
+
+    @on(Messages.PhaseUpdated)
+    def phase_updated(self, event: Messages.PhaseUpdated) -> None:
+        parts = []
+        if event.phase_id:
+            parts.append(f"  {event.phase_id}")
+        if event.phase_status:
+            parts.append(f"{event.phase_status}  ")
+        if parts:
+            self.border_subtitle = " · ".join(parts)
 
     def complete(self, status: str = "success", content: str | None = None) -> None:
         """Collapse args and show result."""

@@ -199,3 +199,8 @@ class Messages:
     @dataclass
     class UserCancelled(Message):
         panel_id: str | None = None
+
+    @dataclass
+    class PhaseUpdated(Message):
+        phase_id: str | None = None
+        phase_status: str | None = None
