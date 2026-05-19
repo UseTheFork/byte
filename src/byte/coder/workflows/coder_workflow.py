@@ -75,7 +75,6 @@ class CoderWorkflow(BaseWorkflow):
         # Add nodes
         graph.add_node(CoderAgentNode)
         graph.add_node(ToolNode)
-        graph.add_node(LintNode)
 
         # Compile graph with memory and configuration
         checkpointer = await self.get_checkpointer()

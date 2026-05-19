@@ -14,7 +14,11 @@ class LintTool(BaseTool):
         "tool exits immediately with a no-op message. On failure, the full lint error output "
         "is returned."
     )
-    input_schema = {}
+    input_schema = {
+        "type": "object",
+        "properties": {},
+        "required": [],
+    }
 
     @override
     async def run(

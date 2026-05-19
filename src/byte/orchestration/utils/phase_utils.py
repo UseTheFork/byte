@@ -17,6 +17,8 @@ class PhaseUtils:
         if not tool_schema:
             return {}
 
+        if "properties" not in tool_schema["input_schema"]:
+            tool_schema["input_schema"]["properties"] = {}
         existing_properties = tool_schema["input_schema"]["properties"]
         required = tool_schema["input_schema"].setdefault("required", [])
 

@@ -37,7 +37,7 @@ class CommitWorkflow(BaseWorkflow):
                 executed_by=CommitAgentNode,
             ),
             RoutePhaseModel(
-                id="5",
+                id="4",
                 executed_by=EndNode,
             ),
         ]
