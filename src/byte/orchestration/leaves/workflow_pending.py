@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from byte.orchestration import Leaf, PhaseUtils
+from byte.orchestration import Leaf, PhaseModel, PhaseUtils
 from byte.support import Section, SectionType
 from byte.support.utils import list_to_multiline_text
 
@@ -20,7 +20,8 @@ class WorkflowPending(Leaf):
         ]
 
         for step in workflow_phases.values():
-            message_parts.append(step.to_pending_md())
+            if isinstance(step, PhaseModel):
+                message_parts.append(step.to_pending_md())
 
         message_parts.append(Section.end())
         return list_to_multiline_text(message_parts)

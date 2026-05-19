@@ -18,6 +18,6 @@ class NodeRegistry(Bootable):
         node_str = Str.class_to_snake_case(node)
         self._nodes[node_str] = node
 
-    def all(self):
+    def all(self) -> Dict[str, Type[BaseNode]]:
         """ """
         return dict(self._nodes)

@@ -127,7 +127,7 @@ class Select(VerticalGroup):
         self.mandatory = mandatory
 
     def on_mount(self):
-        self.border_title = self.ask.question  # ty:ignore[possibly-missing-attribute]
+        self.border_title = self.ask.question
         self.styles.height = len(self.options) + 2
 
     def action_exit_now(self):
@@ -139,7 +139,7 @@ class Select(VerticalGroup):
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
         if self.selected_label:
             self.selected_label.remove_pointer()
-        label = event.item.query_one(ChoiceLabel)  # ty:ignore[possibly-missing-attribute]
+        label = event.item.query_one(ChoiceLabel)
         label.add_pointer()
         self.selected_label = label
         self.selected_item = label.item

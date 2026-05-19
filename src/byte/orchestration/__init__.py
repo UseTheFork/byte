@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from byte.orchestration.message_fragments.message_fragments import MessageFragments
     from byte.orchestration.messages import AIMessage
     from byte.orchestration.models.phase_model import PhaseModel
+    from byte.orchestration.models.route_phase_model import RoutePhaseModel
     from byte.orchestration.prompt_leaves import core_mandates
     from byte.orchestration.reducers import add_constraints, replace_list, replace_str, update_metadata
     from byte.orchestration.schemas import (
@@ -36,7 +37,6 @@ if TYPE_CHECKING:
     from byte.orchestration.utils.graph_builder import GraphBuilder
     from byte.orchestration.utils.phase_utils import PhaseUtils
     from byte.orchestration.utils.prompt_assembler import PromptAssembler
-    from byte.orchestration.validators.user_confirm_validator import UserConfirmValidator
 
 
 __all__ = (
@@ -66,9 +66,9 @@ __all__ = (
     "PhaseUtils",
     "PromptAssembler",
     "PromptSettingsSchema",
+    "RoutePhaseModel",
     "RoutingState",
     "TokenUsageSchema",
-    "UserConfirmValidator",
     "WorkflowService",
     "add_constraints",
     "core_mandates",
@@ -103,12 +103,12 @@ _dynamic_imports = {
     "OrchestrationEvents": "events",
     "OrchestrationServiceProvider": "service_provider",
     "PhaseModel": "models.phase_model",
+    "RoutePhaseModel": "models.route_phase_model",
     "PhaseUtils": "utils.phase_utils",
     "PromptAssembler": "utils.prompt_assembler",
     "PromptSettingsSchema": "schemas",
     "RoutingState": "state",
     "TokenUsageSchema": "schemas",
-    "UserConfirmValidator": "validators.user_confirm_validator",
     "WorkflowService": "services.workflow_service",
     "add_constraints": "reducers",
     "core_mandates": "prompt_leaves",

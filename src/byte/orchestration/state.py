@@ -1,4 +1,4 @@
-from typing import Annotated, Dict, TypedDict
+from typing import Annotated, Dict, TypedDict, Union
 
 from langgraph.graph.message import AnyMessage, add_messages
 
@@ -6,6 +6,7 @@ from byte.orchestration import (
     ConstraintSchema,
     MetadataSchema,
     PhaseModel,
+    RoutePhaseModel,
     add_constraints,
     replace_str,
     update_metadata,
@@ -61,7 +62,7 @@ class BaseState(TypedDict):
     # These are specific to Coder
     touched_files: list[str]
 
-    workflow_phases: Dict[str, PhaseModel] | None
+    workflow_phases: Dict[str, Union[PhaseModel | RoutePhaseModel]] | None
 
     routing: RoutingState
 

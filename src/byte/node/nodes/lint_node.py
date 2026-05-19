@@ -3,13 +3,12 @@ from typing import Literal, Type
 
 from langchain_core.messages import HumanMessage
 from langgraph.graph.state import RunnableConfig
-from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from byte.lint import LintService
 from byte.node import BaseNode
 from byte.node.nodes import EndNode
-from byte.orchestration import AssistantContextSchema, BaseState
+from byte.orchestration import BaseState
 from byte.support import Str
 
 
@@ -25,7 +24,6 @@ class LintNode(BaseNode):
         self,
         state: BaseState,
         *,
-        runtime: Runtime[AssistantContextSchema],
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
         lint_service = self.app.make(LintService)
@@ -45,4 +43,4 @@ class LintNode(BaseNode):
             joined_lint_errors = lint_service.format_lint_errors(failed_commands)
             return self.route_to("coder_agent", {"scratch_messages": HumanMessage(joined_lint_errors)})
 
-        return self.route_to(self.goto)
+        return self.route_back(state)

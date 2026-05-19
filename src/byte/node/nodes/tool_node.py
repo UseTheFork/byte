@@ -83,7 +83,6 @@ class ToolNode(BaseNode):
                 # If we are in a workflow we also need to update the state of the phase
                 if is_workflow_agent:
                     workflow_phases = PhaseUtils.update_phase_with_tool_args(tool_call["args"], workflow_phases)
-
             except ToolException as err:
                 tool_message = ToolMessage(
                     status="error",
@@ -102,6 +101,7 @@ class ToolNode(BaseNode):
         update = {"scratch_messages": outputs, "workflow_phases": workflow_phases, **merged_extra}
 
         # Final single route_back after ALL tools
+        # TODO: This should prob move to routing.
         if any(
             (tool := self.tool_registry_service.get_tool(tc["name"])) and tool.terminates_turn
             for tc in message.tool_calls

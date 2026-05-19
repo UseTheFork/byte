@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from byte.lint.exceptions import LintConfigException
     from byte.lint.service.lint_service import LintService
     from byte.lint.service_provider import LintServiceProvider
+    from byte.lint.tools.lint_tool import LintTool
     from byte.lint.types import LintCommandType, LintFile
 
 __all__ = (
@@ -18,6 +19,7 @@ __all__ = (
     "LintFile",
     "LintService",
     "LintServiceProvider",
+    "LintTool",
 )
 
 _dynamic_imports = {
@@ -26,6 +28,7 @@ _dynamic_imports = {
     "LintCommandType": "types",
     "LintConfigException": "exceptions",
     "LintFile": "types",
+    "LintTool": "tools.lint_tool",
     "LintService": "service.lint_service",
 }
 

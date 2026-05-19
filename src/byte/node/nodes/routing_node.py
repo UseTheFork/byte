@@ -4,7 +4,7 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
 from byte.node import BaseNode
-from byte.orchestration import BaseState, WorkflowService
+from byte.orchestration import BaseState, PhaseUtils, WorkflowService
 
 
 # This is here to control the below Literal and be able to have all possible nodes in one place.
@@ -27,11 +27,18 @@ class RoutingNode(BaseNode):
         ]
     ]:
         routing = state.get("routing", {})
-        self.app["log"].info(f"Routing >> From: {routing.get('source')} >> To: {routing.get('target')}")
 
         # Check if the user has cancelled execution
         workflow_service = self.app.make(WorkflowService)
         if workflow_service.cancel_event.is_set():
             return Command(goto="end_node")
 
+        # Check where we are in the workflow
+        if PhaseUtils.is_workflow_agent(state) and routing.get("target") not in ("tool_node", "end_node"):
+            pending_phase = PhaseUtils.get_pending_phase(state)
+            if pending_phase:
+                self.app["log"].info(f"Routing Phase >> To: {pending_phase.get_executed_by()}")
+                return Command(goto=pending_phase.get_executed_by())  # ty:ignore[invalid-return-type]
+
+        self.app["log"].info(f"Routing >> From: {routing.get('source')} >> To: {routing.get('target')}")
         return Command(goto=routing.get("target"))  # ty:ignore[invalid-return-type]

@@ -1,7 +1,7 @@
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 if TYPE_CHECKING:
-    from byte.orchestration import BaseState, PhaseModel
+    from byte.orchestration import BaseState, PhaseModel, RoutePhaseModel
 
 
 class PhaseUtils:
@@ -55,7 +55,7 @@ class PhaseUtils:
         return phase_dict
 
     @staticmethod
-    def get_pending_phase(state: BaseState) -> PhaseModel | None:
+    def get_pending_phase(state: BaseState) -> Union[RoutePhaseModel | PhaseModel] | None:
         """ """
         workflow_phases = state.get("workflow_phases") or {}
         pending_phase = next(
@@ -65,7 +65,7 @@ class PhaseUtils:
         return pending_phase
 
     @staticmethod
-    def get_workflow_phases(state: BaseState) -> Dict[str, PhaseModel] | None:
+    def get_workflow_phases(state: BaseState) -> Dict[str, Union[RoutePhaseModel | PhaseModel]] | None:
         """ """
         workflow_phases = state.get("workflow_phases") or {}
         if len(workflow_phases.keys()) <= 0:
@@ -104,3 +104,16 @@ class PhaseUtils:
             workflow_phases[phase_id].status = phase_status
 
         return workflow_phases
+
+    # @staticmethod
+    # def get_phase_redirect(args: Dict, workflow_phases: Dict[str, Union[RoutePhaseModel | PhaseModel]]) -> str | None:
+    #     """Return the on_complete route target if the phase just completed."""
+    #     phase_id = args.get("phase_id")
+    #     phase_status = args.get("phase_status")
+
+    #     if phase_id and phase_status == "completed":
+    #         phase = workflow_phases.get(phase_id)
+    #         if phase and phase.on_complete is not None:
+    #             return Str.class_to_snake_case(phase.on_complete)
+
+    #     return None

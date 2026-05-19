@@ -5,19 +5,26 @@ from byte.files import (
     ReplaceFileTool,
     WriteFileTool,
 )
-from byte.node.nodes import LintNode, ToolNode
-from byte.orchestration import BaseWorkflow, CompleteTurnTool, CreatePlanTool, GraphBuilder, PhaseModel
+from byte.node.nodes import EndNode, LintNode, ToolNode
+from byte.orchestration import BaseWorkflow, CompleteTurnTool, CreatePlanTool, GraphBuilder, PhaseModel, RoutePhaseModel
 
 
 class CoderWorkflow(BaseWorkflow):
-    """ """
+    """
+    Primary workflow for AI-driven code changes.
+
+    Orchestrates a multi-phase graph pipeline that plans, implements, lints,
+    and summarises code modifications requested by the user. Phases progress
+    through planning (phase 1), file editing (phase 2), lint routing (phase 3),
+    and turn completion (phase 4), terminating at an end node (phase 5).
+    """
 
     def get_phases(self):
         return [
             PhaseModel(
                 id="1",
                 content="Create a clear, step-by-step plan for implementing the requested changes.",
-                agent=CoderAgentNode,
+                executed_by=CoderAgentNode,
                 tools=[
                     CreatePlanTool,
                 ],
@@ -31,14 +38,30 @@ class CoderWorkflow(BaseWorkflow):
                     DeleteFileTool,
                     ReplaceFileTool,
                 ],
-                agent=CoderAgentNode,
+                executed_by=CoderAgentNode,
             ),
             PhaseModel(
                 id="3",
+                content="Run the lint tool on all touched files. If lint errors are reported, fix them using the available file tools and re-run the lint tool. Repeat until linting passes with no errors.",
+                tools=[
+                    EditFileTool,
+                    WriteFileTool,
+                    DeleteFileTool,
+                    ReplaceFileTool,
+                ],
+                executed_by=CoderAgentNode,
+            ),
+            PhaseModel(
+                id="4",
                 content="Complete the turn with a short summary of the work done during this turn. DO NOT include `key_points`",
                 tools=[
                     CompleteTurnTool,
                 ],
+                executed_by=CoderAgentNode,
+            ),
+            RoutePhaseModel(
+                id="5",
+                executed_by=EndNode,
             ),
         ]
 
