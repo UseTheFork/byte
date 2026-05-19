@@ -12,7 +12,6 @@ class LintServiceProvider(ServiceProvider):
     """
 
     def tools(self):
-        """Returns the list of git-related tools available to the agent."""
         return [
             # keep-sorted start
             LintTool
@@ -20,7 +19,15 @@ class LintServiceProvider(ServiceProvider):
         ]
 
     def services(self):
-        return [LintService]
+        return [
+            # keep-sorted start
+            LintService
+            # keep-sorted end
+        ]
 
     def commands(self):
-        return [LintCommand]
+        return [
+            # keep-sorted start
+            LintCommand
+            # keep-sorted end
+        ]

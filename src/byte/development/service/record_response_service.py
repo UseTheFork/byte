@@ -16,7 +16,7 @@ class RecordResponseService(Service):
 
     async def record_response(
         self,
-        messages: List[BaseMessage],
+        messages: List[BaseMessage] | None,
         agent_name: str,
         config: RunnableConfig,
     ):
@@ -34,6 +34,9 @@ class RecordResponseService(Service):
 
         Usage: `file_path = await service.cache_response(result, runtime.context)`
         """
+
+        if not messages:
+            return
 
         # if self.app.is_development():
         #     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
