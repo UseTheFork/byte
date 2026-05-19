@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Type, TypeVar
 from langgraph.graph import StateGraph
 
 from byte.node import BaseNode, NodeRegistry
-from byte.node.nodes import DummyNode, EndNode, RoutingNode, StartNode
+from byte.node.nodes import DummyNode, EndNode, RoutingNode, StartNode, ToolNode
 from byte.orchestration import (
     AssistantContextSchema,
     BaseState,
@@ -29,6 +29,7 @@ class GraphBuilder:
         self._dummy_nodes = self.discover_node_classes()
 
         self.add_node(StartNode, goto=start_node)
+        self.add_node(ToolNode)
         self.add_node(RoutingNode)
         self.add_node(EndNode)
 

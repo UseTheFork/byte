@@ -8,11 +8,11 @@ from byte.tools import BaseTool, ToolResult
 class LintTool(BaseTool):
     name: str = "lint_files"
     description: str = (
-        "Runs the configured linter against all files touched during the current session. "
-        "Reads the list of modified file paths from state, executes lint checks on each, "
+        "Runs the configured linters against all files touched during the current session. "
+        "Reads the list of modified file paths, executes lint checks on each, "
         "and returns a structured pass/fail result. If linting is disabled in config the "
         "tool exits immediately with a no-op message. On failure, the full lint error output "
-        "is returned so the agent can diagnose and fix the issues."
+        "is returned."
     )
     input_schema = {}
 

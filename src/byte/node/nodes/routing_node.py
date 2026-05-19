@@ -16,7 +16,6 @@ class RoutingNode(BaseNode):
         config: RunnableConfig,
     ) -> Command[
         Literal[
-            "lint_node",
             "end_node",
             "tool_node",
             "commit_agent_node",

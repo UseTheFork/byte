@@ -5,7 +5,8 @@ from byte.files import (
     ReplaceFileTool,
     WriteFileTool,
 )
-from byte.node.nodes import EndNode, LintNode, ToolNode
+from byte.lint.tools.lint_tool import LintTool
+from byte.node.nodes import EndNode, ToolNode
 from byte.orchestration import BaseWorkflow, CompleteTurnTool, CreatePlanTool, GraphBuilder, PhaseModel, RoutePhaseModel
 
 
@@ -42,8 +43,9 @@ class CoderWorkflow(BaseWorkflow):
             ),
             PhaseModel(
                 id="3",
-                content="Run the lint tool on all touched files. If lint errors are reported, fix them using the available file tools and re-run the lint tool. Repeat until linting passes with no errors.",
+                content=f"Run the `{LintTool.name}` tool on all touched files. If lint errors are reported, fix them using the available file tools and re-run the lint tool. Repeat until linting passes with no errors.",
                 tools=[
+                    LintTool,
                     EditFileTool,
                     WriteFileTool,
                     DeleteFileTool,
@@ -71,7 +73,7 @@ class CoderWorkflow(BaseWorkflow):
         graph = self.app.make(GraphBuilder, start_node=CoderAgentNode)
 
         # Add nodes
-        graph.add_node(CoderAgentNode, goto=LintNode)
+        graph.add_node(CoderAgentNode)
         graph.add_node(ToolNode)
         graph.add_node(LintNode)
 

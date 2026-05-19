@@ -1,6 +1,7 @@
 from byte.git import CommitAgentNode, GitCommitTool
-from byte.node.nodes import LintNode, ToolNode
+from byte.node.nodes import EndNode
 from byte.orchestration import BaseWorkflow, CompleteTurnTool, CreateAnalysisTool, GraphBuilder, PhaseModel
+from byte.orchestration.models.route_phase_model import RoutePhaseModel
 
 
 class CommitWorkflow(BaseWorkflow):
@@ -14,7 +15,7 @@ class CommitWorkflow(BaseWorkflow):
                 note=[
                     f"   - DO NOT include `observations` when using the `{CreateAnalysisTool.name}` tool.",
                 ],
-                agent=CommitAgentNode,
+                executed_by=CommitAgentNode,
                 tools=[
                     CreateAnalysisTool,
                 ],
@@ -25,7 +26,7 @@ class CommitWorkflow(BaseWorkflow):
                 tools=[
                     GitCommitTool,
                 ],
-                agent=CommitAgentNode,
+                executed_by=CommitAgentNode,
             ),
             PhaseModel(
                 id="3",
@@ -33,17 +34,20 @@ class CommitWorkflow(BaseWorkflow):
                 tools=[
                     CompleteTurnTool,
                 ],
+                executed_by=CommitAgentNode,
+            ),
+            RoutePhaseModel(
+                id="5",
+                executed_by=EndNode,
             ),
         ]
 
     async def build(self):
         """ """
 
-        graph = self.app.make(GraphBuilder, start_node=LintNode)
+        graph = self.app.make(GraphBuilder, start_node=CommitAgentNode)
 
         # Add nodes
-        graph.add_node(LintNode, goto=CommitAgentNode)
-        graph.add_node(ToolNode)
         graph.add_node(CommitAgentNode)
 
         # Compile graph with memory and configuration

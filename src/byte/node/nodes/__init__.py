@@ -7,7 +7,6 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.node.nodes.dummy_node import DummyNode
     from byte.node.nodes.end_node import EndNode
-    from byte.node.nodes.lint_node import LintNode
     from byte.node.nodes.routing_node import RoutingNode
     from byte.node.nodes.start_node import StartNode
     from byte.node.nodes.tool_node import ToolNode
@@ -15,7 +14,6 @@ if TYPE_CHECKING:
 __all__ = (
     "DummyNode",
     "EndNode",
-    "LintNode",
     "RoutingNode",
     "StartNode",
     "ToolNode",
@@ -25,7 +23,6 @@ _dynamic_imports = {
     # keep-sorted start
     "DummyNode": "dummy_node",
     "EndNode": "end_node",
-    "LintNode": "lint_node",
     "RoutingNode": "routing_node",
     "StartNode": "start_node",
     "ToolNode": "tool_node",
