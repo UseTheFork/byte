@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from byte.orchestration.tools.complete_turn_tool import CompleteTurnTool
     from byte.orchestration.tools.create_analysis_tool import CreateAnalysisTool
     from byte.orchestration.tools.create_plan_tool import CreatePlanTool
+    from byte.orchestration.tools.update_phase_tool import UpdatePhaseTool
     from byte.orchestration.utils.graph_builder import GraphBuilder
     from byte.orchestration.utils.phase_utils import PhaseUtils
     from byte.orchestration.utils.prompt_assembler import PromptAssembler
@@ -69,6 +70,7 @@ __all__ = (
     "RoutePhaseModel",
     "RoutingState",
     "TokenUsageSchema",
+    "UpdatePhaseTool",
     "WorkflowService",
     "add_constraints",
     "core_mandates",
@@ -99,6 +101,7 @@ _dynamic_imports = {
     "Leaves": "leaves.leaves",
     "MessageFragment": "message_fragments.message_fragment",
     "MessageFragments": "message_fragments.message_fragments",
+    "UpdatePhaseTool": "tools.update_phase_tool",
     "MetadataSchema": "schemas",
     "OrchestrationEvents": "events",
     "OrchestrationServiceProvider": "service_provider",

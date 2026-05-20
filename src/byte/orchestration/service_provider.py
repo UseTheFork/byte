@@ -4,6 +4,7 @@ from byte.orchestration import (
     CompleteTurnTool,
     CreateAnalysisTool,
     CreatePlanTool,
+    UpdatePhaseTool,
     WorkflowService,
 )
 
@@ -14,11 +15,11 @@ class OrchestrationServiceProvider(ServiceProvider):
     def tools(self):
         return [
             # keep-sorted start
-            # CompletePlanStepTool,
             CompleteSimpleTurnTool,
             CompleteTurnTool,
             CreateAnalysisTool,
             CreatePlanTool,
+            UpdatePhaseTool,
             # keep-sorted end
         ]
 

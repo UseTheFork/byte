@@ -7,7 +7,15 @@ from byte.files import (
 )
 from byte.lint.tools.lint_tool import LintTool
 from byte.node.nodes import EndNode, ToolNode
-from byte.orchestration import BaseWorkflow, CompleteTurnTool, CreatePlanTool, GraphBuilder, PhaseModel, RoutePhaseModel
+from byte.orchestration import (
+    BaseWorkflow,
+    CompleteTurnTool,
+    CreatePlanTool,
+    GraphBuilder,
+    PhaseModel,
+    RoutePhaseModel,
+    UpdatePhaseTool,
+)
 
 
 class CoderWorkflow(BaseWorkflow):
@@ -50,6 +58,10 @@ class CoderWorkflow(BaseWorkflow):
                     WriteFileTool,
                     DeleteFileTool,
                     ReplaceFileTool,
+                    UpdatePhaseTool,
+                ],
+                note=[
+                    f"   - To Complete this phase use the `{UpdatePhaseTool.name}` tool.",
                 ],
                 executed_by=CoderAgentNode,
             ),

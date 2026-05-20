@@ -98,7 +98,7 @@ class CoderAgentNode(BaseAgentNode):
                 config=config,
             )
             self.app.dispatch_task(
-                record_response_service.record_response(prompt, self.name, config),  # ty:ignore[invalid-argument-type]
+                record_response_service.record_response(prompt, self.name, config),
             )
 
             route_tool_call = self.route_tool_calls(result)
