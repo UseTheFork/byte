@@ -89,6 +89,7 @@ class CoderAgentNode(BaseAgentNode):
         record_response_service = self.app.make(RecordResponseService)
         prompt_assembler = await self.generate_agent_state(state, config)
 
+        # TODO: we should make this a static method in PhaseUtils
         pending_phase = PhaseUtils.get_pending_phase(prompt_assembler.get_state())
         if pending_phase is not None and isinstance(pending_phase, PhaseModel):
             runnable = self.create_runnable(prompt_assembler, tool_choice=pending_phase.tool_choice)
