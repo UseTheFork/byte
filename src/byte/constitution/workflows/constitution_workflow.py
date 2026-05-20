@@ -11,9 +11,9 @@ from byte.constitution import (
 )
 from byte.files import AddFilesTool, ListFilesTool
 from byte.git import GitGrepTool
-from byte.node.nodes import ToolNode
-from byte.orchestration import BaseWorkflow, CompleteTurnTool, GraphBuilder, PhaseModel
-from byte.system import UserConfirmTool, UserSelectTool
+from byte.node.nodes import EndNode, ToolNode
+from byte.orchestration import BaseWorkflow, GraphBuilder, PhaseModel, RoutePhaseModel, UpdatePhaseTool
+from byte.system import UserConfirmOrInputTool, UserConfirmTool, UserSelectTool
 
 
 class ConstitutionWorkflow(BaseWorkflow):
@@ -40,7 +40,7 @@ class ConstitutionWorkflow(BaseWorkflow):
                     ListFilesTool,
                     AddFilesTool,
                 ],
-                agent=ConstitutionAgentNode,
+                executed_by=ConstitutionAgentNode,
             ),
             PhaseModel(
                 id="3",
@@ -51,15 +51,13 @@ class ConstitutionWorkflow(BaseWorkflow):
                     "   - Preserve heading hierarchy and comments can be removed once replaced unless they still add clarifying guidance.",
                     "   - Ensure each Principle section: succinct name line, paragraph (or bullet list) capturing non-negotiable rules, explicit rationale if not obvious.",
                     "   - Ensure Governance section lists amendment procedure, versioning policy, and compliance review expectations.",
+                    f"  - **IMPORTANT**: You MUST use the `{UpdatePhaseTool.name}` tool to end complete this phase.",
                 ],
                 tools=[
-                    GitGrepTool,
-                    UserSelectTool,
-                    ListFilesTool,
-                    AddFilesTool,
+                    UserConfirmOrInputTool,
+                    UpdatePhaseTool,
                 ],
-                agent=ConstitutionAgentNode,
-                completion_mode="confirm",
+                executed_by=ConstitutionAgentNode,
             ),
             PhaseModel(
                 id="4",
@@ -72,12 +70,12 @@ class ConstitutionWorkflow(BaseWorkflow):
                 tools=[
                     UserConfirmTool,
                 ],
-                agent=ConstitutionAgentNode,
+                executed_by=ConstitutionAgentNode,
             ),
             PhaseModel(
                 id="5",
                 content="Write the completed constitution using the provided tools.",
-                agent=ConstitutionAgentNode,
+                executed_by=ConstitutionAgentNode,
                 tools=[
                     AddGovernanceRuleTool,
                     AddPrincipleTool,
@@ -89,12 +87,9 @@ class ConstitutionWorkflow(BaseWorkflow):
                     UpdateMetaTool,
                 ],
             ),
-            PhaseModel(
+            RoutePhaseModel(
                 id="6",
-                content="Complete the turn with a short summary of the work done during this turn. DO NOT include `key_points`",
-                tools=[
-                    CompleteTurnTool,
-                ],
+                executed_by=EndNode,
             ),
         ]
 

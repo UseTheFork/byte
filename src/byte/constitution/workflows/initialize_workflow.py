@@ -13,10 +13,9 @@ from byte.constitution import (
 from byte.files import AddFilesTool, ListFilesTool
 from byte.git import GitGrepTool
 from byte.node.nodes import ToolNode
-from byte.orchestration import GraphBuilder, PhaseModel
-from byte.plan import ConfirmCompletePlanStepTool
+from byte.orchestration import GraphBuilder, PhaseModel, UpdatePhaseTool
 from byte.support.section import Section, SectionType
-from byte.system import UserSelectTool
+from byte.system import UserConfirmOrInputTool, UserSelectTool
 
 
 class InitializeWorkflow(ConstitutionWorkflow):
@@ -32,7 +31,7 @@ class InitializeWorkflow(ConstitutionWorkflow):
                         "The user might require less or more principles than the ones used in the template. If a number is specified, respect that - follow the general template. You will update the doc accordingly."
                     ),
                 ],
-                agent=ConstitutionAgentNode,
+                executed_by=ConstitutionAgentNode,
             ),
             PhaseModel(
                 id="2",
@@ -53,26 +52,24 @@ class InitializeWorkflow(ConstitutionWorkflow):
                     ListFilesTool,
                     AddFilesTool,
                 ],
-                agent=ConstitutionAgentNode,
+                executed_by=ConstitutionAgentNode,
             ),
             PhaseModel(
                 id="3",
                 content="Draft the updated constitution content:",
                 note=[
+                    "   - The user might require less or more principles than the ones used in the template. If a number is specified, respect that - follow the general template. You will update the doc accordingly.",
                     "   - Replace every placeholder with concrete text (no bracketed tokens left except intentionally retained template slots that the project has chosen not to define yet - explicitly justify any left).",
                     "   - Preserve heading hierarchy and comments can be removed once replaced unless they still add clarifying guidance.",
                     "   - Ensure each Principle section: succinct name line, paragraph (or bullet list) capturing non-negotiable rules, explicit rationale if not obvious.",
                     "   - Ensure Governance section lists amendment procedure, versioning policy, and compliance review expectations.",
-                    f"  - Use the `{ConfirmCompletePlanStepTool.name}` tool to confirm and get access to the tools needed to make the final edits.",
+                    f"  - **IMPORTANT**: You MUST use the `{UpdatePhaseTool.name}` tool to end complete this phase.",
                 ],
                 tools=[
-                    GitGrepTool,
-                    UserSelectTool,
-                    ListFilesTool,
-                    AddFilesTool,
+                    UserConfirmOrInputTool,
+                    UpdatePhaseTool,
                 ],
-                agent=ConstitutionAgentNode,
-                completion_mode="confirm",
+                executed_by=ConstitutionAgentNode,
             ),
             PhaseModel(
                 id="4",
@@ -82,12 +79,12 @@ class InitializeWorkflow(ConstitutionWorkflow):
                     "   - Version line matches report.",
                     '   - Principles are declarative, testable, and free of vague language ("should" → replace with MUST/SHOULD rationale where appropriate).',
                 ],
-                agent=ConstitutionAgentNode,
+                executed_by=ConstitutionAgentNode,
             ),
             PhaseModel(
                 id="5",
                 content="Write the completed constitution using the provided tools.",
-                agent=ConstitutionAgentNode,
+                executed_by=ConstitutionAgentNode,
                 tools=[
                     AddGovernanceRuleTool,
                     AddPrincipleTool,
