@@ -14,8 +14,11 @@ llm:
   coder_agent_node:
     model: claude-sonnet-4-6
     provider: anthropic
-  skill_creator_agent_node:
+  spec_creator_agent_node:
     model: claude-opus-4-6
+    provider: anthropic
+  skill_creator_agent_node:
+    model: claude-sonnet-4-6
     provider: anthropic
   commit_agent_node:
     model: claude-haiku-4-5

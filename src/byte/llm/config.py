@@ -23,3 +23,4 @@ class LLMConfig(BaseModel):
     commit_agent_node: LLMModelConfig = LLMModelConfig()
     constitution_agent_node: LLMModelConfig = LLMModelConfig()
     skill_select_agent_node: LLMModelConfig = LLMModelConfig()
+    spec_creator_agent_node: LLMModelConfig = LLMModelConfig()

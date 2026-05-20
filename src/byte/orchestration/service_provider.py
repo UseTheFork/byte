@@ -5,6 +5,7 @@ from byte.orchestration import (
     CreateAnalysisTool,
     CreatePlanTool,
     UpdatePhaseTool,
+    UserConfirmPhaseTool,
     WorkflowService,
 )
 
@@ -20,6 +21,7 @@ class OrchestrationServiceProvider(ServiceProvider):
             CreateAnalysisTool,
             CreatePlanTool,
             UpdatePhaseTool,
+            UserConfirmPhaseTool,
             # keep-sorted end
         ]
 

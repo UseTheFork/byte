@@ -23,6 +23,7 @@ from byte.memory import MemoryServiceProvider
 from byte.node import NodeServiceProvider
 from byte.orchestration import OrchestrationServiceProvider
 from byte.skills import SkillsServiceProvider
+from byte.specs import SpecsServiceProvider
 from byte.system import SystemServiceProvider
 from byte.tools import ToolsServiceProvider
 from byte.tui import TUIServiceProvider
@@ -39,6 +40,7 @@ PROVIDERS = [
     AskServiceProvider,
     CoderServiceProvider,
     ConstitutionServiceProvider,
+    SpecsServiceProvider,
     # PresetsProvider,
     DevelopmentServiceProvider,
     FileServiceProvider,

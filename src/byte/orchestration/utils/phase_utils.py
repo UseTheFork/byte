@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Union
 
+from byte.orchestration import UserConfirmPhaseTool
+
 if TYPE_CHECKING:
     from byte.orchestration import BaseState, PhaseModel, RoutePhaseModel
 
@@ -97,8 +99,15 @@ class PhaseUtils:
         return len(workflow_phases.keys()) > 0
 
     @staticmethod
-    def update_phase_with_tool_args(args: Dict, workflow_phases: Dict[str, PhaseModel] = {}) -> Dict[str, PhaseModel]:
+    def update_phase_with_tool_args(
+        tool_call: Dict[str, Any], workflow_phases: Dict[str, PhaseModel] = {}
+    ) -> Dict[str, PhaseModel]:
         """ """
+        tool_name = tool_call.get("name", None)
+        if tool_name == UserConfirmPhaseTool.name:
+            return workflow_phases
+
+        args = tool_call.get("args", {})
         phase_id = args.get("phase_id", None)
         phase_status = args.get("phase_status", "pending")
 

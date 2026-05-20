@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from byte.orchestration.tools.create_analysis_tool import CreateAnalysisTool
     from byte.orchestration.tools.create_plan_tool import CreatePlanTool
     from byte.orchestration.tools.update_phase_tool import UpdatePhaseTool
+    from byte.orchestration.tools.user_confirm_phase_tool import UserConfirmPhaseTool
     from byte.orchestration.utils.graph_builder import GraphBuilder
     from byte.orchestration.utils.phase_utils import PhaseUtils
     from byte.orchestration.utils.prompt_assembler import PromptAssembler
@@ -71,6 +72,7 @@ __all__ = (
     "RoutingState",
     "TokenUsageSchema",
     "UpdatePhaseTool",
+    "UserConfirmPhaseTool",
     "WorkflowService",
 )
 
@@ -90,6 +92,7 @@ _dynamic_imports = {
     "ConstraintSchema": "schemas",
     "CreateAnalysisTool": "tools.create_analysis_tool",
     "CreatePlanTool": "tools.create_plan_tool",
+    "UserConfirmPhaseTool": "tools.user_confirm_phase_tool",
     "DummyNodeReachedException": "exceptions",
     "GraphBuilder": "utils.graph_builder",
     "Leaf": "leaves.leaf",

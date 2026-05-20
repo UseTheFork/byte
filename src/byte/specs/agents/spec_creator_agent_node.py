@@ -11,23 +11,16 @@ from byte.node import (
     BaseNode,
 )
 from byte.node.nodes import EndNode
-from byte.orchestration import BaseState, Leaves, PhaseModel, PhaseUtils
-from byte.support import Section, SectionType, Str
+from byte.orchestration import BaseState, Leaves, PhaseUtils
+from byte.support import Section, Str
 
 
-class CoderAgentNode(BaseAgentNode):
+class SpecCreatorAgentNode(BaseAgentNode):
     def boot(
         self,
         goto: Type[BaseNode] = EndNode,
         **kwargs,
     ):
-        """
-        Initialize the CoderAgentNode with a target node to route to after execution.
-
-        Args:
-            goto: The target node class to route to after the agent completes. Defaults to EndNode.
-            **kwargs: Additional keyword arguments passed to the parent class.
-        """
         self.goto = Str.class_to_snake_case(goto)
 
     def get_model(self) -> tuple[ModelSchema, dict]:
@@ -36,40 +29,29 @@ class CoderAgentNode(BaseAgentNode):
 
     def get_user_template(self):
         return [
-            Leaves.ConversationHistory(),
             Leaves.UserRequest(),
-            Section.important(
-                f"All tool operations are applied immediately and are reflected in the next user message containing {Section.ref(SectionType.PROJECT_FILES)}."
-            ),
         ]
 
     def get_system_template(self):
         return [
-            Leaves.Preamble(role="Act as an expert software developer."),
-            Leaves.Constitution(),
-            Leaves.SkillsLoaded(),
-            Leaves.CommunicationStyle(
-                [
-                    "   - Conciseness is about **text only**: always fully implement the requested feature, tests, and wiring even if that requires many tool calls.",
-                    "   - No explanations unless user asks",
-                    "   - Never send acknowledgement-only responses; after receiving new context or instructions, immediately continue the task or state the concrete next action you will take.",
-                ]
-            ),
-            Leaves.WorkflowConstraints(
-                [
-                    "   - Analyze the user's request and the provided file context",
-                    "   - If the request is ambiguous, ask clarifying questions",
-                    "   - Identify which files need to be modified, created, or deleted",
-                    "   - Break down the changes into clear, sequential steps",
-                    "   - Do NOT provide full code implementations unless required by tools",
-                    "   - Keep the plan concise and actionable",
-                ]
+            Leaves.Preamble(
+                role="Act as an expert spec creator. Your job is to help users design and create specs by understanding their intent, asking the right questions, and producing clear, well-structured spec definitions."
             ),
             Leaves.OperatingPrinciples(),
+            Leaves.CommunicationStyle(verbose=True),
+            Leaves.WorkflowConstraints(
+                [
+                    "- Understand what the user wants the spec to cover before writing anything",
+                    "- If the request is ambiguous, ask clarifying questions about intent, scope, and success criteria",
+                    "- Keep spec instructions clear, concise, and actionable",
+                ]
+            ),
+            Section.end(),
         ]
 
     def get_context_template(self):
         return [
+            Leaves.SkillsLoaded(),
             Leaves.ToolsLoaded(),
             Leaves.ReferenceMaterials(),
             Leaves.ProjectEnvironment(),
@@ -85,16 +67,9 @@ class CoderAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        record_response_service = self.app.make(RecordResponseService)
         prompt_assembler = await self.generate_agent_state(state, config)
-
-        # TODO: we should make this a static method in PhaseUtils
-        pending_phase = PhaseUtils.get_pending_phase(prompt_assembler.get_state())
-        if pending_phase is not None and isinstance(pending_phase, PhaseModel):
-            runnable = self.create_runnable(prompt_assembler, tool_choice=pending_phase.tool_choice)
-        else:
-            runnable = self.create_runnable(prompt_assembler)
-
+        runnable = self.create_runnable(prompt_assembler)
+        record_response_service = self.app.make(RecordResponseService)
         prompt = await self.generate_prompt(prompt_assembler)
 
         while True:

@@ -184,6 +184,7 @@ class Application(Container):
         self.instance("path.cache", self.cache_path())
         self.instance("path.conventions", self.conventions_path())
         self.instance("path.session_context", self.session_context_path())
+        self.instance("path.specs", self.specs_path())
 
         return self
 
@@ -297,6 +298,18 @@ class Application(Container):
             The full path to the skills directory or subdirectory.
         """
         base = self.config_path("skills")
+        return self.join_paths(base, path)
+
+    def specs_path(self, path: str = "") -> Path:
+        """Get the path to the specs directory.
+
+        Args:
+            path: Optional path to append to the specs directory.
+
+        Returns:
+            The full path to the specs directory or subdirectory.
+        """
+        base = self.config_path("specs")
         return self.join_paths(base, path)
 
     def is_development(self) -> bool:

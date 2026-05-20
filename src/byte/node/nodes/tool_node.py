@@ -82,7 +82,7 @@ class ToolNode(BaseNode):
 
                 # If we are in a workflow we also need to update the state of the phase
                 if is_workflow_agent:
-                    workflow_phases = PhaseUtils.update_phase_with_tool_args(tool_call["args"], workflow_phases)
+                    workflow_phases = PhaseUtils.update_phase_with_tool_args(tool_call, workflow_phases)
             except ToolException as err:
                 tool_message = ToolMessage(
                     status="error",
