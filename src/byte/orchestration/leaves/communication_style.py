@@ -9,19 +9,28 @@ if TYPE_CHECKING:
 
 
 class CommunicationStyle(Leaf):
-    def __init__(self, extra_styles: list = []):
+    def __init__(self, extra_styles: list = [], verbose: bool = False):
         self.extra_styles = extra_styles
+        self.verbose = verbose
 
     async def assemble(self, prompt_assembler: PromptAssembler) -> str:
 
         constraints = [
             Section.start(SectionType.COMMUNICATION_STYLE),
-            "- ALWAYS think and respond in the same spoken language the prompt was written in.",
-            """- No preamble ("Here's...", "I'll...")""",
-            """- No postamble ("Let me know...", "Hope this helps...")""",
-            "- No emojis ever",
-            "- Use rich Markdown formatting (headings, bullet lists, tables, code fences) for any multi-sentence or explanatory answer; only use plain unformatted text if the user explicitly asks.",
         ]
+
+        if not self.verbose:
+            constraints.append("  - Under 4 lines of text (tool use doesn't count)")
+
+        constraints.extend(
+            [
+                "  - ALWAYS think and respond in the same spoken language the prompt was written in.",
+                """  - No preamble ("Here's...", "I'll...")""",
+                """  - No postamble ("Let me know...", "Hope this helps...")""",
+                "  - No emojis ever",
+                "  - Use rich Markdown formatting (headings, bullet lists, tables, code fences) for any multi-sentence or explanatory answer; only use plain unformatted text if the user explicitly asks.",
+            ]
+        )
 
         constraints.extend(self.extra_styles)
 

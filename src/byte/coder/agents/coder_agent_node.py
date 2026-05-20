@@ -11,7 +11,7 @@ from byte.node import (
     BaseNode,
 )
 from byte.node.nodes import EndNode
-from byte.orchestration import BaseState, Leaves, PhaseUtils
+from byte.orchestration import BaseState, Leaves, PhaseModel, PhaseUtils
 from byte.support import Section, SectionType, Str
 
 
@@ -47,7 +47,7 @@ class CoderAgentNode(BaseAgentNode):
         return [
             Leaves.Preamble(role="Act as an expert software developer."),
             Leaves.Constitution(),
-            Leaves.SkillsAvailable(),
+            Leaves.SkillsLoaded(),
             Leaves.CommunicationStyle(
                 [
                     "   - Under 4 lines of text (tool use doesn't count)",
@@ -71,7 +71,6 @@ class CoderAgentNode(BaseAgentNode):
 
     def get_context_template(self):
         return [
-            Leaves.SkillsLoaded(),
             Leaves.ToolsLoaded(),
             Leaves.ReferenceMaterials(),
             Leaves.ProjectEnvironment(),
@@ -89,7 +88,13 @@ class CoderAgentNode(BaseAgentNode):
 
         record_response_service = self.app.make(RecordResponseService)
         prompt_assembler = await self.generate_agent_state(state, config)
-        runnable = self.create_runnable(prompt_assembler)
+
+        pending_phase = PhaseUtils.get_pending_phase(prompt_assembler.get_state())
+        if pending_phase is not None and isinstance(pending_phase, PhaseModel):
+            runnable = self.create_runnable(prompt_assembler, tool_choice=pending_phase.tool_choice)
+        else:
+            runnable = self.create_runnable(prompt_assembler)
+
         prompt = await self.generate_prompt(prompt_assembler)
 
         while True:

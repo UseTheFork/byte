@@ -1,0 +1,54 @@
+from byte.orchestration import ConstraintSchema, MetadataSchema
+
+
+class Reducer:
+    @staticmethod
+    def replace_list(left: list | None, right: list) -> list:
+        """Reducer that replaces the entire list with new values.
+
+        Unlike the default add_messages which appends, this replaces the full list.
+        Used with Annotated to handle state updates that should completely replace
+        rather than accumulate values.
+
+        Usage: `errors: Annotated[list[AnyMessage], replace_list]`
+        """
+        return right
+
+    @staticmethod
+    def replace_str(left: str | None, right: str | None) -> str | None:
+        """Reducer that"""
+        return right
+
+    @staticmethod
+    def add_constraints(left: list[ConstraintSchema] | None, right: list[ConstraintSchema]) -> list[ConstraintSchema]:
+        """Reducer that accumulates user-defined constraints for the current invocation.
+
+        Constraints are suggestions or actions the agent should avoid or follow based on
+        user feedback (e.g., declined tool calls, rejected edits).
+
+        Usage: `constraints: Annotated[list[ConstraintSchema], add_constraints]`
+        """
+        if left is None:
+            return right
+        return left + right
+
+    @staticmethod
+    def update_metadata(left: MetadataSchema | None, right: MetadataSchema) -> MetadataSchema:
+        """Reducer that replaces the old metadata with the new metadata.
+
+        Usage: `metadata: Annotated[MetadataSchema, update_metadata]`
+        """
+        return right
+
+    @staticmethod
+    def add_touched_files(left: list[str] | None, right: list[str]) -> list[str]:
+        """Reducer that accumulates touched files and removes duplicates.
+
+        Combines the left and right lists and removes duplicates.
+
+        Usage: `touched_files: Annotated[list[str], add_touched_files]`
+        """
+        if left is None:
+            return right
+
+        return list(set(left + right))

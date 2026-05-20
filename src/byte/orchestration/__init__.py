@@ -15,8 +15,6 @@ if TYPE_CHECKING:
     from byte.orchestration.messages import AIMessage
     from byte.orchestration.models.phase_model import PhaseModel
     from byte.orchestration.models.route_phase_model import RoutePhaseModel
-    from byte.orchestration.prompt_leaves import core_mandates
-    from byte.orchestration.reducers import add_constraints, replace_list, replace_str, update_metadata
     from byte.orchestration.schemas import (
         AgentConfigBoolSchema,
         AgentConfigSchema,
@@ -38,6 +36,7 @@ if TYPE_CHECKING:
     from byte.orchestration.utils.graph_builder import GraphBuilder
     from byte.orchestration.utils.phase_utils import PhaseUtils
     from byte.orchestration.utils.prompt_assembler import PromptAssembler
+    from byte.orchestration.utils.reducer import Reducer
 
 
 __all__ = (
@@ -67,16 +66,12 @@ __all__ = (
     "PhaseUtils",
     "PromptAssembler",
     "PromptSettingsSchema",
+    "Reducer",
     "RoutePhaseModel",
     "RoutingState",
     "TokenUsageSchema",
     "UpdatePhaseTool",
     "WorkflowService",
-    "add_constraints",
-    "core_mandates",
-    "replace_list",
-    "replace_str",
-    "update_metadata",
 )
 
 
@@ -113,11 +108,7 @@ _dynamic_imports = {
     "RoutingState": "state",
     "TokenUsageSchema": "schemas",
     "WorkflowService": "services.workflow_service",
-    "add_constraints": "reducers",
-    "core_mandates": "prompt_leaves",
-    "replace_list": "reducers",
-    "replace_str": "reducers",
-    "update_metadata": "reducers",
+    "Reducer": "utils.reducer",
     # keep-sorted end
 }
 

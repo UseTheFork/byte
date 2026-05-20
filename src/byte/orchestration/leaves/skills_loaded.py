@@ -10,13 +10,22 @@ if TYPE_CHECKING:
 
 
 class SkillsLoaded(Leaf):
-    def __init__(self, has_section: bool = False):
-        self.has_section = has_section
-
     async def assemble(self, prompt_assembler: PromptAssembler) -> str:
+        app = prompt_assembler.get_app()
+        harness = prompt_assembler.get_state().get("harness", [])
         skill_loader_service = prompt_assembler.get_app().make(SkillLoaderService)
 
-        loaded_skills = {name: skill for name, skill in skill_loader_service._skills.items() if not skill.active}
+        skill_names: list[str] = harness.get("skills", [])
+        app["log"].info(skill_names)
+
+        loaded_skills = {}
+        for name in skill_names:
+            skill = skill_loader_service.get_skill(name)
+            if skill is not None:
+                loaded_skills[name] = skill
+
+        app["log"].info(loaded_skills)
+
         if not loaded_skills:
             return ""
 

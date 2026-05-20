@@ -2,45 +2,26 @@ from typing import Annotated, Dict, TypedDict, Union
 
 from langgraph.graph.message import AnyMessage, add_messages
 
-from byte.orchestration import (
-    ConstraintSchema,
-    MetadataSchema,
-    PhaseModel,
-    RoutePhaseModel,
-    add_constraints,
-    replace_str,
-    update_metadata,
-)
+from byte.orchestration import ConstraintSchema, MetadataSchema, PhaseModel, Reducer, RoutePhaseModel
 
 
 class HarnessState(TypedDict):
-    """State passed to a harnessed agent, constraining its skills, tools, and prompt.
-
-    Usage: Populated by the HarnessAgentNode before spawning an ExecutorAgentNode.
-    """
+    """State passed to a agents, constraining its skills, xyz."""
 
     skills: list[str]
-    tools: list[str]
-    prompt: str | None
 
 
 class RoutingState(TypedDict):
-    """Routing information for graph node transitions.
-
-    Usage: Tracks the current and target nodes during graph execution.
-    """
+    """Routing information for graph node transitions."""
 
     target: str
     source: str
 
 
 class BaseState(TypedDict):
-    """Base state that all agents inherit with messaging and status tracking.
+    """Base state that all agents inherit with messaging and status tracking."""
 
-    Usage: `state = BaseState(messages=[], agent="CoderAgent")`
-    """
-
-    harness: HarnessState | None
+    harness: HarnessState
 
     # Persistent conversation history from memory store
     history_messages: Annotated[list[AnyMessage], add_messages]
@@ -53,11 +34,9 @@ class BaseState(TypedDict):
     # Current user request being processed by the agent
     user_request: str
 
-    constraints: Annotated[list[ConstraintSchema], add_constraints]
+    constraints: Annotated[list[ConstraintSchema], Reducer.add_constraints]
 
-    masked_messages: list[AnyMessage]
-
-    errors: Annotated[str | None, replace_str]
+    errors: Annotated[str | None, Reducer.replace_str]
 
     # These are specific to Coder
     touched_files: list[str]
@@ -68,4 +47,4 @@ class BaseState(TypedDict):
 
     is_cancelled: bool
 
-    metadata: Annotated[MetadataSchema, update_metadata]
+    metadata: Annotated[MetadataSchema, Reducer.update_metadata]

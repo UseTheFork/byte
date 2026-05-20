@@ -30,6 +30,7 @@ class SectionType(StrEnum):
     WORKFLOW = "Workflow"
     WORKFLOW_PHASES = "Workflow Phases"
     WORKFLOW_CONSTRAINTS = "Workflow Constraints"
+    WORKFLOW_CURRENT_PHASE = "Current Workflow Phase"
 
     RESPONSE_FORMAT = "Response Format"
     RESUME_FORMAT = "Resuming The Conversation"

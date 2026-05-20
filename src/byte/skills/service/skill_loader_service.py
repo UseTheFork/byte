@@ -29,7 +29,7 @@ class SkillLoaderService(Service):
     """
 
     def boot(self) -> None:
-        """Discover and load skills on service initialisation.
+        """Discover and load skills on service initialization.
 
         Usage: `service = SkillLoaderService(container)` — boot is called automatically.
         """

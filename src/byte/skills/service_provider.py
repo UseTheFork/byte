@@ -6,6 +6,7 @@ from byte.skills import (
     SkillCommand,
     SkillCreatorAgentNode,
     SkillLoaderService,
+    SkillSelectAgentNode,
 )
 
 
@@ -22,6 +23,7 @@ class SkillsServiceProvider(ServiceProvider):
         return [
             # keep-sorted start
             SkillCreatorAgentNode,
+            SkillSelectAgentNode,
             # keep-sorted end
         ]
 

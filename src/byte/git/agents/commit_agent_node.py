@@ -61,14 +61,13 @@ class CommitAgentNode(BaseAgentNode):
             Section.important("You MUST follow the commit guidelines provided in the Rules section below."),
             "Read and apply ALL rules for commit types, scopes, and description formatting.",
             Section.end(),
-            Section.start(SectionType.COMMUNICATION_STYLE),
-            "- ALWAYS think and respond in the same spoken language the prompt was written in.",
-            "- Conciseness is about **text only**: always fully implement the requested feature, tests, and wiring even if that requires many tool calls.",
-            """- No preamble ("Here's...", "I'll...")""",
-            """- No postamble ("Let me know...", "Hope this helps...")""",
-            "- No emojis ever",
-            "- No explanations unless user asks",
-            "- Never send acknowledgement-only responses; after receiving new context or instructions, immediately continue the task or state the concrete next action you will take.",
+            Leaves.CommunicationStyle(
+                extra_styles=[
+                    "  - Conciseness is about **text only**: always fully implement the requested feature, tests, and wiring even if that requires many tool calls.",
+                    "  - No explanations unless user asks",
+                    "  - Never send acknowledgement-only responses; after receiving new context or instructions, immediately continue the task or state the concrete next action you will take.",
+                ]
+            ),
             Section.end(),
             Leaves.CommitGuidelines(),
         ]

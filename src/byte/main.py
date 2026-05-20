@@ -22,7 +22,6 @@ from byte.lsp import LSPServiceProvider
 from byte.memory import MemoryServiceProvider
 from byte.node import NodeServiceProvider
 from byte.orchestration import OrchestrationServiceProvider
-from byte.plan import PlanServiceProvider
 from byte.skills import SkillsServiceProvider
 from byte.system import SystemServiceProvider
 from byte.tools import ToolsServiceProvider
@@ -49,7 +48,6 @@ PROVIDERS = [
     LintServiceProvider,
     MemoryServiceProvider,
     NodeServiceProvider,
-    PlanServiceProvider,
     SkillsServiceProvider,
     SystemServiceProvider,
     TUIServiceProvider,

@@ -16,6 +16,7 @@ from byte.orchestration import (
     RoutePhaseModel,
     UpdatePhaseTool,
 )
+from byte.skills import SkillSelectAgentNode
 
 
 class CoderWorkflow(BaseWorkflow):
@@ -31,7 +32,19 @@ class CoderWorkflow(BaseWorkflow):
     def get_phases(self):
         return [
             PhaseModel(
-                id="1",
+                id="select-skills",
+                content="Identify and load the relevant skills based on the user's task",
+                executed_by=SkillSelectAgentNode,
+                note=[
+                    f"  - If no skills are relvent complete this phase using the `{UpdatePhaseTool.name}` tool.",
+                ],
+                tools=[
+                    UpdatePhaseTool,
+                ],
+                tool_choice="any",
+            ),
+            PhaseModel(
+                id="create-plan",
                 content="Create a clear, step-by-step plan for implementing the requested changes.",
                 executed_by=CoderAgentNode,
                 tools=[
@@ -39,7 +52,7 @@ class CoderWorkflow(BaseWorkflow):
                 ],
             ),
             PhaseModel(
-                id="2",
+                id="apply-changes",
                 content="Use available tools to apply the changes to complete the step-by-step plan",
                 tools=[
                     EditFileTool,
@@ -50,7 +63,7 @@ class CoderWorkflow(BaseWorkflow):
                 executed_by=CoderAgentNode,
             ),
             PhaseModel(
-                id="3",
+                id="linting",
                 content=f"Run the `{LintTool.name}` tool on all touched files. If lint errors are reported, fix them using the available file tools and re-run the lint tool. Repeat until linting passes with no errors.",
                 tools=[
                     LintTool,
@@ -61,20 +74,23 @@ class CoderWorkflow(BaseWorkflow):
                     UpdatePhaseTool,
                 ],
                 note=[
-                    f"   - To Complete this phase use the `{UpdatePhaseTool.name}` tool.",
+                    f"  - To Complete this phase use the `{UpdatePhaseTool.name}` tool.",
                 ],
                 executed_by=CoderAgentNode,
             ),
             PhaseModel(
-                id="4",
-                content="Complete the turn with a short summary of the work done during this turn. DO NOT include `key_points`",
+                id="summary",
+                content="Complete the turn with a short summary of the work done during this turn.",
+                note=[
+                    "  - Only include 2-3 `key_points`",
+                ],
                 tools=[
                     CompleteTurnTool,
                 ],
                 executed_by=CoderAgentNode,
             ),
             RoutePhaseModel(
-                id="5",
+                id="end",
                 executed_by=EndNode,
             ),
         ]
@@ -85,6 +101,7 @@ class CoderWorkflow(BaseWorkflow):
         graph = self.app.make(GraphBuilder, start_node=CoderAgentNode)
 
         # Add nodes
+        graph.add_node(SkillSelectAgentNode)
         graph.add_node(CoderAgentNode)
         graph.add_node(ToolNode)
 

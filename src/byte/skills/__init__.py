@@ -6,6 +6,7 @@ from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
     from byte.skills.agents.skill_creator_agent_node import SkillCreatorAgentNode
+    from byte.skills.agents.skill_select_agent_node import SkillSelectAgentNode
     from byte.skills.command.skill_command import SkillCommand
     from byte.skills.schemas import Skill
     from byte.skills.service.skill_loader_service import SkillLoaderService
@@ -22,6 +23,7 @@ __all__ = (
     "SkillCommand",
     "SkillCreatorAgentNode",
     "SkillLoaderService",
+    "SkillSelectAgentNode",
     "SkillsServiceProvider",
 )
 
@@ -32,6 +34,7 @@ _dynamic_imports = {
     "LoadSkillTool": "tools.load_skill_tool",
     "Skill": "schemas",
     "SkillCommand": "command.skill_command",
+    "SkillSelectAgentNode": "agents.skill_select_agent_node",
     "SkillCreatorAgentNode": "agents.skill_creator_agent_node",
     "SkillLoaderService": "service.skill_loader_service",
     "SkillsServiceProvider": "service_provider",
