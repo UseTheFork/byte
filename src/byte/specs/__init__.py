@@ -7,7 +7,7 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.specs.agents.spec_creator_agent_node import SpecCreatorAgentNode
     from byte.specs.command.spec_command import SpecCommand
-    from byte.specs.schemas import Spec
+    from byte.specs.schemas import Spec, SpecPhase
     from byte.specs.service.spec_loader_service import SpecLoaderService
     from byte.specs.service_provider import SpecsServiceProvider
     from byte.specs.tools.create_spec_tool import CreateSpecTool
@@ -20,6 +20,7 @@ __all__ = (
     "SpecCommand",
     "SpecCreatorAgentNode",
     "SpecLoaderService",
+    "SpecPhase",
     "SpecsServiceProvider",
 )
 
@@ -31,6 +32,7 @@ _dynamic_imports = {
     "SpecCommand": "command.spec_command",
     "SpecCreatorAgentNode": "agents.spec_creator_agent_node",
     "SpecLoaderService": "service.spec_loader_service",
+    "SpecPhase": "schemas",
     "SpecsServiceProvider": "service_provider",
     # keep-sorted end
 }

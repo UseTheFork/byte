@@ -1,5 +1,4 @@
 import re
-from datetime import datetime
 from typing import override
 
 from byte.specs.service.spec_loader_service import SpecLoaderService
@@ -9,15 +8,15 @@ from byte.tools import BaseTool, ToolResult
 class CreateSpecTool(BaseTool):
     name: str = "create_spec"
     description: str = (
-        "Use this tool to create a new spec file. Call this when you want to persist a spec with a topic, "
-        "description, and instructions. The file will be written as YYYY-MM-DD-<topic>-spec.md with YAML frontmatter."
+        "Use this tool to create a new spec. Call this when you want to persist a spec with a topic, "
+        "description, and instructions. The spec will be written as <topic>/SPEC.md with YAML frontmatter."
     )
     input_schema = {
         "type": "object",
         "properties": {
             "topic": {
                 "type": "string",
-                "description": "The topic slug for the spec (used in the filename). Lowercase, hyphens allowed.",
+                "description": "The topic slug for the spec (used as the subdirectory name). Lowercase, hyphens allowed.",
                 "maxLength": 128,
             },
             "name": {
@@ -53,9 +52,8 @@ class CreateSpecTool(BaseTool):
         topic = re.sub(r"-+", "-", topic)
         topic = topic.strip("-")
 
-        date = datetime.now().strftime("%Y-%m-%d")
-        filename = f"{date}-{topic}-spec.md"
-        spec_file_path = self.app.specs_path(filename)
+        # Each spec lives in its own subdirectory: .byte/specs/<topic>/SPEC.md
+        spec_file_path = self.app.specs_path(topic) / "SPEC.md"
         spec_file_path.parent.mkdir(parents=True, exist_ok=True)
 
         content = f"---\nname: {name}\ndescription: {description}\n---\n\n{instructions}\n"

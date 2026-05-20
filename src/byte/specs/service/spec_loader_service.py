@@ -1,19 +1,21 @@
+import json
 import re
 from pathlib import Path
 from typing import Optional
 
 from byte import Service
-from byte.specs.schemas import Spec
+from byte.specs.schemas import Spec, SpecPhase
 
-SPEC_FILE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}-.+-spec\.md$", re.IGNORECASE)
+SPEC_FILE_NAME = "SPEC.md"
+PHASES_FILE_NAME = "phases.json"
 FRONTMATTER_PATTERN = re.compile(r"^---[\r\n]+(.*?)[\r\n]+---", re.DOTALL | re.MULTILINE)
 
 
 class SpecLoaderService(Service):
     """Service for discovering and loading specs from the specs directory.
 
-    Scans ``app.specs_path()`` (.byte/specs) for files matching
-    ``YYYY-MM-DD-<topic>-spec.md`` containing YAML frontmatter, parsed into
+    Scans ``app.specs_path()`` (.byte/specs) for subdirectories each containing
+    a ``SPEC.md`` file with YAML frontmatter, parsed into
     :class:`~byte.specs.schemas.Spec` instances.
 
     Usage:
@@ -57,18 +59,22 @@ class SpecLoaderService(Service):
     # ------------------------------------------------------------------
 
     def _find_spec_files(self, directory: Path) -> list[Path]:
-        """Recursively find all spec files matching ``YYYY-MM-DD-<topic>-spec.md`` under *directory*.
+        """Find all ``SPEC.md`` files that are direct children of a subdirectory under *directory*.
+
+        Each spec lives in its own subdirectory as ``<topic>/SPEC.md``.
+        Performs case-insensitive matching so ``spec.md`` and ``Spec.MD`` are
+        also discovered on case-sensitive filesystems.
 
         Args:
             directory: Root directory to search.
 
         Returns:
-            List of absolute paths to matching spec files.
+            List of absolute paths to SPEC.md files.
         """
         found: list[Path] = []
         try:
             for item in directory.rglob("*"):
-                if item.is_file() and SPEC_FILE_PATTERN.match(item.name):
+                if item.is_file() and item.name.upper() == SPEC_FILE_NAME.upper():
                     found.append(item.resolve())
         except PermissionError:
             self.app["log"].warning(f"Permission denied scanning: {directory}")
@@ -77,7 +83,7 @@ class SpecLoaderService(Service):
         return found
 
     def _parse_spec_file(self, spec_file: Path) -> Optional[Spec]:
-        """Parse a single ``YYYY-MM-DD-<topic>-spec.md`` file into a Spec dataclass.
+        """Parse a single ``SPEC.md`` file into a Spec dataclass.
 
         Reads YAML frontmatter for *name*, *description*, *version*, and
         *tags*, treating the remainder of the file as the spec instructions.
@@ -145,7 +151,7 @@ class SpecLoaderService(Service):
         )
 
     def _load_from_directory(self, directory: Path) -> dict[str, Spec]:
-        """Scan *directory* recursively for ``YYYY-MM-DD-<topic>-spec.md`` files and parse each one.
+        """Scan *directory* for spec subdirectories each containing a ``SPEC.md`` file and parse each one.
 
         Args:
             directory: Root directory to scan.
@@ -170,6 +176,82 @@ class SpecLoaderService(Service):
 
         self.app["log"].debug(f"Found {len(specs)} spec(s) in {directory}")
         return specs
+
+    def load_phases(self, spec_name: str) -> list[SpecPhase]:
+        """Load phases for a spec from its ``phases.json`` file.
+
+        Returns an empty list if the spec does not exist or no phases file is present.
+
+        Args:
+            spec_name: The name of the spec to load phases for.
+
+        Usage: `phases = service.load_phases("my-feature")`
+        """
+        spec = self.get_spec(spec_name)
+        if spec is None:
+            return []
+
+        phases_file = spec.path / PHASES_FILE_NAME
+        if not phases_file.exists():
+            return []
+
+        try:
+            raw = json.loads(phases_file.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            self.app["log"].warning(f"Could not read phases file {phases_file}: {exc}")
+            return []
+
+        phases: list[SpecPhase] = []
+        for item in raw:
+            try:
+                phases.append(
+                    SpecPhase(
+                        id=item["id"],
+                        status=item.get("status", "pending"),
+                        content=item.get("content", ""),
+                        notes=item.get("notes", []),
+                    )
+                )
+            except (KeyError, TypeError) as exc:
+                self.app["log"].warning(f"Skipping malformed phase entry in {phases_file}: {exc}")
+
+        return phases
+
+    def save_phases(self, spec_name: str, phases: list[SpecPhase]) -> bool:
+        """Persist *phases* for a spec as ``phases.json`` alongside its ``SPEC.md``.
+
+        Args:
+            spec_name: The name of the spec to save phases for.
+            phases: The list of :class:`~byte.specs.schemas.SpecPhase` objects to persist.
+
+        Returns:
+            ``True`` if the file was written successfully, ``False`` otherwise.
+
+        Usage: `service.save_phases("my-feature", phases)`
+        """
+        spec = self.get_spec(spec_name)
+        if spec is None:
+            self.app["log"].warning(f"Cannot save phases — spec '{spec_name}' not found")
+            return False
+
+        phases_file = spec.path / PHASES_FILE_NAME
+        payload = [
+            {
+                "id": phase.id,
+                "status": phase.status,
+                "content": phase.content,
+                "notes": phase.notes,
+            }
+            for phase in phases
+        ]
+
+        try:
+            phases_file.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+        except OSError as exc:
+            self.app["log"].warning(f"Could not write phases file {phases_file}: {exc}")
+            return False
+
+        return True
 
     def reload(self, *args) -> None:
         """Re-scan the specs directory and refresh the loaded specs dict.

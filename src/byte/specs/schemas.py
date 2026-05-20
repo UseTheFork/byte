@@ -1,11 +1,30 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
+from typing import Literal, Optional
+
+
+@dataclass
+class SpecPhase:
+    """Represents a single execution phase attached to a spec.
+
+    Phases are persisted as ``phases.json`` alongside the ``SPEC.md`` file.
+
+    Attributes:
+        id: Unique phase identifier (e.g. ``"phase-1"``).
+        status: Current execution status.
+        content: Description of what this phase should accomplish.
+        notes: Ordered list of additional notes or observations for the phase.
+    """
+
+    id: str
+    status: Literal["pending", "in_progress", "blocked", "completed"] = "pending"
+    content: str = ""
+    notes: list[str] = field(default_factory=list)
 
 
 @dataclass
 class Spec:
-    """Represents a parsed spec file (``YYYY-MM-DD-<topic>-spec.md``).
+    """Represents a parsed spec file (``<topic>/SPEC.md``).
 
     Attributes:
         name: Unique spec name (from frontmatter).

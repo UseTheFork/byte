@@ -1,5 +1,5 @@
 from byte import ServiceProvider
-from byte.specs import CreateSpecWorkflow, SpecCommand
+from byte.specs import CreateSpecWorkflow, SpecCommand, SpecCreatorAgentNode
 from byte.specs.service.spec_loader_service import SpecLoaderService
 from byte.specs.tools.create_spec_tool import CreateSpecTool
 
@@ -12,6 +12,13 @@ class SpecsServiceProvider(ServiceProvider):
 
     Usage: Register with the application container to enable spec loading.
     """
+
+    def agents(self):
+        return [
+            # keep-sorted start
+            SpecCreatorAgentNode,
+            # keep-sorted end
+        ]
 
     def services(self):
         return [
