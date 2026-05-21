@@ -42,20 +42,19 @@ class WorkflowService(Service):
         Usage: `await self._track_token_usage(usage_metadata_callback.usage_metadata)`
         """
         self.app["log"].info(usage_metadata)
-        if usage_metadata:
-            # Get the first (and typically only) model's usage data
-            model_id = next(iter(usage_metadata.keys()))
-            model_usage = usage_metadata[model_id]
 
-            usage = TokenUsageSchema(
-                input_tokens=model_usage.get("input_tokens", 0),
-                input_token_cache_read=model_usage.get("input_token_details", {}).get("cache_read", 0),
-                input_token_cache_creation=model_usage.get("input_token_details", {}).get("cache_creation", 0),
-                output_tokens=model_usage.get("output_tokens", 0),
-                total_tokens=model_usage.get("total_tokens", 0),
-            )
+        if usage_metadata:
             agent_analytics_service = self.app.make(AgentAnalyticsService)
-            await agent_analytics_service.update_usage_by_model(model_id, usage)
+
+            for model_id, model_usage in usage_metadata.items():
+                usage = TokenUsageSchema(
+                    input_tokens=model_usage.get("input_tokens", 0),
+                    input_token_cache_read=model_usage.get("input_token_details", {}).get("cache_read", 0),
+                    input_token_cache_creation=model_usage.get("input_token_details", {}).get("cache_creation", 0),
+                    output_tokens=model_usage.get("output_tokens", 0),
+                    total_tokens=model_usage.get("total_tokens", 0),
+                )
+                await agent_analytics_service.update_usage_by_model(model_id, usage)
 
     async def _handle_stream_event(self, chunk: dict[str, Any] | Any):
         """Handle individual stream events for display and final message extraction.

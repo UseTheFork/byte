@@ -18,9 +18,13 @@ class TokensInfo(Static):
 class CostInfo(Static):
     cost: reactive[str] = reactive("")
 
+    def _format_cost_info(self) -> str:
+        """Wrap cost text in a clickable markup link."""
+        return f"[@click=screen.request_usage_analytics()]{self.cost}[/]"
+
     def watch_cost(self, cost: str) -> None:
         """Update the label when cost changes."""
-        self.update(cost)
+        self.update(self._format_cost_info())
 
 
 class MemoryUsedInfo(Static):

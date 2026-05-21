@@ -14,6 +14,7 @@ from byte.system import SystemEvents
 from byte.tui import Messages
 from byte.tui.screens.manage_context_screen import ManageContextScreen
 from byte.tui.screens.manage_files_screen import ManageFilesScreen
+from byte.tui.screens.usage_analytics_screen import UsageAnalyticsScreen
 from byte.tui.widgets.bootbox import Bootbox
 from byte.tui.widgets.conversation import Conversation
 
@@ -125,3 +126,8 @@ class ConversationScreen(Screen[None]):
         await self.app.push_screen_wait(ManageContextScreen())
         session_context_service = self.app.byte.make(SessionContextService)
         session_context_service.notify_context_stats()
+
+    @work
+    async def action_request_usage_analytics(self) -> None:
+        """"""
+        await self.app.push_screen_wait(UsageAnalyticsScreen())
