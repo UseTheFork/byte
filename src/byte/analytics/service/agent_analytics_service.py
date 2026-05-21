@@ -1,5 +1,6 @@
 from byte import Service
 from byte.analytics import ModelUsage, UsageAnalytics
+from byte.analytics.utils.cost_calculator import CostCalculator
 from byte.llm import LLMRegistryService
 from byte.orchestration import TokenUsageSchema
 from byte.tui import Messages
@@ -44,9 +45,6 @@ class AgentAnalyticsService(Service):
 
             await self.calculate_analytics()
 
-    def get_cost_per_token(self, cost) -> float:
-        return cost / 1000000
-
     async def calculate_analytics(self):
         """Calculate current analytics metrics for token usage and costs.
 
@@ -62,32 +60,16 @@ class AgentAnalyticsService(Service):
         # Calculate session cost across all models
         session_cost = 0.0
         for model_id, usage in self.usage.by_model.items():
-            # Get model data to calculate costs
             model_data = llm_registry.get_model(model_id)
-
             if model_data:
-                c = model_data.constraints
-                model_cost = (
-                    usage.total.input_cache_read * c.cache_read_input_token_cost
-                    + usage.total.input_cache_creation * c.cache_write_input_token_cost
-                    + (usage.total.input - usage.total.input_cache_read) * c.input_cost_per_token
-                    + usage.total.output * c.output_cost_per_token
-                ) / 1000000
-                session_cost += model_cost
+                session_cost += CostCalculator.model_cost(usage, model_data.constraints)
 
         # Calculate last message cost based on model
         last_message_cost = 0.0
         if self.usage.last.type:
             model_data = llm_registry.get_model(self.usage.last.type)
-
             if model_data:
-                c = model_data.constraints
-                last_message_cost = (
-                    self.usage.last.input_cache_read * c.cache_read_input_token_cost
-                    + self.usage.last.input_cache_creation * c.cache_write_input_token_cost
-                    + (self.usage.last.input - self.usage.last.input_cache_read) * c.input_cost_per_token
-                    + self.usage.last.output * c.output_cost_per_token
-                ) / 1000000
+                last_message_cost = CostCalculator.message_cost(self.usage.last, model_data.constraints)
 
         self.emit_tui(
             Messages.UpdateAnalytics(

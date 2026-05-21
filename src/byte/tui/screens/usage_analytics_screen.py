@@ -7,6 +7,7 @@ from textual.screen import ModalScreen
 from textual.widgets import DataTable, Footer, Label
 
 from byte.analytics import AgentAnalyticsService
+from byte.analytics.utils.cost_calculator import CostCalculator
 from byte.llm import LLMRegistryService
 
 if TYPE_CHECKING:
@@ -86,13 +87,7 @@ class UsageAnalyticsScreen(ModalScreen[None]):
             model_data = llm_registry.get_model(model_id)
             cost = 0.0
             if model_data:
-                c = model_data.constraints
-                cost = (
-                    usage.total.input_cache_read * c.cache_read_input_token_cost
-                    + usage.total.input_cache_creation * c.cache_write_input_token_cost
-                    + (usage.total.input - usage.total.input_cache_read) * c.input_cost_per_token
-                    + usage.total.output * c.output_cost_per_token
-                ) / 1_000_000
+                cost = CostCalculator.model_cost(usage, model_data.constraints)
 
             table.add_row(
                 model_id,
@@ -100,7 +95,7 @@ class UsageAnalyticsScreen(ModalScreen[None]):
                 f"{usage.total.input_cache_read:,}",
                 f"{usage.total.input_cache_creation:,}",
                 f"{usage.total.output:,}",
-                f"${cost:.6f}",
+                f"${cost:.2f}",
             )
 
     def action_dismiss_screen(self) -> None:
