@@ -1,35 +1,21 @@
-from typing import Literal, Type
+from typing import Literal
 
 from langchain.messages import HumanMessage
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
-from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
-    BaseNode,
 )
-from byte.node.nodes import EndNode
 from byte.orchestration import BaseState, Leaves, PhaseUtils
-from byte.support import Boundary, BoundaryType, Section, SectionType, Str
+from byte.support import Boundary, BoundaryType, Section, SectionType
 from byte.system.tools.user_confirm_tool import UserConfirmTool
 from byte.system.tools.user_input_text_tool import UserInputTextTool
 from byte.system.tools.user_select_tool import UserSelectTool
 
 
 class SkillCreatorAgentNode(BaseAgentNode):
-    def boot(
-        self,
-        goto: Type[BaseNode] = EndNode,
-        **kwargs,
-    ):
-        self.goto = Str.class_to_snake_case(goto)
-
-    def get_model(self) -> tuple[ModelSchema, dict]:
-        llm_service = self.app.make(LLMService)
-        return llm_service.get_model(self.name)
-
     def get_user_template(self):
         return [
             Leaves.ConversationHistory(),

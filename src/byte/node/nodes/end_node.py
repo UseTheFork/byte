@@ -95,7 +95,7 @@ class EndNode(BaseNode):
         update_dict = {
             **state,
             # Clear the plan assuming its been completed.
-            "plan": [],
+            "workflow_phases": [],
             # We always want to erase the current user request
             "user_request": "",
         }

@@ -8,24 +8,24 @@ if TYPE_CHECKING:
     from byte.analytics.schemas import LastMessageUsage, ModelUsage, TokenCount, UsageAnalytics
     from byte.analytics.service.agent_analytics_service import AgentAnalyticsService
     from byte.analytics.service_provider import AnalyticsProvider
-    from byte.analytics.utils.cost_calculator import CostCalculator
+    from byte.analytics.utils.usage_metrics import UsageMetrics
 
 
 __all__ = (
     "AgentAnalyticsService",
     "AnalyticsProvider",
-    "CostCalculator",
     "LastMessageUsage",
     "ModelUsage",
     "TokenCount",
     "UsageAnalytics",
+    "UsageMetrics",
 )
 
 _dynamic_imports = {
     # keep-sorted start
     "AgentAnalyticsService": "service.agent_analytics_service",
     "AnalyticsProvider": "service_provider",
-    "CostCalculator": "utils.cost_calculator",
+    "UsageMetrics": "utils.usage_metrics",
     "LastMessageUsage": "schemas",
     "ModelUsage": "schemas",
     "TokenCount": "schemas",

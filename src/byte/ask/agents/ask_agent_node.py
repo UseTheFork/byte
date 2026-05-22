@@ -4,7 +4,6 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
-from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
     BaseNode,
@@ -16,6 +15,8 @@ from byte.support.utils import extract_content_from_message
 
 
 class AskAgentNode(BaseAgentNode):
+    llm_tier: str = "reasoning"
+
     def boot(
         self,
         goto: Type[BaseNode] = EndNode,
@@ -31,10 +32,6 @@ class AskAgentNode(BaseAgentNode):
         """
 
         self.goto = Str.class_to_snake_case(goto)
-
-    def get_model(self) -> tuple[ModelSchema, dict]:
-        llm_service = self.app.make(LLMService)
-        return llm_service.get_model(self.name)
 
     def get_user_template(self):
         return [

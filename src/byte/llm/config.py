@@ -16,11 +16,6 @@ class LLMModelConfig(BaseModel):
 class LLMConfig(BaseModel):
     """LLM domain configuration with provider-specific settings."""
 
-    ask_agent_node: LLMModelConfig = LLMModelConfig()
-    coder_agent_node: LLMModelConfig = LLMModelConfig()
-    skill_creator_agent_node: LLMModelConfig = LLMModelConfig()
-    coder_plan_agent_node: LLMModelConfig = LLMModelConfig()
-    commit_agent_node: LLMModelConfig = LLMModelConfig()
-    constitution_agent_node: LLMModelConfig = LLMModelConfig()
-    skill_select_agent_node: LLMModelConfig = LLMModelConfig()
-    spec_creator_agent_node: LLMModelConfig = LLMModelConfig()
+    fast: LLMModelConfig = LLMModelConfig()
+    standard: LLMModelConfig = LLMModelConfig()
+    reasoning: LLMModelConfig = LLMModelConfig()

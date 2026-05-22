@@ -6,8 +6,7 @@ from textual.containers import VerticalGroup
 from textual.screen import ModalScreen
 from textual.widgets import DataTable, Footer, Label
 
-from byte.analytics import AgentAnalyticsService
-from byte.analytics.utils.cost_calculator import CostCalculator
+from byte.analytics import AgentAnalyticsService, UsageMetrics
 from byte.llm import LLMRegistryService
 
 if TYPE_CHECKING:
@@ -87,7 +86,7 @@ class UsageAnalyticsScreen(ModalScreen[None]):
             model_data = llm_registry.get_model(model_id)
             cost = 0.0
             if model_data:
-                cost = CostCalculator.model_cost(usage, model_data.constraints)
+                cost = UsageMetrics.model_cost(usage, model_data.constraints)
 
             table.add_row(
                 model_id,

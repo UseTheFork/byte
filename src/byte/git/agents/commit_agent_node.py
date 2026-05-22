@@ -1,4 +1,4 @@
-from typing import Literal, Type
+from typing import Literal
 
 from langchain.messages import HumanMessage
 from langgraph.graph.state import RunnableConfig
@@ -6,14 +6,11 @@ from langgraph.types import Command
 
 from byte.development import RecordResponseService
 from byte.git import CommitService
-from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
-    BaseNode,
 )
-from byte.node.nodes import EndNode
 from byte.orchestration import BaseState, Leaves, PhaseUtils
-from byte.support import Section, SectionType, Str
+from byte.support import Section, SectionType
 
 # Conventional commit message generation prompt
 # Adapted from Aider: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/prompts.py#L8
@@ -21,26 +18,6 @@ from byte.support import Section, SectionType, Str
 
 
 class CommitAgentNode(BaseAgentNode):
-    def boot(
-        self,
-        goto: Type[BaseNode] = EndNode,
-        **kwargs,
-    ):
-        """Initialize the validation node with constraints and routing configuration.
-
-        Args:
-                goto: Next node to route to after successful validation (default: "end_node")
-                max_lines: Maximum number of non-blank lines allowed in response content (optional)
-
-        Usage: `await node.boot(goto="end_node", max_lines=100)`
-        """
-
-        self.goto = Str.class_to_snake_case(goto)
-
-    def get_model(self) -> tuple[ModelSchema, dict]:
-        llm_service = self.app.make(LLMService)
-        return llm_service.get_model(self.name)
-
     def get_user_template(self):
         return [
             Leaves.GitDiffs(),
@@ -98,7 +75,7 @@ class CommitAgentNode(BaseAgentNode):
         while True:
             result = await runnable.ainvoke(prompt, config=config)
             self.app.dispatch_task(
-                record_response_service.record_response(prompt, self.name, config),  # ty:ignore[invalid-argument-type]
+                record_response_service.record_response(prompt, self.name, config),
             )
 
             route_tool_call = self.route_tool_calls(result)

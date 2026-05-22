@@ -1,39 +1,18 @@
-from typing import Literal, Type
+from typing import Literal
 
 from langchain.messages import HumanMessage
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
-from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
-    BaseNode,
 )
-from byte.node.nodes import EndNode
 from byte.orchestration import BaseState, Leaves, PhaseModel, PhaseUtils
-from byte.support import Section, SectionType, Str
+from byte.support import Section, SectionType
 
 
 class CoderAgentNode(BaseAgentNode):
-    def boot(
-        self,
-        goto: Type[BaseNode] = EndNode,
-        **kwargs,
-    ):
-        """
-        Initialize the CoderAgentNode with a target node to route to after execution.
-
-        Args:
-            goto: The target node class to route to after the agent completes. Defaults to EndNode.
-            **kwargs: Additional keyword arguments passed to the parent class.
-        """
-        self.goto = Str.class_to_snake_case(goto)
-
-    def get_model(self) -> tuple[ModelSchema, dict]:
-        llm_service = self.app.make(LLMService)
-        return llm_service.get_model(self.name)
-
     def get_user_template(self):
         return [
             Leaves.ConversationHistory(),

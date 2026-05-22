@@ -1,26 +1,13 @@
 llm:
-  coder_plan_agent_node:
+  reasoning:
+    model: claude-opus-4-6
+    provider: anthropic
+  standard:
+    # model: mistral-large-latest
+    # provider: mistralai
     model: claude-sonnet-4-6
     provider: anthropic
-  ask_agent_node:
-    model: claude-opus-4-6
-    provider: anthropic
-  constitution_agent_node:
-    model: claude-opus-4-6
-    provider: anthropic
-  skill_select_agent_node:
-    model: claude-opus-4-6
-    provider: anthropic
-  coder_agent_node:
-    model: claude-sonnet-4-6
-    provider: anthropic
-  spec_creator_agent_node:
-    model: claude-opus-4-6
-    provider: anthropic
-  skill_creator_agent_node:
-    model: claude-sonnet-4-6
-    provider: anthropic
-  commit_agent_node:
+  fast:
     model: claude-haiku-4-5
     provider: anthropic
 lint:

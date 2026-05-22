@@ -3,12 +3,12 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, List, Sequence
 
 from langchain.chat_models import init_chat_model
-from langchain.messages import HumanMessage
 from langchain_core.messages import BaseMessage
 from langchain_core.runnables import Runnable
 from langgraph.types import Command
 
-from byte.llm import ModelSchema
+from byte.analytics import UsageMetrics
+from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseNode,
 )
@@ -29,6 +29,8 @@ if TYPE_CHECKING:
 
 
 class BaseAgentNode(BaseNode):
+    llm_tier: str = "standard"
+
     @property
     def name(self) -> str:
         """Agent Name"""
@@ -73,31 +75,9 @@ class BaseAgentNode(BaseNode):
             MessageFragments.Context(),
         ]
 
-    @abstractmethod
     def get_model(self) -> tuple[ModelSchema, dict]:
-        """ """
-        ...
-
-    async def _gather_errors(self, state) -> list[HumanMessage]:
-        """Gather error messages from state for re-prompting the assistant.
-
-        Formats validation or other errors into a user message that will
-        be added to the conversation to guide the assistant's correction.
-
-        Args:
-                state: The current state containing errors
-
-        Returns:
-                List containing a single HumanMessage with error content, or empty list
-
-        Usage: `error_messages = await self._gather_errors(state)`
-        """
-        errors = state.get("errors", None)
-
-        if errors is None:
-            return []
-
-        return [HumanMessage(errors)]
+        llm_service = self.app.make(LLMService)
+        return llm_service.get_model(self.llm_tier)
 
     async def generate_prompt(self, prompt_assembler: PromptAssembler) -> List[BaseMessage]:
         message_fragments = self.get_prompt(prompt_assembler.get_assembled_state())
@@ -157,27 +137,11 @@ class BaseAgentNode(BaseNode):
 
         agent_state = await prompt_assembler.generate_messages()
 
-        if state.get("errors", None) is not None:
-            agent_state["errors"] = await self._gather_errors(agent_state)
-        else:
-            agent_state["errors"] = []
-
-        max_tokens = 150_000
-
-        assembled_user_message_tokens = len(agent_state["user_message"]) / 4
-        assembled_system_message_tokens = len(agent_state["system_message"]) / 4
-        refreshed_context_state_tokens = len(agent_state["context_message"]) / 4
+        # TODO: DO we need this?
+        agent_state["errors"] = []
 
         scratch_messages = state.get("scratch_messages", [])
-        scratch_messages_tokens = sum(len(m.text) / 4 for m in scratch_messages)
-
-        total_tokens = (
-            assembled_user_message_tokens
-            + assembled_system_message_tokens
-            + refreshed_context_state_tokens
-            + scratch_messages_tokens
-        )
-        memory_percent = (total_tokens / max_tokens) * 100
+        _, memory_percent = UsageMetrics.estimate_prompt_tokens(agent_state, scratch_messages)
 
         self.app.emit_tui(
             Messages.UpdateMemory(
@@ -206,19 +170,10 @@ class BaseAgentNode(BaseNode):
         pending_phase = PhaseUtils.get_pending_phase(prompt_assembler.get_state())
 
         if pending_phase is not None and isinstance(pending_phase, PhaseModel):
-            # Append the required completion tool
-            # if pending_phase.completion_mode == "auto":
-            #     completion_tool = tool_registry_service.get_tool("complete_plan_step")
-            # else:
-            #     completion_tool = tool_registry_service.get_tool("confirm_complete_plan_step")
-
-            # tool_schemas.append(completion_tool.tool_schema())
-
             # Append any step-specific tools
             if pending_phase.tools:
                 for tool_class in pending_phase.tools:
                     tool = tool_registry_service.get_tool(tool_class.name)
-                    self.app["log"].info(tool_class.name)
                     assert tool
                     tool_schema = PhaseUtils.inject_phase_input_schema_args(tool.tool_schema())
                     tool_schemas.append(tool_schema)

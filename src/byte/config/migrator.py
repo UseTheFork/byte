@@ -6,8 +6,6 @@ from typing import TYPE_CHECKING
 
 from packaging.version import Version
 
-from byte.support import Yaml
-
 if TYPE_CHECKING:
     from byte.foundation import Application
 
@@ -68,6 +66,6 @@ class Migrator:
 
         # Write our changes back to the config file.
         config_path = self.app.config_path("config.yaml")
-        Yaml.save(config_path, config)
+        # Yaml.save(config_path, config)
 
         return config

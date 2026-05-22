@@ -1,6 +1,5 @@
 from byte import Service
-from byte.analytics import ModelUsage, UsageAnalytics
-from byte.analytics.utils.cost_calculator import CostCalculator
+from byte.analytics import ModelUsage, UsageAnalytics, UsageMetrics
 from byte.llm import LLMRegistryService
 from byte.orchestration import TokenUsageSchema
 from byte.tui import Messages
@@ -62,14 +61,14 @@ class AgentAnalyticsService(Service):
         for model_id, usage in self.usage.by_model.items():
             model_data = llm_registry.get_model(model_id)
             if model_data:
-                session_cost += CostCalculator.model_cost(usage, model_data.constraints)
+                session_cost += UsageMetrics.model_cost(usage, model_data.constraints)
 
         # Calculate last message cost based on model
         last_message_cost = 0.0
         if self.usage.last.type:
             model_data = llm_registry.get_model(self.usage.last.type)
             if model_data:
-                last_message_cost = CostCalculator.message_cost(self.usage.last, model_data.constraints)
+                last_message_cost = UsageMetrics.message_cost(self.usage.last, model_data.constraints)
 
         self.emit_tui(
             Messages.UpdateAnalytics(

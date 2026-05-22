@@ -5,7 +5,6 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
-from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
 )
@@ -14,9 +13,7 @@ from byte.skills.tools.load_skill_tool import LoadSkillTool
 
 
 class SkillSelectAgentNode(BaseAgentNode):
-    def get_model(self) -> tuple[ModelSchema, dict]:
-        llm_service = self.app.make(LLMService)
-        return llm_service.get_model(self.name)
+    llm_tier: str = "reasoning"
 
     def get_user_template(self):
         return [
