@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from byte.orchestration import Leaf
+from byte.support import MD
 from byte.support.section import Section, SectionType
 from byte.support.utils import list_to_multiline_text
 
@@ -20,19 +21,22 @@ class CommunicationStyle(Leaf):
         ]
 
         if not self.verbose:
-            constraints.append("  - Under 4 lines of text (tool use doesn't count)")
+            constraints.append(MD.bullet("Under 4 lines of text (tool use doesn't count)"))
 
         constraints.extend(
             [
-                "  - ALWAYS think and respond in the same spoken language the prompt was written in.",
-                """  - No preamble ("Here's...", "I'll...")""",
-                """  - No postamble ("Let me know...", "Hope this helps...")""",
-                "  - No emojis ever",
-                "  - Use rich Markdown formatting (headings, bullet lists, tables, code fences) for any multi-sentence or explanatory answer; only use plain unformatted text if the user explicitly asks.",
+                MD.bullet("ALWAYS think and respond in the same spoken language the prompt was written in."),
+                MD.bullet("""No preamble ("Here's...", "I'll...")"""),
+                MD.bullet("""No postamble ("Let me know...", "Hope this helps...")"""),
+                MD.bullet("No emojis ever"),
+                MD.bullet(
+                    "Use rich Markdown formatting (headings, bullet lists, tables, code fences) for any multi-sentence or explanatory answer; only use plain unformatted text if the user explicitly asks."
+                ),
             ]
         )
 
-        constraints.extend(self.extra_styles)
+        if self.extra_styles:
+            constraints.extend([MD.bullet(style) for style in self.extra_styles])
 
         constraints.append(Section.end())
 

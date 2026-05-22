@@ -29,6 +29,7 @@ class Epilogue(Leaf):
                 lines.append(
                     f"> **Remember**: This is a followup response. Make sure to consider the {Section.ref(SectionType.WORKFLOW_CURRENT_PHASE)} section and plan accordingly."
                 )
+                lines.append(Section.end())
                 lines.append(pending_phase.to_current_md())
         else:
             if not scratch_messages:

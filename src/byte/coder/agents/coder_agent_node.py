@@ -29,19 +29,19 @@ class CoderAgentNode(BaseAgentNode):
             Leaves.SkillsLoaded(),
             Leaves.CommunicationStyle(
                 [
-                    "   - Conciseness is about **text only**: always fully implement the requested feature, tests, and wiring even if that requires many tool calls.",
-                    "   - No explanations unless user asks",
-                    "   - Never send acknowledgement-only responses; after receiving new context or instructions, immediately continue the task or state the concrete next action you will take.",
+                    "Conciseness is about **text only**: always fully implement the requested feature, tests, and wiring even if that requires many tool calls.",
+                    "No explanations unless user asks",
+                    "Never send acknowledgement-only responses; after receiving new context or instructions, immediately continue the task or state the concrete next action you will take.",
                 ]
             ),
             Leaves.WorkflowConstraints(
                 [
-                    "   - Analyze the user's request and the provided file context",
-                    "   - If the request is ambiguous, ask clarifying questions",
-                    "   - Identify which files need to be modified, created, or deleted",
-                    "   - Break down the changes into clear, sequential steps",
-                    "   - Do NOT provide full code implementations unless required by tools",
-                    "   - Keep the plan concise and actionable",
+                    "Analyze the user's request and the provided file context",
+                    "If the request is ambiguous, ask clarifying questions",
+                    "Identify which files need to be modified, created, or deleted",
+                    "Break down the changes into clear, sequential steps",
+                    "Do NOT provide full code implementations unless required by tools",
+                    "Keep the plan concise and actionable",
                 ]
             ),
             Leaves.OperatingPrinciples(),
