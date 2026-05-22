@@ -5,6 +5,7 @@ from langgraph.graph.message import REMOVE_ALL_MESSAGES
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
+from byte.development import RecordResponseService
 from byte.node import BaseNode
 from byte.orchestration import BaseState, MetadataSchema
 from byte.orchestration.state import HarnessState
@@ -26,11 +27,17 @@ class StartNode(BaseNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
+        record_response_service = self.app.make(RecordResponseService)
+
+        self.app.dispatch_task(
+            record_response_service.clear_cache(config),
+        )
+
         result = {
             # We always remove scratch no matter what.
             "scratch_messages": [RemoveMessage(id=REMOVE_ALL_MESSAGES)],
             "touched_files": state.get("touched_files") or [],
-            "plan": state.get("plan") or [],
+            "workflow_phases": state.get("workflow_phases") or [],
             "errors": None,
             "harness": HarnessState(
                 skills=[],

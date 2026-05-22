@@ -90,4 +90,4 @@ class Section:
 
     @staticmethod
     def end() -> str:
-        return "---\n"
+        return "\n---\n"

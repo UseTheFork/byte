@@ -73,7 +73,7 @@ class ConstitutionAgentNode(BaseAgentNode):
         record_response_service = self.app.make(RecordResponseService)
 
         self.app.dispatch_task(
-            record_response_service.record_response(prompt, self.name, config),
+            record_response_service.record_response(prompt, config),
         )
         result = await runnable.ainvoke(
             prompt,

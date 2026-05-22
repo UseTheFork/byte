@@ -5,6 +5,7 @@ from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 
 from byte.memory import MemoryService
 from byte.orchestration import BaseState
+from byte.support import Str
 from byte.support.mixins import Bootable, Configurable, Eventable
 from byte.tui import TUIManagerService
 
@@ -17,6 +18,16 @@ class BaseWorkflow(ABC, Bootable, Eventable, Configurable):
 
     _graph: Optional[CompiledStateGraph] = None
 
+    @property
+    def name(self) -> str:
+        """Workflow Name"""
+        return Str.class_to_snake_case(self.__class__.__name__)
+
+    @property
+    def human_name(self) -> str:
+        """Human readable workflow name"""
+        return Str.snake_to_title(self.name).strip()
+
     @abstractmethod
     def get_phases(self) -> List[PhaseModel] | None: ...
 
@@ -28,7 +39,7 @@ class BaseWorkflow(ABC, Bootable, Eventable, Configurable):
         behavior, routing logic, and tool integration patterns.
         Usage: Override in subclass to create domain-specific agent graphs
         """
-        pass
+        ...
 
     async def compile(
         self, request: dict, thread_id: Optional[str] = None
@@ -54,10 +65,12 @@ class BaseWorkflow(ABC, Bootable, Eventable, Configurable):
         panel_id = tui_manager_service.get_panel_id()
 
         # Create configuration with thread ID
-        config = RunnableConfig(configurable={"thread_id": thread_id}, metadata={"panel_id": panel_id})
+        config = RunnableConfig(
+            configurable={"thread_id": thread_id}, metadata={"panel_id": panel_id, "workflow": self.name}
+        )
 
         # Create initial state using the agent's state class
-        initial_state = BaseState(**request)
+        initial_state = BaseState(**request)  # ty:ignore[missing-typed-dict-key]
 
         # Get the graph and stream events
         graph = await self.get_graph()

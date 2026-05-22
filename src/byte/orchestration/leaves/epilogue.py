@@ -20,17 +20,22 @@ class Epilogue(Leaf):
             "",
         ]
 
-        if not scratch_messages:
-            lines.append("> **Remember**: This is your first response so you are starting at the FIRST step.")
+        if self.enforcements:
+            lines.extend(self.enforcements)
 
-        pending_phase = PhaseUtils.get_pending_phase(prompt_assembler.get_state())
-        if pending_phase is not None and isinstance(pending_phase, PhaseModel):
-            lines.append(
-                f"> **Remember**: This is a followup response. Make sure to consider the {Section.ref(SectionType.WORKFLOW_CURRENT_PHASE)} section and plan accordingly."
-            )
-            lines.append(pending_phase.to_current_md())
+        if PhaseUtils.is_workflow_agent(prompt_assembler.get_state()):
+            pending_phase = PhaseUtils.get_pending_phase(prompt_assembler.get_state())
+            if pending_phase is not None and isinstance(pending_phase, PhaseModel):
+                lines.append(
+                    f"> **Remember**: This is a followup response. Make sure to consider the {Section.ref(SectionType.WORKFLOW_CURRENT_PHASE)} section and plan accordingly."
+                )
+                lines.append(pending_phase.to_current_md())
         else:
-            lines.append(
-                f"> **Remember**: This is a followup response. Make sure to consider the {Section.ref(SectionType.WORKFLOW)} section and plan accordingly."
-            )
+            if not scratch_messages:
+                lines.append("> **Remember**: This is your first response so you are starting at the FIRST step.")
+            else:
+                lines.append(
+                    f"> **Remember**: This is a followup response. Make sure to consider the {Section.ref(SectionType.WORKFLOW)} section and plan accordingly."
+                )
+
         return list_to_multiline_text(lines)

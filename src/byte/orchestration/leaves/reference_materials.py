@@ -52,6 +52,9 @@ class ReferenceMaterials(Leaf):
                 ]
             )
 
+        if not project_context.conventions and not project_context.session_docs:
+            return ""
+
         project_information_and_context.append(Section.end())
 
         return list_to_multiline_text(project_information_and_context)

@@ -42,7 +42,6 @@ class AskAgentNode(BaseAgentNode):
     def get_system_template(self):
         return [
             Leaves.Preamble(role="Act as an expert software developer."),
-            Leaves.SkillsAvailable(),
             Leaves.CommunicationStyle(verbose=True),
             Leaves.WorkflowConstraints(
                 [
@@ -67,8 +66,6 @@ class AskAgentNode(BaseAgentNode):
 
     def get_context_template(self):
         return [
-            Leaves.SkillsLoaded(),
-            Leaves.ToolsLoaded(),
             Leaves.ReferenceMaterials(),
             Leaves.ProjectEnvironment(),
             Leaves.FileContext(),
@@ -103,7 +100,7 @@ class AskAgentNode(BaseAgentNode):
         record_response_service = self.app.make(RecordResponseService)
 
         self.app.dispatch_task(
-            record_response_service.record_response(prompt, self.name, config),
+            record_response_service.record_response(prompt, config),
         )
         result = await runnable.ainvoke(
             prompt,
@@ -116,4 +113,4 @@ class AskAgentNode(BaseAgentNode):
             return route_tool_call
 
         msg = extract_content_from_message(result)
-        return self.route_to(self.goto, {"scratch_messages": AIMessage(content=msg, agent_name=self.name)})
+        return self.route_to(self.goto, {"scratch_messages": AIMessage(content=msg, agent_name=self.human_name)})

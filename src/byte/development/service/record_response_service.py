@@ -1,3 +1,4 @@
+import shutil
 from typing import List
 
 from langchain_core.messages import BaseMessage
@@ -17,7 +18,6 @@ class RecordResponseService(Service):
     async def record_response(
         self,
         messages: List[BaseMessage] | None,
-        agent_name: str,
         config: RunnableConfig,
     ):
         """Write assistant response to a cache file.
@@ -38,11 +38,12 @@ class RecordResponseService(Service):
         if not messages:
             return
 
-        # if self.app.is_development():
-        #     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        #     cache_file = self.app.cache_path(f"development/{agent_name}_{timestamp}.md")
-        # else:
-        cache_file = self.app.cache_path(f"development/{agent_name}.md")
+        metadata = config.get("metadata", {})
+        workflow_name = metadata.get("workflow", "")
+        langgraph_node = metadata.get("langgraph_node")
+        langgraph_step = metadata.get("langgraph_step")
+
+        cache_file = self.app.cache_path(f"development/{workflow_name}/{langgraph_step}_{langgraph_node}.md")
 
         # Ensure cache directory exists
         cache_file.parent.mkdir(parents=True, exist_ok=True)
@@ -66,9 +67,22 @@ class RecordResponseService(Service):
 
         Usage: `await service.clear_development_cache()`
         """
-        import shutil
 
         dev_cache_dir = self.app.cache_path("development")
 
         if dev_cache_dir.exists() and dev_cache_dir.is_dir():
             shutil.rmtree(dev_cache_dir)
+
+    async def clear_cache(
+        self,
+        config: RunnableConfig,
+    ) -> None:
+        """ """
+
+        metadata = config.get("metadata", {})
+        workflow_name = metadata.get("workflow", "")
+
+        workflow_cache_path = self.app.cache_path(f"development/{workflow_name}")
+
+        if workflow_cache_path.exists() and workflow_cache_path.is_dir():
+            shutil.rmtree(workflow_cache_path)

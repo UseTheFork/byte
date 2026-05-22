@@ -78,7 +78,7 @@ class SpecCreatorAgentNode(BaseAgentNode):
                 config=config,
             )
             self.app.dispatch_task(
-                record_response_service.record_response(prompt, self.name, config),
+                record_response_service.record_response(prompt, config),
             )
 
             route_tool_call = self.route_tool_calls(result)

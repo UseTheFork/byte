@@ -2,11 +2,10 @@ from typing import Literal
 
 from langchain.messages import HumanMessage, ToolMessage
 from langgraph.graph.state import RunnableConfig
-from langgraph.runtime import Runtime
 from langgraph.types import Command
 
-from byte.node import BaseNode, NodeEvents
-from byte.orchestration import AssistantContextSchema, BaseState, CompleteSimpleTurnTool, CompleteTurnTool
+from byte.node import BaseNode
+from byte.orchestration import BaseState, CompleteSimpleTurnTool, CompleteTurnTool
 from byte.orchestration.messages import AIMessage
 from byte.support import Boundary, BoundaryType
 from byte.support.utils import list_to_multiline_text
@@ -81,15 +80,19 @@ class EndNode(BaseNode):
         return list_to_multiline_text(message_parts)
 
     async def __call__(
-        self, state: BaseState, config: RunnableConfig, runtime: Runtime[AssistantContextSchema]
+        self,
+        state: BaseState,
+        *,
+        config: RunnableConfig,
     ) -> Command[Literal["__end__"]]:
-        if runtime is not None and runtime.context is not None:
-            await self.emit(
-                NodeEvents.EndNode(
-                    state=state,
-                    agent=runtime.context.agent,
-                )
-            )
+        # TODO: Is this still needed?
+        # if runtime is not None and runtime.context is not None:
+        #     await self.emit(
+        #         NodeEvents.EndNode(
+        #             state=state,
+        #             agent=runtime.context.agent,
+        #         )
+        #     )
 
         # This is where we promote `scratch_messages` to `history_messages`
         update_dict = {

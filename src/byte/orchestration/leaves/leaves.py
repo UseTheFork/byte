@@ -12,7 +12,6 @@ from byte.orchestration.leaves.preamble import Preamble as _Preamble
 from byte.orchestration.leaves.project_environment import ProjectEnvironment as _ProjectEnvironment
 from byte.orchestration.leaves.project_hierarchy import ProjectHierarchy as _ProjectHierarchy
 from byte.orchestration.leaves.reference_materials import ReferenceMaterials as _ReferenceMaterials
-from byte.orchestration.leaves.reinforcement import Reinforcement as _Reinforcement
 from byte.orchestration.leaves.skills_all import SkillsAll as _SkillsAll
 from byte.orchestration.leaves.skills_available import SkillsAvailable as _SkillsAvailable
 from byte.orchestration.leaves.skills_loaded import SkillsLoaded as _SkillsLoaded
@@ -39,7 +38,6 @@ class Leaves:
     ProjectEnvironment = _ProjectEnvironment
     ProjectHierarchy = _ProjectHierarchy
     ReferenceMaterials = _ReferenceMaterials
-    Reinforcement = _Reinforcement
     SkillsAll = _SkillsAll
     SkillsAvailable = _SkillsAvailable
     SkillsLoaded = _SkillsLoaded

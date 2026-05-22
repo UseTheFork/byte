@@ -31,13 +31,6 @@ class CommitAgentNode(BaseAgentNode):
             Leaves.Preamble(
                 "You are an expert software engineer that generates organized Git commits based on the provided user input."
             ),
-            Section.start(SectionType.TASK),
-            "You are an expert software engineer that generates concise, Git commit messages based on the provided diffs.",
-            "Review the provided context and diffs which are about to be committed to a git repo.",
-            "Review the diffs carefully.",
-            Section.important("You MUST follow the commit guidelines provided in the Rules section below."),
-            "Read and apply ALL rules for commit types, scopes, and description formatting.",
-            Section.end(),
             Leaves.CommunicationStyle(
                 extra_styles=[
                     "  - Conciseness is about **text only**: always fully implement the requested feature, tests, and wiring even if that requires many tool calls.",
@@ -45,6 +38,13 @@ class CommitAgentNode(BaseAgentNode):
                     "  - Never send acknowledgement-only responses; after receiving new context or instructions, immediately continue the task or state the concrete next action you will take.",
                 ]
             ),
+            Section.end(),
+            Leaves.OperatingPrinciples(),
+            Section.start(SectionType.TASK),
+            "Review the provided context and diffs which are about to be committed to a git repo.",
+            "Review the diffs carefully.",
+            Section.important("You MUST follow the commit guidelines provided in the Rules section below."),
+            "Read and apply ALL rules for commit types, scopes, and description formatting.",
             Section.end(),
             Leaves.CommitGuidelines(),
         ]
@@ -75,7 +75,7 @@ class CommitAgentNode(BaseAgentNode):
         while True:
             result = await runnable.ainvoke(prompt, config=config)
             self.app.dispatch_task(
-                record_response_service.record_response(prompt, self.name, config),
+                record_response_service.record_response(prompt, config),
             )
 
             route_tool_call = self.route_tool_calls(result)

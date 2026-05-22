@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, List, Type, TypeVar
 from langchain_core.messages import BaseMessage
 
 from byte.llm import ModelSchema
-from byte.orchestration import Leaf, PhaseUtils
+from byte.orchestration import Leaf, PhaseModel, PhaseUtils
 from byte.support.mixins import Bootable, Eventable
 from byte.support.utils import list_to_multiline_text
 from byte.tools.service.tool_registry_service import ToolRegistryService
@@ -26,9 +26,6 @@ class PromptAssembler(Bootable, Eventable):
     reinforcement messages, and other prompt components, then assembles them
     into a complete prompt using template replacement.
 
-    Usage: `assembler = PromptAssembler(template=["Hello {name}"])`
-    Usage: `state = await assembler.generate_state(state, config, context)`
-    Usage: `prompt = assembler.assemble(name="World", age=30)`
     """
 
     def boot(self, agent_node: BaseAgentNode | None, state: BaseState, extra: dict = {}, **kwargs):
@@ -83,7 +80,7 @@ class PromptAssembler(Bootable, Eventable):
         # Find the first pending step (if any)
         pending_phase = PhaseUtils.get_pending_phase(self.prompt_state)
 
-        if pending_phase is not None:
+        if pending_phase is not None and isinstance(pending_phase, PhaseModel):
             # Append any step-specific tools
             if pending_phase.tools:
                 for tool_class in pending_phase.tools:

@@ -7,7 +7,6 @@ from langchain_core.callbacks import get_usage_metadata_callback
 from byte import Service
 from byte.analytics import AgentAnalyticsService
 from byte.orchestration import BaseWorkflow, TokenUsageSchema
-from byte.support import Str
 from byte.tui import Messages, Status
 
 
@@ -39,7 +38,6 @@ class WorkflowService(Service):
         Args:
             usage_metadata: Dictionary with model IDs as keys and usage stats as values
 
-        Usage: `await self._track_token_usage(usage_metadata_callback.usage_metadata)`
         """
         self.app["log"].info(usage_metadata)
 
@@ -174,7 +172,6 @@ class WorkflowService(Service):
             request: The user request to process
             thread_id: Optional thread ID for conversation context
 
-        Usage: `await workflow_service.execute(ask_workflow, {"user_request" : "How do I...?"})`
         """
         graph, initial_state, config = await workflow.compile(request, thread_id)
 
@@ -184,9 +181,7 @@ class WorkflowService(Service):
         self.message_chunks = {}
         self.cancel_event = threading.Event()
 
-        self.emit_tui(
-            Messages.CreateHeading(Str.snake_to_title(Str.snake_case(workflow.__class__.__name__)), "text-primary")
-        )
+        self.emit_tui(Messages.CreateHeading(workflow.human_name, "text-primary"))
 
         with get_usage_metadata_callback() as usage_metadata_callback:
             async for chunk in graph.astream(
