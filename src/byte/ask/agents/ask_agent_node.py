@@ -4,8 +4,6 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
-from byte.files import AddFilesTool, ListFilesTool
-from byte.git import GitGrepTool
 from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
@@ -15,8 +13,6 @@ from byte.node.nodes import EndNode
 from byte.orchestration import AIMessage, BaseState, Leaves
 from byte.support import Section, SectionType, Str
 from byte.support.utils import extract_content_from_message
-from byte.system import UserSelectTool
-from byte.web import SearchWebTool
 
 
 class AskAgentNode(BaseAgentNode):
@@ -50,7 +46,7 @@ class AskAgentNode(BaseAgentNode):
         return [
             Leaves.Preamble(role="Act as an expert software developer."),
             Leaves.SkillsAvailable(),
-            Leaves.CommunicationStyle(),
+            Leaves.CommunicationStyle(verbose=True),
             Leaves.WorkflowConstraints(
                 [
                     "- Always use best practices when coding",
@@ -89,11 +85,11 @@ class AskAgentNode(BaseAgentNode):
 
     def get_tools(self, state: BaseState):
         return [
-            GitGrepTool,
-            UserSelectTool,
-            ListFilesTool,
-            AddFilesTool,
-            SearchWebTool,
+            # GitGrepTool,
+            # UserSelectTool,
+            # ListFilesTool,
+            # AddFilesTool,
+            # SearchWebTool,
         ]
 
     async def __call__(

@@ -12,7 +12,13 @@ from byte.llm import ModelSchema
 from byte.node import (
     BaseNode,
 )
-from byte.orchestration import MessageFragment, MessageFragments, PhaseUtils, PromptAssembler
+from byte.orchestration import (
+    MessageFragment,
+    MessageFragments,
+    PhaseModel,
+    PhaseUtils,
+    PromptAssembler,
+)
 from byte.orchestration.messages import AIMessage
 from byte.support import Str
 from byte.tools import ToolRegistryService
@@ -199,7 +205,7 @@ class BaseAgentNode(BaseNode):
         # Find the first pending step (if any)
         pending_phase = PhaseUtils.get_pending_phase(prompt_assembler.get_state())
 
-        if pending_phase is not None:
+        if pending_phase is not None and isinstance(pending_phase, PhaseModel):
             # Append the required completion tool
             # if pending_phase.completion_mode == "auto":
             #     completion_tool = tool_registry_service.get_tool("complete_plan_step")
@@ -216,13 +222,6 @@ class BaseAgentNode(BaseNode):
                     assert tool
                     tool_schema = PhaseUtils.inject_phase_input_schema_args(tool.tool_schema())
                     tool_schemas.append(tool_schema)
-
-        else:
-            # No pending steps remain; if workflow_phases exists and all are completed/blocked, allow complete_turn
-            if PhaseUtils.is_workflow_complete(prompt_assembler.get_state()):
-                complete_turn_tool = tool_registry_service.get_tool("complete_turn")
-                assert complete_turn_tool
-                tool_schemas.append(complete_turn_tool.tool_schema())
 
         # Bind agent-level tools if provided
         agent_tools = self.get_tools(prompt_assembler.get_state())
