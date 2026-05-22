@@ -3,7 +3,7 @@ from typing import List
 from pydantic import Field
 
 from byte.orchestration.models.base_phase_model import BasePhaseModel, ToolType
-from byte.support import Section, SectionType
+from byte.support import MD, Section, SectionType
 from byte.support.utils import list_to_multiline_text
 
 
@@ -23,8 +23,8 @@ class PhaseModel(BasePhaseModel):
         return list_to_multiline_text(
             [
                 Section.sub_heading(f"phase-{self.id}", 2, True),
-                f"- phase_id: phase-{self.id}",
-                f"- phase_status: {self.status}",
+                MD.bullet(f"phase_id: phase-{self.id}"),
+                MD.bullet(f"- phase_status: {self.status}"),
                 "",
                 self.content,
                 "",
@@ -36,7 +36,7 @@ class PhaseModel(BasePhaseModel):
         note_block = (
             [
                 Section.sub_heading("Notes", 3),
-                list_to_multiline_text(self.note),
+                list_to_multiline_text([MD.bullet(note) for note in self.note]),
                 "",
             ]
             if self.note

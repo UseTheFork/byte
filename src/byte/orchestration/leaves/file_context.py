@@ -40,7 +40,7 @@ class FileContext(Leaf):
             read_only_content = "\n".join(read_only_files)
             lines.extend(
                 [
-                    Section.sub_heading("Read Only Files", 3),
+                    Section.sub_heading("Read Only Files", 2),
                     "Any edits to these files will be rejected",
                     "",
                     "```",
@@ -53,7 +53,7 @@ class FileContext(Leaf):
             editable_content = "\n".join(editable_files)
             lines.extend(
                 [
-                    Section.sub_heading("Editable Files", 3),
+                    Section.sub_heading("Editable Files", 2),
                     "",
                     "```",
                     f"{editable_content}",

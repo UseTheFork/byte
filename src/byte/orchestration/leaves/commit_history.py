@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from byte.git import GitService
 from byte.orchestration import Leaf
-from byte.support import Section, SectionType
+from byte.support import MD, Section, SectionType
 from byte.support.utils import list_to_multiline_text
 
 if TYPE_CHECKING:
@@ -25,14 +25,16 @@ class CommitHistory(Leaf):
         if self.as_section:
             lines.append(Section.start(SectionType.COMMIT_HISTORY))
 
-        lines.append("Recent commits (newest first):")
         lines.append("")
 
         for c in recent_commits:
             files = ", ".join(c["files"]) if c["files"] else "none"
-            lines.append(f"- [{c['short_hash']}] {c['message']}")
-            lines.append(f"  author: {c['author']} | date: {c['date']}")
-            lines.append(f"  files: {files}")
+            commit_lines = [
+                f"[{c['short_hash']}] {c['message']}",
+                f"author: {c['author']} | date: {c['date']}",
+                f"files: {files}",
+            ]
+            lines.append(MD.bullet_list(commit_lines))
 
         if self.as_section:
             lines.append(Section.end())

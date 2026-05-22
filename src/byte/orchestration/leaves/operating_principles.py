@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from byte.orchestration import Leaf, OrchestrationEvents
-from byte.support import Section, SectionType
+from byte.support import MD, Section, SectionType
 from byte.support.utils import list_to_multiline_text
 
 if TYPE_CHECKING:
@@ -13,16 +13,7 @@ class OperatingPrinciples(Leaf):
         self.has_section = has_section
 
     async def assemble(self, prompt_assembler: PromptAssembler) -> str:
-        """Gather project hierarchy for LLM understanding of project structure.
-
-        Uses FileService to generate a concise tree-like representation
-        of the project's directory structure and important files.
-
-        Returns:
-                List containing a single HumanMessage with formatted project hierarchy
-
-        Usage: `hierarchy_messages = await self._gather_project_hierarchy()`
-        """
+        """ """
 
         reinforcement_payload = await prompt_assembler.emit(
             OrchestrationEvents.GatherReinforcement(
@@ -42,7 +33,8 @@ class OperatingPrinciples(Leaf):
                 "",
                 Section.start(SectionType.OPERATING_PRINCIPLES),
                 Section.important("You **MUST** follow these Operating Principles"),
-                *reinforcement_messages,
+                "",
+                *[MD.bullet(msg) for msg in reinforcement_messages],
                 Section.end(),
             ]
 

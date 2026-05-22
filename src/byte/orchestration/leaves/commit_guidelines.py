@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from byte.orchestration import Leaf
-from byte.support import MD, Section
+from byte.support import MD, Section, SectionType
 from byte.support.utils import list_to_multiline_text
 
 if TYPE_CHECKING:
@@ -29,7 +29,8 @@ class CommitGuidelines(Leaf):
         config = prompt_assembler.get_app()["config"]
         commit_guidelines = []
 
-        commit_guidelines.append(Section.sub_heading("Allowed Commit Types", 2))
+        commit_guidelines.append(Section.start(SectionType.RULES))
+        commit_guidelines.append(Section.sub_heading("Allowed Commit Types", 2, True))
 
         commit_types_list = "\n".join(
             MD.bullet(f"**{type_name}**: {description}") for type_name, description in COMMIT_TYPES.items()

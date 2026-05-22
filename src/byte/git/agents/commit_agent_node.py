@@ -10,7 +10,7 @@ from byte.node import (
     BaseAgentNode,
 )
 from byte.orchestration import BaseState, Leaves, PhaseUtils
-from byte.support import Section, SectionType
+from byte.support import Section
 
 # Conventional commit message generation prompt
 # Adapted from Aider: https://github.com/Aider-AI/aider/blob/e4fc2f515d9ed76b14b79a4b02740cf54d5a0c0b/aider/prompts.py#L8
@@ -33,19 +33,13 @@ class CommitAgentNode(BaseAgentNode):
             ),
             Leaves.CommunicationStyle(
                 extra_styles=[
-                    "  - Conciseness is about **text only**: always fully implement the requested feature, tests, and wiring even if that requires many tool calls.",
-                    "  - No explanations unless user asks",
-                    "  - Never send acknowledgement-only responses; after receiving new context or instructions, immediately continue the task or state the concrete next action you will take.",
+                    "Conciseness is about **text only**: always fully implement the requested feature, tests, and wiring even if that requires many tool calls.",
+                    "No explanations unless user asks",
+                    "Never send acknowledgement-only responses; after receiving new context or instructions, immediately continue the task or state the concrete next action you will take.",
                 ]
             ),
             Section.end(),
             Leaves.OperatingPrinciples(),
-            Section.start(SectionType.TASK),
-            "Review the provided context and diffs which are about to be committed to a git repo.",
-            "Review the diffs carefully.",
-            Section.important("You MUST follow the commit guidelines provided in the Rules section below."),
-            "Read and apply ALL rules for commit types, scopes, and description formatting.",
-            Section.end(),
             Leaves.CommitGuidelines(),
         ]
 

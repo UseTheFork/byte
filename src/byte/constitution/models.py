@@ -116,7 +116,7 @@ class Constitution:
         lines: list[str] = []
 
         # Title
-        lines.append(Section.ref(SectionType.CONSTITUTION))
+        lines.append(Section.start(SectionType.CONSTITUTION))
         lines.append("")
 
         # Core Principles
