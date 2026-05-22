@@ -37,6 +37,8 @@ class SectionType(StrEnum):
     RESPONSE_FORMAT = "Response Format"
     RESUME_FORMAT = "Resuming The Conversation"
 
+    TEMPLATE = "Template"
+
     EXAMPLES = "Examples"
 
     PLAN = "Plan"

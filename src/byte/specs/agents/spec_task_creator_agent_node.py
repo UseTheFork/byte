@@ -9,6 +9,7 @@ from byte.node import (
     BaseAgentNode,
 )
 from byte.orchestration import BaseState, Leaves, PhaseUtils
+from byte.support import Section, SectionType
 
 
 class SpecTaskCreatorAgentNode(BaseAgentNode):
@@ -29,10 +30,20 @@ class SpecTaskCreatorAgentNode(BaseAgentNode):
             Leaves.WorkflowConstraints(
                 [
                     "Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it.",
-                    "Assume they are a skilled developer, but know almost nothing about our toolset or problem domain. Assume they don't know good test design very well.",
-                    "Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD.",
+                    "Assume they are a skilled developer, but know almost nothing about our toolset or problem domain.",
+                    "Give them the whole plan as bite-sized tasks. YAGNI. KISS. DRY.",
                 ]
             ),
+            Section.start(SectionType.TEMPLATE),
+            "Use this template when creating tasks",
+            "```",
+            "# [Feature Name] Implementation Plan",
+            "**Goal:** [One sentence describing what this builds]",
+            "**Architecture:** [2-3 sentences about approach]",
+            "---",
+            "Step 1: FOO",
+            "```",
+            Section.end(),
         ]
 
     def get_context_template(self):

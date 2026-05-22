@@ -305,3 +305,25 @@ class Str:
         Usage: `Str.snake_to_title("base_agent_node")` -> "Base Agent Node"
         """
         return value.replace("_", " ").title()
+
+    @staticmethod
+    def normalize_id(text: str) -> str:
+        """Normalize a string to a lowercase hyphenated ID format.
+
+        Converts text to lowercase, replaces non-alphanumeric characters with hyphens,
+        collapses consecutive hyphens into a single hyphen, and removes leading/trailing hyphens.
+
+        Args:
+            text: The string to normalize.
+
+        Returns:
+            The normalized ID string.
+
+        Usage: `Str.normalize_id("My Topic Name")` -> "my-topic-name"
+        Usage: `Str.normalize_id("TaskID_123")` -> "taskid-123"
+        """
+        text = text.lower()
+        text = re.sub(r"[^a-z0-9]+", "-", text)
+        text = re.sub(r"-+", "-", text)
+        text = text.strip("-")
+        return text

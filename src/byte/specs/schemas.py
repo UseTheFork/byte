@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
 
 from byte.support import MD
 from byte.support.utils import list_to_multiline_text
@@ -87,8 +87,7 @@ class Spec:
         instructions: Body content of the spec file (after frontmatter).
         path: Directory containing the spec file.
         spec_file_path: Absolute path to the spec file.
-        version: Optional version string (from frontmatter).
-        tags: Optional list of tags (from frontmatter).
+        reference_files: Optional list of reference files (from frontmatter).
     """
 
     id: str
@@ -97,8 +96,7 @@ class Spec:
     instructions: str
     path: Path
     spec_file_path: Path
-    version: Optional[str] = None
-    tags: Optional[list[str]] = None
+    reference_files: list[str] = field(default_factory=list)
 
     def to_md(self) -> str:
         return list_to_multiline_text(

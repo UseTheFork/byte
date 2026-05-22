@@ -1,10 +1,10 @@
-import re
 from pathlib import Path
 from typing import Optional
 
 from byte import Service
 from byte.specs import SpecTask
 from byte.specs.schemas import Spec, SpecTaskFiles
+from byte.support import Str
 from byte.support.yaml import Yaml
 
 SPEC_FILE_NAME = "SPEC.md"
@@ -85,8 +85,8 @@ class SpecLoaderService(Service):
     def _parse_spec_file(self, spec_file: Path) -> Optional[Spec]:
         """Parse a single ``SPEC.md`` file into a Spec dataclass.
 
-        Reads YAML frontmatter for *name*, *description*, *version*, and
-        *tags*, treating the remainder of the file as the spec instructions.
+        Reads YAML frontmatter for *name*, *description*, and *reference_files*,
+        treating the remainder of the file as the spec instructions.
 
         Args:
             spec_file: Absolute path to the spec file.
@@ -121,24 +121,19 @@ class SpecLoaderService(Service):
             self.app["log"].warning(f"Missing or invalid 'description' in {spec_file}, skipping")
             return None
 
-        version = frontmatter.get("version")
-        if version is not None and not isinstance(version, str):
-            version = str(version)
-
-        tags = frontmatter.get("tags")
-        if tags is not None and not isinstance(tags, list):
-            self.app["log"].warning(f"'tags' in {spec_file} is not a list, ignoring")
-            tags = None
+        reference_files = frontmatter.get("reference_files", [])
+        if not isinstance(reference_files, list):
+            self.app["log"].warning(f"'reference_files' in {spec_file} is not a list, ignoring")
+            reference_files = []
 
         return Spec(
-            id=re.sub(r"[^a-z0-9]+", "-", name.strip().lower()).strip("-"),
+            id=Str.normalize_id(name),
             name=name.strip(),
             description=description.strip(),
             instructions=body,
             path=spec_file.parent,
             spec_file_path=spec_file,
-            version=version.strip() if isinstance(version, str) else None,
-            tags=tags,
+            reference_files=reference_files,
         )
 
     def _load_from_directory(self, directory: Path) -> dict[str, Spec]:
@@ -294,7 +289,7 @@ class SpecLoaderService(Service):
         all_success = True
         for task in tasks:
             # Normalize task id to filename (convert to lowercase, replace spaces/hyphens)
-            normalized_id = re.sub(r"[^a-z0-9]+", "-", task.id.lower()).strip("-")
+            normalized_id = Str.normalize_id(task.id)
             task_file = tasks_dir / f"{normalized_id}.md"
 
             frontmatter = {
@@ -336,7 +331,7 @@ class SpecLoaderService(Service):
         """
         spec = self.get_spec(spec_name)
         if spec is None:
-            self.app["log"].warning(f"Cannot save task — spec '{spec_name}' not found")
+            self.app["log"].warning(f"Cannot save task - spec '{spec_name}' not found")
             return False
 
         tasks_dir = spec.path / TASKS_DIR_NAME
@@ -346,7 +341,7 @@ class SpecLoaderService(Service):
             self.app["log"].warning(f"Could not create tasks directory {tasks_dir}: {exc}")
             return False
 
-        normalized_id = re.sub(r"[^a-z0-9]+", "-", task.id.lower()).strip("-")
+        normalized_id = Str.normalize_id(task.id)
         task_file = tasks_dir / f"{normalized_id}.md"
 
         frontmatter = {
