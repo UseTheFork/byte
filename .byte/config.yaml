@@ -5,8 +5,9 @@ llm:
   standard:
     # model: mistral-large-latest
     # provider: mistralai
-    # model: claude-sonnet-4-6
-    # provider: anthropic
+    model: claude-sonnet-4-6
+    provider: anthropic
+  coding:
     model: claude-haiku-4-5
     provider: anthropic
   fast:

@@ -1,13 +1,12 @@
-import re
 from pathlib import Path
 from typing import Optional
 
 from byte import Service
 from byte.skills.schemas import Skill
 from byte.support.boundary import Boundary, BoundaryType
+from byte.support.yaml import Yaml
 
 SKILL_FILE_NAME = "SKILL.md"
-FRONTMATTER_PATTERN = re.compile(r"^---[\r\n]+(.*?)[\r\n]+---", re.DOTALL | re.MULTILINE)
 
 
 class SkillLoaderService(Service):
@@ -21,18 +20,10 @@ class SkillLoaderService(Service):
     When two skills share the same name the higher-priority source wins, so
     project skills override agent skills, and both override builtins — matching
     the deduplication strategy used by Crush.
-
-    Usage:
-        skill_loader = app.make(SkillLoaderService)
-        skills = skill_loader.skills          # list of active Skill objects
-        skill_loader.reload()                 # re-scan all paths
     """
 
     def boot(self) -> None:
-        """Discover and load skills on service initialization.
-
-        Usage: `service = SkillLoaderService(container)` — boot is called automatically.
-        """
+        """Discover and load skills on service initialization."""
         self._skills: dict[str, Skill] = {}
         self.reload()
 
@@ -42,10 +33,7 @@ class SkillLoaderService(Service):
 
     @property
     def skills(self) -> dict[str, Skill]:
-        """Return the current dict of active (deduplicated) skills, keyed by name.
-
-        Usage: `for name, skill in service.skills.items(): ...`
-        """
+        """Return the current dict of active (deduplicated) skills, keyed by name."""
         return {name: skill for name, skill in self._skills.items()}
 
     def get_skill(self, name: str) -> Optional[Skill]:
@@ -53,8 +41,6 @@ class SkillLoaderService(Service):
 
         Args:
             name: The skill name to look up.
-
-        Usage: `skill = service.get_skill("code-reviewer")`
         """
         return self._skills.get(name)
 
@@ -67,9 +53,6 @@ class SkillLoaderService(Service):
         Returns:
             An XML string wrapped in ``<available_skills>`` tags, or an empty
             string if there are no skills to render.
-
-        Usage: `xml = service.skills_to_prompt_xml()`
-        Usage: `xml = service.skills_to_prompt_xml(my_skills)`
         """
         if skills is None:
             skills = self._skills
@@ -136,24 +119,14 @@ class SkillLoaderService(Service):
             self.app["log"].warning(f"Could not read skill file {skill_file}: {exc}")
             return None
 
-        match = FRONTMATTER_PATTERN.match(content)
-        if not match:
-            self.app["log"].warning(f"No YAML frontmatter found in {skill_file}, skipping")
-            return None
-
-        frontmatter_text = match.group(1)
-        body = content[match.end() :].strip()
-
         try:
-            import yaml  # lazy import — yaml is an optional dep at module level
-
-            frontmatter = yaml.safe_load(frontmatter_text)
+            frontmatter, body = Yaml.parse_frontmatter(content)
         except Exception as exc:
-            self.app["log"].warning(f"Failed to parse YAML frontmatter in {skill_file}: {exc}")
+            self.app["log"].warning(f"Failed to parse frontmatter in {skill_file}: {exc}")
             return None
 
-        if not isinstance(frontmatter, dict):
-            self.app["log"].warning(f"Frontmatter in {skill_file} is not a mapping, skipping")
+        if not frontmatter:
+            self.app["log"].warning(f"No YAML frontmatter found in {skill_file}, skipping")
             return None
 
         name = frontmatter.get("name")
@@ -228,7 +201,6 @@ class SkillLoaderService(Service):
         Collects skills from all sources in ascending priority order so that
         higher-priority (user) skills override lower-priority (builtin) ones.
 
-        Usage: `service.reload()`
         """
         merged: dict[str, Skill] = {}
 

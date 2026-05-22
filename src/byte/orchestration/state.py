@@ -8,6 +8,7 @@ from byte.orchestration import ConstraintSchema, MetadataSchema, PhaseModel, Red
 class HarnessState(TypedDict):
     """State passed to a agents, constraining its skills, xyz."""
 
+    spec: str
     skills: list[str]
 
 

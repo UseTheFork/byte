@@ -1,14 +1,14 @@
-import json
 import re
 from pathlib import Path
 from typing import Optional
 
 from byte import Service
-from byte.specs.schemas import Spec, SpecPhase
+from byte.specs import SpecTask
+from byte.specs.schemas import Spec, SpecTaskFiles
+from byte.support.yaml import Yaml
 
 SPEC_FILE_NAME = "SPEC.md"
-PHASES_FILE_NAME = "phases.json"
-FRONTMATTER_PATTERN = re.compile(r"^---[\r\n]+(.*?)[\r\n]+---", re.DOTALL | re.MULTILINE)
+TASKS_DIR_NAME = "tasks"
 
 
 class SpecLoaderService(Service):
@@ -100,24 +100,14 @@ class SpecLoaderService(Service):
             self.app["log"].warning(f"Could not read spec file {spec_file}: {exc}")
             return None
 
-        match = FRONTMATTER_PATTERN.match(content)
-        if not match:
-            self.app["log"].warning(f"No YAML frontmatter found in {spec_file}, skipping")
-            return None
-
-        frontmatter_text = match.group(1)
-        body = content[match.end() :].strip()
-
         try:
-            import yaml  # lazy import — yaml is an optional dep at module level
-
-            frontmatter = yaml.safe_load(frontmatter_text)
+            frontmatter, body = Yaml.parse_frontmatter(content)
         except Exception as exc:
-            self.app["log"].warning(f"Failed to parse YAML frontmatter in {spec_file}: {exc}")
+            self.app["log"].warning(f"Failed to parse frontmatter in {spec_file}: {exc}")
             return None
 
-        if not isinstance(frontmatter, dict):
-            self.app["log"].warning(f"Frontmatter in {spec_file} is not a mapping, skipping")
+        if not frontmatter:
+            self.app["log"].warning(f"No YAML frontmatter found in {spec_file}, skipping")
             return None
 
         name = frontmatter.get("name")
@@ -141,6 +131,7 @@ class SpecLoaderService(Service):
             tags = None
 
         return Spec(
+            id=re.sub(r"[^a-z0-9]+", "-", name.strip().lower()).strip("-"),
             name=name.strip(),
             description=description.strip(),
             instructions=body,
@@ -157,7 +148,7 @@ class SpecLoaderService(Service):
             directory: Root directory to scan.
 
         Returns:
-            Dict of successfully parsed Spec objects keyed by name (empty if dir missing).
+            Dict of successfully parsed Spec objects keyed by id (empty if dir missing).
         """
         if not directory.exists():
             self.app["log"].debug(f"Specs directory does not exist, skipping: {directory}")
@@ -172,86 +163,212 @@ class SpecLoaderService(Service):
         for spec_file in self._find_spec_files(directory):
             spec = self._parse_spec_file(spec_file)
             if spec is not None:
-                specs[spec.name] = spec
+                specs[spec.id] = spec
 
         self.app["log"].debug(f"Found {len(specs)} spec(s) in {directory}")
         return specs
 
-    def load_phases(self, spec_name: str) -> list[SpecPhase]:
-        """Load phases for a spec from its ``phases.json`` file.
+    def _parse_task_file(self, task_file: Path) -> Optional[SpecTask]:
+        """Parse a single task markdown file with YAML frontmatter.
 
-        Returns an empty list if the spec does not exist or no phases file is present.
-
-        Args:
-            spec_name: The name of the spec to load phases for.
-
-        Usage: `phases = service.load_phases("my-feature")`
-        """
-        spec = self.get_spec(spec_name)
-        if spec is None:
-            return []
-
-        phases_file = spec.path / PHASES_FILE_NAME
-        if not phases_file.exists():
-            return []
-
-        try:
-            raw = json.loads(phases_file.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as exc:
-            self.app["log"].warning(f"Could not read phases file {phases_file}: {exc}")
-            return []
-
-        phases: list[SpecPhase] = []
-        for item in raw:
-            try:
-                phases.append(
-                    SpecPhase(
-                        id=item["id"],
-                        status=item.get("status", "pending"),
-                        content=item.get("content", ""),
-                        notes=item.get("notes", []),
-                    )
-                )
-            except (KeyError, TypeError) as exc:
-                self.app["log"].warning(f"Skipping malformed phase entry in {phases_file}: {exc}")
-
-        return phases
-
-    def save_phases(self, spec_name: str, phases: list[SpecPhase]) -> bool:
-        """Persist *phases* for a spec as ``phases.json`` alongside its ``SPEC.md``.
+        Reads YAML frontmatter for *id*, *order*, *status*, and *notes*,
+        treating the remainder of the file as the task content.
 
         Args:
-            spec_name: The name of the spec to save phases for.
-            phases: The list of :class:`~byte.specs.schemas.SpecPhase` objects to persist.
+            task_file: Absolute path to the task markdown file.
 
         Returns:
-            ``True`` if the file was written successfully, ``False`` otherwise.
+            A populated Spectask instance, or None if parsing fails.
+        """
+        try:
+            content = task_file.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError) as exc:
+            self.app["log"].warning(f"Could not read task file {task_file}: {exc}")
+            return None
 
-        Usage: `service.save_phases("my-feature", phases)`
+        try:
+            frontmatter, body = Yaml.parse_frontmatter(content)
+        except Exception as exc:
+            self.app["log"].warning(f"Failed to parse frontmatter in {task_file}: {exc}")
+            return None
+
+        task_id = frontmatter.get("id")
+        if not task_id or not isinstance(task_id, str):
+            self.app["log"].warning(f"Missing or invalid 'id' in {task_file}, skipping")
+            return None
+
+        order = frontmatter.get("order", 0)
+        if not isinstance(order, int):
+            try:
+                order = int(order)
+            except ValueError, TypeError:
+                order = 0
+
+        status = frontmatter.get("status", "pending")
+        if status not in ("pending", "in_progress", "blocked", "completed"):
+            status = "pending"
+
+        notes = frontmatter.get("notes", [])
+        if not isinstance(notes, list):
+            notes = []
+
+        files_data = frontmatter.get("files", {})
+        if not isinstance(files_data, dict):
+            files_data = {}
+
+        files = SpecTaskFiles(
+            reference=files_data.get("reference", []) if isinstance(files_data.get("reference"), list) else [],
+            create=files_data.get("create", []) if isinstance(files_data.get("create"), list) else [],
+            edit=files_data.get("edit", []) if isinstance(files_data.get("edit"), list) else [],
+        )
+
+        return SpecTask(
+            id=task_id,
+            order=order,
+            status=status,
+            content=body,
+            notes=notes,
+            files=files,
+        )
+
+    def load_tasks(self, spec_name: str) -> list[SpecTask]:
+        """Load tasks for a spec from its ``tasks/`` subdirectory.
+
+        tasks are stored as individual markdown files with YAML frontmatter.
+        Returns an empty list if the spec does not exist or no tasks directory is present.
+
+        Args:
+            spec_name: The name of the spec to load tasks for.
+
+        Usage: `tasks = service.load_tasks("my-feature")`
         """
         spec = self.get_spec(spec_name)
         if spec is None:
-            self.app["log"].warning(f"Cannot save phases — spec '{spec_name}' not found")
+            return []
+
+        tasks_dir = spec.path / TASKS_DIR_NAME
+        if not tasks_dir.exists():
+            return []
+
+        tasks: list[SpecTask] = []
+        try:
+            for task_file in sorted(tasks_dir.glob("*.md")):
+                task = self._parse_task_file(task_file)
+                if task is not None:
+                    tasks.append(task)
+        except (OSError, PermissionError) as exc:
+            self.app["log"].warning(f"Could not scan tasks directory {tasks_dir}: {exc}")
+            return []
+
+        # Sort by order field
+        tasks.sort(key=lambda p: (p.order, p.id))
+        return tasks
+
+    def save_tasks(self, spec_name: str, tasks: list[SpecTask]) -> bool:
+        """Persist *tasks* for a spec as individual markdown files in ``tasks/`` subdirectory.
+
+        Each task is saved with YAML frontmatter containing id, order, status, and notes,
+        followed by the task content. File names are normalized task IDs.
+
+        Args:
+            spec_name: The name of the spec to save tasks for.
+            tasks: The list of :class:`~byte.specs.schemas.Spectask` objects to persist.
+
+        Returns:
+            ``True`` if all tasks were written successfully, ``False`` if any write failed.
+
+        Usage: `service.save_tasks("my-feature", tasks)`
+        """
+        spec = self.get_spec(spec_name)
+        if spec is None:
+            self.app["log"].warning(f"Cannot save tasks — spec '{spec_name}' not found")
             return False
 
-        phases_file = spec.path / PHASES_FILE_NAME
-        payload = [
-            {
-                "id": phase.id,
-                "status": phase.status,
-                "content": phase.content,
-                "notes": phase.notes,
+        tasks_dir = spec.path / TASKS_DIR_NAME
+        try:
+            tasks_dir.mkdir(parents=True, exist_ok=True)
+        except OSError as exc:
+            self.app["log"].warning(f"Could not create tasks directory {tasks_dir}: {exc}")
+            return False
+
+        all_success = True
+        for task in tasks:
+            # Normalize task id to filename (convert to lowercase, replace spaces/hyphens)
+            normalized_id = re.sub(r"[^a-z0-9]+", "-", task.id.lower()).strip("-")
+            task_file = tasks_dir / f"{normalized_id}.md"
+
+            frontmatter = {
+                "id": task.id,
+                "order": task.order,
+                "status": task.status,
+                "notes": task.notes,
+                "files": {
+                    "reference": task.files.reference,
+                    "create": task.files.create,
+                    "edit": task.files.edit,
+                },
             }
-            for phase in phases
-        ]
+
+            content = Yaml.render_frontmatter(frontmatter, task.content)
+
+            try:
+                task_file.write_text(content, encoding="utf-8")
+            except OSError as exc:
+                self.app["log"].warning(f"Could not write task file {task_file}: {exc}")
+                all_success = False
+
+        return all_success
+
+    def save_task(self, spec_name: str, task: SpecTask) -> bool:
+        """Persist a single *task* for a spec as a markdown file in the ``tasks/`` subdirectory.
+
+        The task is saved with YAML frontmatter containing id, order, status, and notes,
+        followed by the task content. File name is the normalized task ID.
+
+        Args:
+            spec_name: The name of the spec to save the task for.
+            task: The :class:`~byte.specs.schemas.SpecTask` object to persist.
+
+        Returns:
+            ``True`` if the task was written successfully, ``False`` otherwise.
+
+        Usage: `service.save_task("my-feature", task)`
+        """
+        spec = self.get_spec(spec_name)
+        if spec is None:
+            self.app["log"].warning(f"Cannot save task — spec '{spec_name}' not found")
+            return False
+
+        tasks_dir = spec.path / TASKS_DIR_NAME
+        try:
+            tasks_dir.mkdir(parents=True, exist_ok=True)
+        except OSError as exc:
+            self.app["log"].warning(f"Could not create tasks directory {tasks_dir}: {exc}")
+            return False
+
+        normalized_id = re.sub(r"[^a-z0-9]+", "-", task.id.lower()).strip("-")
+        task_file = tasks_dir / f"{normalized_id}.md"
+
+        frontmatter = {
+            "id": task.id,
+            "order": task.order,
+            "status": task.status,
+            "notes": task.notes,
+            "files": {
+                "reference": task.files.reference,
+                "create": task.files.create,
+                "edit": task.files.edit,
+            },
+        }
+
+        content = Yaml.render_frontmatter(frontmatter, task.content)
 
         try:
-            phases_file.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+            task_file.write_text(content, encoding="utf-8")
+            return True
         except OSError as exc:
-            self.app["log"].warning(f"Could not write phases file {phases_file}: {exc}")
+            self.app["log"].warning(f"Could not write task file {task_file}: {exc}")
             return False
-
-        return True
 
     def reload(self, *args) -> None:
         """Re-scan the specs directory and refresh the loaded specs dict.

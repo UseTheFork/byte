@@ -1,6 +1,5 @@
 from typing import override
 
-from byte.orchestration import BaseState
 from byte.skills import SkillLoaderService
 from byte.support import Boundary, BoundaryType, Section, SectionType
 from byte.tools import BaseTool, ToolResult
@@ -26,25 +25,16 @@ class LoadSkillTool(BaseTool):
     async def run(
         self,
         skill_name: str,
-        state: BaseState,
         **kwargs,
     ) -> ToolResult:
-
-        harness = state["harness"]
 
         skill_loader_service = self.app.make(SkillLoaderService)
         skill = skill_loader_service.get_skill(skill_name)
         if skill is None:
             return ToolResult(result={"content": f"Skill '{skill_name}' not found."})
 
-        updated_skills = list(dict.fromkeys([*(harness.get("skills") or []), skill_name]))
-        updated_harness = {**harness, "skills": updated_skills}
-
         return ToolResult(
-            result={"content": f"Skill '{skill_name}' loaded."},
-            extra={
-                "harness": updated_harness,
-            },
+            result={"content": skill.instructions},
         )
 
     @classmethod

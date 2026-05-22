@@ -6,7 +6,7 @@ from byte.tools import BaseTool, ToolResult
 
 
 class CreateSpecTool(BaseTool):
-    name: str = "create_spec"
+    name: str = "create_spec_tool"
     description: str = (
         "Use this tool to create a new spec. Call this when you want to persist a spec with a topic, "
         "description, and instructions. The spec will be written as <topic>/SPEC.md with YAML frontmatter."

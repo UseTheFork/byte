@@ -19,3 +19,4 @@ class LLMConfig(BaseModel):
     fast: LLMModelConfig = LLMModelConfig()
     standard: LLMModelConfig = LLMModelConfig()
     reasoning: LLMModelConfig = LLMModelConfig()
+    coding: LLMModelConfig = LLMModelConfig()

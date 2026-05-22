@@ -13,6 +13,8 @@ from byte.support import Section, SectionType
 
 
 class CoderAgentNode(BaseAgentNode):
+    llm_tier: str = "coding"
+
     def get_user_template(self):
         return [
             Leaves.ConversationHistory(),
@@ -26,7 +28,6 @@ class CoderAgentNode(BaseAgentNode):
         return [
             Leaves.Preamble(role="Act as an expert software developer."),
             Leaves.Constitution(),
-            Leaves.SkillsLoaded(),
             Leaves.CommunicationStyle(
                 [
                     "Conciseness is about **text only**: always fully implement the requested feature, tests, and wiring even if that requires many tool calls.",

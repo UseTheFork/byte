@@ -14,7 +14,8 @@ from byte.orchestration.leaves.project_hierarchy import ProjectHierarchy as _Pro
 from byte.orchestration.leaves.reference_materials import ReferenceMaterials as _ReferenceMaterials
 from byte.orchestration.leaves.skills_all import SkillsAll as _SkillsAll
 from byte.orchestration.leaves.skills_available import SkillsAvailable as _SkillsAvailable
-from byte.orchestration.leaves.skills_loaded import SkillsLoaded as _SkillsLoaded
+from byte.orchestration.leaves.spec import Spec as _Spec
+from byte.orchestration.leaves.spec_tasks import SpecTasks as _SpecTasks
 from byte.orchestration.leaves.tools_all import ToolsAll as _ToolsAll
 from byte.orchestration.leaves.tools_loaded import ToolsLoaded as _ToolsLoaded
 from byte.orchestration.leaves.user_request import UserRequest as _UserRequest
@@ -40,10 +41,11 @@ class Leaves:
     ReferenceMaterials = _ReferenceMaterials
     SkillsAll = _SkillsAll
     SkillsAvailable = _SkillsAvailable
-    SkillsLoaded = _SkillsLoaded
     ToolsAll = _ToolsAll
     ToolsLoaded = _ToolsLoaded
     UserRequest = _UserRequest
     WorkflowConstraints = _WorkflowConstraints
     WorkflowPending = _WorkflowPending
+    Spec = _Spec
+    SpecTasks = _SpecTasks
     # keep-sorted end

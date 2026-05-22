@@ -30,11 +30,11 @@ class SkillSelectAgentNode(BaseAgentNode):
             Leaves.CommunicationStyle(),
             Leaves.WorkflowConstraints(
                 [
-                    "  - Analyze the user's task and identify which available skills are relevant",
-                    f"  - Use the `{LoadSkillTool.name}` to load each relevant skill — do not perform any other work",
-                    "  - Do NOT answer the user's question or perform the task itself",
-                    "  - Do NOT produce code, explanations, or plans",
-                    "  - Load only skills that are directly applicable to the user's task",
+                    "Analyze the user's task and identify which available skills are relevant",
+                    f"Use the `{LoadSkillTool.name}` to load each relevant skill — do not perform any other work",
+                    "DO NOT answer the user's question or perform the task itself",
+                    "DO NOT produce code, explanations, or plans",
+                    "Load only skills that are directly applicable to the user's task",
                 ]
             ),
             Leaves.OperatingPrinciples(),
@@ -42,7 +42,6 @@ class SkillSelectAgentNode(BaseAgentNode):
 
     def get_context_template(self):
         return [
-            Leaves.SkillsLoaded(),
             Leaves.ToolsLoaded(),
             Leaves.ReferenceMaterials(),
             Leaves.ProjectEnvironment(),

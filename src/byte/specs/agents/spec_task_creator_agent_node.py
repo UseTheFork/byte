@@ -11,31 +11,33 @@ from byte.node import (
 from byte.orchestration import BaseState, Leaves, PhaseUtils
 
 
-class SpecCreatorAgentNode(BaseAgentNode):
+class SpecTaskCreatorAgentNode(BaseAgentNode):
     def get_user_template(self):
         return [
+            Leaves.Spec(),
             Leaves.UserRequest(),
         ]
 
     def get_system_template(self):
         return [
             Leaves.Preamble(
-                role="Act as an expert spec creator. Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste."
+                role="Act as an expert spec creator. Write or complete a comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste."
             ),
             Leaves.Constitution(),
             Leaves.OperatingPrinciples(),
             Leaves.CommunicationStyle(verbose=True),
             Leaves.WorkflowConstraints(
                 [
-                    "Understand what the user wants the spec to cover before writing anything",
-                    "If the request is ambiguous, ask clarifying questions about intent, scope, and success criteria",
-                    "Keep spec instructions clear, concise, and actionable",
+                    "Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it.",
+                    "Assume they are a skilled developer, but know almost nothing about our toolset or problem domain. Assume they don't know good test design very well.",
+                    "Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD.",
                 ]
             ),
         ]
 
     def get_context_template(self):
         return [
+            Leaves.SpecTasks(),
             Leaves.ToolsLoaded(),
             Leaves.ReferenceMaterials(),
             Leaves.ProjectEnvironment(),

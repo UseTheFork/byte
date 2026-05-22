@@ -20,14 +20,14 @@ from byte.system.tools.user_select_tool import UserSelectTool
 class CreateSpecWorkflow(BaseWorkflow):
     """ """
 
-    def get_phases(self):
+    def get_phases(self, **kwargs):
         return [
             PhaseModel(
                 id="select-skills",
                 content="Identify and load the relevant skills based on the user's task",
                 executed_by=SkillSelectAgentNode,
                 note=[
-                    f"  - If no skills are relvent complete this phase using the `{UpdatePhaseTool.name}` tool.",
+                    f"If no skills are relvent complete this phase using the `{UpdatePhaseTool.name}` tool.",
                 ],
                 tools=[
                     UpdatePhaseTool,
@@ -38,8 +38,8 @@ class CreateSpecWorkflow(BaseWorkflow):
                 id="capture-intent",
                 content="Capture intent — understand what the spec should cover, what problem it solves, and what the expected outcome looks like.",
                 note=[
-                    "   - Check out the current project state first (files, docs, recent commits)",
-                    """  - Assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.""",
+                    " Check out the current project state first (files, docs, recent commits)",
+                    """Assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.""",
                 ],
                 tools=[
                     UserSelectTool,
@@ -54,10 +54,10 @@ class CreateSpecWorkflow(BaseWorkflow):
                 id="clarify",
                 content="Ask clarifying questions — one at a time, understand purpose/constraints/success criteria",
                 note=[
-                    "  - Prefer multiple choice questions when possible, but open-ended is fine too",
-                    "  - Only one question per message - if a topic needs more exploration, break it into multiple questions",
-                    "  - Focus on understanding: purpose, constraints, success criteria",
-                    f"  - Once you believe you understand what you're building, use the `{UpdatePhaseTool.name}` to complete this phase.",
+                    "Prefer multiple choice questions when possible, but open-ended is fine too",
+                    "Only one question per message - if a topic needs more exploration, break it into multiple questions",
+                    "Focus on understanding: purpose, constraints, success criteria",
+                    f"Once you believe you understand what you're building, use the `{UpdatePhaseTool.name}` to complete this phase.",
                 ],
                 tools=[
                     UserSelectTool,
@@ -70,10 +70,10 @@ class CreateSpecWorkflow(BaseWorkflow):
                 id="propose",
                 content="Propose 2-3 approaches — with trade-offs and your recommendation",
                 note=[
-                    "  - Propose 2-3 different approaches with trade-offs",
-                    "  - Present options conversationally with your recommendation and reasoning",
-                    "  - Lead with your recommended option and explain why",
-                    f"  - Once you believe you understand what you're building, use the `{UpdatePhaseTool.name}` to complete this phase.",
+                    "Propose 2-3 different approaches with trade-offs",
+                    "Present options conversationally with your recommendation and reasoning",
+                    "Lead with your recommended option and explain why",
+                    f"Once you believe you understand what you're building, use the `{UpdatePhaseTool.name}` to complete this phase.",
                 ],
                 tools=[
                     UserSelectTool,
@@ -86,9 +86,9 @@ class CreateSpecWorkflow(BaseWorkflow):
                 id="present-design",
                 content="Presenting the design",
                 note=[
-                    "   - Scale each section to its complexity: a few sentences if straightforward, up to 200-300 words if nuanced",
-                    "   - Ask after each section whether it looks right so far",
-                    "   - Cover: architecture, components, data flow, error handling, testing",
+                    "Scale each section to its complexity: a few sentences if straightforward, up to 200-300 words if nuanced",
+                    "Ask after each section whether it looks right so far",
+                    "Cover: architecture, components, data flow, error handling, testing",
                 ],
                 tools=[
                     UserConfirmTool,

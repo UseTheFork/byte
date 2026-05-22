@@ -25,6 +25,7 @@ class RoutingNode(BaseNode):
             "skill_select_agent_node",
             "ask_agent_node",
             "spec_creator_agent_node",
+            "spec_task_creator_agent_node",
         ]
     ]:
         routing = state.get("routing", {})

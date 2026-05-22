@@ -451,7 +451,7 @@ class FileService(Service):
                         meta={"source": file_ctx.relative_path, "language": language, "mode": "read-only"},
                     )
                     closing = Boundary.close(BoundaryType.FILE)
-                    read_only_files.append(f"{opening}\n{numbered_content}\n{closing}")
+                    read_only_files.append(f"{opening}\n{content}\n{closing}")
 
         if editable:
             for file_ctx in sorted(editable, key=lambda f: f.relative_path):
@@ -467,6 +467,6 @@ class FileService(Service):
                         meta={"source": file_ctx.relative_path, "language": language, "mode": "editable"},
                     )
                     closing = Boundary.close(BoundaryType.FILE)
-                    editable_files.append(f"{opening}\n{numbered_content}\n{closing}")
+                    editable_files.append(f"{opening}\n{content}\n{closing}")
 
         return (read_only_files, editable_files)

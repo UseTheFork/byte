@@ -1,8 +1,5 @@
 import fnmatch
-import re
 from pathlib import Path
-
-import yaml
 
 from byte import Service
 from byte.constitution.models import (
@@ -14,8 +11,7 @@ from byte.constitution.models import (
     ConstitutionSection,
 )
 from byte.support.string import Str
-
-FRONTMATTER_PATTERN = re.compile(r"^---[\r\n]+(.*?)[\r\n]+---", re.DOTALL | re.MULTILINE)
+from byte.support.yaml import Yaml
 
 
 class ConstitutionService(Service):
@@ -101,42 +97,6 @@ class ConstitutionService(Service):
     # Serialisation helpers
     # ------------------------------------------------------------------
 
-    @staticmethod
-    def _render_md(frontmatter: dict, body: str = "") -> str:
-        """Render a Markdown file with YAML frontmatter.
-
-        Args:
-            frontmatter: Mapping to serialise as YAML between ``---`` fences.
-            body:        Optional Markdown body appended after the closing fence.
-
-        Returns:
-            Complete file content string.
-        """
-        fm = yaml.dump(frontmatter, default_flow_style=False, allow_unicode=True).rstrip()
-        parts = [f"---\n{fm}\n---"]
-        if body:
-            parts.append(body.strip())
-        return "\n".join(parts) + "\n"
-
-    @staticmethod
-    def _parse_md(text: str) -> tuple[dict, str]:
-        """Parse a Markdown file into (frontmatter dict, body string).
-
-        Args:
-            text: Raw file content.
-
-        Returns:
-            ``(frontmatter, body)`` where *frontmatter* is an empty dict when
-            no YAML block is found and *body* is the remaining content after the
-            closing ``---``.
-        """
-        match = FRONTMATTER_PATTERN.match(text)
-        if not match:
-            return {}, text.strip()
-        fm = yaml.safe_load(match.group(1)) or {}
-        body = text[match.end() :].strip()
-        return fm, body
-
     def _save(self, constitution: Constitution) -> None:
         """Persist *constitution* to disk as a directory of Markdown files.
 
@@ -151,7 +111,7 @@ class ConstitutionService(Service):
         # --- constitution.md (meta) ---
         meta_file = root / "constitution.md"
         meta_file.write_text(
-            self._render_md(
+            Yaml.render_frontmatter(
                 {
                     "version": constitution.meta.version,
                     "ratified": constitution.meta.ratified,
@@ -167,7 +127,7 @@ class ConstitutionService(Service):
         active_principle_files: set[Path] = set()
         for slug, p in constitution.principles.items():
             f = principles_dir / f"{slug}.md"
-            f.write_text(self._render_md({"name": p.name}, p.description), encoding="utf-8")
+            f.write_text(Yaml.render_frontmatter({"name": p.name}, p.description), encoding="utf-8")
             active_principle_files.add(f)
         # Remove stale files
         for existing in principles_dir.glob("*.md"):
@@ -180,7 +140,7 @@ class ConstitutionService(Service):
         active_governance_files: set[Path] = set()
         for slug, r in constitution.governance.items():
             f = governance_dir / f"{slug}.md"
-            f.write_text(self._render_md({"name": r.name}, r.content), encoding="utf-8")
+            f.write_text(Yaml.render_frontmatter({"name": r.name}, r.content), encoding="utf-8")
             active_governance_files.add(f)
         for existing in governance_dir.glob("*.md"):
             if existing not in active_governance_files:
@@ -200,7 +160,7 @@ class ConstitutionService(Service):
             if section.applies_to:
                 section_fm["applies_to"] = section.applies_to
             section_file = section_dir / "section.md"
-            section_file.write_text(self._render_md(section_fm), encoding="utf-8")
+            section_file.write_text(Yaml.render_frontmatter(section_fm), encoding="utf-8")
 
             # items/
             items_dir = section_dir / "items"
@@ -208,7 +168,7 @@ class ConstitutionService(Service):
             active_item_files: set[Path] = set()
             for item_slug, item in section.items.items():
                 f = items_dir / f"{item_slug}.md"
-                f.write_text(self._render_md({"name": item.name}, item.content), encoding="utf-8")
+                f.write_text(Yaml.render_frontmatter({"name": item.name}, item.content), encoding="utf-8")
                 active_item_files.add(f)
             for existing in items_dir.glob("*.md"):
                 if existing not in active_item_files:
@@ -517,7 +477,7 @@ class ConstitutionService(Service):
         meta_file = root / "constitution.md"
         meta = ConstitutionMeta(version="0.1.0", ratified="", last_amended="")
         if meta_file.exists():
-            fm, _ = self._parse_md(meta_file.read_text(encoding="utf-8"))
+            fm, _ = Yaml.parse_frontmatter(meta_file.read_text(encoding="utf-8"))
             meta = ConstitutionMeta(
                 version=str(fm.get("version", "0.1.0")),
                 ratified=str(fm.get("ratified", "")),
@@ -529,7 +489,7 @@ class ConstitutionService(Service):
         principles_dir = root / "principles"
         if principles_dir.is_dir():
             for f in sorted(principles_dir.glob("*.md")):
-                fm, body = self._parse_md(f.read_text(encoding="utf-8"))
+                fm, body = Yaml.parse_frontmatter(f.read_text(encoding="utf-8"))
                 name = fm.get("name")
                 if not name:
                     self.app["log"].warning(f"ConstitutionService: missing 'name' in {f}, skipping")
@@ -542,7 +502,7 @@ class ConstitutionService(Service):
         governance_dir = root / "governance"
         if governance_dir.is_dir():
             for f in sorted(governance_dir.glob("*.md")):
-                fm, body = self._parse_md(f.read_text(encoding="utf-8"))
+                fm, body = Yaml.parse_frontmatter(f.read_text(encoding="utf-8"))
                 name = fm.get("name")
                 if not name:
                     self.app["log"].warning(f"ConstitutionService: missing 'name' in {f}, skipping")
@@ -561,7 +521,7 @@ class ConstitutionService(Service):
                         f"ConstitutionService: section directory {section_dir} missing section.md, skipping"
                     )
                     continue
-                fm, _ = self._parse_md(section_file.read_text(encoding="utf-8"))
+                fm, _ = Yaml.parse_frontmatter(section_file.read_text(encoding="utf-8"))
                 name = fm.get("name")
                 if not name:
                     self.app["log"].warning(f"ConstitutionService: missing 'name' in {section_file}, skipping")
@@ -574,7 +534,7 @@ class ConstitutionService(Service):
                 items_dir = section_dir / "items"
                 if items_dir.is_dir():
                     for item_file in sorted(items_dir.glob("*.md")):
-                        ifm, ibody = self._parse_md(item_file.read_text(encoding="utf-8"))
+                        ifm, ibody = Yaml.parse_frontmatter(item_file.read_text(encoding="utf-8"))
                         iname = ifm.get("name")
                         if not iname:
                             self.app["log"].warning(f"ConstitutionService: missing 'name' in {item_file}, skipping")

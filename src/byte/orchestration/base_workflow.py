@@ -29,7 +29,7 @@ class BaseWorkflow(ABC, Bootable, Eventable, Configurable):
         return Str.snake_to_title(self.name).strip()
 
     @abstractmethod
-    def get_phases(self) -> List[PhaseModel] | None: ...
+    def get_phases(self, **kwargs) -> List[PhaseModel] | None: ...
 
     @abstractmethod
     async def build(self) -> CompiledStateGraph:

@@ -1,5 +1,13 @@
 from byte import ServiceProvider
-from byte.specs import CreateSpecWorkflow, SpecCommand, SpecCreatorAgentNode
+from byte.specs import (
+    CreateSpecPhaseWorkflow,
+    CreateSpecWorkflow,
+    CreateTaskTool,
+    SpecCommand,
+    SpecCreatorAgentNode,
+    SpecTaskCommand,
+    SpecTaskCreatorAgentNode,
+)
 from byte.specs.service.spec_loader_service import SpecLoaderService
 from byte.specs.tools.create_spec_tool import CreateSpecTool
 
@@ -17,6 +25,7 @@ class SpecsServiceProvider(ServiceProvider):
         return [
             # keep-sorted start
             SpecCreatorAgentNode,
+            SpecTaskCreatorAgentNode,
             # keep-sorted end
         ]
 
@@ -31,6 +40,7 @@ class SpecsServiceProvider(ServiceProvider):
         return [
             # keep-sorted start
             CreateSpecTool,
+            CreateTaskTool,
             # keep-sorted end
         ]
 
@@ -38,6 +48,7 @@ class SpecsServiceProvider(ServiceProvider):
         return [
             # keep-sorted start
             SpecCommand,
+            SpecTaskCommand,
             # keep-sorted end
         ]
 
@@ -45,6 +56,7 @@ class SpecsServiceProvider(ServiceProvider):
         return [
             # keep-sorted start
             CreateSpecWorkflow,
+            CreateSpecPhaseWorkflow,
             # keep-sorted end
         ]
 

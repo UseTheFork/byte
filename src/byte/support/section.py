@@ -22,6 +22,8 @@ class SectionType(StrEnum):
     AVALIABLE_SKILLS = "Avaliable Skills"
     AVALIABLE_TOOLS = "Avaliable Tools"
     TASK = "Task"
+    SPECIFICATION = "Specification"
+    SPECIFICATION_TASKS = "Specification Tasks"
 
     OPERATING_PRINCIPLES = "Operating Principles"
 

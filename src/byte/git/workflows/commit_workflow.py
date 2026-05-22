@@ -17,7 +17,7 @@ class CommitWorkflow(BaseWorkflow):
         return [
             PhaseModel(
                 id="analysis",
-                content=f"Review the provided context and diffs which are about to be committed to a git repo. Create a SHORT list of the changes and pass them to the `{CreateAnalysisTool.name}(observations).",
+                content=f"Review the provided context and diffs which are about to be committed to a git repo. Create a SHORT 1-5 bullet list of the changes and pass them to the `{CreateAnalysisTool.name}(observations)`.",
                 note=[
                     "Review the diffs carefully.",
                     f"DO NOT include `summary` when using the `{CreateAnalysisTool.name}` tool.",

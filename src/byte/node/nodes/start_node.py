@@ -40,6 +40,7 @@ class StartNode(BaseNode):
             "workflow_phases": state.get("workflow_phases") or [],
             "errors": None,
             "harness": HarnessState(
+                spec=state.get("harness", {}).get("spec") or "",
                 skills=[],
             ),
             "metadata": MetadataSchema(
