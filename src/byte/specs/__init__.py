@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from byte.specs.service_provider import SpecsServiceProvider
     from byte.specs.tools.create_spec_tool import CreateSpecTool
     from byte.specs.tools.create_task_tool import CreateTaskTool
+    from byte.specs.tools.edit_task_tool import EditTaskTool
     from byte.specs.workflows.create_spec_phase_workflow import CreateSpecPhaseWorkflow
     from byte.specs.workflows.create_spec_workflow import CreateSpecWorkflow
 
@@ -22,6 +23,7 @@ __all__ = (
     "CreateSpecTool",
     "CreateSpecWorkflow",
     "CreateTaskTool",
+    "EditTaskTool",
     "Spec",
     "SpecCommand",
     "SpecCreatorAgentNode",
@@ -34,16 +36,17 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
-    "SpecTaskCommand": "command.spec_task_command",
-    "CreateTaskTool": "tools.create_task_tool",
     "CreateSpecPhaseWorkflow": "workflows.create_spec_phase_workflow",
     "CreateSpecTool": "tools.create_spec_tool",
     "CreateSpecWorkflow": "workflows.create_spec_workflow",
+    "CreateTaskTool": "tools.create_task_tool",
+    "EditTaskTool": "tools.edit_task_tool",
     "Spec": "schemas",
     "SpecCommand": "command.spec_command",
     "SpecCreatorAgentNode": "agents.spec_creator_agent_node",
     "SpecLoaderService": "service.spec_loader_service",
     "SpecTask": "schemas",
+    "SpecTaskCommand": "command.spec_task_command",
     "SpecTaskCreatorAgentNode": "agents.spec_task_creator_agent_node",
     "SpecsServiceProvider": "service_provider",
     # keep-sorted end

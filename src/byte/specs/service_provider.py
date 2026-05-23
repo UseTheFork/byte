@@ -10,6 +10,7 @@ from byte.specs import (
 )
 from byte.specs.service.spec_loader_service import SpecLoaderService
 from byte.specs.tools.create_spec_tool import CreateSpecTool
+from byte.specs.tools.edit_task_tool import EditTaskTool
 
 
 class SpecsServiceProvider(ServiceProvider):
@@ -41,6 +42,7 @@ class SpecsServiceProvider(ServiceProvider):
             # keep-sorted start
             CreateSpecTool,
             CreateTaskTool,
+            EditTaskTool,
             # keep-sorted end
         ]
 

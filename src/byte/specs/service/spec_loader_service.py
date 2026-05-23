@@ -196,7 +196,7 @@ class SpecLoaderService(Service):
         if not isinstance(order, int):
             try:
                 order = int(order)
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 order = 0
 
         status = frontmatter.get("status", "pending")
@@ -225,6 +225,34 @@ class SpecLoaderService(Service):
             notes=notes,
             files=files,
         )
+
+    def load_task(self, spec_name: str, task_id: str) -> Optional[SpecTask]:
+        """Load a single task for a spec by task ID.
+
+        Args:
+            spec_name: The name of the spec containing the task.
+            task_id: The unique identifier of the task to load.
+
+        Returns:
+            The SpecTask instance if found, None otherwise.
+
+        Usage: `task = service.load_task("my-feature", "lint-files")`
+        """
+        spec = self.get_spec(spec_name)
+        if spec is None:
+            return None
+
+        tasks_dir = spec.path / TASKS_DIR_NAME
+        if not tasks_dir.exists():
+            return None
+
+        normalized_id = Str.normalize_id(task_id)
+        task_file = tasks_dir / f"{normalized_id}.md"
+
+        if not task_file.exists():
+            return None
+
+        return self._parse_task_file(task_file)
 
     def load_tasks(self, spec_name: str) -> list[SpecTask]:
         """Load tasks for a spec from its ``tasks/`` subdirectory.
