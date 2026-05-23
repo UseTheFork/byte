@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
 
 class BaseAgentNode(BaseNode):
-    llm_tier: str = "standard"
+    llm_tier: str = "fast"
 
     @property
     def name(self) -> str:

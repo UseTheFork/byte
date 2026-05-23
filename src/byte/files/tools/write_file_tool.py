@@ -1,12 +1,13 @@
 from typing import override
 
 from byte.files import ToolFileService
+from byte.orchestration import BaseState
 from byte.tools import BaseTool, ToolResult
 from byte.tools.exceptions import ToolRunException
 
 
 class WriteFileTool(BaseTool):
-    name: str = "write_file"
+    name: str = "write_file_tool"
     description: str = "Write content to a file. Creates parent directories if needed."
     input_schema = {
         "type": "object",
@@ -20,19 +21,26 @@ class WriteFileTool(BaseTool):
     @override
     async def run(
         self,
-        file_path: str = "",
-        content: str = "",
+        file_path: str,
+        content: str,
+        state: BaseState,
         **kwargs,
     ) -> ToolResult:
+
+        harness = state.get("harness", {})
 
         try:
             tool_file_service = self.app.make(ToolFileService)
             result = await tool_file_service.write_file(file_path, content)
 
+            # TODO: Is this correct.
+            harness["editable_files"].append(file_path)
+
             return ToolResult(
                 result={"content": result},
                 extra={
                     "touched_files": [file_path],
+                    "harness": harness,
                 },
             )
 

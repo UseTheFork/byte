@@ -18,6 +18,8 @@ from byte.support import Section
 
 
 class CommitAgentNode(BaseAgentNode):
+    llm_tier: str = "standard"
+
     def get_user_template(self):
         return [
             Leaves.GitDiffs(),

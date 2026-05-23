@@ -8,7 +8,7 @@ from byte.tools import BaseTool, ToolResult
 
 
 class CompleteTurnTool(BaseTool):
-    name: str = "complete_turn"
+    name: str = "complete_turn_tool"
     description: str = (
         "Mark the current agent turn as complete by providing a short summary of the work done during this turn. "
         "This summary will be shown to other agents when reviewing conversation history."

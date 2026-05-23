@@ -133,13 +133,16 @@ class Conversation(Widget):
 
     @work(thread=True)
     async def emit_user_input_submitted(self, event: Messages.UserInputSubmitted):
-        # TODO: should we make this none blocking?
-        await self.event_bus.emit(
-            TuiEvents.UserInputSubmitted(
-                event.body,
-                interrupted=event.interrupted,
+        try:
+            await self.event_bus.emit(
+                TuiEvents.UserInputSubmitted(
+                    event.body,
+                    interrupted=event.interrupted,
+                )
             )
-        )
+        except Exception as e:
+            self.post_message(Messages.Status(state="error", message="Oof... Check the logs."))
+            raise e
 
     async def get_or_create_response_panel(self, panel_id: str | None) -> ResponsePanel:
         if panel_id is None:

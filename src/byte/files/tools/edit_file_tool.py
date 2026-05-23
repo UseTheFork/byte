@@ -6,7 +6,7 @@ from byte.tools.exceptions import ToolRunException
 
 
 class EditFileTool(BaseTool):
-    name: str = "edit_file"
+    name: str = "edit_file_tool"
     description: str = """Edit a file by replacing a specific string. The search_string must match exactly character for character.\n\n > **Critical **: The tool is extremely literal. Text must match **EXACTLY**"""
     input_schema = {
         "type": "object",

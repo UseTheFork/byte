@@ -6,7 +6,7 @@ from byte.tools import BaseTool, ToolResult
 
 
 class LintTool(BaseTool):
-    name: str = "lint_files"
+    name: str = "lint_files_tool"
     description: str = (
         "Runs the configured linters against all files touched during the current session. "
         "Reads the list of modified file paths, executes lint checks on each, "

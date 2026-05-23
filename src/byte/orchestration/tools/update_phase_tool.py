@@ -4,7 +4,7 @@ from byte.tools import BaseTool, ToolResult
 
 
 class UpdatePhaseTool(BaseTool):
-    name: str = "update_phase"
+    name: str = "update_phase_tool"
     description: str = "Update the status of a phase. Only use this tool if explicitly stated in the phase instruction."
     input_schema = {
         "type": "object",
