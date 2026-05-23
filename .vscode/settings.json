@@ -3,6 +3,5 @@
   "ty.path": [".venv/bin/ty"],
   "python.testing.pytestArgs": ["src"],
   "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true,
-  "cSpell.words": ["anouther"]
+  "python.testing.pytestEnabled": true
 }

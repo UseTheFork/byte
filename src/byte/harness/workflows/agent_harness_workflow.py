@@ -1,4 +1,4 @@
-from byte.harness import ExecutorAgentNode, HarnessAgentNode
+from byte.harness import HarnessAgentNode
 from byte.node.nodes import ToolNode
 from byte.orchestration import BaseWorkflow, GraphBuilder
 
@@ -12,8 +12,7 @@ class AgentHarnessWorkflow(BaseWorkflow):
         graph = self.app.make(GraphBuilder, start_node=HarnessAgentNode)
 
         # Add nodes
-        graph.add_node(HarnessAgentNode, goto=ExecutorAgentNode)
-        graph.add_node(ExecutorAgentNode)
+        graph.add_node(HarnessAgentNode)
         graph.add_node(ToolNode)
 
         # Compile graph with memory and configuration

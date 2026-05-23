@@ -1,13 +1,14 @@
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Optional
 
 from pydantic import BaseModel
 
-from byte.support.utils import get_language_from_filename
+from byte.support import Boundary, BoundaryType
+from byte.support.utils import get_language_from_filename, list_to_multiline_text
 
 
-class FileMode(Enum):
+class FileMode(StrEnum):
     """File access mode for AI context management."""
 
     READ_ONLY = "read_only"
@@ -45,3 +46,18 @@ class FileContext(BaseModel):
             return self.path.read_text(encoding="utf-8")
         except (FileNotFoundError, PermissionError, UnicodeDecodeError) as e:
             return f"**ERROR** reading file:\n\n{e!s}"
+
+    def to_boundary(self) -> str:
+        opening = Boundary.open(
+            BoundaryType.FILE,
+            meta={"source": self.relative_path, "language": self.language, "mode": self.mode},
+        )
+        content = str(self.get_content())
+        closing = Boundary.close(BoundaryType.FILE)
+        return list_to_multiline_text(
+            [
+                opening,
+                content,
+                closing,
+            ]
+        )

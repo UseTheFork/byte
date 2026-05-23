@@ -18,6 +18,9 @@ class ToolsLoaded(Leaf):
         tool_registry_service = prompt_assembler.get_app().make(ToolRegistryService)
         tools = prompt_assembler.get_tools()
 
+        if not tools:
+            return ""
+
         harness_tools = {tool.name: tool for tool in tools}
         tools_xml = tool_registry_service.tools_to_prompt_xml(harness_tools)
 

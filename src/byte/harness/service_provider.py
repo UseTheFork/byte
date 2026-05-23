@@ -1,4 +1,9 @@
-from byte.harness import AgentHarnessWorkflow, BootstrapAgentTool, ExecutorAgentNode, HarnessAgentNode
+from byte.harness import (
+    AgentHarnessWorkflow,
+    BootstrapAgentTool,
+    BootstrapSkillsAndFilesTool,
+    HarnessAgentNode,
+)
 from byte.support import ServiceProvider
 
 
@@ -6,7 +11,6 @@ class HarnessServiceProvider(ServiceProvider):
     def agents(self):
         return [
             # keep-sorted start
-            ExecutorAgentNode,
             HarnessAgentNode,
             # keep-sorted end
         ]
@@ -15,6 +19,7 @@ class HarnessServiceProvider(ServiceProvider):
         return [
             # keep-sorted start
             BootstrapAgentTool,
+            BootstrapSkillsAndFilesTool,
             # keep-sorted end
         ]
 

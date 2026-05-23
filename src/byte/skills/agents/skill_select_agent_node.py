@@ -80,8 +80,8 @@ class SkillSelectAgentNode(BaseAgentNode):
             if route_tool_call is not None:
                 return route_tool_call
 
-            if not PhaseUtils.is_workflow_complete(prompt_assembler.get_state()):
-                prompt = prompt.extend(  # ty:ignore[unresolved-attribute]
+            if not PhaseUtils.is_workflow_complete(prompt_assembler.get_state()) and prompt:
+                prompt = prompt.extend(
                     [
                         HumanMessage(
                             content=[

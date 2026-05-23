@@ -34,9 +34,17 @@ class LoadSkillTool(BaseTool):
             return ToolResult(result={"content": f"Skill '{skill_name}' not found."})
 
         return ToolResult(
-            result={"content": skill.instructions},
+            result={
+                "name": skill_name,
+                "content": skill.instructions,
+            },
         )
 
     @classmethod
     def format_tool_message(cls, result: ToolResult) -> str:
         return result.result.get("content", "")
+
+    @classmethod
+    def format_tui_message(cls, result: ToolResult) -> str:
+        skill_name = result.result.get("name", "")
+        return f"Skill '{skill_name}' loaded."

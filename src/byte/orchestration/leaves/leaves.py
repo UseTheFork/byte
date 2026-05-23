@@ -7,6 +7,10 @@ from byte.orchestration.leaves.conversation_history import ConversationHistory a
 from byte.orchestration.leaves.epilogue import Epilogue as _Epilogue
 from byte.orchestration.leaves.file_context import FileContext as _FileContext
 from byte.orchestration.leaves.git_diffs import GitDiffs as _GitDiffs
+from byte.orchestration.leaves.harness_workspace_files import HarnessWorkspaceFiles as _HarnessWorkspaceFiles
+from byte.orchestration.leaves.harness_workspace_reference_files import (
+    HarnessWorkspaceReferenceFiles as _HarnessWorkspaceReferenceFiles,
+)
 from byte.orchestration.leaves.operating_principles import OperatingPrinciples as _OperatingPrinciples
 from byte.orchestration.leaves.preamble import Preamble as _Preamble
 from byte.orchestration.leaves.project_environment import ProjectEnvironment as _ProjectEnvironment
@@ -47,5 +51,7 @@ class Leaves:
     WorkflowConstraints = _WorkflowConstraints
     WorkflowPending = _WorkflowPending
     Spec = _Spec
+    HarnessWorkspaceFiles = _HarnessWorkspaceFiles
     SpecTasks = _SpecTasks
+    HarnessWorkspaceReferenceFiles = _HarnessWorkspaceReferenceFiles
     # keep-sorted end

@@ -5,17 +5,17 @@ from typing import TYPE_CHECKING
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
-    from byte.harness.agents.executor_agent_node import ExecutorAgentNode
     from byte.harness.agents.harness_agent_node import HarnessAgentNode
     from byte.harness.service_provider import HarnessServiceProvider
     from byte.harness.tools.bootstrap_agent_tool import BootstrapAgentTool
+    from byte.harness.tools.bootstrap_skills_files_tool import BootstrapSkillsAndFilesTool
     from byte.harness.workflows.agent_harness_workflow import AgentHarnessWorkflow
 
 
 __all__ = (
     "AgentHarnessWorkflow",
     "BootstrapAgentTool",
-    "ExecutorAgentNode",
+    "BootstrapSkillsAndFilesTool",
     "HarnessAgentNode",
     "HarnessServiceProvider",
 )
@@ -23,8 +23,8 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "AgentHarnessWorkflow": "workflows.agent_harness_workflow",
+    "BootstrapSkillsAndFilesTool": "tools.bootstrap_skills_files_tool",
     "BootstrapAgentTool": "tools.bootstrap_agent_tool",
-    "ExecutorAgentNode": "agents.executor_agent_node",
     "HarnessAgentNode": "agents.harness_agent_node",
     "HarnessServiceProvider": "service_provider",
     # keep-sorted end

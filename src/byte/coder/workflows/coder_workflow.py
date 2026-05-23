@@ -5,6 +5,7 @@ from byte.files import (
     ReplaceFileTool,
     WriteFileTool,
 )
+from byte.harness import BootstrapSkillsAndFilesTool, HarnessAgentNode
 from byte.lint.tools.lint_tool import LintTool
 from byte.node.nodes import EndNode, ToolNode
 from byte.orchestration import (
@@ -16,7 +17,6 @@ from byte.orchestration import (
     RoutePhaseModel,
     UpdatePhaseTool,
 )
-from byte.skills import SkillSelectAgentNode
 
 
 class CoderWorkflow(BaseWorkflow):
@@ -29,17 +29,18 @@ class CoderWorkflow(BaseWorkflow):
     and turn completion (phase 4), terminating at an end node (phase 5).
     """
 
-    def get_phases(self):
+    def get_phases(self, **kwargs):
+
         return [
             PhaseModel(
-                id="select-skills",
-                content="Identify and load the relevant skills based on the user's task",
-                executed_by=SkillSelectAgentNode,
+                id="select-skills-and-files",
+                content="Identify and load the relevant skills, reference files, and files that will need to be edited based on the user's task",
+                executed_by=HarnessAgentNode,
                 note=[
-                    f"  - If no skills are relvent complete this phase using the `{UpdatePhaseTool.name}` tool.",
+                    f"Use the `{BootstrapSkillsAndFilesTool.name}` to load skills, editable files, and reference files as needed by the workflow",
                 ],
                 tools=[
-                    UpdatePhaseTool,
+                    BootstrapSkillsAndFilesTool,
                 ],
                 tool_choice="any",
             ),
@@ -74,7 +75,7 @@ class CoderWorkflow(BaseWorkflow):
                     UpdatePhaseTool,
                 ],
                 note=[
-                    f"  - To Complete this phase use the `{UpdatePhaseTool.name}` tool.",
+                    f"To Complete this phase use the `{UpdatePhaseTool.name}` tool.",
                 ],
                 executed_by=CoderAgentNode,
             ),
@@ -82,7 +83,7 @@ class CoderWorkflow(BaseWorkflow):
                 id="summary",
                 content="Complete the turn with a short summary of the work done during this turn.",
                 note=[
-                    "  - Only include 2-3 `key_points`",
+                    "Only include 2-3 `key_points`",
                 ],
                 tools=[
                     CompleteTurnTool,
@@ -98,10 +99,10 @@ class CoderWorkflow(BaseWorkflow):
     async def build(self):
         """ """
 
-        graph = self.app.make(GraphBuilder, start_node=CoderAgentNode)
+        graph = self.app.make(GraphBuilder, start_node=HarnessAgentNode)
 
         # Add nodes
-        graph.add_node(SkillSelectAgentNode)
+        graph.add_node(HarnessAgentNode)
         graph.add_node(CoderAgentNode)
         graph.add_node(ToolNode)
 

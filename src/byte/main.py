@@ -15,6 +15,7 @@ from byte.event import EventsServiceProvider
 from byte.files import FileServiceProvider
 from byte.foundation import Application
 from byte.git import GitServiceProvider
+from byte.harness import HarnessServiceProvider
 from byte.knowledge import KnowledgeServiceProvider
 from byte.lint import LintServiceProvider
 from byte.llm import LLMServiceProvider
@@ -42,6 +43,7 @@ PROVIDERS = [
     ConstitutionServiceProvider,
     SpecsServiceProvider,
     # PresetsProvider,
+    HarnessServiceProvider,
     DevelopmentServiceProvider,
     FileServiceProvider,
     KnowledgeServiceProvider,

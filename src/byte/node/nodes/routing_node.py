@@ -24,6 +24,7 @@ class RoutingNode(BaseNode):
             "skill_creator_agent_node",
             "skill_select_agent_node",
             "ask_agent_node",
+            "harness_agent_node",
             "spec_creator_agent_node",
             "spec_task_creator_agent_node",
         ]

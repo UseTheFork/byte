@@ -17,6 +17,8 @@ class CoderAgentNode(BaseAgentNode):
 
     def get_user_template(self):
         return [
+            Leaves.ReferenceMaterials(),
+            Leaves.HarnessWorkspaceReferenceFiles(),
             Leaves.ConversationHistory(),
             Leaves.UserRequest(),
             Section.important(
@@ -52,9 +54,8 @@ class CoderAgentNode(BaseAgentNode):
         return [
             Leaves.Constitution(),
             Leaves.ToolsLoaded(),
-            Leaves.ReferenceMaterials(),
             Leaves.ProjectEnvironment(),
-            Leaves.FileContext(),
+            Leaves.HarnessWorkspaceFiles(),
             Leaves.WorkflowPending(),
             Leaves.Epilogue(),
         ]
