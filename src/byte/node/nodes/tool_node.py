@@ -2,7 +2,7 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.types import Command
 
 from byte.node import BaseNode
-from byte.orchestration import BaseState, PhaseUtils
+from byte.orchestration import BaseState, PhaseModel, PhaseUtils
 from byte.support.utils import get_last_message
 from byte.tools import ToolMessage, ToolRegistryService
 from byte.tools.exceptions import ToolException, ToolNotFoundException
@@ -46,10 +46,19 @@ class ToolNode(BaseNode):
         is_workflow_agent = PhaseUtils.is_workflow_agent(state)
         if is_workflow_agent:
             workflow_phases = state["workflow_phases"]
+            current_phase = PhaseUtils.get_pending_phase(state)
 
         # TODO: we should make this truly async with a gather
         for tool_call in message.tool_calls:
             try:
+                if is_workflow_agent and isinstance(current_phase, PhaseModel):
+                    allowed_tool_names = [str(t) for t in current_phase.tools]
+                    if tool_call["name"] not in allowed_tool_names:
+                        raise ToolException(
+                            f"Tool '{tool_call['name']}' is NOT allowed in the current phase. "
+                            f"Allowed tools: {', '.join(allowed_tool_names) if allowed_tool_names else 'none'}"
+                        )
+
                 tool = self.tool_registry_service.get_tool(tool_call["name"])
                 if not tool:
                     raise ToolNotFoundException(
@@ -82,7 +91,7 @@ class ToolNode(BaseNode):
 
                 # If we are in a workflow we also need to update the state of the phase
                 if is_workflow_agent:
-                    workflow_phases = PhaseUtils.update_phase_with_tool_args(tool_call, workflow_phases)
+                    workflow_phases = PhaseUtils.update_phase_with_tool_args(tool_call, workflow_phases)  # ty:ignore[invalid-argument-type]
             except ToolException as err:
                 tool_message = ToolMessage(
                     status="error",

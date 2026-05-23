@@ -100,8 +100,8 @@ class PhaseUtils:
 
     @staticmethod
     def update_phase_with_tool_args(
-        tool_call: Dict[str, Any], workflow_phases: Dict[str, PhaseModel] = {}
-    ) -> Dict[str, PhaseModel]:
+        tool_call: Dict[str, Any], workflow_phases: Dict[str, Union[RoutePhaseModel | PhaseModel]] = {}
+    ) -> Dict[str, Union[RoutePhaseModel | PhaseModel]]:
         """ """
         tool_name = tool_call.get("name", None)
         if tool_name == UserConfirmPhaseTool.name:

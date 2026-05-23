@@ -28,6 +28,7 @@ class HarnessWorkspaceReferenceFiles(Leaf):
                 "",
                 "Below are files for reference only. Any edits to these files will be rejected",
                 "",
+                "```",
             ]
         )
 
@@ -36,6 +37,7 @@ class HarnessWorkspaceReferenceFiles(Leaf):
             if file_context:
                 lines.append(file_context.to_boundary())
 
+        lines.append("```")
         lines.append(Section.end())
 
         return list_to_multiline_text(lines)

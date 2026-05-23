@@ -31,6 +31,7 @@ class HarnessWorkspaceFiles(Leaf):
                 "",
                 Section.sub_heading("Editable Files", 2, True),
                 "",
+                "```",
             ]
         )
 
@@ -39,6 +40,7 @@ class HarnessWorkspaceFiles(Leaf):
             if file_context:
                 lines.append(file_context.to_boundary())
 
+        lines.append("```")
         lines.append(Section.end())
 
         return list_to_multiline_text(lines)

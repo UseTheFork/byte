@@ -65,7 +65,7 @@ class CoderWorkflow(BaseWorkflow):
             ),
             PhaseModel(
                 id="linting",
-                content=f"Run the `{LintTool.name}` tool on all touched files. If lint errors are reported, fix them using the available file tools and re-run the lint tool. Repeat until linting passes with no errors.",
+                content=f"Run the `{LintTool.name}`. If lint errors are reported, fix them using the available file tools and re-run the lint tool. Repeat until linting passes with no errors.",
                 tools=[
                     LintTool,
                     EditFileTool,

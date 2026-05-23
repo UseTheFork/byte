@@ -52,7 +52,6 @@ class CoderAgentNode(BaseAgentNode):
 
     def get_context_template(self):
         return [
-            Leaves.Constitution(),
             Leaves.ToolsLoaded(),
             Leaves.ProjectEnvironment(),
             Leaves.HarnessWorkspaceFiles(),

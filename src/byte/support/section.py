@@ -1,5 +1,7 @@
 from enum import StrEnum
 
+from byte.support import Str
+
 
 class SectionType(StrEnum):
     """Type of boundary marker for content sections."""
@@ -57,13 +59,13 @@ class Section:
         if not isinstance(section_type, SectionType):
             raise ValueError(f"section_type must be a SectionType enum, got {type(section_type).__name__}")
 
-        anchor = section_type.value.lower().replace(" ", "-")
+        anchor = Str.normalize_id(section_type.value)
 
         return f"# Section: {section_type.value} [section-{anchor}]\n"
 
     @staticmethod
     def ref(section_type: SectionType) -> str:
-        anchor = section_type.value.lower().replace(" ", "-")
+        anchor = Str.normalize_id(section_type.value)
         return f"[{section_type.value}](#section-{anchor})"
 
     @staticmethod
@@ -83,14 +85,14 @@ class Section:
             raise ValueError(f"level must be 2, 3, or 4, got {level}")
 
         if ref:
-            anchor = title.lower().replace(" ", "-")
+            anchor = Str.normalize_id(title)
             return f"{'#' * level} {title} [{title}](#{anchor})"
 
         return f"{'#' * level} {title}"
 
     @staticmethod
     def sub_heading_ref(title: str) -> str:
-        anchor = title.lower().replace(" ", "-")
+        anchor = Str.normalize_id(title)
         return f"[{title}](#{anchor})"
 
     @staticmethod

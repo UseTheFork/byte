@@ -1,16 +1,17 @@
 import re
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import List, Optional
 
 from byte import Service
 from byte.files import FileEvents, FileMode, FileService
 from byte.orchestration import OrchestrationEvents
+from byte.support import MD
 from byte.support.utils import list_to_multiline_text
 from byte.tui import Messages, TUIManagerService
 
 
-class AICommentType(str, Enum):
+class AICommentType(StrEnum):
     """Type of ai comment operation."""
 
     AI = "AI"
@@ -213,18 +214,21 @@ class AICommentWatcherService(Service):
 
         for single_comment in gathered_comments:
             comment_action_type = single_comment.get("action_type")
+            comment_block = []
 
             # Only include comments based on the action type
             if action_type == comment_action_type:
                 file_path = single_comment.get("file_path")
 
-                ai_instruction.append(f" - {file_path}")
+                comment_block.append(f"{file_path}")
 
                 # Extract instruction from the comment text
                 for comment in single_comment.get("comments", []):
                     # Remove comment markers and extract instruction
                     clean_comment = comment.strip().lstrip("/#-;").strip()
-                    ai_instruction.append(f"   > {clean_comment.strip()}")
+                    comment_block.append(clean_comment.strip())
+
+                ai_instruction.append(MD.bullet_list(comment_block))
 
         ai_instruction = "\n".join(ai_instruction)
 

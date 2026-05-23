@@ -36,6 +36,9 @@ class ToolsLoaded(Leaf):
 
         message_parts = [
             Section.start(SectionType.AVALIABLE_TOOLS),
+            Section.important(
+                "These are the ONLY tools you are allowed to use. Any other tool calls will be rejected."
+            ),
             "```",
             tools_xml,
             "```",

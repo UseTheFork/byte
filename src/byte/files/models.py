@@ -50,7 +50,7 @@ class FileContext(BaseModel):
     def to_boundary(self) -> str:
         opening = Boundary.open(
             BoundaryType.FILE,
-            meta={"source": self.relative_path, "language": self.language, "mode": self.mode},
+            meta={"source": self.relative_path, "language": self.language},
         )
         content = str(self.get_content())
         closing = Boundary.close(BoundaryType.FILE)
