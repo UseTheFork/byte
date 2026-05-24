@@ -278,7 +278,7 @@ class Conversation(Widget):
     @on(Messages.TokenReceived)
     async def update_status_token(self, event: Messages.TokenReceived) -> None:
         fragment = event.fragment.replace("\n", "")
-        self.status_bar.update_text(fragment)
+        self.status_bar.update_text(f"( {fragment} )")
 
     @on(Messages.ToolCall)
     async def complete_toolcall(self, event: Messages.ToolCall) -> None:

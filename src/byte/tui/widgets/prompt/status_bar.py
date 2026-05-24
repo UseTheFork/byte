@@ -25,11 +25,11 @@ if TYPE_CHECKING:
     from byte.tui import ByteTUI
 
 LOADING_EMOJIS = [
-    f"[$primary]{L_PARENTHESIS}{WORD_JOINER}{SPACE}{SPACE}{SPACE}{EYE_CIRCUMFLEX}{MOUTH_UNDERTIE}{WORD_JOINER}{EYE_CIRCUMFLEX}{WORD_JOINER}{R_PARENTHESIS}[/]{SPACE}{SPACE}{SPACE}{SPACE}",
-    f"[$primary]{L_PARENTHESIS}{WORD_JOINER}{SPACE}{SPACE}{SPACE}{EYE_CIRCUMFLEX}{MOUTH_UNDERTIE}{WORD_JOINER}{EYE_CIRCUMFLEX}{WORD_JOINER}{R_PARENTHESIS}[/].{SPACE}{SPACE}{SPACE}",
-    f"[$primary]{L_PARENTHESIS}{WORD_JOINER}{SPACE}{SPACE}{SPACE}{EYE_CIRCUMFLEX}{MOUTH_UNDERTIE}{WORD_JOINER}{EYE_CIRCUMFLEX}{WORD_JOINER}{R_PARENTHESIS}[/].｡{SPACE}{SPACE}",
-    f"[$primary]{L_PARENTHESIS}{WORD_JOINER}{SPACE}{SPACE}{SPACE}{EYE_CIRCUMFLEX}{MOUTH_UNDERTIE}{WORD_JOINER}{EYE_CIRCUMFLEX}{WORD_JOINER}{R_PARENTHESIS}[/].｡o{SPACE}",
-    f"[$primary]{L_PARENTHESIS}{WORD_JOINER}{SPACE}{SPACE}{SPACE}{EYE_CIRCUMFLEX}{MOUTH_UNDERTIE}{WORD_JOINER}{EYE_CIRCUMFLEX}{WORD_JOINER}{R_PARENTHESIS}[/].｡oO",
+    f"[$primary]{L_PARENTHESIS}{WORD_JOINER}{SPACE}{SPACE}{SPACE}{EYE_CIRCUMFLEX}{MOUTH_UNDERTIE}{WORD_JOINER}{EYE_CIRCUMFLEX}{WORD_JOINER}{R_PARENTHESIS}[/][$primary].[/]｡oO",
+    f"[$primary]{L_PARENTHESIS}{WORD_JOINER}{SPACE}{SPACE}{SPACE}{EYE_CIRCUMFLEX}{MOUTH_UNDERTIE}{WORD_JOINER}{EYE_CIRCUMFLEX}{WORD_JOINER}{R_PARENTHESIS}[/][$secondary].[/][$primary]｡[/]oO",
+    f"[$primary]{L_PARENTHESIS}{WORD_JOINER}{SPACE}{SPACE}{SPACE}{EYE_CIRCUMFLEX}{MOUTH_UNDERTIE}{WORD_JOINER}{EYE_CIRCUMFLEX}{WORD_JOINER}{R_PARENTHESIS}[/].[$secondary]｡[/][$primary]o[/]O",
+    f"[$primary]{L_PARENTHESIS}{WORD_JOINER}{SPACE}{SPACE}{SPACE}{EYE_CIRCUMFLEX}{MOUTH_UNDERTIE}{WORD_JOINER}{EYE_CIRCUMFLEX}{WORD_JOINER}{R_PARENTHESIS}[/].｡[$secondary]o[/][$primary]O[/]",
+    f"[$primary]{L_PARENTHESIS}{WORD_JOINER}{SPACE}{SPACE}{SPACE}{EYE_CIRCUMFLEX}{MOUTH_UNDERTIE}{WORD_JOINER}{EYE_CIRCUMFLEX}{WORD_JOINER}{R_PARENTHESIS}[/].｡o[$secondary]O[/]",
 ]
 
 StatusState = Literal[
@@ -153,14 +153,14 @@ class StatusBar(HorizontalGroup, can_focus=False):
 
     def show_loading(self, text: str = "") -> None:
         """Show the status bar in animated loading mode."""
-        if text:
-            self.text = text
+
+        self.text = text
         self.is_loading = True
 
     def show_status(self, text: str = "", state: StatusState = "default") -> None:
         """Show the status bar with a static status emoji."""
-        if text:
-            self.text = text
+
+        self.text = text
         self.is_loading = False
         self.query_one(StatusEmoji).state = state
 
