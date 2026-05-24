@@ -74,7 +74,7 @@ class InteractionService(Service):
         self.emit_tui(Messages.Status())
         return cast(Answer, answer)
 
-    async def input_text(self, message: str) -> str:
+    async def input_text(self, message: str) -> Answer:
         """Ask user for text input with optional default.
 
         Usage: `text = await interaction_service.input_text("Enter name:", "default_name")`
@@ -97,11 +97,11 @@ class InteractionService(Service):
             raise InputCancelledError
 
         self.emit_tui(Messages.Status())
-        return cast(str, answer)
+        return cast(Answer, answer)
 
     async def confirm_or_input(
         self, confirm_message: str, input_message: str, default_confirm: bool = True
-    ) -> tuple[bool, Optional[str]]:
+    ) -> tuple[bool, Optional[Answer]]:
         """Ask user for confirmation, then prompt for text input if they decline.
 
         Returns a tuple of (confirmed: bool, text_input: Optional[str]).

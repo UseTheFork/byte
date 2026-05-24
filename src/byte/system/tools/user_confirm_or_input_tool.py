@@ -5,7 +5,7 @@ from byte.tui import InteractionService
 
 
 class UserConfirmOrInputTool(BaseTool):
-    name: str = "user_confirm_or_input"
+    name: str = "user_confirm_or_input_tool"
     description: str = (
         "Ask the user a yes/no question. If they confirm, return True with no text. "
         "If they decline, prompt for text input and return the result."

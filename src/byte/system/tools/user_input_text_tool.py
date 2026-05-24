@@ -5,7 +5,7 @@ from byte.tui import InteractionService
 
 
 class UserInputTextTool(BaseTool):
-    name: str = "user_input_text"
+    name: str = "user_input_text_tool"
     description: str = "Ask the user for free-form text input and return their response."
     input_schema = {
         "type": "object",

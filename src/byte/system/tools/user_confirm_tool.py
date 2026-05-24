@@ -5,7 +5,7 @@ from byte.tui import InteractionService
 
 
 class UserConfirmTool(BaseTool):
-    name: str = "user_confirm"
+    name: str = "user_confirm_tool"
     description: str = "Ask the user a yes or no question and return their response."
     input_schema = {
         "type": "object",

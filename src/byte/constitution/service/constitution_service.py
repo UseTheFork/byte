@@ -88,8 +88,8 @@ class ConstitutionService(Service):
             content="Constitution supersedes all other practices. Amendments require documentation and approval.",
         )
         return Constitution(
-            principles={Str.slugify(example.name): example},
-            governance={Str.slugify(default_rule.name): default_rule},
+            principles={Str.normalize_id(example.name): example},
+            governance={Str.normalize_id(default_rule.name): default_rule},
             meta=ConstitutionMeta(version="0.1.0", ratified=today, last_amended=today),
         )
 
@@ -257,7 +257,7 @@ class ConstitutionService(Service):
         Usage: `service.add_principle("I. Library-First", "Every feature starts as a library.")`
         """
         assert self._constitution
-        slug = Str.slugify(name)
+        slug = Str.normalize_id(name)
         if slug in self._constitution.principles:
             raise ValueError(f"Principle with slug '{slug}' already exists.")
         principle = ConstitutionPrinciple(name=name, description=description)
@@ -277,7 +277,7 @@ class ConstitutionService(Service):
         Usage: `service.delete_principle("I. Library-First")`
         """
         assert self._constitution
-        slug = Str.slugify(name)
+        slug = Str.normalize_id(name)
         if slug not in self._constitution.principles:
             raise ValueError(f"Principle '{name}' (slug: '{slug}') not found.")
         del self._constitution.principles[slug]
@@ -303,7 +303,7 @@ class ConstitutionService(Service):
         Usage: `service.add_section("Security Requirements", applies_to=["src/byte/node/**"])`
         """
         assert self._constitution
-        slug = Str.slugify(name)
+        slug = Str.normalize_id(name)
         if slug in self._constitution.sections:
             raise ValueError(f"Section with slug '{slug}' already exists.")
         section = ConstitutionSection(name=name, applies_to=applies_to)
@@ -323,7 +323,7 @@ class ConstitutionService(Service):
         Usage: `service.delete_section("Security Requirements")`
         """
         assert self._constitution
-        slug = Str.slugify(name)
+        slug = Str.normalize_id(name)
         if slug not in self._constitution.sections:
             raise ValueError(f"Section '{name}' (slug: '{slug}') not found.")
         del self._constitution.sections[slug]
@@ -348,11 +348,11 @@ class ConstitutionService(Service):
         Usage: `service.add_section_item("Security Requirements", "Secret Management", "All secrets in env vars.")`
         """
         assert self._constitution
-        section_slug = Str.slugify(section_name)
+        section_slug = Str.normalize_id(section_name)
         if section_slug not in self._constitution.sections:
             raise ValueError(f"Section '{section_name}' (slug: '{section_slug}') not found.")
         section = self._constitution.sections[section_slug]
-        item_slug = Str.slugify(item_name)
+        item_slug = Str.normalize_id(item_name)
         if item_slug in section.items:
             raise ValueError(f"Item '{item_name}' (slug: '{item_slug}') already exists in section '{section_name}'.")
         item = ConstitutionItem(name=item_name, content=content)
@@ -374,11 +374,11 @@ class ConstitutionService(Service):
         Usage: `service.delete_section_item("Security Requirements", "Secret Management")`
         """
         assert self._constitution
-        section_slug = Str.slugify(section_name)
+        section_slug = Str.normalize_id(section_name)
         if section_slug not in self._constitution.sections:
             raise ValueError(f"Section '{section_name}' (slug: '{section_slug}') not found.")
         section = self._constitution.sections[section_slug]
-        item_slug = Str.slugify(item_name)
+        item_slug = Str.normalize_id(item_name)
         if item_slug not in section.items:
             raise ValueError(f"Item '{item_name}' (slug: '{item_slug}') not found in section '{section_name}'.")
         del section.items[item_slug]
@@ -401,7 +401,7 @@ class ConstitutionService(Service):
         Usage: `service.add_governance_rule("Supremacy", "Constitution supersedes all other practices.")`
         """
         assert self._constitution
-        slug = Str.slugify(name)
+        slug = Str.normalize_id(name)
         if slug in self._constitution.governance:
             raise ValueError(f"Governance rule with slug '{slug}' already exists.")
         rule = ConstitutionGovernanceRule(name=name, content=content)
@@ -421,7 +421,7 @@ class ConstitutionService(Service):
         Usage: `service.delete_governance_rule("Supremacy")`
         """
         assert self._constitution
-        slug = Str.slugify(name)
+        slug = Str.normalize_id(name)
         if slug not in self._constitution.governance:
             raise ValueError(f"Governance rule '{name}' (slug: '{slug}') not found.")
         del self._constitution.governance[slug]

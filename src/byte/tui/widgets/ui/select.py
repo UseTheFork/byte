@@ -139,7 +139,7 @@ class Select(VerticalGroup):
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
         if self.selected_label:
             self.selected_label.remove_pointer()
-        label = event.item.query_one(ChoiceLabel)
+        label = event.item.query_one(ChoiceLabel)  # ty:ignore[unresolved-attribute]
         label.add_pointer()
         self.selected_label = label
         self.selected_item = label.item
@@ -160,12 +160,12 @@ class Select(VerticalGroup):
     def compose(self) -> ComposeResult:
         initial_index = 0
         items: list[ListItem] = []
-        for idx, option in enumerate(self.options):
-            list_item = ListItem(ChoiceLabel(option))
+        for idx, option in enumerate(self.options):  # ty:ignore[invalid-argument-type]
+            list_item = ListItem(ChoiceLabel(option))  # ty:ignore[invalid-argument-type]
             items.append(list_item)
             if self.default and option == self.default:
                 initial_index = idx
-        self.list_view = ListView(*items, initial_index=initial_index)
+        self.list_view = ListView(*items, initial_index=initial_index)  # ty:ignore[invalid-assignment]
         yield self.list_view
 
     def submit_current_value(self, answer: Answer | AnswerCancelled):

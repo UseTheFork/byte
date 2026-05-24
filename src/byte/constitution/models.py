@@ -160,7 +160,7 @@ class Constitution:
         lines.extend(
             [
                 "",
-                "---",
+                Section.end(),
             ]
         )
         return list_to_multiline_text(lines)
@@ -170,26 +170,26 @@ class Constitution:
         principles: dict[str, ConstitutionPrinciple] = {}
         for p in data.get("principles", []):
             principle = ConstitutionPrinciple(name=p["name"], description=p["description"])
-            principles[Str.slugify(principle.name)] = principle
+            principles[Str.normalize_id(principle.name)] = principle
 
         sections: dict[str, ConstitutionSection] = {}
         for s in data.get("sections", []):
             items: dict[str, ConstitutionItem] = {}
             for i in s.get("items", []):
                 item = ConstitutionItem(name=i["name"], content=i["content"])
-                items[Str.slugify(item.name)] = item
+                items[Str.normalize_id(item.name)] = item
 
             section = ConstitutionSection(
                 name=s["name"],
                 items=items,
                 applies_to=s.get("applies_to"),
             )
-            sections[Str.slugify(section.name)] = section
+            sections[Str.normalize_id(section.name)] = section
 
         governance: dict[str, ConstitutionGovernanceRule] = {}
         for r in data.get("governance", []):
             rule = ConstitutionGovernanceRule(name=r["name"], content=r["content"])
-            governance[Str.slugify(rule.name)] = rule
+            governance[Str.normalize_id(rule.name)] = rule
 
         raw_meta = data.get("meta", {})
         meta = ConstitutionMeta(

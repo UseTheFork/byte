@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 import asyncio
+from typing import TYPE_CHECKING
 
 from textual import getters
 from textual.app import ComposeResult
@@ -12,6 +11,12 @@ from typing_extensions import Self
 
 from byte.tui import Messages
 from byte.tui.schemas import Answer, AnswerCancelled, Ask
+
+if TYPE_CHECKING:
+    from byte.tui import ByteTUI
+
+
+# TODO: Why is the background on this Not transparent on dim?
 
 
 class Input(VerticalGroup):
@@ -30,15 +35,17 @@ class Input(VerticalGroup):
         Input {
             background: transparent;
             height: auto;
+            border: none;
             
             & VerticalGroup {
                 background: transparent;
             }
             
-            & TextualInput {
+            & Input {
                 background: transparent;
                 border: none;
                 padding: 0 1;
+                height: auto;
                 
                 &:focus {
                     border: none;
@@ -46,6 +53,8 @@ class Input(VerticalGroup):
             }
         }
         """
+
+    app: ByteTUI
 
     _result_future: asyncio.Future[Answer | list[Answer] | str | AnswerCancelled]
     submitted: var[bool] = var(False)
@@ -81,8 +90,8 @@ class Input(VerticalGroup):
         self.mandatory = mandatory
 
     def on_mount(self):
-        self.border_title = self.ask.question  # ty:ignore[possibly-missing-attribute]
-        self.styles.height = 3
+        if self.ask:
+            self.border_title = self.ask.question
 
     def action_exit_now(self):
         if not self.submitted:
@@ -102,7 +111,7 @@ class Input(VerticalGroup):
             return super().focus(scroll_visible)
 
     def compose(self) -> ComposeResult:
-        self.text_input = TextualInput(
+        self.text_input = TextualInput(  # ty:ignore[invalid-assignment]
             value=self.default,
             placeholder="Type your answer...",
         )
@@ -112,23 +121,25 @@ class Input(VerticalGroup):
         """Submit the current value and disable the input."""
         self.submitted = True
 
+        # For text input, we return the string directly in the future
+        # but post an Answer message for consistency
+        if isinstance(value, str):
+            answer = Answer(label=value, value=value)
+        else:
+            answer = value
+
         # Resolve the future if present
         if self._result_future and not self._result_future.done():
-            self._result_future.set_result(value)
+            loop = self._result_future.get_loop()
+            loop.call_soon_threadsafe(self._result_future.set_result, answer)
 
         self.disabled = True
         self.remove_class("border-round")
 
-        if isinstance(value, AnswerCancelled):
+        if isinstance(answer, AnswerCancelled):
             self.add_class("border-round-error")
         else:
             self.add_class("border-round-dim")
 
         # Post message with the string value wrapped in Answer if not cancelled
-        if isinstance(value, AnswerCancelled):
-            self.post_message(Messages.Answer(value))
-        else:
-            # For text input, we return the string directly in the future
-            # but post an Answer message for consistency
-            answer = Answer(label=value, value=value)
-            self.post_message(Messages.Answer(answer))
+        self.post_message(Messages.Answer(answer))
