@@ -164,6 +164,10 @@ class StatusBar(HorizontalGroup, can_focus=False):
         self.is_loading = False
         self.query_one(StatusEmoji).state = state
 
+    def update_text(self, text: str) -> None:
+        """Update only the text in the status bar."""
+        self.text = text
+
     def watch_is_loading(self, loading: bool) -> None:
         try:
             self.query_one(LoadingEmoji).display = loading

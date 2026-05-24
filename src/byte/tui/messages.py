@@ -204,3 +204,7 @@ class Messages:
     class PhaseUpdated(Message):
         phase_id: str | None = None
         phase_status: str | None = None
+
+    @dataclass
+    class TokenReceived(Message):
+        fragment: str

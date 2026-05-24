@@ -275,6 +275,11 @@ class Conversation(Widget):
         else:
             self.status_bar.show_status(event.message if event.message is not None else "", state=event.state)
 
+    @on(Messages.TokenReceived)
+    async def update_status_token(self, event: Messages.TokenReceived) -> None:
+        fragment = event.fragment.replace("\n", "")
+        self.status_bar.update_text(fragment)
+
     @on(Messages.ToolCall)
     async def complete_toolcall(self, event: Messages.ToolCall) -> None:
         """Handle tool call display."""

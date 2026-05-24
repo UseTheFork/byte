@@ -18,52 +18,6 @@ if TYPE_CHECKING:
     from byte.tui import ByteTUI
 
 
-class ToolArgsRaw(Widget, can_focus=False):
-    """Displays raw streaming tokens with a line limit."""
-
-    DEFAULT_CSS = """
-    ToolArgsRaw {
-        height: auto;
-        max-height: 3;
-        overflow: auto;
-        border-top: round $secondary;
-        border-bottom: round $secondary;
-        padding: 1 2;
-    }
-    """
-
-    def __init__(
-        self,
-        name: str | None = None,
-        id: str | None = None,
-        classes: str | None = None,
-        disabled: bool = False,
-        max_lines: int = 10,
-    ) -> None:
-        super().__init__(
-            name=name,
-            id=id,
-            classes=classes,
-            disabled=disabled,
-        )
-        self.raw_buffer = ""
-        self.max_lines = max_lines
-
-    def render(self) -> RenderableType:
-        """Render the last N lines of raw tokens."""
-        if not self.raw_buffer:
-            return Text("(streaming...)", style="dim")
-
-        lines = self.raw_buffer.split("\n")
-        tail_lines = lines[-self.max_lines :] if len(lines) > self.max_lines else lines
-        return Text("\n".join(tail_lines), style="dim white")
-
-    async def append(self, fragment: str) -> None:
-        """Append a fragment to the raw buffer."""
-        self.raw_buffer = self.raw_buffer + fragment
-        self.refresh()
-
-
 class ToolArgs(Widget, can_focus=False):
     """Displays streaming tool call arguments."""
 
@@ -121,9 +75,11 @@ class ToolArgs(Widget, can_focus=False):
         return output
 
     async def append(self, fragment: str) -> None:
-
         self.raw_args = self.raw_args + fragment
         self.refresh(layout=True)
+
+        # Allow the task to wake up and actually display the new markdown
+        await asyncio.sleep(0)
 
 
 class ToolCallStream:
@@ -132,14 +88,12 @@ class ToolCallStream:
     This will accumulate argument fragments if they can't be rendered fast enough.
     """
 
-    def __init__(self, tool_call_display: ToolArgs, tool_args_raw: ToolArgsRaw | None = None) -> None:
+    def __init__(self, tool_call_display: ToolArgs) -> None:
         """
         Args:
-            tool_call_display: ToolArgs widget to update with parsed arguments.
-            tool_args_raw: Optional ToolArgsRaw widget to display raw streaming tokens.
+            tool_call_display: ToolCallDisplay widget to update.
         """
         self.tool_call_display = tool_call_display
-        self.tool_args_raw = tool_args_raw
         self._task: asyncio.Task | None = None
         self._new_markup = asyncio.Event()
         self._pending: list[str] = []
@@ -188,9 +142,8 @@ class ToolCallStream:
         if not fragment:
             # Nothing to do for empty strings.
             return
-        # Feed the fragment to the raw display widget if available
-        if self.tool_args_raw:
-            await self.tool_args_raw.append(fragment)
+
+        self.tool_call_display.post_message(Messages.TokenReceived(fragment))
         # Append the new fragment, and set an event to tell the _run loop to wake up
         self._pending.append(fragment)
         self._new_markup.set()
@@ -281,7 +234,6 @@ class ToolCall(Widget, can_focus=False):
             title="Arguments", collapsed=False, collapsed_symbol=ANGLE_RIGHT, expanded_symbol=ANGLE_DOWN
         ):
             yield ToolArgs()
-            yield ToolArgsRaw()
         yield ToolResult()
 
     @on(Messages.PhaseUpdated)
@@ -299,9 +251,6 @@ class ToolCall(Widget, can_focus=False):
         collapsible = self.query_one(ToolArgsCollapsible)
         collapsible.collapsed = True
 
-        tool_args_raw = self.query_one(ToolArgsRaw)
-        tool_args_raw.styles.display = "none"
-
         result_widget = self.query_one(ToolResult)
         if status == "success":
             pass
@@ -314,7 +263,6 @@ class ToolCall(Widget, can_focus=False):
     @classmethod
     def get_stream(cls, widget: ToolCall) -> ToolCallStream:
         tool_args = widget.query_one(ToolArgs)
-        tool_args_raw = widget.query_one(ToolArgsRaw)
-        stream = ToolCallStream(tool_args, tool_args_raw)
+        stream = ToolCallStream(tool_args)  # Stream targets ToolArgs now
         stream.start()
         return stream

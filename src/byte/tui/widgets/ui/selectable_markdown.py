@@ -14,6 +14,8 @@ from textual.widget import Widget
 from textual.widgets import TextArea
 from textual.widgets.text_area import Selection
 
+from byte.tui import Messages
+
 
 class MarkdownStream:
     """An object to manage streaming markdown.
@@ -77,6 +79,8 @@ class MarkdownStream:
         if not markdown_fragment:
             # Nothing to do for empty strings.
             return
+
+        self.markdown_widget.post_message(Messages.TokenReceived(markdown_fragment))
         # Append the new fragment, and set an event to tell the _run loop to wake up
         self._pending.append(markdown_fragment)
         self._new_markup.set()
@@ -377,7 +381,7 @@ class SelectableMarkdown(Widget, can_focus=True):
     def leave_selection_mode(self) -> None:
         self.selection_mode = False
 
-    def watch_has_focus(self, value: bool) -> None:
+    def watch_has_focus(self, value: bool) -> None:  # ty:ignore[invalid-method-override]
         if value:
             try:
                 child = self.query_one(SelectionTextArea)
