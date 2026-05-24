@@ -1,41 +1,18 @@
-from typing import Literal, Type
+from typing import Literal
 
+from langchain_core.messages import HumanMessage
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
-from byte.llm import LLMService, ModelSchema
 from byte.node import (
     BaseAgentNode,
-    BaseNode,
 )
-from byte.node.nodes import EndNode
-from byte.orchestration import AIMessage, BaseState, Leaves
-from byte.support import Section, SectionType, Str
-from byte.support.utils import extract_content_from_message
+from byte.orchestration import BaseState, Leaves, PhaseModel, PhaseUtils
+from byte.support import Section, SectionType
 
 
 class ConstitutionAgentNode(BaseAgentNode):
-    def boot(
-        self,
-        goto: Type[BaseNode] = EndNode,
-        **kwargs,
-    ):
-        """Initialize the validation node with constraints and routing configuration.
-
-        Args:
-                goto: Next node to route to after successful validation (default: "end_node")
-                max_lines: Maximum number of non-blank lines allowed in response content (optional)
-
-        Usage: `await node.boot(goto="end_node", max_lines=100)`
-        """
-
-        self.goto = Str.class_to_snake_case(goto)
-
-    def get_model(self) -> tuple[ModelSchema, dict]:
-        llm_service = self.app.make(LLMService)
-        return llm_service.get_model(self.name)
-
     def get_user_template(self):
         return [
             Leaves.UserRequest(),
@@ -44,7 +21,17 @@ class ConstitutionAgentNode(BaseAgentNode):
     def get_system_template(self):
         return [
             Leaves.Preamble(
-                role=f"You are updating the project constitution at {Section.ref(SectionType.CONSTITUTION)}. Your job is to (a) collect/derive concrete values, (b) fill the template precisely, and (c) propagate any amendments across dependent artifacts."
+                role=f"Act as a project governance architect. You are updating the project constitution at {Section.ref(SectionType.CONSTITUTION)}."
+            ),
+            Leaves.CommunicationStyle(
+                verbose=True,
+            ),
+            Leaves.WorkflowConstraints(
+                [
+                    "Your job is to (a) collect/derive concrete values",
+                    "(b) fill the template precisely",
+                    "(c) propagate any amendments across dependent artifacts.",
+                ]
             ),
             Leaves.OperatingPrinciples(),
         ]
@@ -55,7 +42,7 @@ class ConstitutionAgentNode(BaseAgentNode):
             Leaves.ToolsLoaded(),
             Leaves.ReferenceMaterials(),
             Leaves.ProjectEnvironment(),
-            Leaves.FileContext(),
+            Leaves.HarnessWorkspaceFiles(),
             Leaves.WorkflowPending(),
             Leaves.Epilogue(),
         ]
@@ -67,22 +54,41 @@ class ConstitutionAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        prompt_assembler = await self.generate_agent_state(state, config)
-        runnable = self.create_runnable(prompt_assembler, tool_choice="any")
-        prompt = await self.generate_prompt(prompt_assembler)
         record_response_service = self.app.make(RecordResponseService)
+        prompt_assembler = await self.generate_agent_state(state, config)
 
-        self.app.dispatch_task(
-            record_response_service.record_response(prompt, config),
-        )
-        result = await runnable.ainvoke(
-            prompt,
-            config=config,
-        )
+        # TODO: we should make this a static method in PhaseUtils
+        pending_phase = PhaseUtils.get_pending_phase(prompt_assembler.get_state())
+        if pending_phase is not None and isinstance(pending_phase, PhaseModel):
+            runnable = self.create_runnable(prompt_assembler, tool_choice=pending_phase.tool_choice)
+        else:
+            runnable = self.create_runnable(prompt_assembler)
 
-        route_tool_call = self.route_tool_calls(result)
-        if route_tool_call is not None:
-            return route_tool_call
+        prompt = await self.generate_prompt(prompt_assembler)
 
-        msg = extract_content_from_message(result)
-        return self.route_to(self.goto, {"scratch_messages": AIMessage(content=msg, agent_name=self.name)})
+        while True:
+            result = await runnable.ainvoke(
+                prompt,
+                config=config,
+            )
+            self.app.dispatch_task(
+                record_response_service.record_response(prompt, config),
+            )
+
+            route_tool_call = self.route_tool_calls(result)
+            if route_tool_call is not None:
+                return route_tool_call
+
+            if not PhaseUtils.is_workflow_complete(prompt_assembler.get_state()):
+                prompt = prompt.extend(  # ty:ignore[unresolved-attribute]
+                    [
+                        HumanMessage(
+                            content=[
+                                {
+                                    "type": "text",
+                                    "text": "The workflow has incomplete phases, use the provided tools to complete the workflow.",
+                                },
+                            ]
+                        )
+                    ]
+                )

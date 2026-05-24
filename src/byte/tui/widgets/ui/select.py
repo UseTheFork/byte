@@ -59,6 +59,11 @@ class Select(VerticalGroup):
             & VerticalGroup {
                 background: transparent;
             }
+            & Label {
+                padding: 0 1;
+                color: $text;
+                text-style: bold;
+            }
             & ListView {
                 background: transparent;
                 & > ListItem {
@@ -127,8 +132,7 @@ class Select(VerticalGroup):
         self.mandatory = mandatory
 
     def on_mount(self):
-        self.border_title = self.ask.question
-        self.styles.height = len(self.options) + 2
+        self.styles.height = len(self.options) + 2 if self.options else 2
 
     def action_exit_now(self):
         if self.selected_label:
@@ -158,6 +162,8 @@ class Select(VerticalGroup):
         return self.selected_item
 
     def compose(self) -> ComposeResult:
+        if self.ask:
+            yield Label(self.ask.question)
         initial_index = 0
         items: list[ListItem] = []
         for idx, option in enumerate(self.options):  # ty:ignore[invalid-argument-type]
