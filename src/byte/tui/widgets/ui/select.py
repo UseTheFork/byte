@@ -63,6 +63,7 @@ class Select(VerticalGroup):
                 padding: 0 1;
                 color: $text;
                 text-style: bold;
+                height: auto;
             }
             & ListView {
                 background: transparent;
@@ -132,7 +133,8 @@ class Select(VerticalGroup):
         self.mandatory = mandatory
 
     def on_mount(self):
-        self.styles.height = len(self.options) + 2 if self.options else 2
+        # Add extra padding for the Label as well.
+        self.styles.height = len(self.options) + 4 if self.options else 4
 
     def action_exit_now(self):
         if self.selected_label:
@@ -163,7 +165,7 @@ class Select(VerticalGroup):
 
     def compose(self) -> ComposeResult:
         if self.ask:
-            yield Label(self.ask.question)
+            yield Label(self.ask.question, expand=True)
         initial_index = 0
         items: list[ListItem] = []
         for idx, option in enumerate(self.options):  # ty:ignore[invalid-argument-type]

@@ -47,7 +47,8 @@ class UserConfirmOrInputTool(BaseTool):
         if confirmed:
             return ToolResult(result={"content": "User confirmed yes."})
 
-        return ToolResult(result={"content": f"User declined and provided input: {text_input}"})
+        # TODO: if text_input is not none.
+        return ToolResult(result={"content": f"User declined and provided input: {text_input.value}"})
 
     @classmethod
     def format_tool_message(cls, result: ToolResult) -> str:

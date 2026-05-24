@@ -16,9 +16,6 @@ if TYPE_CHECKING:
     from byte.tui import ByteTUI
 
 
-# TODO: Why is the background on this Not transparent on dim?
-
-
 class TextInput(VerticalGroup):
     """An input widget that allows text input from the user."""
 
@@ -42,6 +39,7 @@ class TextInput(VerticalGroup):
             }
             
             & Label {
+                height: auto;
                 padding: 0 1;
                 color: $text;
                 text-style: bold;
@@ -118,7 +116,7 @@ class TextInput(VerticalGroup):
 
     def compose(self) -> ComposeResult:
         if self.ask:
-            yield Label(self.ask.question)
+            yield Label(self.ask.question, expand=True)
         self.text_input = Input(  # ty:ignore[invalid-assignment]
             value=self.default,
             placeholder="Type your answer...",

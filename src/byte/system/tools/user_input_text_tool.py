@@ -29,7 +29,7 @@ class UserInputTextTool(BaseTool):
 
         text = await interaction_service.input_text(question)
 
-        return ToolResult(result={"content": text})
+        return ToolResult(result={"content": text.value})
 
     @classmethod
     def format_tool_message(cls, result: ToolResult) -> str:
