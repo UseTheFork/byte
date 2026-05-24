@@ -6,7 +6,7 @@ from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import VerticalGroup
 from textual.reactive import var
-from textual.widgets import Input as TextualInput
+from textual.widgets import Input
 from typing_extensions import Self
 
 from byte.tui import Messages
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 # TODO: Why is the background on this Not transparent on dim?
 
 
-class Input(VerticalGroup):
+class TextInput(VerticalGroup):
     """An input widget that allows text input from the user."""
 
     BINDINGS = [
@@ -32,7 +32,7 @@ class Input(VerticalGroup):
     ]
 
     DEFAULT_CSS = """
-        Input {
+        TextInput {
             background: transparent;
             height: auto;
             border: none;
@@ -59,7 +59,7 @@ class Input(VerticalGroup):
     _result_future: asyncio.Future[Answer | list[Answer] | str | AnswerCancelled]
     submitted: var[bool] = var(False)
 
-    text_input = getters.query_one(TextualInput)
+    text_input = getters.query_one(Input)
 
     ask: var[Ask | None] = var(None)
 
@@ -97,7 +97,7 @@ class Input(VerticalGroup):
         if not self.submitted:
             self.submit_value(AnswerCancelled())
 
-    def on_input_submitted(self, event: TextualInput.Submitted) -> None:
+    def on_input_submitted(self, event: Input.Submitted) -> None:
         """Handle when user presses Enter in the input field."""
         if not self.submitted:
             value = event.value.strip()
@@ -111,7 +111,7 @@ class Input(VerticalGroup):
             return super().focus(scroll_visible)
 
     def compose(self) -> ComposeResult:
-        self.text_input = TextualInput(  # ty:ignore[invalid-assignment]
+        self.text_input = Input(  # ty:ignore[invalid-assignment]
             value=self.default,
             placeholder="Type your answer...",
         )

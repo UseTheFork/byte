@@ -10,11 +10,11 @@ from textual.widgets import Markdown
 from byte.tui import Messages
 from byte.tui.schemas import Ask
 from byte.tui.widgets.ui.human_message import HumanMessage
-from byte.tui.widgets.ui.input import Input
 from byte.tui.widgets.ui.linting import Linting
 from byte.tui.widgets.ui.loading_indicator import LoadingIndicator
 from byte.tui.widgets.ui.select import Select
 from byte.tui.widgets.ui.selectable_markdown import SelectableMarkdown
+from byte.tui.widgets.ui.text_input import TextInput
 from byte.tui.widgets.ui.text_rule import TextRule
 from byte.tui.widgets.ui.tool_call import ToolCall
 
@@ -98,8 +98,8 @@ class ResponsePanel(VerticalGroup):
         select.focus()
         return select
 
-    async def mount_input(self, ask: Ask) -> Input:
-        input_widget = Input(ask)
+    async def mount_input(self, ask: Ask) -> TextInput:
+        input_widget = TextInput(ask)
         await self.mount(input_widget)
         input_widget.focus()
         return input_widget
