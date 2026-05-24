@@ -52,7 +52,7 @@ class ToolNode(BaseNode):
         for tool_call in message.tool_calls:
             try:
                 if is_workflow_agent and isinstance(current_phase, PhaseModel):
-                    allowed_tool_names = [str(t) for t in current_phase.tools]
+                    allowed_tool_names = [str(t.name) for t in current_phase.tools]
                     if tool_call["name"] not in allowed_tool_names:
                         raise ToolException(
                             f"Tool '{tool_call['name']}' is NOT allowed in the current phase. "

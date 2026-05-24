@@ -10,7 +10,7 @@ MAX_RESULT_LENGTH = 10000
 
 
 class GitGrepTool(BaseTool):
-    name: str = "git_grep"
+    name: str = "git_grep_tool"
     description: str = list_to_multiline_text(
         [
             "Search for a pattern in tracked files using git grep. This tool searches through all files tracked by git for the specified pattern. It's useful for finding where specific code, functions, or text appears in the codebase.",

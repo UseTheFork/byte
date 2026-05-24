@@ -5,7 +5,7 @@ from byte.web import ChromiumService
 
 
 class SearchWebTool(BaseTool):
-    name: str = "search_web"
+    name: str = "search_web_tool"
     description: str = (
         "Searches the web for information matching the given query and returns relevant page content as markdown."
     )

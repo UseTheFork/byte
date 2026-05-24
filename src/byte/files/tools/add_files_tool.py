@@ -1,21 +1,19 @@
 from typing import override
 
-from byte.files import FileMode, FileService
-from byte.support import Section, SectionType
+from byte.files import FileService
+from byte.orchestration import BaseState
+from byte.support import MD, Section, SectionType
 from byte.support.utils import list_to_multiline_text
 from byte.tools import BaseTool, ToolResult
 
 
 class AddFilesTool(BaseTool):
-    name: str = "read_files"
+    name: str = "add_files_tool"
     description: str = list_to_multiline_text(
         [
-            f"Add one or more files to the {Section.ref(SectionType.PROJECT_FILES)} section so their contents become available in context.",
-            Section.start(SectionType.RULES),
-            f" - YOU MUST check the {Section.ref(SectionType.PROJECT_FILES)}",
-            " - Only use this tool with known file paths.",
-            f" - Use only when the file content is NOT already available in the {Section.ref(SectionType.PROJECT_FILES)} or known state.",
-            " - DO NOT use this tool to reread files included verbatim in the current message.",
+            f"Add one or more files to {Section.ref(SectionType.PROJECT_FILES)} for the current workflow.",
+            MD.bullet("Only use this tool with known file paths."),
+            MD.bullet(f"Use only when the file is NOT already in the {Section.ref(SectionType.PROJECT_FILES)}."),
         ]
     )
     input_schema = {
@@ -24,7 +22,7 @@ class AddFilesTool(BaseTool):
             "file_paths": {
                 "type": "array",
                 "items": {"type": "string"},
-                "description": "List of file paths to read (relative to the project root)",
+                "description": f"List of file paths to add to {Section.ref(SectionType.PROJECT_FILES)} (relative to the project root)",
             },
         },
         "required": ["file_paths"],
@@ -33,34 +31,27 @@ class AddFilesTool(BaseTool):
     @override
     async def run(
         self,
+        state: BaseState,
         file_paths: list[str] = [],
         **kwargs,
     ) -> ToolResult:
-
+        harness = state.get("harness", {})
         file_service = self.app.make(FileService)
 
-        files: list[dict] = []
-        for file_path in file_paths:
-            if await file_service.is_file_in_context(file_path):
-                files.append({"file": file_path, "status": "Already in Context"})
-                continue
+        missing_files = [f for f in file_paths if file_service.get_file_context(f) is None]
+        if missing_files:
+            return ToolResult(success=False, result={"content": f"File(s) not found: {', '.join(missing_files)}."})
 
-            added = await file_service.add_file(file_path, FileMode.READ_ONLY)
-            if added:
-                files.append({"file": file_path, "status": "Loaded"})
-            else:
-                files.append({"file": file_path, "status": "Does Not Exist"})
+        current_editable = harness.get("editable_files", [])
+        updated_editable = list(set(current_editable + file_paths))
 
-        return ToolResult(result={"files": files})
+        harness["editable_files"] = updated_editable
+
+        return ToolResult(
+            result={"content": f"Added {len(file_paths)} file(s) to= files. Total files: {len(updated_editable)}."},
+            extra={"harness": harness},
+        )
 
     @classmethod
     def format_tool_message(cls, result: ToolResult) -> str:
-        files: list[dict] = result.result.get("files", [])
-        lines = [f"- {f['file']}: {f['status']}" for f in files]
-        return "Files loaded:\n" + "\n".join(lines)
-
-    @classmethod
-    def format_tui_message(cls, result: ToolResult) -> str:
-        files: list[dict] = result.result.get("files", [])
-        rows = [f"| `{f['file']}` | {f['status']} |" for f in files]
-        return "| File | Status |\n|------|--------|\n" + "\n".join(rows)
+        return result.result.get("content", "")

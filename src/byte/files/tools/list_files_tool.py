@@ -5,7 +5,7 @@ from byte.tools import BaseTool, ToolResult
 
 
 class ListFilesTool(BaseTool):
-    name: str = "list_files"
+    name: str = "list_files_tool"
     description: str = "List files in the project. Optionally provide a path to list files in a specific directory; without a path, lists files at the project root."
     input_schema = {
         "type": "object",

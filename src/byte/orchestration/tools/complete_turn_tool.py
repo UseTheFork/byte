@@ -7,6 +7,7 @@ from byte.support.utils import list_to_multiline_text
 from byte.tools import BaseTool, ToolResult
 
 
+# AI:
 class CompleteTurnTool(BaseTool):
     name: str = "complete_turn_tool"
     description: str = (

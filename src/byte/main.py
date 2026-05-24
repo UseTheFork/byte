@@ -23,6 +23,7 @@ from byte.lsp import LSPServiceProvider
 from byte.memory import MemoryServiceProvider
 from byte.node import NodeServiceProvider
 from byte.orchestration import OrchestrationServiceProvider
+from byte.research import ResearchServiceProvider
 from byte.skills import SkillsServiceProvider
 from byte.specs import SpecsServiceProvider
 from byte.system import SystemServiceProvider
@@ -45,6 +46,7 @@ PROVIDERS = [
     # PresetsProvider,
     HarnessServiceProvider,
     DevelopmentServiceProvider,
+    ResearchServiceProvider,
     FileServiceProvider,
     KnowledgeServiceProvider,
     LLMServiceProvider,

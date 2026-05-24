@@ -6,7 +6,7 @@ from byte.tui.schemas import Answer
 
 
 class UserSelectTool(BaseTool):
-    name: str = "user_select"
+    name: str = "user_select_tool"
     description: str = "Present the user with a list of choices and return their selection."
     input_schema = {
         "type": "object",

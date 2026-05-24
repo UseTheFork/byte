@@ -4,6 +4,8 @@ from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
 from byte.development import RecordResponseService
+from byte.files import AddFilesTool, ListFilesTool
+from byte.git import GitGrepTool
 from byte.node import (
     BaseAgentNode,
     BaseNode,
@@ -12,9 +14,11 @@ from byte.node.nodes import EndNode
 from byte.orchestration import AIMessage, BaseState, Leaves
 from byte.support import Section, SectionType, Str
 from byte.support.utils import extract_content_from_message
+from byte.system import UserSelectTool
+from byte.web import SearchWebTool
 
 
-class AskAgentNode(BaseAgentNode):
+class ResearchAgentNode(BaseAgentNode):
     llm_tier: str = "reasoning"
 
     def boot(
@@ -41,24 +45,28 @@ class AskAgentNode(BaseAgentNode):
 
     def get_system_template(self):
         return [
-            Leaves.Preamble(role="Act as an expert software developer."),
+            Leaves.Preamble(
+                role="Act as an expert research analyst specializing in code exploration, analysis, and knowledge synthesis. Your role is to investigate codebases, understand complex systems, and provide clear, evidence-based insights."
+            ),
             Leaves.CommunicationStyle(verbose=True),
             Leaves.WorkflowConstraints(
                 [
-                    "Always use best practices when coding",
-                    "Respect and use existing conventions, libraries, etc that are already present in the code base",
-                    "Take requests for changes to the supplied code",
-                    "If the request is ambiguous, ask questions",
-                    "Keep changes simple don't build more then what is asked for",
-                    "Do not provide full code implementations unless explicitly requested. Describe the changes needed first.",
+                    "Use search and grep tools to explore the codebase before making claims",
+                    "Ground all findings in actual code references (file paths, snippets)",
+                    "Respect existing conventions, architectures, and patterns in the codebase",
+                    "Ask clarifying questions if the research objective is ambiguous",
+                    "Synthesize findings into actionable insights with clear implications",
+                    "Do not propose implementation changes unless explicitly requested - focus on analysis and understanding",
+                    "For comparative analysis, examine multiple code paths and document trade-offs",
                 ]
             ),
             "",
             Section.start(SectionType.RESPONSE_FORMAT),
-            "Use clear, concise explanations",
-            "Format code with proper syntax highlighting",
-            "Provide context for suggested changes",
-            "Focus on actionable findings, not exhaustive documentation",
+            "Structure findings with clear headings and sections",
+            "Always cite code references (file path, function/class name)",
+            "Use code blocks only to highlight key evidence, not full implementations",
+            "Provide context explaining why findings matter for the codebase",
+            "End with actionable takeaways or recommendations based on evidence",
             Section.end(),
             "",
             Leaves.OperatingPrinciples(),
@@ -68,13 +76,25 @@ class AskAgentNode(BaseAgentNode):
         return [
             Leaves.ReferenceMaterials(),
             Leaves.ProjectEnvironment(),
-            Leaves.FileContext(),
+            Leaves.ProjectHierarchy(),
+            Leaves.HarnessWorkspaceFiles(),
+            Leaves.HarnessWorkspaceReferenceFiles(),
             Leaves.Epilogue(
                 enforcements=[
                     "NEVER use XML-style tags in your responses (e.g., <file>, <search>, <replace>). These are for internal parsing only.",
-                    "DO NOT provide full code implementations unless explicitly requested. Describe the changes needed first.",
+                    "Always use the GitGrepTool and ListFilesTool to explore the codebase and ground your analysis in actual code.",
+                    "Prioritize evidence-based findings over assumptions—verify claims with code references.",
                 ]
             ),
+        ]
+
+    def get_tools(self, state: BaseState):
+        return [
+            GitGrepTool,
+            ListFilesTool,
+            SearchWebTool,
+            UserSelectTool,
+            AddFilesTool,
         ]
 
     async def __call__(
