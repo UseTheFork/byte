@@ -8,7 +8,7 @@ from textual.containers import VerticalGroup
 from textual.content import Content
 from textual.message import Message
 from textual.reactive import var
-from textual.widgets import Markdown, TextArea
+from textual.widgets import Markdown, Rule, TextArea
 from typing_extensions import Self
 
 from byte.tui import Messages
@@ -177,6 +177,7 @@ class TextInput(VerticalGroup):
     def compose(self) -> ComposeResult:
         if self.ask:
             yield Markdown(self.ask.question)
+        yield Rule()
         self.text_input = TextInputTextArea(  # ty:ignore[invalid-assignment]
             placeholder="Type your answer...",
             id="text-input-area",

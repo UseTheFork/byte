@@ -6,7 +6,7 @@ from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import VerticalGroup
 from textual.reactive import var
-from textual.widgets import Label, ListItem, ListView, Markdown
+from textual.widgets import Label, ListItem, ListView, Markdown, Rule
 from typing_extensions import Self
 
 from byte.tui import Messages
@@ -163,6 +163,8 @@ class Select(VerticalGroup):
     def compose(self) -> ComposeResult:
         if self.ask:
             yield Markdown(self.ask.question)
+        yield Rule()
+
         initial_index = 0
         items: list[ListItem] = []
         for idx, option in enumerate(self.options):  # ty:ignore[invalid-argument-type]
