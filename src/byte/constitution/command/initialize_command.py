@@ -1,4 +1,3 @@
-import argparse
 from argparse import Namespace
 
 from byte import ByteArgumentParser, Command
@@ -26,7 +25,6 @@ class InitializeCommand(Command):
             prog=self.name,
             description="Initialize the project constitution",
         )
-        parser.add_argument("constitution_query", nargs=argparse.REMAINDER, help="The initialization statement")
         return parser
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
@@ -67,11 +65,13 @@ class InitializeCommand(Command):
                 f"\n\nWhat linting and formatting tools will this project use? \n\n {linting_tools.value.strip()}"
             )
 
-        if args.constitution_query:
-            query_text = " ".join(args.constitution_query)
+        confirmed, text_input = await interaction_service.confirm_or_input(
+            "Do you have any other comments to add?", "Enter your additional comments:", default_confirm=False
+        )
+        if not confirmed and text_input:
             lines.append("")
             lines.append("Additional Comments:")
-            lines.append(query_text)
+            lines.append(text_input.value.strip())
 
         combined_lines = (
             "We are initializing the project and need the constition created. Here are the answers to a generic questioner the user completed:"

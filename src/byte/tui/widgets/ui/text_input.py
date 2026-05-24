@@ -5,8 +5,10 @@ from textual import getters
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import VerticalGroup
+from textual.content import Content
+from textual.message import Message
 from textual.reactive import var
-from textual.widgets import Input, Markdown
+from textual.widgets import Markdown, TextArea
 from typing_extensions import Self
 
 from byte.tui import Messages
@@ -14,6 +16,72 @@ from byte.tui.schemas import Answer, AnswerCancelled, Ask
 
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
+
+
+class TextInputTextArea(TextArea):
+    class Submitted(Message):
+        def __init__(self, markdown: str) -> None:
+            self.markdown = markdown
+            super().__init__()
+
+    BINDINGS = [
+        Binding(
+            "enter",
+            "submit",
+            "Send",
+            # key_display="\u23ce ",
+            priority=True,
+            tooltip="Send the prompt to the agent",
+        ),
+        Binding(
+            "ctrl+j,shift+enter",
+            "newline",
+            "Line",
+            # key_display="\u21e7 + \u23ce ",
+            tooltip="Insert a new line character",
+        ),
+    ]
+
+    app: ByteTUI
+
+    multi_line = var(False, bindings=True)
+
+    def __init__(
+        self,
+        *,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+        disabled: bool = False,
+        compact: bool = True,
+        placeholder: str | Content = "",
+    ):
+        super().__init__(name=name, id=id, classes=classes, disabled=disabled, compact=compact, placeholder=placeholder)
+        self._autocomplete = None
+
+    def on_mount(self) -> None:
+        self.highlight_cursor_line = False
+        self.hide_suggestion_on_blur = False
+
+    def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
+        if action == "newline" and self.multi_line:
+            return False
+        if action == "submit" and self.multi_line:
+            return False
+        if action == "multiline_submit":
+            return self.multi_line
+        return True
+
+    def action_multiline_submit(self) -> None:
+        self.post_message(Messages.UserInputSubmitted(self.text))
+        self.clear()
+
+    def action_submit(self) -> None:
+        self.post_message(TextInputTextArea.Submitted(self.text))
+        self.clear()
+
+    def action_newline(self) -> None:
+        self.insert("\n")
 
 
 class TextInput(VerticalGroup):
@@ -41,7 +109,7 @@ class TextInput(VerticalGroup):
                 height: auto;
             }
             
-            & Input {
+            & TextArea {
                 background: transparent;
                 border: none;
                 padding: 0 1;
@@ -59,7 +127,7 @@ class TextInput(VerticalGroup):
     _result_future: asyncio.Future[Answer | list[Answer] | str | AnswerCancelled]
     submitted: var[bool] = var(False)
 
-    text_input = getters.query_one(Input)
+    text_input = getters.query_one(TextInputTextArea)
 
     ask: var[Ask | None] = var(None)
 
@@ -93,10 +161,10 @@ class TextInput(VerticalGroup):
         if not self.submitted:
             self.submit_value(AnswerCancelled())
 
-    def on_input_submitted(self, event: Input.Submitted) -> None:
+    def on_text_input_text_area_submitted(self, event: TextInputTextArea.Submitted) -> None:
         """Handle when user presses Enter in the input field."""
         if not self.submitted:
-            value = event.value.strip()
+            value = event.markdown.strip()
             self.submit_value(value)
 
     def focus(self, scroll_visible: bool = True) -> Self:
@@ -109,9 +177,9 @@ class TextInput(VerticalGroup):
     def compose(self) -> ComposeResult:
         if self.ask:
             yield Markdown(self.ask.question)
-        self.text_input = Input(  # ty:ignore[invalid-assignment]
-            value=self.default,
+        self.text_input = TextInputTextArea(  # ty:ignore[invalid-assignment]
             placeholder="Type your answer...",
+            id="text-input-area",
         )
         yield self.text_input
 
