@@ -6,7 +6,7 @@ from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import VerticalGroup
 from textual.reactive import var
-from textual.widgets import Input, Label
+from textual.widgets import Input, Markdown
 from typing_extensions import Self
 
 from byte.tui import Messages
@@ -38,11 +38,8 @@ class TextInput(VerticalGroup):
                 background: transparent;
             }
             
-            & Label {
+            & Markdown {
                 height: auto;
-                padding: 0 1;
-                color: $text;
-                text-style: bold;
             }
             
             & Input {
@@ -116,7 +113,7 @@ class TextInput(VerticalGroup):
 
     def compose(self) -> ComposeResult:
         if self.ask:
-            yield Label(self.ask.question, expand=True)
+            yield Markdown(self.ask.question)
         self.text_input = Input(  # ty:ignore[invalid-assignment]
             value=self.default,
             placeholder="Type your answer...",

@@ -1,6 +1,5 @@
 from typing import Literal
 
-from langchain_core.messages import HumanMessage
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
@@ -13,6 +12,8 @@ from byte.support import Section, SectionType
 
 
 class ConstitutionAgentNode(BaseAgentNode):
+    llm_tier: str = "reasoning"
+
     def get_user_template(self):
         return [
             Leaves.UserRequest(),
@@ -40,9 +41,8 @@ class ConstitutionAgentNode(BaseAgentNode):
         return [
             Leaves.Constitution(),
             Leaves.ToolsLoaded(),
-            Leaves.ReferenceMaterials(),
             Leaves.ProjectEnvironment(),
-            Leaves.HarnessWorkspaceFiles(),
+            Leaves.HarnessWorkspaceReferenceContext(),
             Leaves.WorkflowPending(),
             Leaves.Epilogue(),
         ]
@@ -80,15 +80,8 @@ class ConstitutionAgentNode(BaseAgentNode):
                 return route_tool_call
 
             if not PhaseUtils.is_workflow_complete(prompt_assembler.get_state()):
-                prompt = prompt.extend(  # ty:ignore[unresolved-attribute]
-                    [
-                        HumanMessage(
-                            content=[
-                                {
-                                    "type": "text",
-                                    "text": "The workflow has incomplete phases, use the provided tools to complete the workflow.",
-                                },
-                            ]
-                        )
-                    ]
+                prompt[-1].content[0]["text"] += (  # ty:ignore[invalid-argument-type]
+                    " > ERROR: The workflow has incomplete phases, you MUST use the provided tools to complete the workflow."
                 )
+
+                self.app["log"].info(prompt)

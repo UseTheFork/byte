@@ -8,6 +8,9 @@ from byte.orchestration.leaves.epilogue import Epilogue as _Epilogue
 from byte.orchestration.leaves.file_context import FileContext as _FileContext
 from byte.orchestration.leaves.git_diffs import GitDiffs as _GitDiffs
 from byte.orchestration.leaves.harness_workspace_files import HarnessWorkspaceFiles as _HarnessWorkspaceFiles
+from byte.orchestration.leaves.harness_workspace_reference_context import (
+    HarnessWorkspaceReferenceContext as _HarnessWorkspaceReferenceContext,
+)
 from byte.orchestration.leaves.harness_workspace_reference_files import (
     HarnessWorkspaceReferenceFiles as _HarnessWorkspaceReferenceFiles,
 )
@@ -54,4 +57,5 @@ class Leaves:
     HarnessWorkspaceFiles = _HarnessWorkspaceFiles
     SpecTasks = _SpecTasks
     HarnessWorkspaceReferenceFiles = _HarnessWorkspaceReferenceFiles
+    HarnessWorkspaceReferenceContext = _HarnessWorkspaceReferenceContext
     # keep-sorted end

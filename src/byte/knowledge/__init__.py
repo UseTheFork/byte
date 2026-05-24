@@ -13,8 +13,10 @@ if TYPE_CHECKING:
     from byte.knowledge.models import SessionContextModel
     from byte.knowledge.service.session_context_service import SessionContextService
     from byte.knowledge.service_provider import KnowledgeServiceProvider
+    from byte.knowledge.tools.add_files_to_context_tool import AddFilesToContextTool
 
 __all__ = (
+    "AddFilesToContextTool",
     "ContextAddCommand",
     "ContextAddFileCommand",
     "ContextDropCommand",
@@ -35,6 +37,7 @@ _dynamic_imports = {
     "SessionContextModel": "models",
     "SessionContextService": "service.session_context_service",
     "WebCommand": "command.web_command",
+    "AddFilesToContextTool": "tools.add_files_to_context_tool",
     # keep-sorted end
 }
 

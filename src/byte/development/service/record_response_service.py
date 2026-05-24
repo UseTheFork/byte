@@ -56,6 +56,20 @@ class RecordResponseService(Service):
             content_parts.append(str(message.text))
             content_parts.append("")
 
+            if hasattr(message, "tool_calls") and message.tool_calls:
+                content_parts.append("Tool Calls:")
+                for tool_call in message.tool_calls:
+                    tool_name = (
+                        tool_call.get("name", "unknown")
+                        if isinstance(tool_call, dict)
+                        else getattr(tool_call, "name", "unknown")
+                    )
+                    tool_args = (
+                        tool_call.get("args", {}) if isinstance(tool_call, dict) else getattr(tool_call, "args", {})
+                    )
+                    content_parts.append(f"  - {tool_name}: {tool_args}")
+                content_parts.append("")
+
         content = "\n".join(content_parts)
         cache_file.write_text(content, encoding="utf-8")
 

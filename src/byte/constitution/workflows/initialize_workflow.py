@@ -10,10 +10,11 @@ from byte.constitution import (
     DeleteSectionTool,
     UpdateMetaTool,
 )
-from byte.files import AddFilesTool, ListFilesTool
+from byte.files import ListFilesTool
 from byte.git import GitGrepTool
-from byte.node.nodes import ToolNode
-from byte.orchestration import GraphBuilder, PhaseModel, UpdatePhaseTool
+from byte.knowledge import AddFilesToContextTool
+from byte.node.nodes import EndNode, ToolNode
+from byte.orchestration import GraphBuilder, PhaseModel, RoutePhaseModel, UpdatePhaseTool, UserConfirmPhaseTool
 from byte.support import MD
 from byte.system import UserConfirmOrInputTool, UserConfirmTool, UserInputTextTool, UserSelectTool
 
@@ -25,7 +26,7 @@ class InitializeWorkflow(ConstitutionWorkflow):
         return [
             PhaseModel(
                 id="consider-and-interview",
-                content="Gather requirements and context for initializing a new constitution.",
+                content="Gather requirements and context for initializing the constitution.",
                 note=[
                     MD.bullet("Interview the user about project values, principles, and governance needs."),
                     MD.bullet("The project may be brand new with no existing constitution file or documentation."),
@@ -38,7 +39,7 @@ class InitializeWorkflow(ConstitutionWorkflow):
                 tools=[
                     GitGrepTool,
                     ListFilesTool,
-                    AddFilesTool,
+                    AddFilesToContextTool,
                     UserInputTextTool,
                     UserConfirmOrInputTool,
                     UserConfirmTool,
@@ -47,7 +48,7 @@ class InitializeWorkflow(ConstitutionWorkflow):
                 executed_by=ConstitutionAgentNode,
             ),
             PhaseModel(
-                id="collect",
+                id="collect-derive",
                 content="Collect/derive values for placeholders:",
                 note=[
                     MD.bullet("If user input (conversation) supplies a value, use it."),
@@ -67,7 +68,7 @@ class InitializeWorkflow(ConstitutionWorkflow):
                     GitGrepTool,
                     UserSelectTool,
                     ListFilesTool,
-                    AddFilesTool,
+                    AddFilesToContextTool,
                 ],
                 executed_by=ConstitutionAgentNode,
             ),
@@ -90,13 +91,10 @@ class InitializeWorkflow(ConstitutionWorkflow):
                     MD.bullet(
                         "Ensure Governance section lists amendment procedure, versioning policy, and compliance review expectations."
                     ),
-                    MD.bullet(
-                        f"**IMPORTANT**: You MUST use the `{UpdatePhaseTool.name}` tool to end complete this phase."
-                    ),
+                    MD.bullet(f"You MUST use the {UserConfirmPhaseTool.name} to complete this phase."),
                 ],
                 tools=[
-                    UserConfirmOrInputTool,
-                    UpdatePhaseTool,
+                    UserConfirmPhaseTool,
                 ],
                 executed_by=ConstitutionAgentNode,
             ),
@@ -109,6 +107,10 @@ class InitializeWorkflow(ConstitutionWorkflow):
                     MD.bullet(
                         'Principles are declarative, testable, and free of vague language ("should" → replace with MUST/SHOULD rationale where appropriate).'
                     ),
+                    MD.bullet(f"You MUST use the {UpdatePhaseTool.name} to complete this phase."),
+                ],
+                tools=[
+                    UpdatePhaseTool,
                 ],
                 executed_by=ConstitutionAgentNode,
             ),
@@ -125,7 +127,12 @@ class InitializeWorkflow(ConstitutionWorkflow):
                     DeleteSectionItemTool,
                     DeleteSectionTool,
                     UpdateMetaTool,
+                    UpdatePhaseTool,
                 ],
+            ),
+            RoutePhaseModel(
+                id="end",
+                executed_by=EndNode,
             ),
         ]
 

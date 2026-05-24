@@ -39,7 +39,11 @@ class UserConfirmPhaseTool(BaseTool):
                 extra={"workflow_phases": workflow_phases},
             )
 
-        return ToolResult(result={"content": f"User declined {phase_id} completion and provided input: {text_input}"})
+        return ToolResult(
+            result={
+                "content": f"User declined {phase_id} completion and provided input: {text_input.value.strip() if text_input else ''}"
+            }
+        )
 
     @classmethod
     def format_tool_message(cls, result: ToolResult) -> str:

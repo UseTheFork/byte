@@ -1,7 +1,8 @@
 from typing import Literal
 
+from byte.support import Boundary, BoundaryType
 from byte.support.mixins import Bootable
-from byte.support.utils import slugify
+from byte.support.utils import list_to_multiline_text, slugify
 
 
 class SessionContextModel(Bootable):
@@ -51,3 +52,18 @@ class SessionContextModel(Bootable):
         """
         if self.file_path.exists():
             self.file_path.unlink()
+
+    def to_boundary(self) -> str:
+        opening = Boundary.open(
+            BoundaryType.CONTEXT,
+            meta={"type": self.type, "key": self.key},
+        )
+        content = str(self.content)
+        closing = Boundary.close(BoundaryType.CONTEXT)
+        return list_to_multiline_text(
+            [
+                opening,
+                content,
+                closing,
+            ]
+        )

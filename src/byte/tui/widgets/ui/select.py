@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import asyncio
 
 from rich.text import Text
@@ -8,7 +6,7 @@ from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import VerticalGroup
 from textual.reactive import var
-from textual.widgets import Label, ListItem, ListView
+from textual.widgets import Label, ListItem, ListView, Markdown
 from typing_extensions import Self
 
 from byte.tui import Messages
@@ -55,17 +53,16 @@ class Select(VerticalGroup):
 
     DEFAULT_CSS = """
         Select {
+            height: auto;
             background: transparent;
             & VerticalGroup {
                 background: transparent;
             }
-            & Label {
-                padding: 0 1;
-                color: $text;
-                text-style: bold;
+            & Markdown {
                 height: auto;
             }
             & ListView {
+                height: auto;
                 background: transparent;
                 & > ListItem {
                     color: $foreground;
@@ -132,9 +129,9 @@ class Select(VerticalGroup):
 
         self.mandatory = mandatory
 
-    def on_mount(self):
-        # Add extra padding for the Label as well.
-        self.styles.height = len(self.options) + 4 if self.options else 4
+    # def on_mount(self):
+    # Add extra padding for the Label as well.
+    # self.styles.height = len(self.options) + 4 if self.options else 4
 
     def action_exit_now(self):
         if self.selected_label:
@@ -165,7 +162,7 @@ class Select(VerticalGroup):
 
     def compose(self) -> ComposeResult:
         if self.ask:
-            yield Label(self.ask.question, expand=True)
+            yield Markdown(self.ask.question)
         initial_index = 0
         items: list[ListItem] = []
         for idx, option in enumerate(self.options):  # ty:ignore[invalid-argument-type]

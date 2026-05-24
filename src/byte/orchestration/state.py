@@ -12,6 +12,7 @@ class HarnessState(TypedDict):
     skills: list[str]
     editable_files: list[str]
     reference_files: list[str]
+    reference_context: list[str]
 
 
 class RoutingState(TypedDict):

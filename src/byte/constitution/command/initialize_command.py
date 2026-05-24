@@ -41,42 +41,47 @@ class InitializeCommand(Command):
             ("YAGNI (You Aren't Gonna Need It)", "YAGNI"),
         ]
 
+        lines.append(MD.bullet("Include a principle / sections on:"))
         for principle_name, _ in principles:
             include = await interaction_service.confirm(f"Include {principle_name}?", default=True)
-            lines.append(MD.bullet("Include a principle / sections on:"))
             if include:
-                lines.append(MD.bullet(principle_name))
+                lines.append(MD.bullet(f"Include a principle / sections on {principle_name}: Yes"))
 
         frameworks = await interaction_service.input_text(
             "What frameworks will this project use? (e.g., Laravel, Django, FastAPI)"
         )
         if frameworks.value.strip():
-            lines.append(MD.bullet(f"Project frameworks: {frameworks}"))
+            lines.append(f"\n\nWhat frameworks will this project use?\n\n {frameworks.value.strip()}")
 
         testing_frameworks = await interaction_service.input_text(
             "What testing frameworks will this project use? (e.g., PEST, pytest, Vitest)"
         )
         if testing_frameworks.value.strip():
-            lines.append(MD.bullet(f"Testing frameworks: {testing_frameworks}"))
+            lines.append(f"\n\nWhat testing frameworks will this project use?\n\n {testing_frameworks.value.strip()}")
 
         linting_tools = await interaction_service.input_text(
             "What linting and formatting tools will this project use? (e.g., RUFF, prettier, pint)"
         )
         if linting_tools.value.strip():
-            lines.append(MD.bullet(f"Linting and formatting tools: {linting_tools}"))
+            lines.append(
+                f"\n\nWhat linting and formatting tools will this project use? \n\n {linting_tools.value.strip()}"
+            )
 
         if args.constitution_query:
             query_text = " ".join(args.constitution_query)
             lines.append("")
-            lines.append("Additional context:")
+            lines.append("Additional Comments:")
             lines.append(query_text)
 
-        combined_lines = list_to_multiline_text(lines)
+        combined_lines = (
+            "We are initializing the project and need the constition created. Here are the answers to a generic questioner the user completed:"
+            + list_to_multiline_text(lines)
+        )
 
         initialize_workflow = self.app.make(InitializeWorkflow)
 
         self.emit_tui(Messages.CommandExecutionStarted())
-        self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
+        self.emit_tui(Messages.AddUserInput(combined_lines, command=self.name))
 
         workflow_service = self.app.make(WorkflowService)
         workflow_phases = PhaseUtils.to_phase_dict(initialize_workflow.get_phases())
@@ -84,7 +89,7 @@ class InitializeCommand(Command):
         await workflow_service.execute(
             initialize_workflow,
             {
-                "user_request": f"We are initializing the project and need the constition created.\n{combined_lines}",
+                "user_request": combined_lines,
                 "workflow_phases": workflow_phases,
             },
         )

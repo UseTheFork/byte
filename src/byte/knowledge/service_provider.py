@@ -1,5 +1,6 @@
 from byte import EventBus, ServiceProvider
 from byte.knowledge import (
+    AddFilesToContextTool,
     ContextAddFileCommand,
     ContextDropCommand,
     ContextListCommand,
@@ -35,6 +36,14 @@ class KnowledgeServiceProvider(ServiceProvider):
             ContextDropCommand,
             ContextListCommand,
             WebCommand,
+            # keep-sorted end
+        ]
+
+    def tools(self):
+        """"""
+        return [
+            # keep-sorted start
+            AddFilesToContextTool,
             # keep-sorted end
         ]
 
