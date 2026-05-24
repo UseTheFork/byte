@@ -155,7 +155,7 @@ class ConstitutionService(Service):
         principles_dir.mkdir(exist_ok=True)
         active_principle_files: set[Path] = set()
         for slug, p in constitution.principles.items():
-            f = principles_dir / f"{slug}.md"
+            f = principles_dir / f"{p.id}.md"
             f.write_text(
                 Yaml.render_frontmatter({"id": p.id, "name": p.name, "order": p.order}, p.description), encoding="utf-8"
             )
@@ -170,7 +170,7 @@ class ConstitutionService(Service):
         governance_dir.mkdir(exist_ok=True)
         active_governance_files: set[Path] = set()
         for slug, r in constitution.governance.items():
-            f = governance_dir / f"{slug}.md"
+            f = governance_dir / f"{r.id}.md"
             f.write_text(
                 Yaml.render_frontmatter({"id": r.id, "name": r.name, "order": r.order}, r.content), encoding="utf-8"
             )
@@ -184,7 +184,7 @@ class ConstitutionService(Service):
         sections_dir.mkdir(exist_ok=True)
         active_section_dirs: set[Path] = set()
         for slug, section in constitution.sections.items():
-            section_dir = sections_dir / slug
+            section_dir = sections_dir / section.id
             section_dir.mkdir(exist_ok=True)
             active_section_dirs.add(section_dir)
 
@@ -200,7 +200,7 @@ class ConstitutionService(Service):
             items_dir.mkdir(exist_ok=True)
             active_item_files: set[Path] = set()
             for item_slug, item in section.items.items():
-                f = items_dir / f"{item_slug}.md"
+                f = items_dir / f"{item.id}.md"
                 f.write_text(
                     Yaml.render_frontmatter(
                         {"id": item.id, "section_id": item.section_id, "name": item.name, "order": item.order},
@@ -562,9 +562,9 @@ class ConstitutionService(Service):
                 if not name:
                     self.app["log"].warning(f"ConstitutionService: missing 'name' in {f}, skipping")
                     continue
-                slug = f.stem
-                principles[slug] = ConstitutionPrinciple(
-                    id=str(fm.get("id", "")), name=str(name), description=body, order=int(fm.get("order", 0))
+                principle_id = str(fm.get("id", ""))
+                principles[principle_id] = ConstitutionPrinciple(
+                    id=principle_id, name=str(name), description=body, order=int(fm.get("order", 0))
                 )
 
         # --- governance ---
@@ -577,9 +577,9 @@ class ConstitutionService(Service):
                 if not name:
                     self.app["log"].warning(f"ConstitutionService: missing 'name' in {f}, skipping")
                     continue
-                slug = f.stem
-                governance[slug] = ConstitutionGovernanceRule(
-                    id=str(fm.get("id", "")), name=str(name), content=body, order=int(fm.get("order", 0))
+                rule_id = str(fm.get("id", ""))
+                governance[rule_id] = ConstitutionGovernanceRule(
+                    id=rule_id, name=str(name), content=body, order=int(fm.get("order", 0))
                 )
 
         # --- sections ---
@@ -611,18 +611,18 @@ class ConstitutionService(Service):
                         if not iname:
                             self.app["log"].warning(f"ConstitutionService: missing 'name' in {item_file}, skipping")
                             continue
-                        item_slug = item_file.stem
-                        items[item_slug] = ConstitutionItem(
-                            id=str(ifm.get("id", "")),
+                        item_id = str(ifm.get("id", ""))
+                        items[item_id] = ConstitutionItem(
+                            id=item_id,
                             section_id=str(ifm.get("section_id", "")),
                             name=str(iname),
                             content=ibody,
                             order=int(ifm.get("order", 0)),
                         )
 
-                slug = section_dir.name
-                sections[slug] = ConstitutionSection(
-                    id=str(fm.get("id", "")),
+                section_id = str(fm.get("id", ""))
+                sections[section_id] = ConstitutionSection(
+                    id=section_id,
                     name=str(name),
                     items=items,
                     applies_to=applies_to,

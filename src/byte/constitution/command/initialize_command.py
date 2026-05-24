@@ -49,24 +49,25 @@ class InitializeCommand(Command):
             "What frameworks will this project use? (e.g., Laravel, Django, FastAPI)"
         )
         if frameworks.value.strip():
-            lines.append(f"\n\nWhat frameworks will this project use?\n\n {frameworks.value.strip()}")
+            lines.append("What frameworks will this project use?")
+            lines.append(frameworks.value.strip())
 
         testing_frameworks = await interaction_service.input_text(
             "What testing frameworks will this project use? (e.g., PEST, pytest, Vitest)"
         )
         if testing_frameworks.value.strip():
-            lines.append(f"\n\nWhat testing frameworks will this project use?\n\n {testing_frameworks.value.strip()}")
+            lines.append("What testing frameworks will this project use?")
+            lines.append(testing_frameworks.value.strip())
 
         linting_tools = await interaction_service.input_text(
             "What linting and formatting tools will this project use? (e.g., RUFF, prettier, pint)"
         )
         if linting_tools.value.strip():
-            lines.append(
-                f"\n\nWhat linting and formatting tools will this project use? \n\n {linting_tools.value.strip()}"
-            )
+            lines.append("What linting and formatting tools will this project use?")
+            lines.append(linting_tools.value.strip())
 
         confirmed, text_input = await interaction_service.confirm_or_input(
-            "Do you have any other comments to add?", "Enter your additional comments:", default_confirm=True
+            "Do you have any other comments to add?", "Enter your additional comments:", default_confirm=False
         )
         if confirmed and text_input:
             lines.append("")
