@@ -299,6 +299,9 @@ class ToolCall(Widget, can_focus=False):
         collapsible = self.query_one(ToolArgsCollapsible)
         collapsible.collapsed = True
 
+        tool_args_raw = self.query_one(ToolArgsRaw)
+        tool_args_raw.styles.display = "none"
+
         result_widget = self.query_one(ToolResult)
         if status == "success":
             pass
