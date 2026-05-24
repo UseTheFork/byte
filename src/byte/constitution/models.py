@@ -9,8 +9,10 @@ from byte.support.utils import list_to_multiline_text
 class ConstitutionPrinciple:
     """A single named principle within the Core Principles section."""
 
+    id: str
     name: str
     description: str
+    order: int = 0
 
 
 @dataclass
@@ -22,8 +24,11 @@ class ConstitutionItem:
     replaced rather than the entire section blob.
     """
 
+    id: str
+    section_id: str
     name: str
     content: str
+    order: int = 0
 
 
 @dataclass
@@ -33,8 +38,10 @@ class ConstitutionGovernanceRule:
     Keyed by slug in the parent dict for O(1) lookup and surgical edits.
     """
 
+    id: str
     name: str
     content: str
+    order: int = 0
 
 
 @dataclass
@@ -48,9 +55,11 @@ class ConstitutionSection:
                     When None or empty, the section applies to all files.
     """
 
+    id: str
     name: str
     items: dict[str, ConstitutionItem] = field(default_factory=dict)
     applies_to: list[str] | None = None  # None = applies to all
+    order: int = 0
 
 
 @dataclass
@@ -87,8 +96,13 @@ class Constitution:
 
     def to_dict(self) -> dict:
         return {
-            "principles": [{"name": p.name, "description": p.description} for p in self.principles.values()],
-            "governance": [{"name": r.name, "content": r.content} for r in self.governance.values()],
+            "principles": [
+                {"id": p.id, "name": p.name, "description": p.description, "order": p.order}
+                for p in self.principles.values()
+            ],
+            "governance": [
+                {"id": r.id, "name": r.name, "content": r.content, "order": r.order} for r in self.governance.values()
+            ],
             "meta": {
                 "version": self.meta.version,
                 "ratified": self.meta.ratified,
@@ -96,8 +110,13 @@ class Constitution:
             },
             "sections": [
                 {
+                    "id": s.id,
                     "name": s.name,
-                    "items": [{"name": i.name, "content": i.content} for i in s.items.values()],
+                    "items": [
+                        {"id": i.id, "section_id": i.section_id, "name": i.name, "content": i.content, "order": i.order}
+                        for i in s.items.values()
+                    ],
+                    "order": s.order,
                     **({} if s.applies_to is None else {"applies_to": s.applies_to}),
                 }
                 for s in self.sections.values()
@@ -122,22 +141,25 @@ class Constitution:
         # Core Principles
         lines.append(Section.sub_heading("Core Principles", 2, True))
         lines.append("")
-        for principle in self.principles.values():
-            lines.append(Section.sub_heading(principle.name, 3, True))
+        for principle in sorted(self.principles.values(), key=lambda p: p.order):
+            lines.append(Section.sub_heading(f"{principle.order}. {principle.name}", 3, True))
+            lines.append(f"**ID**: `{principle.id}`")
             lines.append("")
             lines.append(principle.description)
             lines.append("")
 
         # Additional sections (each may be scoped to specific file patterns)
-        for section in self.sections.values():
+        for section in sorted(self.sections.values(), key=lambda s: s.order):
             lines.append(Section.sub_heading(section.name, 2, True))
+            lines.append(f"**ID**: `{section.id}`")
             lines.append("")
             if section.applies_to:
                 scopes = ", ".join(f"`{p}`" for p in section.applies_to)
                 lines.append(f"*Applies to: {scopes}*")
                 lines.append("")
-            for item in section.items.values():
+            for item in sorted(section.items.values(), key=lambda i: i.order):
                 lines.append(Section.sub_heading(item.name, 3, True))
+                lines.append(f"**ID**: `{item.id}`")
                 lines.append("")
                 lines.append(item.content)
                 lines.append("")
@@ -145,8 +167,9 @@ class Constitution:
         # Governance
         lines.append(Section.sub_heading("Governance", 2, True))
         lines.append("")
-        for rule in self.governance.values():
+        for rule in sorted(self.governance.values(), key=lambda r: r.order):
             lines.append(Section.sub_heading(rule.name, 3, True))
+            lines.append(f"**ID**: `{rule.id}`")
             lines.append("")
             lines.append(rule.content)
             lines.append("")
@@ -169,26 +192,38 @@ class Constitution:
     def from_dict(cls, data: dict) -> Constitution:
         principles: dict[str, ConstitutionPrinciple] = {}
         for p in data.get("principles", []):
-            principle = ConstitutionPrinciple(name=p["name"], description=p["description"])
+            principle = ConstitutionPrinciple(
+                id=p.get("id", ""), name=p["name"], description=p["description"], order=p.get("order", 0)
+            )
             principles[Str.normalize_id(principle.name)] = principle
 
         sections: dict[str, ConstitutionSection] = {}
         for s in data.get("sections", []):
             items: dict[str, ConstitutionItem] = {}
             for i in s.get("items", []):
-                item = ConstitutionItem(name=i["name"], content=i["content"])
+                item = ConstitutionItem(
+                    id=i.get("id", ""),
+                    section_id=i.get("section_id", ""),
+                    name=i["name"],
+                    content=i["content"],
+                    order=i.get("order", 0),
+                )
                 items[Str.normalize_id(item.name)] = item
 
             section = ConstitutionSection(
+                id=s.get("id", ""),
                 name=s["name"],
                 items=items,
                 applies_to=s.get("applies_to"),
+                order=s.get("order", 0),
             )
             sections[Str.normalize_id(section.name)] = section
 
         governance: dict[str, ConstitutionGovernanceRule] = {}
         for r in data.get("governance", []):
-            rule = ConstitutionGovernanceRule(name=r["name"], content=r["content"])
+            rule = ConstitutionGovernanceRule(
+                id=r.get("id", ""), name=r["name"], content=r["content"], order=r.get("order", 0)
+            )
             governance[Str.normalize_id(rule.name)] = rule
 
         raw_meta = data.get("meta", {})

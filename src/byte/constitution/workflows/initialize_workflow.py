@@ -2,6 +2,7 @@ from byte.constitution import (
     AddGovernanceRuleTool,
     AddPrincipleTool,
     AddSectionItemTool,
+    AddSectionTool,
     ConstitutionAgentNode,
     ConstitutionWorkflow,
     DeleteGovernanceRuleTool,
@@ -104,6 +105,7 @@ class InitializeWorkflow(ConstitutionWorkflow):
                 executed_by=ConstitutionAgentNode,
                 tools=[
                     AddGovernanceRuleTool,
+                    AddSectionTool,
                     AddPrincipleTool,
                     AddSectionItemTool,
                     DeleteGovernanceRuleTool,
@@ -126,6 +128,7 @@ class InitializeWorkflow(ConstitutionWorkflow):
                 ],
                 tools=[
                     AddGovernanceRuleTool,
+                    AddSectionTool,
                     AddPrincipleTool,
                     AddSectionItemTool,
                     DeleteGovernanceRuleTool,

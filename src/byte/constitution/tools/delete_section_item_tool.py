@@ -6,21 +6,21 @@ from byte.tools.exceptions import ToolRunException
 
 
 class DeleteSectionItemTool(BaseTool):
-    name: str = "constitution_delete_section_item"
+    name: str = "constitution_delete_section_item_tool"
     description: str = "Remove a named item from an existing constitution section."
     input_schema = {
         "type": "object",
         "properties": {
-            "section_name": {
+            "section_id": {
                 "type": "string",
-                "description": "Display name or slug of the parent section.",
+                "description": "ID of the parent section.",
             },
-            "item_name": {
+            "item_id": {
                 "type": "string",
-                "description": "Display name or slug of the item to remove.",
+                "description": "ID of the item to remove.",
             },
         },
-        "required": ["section_name", "item_name"],
+        "required": ["section_id", "item_id"],
     }
 
     @classmethod
@@ -28,11 +28,11 @@ class DeleteSectionItemTool(BaseTool):
         return result.result.get("message", "")
 
     @override
-    async def run(self, section_name: str, item_name: str, **kwargs) -> ToolResult:
+    async def run(self, section_id: str, item_id: str, **kwargs) -> ToolResult:
         service = self.app.make(ConstitutionService)
         try:
-            service.delete_section_item(section_name=section_name, item_name=item_name)
+            service.delete_section_item(section_id=section_id, item_id=item_id)
         except (RuntimeError, ValueError) as exc:
             raise ToolRunException(str(exc)) from exc
 
-        return ToolResult(result={"message": f"Deleted item '{item_name}' from section '{section_name}'."})
+        return ToolResult(result={"message": f"Deleted item with id '{item_id}' from section with id '{section_id}'."})

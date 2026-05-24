@@ -6,7 +6,7 @@ from byte.tools.exceptions import ToolRunException
 
 
 class UpdateMetaTool(BaseTool):
-    name: str = "constitution_update_meta"
+    name: str = "constitution_update_meta_tool"
     description: str = (
         "Update the constitution metadata: ratification date, last amended date, and/or version. "
         "Provide only the fields you want to change."

@@ -6,17 +6,17 @@ from byte.tools.exceptions import ToolRunException
 
 
 class DeleteGovernanceRuleTool(BaseTool):
-    name: str = "constitution_delete_governance_rule"
-    description: str = "Remove a named governance rule from the project constitution by name."
+    name: str = "constitution_delete_governance_rule_tool"
+    description: str = "Remove a governance rule from the project constitution by id."
     input_schema = {
         "type": "object",
         "properties": {
-            "name": {
+            "rule_id": {
                 "type": "string",
-                "description": "Display name or slug of the governance rule to remove.",
+                "description": "ID of the governance rule to remove.",
             },
         },
-        "required": ["name"],
+        "required": ["rule_id"],
     }
 
     @classmethod
@@ -24,11 +24,11 @@ class DeleteGovernanceRuleTool(BaseTool):
         return result.result.get("message", "")
 
     @override
-    async def run(self, name: str, **kwargs) -> ToolResult:
+    async def run(self, rule_id: str, **kwargs) -> ToolResult:
         service = self.app.make(ConstitutionService)
         try:
-            service.delete_governance_rule(name=name)
+            service.delete_governance_rule(rule_id=rule_id)
         except (RuntimeError, ValueError) as exc:
             raise ToolRunException(str(exc)) from exc
 
-        return ToolResult(result={"message": f"Deleted governance rule '{name}' from the constitution."})
+        return ToolResult(result={"message": f"Deleted governance rule with id '{rule_id}' from the constitution."})

@@ -6,7 +6,7 @@ from byte.tools.exceptions import ToolRunException
 
 
 class AddGovernanceRuleTool(BaseTool):
-    name: str = "constitution_add_governance_rule"
+    name: str = "constitution_add_governance_rule_tool"
     description: str = "Add a named governance rule to the project constitution."
     input_schema = {
         "type": "object",
@@ -19,6 +19,10 @@ class AddGovernanceRuleTool(BaseTool):
                 "type": "string",
                 "description": "Content of the governance rule.",
             },
+            "order": {
+                "type": "integer",
+                "description": "Display order of the governance rule (e.g. 1, 2, 3). Defaults to 0.",
+            },
         },
         "required": ["name", "content"],
     }
@@ -28,10 +32,10 @@ class AddGovernanceRuleTool(BaseTool):
         return result.result.get("message", "")
 
     @override
-    async def run(self, name: str, content: str, **kwargs) -> ToolResult:
+    async def run(self, name: str, content: str, order: int = 0, **kwargs) -> ToolResult:
         service = self.app.make(ConstitutionService)
         try:
-            rule = service.add_governance_rule(name=name, content=content)
+            rule = service.add_governance_rule(name=name, content=content, order=order)
         except (RuntimeError, ValueError) as exc:
             raise ToolRunException(str(exc)) from exc
 

@@ -25,14 +25,14 @@ class ConstitutionService(Service):
         .byte/constitution/
             constitution.md          # frontmatter: version, ratified, last_amended
             principles/
-                <slug>.md            # frontmatter: name; body: description
+                <id>.md            # frontmatter: name; body: description
             governance/
-                <slug>.md            # frontmatter: name; body: content
+                <id>.md            # frontmatter: name; body: content
             sections/
-                <slug>/
+                <id>/
                     section.md       # frontmatter: name, applies_to (list)
                     items/
-                        <slug>.md    # frontmatter: name; body: content
+                        <id>.md    # frontmatter: name; body: content
 
     Usage:
         service = app.make(ConstitutionService)
@@ -80,29 +80,35 @@ class ConstitutionService(Service):
         """
         today = __import__("datetime").date.today().isoformat()
         example = ConstitutionPrinciple(
+            id="principle-1",
             name="I. Example Principle",
             description="Describe your first core principle here.",
         )
+        item_1 = ConstitutionItem(
+            id="item-1",
+            section_id="section-1",
+            name="Example Security Item",
+            content="Describe your first security requirement here.",
+        )
         section_1 = ConstitutionSection(
+            id="section-1",
             name="Security Requirements",
-            items={
-                Str.normalize_id("Example Security Item"): ConstitutionItem(
-                    name="Example Security Item",
-                    content="Describe your first security requirement here.",
-                )
-            },
+            items={Str.normalize_id("Example Security Item"): item_1},
+        )
+        item_2 = ConstitutionItem(
+            id="item-2",
+            section_id="section-2",
+            name="Example Code Standard",
+            content="Describe your first code standard here.",
         )
         section_2 = ConstitutionSection(
+            id="section-2",
             name="Code Standards",
             applies_to=["src/foo/**"],
-            items={
-                Str.normalize_id("Example Code Standard"): ConstitutionItem(
-                    name="Example Code Standard",
-                    content="Describe your first code standard here.",
-                )
-            },
+            items={Str.normalize_id("Example Code Standard"): item_2},
         )
         default_rule = ConstitutionGovernanceRule(
+            id="governance-1",
             name="Supremacy",
             content="Constitution supersedes all other practices. Amendments require documentation and approval.",
         )
@@ -150,7 +156,9 @@ class ConstitutionService(Service):
         active_principle_files: set[Path] = set()
         for slug, p in constitution.principles.items():
             f = principles_dir / f"{slug}.md"
-            f.write_text(Yaml.render_frontmatter({"name": p.name}, p.description), encoding="utf-8")
+            f.write_text(
+                Yaml.render_frontmatter({"id": p.id, "name": p.name, "order": p.order}, p.description), encoding="utf-8"
+            )
             active_principle_files.add(f)
         # Remove stale files
         for existing in principles_dir.glob("*.md"):
@@ -163,7 +171,9 @@ class ConstitutionService(Service):
         active_governance_files: set[Path] = set()
         for slug, r in constitution.governance.items():
             f = governance_dir / f"{slug}.md"
-            f.write_text(Yaml.render_frontmatter({"name": r.name}, r.content), encoding="utf-8")
+            f.write_text(
+                Yaml.render_frontmatter({"id": r.id, "name": r.name, "order": r.order}, r.content), encoding="utf-8"
+            )
             active_governance_files.add(f)
         for existing in governance_dir.glob("*.md"):
             if existing not in active_governance_files:
@@ -179,7 +189,7 @@ class ConstitutionService(Service):
             active_section_dirs.add(section_dir)
 
             # section.md
-            section_fm: dict = {"name": section.name}
+            section_fm: dict = {"id": section.id, "name": section.name, "order": section.order}
             if section.applies_to:
                 section_fm["applies_to"] = section.applies_to
             section_file = section_dir / "section.md"
@@ -191,7 +201,13 @@ class ConstitutionService(Service):
             active_item_files: set[Path] = set()
             for item_slug, item in section.items.items():
                 f = items_dir / f"{item_slug}.md"
-                f.write_text(Yaml.render_frontmatter({"name": item.name}, item.content), encoding="utf-8")
+                f.write_text(
+                    Yaml.render_frontmatter(
+                        {"id": item.id, "section_id": item.section_id, "name": item.name, "order": item.order},
+                        item.content,
+                    ),
+                    encoding="utf-8",
+                )
                 active_item_files.add(f)
             for existing in items_dir.glob("*.md"):
                 if existing not in active_item_files:
@@ -267,12 +283,13 @@ class ConstitutionService(Service):
     # Principles
     # ------------------------------------------------------------------
 
-    def add_principle(self, name: str, description: str) -> ConstitutionPrinciple:
+    def add_principle(self, name: str, description: str, order: int = 0) -> ConstitutionPrinciple:
         """Add a new principle to the constitution and persist.
 
         Args:
             name:        Display name (e.g. "I. Library-First").
             description: Full text of the principle.
+            order:       Display order (e.g. 1, 2, 3).
 
         Raises:
             ValueError: If no constitution is loaded or the slug already exists.
@@ -283,28 +300,32 @@ class ConstitutionService(Service):
         slug = Str.normalize_id(name)
         if slug in self._constitution.principles:
             raise ValueError(f"Principle with slug '{slug}' already exists.")
-        principle = ConstitutionPrinciple(name=name, description=description)
+        principle = ConstitutionPrinciple(id=slug, name=name, description=description, order=order)
         self._constitution.principles[slug] = principle
         self._save(self._constitution)
         return principle
 
-    def delete_principle(self, name: str) -> None:
-        """Remove a principle by name (or slug) and persist.
+    def delete_principle(self, principle_id: str) -> None:
+        """Remove a principle by id and persist.
 
         Args:
-            name: Display name or slug of the principle to remove.
+            principle_id: ID of the principle to remove.
 
         Raises:
             ValueError: If no constitution is loaded or the principle is not found.
 
-        Usage: `service.delete_principle("I. Library-First")`
+        Usage: `service.delete_principle("principle-1")`
         """
         assert self._constitution
-        slug = Str.normalize_id(name)
-        if slug not in self._constitution.principles:
-            raise ValueError(f"Principle '{name}' (slug: '{slug}') not found.")
-        del self._constitution.principles[slug]
-        principle_file = self._constitution_path / "principles" / f"{slug}.md"
+        principle_slug = None
+        for slug, p in self._constitution.principles.items():
+            if p.id == principle_id:
+                principle_slug = slug
+                break
+        if principle_slug is None:
+            raise ValueError(f"Principle with id '{principle_id}' not found.")
+        del self._constitution.principles[principle_slug]
+        principle_file = self._constitution_path / "principles" / f"{principle_slug}.md"
         if principle_file.exists():
             principle_file.unlink()
         self._save(self._constitution)
@@ -313,12 +334,13 @@ class ConstitutionService(Service):
     # Sections
     # ------------------------------------------------------------------
 
-    def add_section(self, name: str, applies_to: list[str] | None = None) -> ConstitutionSection:
+    def add_section(self, name: str, applies_to: list[str] | None = None, order: int = 0) -> ConstitutionSection:
         """Add a new empty section to the constitution and persist.
 
         Args:
             name:       Display name of the section.
             applies_to: Optional glob patterns scoping the section to specific files.
+            order:      Display order (e.g. 1, 2, 3).
 
         Raises:
             ValueError: If no constitution is loaded or the slug already exists.
@@ -329,81 +351,99 @@ class ConstitutionService(Service):
         slug = Str.normalize_id(name)
         if slug in self._constitution.sections:
             raise ValueError(f"Section with slug '{slug}' already exists.")
-        section = ConstitutionSection(name=name, applies_to=applies_to)
+        section = ConstitutionSection(id=slug, name=name, applies_to=applies_to, order=order)
         self._constitution.sections[slug] = section
         self._save(self._constitution)
         return section
 
-    def delete_section(self, name: str) -> None:
-        """Remove a section by name (or slug) and persist.
+    def delete_section(self, section_id: str) -> None:
+        """Remove a section by id and persist.
 
         Args:
-            name: Display name or slug of the section to remove.
+            section_id: ID of the section to remove.
 
         Raises:
             ValueError: If no constitution is loaded or the section is not found.
 
-        Usage: `service.delete_section("Security Requirements")`
+        Usage: `service.delete_section("section-1")`
         """
         assert self._constitution
-        slug = Str.normalize_id(name)
-        if slug not in self._constitution.sections:
-            raise ValueError(f"Section '{name}' (slug: '{slug}') not found.")
-        del self._constitution.sections[slug]
+        section_slug = None
+        for slug, section in self._constitution.sections.items():
+            if section.id == section_id:
+                section_slug = slug
+                break
+        if section_slug is None:
+            raise ValueError(f"Section with id '{section_id}' not found.")
+        del self._constitution.sections[section_slug]
         self._save(self._constitution)
 
     # ------------------------------------------------------------------
     # Section items
     # ------------------------------------------------------------------
 
-    def add_section_item(self, section_name: str, item_name: str, content: str) -> ConstitutionItem:
+    def add_section_item(self, section_id: str, item_name: str, content: str, order: int = 0) -> ConstitutionItem:
         """Add a named item to an existing section and persist.
 
         Args:
-            section_name: Display name or slug of the parent section.
-            item_name:    Display name of the new item.
-            content:      Content of the item.
+            section_id: ID of the parent section.
+            item_name:  Display name of the new item.
+            content:    Content of the item.
+            order:      Display order (e.g. 1, 2, 3).
 
         Raises:
             ValueError: If no constitution is loaded, the section is not found,
                         or an item with the same slug already exists in that section.
 
-        Usage: `service.add_section_item("Security Requirements", "Secret Management", "All secrets in env vars.")`
+        Usage: `service.add_section_item("section-1", "Secret Management", "All secrets in env vars.")`
         """
         assert self._constitution
-        section_slug = Str.normalize_id(section_name)
-        if section_slug not in self._constitution.sections:
-            raise ValueError(f"Section '{section_name}' (slug: '{section_slug}') not found.")
-        section = self._constitution.sections[section_slug]
+        # Find the section by id
+        section = None
+        for slug, sec in self._constitution.sections.items():
+            if sec.id == section_id:
+                section = sec
+                break
+        if section is None:
+            raise ValueError(f"Section with id '{section_id}' not found.")
         item_slug = Str.normalize_id(item_name)
         if item_slug in section.items:
-            raise ValueError(f"Item '{item_name}' (slug: '{item_slug}') already exists in section '{section_name}'.")
-        item = ConstitutionItem(name=item_name, content=content)
+            raise ValueError(f"Item '{item_name}' (slug: '{item_slug}') already exists in section '{section.name}'.")
+        item = ConstitutionItem(id=item_slug, section_id=section.id, name=item_name, content=content, order=order)
         section.items[item_slug] = item
         self._save(self._constitution)
         return item
 
-    def delete_section_item(self, section_name: str, item_name: str) -> None:
-        """Remove a named item from a section and persist.
+    def delete_section_item(self, section_id: str, item_id: str) -> None:
+        """Remove an item from a section and persist.
 
         Args:
-            section_name: Display name or slug of the parent section.
-            item_name:    Display name or slug of the item to remove.
+            section_id: ID of the parent section.
+            item_id:    ID of the item to remove.
 
         Raises:
             ValueError: If no constitution is loaded, the section is not found,
                         or the item is not found within the section.
 
-        Usage: `service.delete_section_item("Security Requirements", "Secret Management")`
+        Usage: `service.delete_section_item("section-1", "item-1")`
         """
         assert self._constitution
-        section_slug = Str.normalize_id(section_name)
-        if section_slug not in self._constitution.sections:
-            raise ValueError(f"Section '{section_name}' (slug: '{section_slug}') not found.")
-        section = self._constitution.sections[section_slug]
-        item_slug = Str.normalize_id(item_name)
-        if item_slug not in section.items:
-            raise ValueError(f"Item '{item_name}' (slug: '{item_slug}') not found in section '{section_name}'.")
+        # Find the section by id
+        section = None
+        for slug, sec in self._constitution.sections.items():
+            if sec.id == section_id:
+                section = sec
+                break
+        if section is None:
+            raise ValueError(f"Section with id '{section_id}' not found.")
+        # Find the item by id
+        item_slug = None
+        for slug, item in section.items.items():
+            if item.id == item_id:
+                item_slug = slug
+                break
+        if item_slug is None:
+            raise ValueError(f"Item with id '{item_id}' not found in section '{section.name}'.")
         del section.items[item_slug]
         self._save(self._constitution)
 
@@ -411,12 +451,13 @@ class ConstitutionService(Service):
     # Governance rules
     # ------------------------------------------------------------------
 
-    def add_governance_rule(self, name: str, content: str) -> ConstitutionGovernanceRule:
+    def add_governance_rule(self, name: str, content: str, order: int = 0) -> ConstitutionGovernanceRule:
         """Add a named governance rule and persist.
 
         Args:
             name:    Display name of the rule.
             content: Content of the rule.
+            order:   Display order (e.g. 1, 2, 3).
 
         Raises:
             ValueError: If no constitution is loaded or a rule with the same slug already exists.
@@ -427,27 +468,31 @@ class ConstitutionService(Service):
         slug = Str.normalize_id(name)
         if slug in self._constitution.governance:
             raise ValueError(f"Governance rule with slug '{slug}' already exists.")
-        rule = ConstitutionGovernanceRule(name=name, content=content)
+        rule = ConstitutionGovernanceRule(id=slug, name=name, content=content, order=order)
         self._constitution.governance[slug] = rule
         self._save(self._constitution)
         return rule
 
-    def delete_governance_rule(self, name: str) -> None:
-        """Remove a governance rule by name (or slug) and persist.
+    def delete_governance_rule(self, rule_id: str) -> None:
+        """Remove a governance rule by id and persist.
 
         Args:
-            name: Display name or slug of the rule to remove.
+            rule_id: ID of the governance rule to remove.
 
         Raises:
             ValueError: If no constitution is loaded or the rule is not found.
 
-        Usage: `service.delete_governance_rule("Supremacy")`
+        Usage: `service.delete_governance_rule("governance-1")`
         """
         assert self._constitution
-        slug = Str.normalize_id(name)
-        if slug not in self._constitution.governance:
-            raise ValueError(f"Governance rule '{name}' (slug: '{slug}') not found.")
-        del self._constitution.governance[slug]
+        rule_slug = None
+        for slug, r in self._constitution.governance.items():
+            if r.id == rule_id:
+                rule_slug = slug
+                break
+        if rule_slug is None:
+            raise ValueError(f"Governance rule with id '{rule_id}' not found.")
+        del self._constitution.governance[rule_slug]
         self._save(self._constitution)
 
     # ------------------------------------------------------------------
@@ -518,7 +563,9 @@ class ConstitutionService(Service):
                     self.app["log"].warning(f"ConstitutionService: missing 'name' in {f}, skipping")
                     continue
                 slug = f.stem
-                principles[slug] = ConstitutionPrinciple(name=str(name), description=body)
+                principles[slug] = ConstitutionPrinciple(
+                    id=str(fm.get("id", "")), name=str(name), description=body, order=int(fm.get("order", 0))
+                )
 
         # --- governance ---
         governance: dict[str, ConstitutionGovernanceRule] = {}
@@ -531,7 +578,9 @@ class ConstitutionService(Service):
                     self.app["log"].warning(f"ConstitutionService: missing 'name' in {f}, skipping")
                     continue
                 slug = f.stem
-                governance[slug] = ConstitutionGovernanceRule(name=str(name), content=body)
+                governance[slug] = ConstitutionGovernanceRule(
+                    id=str(fm.get("id", "")), name=str(name), content=body, order=int(fm.get("order", 0))
+                )
 
         # --- sections ---
         sections: dict[str, ConstitutionSection] = {}
@@ -563,10 +612,22 @@ class ConstitutionService(Service):
                             self.app["log"].warning(f"ConstitutionService: missing 'name' in {item_file}, skipping")
                             continue
                         item_slug = item_file.stem
-                        items[item_slug] = ConstitutionItem(name=str(iname), content=ibody)
+                        items[item_slug] = ConstitutionItem(
+                            id=str(ifm.get("id", "")),
+                            section_id=str(ifm.get("section_id", "")),
+                            name=str(iname),
+                            content=ibody,
+                            order=int(ifm.get("order", 0)),
+                        )
 
                 slug = section_dir.name
-                sections[slug] = ConstitutionSection(name=str(name), items=items, applies_to=applies_to)
+                sections[slug] = ConstitutionSection(
+                    id=str(fm.get("id", "")),
+                    name=str(name),
+                    items=items,
+                    applies_to=applies_to,
+                    order=int(fm.get("order", 0)),
+                )
 
         return Constitution(
             principles=principles,

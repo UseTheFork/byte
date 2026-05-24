@@ -6,17 +6,17 @@ from byte.tools.exceptions import ToolRunException
 
 
 class DeleteSectionTool(BaseTool):
-    name: str = "constitution_delete_section"
-    description: str = "Remove a section from the project constitution by name."
+    name: str = "constitution_delete_section_tool"
+    description: str = "Remove a section from the project constitution by id."
     input_schema = {
         "type": "object",
         "properties": {
-            "name": {
+            "section_id": {
                 "type": "string",
-                "description": "Display name or slug of the section to remove.",
+                "description": "ID of the section to remove.",
             },
         },
-        "required": ["name"],
+        "required": ["section_id"],
     }
 
     @classmethod
@@ -24,11 +24,11 @@ class DeleteSectionTool(BaseTool):
         return result.result.get("message", "")
 
     @override
-    async def run(self, name: str, **kwargs) -> ToolResult:
+    async def run(self, section_id: str, **kwargs) -> ToolResult:
         service = self.app.make(ConstitutionService)
         try:
-            service.delete_section(name=name)
+            service.delete_section(section_id=section_id)
         except (RuntimeError, ValueError) as exc:
             raise ToolRunException(str(exc)) from exc
 
-        return ToolResult(result={"message": f"Deleted section '{name}' from the constitution."})
+        return ToolResult(result={"message": f"Deleted section with id '{section_id}' from the constitution."})

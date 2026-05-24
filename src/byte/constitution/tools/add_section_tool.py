@@ -6,7 +6,7 @@ from byte.tools.exceptions import ToolRunException
 
 
 class AddSectionTool(BaseTool):
-    name: str = "constitution_add_section"
+    name: str = "constitution_add_section_tool"
     description: str = (
         "Add a new section to the project constitution. "
         "Sections can optionally be scoped to specific file glob patterns."
@@ -23,6 +23,10 @@ class AddSectionTool(BaseTool):
                 "items": {"type": "string"},
                 "description": "Optional glob patterns scoping this section to specific files (e.g. ['src/byte/node/**']). Omit for a global section.",
             },
+            "order": {
+                "type": "integer",
+                "description": "Display order of the section (e.g. 1, 2, 3). Defaults to 0.",
+            },
         },
         "required": ["name"],
     }
@@ -32,10 +36,10 @@ class AddSectionTool(BaseTool):
         return result.result.get("message", "")
 
     @override
-    async def run(self, name: str, applies_to: list[str] | None = None, **kwargs) -> ToolResult:
+    async def run(self, name: str, applies_to: list[str] | None = None, order: int = 0, **kwargs) -> ToolResult:
         service = self.app.make(ConstitutionService)
         try:
-            section = service.add_section(name=name, applies_to=applies_to or None)
+            section = service.add_section(name=name, applies_to=applies_to or None, order=order)
         except (RuntimeError, ValueError) as exc:
             raise ToolRunException(str(exc)) from exc
 

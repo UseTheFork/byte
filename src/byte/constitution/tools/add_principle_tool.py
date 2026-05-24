@@ -6,7 +6,7 @@ from byte.tools.exceptions import ToolRunException
 
 
 class AddPrincipleTool(BaseTool):
-    name: str = "constitution_add_principle"
+    name: str = "constitution_add_principle_tool"
     description: str = (
         "Add a new core principle to the project constitution. "
         "Each principle has a display name (e.g. 'I. Library-First') and a description."
@@ -22,6 +22,10 @@ class AddPrincipleTool(BaseTool):
                 "type": "string",
                 "description": "Full text describing the principle.",
             },
+            "order": {
+                "type": "integer",
+                "description": "Display order of the principle (e.g. 1, 2, 3). Defaults to 0.",
+            },
         },
         "required": ["name", "description"],
     }
@@ -31,10 +35,10 @@ class AddPrincipleTool(BaseTool):
         return result.result.get("message", "")
 
     @override
-    async def run(self, name: str, description: str, **kwargs) -> ToolResult:
+    async def run(self, name: str, description: str, order: int = 0, **kwargs) -> ToolResult:
         service = self.app.make(ConstitutionService)
         try:
-            principle = service.add_principle(name=name, description=description)
+            principle = service.add_principle(name=name, description=description, order=order)
         except (RuntimeError, ValueError) as exc:
             raise ToolRunException(str(exc)) from exc
 

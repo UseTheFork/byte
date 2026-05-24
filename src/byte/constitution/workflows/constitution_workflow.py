@@ -2,6 +2,7 @@ from byte.constitution import (
     AddGovernanceRuleTool,
     AddPrincipleTool,
     AddSectionItemTool,
+    AddSectionTool,
     ConstitutionAgentNode,
     DeleteGovernanceRuleTool,
     DeletePrincipleTool,
@@ -9,10 +10,18 @@ from byte.constitution import (
     DeleteSectionTool,
     UpdateMetaTool,
 )
-from byte.files import AddFilesTool, ListFilesTool
+from byte.files import ListFilesTool
 from byte.git import GitGrepTool
+from byte.knowledge import AddFilesToContextTool
 from byte.node.nodes import EndNode, ToolNode
-from byte.orchestration import BaseWorkflow, GraphBuilder, PhaseModel, RoutePhaseModel, UpdatePhaseTool
+from byte.orchestration import (
+    BaseWorkflow,
+    GraphBuilder,
+    PhaseModel,
+    RoutePhaseModel,
+    UpdatePhaseTool,
+    UserConfirmPhaseTool,
+)
 from byte.support import MD, Section, SectionType
 from byte.system import UserConfirmOrInputTool, UserConfirmTool, UserInputTextTool, UserSelectTool
 
@@ -26,15 +35,17 @@ class ConstitutionWorkflow(BaseWorkflow):
                 id="consider",
                 content=f"Consider the existing constitution at {Section.ref(SectionType.CONSTITUTION)}",
                 note=[
-                    Section.important(
-                        "The user might require less or more principles than the ones used in the template. If a number is specified, respect that - follow the general template. You will update the doc accordingly."
+                    MD.bullet(
+                        "The user might require less or more principles / sections than the ones used in the template. If a number is specified, respect that - follow the general template. You will update the doc accordingly."
                     ),
+                    MD.bullet(f"You MUST use the {UserConfirmPhaseTool.name} to complete this phase."),
                 ],
                 tools=[
                     UserInputTextTool,
                     UserConfirmOrInputTool,
                     UserConfirmTool,
                     UserSelectTool,
+                    UpdatePhaseTool,
                 ],
                 executed_by=ConstitutionAgentNode,
             ),
@@ -59,7 +70,7 @@ class ConstitutionWorkflow(BaseWorkflow):
                     GitGrepTool,
                     UserSelectTool,
                     ListFilesTool,
-                    AddFilesTool,
+                    AddFilesToContextTool,
                 ],
                 executed_by=ConstitutionAgentNode,
             ),
@@ -83,18 +94,34 @@ class ConstitutionWorkflow(BaseWorkflow):
                         "Ensure Governance section lists amendment procedure, versioning policy, and compliance review expectations."
                     ),
                     MD.bullet(
-                        f"**IMPORTANT**: You MUST use the `{UpdatePhaseTool.name}` tool to end complete this phase."
+                        f"**IMPORTANT**: You MUST use the `{UserConfirmPhaseTool.name}` tool to end complete this phase."
                     ),
                 ],
                 tools=[
-                    UserConfirmOrInputTool,
-                    UpdatePhaseTool,
+                    UserConfirmPhaseTool,
                 ],
                 executed_by=ConstitutionAgentNode,
             ),
             PhaseModel(
+                id="update",
+                content="Make the changes to the constitution using the provided tools.",
+                executed_by=ConstitutionAgentNode,
+                tools=[
+                    AddGovernanceRuleTool,
+                    AddSectionTool,
+                    AddPrincipleTool,
+                    AddSectionItemTool,
+                    DeleteGovernanceRuleTool,
+                    DeletePrincipleTool,
+                    DeleteSectionItemTool,
+                    DeleteSectionTool,
+                    UpdateMetaTool,
+                    UpdatePhaseTool,
+                ],
+            ),
+            PhaseModel(
                 id="validate",
-                content="Validation before final output:",
+                content="Validation final output:",
                 note=[
                     MD.bullet("No remaining unexplained bracket tokens."),
                     MD.bullet("Version line matches report."),
@@ -103,16 +130,8 @@ class ConstitutionWorkflow(BaseWorkflow):
                     ),
                 ],
                 tools=[
-                    UserConfirmTool,
-                ],
-                executed_by=ConstitutionAgentNode,
-            ),
-            PhaseModel(
-                id="create",
-                content="Write the completed constitution using the provided tools.",
-                executed_by=ConstitutionAgentNode,
-                tools=[
                     AddGovernanceRuleTool,
+                    AddSectionTool,
                     AddPrincipleTool,
                     AddSectionItemTool,
                     DeleteGovernanceRuleTool,
@@ -120,7 +139,9 @@ class ConstitutionWorkflow(BaseWorkflow):
                     DeleteSectionItemTool,
                     DeleteSectionTool,
                     UpdateMetaTool,
+                    UpdatePhaseTool,
                 ],
+                executed_by=ConstitutionAgentNode,
             ),
             RoutePhaseModel(
                 id="end",
