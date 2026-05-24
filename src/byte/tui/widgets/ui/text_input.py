@@ -32,7 +32,6 @@ class TextInput(VerticalGroup):
         TextInput {
             background: transparent;
             height: auto;
-            border: none;
             
             & VerticalGroup {
                 background: transparent;
@@ -89,10 +88,6 @@ class TextInput(VerticalGroup):
 
         self.default = default
         self.mandatory = mandatory
-
-    def on_mount(self):
-        if self.ask:
-            self.border_title = ""
 
     def action_exit_now(self):
         if not self.submitted:
