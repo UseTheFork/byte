@@ -83,6 +83,25 @@ class ConstitutionService(Service):
             name="I. Example Principle",
             description="Describe your first core principle here.",
         )
+        section_1 = ConstitutionSection(
+            name="Security Requirements",
+            items={
+                Str.normalize_id("Example Security Item"): ConstitutionItem(
+                    name="Example Security Item",
+                    content="Describe your first security requirement here.",
+                )
+            },
+        )
+        section_2 = ConstitutionSection(
+            name="Code Standards",
+            applies_to=["src/foo/**"],
+            items={
+                Str.normalize_id("Example Code Standard"): ConstitutionItem(
+                    name="Example Code Standard",
+                    content="Describe your first code standard here.",
+                )
+            },
+        )
         default_rule = ConstitutionGovernanceRule(
             name="Supremacy",
             content="Constitution supersedes all other practices. Amendments require documentation and approval.",
@@ -91,6 +110,10 @@ class ConstitutionService(Service):
             principles={Str.normalize_id(example.name): example},
             governance={Str.normalize_id(default_rule.name): default_rule},
             meta=ConstitutionMeta(version="0.1.0", ratified=today, last_amended=today),
+            sections={
+                Str.normalize_id(section_1.name): section_1,
+                Str.normalize_id(section_2.name): section_2,
+            },
         )
 
     # ------------------------------------------------------------------

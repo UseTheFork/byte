@@ -66,9 +66,9 @@ class InitializeCommand(Command):
             )
 
         confirmed, text_input = await interaction_service.confirm_or_input(
-            "Do you have any other comments to add?", "Enter your additional comments:", default_confirm=False
+            "Do you have any other comments to add?", "Enter your additional comments:", default_confirm=True
         )
-        if not confirmed and text_input:
+        if confirmed and text_input:
             lines.append("")
             lines.append("Additional Comments:")
             lines.append(text_input.value.strip())

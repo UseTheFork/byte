@@ -99,22 +99,6 @@ class InitializeWorkflow(ConstitutionWorkflow):
                 executed_by=ConstitutionAgentNode,
             ),
             PhaseModel(
-                id="validate",
-                content="Validation before final output:",
-                note=[
-                    MD.bullet("No remaining unexplained bracket tokens."),
-                    MD.bullet("Version line matches report."),
-                    MD.bullet(
-                        'Principles are declarative, testable, and free of vague language ("should" → replace with MUST/SHOULD rationale where appropriate).'
-                    ),
-                    MD.bullet(f"You MUST use the {UpdatePhaseTool.name} to complete this phase."),
-                ],
-                tools=[
-                    UpdatePhaseTool,
-                ],
-                executed_by=ConstitutionAgentNode,
-            ),
-            PhaseModel(
                 id="create",
                 content="Write the completed constitution using the provided tools.",
                 executed_by=ConstitutionAgentNode,
@@ -129,6 +113,29 @@ class InitializeWorkflow(ConstitutionWorkflow):
                     UpdateMetaTool,
                     UpdatePhaseTool,
                 ],
+            ),
+            PhaseModel(
+                id="validate",
+                content="Validation final output:",
+                note=[
+                    MD.bullet("No remaining unexplained bracket tokens."),
+                    MD.bullet("Version line matches report."),
+                    MD.bullet(
+                        'Principles are declarative, testable, and free of vague language ("should" → replace with MUST/SHOULD rationale where appropriate).'
+                    ),
+                ],
+                tools=[
+                    AddGovernanceRuleTool,
+                    AddPrincipleTool,
+                    AddSectionItemTool,
+                    DeleteGovernanceRuleTool,
+                    DeletePrincipleTool,
+                    DeleteSectionItemTool,
+                    DeleteSectionTool,
+                    UpdateMetaTool,
+                    UpdatePhaseTool,
+                ],
+                executed_by=ConstitutionAgentNode,
             ),
             RoutePhaseModel(
                 id="end",

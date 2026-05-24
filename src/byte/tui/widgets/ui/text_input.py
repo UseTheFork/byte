@@ -188,6 +188,9 @@ class TextInput(VerticalGroup):
         """Submit the current value and disable the input."""
         self.submitted = True
 
+        self.text_input.text = str(value) if isinstance(value, str) else ""
+        self.text_input.disabled = True
+
         # For text input, we return the string directly in the future
         # but post an Answer message for consistency
         if isinstance(value, str):

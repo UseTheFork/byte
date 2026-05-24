@@ -187,8 +187,6 @@ class BaseAgentNode(BaseNode):
                     tool_schema = PhaseUtils.inject_phase_input_schema_args(tool.tool_schema())
                 tool_schemas.append(tool_schema)
 
-        self.app["log"].info(tool_schemas)
-
         # Bind tool schemas to the model
         if tool_choice:
             model = model.bind_tools(tool_schemas, tool_choice=tool_choice)
