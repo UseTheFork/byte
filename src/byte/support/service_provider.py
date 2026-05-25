@@ -47,6 +47,7 @@ class ServiceProvider(ABC):
 
         for service_class in services:
             self.app.singleton(service_class)
+            self.app["console"].print_boot_status("ok", f"Registered {service_class.__name__}")
 
     # TODO: Doc Strings
     def agents(self) -> List[Type[BaseAgentNode]]:
@@ -83,6 +84,7 @@ class ServiceProvider(ABC):
         for node_class in nodes:
             self.app.bind(node_class)
             node_registry.register(node_class)
+            self.app["console"].print_boot_status("ok", f"Registered {node_class.__name__}")
 
     # TODO: Doc Strings
     def commands(self) -> List[Type[Command]]:
@@ -102,6 +104,7 @@ class ServiceProvider(ABC):
             self.app.bind(command_class)
             command = self.app.make(command_class)
             command_registry.register_slash_command(command)
+            self.app["console"].print_boot_status("ok", f"Registered {command_class.__name__}")
 
     # TODO: Doc Strings
     def tools(self) -> List[Type[BaseTool]]:
@@ -119,6 +122,7 @@ class ServiceProvider(ABC):
 
         for tool_class in tools:
             tool_registry_service.register_tool(tool_class)
+            self.app["console"].print_boot_status("ok", f"Registered {tool_class.__name__}")
 
     # TODO: Doc Strings
     def workflows(self) -> List[Type[BaseWorkflow]]:
@@ -134,6 +138,7 @@ class ServiceProvider(ABC):
 
         for workflow_class in workflows:
             self.app.bind(workflow_class)
+            self.app["console"].print_boot_status("ok", f"Registered {workflow_class.__name__}")
 
     def set_application(self, app: Application):
         """Set the container instance for providers that need container access.

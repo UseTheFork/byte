@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Type, TypeVa
 
 from byte.support import Str
 from byte.support.mixins import Bootable
+from byte.tui import Console
 
 T = TypeVar("T")
 
@@ -202,15 +203,15 @@ class Container:
         abstract_str = self._normalize_abstract(abstract)
         return abstract_str in self._instances
 
-    # TODO: Can the beow overloads be moved in to application?
+    # TODO: Can the below overloads be moved in to application?
     @overload
     def __getitem__(self, abstract: Literal["args"], **kwargs) -> Repository: ...
 
     @overload
     def __getitem__(self, abstract: Literal["env"], **kwargs) -> str: ...
 
-    # @overload
-    # def __getitem__(self, abstract: Literal["console"], **kwargs) -> Console: ...
+    @overload
+    def __getitem__(self, abstract: Literal["console"], **kwargs) -> Console: ...
 
     @overload
     def __getitem__(self, abstract: Literal["config"], **kwargs) -> ByteConfig: ...

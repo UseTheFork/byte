@@ -1,7 +1,7 @@
 from byte import EventBus, ServiceProvider
 from byte.foundation import TaskManager
 from byte.node import NodeRegistry
-from byte.tui import ByteTUI
+from byte.tui import ByteTUI, Console
 
 
 class FoundationServiceProvider(ServiceProvider):
@@ -9,6 +9,8 @@ class FoundationServiceProvider(ServiceProvider):
 
     def register(self) -> None:
         """Register core foundation singletons into the application container."""
+
+        self.app.singleton(Console)
 
         self.app.singleton(ByteTUI)
 

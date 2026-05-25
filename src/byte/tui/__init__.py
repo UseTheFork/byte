@@ -4,6 +4,7 @@ from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
     from byte.tui.byte_tui import ByteTUI
+    from byte.tui.console import Console
     from byte.tui.events import TuiEvents
     from byte.tui.exceptions import InputCancelledError
     from byte.tui.messages import Messages, Status
@@ -17,6 +18,7 @@ if TYPE_CHECKING:
 __all__ = (
     "AutocompleteOption",
     "ByteTUI",
+    "Console",
     "InputCancelledError",
     "InteractionService",
     "Messages",
@@ -30,6 +32,7 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "AutocompleteOption": "schemas",
+    "Console": "console",
     "ByteTUI": "byte_tui",
     "InputCancelledError": "exceptions",
     "InteractionService": "service.interactions_service",

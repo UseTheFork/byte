@@ -134,26 +134,26 @@ class PrepareEnvironment(Bootstrapper):
 
     #     app["console"].print_success(f"Created configuration file at {config_path}\n")
 
-    # def _setup_byte_directories(self, app: Application) -> None:
-    #     """Set up all necessary Byte directories.
+    def _setup_byte_directories(self, app: Application) -> None:
+        """Set up all necessary Byte directories.
 
-    #     Creates .byte, .byte/conventions, and .byte/cache directories.
-    #     Usage: `initializer._setup_byte_directories()`
-    #     """
+        Creates .byte, .byte/conventions, and .byte/cache directories.
+        Usage: `initializer._setup_byte_directories()`
+        """
 
-    #     # Ensure the main .byte directory exists
-    #     app.config_path().parent.mkdir(parents=True, exist_ok=True)
+        # Ensure the main .byte directory exists
+        app.config_path().parent.mkdir(parents=True, exist_ok=True)
 
-    #     # Create conventions directory for style guides and project conventions
-    #     app.conventions_path().parent.mkdir(parents=True, exist_ok=True)
+        # Create conventions directory for style guides and project conventions
+        app.conventions_path().parent.mkdir(parents=True, exist_ok=True)
 
-    #     # Create context directory for style guides and project context
-    #     app.session_context_path().parent.mkdir(parents=True, exist_ok=True)
+        # Create context directory for style guides and project context
+        app.session_context_path().parent.mkdir(parents=True, exist_ok=True)
 
-    #     # Create cache directory for temporary files
-    #     app.cache_path().parent.mkdir(parents=True, exist_ok=True)
+        # Create cache directory for temporary files
+        app.cache_path().parent.mkdir(parents=True, exist_ok=True)
 
-    #     app["console"].print_success("Created Byte directories")
+        app["console"].print_success("Created Byte directories")
 
     # def _setup_gitignore(self, app: Application):
     #     """Ensure .gitignore exists and contains byte cache and session patterns.
@@ -202,11 +202,10 @@ class PrepareEnvironment(Bootstrapper):
     #         else:
     #             pass
 
-    # def _run_first_boot_setup(self, app: Application):
-
-    #     self._setup_byte_directories(app)
-    #     self._setup_gitignore(app)
-    #     self._setup_config(app)
+    def _run_first_boot_setup(self, app: Application):
+        self._setup_byte_directories(app)
+        self._setup_gitignore(app)
+        self._setup_config(app)
 
     def bootstrap(self, app: Application) -> None:
         """ """
@@ -214,8 +213,8 @@ class PrepareEnvironment(Bootstrapper):
 
         self._prepare_directories(app)
 
-        # if self.is_first_boot(app):
-        #     self._run_first_boot_setup(app)
+        if self.is_first_boot(app):
+            self._run_first_boot_setup(app)
 
     def is_first_boot(self, app: Application) -> bool:
         """Check if this is the first time Byte is being run.

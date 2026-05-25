@@ -1,10 +1,9 @@
 from typing import TYPE_CHECKING
 
 from pydantic.dataclasses import dataclass
-from textual.theme import Theme
 
 if TYPE_CHECKING:
-    from byte.tui import ByteTUI
+    pass
 
 
 @dataclass(frozen=True)
@@ -131,38 +130,12 @@ CATPPUCCIN_FRAPPE = ByteTheme(
 )
 
 
-class ThemeRegistry:
-    """Registry for managing and registering Catppuccin themes with Textual."""
+class BaseThemeRegistry:
+    """Base Registry for managing and registering byte themes."""
 
-    def register_themes(self, tui: ByteTUI):
-        themes = {
-            "byte-catppuccin-mocha": CATPPUCCIN_MOCHA,
-            "byte-catppuccin-macchiato": CATPPUCCIN_MACCHIATO,
-            "byte-catppuccin-latte": CATPPUCCIN_LATTE,
-            "byte-catppuccin-frappe": CATPPUCCIN_FRAPPE,
-        }
-
-        # .venv/lib/python3.14/site-packages/textual/design.py
-        for theme_name, byte_theme in themes.items():
-            is_dark = theme_name != "byte-catppuccin-latte"
-
-            textual_theme = Theme(
-                name=theme_name,
-                primary=byte_theme.base0D,
-                secondary=byte_theme.base0E,
-                accent=byte_theme.base09,
-                foreground=byte_theme.base05,
-                background=byte_theme.base00,
-                success=byte_theme.base0B,
-                warning=byte_theme.base0A,
-                error=byte_theme.base08,
-                surface=byte_theme.base01,
-                panel=byte_theme.base02,
-                dark=is_dark,
-                variables={
-                    "block-cursor-text-style": "none",
-                    "footer-key-foreground": byte_theme.base0D,
-                    "input-selection-background": f"{byte_theme.base0D} 35%",
-                },
-            )
-            tui.register_theme(textual_theme)
+    themes = {
+        "byte-catppuccin-mocha": CATPPUCCIN_MOCHA,
+        "byte-catppuccin-macchiato": CATPPUCCIN_MACCHIATO,
+        "byte-catppuccin-latte": CATPPUCCIN_LATTE,
+        "byte-catppuccin-frappe": CATPPUCCIN_FRAPPE,
+    }

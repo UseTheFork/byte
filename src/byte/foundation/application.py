@@ -9,7 +9,7 @@ from byte import ServiceProvider, TaskManager
 from byte.foundation import Container, FoundationServiceProvider, Kernel
 from byte.foundation.bootstrap import RegisterProviders
 from byte.logging import LogService, LogServiceProvider
-from byte.tui import ByteTUI
+from byte.tui import ByteTUI, Console
 
 T = TypeVar("T")
 
@@ -39,6 +39,7 @@ class Application(Container):
 
         Usage: Called internally during application initialization to bind log and console services.
         """
+        self.instance("console", self.console())
 
         return self
 
@@ -154,7 +155,7 @@ class Application(Container):
         # TODO: Use gather here?
         for provider in providers:
             provider_instance = self.make(provider)
-            await self.boot_provider(provider_instance)
+            await self.boot_provider(provider_instance)  # ty:ignore[invalid-argument-type]
 
         # Fire booted callbacks
         for callback in self._booted_callbacks:
@@ -198,6 +199,10 @@ class Application(Container):
     def tui(self) -> ByteTUI:
         """ """
         return self.make(ByteTUI)
+
+    def console(self) -> Console:
+        """ """
+        return self.make(Console)
 
     def path(self, path: str = "") -> Path:
         """

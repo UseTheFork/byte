@@ -7,7 +7,7 @@ from textual.widgets import Footer
 
 from byte import CommandRegistryService, EventBus
 from byte.tui.screens.conversation_screen import ConversationScreen
-from byte.tui.themes import ThemeRegistry
+from byte.tui.themes.tui_theme_regisrty import TuiThemeRegistry
 from byte.tui.widgets.conversation import Conversation
 
 if TYPE_CHECKING:
@@ -62,7 +62,7 @@ class ByteTUI(App, inherit_bindings=False):
         yield Footer()
 
     def _setup_themes(self):
-        theme_registry = ThemeRegistry()
+        theme_registry = TuiThemeRegistry()
         theme_registry.register_themes(self)
 
         # TODO: This should come from config
