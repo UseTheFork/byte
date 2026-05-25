@@ -8,7 +8,6 @@ from byte.lint.config import LintConfig
 from byte.llm.config import LLMConfig
 from byte.lsp.config import LSPConfig
 from byte.presets.config import PresetsConfig
-from byte.system.config import SystemConfig
 from byte.tui.config import TUIConfig
 from byte.web.config import WebConfig
 
@@ -34,7 +33,7 @@ class ByteConfig(BaseModel):
     version: str = Field(default="0.0.0", exclude=True, description="XXXX")
 
     # keep-sorted start
-    app: AppConfig = Field(default_factory=AppConfig)
+    app: AppConfig = Field(default_factory=AppConfig, exclude=True)
     boot: BootConfig = Field(default_factory=BootConfig)
     files: FilesConfig = Field(default_factory=FilesConfig)
     git: GitConfig = Field(default_factory=GitConfig)
@@ -42,7 +41,6 @@ class ByteConfig(BaseModel):
     llm: LLMConfig = Field(default_factory=LLMConfig)
     lsp: LSPConfig = Field(default_factory=LSPConfig)
     presets: Optional[list[PresetsConfig]] = Field(default_factory=list)
-    system: SystemConfig = Field(default_factory=SystemConfig)
     tui: TUIConfig = Field(default_factory=TUIConfig)
     web: WebConfig = Field(default_factory=WebConfig)
     # keep-sorted end

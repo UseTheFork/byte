@@ -15,7 +15,7 @@ class GitConfig(BaseModel):
         description="Enable scope selection for conventional commits",
     )
     enable_breaking_changes: bool = Field(
-        default=True,
+        default=False,
         description="Enable breaking change detection and confirmation",
     )
     enable_body: bool = Field(

@@ -6,7 +6,6 @@ from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
     from byte.system.command.exit_command import ExitCommand
-    from byte.system.config import PathsConfig, SystemConfig
     from byte.system.events import SystemEvents
     from byte.system.service.config_writer_service import ConfigWriterService
     from byte.system.service.system_context_service import SystemContextService
@@ -19,8 +18,6 @@ if TYPE_CHECKING:
 __all__ = (
     "ConfigWriterService",
     "ExitCommand",
-    "PathsConfig",
-    "SystemConfig",
     "SystemContextService",
     "SystemEvents",
     "SystemServiceProvider",
@@ -34,8 +31,6 @@ _dynamic_imports = {
     # keep-sorted start
     "ConfigWriterService": "service.config_writer_service",
     "ExitCommand": "command.exit_command",
-    "PathsConfig": "config",
-    "SystemConfig": "config",
     "SystemContextService": "service.system_context_service",
     "SystemEvents": "events",
     "SystemServiceProvider": "service_provider",

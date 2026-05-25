@@ -3,13 +3,16 @@ from __future__ import annotations
 import shutil
 from typing import TYPE_CHECKING
 
+from byte.config import ByteConfig
 from byte.foundation.bootstrap.bootstrapper import Bootstrapper
+from byte.llm.config import LLMModelConfig
+from byte.support import Yaml
+from byte.tui.rich.menu import Menu
 
 if TYPE_CHECKING:
     from byte.foundation import Application
 
 
-# TODO: This should happend in the TUI or as a tui?
 class PrepareEnvironment(Bootstrapper):
     """"""
 
@@ -62,77 +65,93 @@ class PrepareEnvironment(Bootstrapper):
 
     #     return config
 
-    # def _init_files(self, app: Application, config: ByteConfig) -> ByteConfig:
-    #     """Initialize files configuration by asking if user wants to enable file watching.
+    def _init_files(self, app: Application, config: ByteConfig) -> ByteConfig:
+        """Initialize files configuration by asking if user wants to enable file watching.
 
-    #     Prompts user with a confirmation dialog. If confirmed, sets watch.enable to true.
-    #     Usage: `config = initializer._init_files(config)`
-    #     """
+        Prompts user with a confirmation dialog. If confirmed, sets watch.enable to true.
+        Usage: `config = initializer._init_files(config)`
+        """
 
-    #     # menu = Menu(
-    #     #     title="Enable file watching for AI comment markers (AI:, AI@, AI?, AI!)?", console=app["console"].console
-    #     # )
-    #     # enable_watch = menu.confirm(default=False)
+        menu = Menu(
+            title="Enable file watching for AI comment markers (AI:, AI@, AI?, AI!)?", console=app["console"].console
+        )
+        enable_watch = menu.confirm(default=False)
 
-    #     # if enable_watch:
-    #     #     config.files.watch.enable = True
-    #     #     app["console"].print_success("File watching enabled\n")
-    #     # else:
-    #     #     config.files.watch.enable = False
-    #     #     app["console"].print_info("File watching disabled\n")
+        if enable_watch:
+            config.files.watch.enable = True
+            app["console"].print_success("File watching enabled\n")
+        else:
+            config.files.watch.enable = False
+            app["console"].print_info("File watching disabled\n")
 
-    #     return config
+        return config
 
-    # def _init_llm(self, app: Application) -> Literal["anthropic", "gemini", "openai"]:
-    #     """Initialize LLM configuration by asking user to choose a provider.
+    def _init_llm(self, app: Application, config: ByteConfig) -> ByteConfig:
+        """Initialize LLM configuration by asking user to choose a provider.
 
-    #     Only shows providers that are enabled (have API keys set).
-    #     Returns the selected provider name.
-    #     Usage: `model = initializer._init_llm()` -> "anthropic"
-    #     """
+        Returns the selected provider name.
+        Usage: `model = initializer._init_llm()` -> "anthropic"
+        """
 
-    #     # Build list of enabled providers
-    #     providers = [
-    #         "anthropic",
-    #         "gemini",
-    #         "openai",
-    #     ]
+        # Build list of enabled providers
+        providers = [
+            "anthropic",
+            "gemini",
+            "openai",
+        ]
 
-    #     # Multiple providers available - ask user to choose
-    #     # app["console"].print_info("Please choose a default provider:\n")
-    #     # menu = Menu(*providers, title="Select LLM Provider", console=app["console"].console)
-    #     # selected = menu.select()
+        # Multiple providers available - ask user to choose
+        app["console"].print_info("Please choose a default provider:\n")
+        menu = Menu(*providers, title="Select LLM Provider", console=app["console"].console)
+        selected = menu.select()
 
-    #     if selected is None:
-    #         # User cancelled - default to first available
-    #         selected = providers[0]
-    #         app["console"].print_warning(f"No selection made, defaulting to {selected}\n")
-    #     else:
-    #         app["console"].print_success(f"Selected {selected} as LLM provider\n")
+        if selected is None:
+            # User cancelled - default to first available
+            selected = providers[0]
+            app["console"].print_warning(f"No selection made, defaulting to {selected}\n")
+        else:
+            app["console"].print_success(f"Selected {selected} as LLM provider\n")
 
-    #     return selected  # ty:ignore[invalid-return-type]
+        if selected == "anthropic":
+            config.llm.reasoning = LLMModelConfig(model="claude-opus-4-6", provider="anthropic")
+            config.llm.standard = LLMModelConfig(model="claude-sonnet-4-6", provider="anthropic")
+            config.llm.coding = LLMModelConfig(model="claude-haiku-4-5", provider="anthropic")
+            config.llm.fast = LLMModelConfig(model="claude-haiku-4-5", provider="anthropic")
+        elif selected == "gemini":
+            config.llm.reasoning = LLMModelConfig(model="gemini-3.1-pro-preview", provider="gemini")
+            config.llm.standard = LLMModelConfig(model="gemini-3.5-flash", provider="gemini")
+            config.llm.coding = LLMModelConfig(model="gemini-3.5-flash", provider="gemini")
+            config.llm.fast = LLMModelConfig(model="gemini-3.5-flash", provider="gemini")
+        else:
+            config.llm.reasoning = LLMModelConfig(model="gpt-5.5", provider="openai")
+            config.llm.standard = LLMModelConfig(model="gpt-5.4", provider="openai")
+            config.llm.coding = LLMModelConfig(model="gpt-5.4-mini", provider="openai")
+            config.llm.fast = LLMModelConfig(model="gpt-5.4-mini", provider="openai")
+        return config
 
-    # def _setup_config(self, app: Application) -> None:
-    #     # Initialize LLM configuration
-    #     # llm_model = self._init_llm(app)
+    def _setup_config(self, app: Application) -> None:
 
-    #     # TODO: need to make choosing a LLM smarter. Should load and let user select a provider if they want to.
+        # TODO: need to make choosing a LLM smarter. Should load and let user select a provider if they want to.
 
-    #     # Build config with selected LLM model
-    #     config = ByteConfig()
+        # Build config with selected LLM model
+        config = ByteConfig()
 
-    #     # Initialize files configuration
-    #     config = self._init_files(app, config)
+        # Initialize files configuration
+        config = self._init_files(app, config)
 
-    #     # Initialize web configuration
-    #     config = self._init_web(app, config)
+        # Initialize LLM configuration
+        config = self._init_llm(app, config)
 
-    #     # Write the configuration template to the YAML file
+        # Initialize web configuration
+        # TODO: need to finish this.
+        # config = self._init_web(app, config)
 
-    #     config_path = app.config_path("config.yaml")
-    #     Yaml.save(config_path, config.model_dump(mode="json"))
+        # Write the configuration template to the YAML file
 
-    #     app["console"].print_success(f"Created configuration file at {config_path}\n")
+        config_path = app.config_path("config.yaml")
+        Yaml.save(config_path, config.model_dump(mode="json"))
+
+        app["console"].print_success(f"Created configuration file at {config_path}\n")
 
     def _setup_byte_directories(self, app: Application) -> None:
         """Set up all necessary Byte directories.
@@ -155,52 +174,52 @@ class PrepareEnvironment(Bootstrapper):
 
         app["console"].print_success("Created Byte directories")
 
-    # def _setup_gitignore(self, app: Application):
-    #     """Ensure .gitignore exists and contains byte cache and session patterns.
+    def _setup_gitignore(self, app: Application):
+        """Ensure .gitignore exists and contains byte cache and session patterns.
 
-    #     Usage: `config = self._apply_gitignore_config(config)`
-    #     """
-    #     gitignore_path = app.path(".gitignore")
+        Usage: `config = self._apply_gitignore_config(config)`
+        """
+        gitignore_path = app.path(".gitignore")
 
-    #     byte_patterns = [".byte/cache/*", ".byte/session_context/*"]
+        byte_patterns = [".byte/cache/*", ".byte/session_context/*"]
 
-    #     # Check if .gitignore exists
-    #     if gitignore_path.exists():
-    #         # Read existing content
-    #         content = gitignore_path.read_text()
+        # Check if .gitignore exists
+        if gitignore_path.exists():
+            # Read existing content
+            content = gitignore_path.read_text()
 
-    #         # Check which patterns are missing
-    #         missing_patterns = [pattern for pattern in byte_patterns if pattern not in content]
+            # Check which patterns are missing
+            missing_patterns = [pattern for pattern in byte_patterns if pattern not in content]
 
-    #         if missing_patterns:
-    #             # Ask user if they want to add missing patterns to gitignore
-    #             patterns_str = ", ".join(missing_patterns)
-    #             menu = Menu(title=f"Add {patterns_str} to .gitignore?", console=app["console"].console)
-    #             add_to_gitignore = menu.confirm(default=True)
+            if missing_patterns:
+                # Ask user if they want to add missing patterns to gitignore
+                patterns_str = ", ".join(missing_patterns)
+                menu = Menu(title=f"Add {patterns_str} to .gitignore?", console=app["console"].console)
+                add_to_gitignore = menu.confirm(default=True)
 
-    #             if add_to_gitignore:
-    #                 # Add missing patterns
-    #                 with open(gitignore_path, "a") as f:
-    #                     # Add newline if file doesn't end with one
-    #                     if content and not content.endswith("\n"):
-    #                         f.write("\n")
-    #                     f.writelines(f"{pattern}\n" for pattern in missing_patterns)
-    #                 # app["console"].print_success(f"Added {patterns_str} to .gitignore\n")
-    #             else:
-    #                 pass
-    #                 # app["console"].print_info("Skipped adding patterns to .gitignore\n")
-    #     else:
-    #         # Ask user if they want to create .gitignore with byte patterns
-    #         menu = Menu(title="Create .gitignore with .byte patterns?", console=app["console"].console)
-    #         create_gitignore = menu.confirm(default=True)
+                if add_to_gitignore:
+                    # Add missing patterns
+                    with open(gitignore_path, "a") as f:
+                        # Add newline if file doesn't end with one
+                        if content and not content.endswith("\n"):
+                            f.write("\n")
+                        f.writelines(f"{pattern}\n" for pattern in missing_patterns)
+                    # app["console"].print_success(f"Added {patterns_str} to .gitignore\n")
+                else:
+                    pass
+                    # app["console"].print_info("Skipped adding patterns to .gitignore\n")
+        else:
+            # Ask user if they want to create .gitignore with byte patterns
+            menu = Menu(title="Create .gitignore with .byte patterns?", console=app["console"].console)
+            create_gitignore = menu.confirm(default=True)
 
-    #         if create_gitignore:
-    #             # Create .gitignore with byte patterns
-    #             gitignore_content = "\n".join(byte_patterns) + "\n"
-    #             gitignore_path.write_text(gitignore_content)
-    #             # app["console"].print_success("Created .gitignore with .byte patterns\n")
-    #         else:
-    #             pass
+            if create_gitignore:
+                # Create .gitignore with byte patterns
+                gitignore_content = "\n".join(byte_patterns) + "\n"
+                gitignore_path.write_text(gitignore_content)
+                # app["console"].print_success("Created .gitignore with .byte patterns\n")
+            else:
+                pass
 
     def _run_first_boot_setup(self, app: Application):
         self._setup_byte_directories(app)
