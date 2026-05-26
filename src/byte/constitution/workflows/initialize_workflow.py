@@ -15,7 +15,7 @@ from byte.files import ListFilesTool
 from byte.git import GitGrepTool
 from byte.knowledge import AddFilesToContextTool
 from byte.node.nodes import EndNode, ToolNode
-from byte.orchestration import GraphBuilder, PhaseModel, RoutePhaseModel, UpdatePhaseTool, UserConfirmPhaseTool
+from byte.orchestration import GraphBuilder, PhaseModel, RoutePhaseModel, UpdatePhaseTool
 from byte.support import MD
 from byte.system import UserConfirmOrInputTool, UserConfirmTool, UserInputTextTool, UserSelectTool
 
@@ -74,8 +74,8 @@ class InitializeWorkflow(ConstitutionWorkflow):
                 executed_by=ConstitutionAgentNode,
             ),
             PhaseModel(
-                id="draft",
-                content="Draft the updated constitution content:",
+                id="create",
+                content="Write the draft constitution using the provided tools.",
                 note=[
                     MD.bullet(
                         "The user might require less or more principles than the ones used in the template. If a number is specified, respect that - follow the general template. You will update the doc accordingly."
@@ -92,16 +92,7 @@ class InitializeWorkflow(ConstitutionWorkflow):
                     MD.bullet(
                         "Ensure Governance section lists amendment procedure, versioning policy, and compliance review expectations."
                     ),
-                    MD.bullet(f"You MUST use the {UserConfirmPhaseTool.name} to complete this phase."),
                 ],
-                tools=[
-                    UserConfirmPhaseTool,
-                ],
-                executed_by=ConstitutionAgentNode,
-            ),
-            PhaseModel(
-                id="create",
-                content="Write the completed constitution using the provided tools.",
                 executed_by=ConstitutionAgentNode,
                 tools=[
                     AddGovernanceRuleTool,
@@ -117,7 +108,7 @@ class InitializeWorkflow(ConstitutionWorkflow):
                 ],
             ),
             PhaseModel(
-                id="validate",
+                id="validate-and-finalize",
                 content="Validation final output:",
                 note=[
                     MD.bullet("No remaining unexplained bracket tokens."),

@@ -47,7 +47,6 @@ class ConstitutionService(Service):
         """
         self._constitution: Constitution | None = None
         self._constitution_path: Path = self.app.config_path("constitution")
-        self.reload()
 
     # ------------------------------------------------------------------
     # Public API
@@ -68,120 +67,6 @@ class ConstitutionService(Service):
         Usage: `path = service.constitution_path`
         """
         return self._constitution_path
-
-    # ------------------------------------------------------------------
-    # Private helpers
-    # ------------------------------------------------------------------
-
-    def _create_blank(self) -> Constitution:
-        """Create a blank Constitution with sensible defaults.
-
-        Usage: `c = self._create_blank()`
-        """
-        today = __import__("datetime").date.today().isoformat()
-
-        principles = {}
-
-        if self.app["config"].constitution.enable_ddd:
-            ddd = ConstitutionPrinciple(
-                id="ddd",
-                order=10,
-                name="Domain Driven Design",
-                description="All business logic MUST be organized into bounded-context domains under [DOMAIN_LOCATION]. Cross-domain communication MUST occur through explicit public interfaces — never by reaching into another domain's internals. New features MUST be placed in the appropriate existing domain or justify the creation of a new one.",
-            )
-            principles[ddd.id] = ddd
-
-        if self.app["config"].constitution.enable_dry:
-            dry = ConstitutionPrinciple(
-                id="dry",
-                order=20,
-                name="Don't Repeat Yourself (DRY)",
-                description="All code MUST avoid unnecessary duplication of logic, configuration, and data definitions. Shared behavior MUST be extracted into reusable services, utilities, or base classes and resolved through the application container or established import patterns. When identical or near-identical logic exists in more than one location, it MUST be consolidated into a single authoritative source. Duplication in test fixtures, schema definitions, and prompt templates MUST be reduced through shared factories, constants, or helper modules. Shared logic MUST be extracted into [SHARED_LOGIC_LOCATION]",
-            )
-            principles[dry.id] = dry
-
-        if self.app["config"].constitution.enable_tdd:
-            tdd = ConstitutionPrinciple(
-                id="tdd",
-                order=30,
-                name="TDD (Test Driven Development)",
-                description="All new functionality MUST be accompanied by tests written before or alongside the implementation. The test suite MUST pass before any code is considered complete. [TESTING_LOCATION]. [TESTING_FRAMEWORK] is the required testing framework.",
-            )
-            principles[tdd.id] = tdd
-
-        if self.app["config"].constitution.enable_yagni:
-            yagni = ConstitutionPrinciple(
-                id="yagni",
-                order=40,
-                name="You Aren't Gonna Need It (YAGNI)",
-                description="Code MUST only be written to satisfy current, concrete requirements — never on speculation of future needs. Abstractions, configuration options, and extension points MUST NOT be introduced until a real use case demands them. Remove dead code promptly.",
-            )
-            principles[yagni.id] = yagni
-
-        if self.app["config"].constitution.enable_tda:
-            tda = ConstitutionPrinciple(
-                id="tda",
-                order=50,
-                name="TDA (Tell, Don't Ask)",
-                description="Objects MUST expose behavior through commands that perform work internally rather than exposing state for external decision-making. Callers MUST tell objects what to do - not query their state and act on the result. Logic that depends on an object's internal state MUST reside within that object. Getter-heavy interfaces MUST be refactored to move the dependent logic into the owning class or module.",
-            )
-            principles[tda.id] = tda
-
-        item_1 = ConstitutionItem(
-            id="item-1",
-            order=10,
-            section_id="section-1",
-            name="Example Security Item",
-            content="Describe your first security requirement here.",
-        )
-
-        section_1 = ConstitutionSection(
-            id="section-1",
-            order=10,
-            name="Security Requirements",
-            items={item_1.id: item_1},
-        )
-
-        item_2 = ConstitutionItem(
-            id="item-2",
-            order=10,
-            section_id="section-2",
-            name="Example Code Standard",
-            content="Describe your first code standard here.",
-        )
-
-        section_2 = ConstitutionSection(
-            id="section-2",
-            order=10,
-            name="Code Standards",
-            applies_to=["*"],
-            items={item_2.id: item_2},
-        )
-
-        supremacy = ConstitutionGovernanceRule(
-            id="supremacy",
-            order=990,
-            name="Supremacy",
-            content="This constitution supersedes all other project practices, conventions, and ad-hoc agreements. Amendments require documentation and explicit approval. All contributors — human and automated — MUST comply.",
-        )
-        versioning_policy = ConstitutionGovernanceRule(
-            id="versioning-policy",
-            order=999,
-            name="Versioning Policy",
-            content="Constitution versions follow semantic versioning: MAJOR for principle removals or backward-incompatible redefinitions, MINOR for new principles or materially expanded guidance, PATCH for wording clarifications and non-semantic refinements.",
-        )
-        return Constitution(
-            principles={ddd.id: ddd},
-            governance={
-                supremacy.id: supremacy,
-                versioning_policy.id: versioning_policy,
-            },
-            meta=ConstitutionMeta(version="0.1.0", ratified=today, last_amended=today),
-            sections={
-                Str.normalize_id(section_1.name): section_1,
-                Str.normalize_id(section_2.name): section_2,
-            },
-        )
 
     # ------------------------------------------------------------------
     # Serialisation helpers
@@ -296,7 +181,7 @@ class ConstitutionService(Service):
         assert self._constitution
         return self._constitution
 
-    def get_constitution_for_path(self, paths: list[str | Path] | None = None) -> Constitution:
+    def get_constitution_for_path(self, paths: list[str | Path] | None = None) -> Constitution | None:
         """Return a filtered Constitution containing only sections relevant to *paths*.
 
         Sections without ``applies_to`` (global) are always included.
@@ -319,7 +204,8 @@ class ConstitutionService(Service):
             `c = service.get_constitution_for_path(None)`
             `c = service.get_constitution_for_path(["src/byte/node/agents/foo.py", "src/byte/other.py"])`
         """
-        assert self._constitution
+        if not self._constitution:
+            return None
 
         if paths is None:
             return self._constitution
@@ -731,14 +617,6 @@ class ConstitutionService(Service):
         Usage: `service.reload()`
         """
         root = self._constitution_path
-
-        if not root.exists():
-            self.app["log"].debug(
-                f"ConstitutionService: no constitution directory found at {root}, creating blank constitution"
-            )
-            self._constitution = self._create_blank()
-            self._save(self._constitution)
-            return
 
         try:
             self._constitution = self._load_from_directory(root)

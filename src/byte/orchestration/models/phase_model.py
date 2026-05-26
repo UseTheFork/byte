@@ -22,8 +22,7 @@ class PhaseModel(BasePhaseModel):
     def to_pending_md(self) -> str:
         return list_to_multiline_text(
             [
-                Section.sub_heading(f"phase-{self.id}", 2, True),
-                MD.bullet(f"phase_id: phase-{self.id}"),
+                Section.sub_heading(f"Phase: {self.id}", 2, True),
                 MD.bullet(f"- phase_status: {self.status}"),
                 "",
                 self.content,

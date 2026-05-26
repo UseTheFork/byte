@@ -40,7 +40,7 @@ class GitCommitTool(BaseTool):
                 "description": "OPTIONAL body with motivation for the change and contrast with previous behavior. Only needed if the commit_message isn't sufficiently informative.",
             },
         },
-        "required": ["type", "commit_message", "breaking_change"],
+        "required": ["type", "commit_message"],
     }
 
     @override
@@ -48,7 +48,7 @@ class GitCommitTool(BaseTool):
         self,
         type: str,
         commit_message: str,
-        breaking_change: bool,
+        breaking_change: bool = False,
         scope: str | None = None,
         breaking_change_message: str | None = None,
         body: str | None = None,

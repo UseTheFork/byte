@@ -22,6 +22,8 @@ class Constitution(Leaf):
             context_files = file_service.list_files()
             filtered = [f.path for f in context_files] if context_files else None
 
-        constitution_md = constitution_service.get_constitution_for_path(filtered).to_markdown()  # ty:ignore[invalid-argument-type]
+        constitution_md = constitution_service.get_constitution_for_path(filtered)  # ty:ignore[invalid-argument-type]
+        if not constitution_md:
+            return ""
 
-        return constitution_md
+        return constitution_md.to_markdown()
