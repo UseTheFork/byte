@@ -12,7 +12,7 @@ class ConstitutionPrinciple:
     id: str
     name: str
     description: str
-    order: int = 0
+    order: int = 1
 
 
 @dataclass
@@ -28,7 +28,7 @@ class ConstitutionItem:
     section_id: str
     name: str
     content: str
-    order: int = 0
+    order: int = 1
 
 
 @dataclass
@@ -41,7 +41,7 @@ class ConstitutionGovernanceRule:
     id: str
     name: str
     content: str
-    order: int = 0
+    order: int = 1
 
 
 @dataclass
@@ -59,7 +59,7 @@ class ConstitutionSection:
     name: str
     items: dict[str, ConstitutionItem] = field(default_factory=dict)
     applies_to: list[str] | None = None  # None = applies to all
-    order: int = 0
+    order: int = 1
 
 
 @dataclass

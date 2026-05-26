@@ -2,6 +2,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
+from byte.constitution import ConstitutionConfig
 from byte.files.config import FilesConfig
 from byte.git.config import GitConfig
 from byte.lint.config import LintConfig
@@ -35,6 +36,7 @@ class ByteConfig(BaseModel):
     # keep-sorted start
     app: AppConfig = Field(default_factory=AppConfig, exclude=True)
     boot: BootConfig = Field(default_factory=BootConfig)
+    constitution: ConstitutionConfig = Field(default_factory=ConstitutionConfig)
     files: FilesConfig = Field(default_factory=FilesConfig)
     git: GitConfig = Field(default_factory=GitConfig)
     lint: LintConfig = Field(default_factory=LintConfig, description="Code linting and formatting configuration")

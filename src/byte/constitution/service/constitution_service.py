@@ -79,11 +79,54 @@ class ConstitutionService(Service):
         Usage: `c = self._create_blank()`
         """
         today = __import__("datetime").date.today().isoformat()
-        example = ConstitutionPrinciple(
-            id="principle-1",
-            name="I. Example Principle",
-            description="Describe your first core principle here.",
-        )
+
+        principles = {}
+
+        if self.app["config"].constitution.enable_ddd:
+            ddd = ConstitutionPrinciple(
+                id="ddd",
+                order=1,
+                name="Domain Driven Design",
+                description="All business logic MUST be organized into bounded-context domains under [DOMAIN_LOCATION]. Cross-domain communication MUST occur through explicit public interfaces — never by reaching into another domain's internals. New features MUST be placed in the appropriate existing domain or justify the creation of a new one.",
+            )
+            principles[ddd.id] = ddd
+
+        if self.app["config"].constitution.enable_dry:
+            dry = ConstitutionPrinciple(
+                id="dry",
+                order=2,
+                name="Don't Repeat Yourself (DRY)",
+                description="All code MUST avoid unnecessary duplication of logic, configuration, and data definitions. Shared behavior MUST be extracted into reusable services, utilities, or base classes and resolved through the application container or established import patterns. When identical or near-identical logic exists in more than one location, it MUST be consolidated into a single authoritative source. Duplication in test fixtures, schema definitions, and prompt templates MUST be reduced through shared factories, constants, or helper modules. Shared logic MUST be extracted into [SHARED_LOGIC_LOCATION]",
+            )
+            principles[dry.id] = dry
+
+        if self.app["config"].constitution.enable_tdd:
+            tdd = ConstitutionPrinciple(
+                id="tdd",
+                order=3,
+                name="TDD (Test Driven Development)",
+                description="All new functionality MUST be accompanied by tests written before or alongside the implementation. The test suite MUST pass before any code is considered complete. [TESTING_LOCATION]. [TESTING_FRAMEWORK] is the required testing framework.",
+            )
+            principles[tdd.id] = tdd
+
+        if self.app["config"].constitution.enable_yagni:
+            yagni = ConstitutionPrinciple(
+                id="yagni",
+                order=4,
+                name="You Aren't Gonna Need It (YAGNI)",
+                description="Code MUST only be written to satisfy current, concrete requirements — never on speculation of future needs. Abstractions, configuration options, and extension points MUST NOT be introduced until a real use case demands them. Remove dead code promptly.",
+            )
+            principles[yagni.id] = yagni
+
+        if self.app["config"].constitution.enable_tda:
+            tda = ConstitutionPrinciple(
+                id="tda",
+                order=5,
+                name="TDA (Tell, Don't Ask)",
+                description="Objects MUST expose behavior through commands that perform work internally rather than exposing state for external decision-making. Callers MUST tell objects what to do - not query their state and act on the result. Logic that depends on an object's internal state MUST reside within that object. Getter-heavy interfaces MUST be refactored to move the dependent logic into the owning class or module.",
+            )
+            principles[tda.id] = tda
+
         item_1 = ConstitutionItem(
             id="item-1",
             section_id="section-1",
@@ -110,10 +153,10 @@ class ConstitutionService(Service):
         default_rule = ConstitutionGovernanceRule(
             id="governance-1",
             name="Supremacy",
-            content="Constitution supersedes all other practices. Amendments require documentation and approval.",
+            content="This constitution supersedes all other project practices, conventions, and ad-hoc agreements. Amendments require documentation and explicit approval. All contributors — human and automated — MUST comply.",
         )
         return Constitution(
-            principles={Str.normalize_id(example.name): example},
+            principles={ddd.id: ddd},
             governance={Str.normalize_id(default_rule.name): default_rule},
             meta=ConstitutionMeta(version="0.1.0", ratified=today, last_amended=today),
             sections={
