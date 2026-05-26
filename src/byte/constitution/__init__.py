@@ -6,7 +6,6 @@ if TYPE_CHECKING:
     from byte.constitution.agents.constitution_agent_node import ConstitutionAgentNode
     from byte.constitution.command.constitution_command import ConstitutionCommand
     from byte.constitution.command.initialize_command import InitializeCommand
-    from byte.constitution.config import ConstitutionConfig
     from byte.constitution.models import (
         Constitution,
         ConstitutionGovernanceRule,
@@ -39,7 +38,6 @@ __all__ = (
     "Constitution",
     "ConstitutionAgentNode",
     "ConstitutionCommand",
-    "ConstitutionConfig",
     "ConstitutionGovernanceRule",
     "ConstitutionItem",
     "ConstitutionMeta",
@@ -59,7 +57,6 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
-    "ConstitutionConfig": "config",
     "AddGovernanceRuleTool": "tools",
     "AddPrincipleTool": "tools",
     "AddSectionItemTool": "tools",

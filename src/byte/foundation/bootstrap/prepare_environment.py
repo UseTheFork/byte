@@ -127,34 +127,6 @@ class PrepareEnvironment(Bootstrapper):
             config.llm.fast = LLMModelConfig(model="gpt-5.4-mini", provider="openai")
         return config
 
-    def _init_constitution(self, app: Application, config: ByteConfig) -> ByteConfig:
-        """Initialize Constitution configuration by asking user to enable each principle.
-
-        Prompts user for each DDD, DRY, TDD, YAGNI, and TDA principles.
-        Usage: `config = initializer._init_constitution(config)`
-        """
-
-        app["console"].print_info("Configure Constitution principles:\n")
-
-        menu = Menu(title="Enable DDD (Domain Driven Design)?", console=app["console"].console)
-        config.constitution.enable_ddd = bool(menu.confirm(default=False))
-
-        menu = Menu(title="Enable DRY (Don't Repeat Yourself)?", console=app["console"].console)
-        config.constitution.enable_dry = bool(menu.confirm(default=False))
-
-        menu = Menu(title="Enable TDD (Test Driven Development)?", console=app["console"].console)
-        config.constitution.enable_tdd = bool(menu.confirm(default=False))
-
-        menu = Menu(title="Enable YAGNI (You Aren't Gonna Need It)?", console=app["console"].console)
-        config.constitution.enable_yagni = bool(menu.confirm(default=False))
-
-        menu = Menu(title="Enable TDA (Tell, Don't Ask)?", console=app["console"].console)
-        config.constitution.enable_tda = bool(menu.confirm(default=False))
-
-        app["console"].print_success("Constitution configuration complete\n")
-
-        return config
-
     def _setup_config(self, app: Application) -> None:
 
         # TODO: need to make choosing a LLM smarter. Should load and let user select a provider if they want to.
@@ -167,9 +139,6 @@ class PrepareEnvironment(Bootstrapper):
 
         # Initialize LLM configuration
         config = self._init_llm(app, config)
-
-        # Initialize Constitution configuration
-        config = self._init_constitution(app, config)
 
         # Initialize web configuration
         # TODO: need to finish this.

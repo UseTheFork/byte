@@ -85,7 +85,7 @@ class ConstitutionService(Service):
         if self.app["config"].constitution.enable_ddd:
             ddd = ConstitutionPrinciple(
                 id="ddd",
-                order=1,
+                order=10,
                 name="Domain Driven Design",
                 description="All business logic MUST be organized into bounded-context domains under [DOMAIN_LOCATION]. Cross-domain communication MUST occur through explicit public interfaces — never by reaching into another domain's internals. New features MUST be placed in the appropriate existing domain or justify the creation of a new one.",
             )
@@ -94,7 +94,7 @@ class ConstitutionService(Service):
         if self.app["config"].constitution.enable_dry:
             dry = ConstitutionPrinciple(
                 id="dry",
-                order=2,
+                order=20,
                 name="Don't Repeat Yourself (DRY)",
                 description="All code MUST avoid unnecessary duplication of logic, configuration, and data definitions. Shared behavior MUST be extracted into reusable services, utilities, or base classes and resolved through the application container or established import patterns. When identical or near-identical logic exists in more than one location, it MUST be consolidated into a single authoritative source. Duplication in test fixtures, schema definitions, and prompt templates MUST be reduced through shared factories, constants, or helper modules. Shared logic MUST be extracted into [SHARED_LOGIC_LOCATION]",
             )
@@ -103,7 +103,7 @@ class ConstitutionService(Service):
         if self.app["config"].constitution.enable_tdd:
             tdd = ConstitutionPrinciple(
                 id="tdd",
-                order=3,
+                order=30,
                 name="TDD (Test Driven Development)",
                 description="All new functionality MUST be accompanied by tests written before or alongside the implementation. The test suite MUST pass before any code is considered complete. [TESTING_LOCATION]. [TESTING_FRAMEWORK] is the required testing framework.",
             )
@@ -112,7 +112,7 @@ class ConstitutionService(Service):
         if self.app["config"].constitution.enable_yagni:
             yagni = ConstitutionPrinciple(
                 id="yagni",
-                order=4,
+                order=40,
                 name="You Aren't Gonna Need It (YAGNI)",
                 description="Code MUST only be written to satisfy current, concrete requirements — never on speculation of future needs. Abstractions, configuration options, and extension points MUST NOT be introduced until a real use case demands them. Remove dead code promptly.",
             )
@@ -121,7 +121,7 @@ class ConstitutionService(Service):
         if self.app["config"].constitution.enable_tda:
             tda = ConstitutionPrinciple(
                 id="tda",
-                order=5,
+                order=50,
                 name="TDA (Tell, Don't Ask)",
                 description="Objects MUST expose behavior through commands that perform work internally rather than exposing state for external decision-making. Callers MUST tell objects what to do - not query their state and act on the result. Logic that depends on an object's internal state MUST reside within that object. Getter-heavy interfaces MUST be refactored to move the dependent logic into the owning class or module.",
             )
@@ -129,35 +129,53 @@ class ConstitutionService(Service):
 
         item_1 = ConstitutionItem(
             id="item-1",
+            order=10,
             section_id="section-1",
             name="Example Security Item",
             content="Describe your first security requirement here.",
         )
+
         section_1 = ConstitutionSection(
             id="section-1",
+            order=10,
             name="Security Requirements",
-            items={Str.normalize_id("Example Security Item"): item_1},
+            items={item_1.id: item_1},
         )
+
         item_2 = ConstitutionItem(
             id="item-2",
+            order=10,
             section_id="section-2",
             name="Example Code Standard",
             content="Describe your first code standard here.",
         )
+
         section_2 = ConstitutionSection(
             id="section-2",
+            order=10,
             name="Code Standards",
-            applies_to=["src/foo/**"],
-            items={Str.normalize_id("Example Code Standard"): item_2},
+            applies_to=["*"],
+            items={item_2.id: item_2},
         )
-        default_rule = ConstitutionGovernanceRule(
-            id="governance-1",
+
+        supremacy = ConstitutionGovernanceRule(
+            id="supremacy",
+            order=990,
             name="Supremacy",
             content="This constitution supersedes all other project practices, conventions, and ad-hoc agreements. Amendments require documentation and explicit approval. All contributors — human and automated — MUST comply.",
         )
+        versioning_policy = ConstitutionGovernanceRule(
+            id="versioning-policy",
+            order=999,
+            name="Versioning Policy",
+            content="Constitution versions follow semantic versioning: MAJOR for principle removals or backward-incompatible redefinitions, MINOR for new principles or materially expanded guidance, PATCH for wording clarifications and non-semantic refinements.",
+        )
         return Constitution(
             principles={ddd.id: ddd},
-            governance={Str.normalize_id(default_rule.name): default_rule},
+            governance={
+                supremacy.id: supremacy,
+                versioning_policy.id: versioning_policy,
+            },
             meta=ConstitutionMeta(version="0.1.0", ratified=today, last_amended=today),
             sections={
                 Str.normalize_id(section_1.name): section_1,
@@ -678,6 +696,31 @@ class ConstitutionService(Service):
             meta=meta,
             sections=sections,
         )
+
+    def save_and_set_current(self, constitution: Constitution) -> None:
+        """Erase the constitution directory, save the provided constitution, and set it as current.
+
+        Args:
+            constitution: The Constitution instance to save and set as current.
+
+        Usage: `service.save_and_set_current(constitution)`
+        """
+        import shutil
+
+        root = self._constitution_path
+
+        # Erase existing constitution directory
+        if root.exists():
+            shutil.rmtree(root)
+
+        # Recreate directory and save the constitution
+        root.mkdir(parents=True, exist_ok=True)
+        self._save(constitution)
+
+        # Set as current constitution
+        self._constitution = constitution
+
+        self.app["log"].debug(f"ConstitutionService: saved and set current constitution to {root}")
 
     def reload(self) -> None:
         """Re-read the constitution directory from disk.

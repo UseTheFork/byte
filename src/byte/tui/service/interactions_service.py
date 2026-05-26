@@ -39,6 +39,10 @@ class InteractionService(Service):
 
         await result_future
         answer = result_future.result()
+        self.app["log"].info(answer)
+        self.app["log"].info(answer)
+        self.app["log"].info(answer)
+        self.app["log"].info(answer)
 
         if isinstance(answer, AnswerCancelled):
             raise InputCancelledError
