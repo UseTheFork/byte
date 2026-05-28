@@ -6,6 +6,7 @@ from byte.orchestration import BaseState
 from byte.support import MD, Section, SectionType
 from byte.support.utils import list_to_multiline_text
 from byte.tools import BaseTool, ToolResult
+from byte.tools.exceptions import ToolValidationException
 
 
 class AddFilesToContextTool(BaseTool):
@@ -68,7 +69,7 @@ class AddFilesToContextTool(BaseTool):
             context_keys.append(context_key)
 
         if missing_files:
-            return ToolResult(success=False, result={"content": f"File(s) not found: {', '.join(missing_files)}."})
+            raise ToolValidationException(f"File(s) not found: {', '.join(missing_files)}.")
 
         current_editable = harness.get("reference_context", [])
         updated_editable = list(set(current_editable + context_keys))

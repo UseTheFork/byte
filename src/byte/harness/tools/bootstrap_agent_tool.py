@@ -5,6 +5,7 @@ from byte.orchestration import BaseState
 from byte.skills import SkillLoaderService
 from byte.support import Section, SectionType
 from byte.tools import BaseTool, ToolResult
+from byte.tools.exceptions import ToolValidationException
 
 
 class BootstrapAgentTool(BaseTool):
@@ -57,9 +58,7 @@ class BootstrapAgentTool(BaseTool):
 
         invalid = [name for name in skills if skill_loader_service.get_skill(name) is None]
         if invalid:
-            return ToolResult(
-                success=False, result={"content": f"Unknown skill(s): {', '.join(invalid)}. No changes made."}
-            )
+            raise ToolValidationException(f"Unknown skill(s): {', '.join(invalid)}.")
 
         harness["skills"] = skills
 
@@ -70,9 +69,7 @@ class BootstrapAgentTool(BaseTool):
 
         all_missing = missing_editable + missing_reference
         if all_missing:
-            return ToolResult(
-                success=False, result={"content": f"File(s) not found: {', '.join(all_missing)}. No changes made."}
-            )
+            raise ToolValidationException(f"File(s) not found: {', '.join(all_missing)}.")
 
         harness["editable_files"] = editable_files
         harness["reference_files"] = reference_files

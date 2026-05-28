@@ -83,18 +83,16 @@ class ToolNode(BaseNode):
                 )
 
                 # TODO: This prob needs to have a deep merge.
-                # TODO: should we check tool_result.success here or leave it out like before?
-                if tool_result.extra and tool_result.success:
+                if tool_result.extra:
                     merged_extra.update(tool_result.extra)
 
                 self._update_tui(tool_message, tool_result)
                 outputs.append(tool_message)
 
                 # If we are in a workflow we also need to update the state of the phase
-                if is_workflow_agent and tool_result.success:
+                if is_workflow_agent:
                     workflow_phases = PhaseUtils.update_phase_with_tool_args(tool_call, workflow_phases)  # ty:ignore[invalid-argument-type]
             except ToolException as err:
-                # TODO: should prob leverage this instead of tool result success
                 tool_message = ToolMessage(
                     status="error",
                     content=[

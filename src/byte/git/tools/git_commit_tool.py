@@ -2,8 +2,7 @@ from typing import override
 
 from byte.git import CommitService, GitService
 from byte.git.schemas import CommitMessage
-from byte.tools import BaseTool, ToolResult
-from byte.tools.exceptions import ToolRunException
+from byte.tools import BaseTool, ToolDeclinedException, ToolResult, ToolRunException
 from byte.tui import InteractionService, Messages
 
 
@@ -36,7 +35,7 @@ class GitCommitTool(BaseTool):
                 "description": "REQUIRED if breaking_change is True AND the commit_message isn't sufficiently informative. Describes the breaking change.",
             },
             "body": {
-                "type": "boolean",
+                "type": "string",
                 "description": "OPTIONAL body with motivation for the change and contrast with previous behavior. Only needed if the commit_message isn't sufficiently informative.",
             },
         },
@@ -95,7 +94,7 @@ class GitCommitTool(BaseTool):
             except Exception as e:
                 raise ToolRunException(f"Error creating git commit: {e!s}") from e
 
-        return ToolResult(result="User declined the tool call.")
+        raise ToolDeclinedException("User declined the tool call.")
 
     @classmethod
     def format_tool_message(cls, result: ToolResult) -> str:

@@ -3,6 +3,7 @@ from typing import Literal, override
 from byte.specs.schemas import SpecTask, SpecTaskFiles
 from byte.specs.service.spec_loader_service import SpecLoaderService
 from byte.tools import BaseTool, ToolResult
+from byte.tools.exceptions import ToolRunException
 
 
 class CreateTaskTool(BaseTool):
@@ -109,10 +110,7 @@ class CreateTaskTool(BaseTool):
         if success:
             return ToolResult(result={"content": f"Phase '{task_id}' created for spec '{spec_id}'."})
         else:
-            return ToolResult(
-                success=False,
-                result={"content": f"Failed to create phase '{task_id}' for spec '{spec_id}'."},
-            )
+            raise ToolRunException(f"Failed to create phase '{task_id}' for spec '{spec_id}'.")
 
     @classmethod
     def format_tool_message(cls, result: ToolResult) -> str:

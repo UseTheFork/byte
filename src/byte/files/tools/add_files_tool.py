@@ -5,6 +5,7 @@ from byte.orchestration import BaseState
 from byte.support import MD, Section, SectionType
 from byte.support.utils import list_to_multiline_text
 from byte.tools import BaseTool, ToolResult
+from byte.tools.exceptions import ToolValidationException
 
 
 class AddFilesTool(BaseTool):
@@ -40,7 +41,7 @@ class AddFilesTool(BaseTool):
 
         missing_files = [f for f in file_paths if file_service.get_file_context(f) is None]
         if missing_files:
-            return ToolResult(success=False, result={"content": f"File(s) not found: {', '.join(missing_files)}."})
+            raise ToolValidationException(f"File(s) not found: {', '.join(missing_files)}.")
 
         current_editable = harness.get("editable_files", [])
         updated_editable = list(set(current_editable + file_paths))

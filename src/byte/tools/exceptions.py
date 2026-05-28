@@ -25,3 +25,9 @@ class ToolRunException(ToolException):
     """Raised when an error occurs during tool execution."""
 
     pass
+
+
+class ToolDeclinedException(ToolException):
+    """Raised when a user declines to execute a tool call."""
+
+    pass

@@ -3,6 +3,7 @@ from typing import override
 from byte.specs.schemas import SpecTask, SpecTaskFiles
 from byte.specs.service.spec_loader_service import SpecLoaderService
 from byte.tools import BaseTool, ToolResult
+from byte.tools.exceptions import ToolRunException, ToolValidationException
 
 
 class EditTaskTool(BaseTool):
@@ -80,9 +81,8 @@ class EditTaskTool(BaseTool):
         # Load the existing task
         existing_task = spec_loader_service.load_task(spec_id, task_id)
         if existing_task is None:
-            return ToolResult(
-                success=False,
-                result={"content": f"Task '{task_id}' not found in spec '{spec_id}'."},
+            raise ToolValidationException(
+                f"Task '{task_id}' not found in spec '{spec_id}'.",
             )
 
         # Prepare updated values, preserving existing values if not provided
@@ -90,9 +90,7 @@ class EditTaskTool(BaseTool):
         updated_status = status if status is not None else existing_task.status
         updated_content = content if content is not None else existing_task.content
         updated_notes = notes if notes is not None else existing_task.notes
-        updated_reference_files = (
-            reference_files if reference_files is not None else existing_task.files.reference
-        )
+        updated_reference_files = reference_files if reference_files is not None else existing_task.files.reference
         updated_create_files = create_files if create_files is not None else existing_task.files.create
         updated_edit_files = edit_files if edit_files is not None else existing_task.files.edit
 
@@ -123,10 +121,7 @@ class EditTaskTool(BaseTool):
         if success:
             return ToolResult(result={"content": f"Task '{task_id}' updated for spec '{spec_id}'."})
         else:
-            return ToolResult(
-                success=False,
-                result={"content": f"Failed to update task '{task_id}' for spec '{spec_id}'."},
-            )
+            raise ToolRunException(f"Failed to update task '{task_id}' for spec '{spec_id}'.")
 
     @classmethod
     def format_tool_message(cls, result: ToolResult) -> str:
