@@ -29,11 +29,12 @@ class CoderAgentNode(BaseAgentNode):
             Leaves.Preamble(role="Act as an expert software developer."),
             Leaves.Constitution(),
             Leaves.CommunicationStyle(
-                [
+                rich_markdown=False,
+                extra_styles=[
                     "Conciseness is about **text only**: always fully implement the requested feature, tests, and wiring even if that requires many tool calls.",
                     "No explanations unless user asks",
                     "Never send acknowledgement-only responses; after receiving new context or instructions, immediately continue the task or state the concrete next action you will take.",
-                ]
+                ],
             ),
             Leaves.WorkflowConstraints(
                 [

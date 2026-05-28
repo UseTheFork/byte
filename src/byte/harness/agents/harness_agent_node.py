@@ -25,13 +25,15 @@ class HarnessAgentNode(BaseAgentNode):
                 role="Act as a harness selector. Your responsibility is to identify and load the relevant skills, files to edit, and reference files based on the user's task and the current workflow."
             ),
             Leaves.SkillsAvailable(),
-            Leaves.CommunicationStyle(),
+            Leaves.CommunicationStyle(
+                rich_markdown=False,
+            ),
             Leaves.WorkflowConstraints(
                 [
-                    "Analyze the user's task and the available tools to determine what skills, editable files, and reference files are needed",
+                    "Analyze the user's task and the available tools to determine what instruction, skills, editable files, and reference files are needed",
                     "Pass only the parameters required by the tools provided in the current phase",
-                    "DO NOT answer the user's question or perform the task itself",
-                    "DO NOT produce code, explanations, or plans",
+                    "**DO NOT** answer the user's question or perform the task itself",
+                    "**DO NOT** produce code, explanations, or plans",
                 ]
             ),
             Leaves.OperatingPrinciples(),

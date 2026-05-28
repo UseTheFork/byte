@@ -81,5 +81,5 @@ class ConstitutionAgentNode(BaseAgentNode):
 
             if not PhaseUtils.is_workflow_complete(prompt_assembler.get_state()):
                 prompt[-1].content[0]["text"] += (  # ty:ignore[invalid-argument-type]
-                    " > ERROR: The workflow has incomplete phases, you MUST use the provided tools to complete the workflow."
+                    " > **ERROR**: The workflow has incomplete phases, you MUST use the provided tools to complete the workflow."
                 )
