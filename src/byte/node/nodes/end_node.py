@@ -65,17 +65,6 @@ class EndNode(BaseNode):
                     )
 
                 message_parts.append(content_text)
-            # elif isinstance(message, ToolMessage):
-            #     # Add tool execution summary
-            #     tool_name = getattr(message, "name", "unknown tool")
-            #     tool_status = getattr(message, "status", "unknown")
-            #     content_text = list_to_multiline_text(
-            #         [
-            #             Boundary.open(BoundaryType.TOOL_CALL),
-            #             f"Called {tool_name} applied with status {tool_status}",
-            #             Boundary.close(BoundaryType.TOOL_CALL),
-            #         ]
-            #     )
 
         return list_to_multiline_text(message_parts)
 
@@ -85,14 +74,6 @@ class EndNode(BaseNode):
         *,
         config: RunnableConfig,
     ) -> Command[Literal["__end__"]]:
-        # TODO: Is this still needed?
-        # if runtime is not None and runtime.context is not None:
-        #     await self.emit(
-        #         NodeEvents.EndNode(
-        #             state=state,
-        #             agent=runtime.context.agent,
-        #         )
-        #     )
 
         # This is where we promote `scratch_messages` to `history_messages`
         update_dict = {
