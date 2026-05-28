@@ -291,7 +291,7 @@ class AICommentWatcherService(Service):
             if active_agent == "coder_agent_node":
                 reinforcement_list.extend(
                     [
-                        "**IMPORTANT**: Execute the users request following the project's coding standards and conventions.",
+                        "**IMPORTANT**: Execute the users request following tzhe project's coding standards and conventions.",
                         "If multiple tasks are present, complete them in the order they appear.",
                         'After successfully implementing all changes, remove the "AI:" comment markers from the code.',
                     ]
