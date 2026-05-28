@@ -17,6 +17,7 @@ from byte.orchestration import (
     RoutePhaseModel,
     UpdatePhaseTool,
 )
+from byte.system import UserConfirmTool, UserInputTextTool, UserSelectTool
 
 
 class CoderWorkflow(BaseWorkflow):
@@ -34,15 +35,19 @@ class CoderWorkflow(BaseWorkflow):
         return [
             PhaseModel(
                 id="select-skills-and-files",
-                content="Identify and load the relevant skills, reference files, and files that will need to be edited based on the user's task",
+                content="Identify and load the relevant skills, reference files, and files that will need to be edited based on the user's task. Then use the conversation history and the users request to create a short, clear, concise instruction to pass to the coding agent.",
                 executed_by=HarnessAgentNode,
                 note=[
-                    f"Use the `{BootstrapSkillsAndFilesTool.name}` to load skills, editable files, and reference files as needed by the workflow",
+                    f"Use the `{BootstrapSkillsAndFilesTool.name}` to load skills, editable files, reference files, and provied a clear instruction on the changes that need to be made by the workflow",
+                    "The coding agent that you bootstrap has no references to conversation history.",
+                    f"If the users request is ambiguous or unclear you may use one `{UserInputTextTool.name}`, `{UserConfirmTool.name}`, `{UserSelectTool.name}` to clarify the request. ONLY DO THIS IF YOU HAVE TO.",
                 ],
                 tools=[
                     BootstrapSkillsAndFilesTool,
+                    UserInputTextTool,
+                    UserConfirmTool,
+                    UserSelectTool,
                 ],
-                tool_choice="any",
             ),
             PhaseModel(
                 id="create-plan",

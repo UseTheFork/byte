@@ -47,6 +47,7 @@ class ConstitutionService(Service):
         """
         self._constitution: Constitution | None = None
         self._constitution_path: Path = self.app.config_path("constitution")
+        self.reload()
 
     # ------------------------------------------------------------------
     # Public API

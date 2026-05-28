@@ -15,6 +15,10 @@ class BootstrapSkillsAndFilesTool(BaseTool):
     input_schema = {
         "type": "object",
         "properties": {
+            "instruction": {
+                "type": "string",
+                "description": "A short, clear, concise instruction to pass to the coding agent on exactly what must be done to complete the users task.",
+            },
             "skills": {
                 "type": "array",
                 "items": {"type": "string"},
@@ -31,13 +35,14 @@ class BootstrapSkillsAndFilesTool(BaseTool):
                 "description": f"List of reference file paths to provide context to the agent. These are in the {Section.ref(SectionType.PROJECT_FILES)} section under {Section.sub_heading_ref('Reference Files')}.",
             },
         },
-        "required": [],
+        "required": ["instruction"],
     }
 
     @override
     async def run(
         self,
         state: BaseState,
+        instruction: str,
         skills: list[str] = [],
         editable_files: list[str] = [],
         reference_files: list[str] = [],
@@ -46,6 +51,8 @@ class BootstrapSkillsAndFilesTool(BaseTool):
         harness = state.get("harness", {})
 
         skill_loader_service = self.app.make(SkillLoaderService)
+
+        harness["instruction"] = instruction
 
         invalid = [name for name in skills if skill_loader_service.get_skill(name) is None]
         if invalid:
@@ -70,9 +77,7 @@ class BootstrapSkillsAndFilesTool(BaseTool):
         harness["reference_files"] = reference_files
 
         return ToolResult(
-            result={
-                "content": f"Harness skills set to: {', '.join(skills)}. Loaded {len(editable_files)} editable file(s) and {len(reference_files)} reference file(s)."
-            },
+            result={"content": "OK"},
             extra={"harness": harness},
         )
 

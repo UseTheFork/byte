@@ -1,6 +1,5 @@
 from typing import Literal
 
-from langchain.messages import HumanMessage
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
@@ -73,16 +72,7 @@ class HarnessAgentNode(BaseAgentNode):
             if route_tool_call is not None:
                 return route_tool_call
 
-            if not PhaseUtils.is_workflow_complete(prompt_assembler.get_state()) and prompt:
-                prompt = prompt.extend(
-                    [
-                        HumanMessage(
-                            content=[
-                                {
-                                    "type": "text",
-                                    "text": "The workflow has incomplete phases, use the provided tools to complete the workflow.",
-                                },
-                            ]
-                        )
-                    ]
+            if not PhaseUtils.is_workflow_complete(prompt_assembler.get_state()):
+                prompt[-1].content[0]["text"] += (  # ty:ignore[invalid-argument-type]
+                    " > ERROR: The workflow has incomplete phases, you MUST use the provided tools to complete the workflow."
                 )

@@ -83,5 +83,3 @@ class ConstitutionAgentNode(BaseAgentNode):
                 prompt[-1].content[0]["text"] += (  # ty:ignore[invalid-argument-type]
                     " > ERROR: The workflow has incomplete phases, you MUST use the provided tools to complete the workflow."
                 )
-
-                self.app["log"].info(prompt)

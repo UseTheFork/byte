@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class ToolsLoaded(Leaf):
-    def __init__(self, as_section: bool = False):
+    def __init__(self, as_section: bool = True):
         self.as_section = as_section
 
     async def assemble(self, prompt_assembler: PromptAssembler) -> str:

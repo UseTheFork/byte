@@ -9,6 +9,7 @@ class HarnessState(TypedDict):
     """State passed to a agents, constraining its skills, xyz."""
 
     spec: str
+    instruction: str | None
     skills: list[str]
     editable_files: list[str]
     reference_files: list[str]
