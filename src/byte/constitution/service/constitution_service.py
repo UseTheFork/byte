@@ -512,7 +512,7 @@ class ConstitutionService(Service):
                     continue
                 principle_id = str(fm.get("id", ""))
                 principles[principle_id] = ConstitutionPrinciple(
-                    id=principle_id, name=str(name), description=body, order=int(fm.get("order", 0))
+                    id=principle_id, name=str(name), description=body, order=int(fm.get("order", 1))
                 )
 
         # --- governance ---
@@ -527,7 +527,7 @@ class ConstitutionService(Service):
                     continue
                 rule_id = str(fm.get("id", ""))
                 governance[rule_id] = ConstitutionGovernanceRule(
-                    id=rule_id, name=str(name), content=body, order=int(fm.get("order", 0))
+                    id=rule_id, name=str(name), content=body, order=int(fm.get("order", 1))
                 )
 
         # --- sections ---
@@ -565,7 +565,7 @@ class ConstitutionService(Service):
                             section_id=str(ifm.get("section_id", "")),
                             name=str(iname),
                             content=ibody,
-                            order=int(ifm.get("order", 0)),
+                            order=int(ifm.get("order", 1)),
                         )
 
                 section_id = str(fm.get("id", ""))
@@ -574,7 +574,7 @@ class ConstitutionService(Service):
                     name=str(name),
                     items=items,
                     applies_to=applies_to,
-                    order=int(fm.get("order", 0)),
+                    order=int(fm.get("order", 1)),
                 )
 
         return Constitution(

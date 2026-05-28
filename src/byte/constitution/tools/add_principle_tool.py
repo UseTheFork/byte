@@ -24,7 +24,7 @@ class AddPrincipleTool(BaseTool):
             },
             "order": {
                 "type": "integer",
-                "description": "Display order of the principle (e.g. 1, 2, 3). Defaults to 0.",
+                "description": "Display order of the principle (e.g. 1, 2, 3). Defaults to 1.",
             },
         },
         "required": ["name", "description"],
@@ -35,7 +35,7 @@ class AddPrincipleTool(BaseTool):
         return result.result.get("message", "")
 
     @override
-    async def run(self, name: str, description: str, order: int = 0, **kwargs) -> ToolResult:
+    async def run(self, name: str, description: str, order: int = 1, **kwargs) -> ToolResult:
         service = self.app.make(ConstitutionService)
         try:
             principle = service.add_principle(name=name, description=description, order=order)

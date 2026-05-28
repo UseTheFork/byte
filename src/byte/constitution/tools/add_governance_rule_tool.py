@@ -21,7 +21,7 @@ class AddGovernanceRuleTool(BaseTool):
             },
             "order": {
                 "type": "integer",
-                "description": "Display order of the governance rule (e.g. 1, 2, 3). Defaults to 0.",
+                "description": "Display order of the governance rule (e.g. 1, 2, 3). Defaults to 1.",
             },
         },
         "required": ["name", "content"],
@@ -32,7 +32,7 @@ class AddGovernanceRuleTool(BaseTool):
         return result.result.get("message", "")
 
     @override
-    async def run(self, name: str, content: str, order: int = 0, **kwargs) -> ToolResult:
+    async def run(self, name: str, content: str, order: int = 1, **kwargs) -> ToolResult:
         service = self.app.make(ConstitutionService)
         try:
             rule = service.add_governance_rule(name=name, content=content, order=order)

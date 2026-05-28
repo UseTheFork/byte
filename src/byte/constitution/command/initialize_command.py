@@ -93,6 +93,16 @@ class InitializeCommand(Command):
             )
             principles[tda.id] = tda
 
+        include = await interaction_service.confirm("Enable Strict Typing?", default=True)
+        if include:
+            strict_typing = ConstitutionPrinciple(
+                id="strict-typing",
+                order=60,
+                name="Strict Typing",
+                description="All function signatures MUST include explicit type annotations for parameters and return types. All variables MUST have type annotations where types are not obvious from context. Use of `Any` is prohibited unless explicitly justified with a comment. Type-checking tools MUST pass cleanly with no errors or unresolved type issues.",
+            )
+            principles[strict_typing.id] = strict_typing
+
         sections = {}
 
         include = await interaction_service.confirm("Include Tooling & Framework Standards section?", default=True)

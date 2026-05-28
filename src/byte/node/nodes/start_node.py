@@ -45,7 +45,7 @@ class StartNode(BaseNode):
                 editable_files=state.get("harness", {}).get("editable_files") or [],
                 reference_files=state.get("harness", {}).get("reference_files") or [],
                 reference_context=state.get("harness", {}).get("reference_context") or [],
-                skills=[],
+                skills=state.get("harness", {}).get("skills") or [],
             ),
             "metadata": MetadataSchema(
                 iteration=0,

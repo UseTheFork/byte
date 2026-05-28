@@ -25,7 +25,7 @@ class AddSectionItemTool(BaseTool):
             },
             "order": {
                 "type": "integer",
-                "description": "Display order of the item (e.g. 1, 2, 3). Defaults to 0.",
+                "description": "Display order of the item (e.g. 1, 2, 3). Defaults to 1.",
             },
         },
         "required": ["section_id", "item_name", "content"],
@@ -36,7 +36,7 @@ class AddSectionItemTool(BaseTool):
         return result.result.get("message", "")
 
     @override
-    async def run(self, section_id: str, item_name: str, content: str, order: int = 0, **kwargs) -> ToolResult:
+    async def run(self, section_id: str, item_name: str, content: str, order: int = 1, **kwargs) -> ToolResult:
         service = self.app.make(ConstitutionService)
         try:
             item = service.add_section_item(section_id=section_id, item_name=item_name, content=content, order=order)
