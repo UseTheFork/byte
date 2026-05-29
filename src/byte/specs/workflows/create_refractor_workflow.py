@@ -12,6 +12,7 @@ from byte.orchestration import (
 )
 from byte.specs import CreateTaskTool, SpecCreatorAgentNode, SpecTaskCreatorAgentNode
 from byte.specs.tools.create_spec_tool import CreateSpecTool
+from byte.system import UserMultiSelectTool
 from byte.system.tools.user_confirm_tool import UserConfirmTool
 from byte.system.tools.user_select_tool import UserSelectTool
 
@@ -40,6 +41,7 @@ class CreateRefractorWorkflow(BaseWorkflow):
                 ],
                 tools=[
                     UserSelectTool,
+                    UserMultiSelectTool,
                     UserConfirmTool,
                     ListFilesTool,
                     AddFilesTool,
@@ -58,22 +60,7 @@ class CreateRefractorWorkflow(BaseWorkflow):
                 ],
                 tools=[
                     UserSelectTool,
-                    UserConfirmTool,
-                    UpdatePhaseTool,
-                ],
-                executed_by=SpecCreatorAgentNode,
-            ),
-            PhaseModel(
-                id="propose",
-                content="Propose 2-3 refactoring approaches - with trade-offs and your recommendation",
-                note=[
-                    "Propose 2-3 different refactoring approaches with trade-offs",
-                    "Present options conversationally with your recommendation and reasoning",
-                    "Lead with your recommended option and explain why",
-                    f"Once you believe you have the refactoring plan agreed upon, use the `{UpdatePhaseTool.name}` to complete this phase.",
-                ],
-                tools=[
-                    UserSelectTool,
+                    UserMultiSelectTool,
                     UserConfirmTool,
                     UpdatePhaseTool,
                 ],
@@ -108,6 +95,7 @@ class CreateRefractorWorkflow(BaseWorkflow):
 
         # Add nodes
         graph.add_node(SpecCreatorAgentNode)
+        graph.add_node(SpecTaskCreatorAgentNode)
         graph.add_node(HarnessAgentNode)
         graph.add_node(ToolNode)
 

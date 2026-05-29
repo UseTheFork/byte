@@ -39,10 +39,6 @@ class InteractionService(Service):
 
         await result_future
         answer = result_future.result()
-        self.app["log"].info(answer)
-        self.app["log"].info(answer)
-        self.app["log"].info(answer)
-        self.app["log"].info(answer)
 
         if isinstance(answer, AnswerCancelled):
             raise InputCancelledError
@@ -102,6 +98,34 @@ class InteractionService(Service):
 
         self.emit_tui(Messages.Status())
         return cast(Answer, answer)
+
+    async def multi_select(self, message: str, choices: List[Answer]) -> list[Answer]:
+        """Ask user to select multiple options from a list.
+
+        Usage: `selected = await interaction_service.multi_select("Pick items:", [Answer(...), Answer(...)])`
+        """
+        if not choices:
+            raise ValueError("Choices list cannot be empty")
+
+        result_future: asyncio.Future[Answer | list[Answer] | str | AnswerCancelled] = asyncio.Future()
+        self.emit_tui(Messages.Status(state="question"))
+        self.emit_tui(
+            Messages.PromptUser(
+                question=message,
+                options=choices,
+                prompt_type="multiselect",
+                result_future=result_future,
+            )
+        )
+
+        await result_future
+        answer = result_future.result()
+
+        if isinstance(answer, AnswerCancelled):
+            raise InputCancelledError
+
+        self.emit_tui(Messages.Status())
+        return cast(list[Answer], answer)
 
     async def confirm_or_input(
         self, confirm_message: str, input_message: str, default_confirm: bool = True

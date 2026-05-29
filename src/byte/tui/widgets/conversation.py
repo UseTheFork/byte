@@ -235,6 +235,13 @@ class Conversation(Widget):
                 result_future=event.result_future,
             )
             await response_panel.mount_select(ask)
+        elif event.prompt_type == "multiselect":
+            ask = Ask(
+                question=event.question,
+                options=event.options,
+                result_future=event.result_future,
+            )
+            await response_panel.mount_multi_select(ask)
         else:
             ask = Ask(
                 question=event.question,

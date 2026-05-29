@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from byte.system.tools.user_confirm_or_input_tool import UserConfirmOrInputTool
     from byte.system.tools.user_confirm_tool import UserConfirmTool
     from byte.system.tools.user_input_text_tool import UserInputTextTool
+    from byte.system.tools.user_multi_select_tool import UserMultiSelectTool
     from byte.system.tools.user_select_tool import UserSelectTool
 
 __all__ = (
@@ -24,6 +25,7 @@ __all__ = (
     "UserConfirmOrInputTool",
     "UserConfirmTool",
     "UserInputTextTool",
+    "UserMultiSelectTool",
     "UserSelectTool",
 )
 
@@ -37,6 +39,7 @@ _dynamic_imports = {
     "UserConfirmOrInputTool": "tools.user_confirm_or_input_tool",
     "UserConfirmTool": "tools.user_confirm_tool",
     "UserInputTextTool": "tools.user_input_text_tool",
+    "UserMultiSelectTool": "tools.user_multi_select_tool",
     "UserSelectTool": "tools.user_select_tool",
     # keep-sorted end
 }

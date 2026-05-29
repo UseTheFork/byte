@@ -7,6 +7,7 @@ from byte.system import (
     UserConfirmOrInputTool,
     UserConfirmTool,
     UserInputTextTool,
+    UserMultiSelectTool,
     UserSelectTool,
 )
 
@@ -26,6 +27,7 @@ class SystemServiceProvider(ServiceProvider):
             UserConfirmOrInputTool,
             UserConfirmTool,
             UserInputTextTool,
+            UserMultiSelectTool,
             UserSelectTool,
             # keep-sorted end
         ]

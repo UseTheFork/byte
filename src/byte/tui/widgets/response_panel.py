@@ -12,6 +12,7 @@ from byte.tui.schemas import Ask
 from byte.tui.widgets.ui.human_message import HumanMessage
 from byte.tui.widgets.ui.linting import Linting
 from byte.tui.widgets.ui.loading_indicator import LoadingIndicator
+from byte.tui.widgets.ui.multi_select import MultiSelect
 from byte.tui.widgets.ui.select import Select
 from byte.tui.widgets.ui.selectable_markdown import SelectableMarkdown
 from byte.tui.widgets.ui.text_input import TextInput
@@ -97,6 +98,12 @@ class ResponsePanel(VerticalGroup):
         await self.mount(select)
         select.focus()
         return select
+
+    async def mount_multi_select(self, ask: Ask) -> MultiSelect:
+        multi_select = MultiSelect(ask)
+        await self.mount(multi_select)
+        multi_select.focus()
+        return multi_select
 
     async def mount_input(self, ask: Ask) -> TextInput:
         input_widget = TextInput(ask)

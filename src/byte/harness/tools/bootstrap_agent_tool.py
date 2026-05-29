@@ -28,7 +28,7 @@ class BootstrapAgentTool(BaseTool):
             "editable_files": {
                 "type": "array",
                 "items": {"type": "string"},
-                "description": f"List of file paths that can be edited in the current workflow. These are in the {Section.ref(SectionType.PROJECT_FILES)} section under {Section.sub_heading_ref('Editable Files')}.",
+                "description": f"List of file paths that can be edited in the current workflow. These are in the {Section.ref(SectionType.PROJECT_FILES)} section under {Section.sub_heading_ref('Editable Files')}. This should NOT include any new files that will be created.",
             },
             "reference_files": {
                 "type": "array",
