@@ -4,7 +4,8 @@ from argparse import Namespace
 from byte import ByteArgumentParser, Command
 from byte.orchestration import WorkflowService
 from byte.research import ResearchWorkflow
-from byte.tui import Messages
+from byte.tui import InteractionService, Messages
+from byte.tui.schemas import Answer
 
 
 class ResearchCommand(Command):
@@ -38,6 +39,17 @@ class ResearchCommand(Command):
         Processes the user's question through the agent service, which handles
         the complete interaction flow including AI response generation and display.
         """
+
+        answer_options = [
+            Answer(label="AAA", value="AAA", is_default=False),
+            Answer(label="B", value="B", is_default=False),
+            Answer(label="C", value="C", is_default=False),
+        ]
+
+        interaction_service = self.app.make(InteractionService)
+
+        selected = await interaction_service.multi_select("test", answer_options)
+        self.app["log"].info(selected)
 
         research_workflow = self.app.make(ResearchWorkflow)
 
