@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
 
-from byte.support import MD
+from byte.support import MD, Section
 from byte.support.utils import list_to_multiline_text
 
 
@@ -46,9 +46,7 @@ class SpecTask:
 
     def to_md(self) -> str:
         lines = [
-            MD.bullet(f"ID: {self.id}"),
-            MD.bullet(f"Order: {self.order}"),
-            MD.bullet(f"Status: {self.status}"),
+            Section.sub_heading("Current Task for Specification", 2),
             self.content,
         ]
 

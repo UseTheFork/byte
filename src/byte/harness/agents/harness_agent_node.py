@@ -16,6 +16,7 @@ class HarnessAgentNode(BaseAgentNode):
     def get_user_template(self):
         return [
             Leaves.ConversationHistory(),
+            Leaves.Spec(),
             Leaves.UserRequest(),
         ]
 
@@ -41,12 +42,12 @@ class HarnessAgentNode(BaseAgentNode):
 
     def get_context_template(self):
         return [
-            Leaves.ToolsLoaded(),
             Leaves.ReferenceMaterials(),
             Leaves.ProjectEnvironment(),
             Leaves.FileContext(),
             Leaves.WorkflowPending(),
             Leaves.Epilogue(),
+            Leaves.ToolsLoaded(),
         ]
 
     async def __call__(

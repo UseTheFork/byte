@@ -55,7 +55,7 @@ class HarnessStateUtils:
         valid_keys = {"edit", "create", "test", "reference"}
         for key, value in kwargs.items():
             if key in valid_keys:
-                files[key] = value
+                files[key] = value  # ty:ignore[invalid-key]
         harness["files"] = files
         return harness
 

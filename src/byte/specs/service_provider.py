@@ -7,6 +7,7 @@ from byte.specs import (
     RefractorCommand,
     SpecCommand,
     SpecCreatorAgentNode,
+    SpecExecuteCommand,
     SpecTaskCreatorAgentNode,
 )
 from byte.specs.service.spec_loader_service import SpecLoaderService
@@ -50,6 +51,7 @@ class SpecsServiceProvider(ServiceProvider):
     def commands(self):
         return [
             # keep-sorted start
+            SpecExecuteCommand,
             RefractorCommand,
             SpecCommand,
             # keep-sorted end

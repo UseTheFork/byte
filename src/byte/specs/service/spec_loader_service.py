@@ -82,7 +82,7 @@ class SpecLoaderService(Service):
             self.app["log"].warning(f"Error scanning directory {directory}: {exc}")
         return found
 
-    def _parse_spec_file(self, spec_file: Path) -> Optional[Spec]:
+    def _parse_spec_file(self, spec_file: Path, specs_root: Path) -> Optional[Spec]:
         """Parse a single ``SPEC.md`` file into a Spec dataclass.
 
         Reads YAML frontmatter for *name*, *description*, and *reference_files*,
@@ -90,6 +90,7 @@ class SpecLoaderService(Service):
 
         Args:
             spec_file: Absolute path to the spec file.
+            specs_root: Root directory for computing relative spec ID.
 
         Returns:
             A populated Spec instance, or None if parsing fails.
@@ -126,8 +127,9 @@ class SpecLoaderService(Service):
             self.app["log"].warning(f"'reference_files' in {spec_file} is not a list, ignoring")
             reference_files = []
 
+        spec_id = str(spec_file.parent.relative_to(specs_root))
         return Spec(
-            id=Str.normalize_id(name),
+            id=spec_id,
             name=name.strip(),
             description=description.strip(),
             instructions=body,
@@ -156,7 +158,7 @@ class SpecLoaderService(Service):
         specs: dict[str, Spec] = {}
 
         for spec_file in self._find_spec_files(directory):
-            spec = self._parse_spec_file(spec_file)
+            spec = self._parse_spec_file(spec_file, specs_root=directory)
             if spec is not None:
                 specs[spec.id] = spec
 
@@ -196,7 +198,7 @@ class SpecLoaderService(Service):
         if not isinstance(order, int):
             try:
                 order = int(order)
-            except (ValueError, TypeError):
+            except ValueError, TypeError:
                 order = 0
 
         status = frontmatter.get("status", "pending")

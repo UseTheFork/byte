@@ -3,9 +3,10 @@ from typing import List
 
 from byte import ByteArgumentParser, Command
 from byte.coder import CoderWorkflow
+from byte.files import FileMode, FileService
 from byte.orchestration import PhaseUtils, WorkflowService
 from byte.specs import SpecLoaderService
-from byte.tui import Messages
+from byte.tui import InteractionService, Messages
 
 
 class SpecExecuteCommand(Command):
@@ -30,6 +31,9 @@ class SpecExecuteCommand(Command):
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
 
+        file_service = self.app.make(FileService)
+        interaction_service = self.app.make(InteractionService)
+
         coder_workflow = self.app.make(CoderWorkflow)
 
         self.emit_tui(Messages.CommandExecutionStarted())
@@ -43,15 +47,36 @@ class SpecExecuteCommand(Command):
         tasks = spec_loader_service.load_tasks(args.spec)
 
         for task in tasks:
-            task.to_md()
+            if task.status == "completed":
+                continue
+
+            task.status = "in_progress"
+            spec_loader_service.save_task(args.spec, task)
+
+            await file_service.clear_context()
+
+            for path in task.files.edit:
+                await file_service.add_file(path, FileMode.EDITABLE)
+            for path in task.files.reference:
+                await file_service.add_file(path, FileMode.READ_ONLY)
+
             await workflow_service.execute(
                 coder_workflow,
                 {
-                    "user_request": " ".join(args.task_query),
-                    "harness": {"spec": args.task},
+                    "user_request": task.to_md(),
+                    "harness": {
+                        "spec": args.spec,
+                    },
                     "workflow_phases": workflow_phases,
                 },
             )
+
+            confirmed = await interaction_service.confirm("Validate task completion", True)
+            if confirmed:
+                task.status = "completed"
+                spec_loader_service.save_task(args.spec, task)
+            else:
+                break
 
         self.emit_tui(Messages.CommandExecutionCompleted())
 

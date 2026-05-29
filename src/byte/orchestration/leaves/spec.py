@@ -14,6 +14,9 @@ class Spec(Leaf):
         harness = prompt_assembler.get_state().get("harness", {})
         spec_name = harness.get("spec")
 
+        if not spec_name:
+            return ""
+
         spec_loader_service = prompt_assembler.get_app().make(SpecLoaderService)
         spec = spec_loader_service.get_spec(spec_name)
 
