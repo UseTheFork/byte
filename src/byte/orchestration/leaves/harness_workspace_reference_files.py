@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from byte.files import FileService
-from byte.orchestration import Leaf
+from byte.orchestration import HarnessStateUtils, Leaf
 from byte.support import Section, SectionType
 from byte.support.utils import list_to_multiline_text
 
@@ -13,8 +13,7 @@ class HarnessWorkspaceReferenceFiles(Leaf):
     """Harness leaf that renders reference files for the workspace."""
 
     async def assemble(self, prompt_assembler: PromptAssembler) -> str:
-        harness = prompt_assembler.get_state().get("harness", {})
-        reference_files = harness.get("reference_files")
+        reference_files = HarnessStateUtils.get_reference_files(prompt_assembler.get_state())
         file_service = prompt_assembler.get_app().make(FileService)
 
         lines = []

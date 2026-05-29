@@ -1,7 +1,7 @@
 from typing import override
 
 from byte.files import FileService
-from byte.orchestration import BaseState
+from byte.orchestration import BaseState, HarnessStateUtils
 from byte.support import MD, Section, SectionType
 from byte.support.utils import list_to_multiline_text
 from byte.tools import BaseTool, ToolResult
@@ -36,17 +36,16 @@ class AddFilesTool(BaseTool):
         file_paths: list[str] = [],
         **kwargs,
     ) -> ToolResult:
-        harness = state.get("harness", {})
         file_service = self.app.make(FileService)
 
         missing_files = [f for f in file_paths if file_service.get_file_context(f) is None]
         if missing_files:
             raise ToolValidationException(f"File(s) not found: {', '.join(missing_files)}.")
 
-        current_editable = harness.get("editable_files", [])
+        current_editable = HarnessStateUtils.get_editable_files(state)
         updated_editable = list(set(current_editable + file_paths))
 
-        harness["editable_files"] = updated_editable
+        harness = HarnessStateUtils.set_files(state, edit=updated_editable)
 
         return ToolResult(
             result={"content": f"Added {len(file_paths)} file(s) to= files. Total files: {len(updated_editable)}."},

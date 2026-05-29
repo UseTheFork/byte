@@ -5,14 +5,22 @@ from langgraph.graph.message import AnyMessage, add_messages
 from byte.orchestration import ConstraintSchema, MetadataSchema, PhaseModel, Reducer, RoutePhaseModel
 
 
+class HarnessFiles(TypedDict):
+    """File categories for harness configuration."""
+
+    edit: list[str] | None
+    create: list[str] | None
+    test: list[str] | None
+    reference: list[str] | None
+
+
 class HarnessState(TypedDict):
     """State passed to a agents, constraining its skills, xyz."""
 
     spec: str
     instruction: str | None
     skills: list[str]
-    editable_files: list[str]
-    reference_files: list[str]
+    files: HarnessFiles
     reference_context: list[str]
 
 

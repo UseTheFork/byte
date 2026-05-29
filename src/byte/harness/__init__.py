@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from byte.harness.tools.bootstrap_skills_tool import BootstrapSkillsTool
     from byte.harness.workflows.agent_harness_workflow import AgentHarnessWorkflow
 
-
 __all__ = (
     "AgentHarnessWorkflow",
     "BootstrapAgentTool",

@@ -1,7 +1,7 @@
 # Unicode character constants for TUI widgets
 SQUARE_OUTLINE = "\u25fb"  # ◻
 SQUARE_FILLED = "\u25fc"  # ◼
-SELECT_POINTER = "\u276f"  # ❯
+SELECT_POINTER = "\u276f"  # ❯  # noqa: RUF003
 ANGLE_RIGHT = "\u276f"  # ❯  # noqa: RUF003
 ANGLE_DOWN = "\u2304"  # ⌄
 WORD_JOINER = "\u2060"  # word joiner

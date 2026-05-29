@@ -1,7 +1,7 @@
 from typing import override
 
 from byte.files import FileService
-from byte.orchestration import BaseState
+from byte.orchestration import BaseState, HarnessStateUtils
 from byte.skills import SkillLoaderService
 from byte.support import Section, SectionType
 from byte.tools import BaseTool, ToolResult
@@ -50,7 +50,7 @@ class BootstrapAgentTool(BaseTool):
         reference_context: list[str] = [],
         **kwargs,
     ) -> ToolResult:
-        harness = state.get("harness", {})
+        harness = HarnessStateUtils.get_harness(state)
 
         skill_loader_service = self.app.make(SkillLoaderService)
 
@@ -71,8 +71,7 @@ class BootstrapAgentTool(BaseTool):
         if all_missing:
             raise ToolValidationException(f"File(s) not found: {', '.join(all_missing)}.")
 
-        harness["editable_files"] = editable_files
-        harness["reference_files"] = reference_files
+        harness = HarnessStateUtils.set_files(state, edit=editable_files, reference=reference_files)
 
         return ToolResult(
             result={"content": "OK"},

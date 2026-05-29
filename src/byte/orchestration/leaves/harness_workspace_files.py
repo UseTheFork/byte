@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from byte.files import FileService
-from byte.orchestration import Leaf
+from byte.orchestration import HarnessStateUtils, Leaf
 from byte.support import Section, SectionType
 from byte.support.utils import list_to_multiline_text
 
@@ -11,9 +11,7 @@ if TYPE_CHECKING:
 
 class HarnessWorkspaceFiles(Leaf):
     async def assemble(self, prompt_assembler: PromptAssembler) -> str:
-
-        harness = prompt_assembler.get_state().get("harness", {})
-        editable_files = harness.get("editable_files")
+        editable_files = HarnessStateUtils.get_editable_files(prompt_assembler.get_state())
         file_service = prompt_assembler.get_app().make(FileService)
 
         lines = []

@@ -1,7 +1,7 @@
 from typing import override
 
 from byte.files import FileService
-from byte.orchestration import BaseState
+from byte.orchestration import BaseState, HarnessStateUtils
 from byte.skills import SkillLoaderService
 from byte.support import Section, SectionType
 from byte.tools import BaseTool, ToolResult
@@ -22,7 +22,12 @@ class BootstrapSkillsFilesTool(BaseTool):
             "editable_files": {
                 "type": "array",
                 "items": {"type": "string"},
-                "description": f"List of file paths that can be edited in the current workflow. These are in the {Section.ref(SectionType.PROJECT_FILES)} section under {Section.sub_heading_ref('Editable Files')}. This should NOT include any new files that will be created.",
+                "description": f"List of file paths that can be edited in the current workflow. These are in the {Section.ref(SectionType.PROJECT_FILES)} section under {Section.sub_heading_ref('Editable Files')}.",
+            },
+            "create_files": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "List of file paths to be created in the current workflow.",
             },
             "reference_files": {
                 "type": "array",
@@ -32,16 +37,19 @@ class BootstrapSkillsFilesTool(BaseTool):
         },
     }
 
+    # These are in the {Section.ref(SectionType.PROJECT_FILES)} section under {Section.sub_heading_ref('Create Files')}.
+
     @override
     async def run(
         self,
         state: BaseState,
         skills: list[str] = [],
         editable_files: list[str] = [],
+        create_files: list[str] = [],
         reference_files: list[str] = [],
         **kwargs,
     ) -> ToolResult:
-        harness = state.get("harness", {})
+        harness = HarnessStateUtils.get_harness(state)
 
         skill_loader_service = self.app.make(SkillLoaderService)
 
@@ -60,8 +68,9 @@ class BootstrapSkillsFilesTool(BaseTool):
         if all_missing:
             raise ToolValidationException(f"File(s) not found: {', '.join(all_missing)}.")
 
-        harness["editable_files"] = editable_files
-        harness["reference_files"] = reference_files
+        harness = HarnessStateUtils.set_files(
+            state, edit=editable_files, create=create_files, reference=reference_files
+        )
 
         return ToolResult(
             result={"content": "OK"},

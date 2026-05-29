@@ -8,7 +8,7 @@ from langgraph.types import Command
 from byte.development import RecordResponseService
 from byte.node import BaseNode
 from byte.orchestration import BaseState, MetadataSchema
-from byte.orchestration.state import HarnessState
+from byte.orchestration.state import HarnessFiles, HarnessState
 from byte.support import Str
 
 
@@ -42,8 +42,12 @@ class StartNode(BaseNode):
             "harness": HarnessState(
                 instruction=state.get("harness", {}).get("instruction") or "",
                 spec=state.get("harness", {}).get("spec") or "",
-                editable_files=state.get("harness", {}).get("editable_files") or [],
-                reference_files=state.get("harness", {}).get("reference_files") or [],
+                files=HarnessFiles(
+                    edit=state.get("harness", {}).get("files", {}).get("edit"),
+                    create=state.get("harness", {}).get("files", {}).get("create"),
+                    test=state.get("harness", {}).get("files", {}).get("test"),
+                    reference=state.get("harness", {}).get("files", {}).get("reference"),
+                ),
                 reference_context=state.get("harness", {}).get("reference_context") or [],
                 skills=state.get("harness", {}).get("skills") or [],
             ),
