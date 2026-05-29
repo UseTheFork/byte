@@ -10,7 +10,7 @@ from textual.widgets import Label, ListItem, ListView, Markdown, Rule
 from typing_extensions import Self
 
 from byte.tui import Messages
-from byte.tui.constants import SQUARE_FILLED, SQUARE_OUTLINE
+from byte.tui.constants import SELECT_POINTER, SQUARE_FILLED, SQUARE_OUTLINE
 from byte.tui.schemas import Answer, AnswerCancelled, Ask
 
 
@@ -32,7 +32,7 @@ class ChoiceLabel(Label):
 
     def __init__(self, item: Answer, selected: bool = False):
         self._text = self._get_text(item)
-        super().__init__(Text(f"{SQUARE_OUTLINE} ").append_text(self._text))
+        super().__init__(Text(f"  {SQUARE_OUTLINE} ").append_text(self._text))
         self.item = item
         self.selected = selected
         if selected:
@@ -40,18 +40,19 @@ class ChoiceLabel(Label):
 
     def add_pointer(self) -> None:
         """Show pointer (highlight) for currently focused item."""
-        self.update(Text(f"{SQUARE_FILLED} ").append_text(self._text))
+        self.update(Text(f"{SELECT_POINTER} {SQUARE_FILLED} ").append_text(self._text))
 
     def remove_pointer(self) -> None:
         """Hide pointer for unfocused item."""
         icon = SQUARE_FILLED if self.selected else SQUARE_OUTLINE
-        self.update(Text(f"{icon} ").append_text(self._text))
+        self.update(Text(f"  {icon} ").append_text(self._text))
 
     def toggle_selection(self) -> None:
         """Toggle selection state and update visual."""
         self.selected = not self.selected
         self.toggle_class("selected")
-        self.update(Text(f"{SQUARE_FILLED} ").append_text(self._text))
+        icon = SQUARE_FILLED if self.selected else SQUARE_OUTLINE
+        self.update(Text(f"{SELECT_POINTER} {icon} ").append_text(self._text))
 
 
 class MultiSelect(VerticalGroup):
@@ -95,7 +96,7 @@ class MultiSelect(VerticalGroup):
                     &.-hovered {
                         background: transparent;
                     }
-                    
+
                     &.-highlight {
                         color: $primary;
                         background: transparent;

@@ -10,7 +10,7 @@ from textual.widgets import Label, ListItem, ListView, Markdown, Rule
 from typing_extensions import Self
 
 from byte.tui import Messages
-from byte.tui.constants import SQUARE_FILLED, SQUARE_OUTLINE
+from byte.tui.constants import SELECT_POINTER, SQUARE_FILLED, SQUARE_OUTLINE
 from byte.tui.schemas import Answer, AnswerCancelled, Ask
 
 
@@ -29,14 +29,14 @@ class ChoiceLabel(Label):
 
     def __init__(self, item: Answer, highlight_indices: list[int] | None = None):
         self._text = self._get_text(item, highlight_indices)
-        super().__init__(Text(f"{SQUARE_OUTLINE} ").append_text(self._text))
+        super().__init__(Text(f"  {SQUARE_OUTLINE} ").append_text(self._text))
         self.item = item
 
     def add_pointer(self):
-        self.update(Text(f"{SQUARE_FILLED} ").append_text(self._text))
+        self.update(Text(f"{SELECT_POINTER} {SQUARE_FILLED} ").append_text(self._text))
 
     def remove_pointer(self):
-        self.update(Text(f"{SQUARE_OUTLINE} ").append_text(self._text))
+        self.update(Text(f"  {SQUARE_OUTLINE} ").append_text(self._text))
 
 
 class Select(VerticalGroup):
@@ -73,7 +73,7 @@ class Select(VerticalGroup):
                     &.-hovered {
                         background: transparent;
                     }
-                    
+
                     &.-highlight {
                         color: $primary;
                         background: transparent;
