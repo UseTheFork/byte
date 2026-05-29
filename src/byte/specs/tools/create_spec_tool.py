@@ -1,5 +1,6 @@
 from typing import List, override
 
+from byte.orchestration import BaseState
 from byte.specs.service.spec_loader_service import SpecLoaderService
 from byte.support import Str
 from byte.support.yaml import Yaml
@@ -47,6 +48,7 @@ class CreateSpecTool(BaseTool):
     @override
     async def run(
         self,
+        state: BaseState,
         topic: str = "",
         name: str = "",
         description: str = "",
@@ -72,7 +74,15 @@ class CreateSpecTool(BaseTool):
         spec_loader_service = self.app.make(SpecLoaderService)
         spec_loader_service.reload()
 
-        return ToolResult(result={"content": f"Spec '{name}' created at {spec_file_path}."})
+        # Since we are creating a spec here we load it in to the harness to make sure that our next agent (usually the Task writer is aware of the task)
+        harness = state.get("harness", {})
+        harness["spec"] = topic
+        harness["reference_files"] = reference_files
+
+        return ToolResult(
+            result={"content": f"Spec '{name}' created at {spec_file_path}."},
+            extra={"harness": harness},
+        )
 
     @classmethod
     def format_tool_message(cls, result: ToolResult) -> str:

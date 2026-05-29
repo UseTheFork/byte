@@ -1,19 +1,19 @@
-import argparse
 from argparse import Namespace
 from typing import List
 
 from byte import ByteArgumentParser, Command
+from byte.coder import CoderWorkflow
 from byte.orchestration import PhaseUtils, WorkflowService
-from byte.specs import CreateSpecPhaseWorkflow, SpecLoaderService
+from byte.specs import SpecLoaderService
 from byte.tui import Messages
 
 
-class SpecTaskCommand(Command):
+class SpecExecuteCommand(Command):
     """ """
 
     @property
     def name(self) -> str:
-        return "spec-task"
+        return "spec"
 
     @property
     def category(self) -> str:
@@ -23,30 +23,35 @@ class SpecTaskCommand(Command):
     def parser(self) -> ByteArgumentParser:
         parser = ByteArgumentParser(
             prog=self.name,
-            description="Have an agent create a new task",
+            description="Execute or continue executing a spec",
         )
-        parser.add_argument("task", help="The task id")
-        parser.add_argument("task_query", nargs=argparse.REMAINDER, help="The user's query to generate the task for")
+        parser.add_argument("spec", help="The task id")
         return parser
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
 
-        create_spec_phase_workflow = self.app.make(CreateSpecPhaseWorkflow)
+        coder_workflow = self.app.make(CoderWorkflow)
 
         self.emit_tui(Messages.CommandExecutionStarted())
         self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         workflow_service = self.app.make(WorkflowService)
-        workflow_phases = PhaseUtils.to_phase_dict(create_spec_phase_workflow.get_phases())
+        workflow_phases = PhaseUtils.to_phase_dict(coder_workflow.get_phases())
 
-        await workflow_service.execute(
-            create_spec_phase_workflow,
-            {
-                "user_request": " ".join(args.task_query),
-                "harness": {"spec": args.task},
-                "workflow_phases": workflow_phases,
-            },
-        )
+        # Specs are executed via the coder workflow one by one and are just passed in via a user request and a files context.
+        spec_loader_service = self.app.make(SpecLoaderService)
+        tasks = spec_loader_service.load_tasks(args.spec)
+
+        for task in tasks:
+            task.to_md()
+            await workflow_service.execute(
+                coder_workflow,
+                {
+                    "user_request": " ".join(args.task_query),
+                    "harness": {"spec": args.task},
+                    "workflow_phases": workflow_phases,
+                },
+            )
 
         self.emit_tui(Messages.CommandExecutionCompleted())
 

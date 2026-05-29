@@ -24,9 +24,8 @@ class SpecTasks(Leaf):
             Section.start(SectionType.SPECIFICATION_TASKS),
         ]
 
-        for phase in tasks:
-            message_parts.append(phase.to_md())
-            pass
+        for task in tasks:
+            message_parts.append(task.to_md())
 
         message_parts.extend(Section.end())
 

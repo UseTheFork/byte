@@ -1,6 +1,8 @@
 from byte.harness import (
     AgentHarnessWorkflow,
     BootstrapAgentTool,
+    BootstrapSkillsFilesTool,
+    BootstrapSkillsTool,
     HarnessAgentNode,
 )
 from byte.support import ServiceProvider
@@ -18,6 +20,8 @@ class HarnessServiceProvider(ServiceProvider):
         return [
             # keep-sorted start
             BootstrapAgentTool,
+            BootstrapSkillsFilesTool,
+            BootstrapSkillsTool,
             # keep-sorted end
         ]
 

@@ -7,46 +7,52 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.specs.agents.spec_creator_agent_node import SpecCreatorAgentNode
     from byte.specs.agents.spec_task_creator_agent_node import SpecTaskCreatorAgentNode
+    from byte.specs.command.refractor_command import RefractorCommand
     from byte.specs.command.spec_command import SpecCommand
-    from byte.specs.command.spec_task_command import SpecTaskCommand
+    from byte.specs.command.spec_execute_command import SpecExecuteCommand
     from byte.specs.schemas import Spec, SpecTask
     from byte.specs.service.spec_loader_service import SpecLoaderService
     from byte.specs.service_provider import SpecsServiceProvider
     from byte.specs.tools.create_spec_tool import CreateSpecTool
     from byte.specs.tools.create_task_tool import CreateTaskTool
     from byte.specs.tools.edit_task_tool import EditTaskTool
-    from byte.specs.workflows.create_spec_phase_workflow import CreateSpecPhaseWorkflow
+    from byte.specs.workflows.create_refractor_workflow import CreateRefractorWorkflow
+    from byte.specs.workflows.create_spec_task_workflow import CreateSpecTaskWorkflow
     from byte.specs.workflows.create_spec_workflow import CreateSpecWorkflow
 
 __all__ = (
-    "CreateSpecPhaseWorkflow",
+    "CreateRefractorWorkflow",
+    "CreateSpecTaskWorkflow",
     "CreateSpecTool",
     "CreateSpecWorkflow",
     "CreateTaskTool",
     "EditTaskTool",
+    "RefractorCommand",
     "Spec",
     "SpecCommand",
     "SpecCreatorAgentNode",
+    "SpecExecuteCommand",
     "SpecLoaderService",
     "SpecTask",
-    "SpecTaskCommand",
     "SpecTaskCreatorAgentNode",
     "SpecsServiceProvider",
 )
 
 _dynamic_imports = {
     # keep-sorted start
-    "CreateSpecPhaseWorkflow": "workflows.create_spec_phase_workflow",
+    "CreateRefractorWorkflow": "workflows.create_refractor_workflow",
+    "CreateSpecTaskWorkflow": "workflows.create_spec_task_workflow",
     "CreateSpecTool": "tools.create_spec_tool",
     "CreateSpecWorkflow": "workflows.create_spec_workflow",
     "CreateTaskTool": "tools.create_task_tool",
     "EditTaskTool": "tools.edit_task_tool",
+    "RefractorCommand": "command.refractor_command",
     "Spec": "schemas",
     "SpecCommand": "command.spec_command",
     "SpecCreatorAgentNode": "agents.spec_creator_agent_node",
+    "SpecExecuteCommand": "command.spec_execute_command",
     "SpecLoaderService": "service.spec_loader_service",
     "SpecTask": "schemas",
-    "SpecTaskCommand": "command.spec_task_command",
     "SpecTaskCreatorAgentNode": "agents.spec_task_creator_agent_node",
     "SpecsServiceProvider": "service_provider",
     # keep-sorted end

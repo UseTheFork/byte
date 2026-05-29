@@ -1,16 +1,15 @@
+from byte.harness import BootstrapSkillsTool, HarnessAgentNode
 from byte.node.nodes import EndNode, ToolNode
 from byte.orchestration import (
     BaseWorkflow,
     GraphBuilder,
     PhaseModel,
     RoutePhaseModel,
-    UpdatePhaseTool,
 )
-from byte.skills import SkillSelectAgentNode
 from byte.specs import CreateTaskTool, SpecTaskCreatorAgentNode
 
 
-class CreateSpecPhaseWorkflow(BaseWorkflow):
+class CreateSpecTaskWorkflow(BaseWorkflow):
     """ """
 
     def get_phases(self, **kwargs):
@@ -18,14 +17,10 @@ class CreateSpecPhaseWorkflow(BaseWorkflow):
             PhaseModel(
                 id="select-skills",
                 content="Identify and load the relevant skills based on the user's task",
-                executed_by=SkillSelectAgentNode,
-                note=[
-                    f"If no skills are relvent complete this phase using the `{UpdatePhaseTool.name}` tool.",
-                ],
+                executed_by=HarnessAgentNode,
                 tools=[
-                    UpdatePhaseTool,
+                    BootstrapSkillsTool,
                 ],
-                tool_choice="any",
             ),
             PhaseModel(
                 id="create-phases",
@@ -44,11 +39,11 @@ class CreateSpecPhaseWorkflow(BaseWorkflow):
     async def build(self):
         """ """
 
-        graph = self.app.make(GraphBuilder, start_node=SpecTaskCreatorAgentNode)
+        graph = self.app.make(GraphBuilder, start_node=HarnessAgentNode)
 
         # Add nodes
         graph.add_node(SpecTaskCreatorAgentNode)
-        graph.add_node(SkillSelectAgentNode)
+        graph.add_node(HarnessAgentNode)
         graph.add_node(ToolNode)
 
         # Compile graph with memory and configuration

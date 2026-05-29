@@ -1,6 +1,5 @@
 from typing import Literal
 
-from langchain.messages import HumanMessage
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
@@ -16,7 +15,6 @@ class SpecTaskCreatorAgentNode(BaseAgentNode):
     def get_user_template(self):
         return [
             Leaves.Spec(),
-            Leaves.UserRequest(),
         ]
 
     def get_system_template(self):
@@ -31,7 +29,6 @@ class SpecTaskCreatorAgentNode(BaseAgentNode):
                 [
                     "Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it.",
                     "Assume they are a skilled developer, but know almost nothing about our toolset or problem domain.",
-                    "Give them the whole plan as bite-sized tasks. YAGNI. KISS. DRY.",
                 ]
             ),
             Section.start(SectionType.TEMPLATE),
@@ -41,7 +38,7 @@ class SpecTaskCreatorAgentNode(BaseAgentNode):
             "**Goal:** [One sentence describing what this builds]",
             "**Architecture:** [2-3 sentences about approach]",
             "---",
-            "Step 1: FOO",
+            "[Task Instruction]",
             "```",
             Section.end(),
         ]
@@ -49,12 +46,13 @@ class SpecTaskCreatorAgentNode(BaseAgentNode):
     def get_context_template(self):
         return [
             Leaves.SpecTasks(),
-            Leaves.ToolsLoaded(),
             Leaves.ReferenceMaterials(),
             Leaves.ProjectEnvironment(),
-            Leaves.FileContext(),
+            Leaves.HarnessWorkspaceFiles(),
+            Leaves.HarnessWorkspaceReferenceFiles(),
             Leaves.WorkflowPending(),
             Leaves.Epilogue(),
+            Leaves.ToolsLoaded(),
         ]
 
     async def __call__(
@@ -83,15 +81,6 @@ class SpecTaskCreatorAgentNode(BaseAgentNode):
                 return route_tool_call
 
             if not PhaseUtils.is_workflow_complete(prompt_assembler.get_state()):
-                prompt = prompt.extend(  # ty:ignore[unresolved-attribute]
-                    [
-                        HumanMessage(
-                            content=[
-                                {
-                                    "type": "text",
-                                    "text": "The workflow has incomplete phases, use the provided tools to complete the workflow.",
-                                },
-                            ]
-                        )
-                    ]
+                prompt[-1].content[0]["text"] += (  # ty:ignore[invalid-argument-type]
+                    " > ERROR: The workflow has incomplete phases, you MUST use the provided tools to complete the workflow."
                 )
