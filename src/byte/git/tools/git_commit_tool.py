@@ -2,10 +2,12 @@ from typing import override
 
 from byte.git import CommitService, GitService
 from byte.git.schemas import CommitMessage
+from byte.support import MD, Section
 from byte.tools import BaseTool, ToolDeclinedException, ToolResult, ToolRunException
 from byte.tui import InteractionService, Messages
 
 
+# TODO: we should have a hook that can modify input_schema on the base tool maybe have it be a static method of the class?
 class GitCommitTool(BaseTool):
     name: str = "git_commit"
     description: str = (
@@ -16,15 +18,15 @@ class GitCommitTool(BaseTool):
         "properties": {
             "type": {
                 "type": "string",
-                "description": "The commit type. Refer to the <rules type='Allowed Commit Types'> section for valid types and their descriptions.",
+                "description": f"The commit type. Refer to the {Section.sub_heading_ref('Allowed Commit Types')} section for valid types and their descriptions.",
             },
             "commit_message": {
                 "type": "string",
-                "description": "The description part of the commit message only (without the type prefix). Refer to the <rules type='Commit Description Guidelines'> section for formatting requirements.",
+                "description": f"The description part of the commit message only (without the type prefix). Refer to the {Section.sub_heading_ref('Commit Description Guidelines')} section for formatting requirements.",
             },
             "scope": {
                 "type": "string",
-                "description": "OPTIONAL scope providing additional contextual information. Refer to the <rules type='Allowed Commit Scopes'> section for valid scope values.",
+                "description": f"OPTIONAL scope providing additional contextual information. Refer to the {Section.sub_heading_ref('Allowed Commit Scopes')} section for valid scope values.",
             },
             "breaking_change": {
                 "type": "boolean",
@@ -35,8 +37,9 @@ class GitCommitTool(BaseTool):
                 "description": "REQUIRED if breaking_change is True AND the commit_message isn't sufficiently informative. Describes the breaking change.",
             },
             "body": {
-                "type": "string",
-                "description": "OPTIONAL body with motivation for the change and contrast with previous behavior. Only needed if the commit_message isn't sufficiently informative.",
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "OPTIONAL list of body lines with motivation for the change and contrast with previous behavior. Only needed if the commit_message isn't sufficiently informative.",
             },
         },
         "required": ["type", "commit_message"],
@@ -50,7 +53,7 @@ class GitCommitTool(BaseTool):
         breaking_change: bool = False,
         scope: str | None = None,
         breaking_change_message: str | None = None,
-        body: str | None = None,
+        body: list[str] | None = None,
         **kwargs,
     ) -> ToolResult:
 
@@ -64,7 +67,7 @@ class GitCommitTool(BaseTool):
             commit_message=commit_message,
             breaking_change=breaking_change,
             breaking_change_message=breaking_change_message,
-            body=body,
+            body="\n".join(f"- {line}" for line in body) if body else None,
         )
 
         formatted_message = commit.format()
@@ -82,7 +85,14 @@ class GitCommitTool(BaseTool):
         )
 
         if not confirmed:
-            return ToolResult(result={"content": str(change)})
+            raise ToolDeclinedException(
+                MD.list_to_text(
+                    [
+                        "Make the following changes:",
+                        str(change),
+                    ]
+                )
+            )
 
         if confirmed:
             try:
@@ -93,8 +103,6 @@ class GitCommitTool(BaseTool):
 
             except Exception as e:
                 raise ToolRunException(f"Error creating git commit: {e!s}") from e
-
-        raise ToolDeclinedException("User declined the tool call.")
 
     @classmethod
     def format_tool_message(cls, result: ToolResult) -> str:

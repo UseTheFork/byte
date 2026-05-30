@@ -7,7 +7,7 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.git.agents.commit_agent_node import CommitAgentNode
     from byte.git.command.commit_command import CommitCommand
-    from byte.git.schemas import CommitGroup, CommitMessage, CommitPlan
+    from byte.git.schemas import CommitMessage
     from byte.git.service.commit_service import CommitService
     from byte.git.service.git_service import GitService
     from byte.git.service_provider import GitServiceProvider
@@ -19,9 +19,7 @@ if TYPE_CHECKING:
 __all__ = (
     "CommitAgentNode",
     "CommitCommand",
-    "CommitGroup",
     "CommitMessage",
-    "CommitPlan",
     "CommitService",
     "CommitWorkflow",
     "GitCommitTool",
@@ -35,9 +33,7 @@ _dynamic_imports = {
     # keep-sorted start
     "CommitAgentNode": "agents.commit_agent_node",
     "CommitCommand": "command.commit_command",
-    "CommitGroup": "schemas",
     "CommitMessage": "schemas",
-    "CommitPlan": "schemas",
     "CommitService": "service.commit_service",
     "CommitWorkflow": "workflows.commit_workflow",
     "GitCommitTool": "tools.git_commit_tool",

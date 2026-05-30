@@ -32,3 +32,16 @@ class MD:
                 # Remaining lines get indented
                 result.append(f"{indent}  {line.strip()}")
         return "\n".join(result)
+
+    @staticmethod
+    def list_to_text(lines: list[str], seperator: str = "\n") -> str:
+        """
+        Convert a list of strings into a single multi-line string.
+
+        Example:
+            ["foo", "bar", "baz"] -> "foo\nbar\nbaz"
+        """
+        if not lines:
+            return ""
+
+        return seperator.join(lines)
