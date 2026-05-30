@@ -5,7 +5,7 @@ from byte.tools import BaseTool, ToolResult
 
 
 class CreatePlanTool(BaseTool):
-    name: str = "create_plan"
+    name: str = "create_plan_tool"
     description: str = (
         "Create a structured plan composed of ordered steps for completing the current request."
         "Use this to break down complex tasks into a clear, sequential list before executing them."

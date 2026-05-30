@@ -36,7 +36,6 @@ class PromptTextArea(TextArea):
             "enter",
             "submit",
             "Send",
-            # key_display="\u23ce ",
             priority=True,
             tooltip="Send the prompt to the agent",
         ),
@@ -44,7 +43,6 @@ class PromptTextArea(TextArea):
             "ctrl+j,shift+enter",
             "newline",
             "Line",
-            # key_display="\u21e7 + \u23ce ",
             tooltip="Insert a new line character",
         ),
         Binding(
@@ -157,7 +155,6 @@ class PromptInput(containers.VerticalGroup):
     PROMPT_NULL = " "
     PROMPT_AI = Content.styled("\u276f", "$text-secondary")
     PROMPT_MULTILINE = Content.styled("\u2630", "$text-secondary")
-    # PROMPT_MULTILINE = Content.styled("☰", "$text-secondary")
 
     multi_line = var(False)
 
@@ -178,15 +175,6 @@ class PromptInput(containers.VerticalGroup):
             self.PROMPT_MULTILINE if self.multi_line else self.PROMPT_AI,
             layout=False,
         )
-
-        # prompt_message = " "
-        # self.prompt_text_area.placeholder = Content.assemble(
-        #     f"{prompt_message}\t".expandtabs(8),
-        #     ("▌/▐", "r"),
-        #     " commands ",
-        #     ("▌@▐", "r"),
-        #     " files",
-        # )
 
     def compose(self) -> ComposeResult:
         with containers.HorizontalGroup(id="text-prompt"):

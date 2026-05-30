@@ -140,13 +140,11 @@ class TextAreaAutoComplete(Widget):
         self._suppressed: bool = False  # Suppress until user types
         self._search_timer = None  # Timer for debounced file search
 
-        self.slash_commands = self.app.command_registry.get_all_slash_command_names()
-
     @property
     def file_index(self) -> list[str]:
         """Get file index from app if available."""
         if hasattr(self.app, "file_index") and self.app.file_index:
-            return self.app.file_index.files  # type: ignore[attr-defined]
+            return self.app.file_index.files  # ty:ignore[unresolved-attribute]
         return self._file_index
 
     @file_index.setter
@@ -219,7 +217,7 @@ class TextAreaAutoComplete(Widget):
         self._search_timer = None
 
         current_state = self._get_target_state()
-        if not current_state.text.startswith("/") or " " not in current_state.text:
+        if not current_state.text.startswith("/"):
             self.action_hide()
             return
         self.run_worker(self._do_slash_arg_search_async(current_state), exclusive=True)
@@ -235,9 +233,6 @@ class TextAreaAutoComplete(Widget):
         if option_count == 1:
             first_option = self.option_list.get_option_at_index(0).prompt
             text = first_option.plain if isinstance(first_option, Text) else str(first_option)
-            # For slash commands, compare with the full command
-            if self._mode == "slash":
-                return text != search_string.lstrip("/")
             return text != search_string
         return True
 
@@ -255,7 +250,6 @@ class TextAreaAutoComplete(Widget):
 
     def _get_path_candidates(self, state: TargetState) -> list[DropdownItem]:
         """Get file path candidates from index with fuzzy matching."""
-        query = self._get_search_string(state)
         files = self.file_index
 
         if not files:
@@ -282,9 +276,7 @@ class TextAreaAutoComplete(Widget):
 
     def _get_candidates(self, state: TargetState) -> list[DropdownItem]:
         """Get autocomplete candidates based on mode."""
-        if self._mode == "slash":
-            return [DropdownItem(cmd) for cmd in self.slash_commands]
-        elif self._mode == "path":
+        if self._mode == "path":
             return self._get_path_candidates(state)
         return []
 
@@ -304,24 +296,15 @@ class TextAreaAutoComplete(Widget):
         if not search_string:
             return candidates
 
-        # For slash commands, strip the leading slashes
-        query = search_string.lstrip("/") if self._mode == "slash" else search_string
-        if not query:
-            return candidates
-
         matches_and_scores: list[tuple[DropdownItem, float]] = []
         for candidate in candidates:
-            candidate_string = candidate.value.strip("/")  # Strip slashes for matching
-            score, offsets = self._fuzzy_search.match(query, candidate_string)
+            candidate_string = candidate.value
+            score, offsets = self._fuzzy_search.match(search_string, candidate_string)
             if score > 0:
                 # Bonus for match starting at position 0
                 if offsets and offsets[0] == 0:
                     score += 10.0
-                # Adjust offsets if main has leading / that was stripped for matching
-                adjusted_offsets = offsets
-                if self._mode == "slash" and candidate.main.plain.startswith("/"):
-                    adjusted_offsets = [o + 1 for o in offsets]
-                highlighted = self._apply_highlights(candidate.main, tuple(adjusted_offsets))
+                highlighted = self._apply_highlights(candidate.main, tuple(offsets))
                 item = DropdownItem(
                     main=highlighted,
                     prefix=candidate.prefix,
@@ -385,15 +368,12 @@ class TextAreaAutoComplete(Widget):
     async def _do_shell_search_async(self, state: TargetState) -> None:
         """Async shell search - runs executable scan off main thread."""
         text = state.text[: state.cursor_position] if state.cursor_position > 0 else state.text
-        cmd, arg = parse_shell_input(text)
+        cmd, _ = parse_shell_input(text)
 
         if not cmd:
             # completions = await complete_command_async(arg, limit=20)
             completions = []
             candidates = [DropdownItem(c, prefix="$ ") for c in completions]
-        # else:
-        #     completions = await asyncio.to_thread(complete_path, arg, cwd, 20)
-        #     candidates = [DropdownItem(c, prefix="📄 ") for c in completions]
 
         # Re-verify we're still in shell mode (user may have changed input)
         current_state = self._get_target_state()
@@ -446,15 +426,8 @@ class TextAreaAutoComplete(Widget):
         elif state.text.startswith("/"):
             self._mode = "slash"
             self._trigger_pos = 0
-            # Check if we're completing arguments (space after command)
-            if " " in state.text:
-                # Debounce like path search since get_completions may be async
-                self._cancel_search_timer()
-                self._search_timer = self.set_timer(0.1, self._do_slash_arg_search)
-            else:
-                # Completing command name (instant)
-                self._cancel_search_timer()
-                self._show_options(state)
+            self._cancel_search_timer()
+            self._search_timer = self.set_timer(0.1, self._do_slash_arg_search)
         # Check for @ path reference
         elif "@" in text_to_check:
             at_pos = text_to_check.rfind("@")
@@ -502,7 +475,7 @@ class TextAreaAutoComplete(Widget):
         self.watch(self.target, "selection", self._on_selection_change)
         # Register with target for key interception
         if hasattr(self.target, "_autocomplete"):
-            self.target._autocomplete = self  # type: ignore[attr-defined]
+            self.target._autocomplete = self  # ty:ignore[invalid-assignment]
 
     def _apply_completion(self, value: str, state: TargetState) -> None:
         """Insert the completion into the TextArea."""
@@ -514,6 +487,7 @@ class TextAreaAutoComplete(Widget):
         if self._mode == "slash":
             if " " in state.text[:cursor_pos]:
                 # Completing an argument - replace the partial argument
+                # text[:arg_start] includes "/" prefix, so it's preserved
                 parts = text[:cursor_pos].split(" ")
                 if len(parts) > 1:
                     # Find where current arg starts
@@ -527,9 +501,9 @@ class TextAreaAutoComplete(Widget):
                     col = len(lines[-1])
                     target.move_cursor((row, col))
             else:
-                # Completing command name (existing behavior)
-                target.text = value + " "  # Add space after command
-                target.move_cursor((0, len(value) + 1))
+                # Completing command name - preserve / prefix
+                target.text = "/" + value + " "  # Add / prefix and space after command
+                target.move_cursor((0, len(value) + 2))
         elif self._mode == "path":
             # Replace @query with the selected path (keep the @), add trailing space
             replace_start = self._trigger_pos + 1  # After @
@@ -566,11 +540,11 @@ class TextAreaAutoComplete(Widget):
             # Only auto-submit for slash commands (complete actions)
             # File paths are usually part of a larger message
             if submit and self._mode == "slash" and hasattr(self.target, "action_submit"):
-                self.target.action_submit()  # type: ignore[attr-defined]
+                self.target.action_submit()  # ty:ignore[call-non-callable]
 
         self.call_after_refresh(hide_and_reset)
 
-    def handle_key(self, key: str) -> bool:  # type: ignore[override]
+    def handle_key(self, key: str) -> bool:  # ty:ignore[invalid-method-override]
         """Handle a key press. Returns True if the key was consumed.
 
         Call this from the target widget's key handler to intercept keys
