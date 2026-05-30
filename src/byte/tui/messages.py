@@ -79,6 +79,17 @@ class Messages:
         panel_id: str | None = None
 
     @dataclass
+    class CreateTokenUsage(Message):
+        summary: str
+        input_tokens: int = 0
+        output_tokens: int = 0
+        input_cache_read: int = 0
+        input_cache_creation: int = 0
+        cost: float = 0.0
+        max_input_tokens: int = 0
+        panel_id: str | None = None
+
+    @dataclass
     class AddStaticMarkdown(Message):
         content: str = ""
         panel_id: str | None = None

@@ -3,23 +3,26 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, List, Sequence
 
 from langchain.chat_models import init_chat_model
+from langchain.messages import AIMessage as LangchainAIMessage
 from langchain_core.messages import BaseMessage
 from langchain_core.runnables import Runnable
+from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
-from byte.analytics import UsageMetrics
-from byte.llm import LLMService, ModelSchema
+from byte.analytics import LastMessageUsage, UsageMetrics
+from byte.development import RecordResponseService
+from byte.llm import LLMRegistryService, LLMService, ModelSchema
 from byte.node import (
     BaseNode,
 )
 from byte.orchestration import (
+    AIMessage,
     MessageFragment,
     MessageFragments,
     PhaseModel,
     PhaseUtils,
     PromptAssembler,
 )
-from byte.orchestration.messages import AIMessage
 from byte.support import Str
 from byte.tools import ToolRegistryService
 from byte.tui import Messages
@@ -113,6 +116,64 @@ class BaseAgentNode(BaseNode):
             )
 
         return messages
+
+    async def finalize_response(self, result: LangchainAIMessage, prompt: List[BaseMessage], config: RunnableConfig):
+        """Post-invoke hook that runs after every ainvoke call.
+
+        Handles usage summary emission, response recording, and any other
+        post-processing that should occur after the LLM responds.
+        """
+        self.emit_usage_summary(result)
+
+        record_response_service = self.app.make(RecordResponseService)
+        self.app.dispatch_task(
+            record_response_service.record_response(prompt, config),
+        )
+
+    def emit_usage_summary(self, result: LangchainAIMessage):
+        usage = result.usage_metadata
+        model_schema, _ = self.get_model()
+
+        if usage is None:
+            return
+
+        # Build a LastMessageUsage from the result
+        last_usage = LastMessageUsage(
+            input=usage.get("input_tokens", 0),
+            output=usage.get("output_tokens", 0),
+            input_cache_read=usage.get("input_token_details", {}).get("cache_read", 0),
+            input_cache_creation=usage.get("input_token_details", {}).get("cache_creation", 0),
+        )
+
+        # Get constraints and calculate cost
+        llm_registry = self.app.make(LLMRegistryService)
+        model_data = llm_registry.get_model(model_schema.model)
+
+        if model_data is None:
+            return
+
+        cost = UsageMetrics.message_cost(last_usage, model_data.constraints)
+
+        # Calculate memory percentage
+        memory_percent = ""
+        if model_data.constraints.max_input_tokens > 0:
+            memory_value = round((last_usage.input / model_data.constraints.max_input_tokens) * 100, 1)
+            # Strip trailing .0 for clean formatting
+            memory_str = f"{memory_value:.1f}".rstrip("0").rstrip(".")
+            memory_percent = f" · Memory: {memory_str}%"
+
+        summary = f"Tokens: {last_usage.input:,} in / {last_usage.output:,} out · Cost: ${cost:.4f}{memory_percent}"
+        self.emit_tui(
+            Messages.CreateTokenUsage(
+                summary=summary,
+                input_tokens=last_usage.input,
+                output_tokens=last_usage.output,
+                input_cache_read=last_usage.input_cache_read,
+                input_cache_creation=last_usage.input_cache_creation,
+                cost=cost,
+                max_input_tokens=model_data.constraints.max_input_tokens,
+            )
+        )
 
     async def generate_agent_state(self, state: BaseState, config, extra: dict = {}) -> PromptAssembler:
         """Generate the agent state for the assistant node invocation.

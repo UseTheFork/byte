@@ -3,7 +3,6 @@ from typing import Literal, Type
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
-from byte.development import RecordResponseService
 from byte.node import (
     BaseAgentNode,
     BaseNode,
@@ -88,16 +87,13 @@ class AskAgentNode(BaseAgentNode):
         prompt = await self.generate_prompt(prompt_assembler)
         runnable = self.create_runnable(prompt_assembler)
 
-        record_response_service = self.app.make(RecordResponseService)
-
-        self.app.dispatch_task(
-            record_response_service.record_response(prompt, config),
-        )
         result = await runnable.ainvoke(
             prompt,
             config=config,
             cache_control={"type": "ephemeral"},
         )
+
+        await self.finalize_response(result, prompt, config)
 
         route_tool_call = self.route_tool_calls(result)
         if route_tool_call is not None:

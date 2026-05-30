@@ -3,7 +3,6 @@ from typing import Literal
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
-from byte.development import RecordResponseService
 from byte.node import (
     BaseAgentNode,
 )
@@ -65,7 +64,6 @@ class CoderAgentNode(BaseAgentNode):
         config: RunnableConfig,
     ) -> Command[Literal["routing_node"]]:
 
-        record_response_service = self.app.make(RecordResponseService)
         prompt_assembler = await self.generate_agent_state(state, config)
 
         # TODO: we should make this a static method in PhaseUtils
@@ -82,9 +80,7 @@ class CoderAgentNode(BaseAgentNode):
                 prompt,
                 config=config,
             )
-            self.app.dispatch_task(
-                record_response_service.record_response(prompt, config),
-            )
+            await self.finalize_response(result, prompt, config)
 
             route_tool_call = self.route_tool_calls(result)
             if route_tool_call is not None:

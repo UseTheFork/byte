@@ -19,6 +19,7 @@ from byte.tui.widgets.prompt.prompt_panel import PromptPanel
 from byte.tui.widgets.prompt.status_bar import StatusBar
 from byte.tui.widgets.response_panel import ResponsePanel
 from byte.tui.widgets.ui.selectable_markdown import SelectableMarkdown
+from byte.tui.widgets.ui.token_usage_rule import TokenUsageRule
 
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
@@ -183,6 +184,22 @@ class Conversation(Widget):
     async def add_heading(self, event: Messages.CreateHeading) -> None:
         response_panel = await self.get_or_create_response_panel(event.panel_id)
         await response_panel.add_heading(event)
+        self.scroll_to_latest_message()
+
+    @on(Messages.CreateTokenUsage)
+    async def add_token_usage(self, event: Messages.CreateTokenUsage) -> None:
+        response_panel = await self.get_or_create_response_panel(event.panel_id)
+        await response_panel.mount(
+            TokenUsageRule(
+                text=event.summary,
+                input_tokens=event.input_tokens,
+                output_tokens=event.output_tokens,
+                input_cache_read=event.input_cache_read,
+                input_cache_creation=event.input_cache_creation,
+                cost=event.cost,
+                max_input_tokens=event.max_input_tokens,
+            )
+        )
         self.scroll_to_latest_message()
 
     @on(Messages.AddStaticMarkdown)

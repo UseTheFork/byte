@@ -1,7 +1,7 @@
 from typing import override
 
 from byte.files import ToolFileService
-from byte.orchestration import BaseState
+from byte.orchestration import BaseState, HarnessStateUtils
 from byte.tools import BaseTool, ToolResult
 from byte.tools.exceptions import ToolRunException
 
@@ -26,15 +26,13 @@ class WriteFileTool(BaseTool):
         state: BaseState,
         **kwargs,
     ) -> ToolResult:
-
-        harness = state.get("harness", {})
-
         try:
             tool_file_service = self.app.make(ToolFileService)
             result = await tool_file_service.write_file(file_path, content)
 
-            # TODO: Is this correct.
-            harness["editable_files"].append(file_path)
+            current_editable = HarnessStateUtils.get_editable_files(state)
+            updated_editable = list(set(current_editable + [file_path]))
+            harness = HarnessStateUtils.set_files(state, edit=updated_editable)
 
             return ToolResult(
                 result={"content": result},

@@ -1,10 +1,8 @@
 from typing import Literal
 
-from langchain.messages import HumanMessage
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
-from byte.development import RecordResponseService
 from byte.git import CommitService
 from byte.node import (
     BaseAgentNode,
@@ -64,26 +62,15 @@ class CommitAgentNode(BaseAgentNode):
         runnable = self.create_runnable(prompt_assembler)
         prompt = await self.generate_prompt(prompt_assembler)
 
-        record_response_service = self.app.make(RecordResponseService)
-
         while True:
             result = await runnable.ainvoke(prompt, config=config)
-            self.app.dispatch_task(
-                record_response_service.record_response(prompt, config),
-            )
+            await self.finalize_response(result, prompt, config)
 
             route_tool_call = self.route_tool_calls(result)
             if route_tool_call is not None:
                 return route_tool_call
 
             if not PhaseUtils.is_workflow_complete(prompt_assembler.get_state()):
-                prompt = prompt.append(  # ty:ignore[unresolved-attribute]
-                    HumanMessage(
-                        content=[
-                            {
-                                "type": "text",
-                                "text": "The workflow has incomplete phases, use the provided tools to complete the workflow.",
-                            },
-                        ]
-                    )
+                prompt[-1].content[0]["text"] += (  # ty:ignore[invalid-argument-type]
+                    " > ERROR: The workflow has incomplete phases, you MUST use the provided tools to complete the workflow."
                 )
