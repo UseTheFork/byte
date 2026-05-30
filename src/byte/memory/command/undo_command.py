@@ -44,9 +44,6 @@ class UndoCommand(Command):
         state_snapshot = await coder_agent_graph.aget_state(config)
         messages = state_snapshot.values.get("history_messages", [])
 
-        self.app["log"].info(state_snapshot)
-        self.app["log"].info(messages)
-
         # Find the most recent HumanMessage index
         last_human_index = None
         for i in range(len(messages) - 1, -1, -1):
