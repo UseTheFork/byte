@@ -68,9 +68,11 @@ class DropdownItem(Option):
         prefix: str | Content | None = None,
         id: str | None = None,
         disabled: bool = False,
+        value: str | None = None,
     ) -> None:
         self.main = Content(main) if isinstance(main, str) else main
         self.prefix = Content(prefix) if isinstance(prefix, str) else prefix
+        self._raw_value = value
         prompt = self.main
         if self.prefix:
             prompt = Content.assemble(self.prefix, self.main)
@@ -79,6 +81,8 @@ class DropdownItem(Option):
     @property
     def value(self) -> str:
         """Get plain text value of the option (without prefix)."""
+        if self._raw_value is not None:
+            return self._raw_value
         return self.main.plain
 
 
@@ -197,8 +201,17 @@ class TextAreaAutoComplete(Widget):
         # Get completions from registry (which delegates to command)
         completions = await self.app.command_registry.get_slash_completions(text)
 
-        # Convert to DropdownItems
-        candidates = [DropdownItem(comp, prefix="") for comp, _desc in completions]
+        # Convert to DropdownItems with descriptions
+        candidates = []
+        for comp, desc in completions:
+            if desc:
+                # Display completion with description, styled dimly
+                desc_text = f"  {desc}"
+                desc_content = Content(desc_text).stylize(Style(dim=True), 0, len(desc_text))
+                main = Content.assemble(Content(comp), desc_content)
+            else:
+                main = Content(comp)
+            candidates.append(DropdownItem(main, prefix="", value=comp))
 
         # Update option list
         option_list = self.option_list
@@ -527,7 +540,11 @@ class TextAreaAutoComplete(Widget):
             return
 
         option = self.option_list.get_option_at_index(option_index)
-        value = option.prompt.plain if isinstance(option.prompt, Text) else str(option.prompt)
+        value = (
+            option.value
+            if isinstance(option, DropdownItem)
+            else (option.prompt.plain if isinstance(option.prompt, Text) else str(option.prompt))
+        )
 
         state = self._get_target_state()
         self._completing = True
