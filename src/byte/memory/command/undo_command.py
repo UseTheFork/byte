@@ -1,11 +1,12 @@
 from argparse import Namespace
 
-from langchain_core.messages import HumanMessage
-from langgraph.graph.message import RemoveMessage
+from langchain.messages import HumanMessage, RemoveMessage
 from langgraph.graph.state import RunnableConfig
 
 from byte import ByteArgumentParser, Command
+from byte.coder import CoderWorkflow
 from byte.memory import MemoryService
+from byte.tui import InteractionService, Messages
 
 
 class UndoCommand(Command):
@@ -33,13 +34,8 @@ class UndoCommand(Command):
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute undo operation on current conversation thread."""
-        memory_service = self.app.make(MemoryService)
-        console = self.app["console"]
-
-        # TODO: this is all wrong.
-        # It dosent matter if we use CoderAgent or AskAgent here since they use the same BaseState.
-        coder_agent = self.app.make(CoderAgent)
-        coder_agent_graph = await coder_agent.get_graph()
+        coder_workflow = self.app.make(CoderWorkflow)
+        coder_agent_graph = await coder_workflow.get_graph()
 
         memory_service = self.app.make(MemoryService)
         thread_id = await memory_service.get_or_create_thread()
@@ -47,6 +43,9 @@ class UndoCommand(Command):
         config = RunnableConfig(configurable={"thread_id": thread_id})
         state_snapshot = await coder_agent_graph.aget_state(config)
         messages = state_snapshot.values.get("history_messages", [])
+
+        self.app["log"].info(state_snapshot)
+        self.app["log"].info(messages)
 
         # Find the most recent HumanMessage index
         last_human_index = None
@@ -60,53 +59,22 @@ class UndoCommand(Command):
             messages_to_remove = messages[last_human_index:]
             remove_messages = [RemoveMessage(id=message.id) for message in messages_to_remove]
 
-            # Display message previews
-            max_preview_lines = 5
-            console.print()
-            console.rule("Messages to Remove")
-            console.print()
-
-            for idx, message in enumerate(messages_to_remove):
-                message_type = type(message).__name__
-                content = str(message.content) if hasattr(message, "content") else str(message)
-
-                # Get first few lines for preview
-                lines = content.split("\n")
-                preview_lines = lines[:max_preview_lines]
-
-                # Truncate long lines based on console width
-                console_width = console.width
-                max_line_length = max(40, console_width - 8)
-                truncated_lines = []
-                for line in preview_lines:
-                    if len(line) > max_line_length:
-                        truncated_lines.append(line[:max_line_length] + "...")
-                    else:
-                        truncated_lines.append(line)
-
-                preview_content = "\n".join(truncated_lines)
-
-                # Add ellipsis if there are more lines
-                if len(lines) > max_preview_lines:
-                    preview_content += "\n..."
-
-                # Create panel for this message
-                panel = console.panel(
-                    preview_content,
-                    title=f"{idx + 1}. {message_type} ({len(lines)} lines)",
-                    border_style="secondary",
-                )
-                console.print(panel)
-
             num_messages = len(messages_to_remove)
-            confirmed = console.confirm(
-                f"Remove {num_messages} message{'s' if num_messages != 1 else ''}?", default=True
+            panel_id: str | None = (
+                state_snapshot.metadata.get("panel_id") if state_snapshot.metadata is not None else None
+            )
+
+            interaction_service = self.app.make(InteractionService)
+
+            # TODO: Fix the below to use our own protocol to forward events.
+            confirmed = await interaction_service.confirm(
+                f"This would remove {num_messages} message{'s' if num_messages != 1 else ''} from panel [{panel_id}](action:screen.scroll_to_panel('{panel_id}')). Proceed?"
             )
 
             if confirmed:
                 await coder_agent_graph.aupdate_state(config, {"history_messages": remove_messages})
 
-                console.print_success_panel(
-                    "Successfully undone last step",
-                    title="Undo",
-                )
+                if panel_id is not None:
+                    self.emit_tui(Messages.RemovePanel(panel_id_to_remove=panel_id))
+
+                await self.notify_success("Successfully undone last step")

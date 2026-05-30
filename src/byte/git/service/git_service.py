@@ -224,8 +224,6 @@ class GitService(Service, UserInteractive, Notifiable):
 
             change_type = diff_item.change_type
 
-            self.app["log"].info(f"change_type: {diff_item.change_type}")
-
             match diff_item.change_type:
                 case "A":
                     msg = f"new: {diff_item.a_path}"

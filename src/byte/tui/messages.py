@@ -197,6 +197,10 @@ class Messages:
         pass
 
     @dataclass
+    class RemovePanel(Message):
+        panel_id_to_remove: str
+
+    @dataclass
     class UserCancelled(Message):
         panel_id: str | None = None
 

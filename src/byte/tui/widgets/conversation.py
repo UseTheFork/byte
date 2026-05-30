@@ -185,6 +185,12 @@ class Conversation(Widget):
         await response_panel.add_heading(event)
         self.scroll_to_latest_message()
 
+    @on(Messages.AddStaticMarkdown)
+    async def add_static_markdown(self, event: Messages.AddStaticMarkdown) -> None:
+        response_panel = await self.get_or_create_response_panel(event.panel_id)
+        await response_panel.add_static_markdown(event.content)
+        self.scroll_to_latest_message()
+
     @on(Messages.Response)
     async def handle_response(self, event: Messages.Response) -> None:
         response_panel = await self.get_or_create_response_panel(event.panel_id)
@@ -347,4 +353,12 @@ class Conversation(Widget):
             for child in self.chat_container.query(ResponsePanel).results():
                 await child.remove()
         except Exception:
+            pass
+
+    @on(Messages.RemovePanel)
+    async def remove_panel(self, event: Messages.RemovePanel) -> None:
+        try:
+            panel = self.query_one(f"#{event.panel_id_to_remove}", ResponsePanel)
+            await panel.remove()
+        except NoMatches:
             pass

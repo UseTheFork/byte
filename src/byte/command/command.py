@@ -1,13 +1,10 @@
 import argparse
 from abc import ABC, abstractmethod
 from argparse import Namespace
-from typing import TYPE_CHECKING, List
+from typing import List
 
 from byte import ByteArgumentParser
 from byte.support.mixins import Bootable, Eventable, Notifiable, UserInteractive
-
-if TYPE_CHECKING:
-    pass
 
 
 class Command(ABC, Bootable, UserInteractive, Notifiable, Eventable):
