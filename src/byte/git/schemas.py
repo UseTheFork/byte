@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
 
 
-# AI: modify body here as well to handle the list of strings. AI!
 class CommitMessage(BaseModel):
     type: str = Field(
         ...,

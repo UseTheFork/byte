@@ -39,7 +39,11 @@ class GitCommitTool(BaseTool):
             "body": {
                 "type": "array",
                 "items": {"type": "string"},
-                "description": "OPTIONAL list of body lines with motivation for the change and contrast with previous behavior. Only needed if the commit_message isn't sufficiently informative.",
+                "description": """OPTIONAL list of body lines with motivation for the change and contrast with previous behavior.
+                - Only needed if the commit_message isn't sufficiently informative.
+                - Use imperative, present tense: 'change' not 'changed' nor 'changes'.
+                - Should explain why the change was made, not what was changed (code shows that).
+                - If breaking_change is True, describe the breaking changes here.""",
             },
         },
         "required": ["type", "commit_message"],
