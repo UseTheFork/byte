@@ -45,3 +45,21 @@ class MD:
             return ""
 
         return seperator.join(lines)
+
+    @staticmethod
+    def clean_comment_lines(lines: list[str] | str) -> str:
+        """Clean comment lines by removing leading comment markers.
+
+        Accepts either a list of strings or a single string (which gets split into lines).
+        Removes leading comment markers (/, #, -, ;) from each line using lstrip.
+        Returns cleaned lines joined by newlines.
+
+        Example:
+            ["# foo", "// bar"] -> "foo\nbar"
+            "# foo\n// bar" -> "foo\nbar"
+        """
+        if isinstance(lines, str):
+            lines = lines.split("\n")
+
+        result = [line.lstrip("/#-;").strip() for line in lines]
+        return "\n".join(result)

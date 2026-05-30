@@ -74,10 +74,18 @@ class BootstrapAgentTool(BaseTool):
         harness = HarnessStateUtils.set_files(state, edit=editable_files, reference=reference_files)
 
         return ToolResult(
-            result={"content": "OK"},
+            result={"content": "OK", "instruction": instruction},
             extra={"harness": harness},
         )
 
     @classmethod
     def format_tool_message(cls, result: ToolResult) -> str:
         return result.result.get("content", "")
+
+    @classmethod
+    def format_tui_message(cls, result: ToolResult) -> str:
+        """Format the tool result for display in the TUI.
+
+        Override this method to customize how a tool's result is presented.
+        """
+        return result.result.get("instruction", "")

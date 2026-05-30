@@ -225,9 +225,8 @@ class AICommentWatcherService(Service):
                 # Extract instruction from the comment text
                 for comment in single_comment.get("comments", []):
                     # Remove comment markers and extract instruction
-                    clean_comment = comment.strip().lstrip("/#-;").strip()
+                    clean_comment = MD.clean_comment_lines(comment)
                     comment_block.append(clean_comment.strip())
-
                 ai_instruction.append(MD.bullet_list(comment_block))
 
         ai_instruction = "\n".join(ai_instruction)
