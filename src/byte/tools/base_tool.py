@@ -1,3 +1,4 @@
+import json
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict
 
@@ -36,6 +37,15 @@ class BaseTool(ABC, Bootable):
         missing = [field for field in required if field not in args]
         if missing:
             raise ToolValidationException(f"Missing required argument(s): {', '.join(missing)}")
+
+        # Deserialize JSON strings for array and object schema types
+        properties = self.input_schema.get("properties", {})
+        for key, value in args.items():
+            if isinstance(value, str) and key in properties:
+                param_schema = properties[key]
+                param_type = param_schema.get("type")
+                if param_type in ("array", "object"):
+                    args[key] = json.loads(value)
 
         try:
             return await self.run(**args, state=state)

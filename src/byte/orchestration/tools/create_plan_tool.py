@@ -34,5 +34,4 @@ class CreatePlanTool(BaseTool):
 
     @override
     async def run(self, steps: List[str], **kwargs) -> ToolResult:
-        # Pass strings through directly as the plan
         return ToolResult(result={"plan": steps})
