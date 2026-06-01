@@ -162,7 +162,7 @@ class BaseAgentNode(BaseNode):
             memory_str = f"{memory_value:.1f}".rstrip("0").rstrip(".")
             memory_percent = f" · Memory: {memory_str}%"
 
-        summary = f"{model_schema.model} · Tokens: {last_usage.input:,} in / {last_usage.output:,} out · Cost: ${cost:.4f}{memory_percent}"
+        summary = f"{model_schema.model} · Tokens: {last_usage.input:,} in / {last_usage.output:,} out · Cost: ${cost:.2f}{memory_percent}"
         self.emit_tui(
             Messages.CreateTokenUsage(
                 summary=summary,
@@ -197,9 +197,6 @@ class BaseAgentNode(BaseNode):
         prompt_assembler = self.app.make(PromptAssembler, agent_node=self, state=state, extra=extra)
 
         agent_state = await prompt_assembler.generate_messages()
-
-        # TODO: DO we need this?
-        agent_state["errors"] = []
 
         scratch_messages = state.get("scratch_messages", [])
         _, memory_percent = UsageMetrics.estimate_prompt_tokens(agent_state, scratch_messages)

@@ -44,8 +44,15 @@ class BaseTool(ABC, Bootable):
             if isinstance(value, str) and key in properties:
                 param_schema = properties[key]
                 param_type = param_schema.get("type")
+
                 if param_type in ("array", "object"):
-                    args[key] = json.loads(value)
+                    try:
+                        args[key] = json.loads(value)
+                    except json.JSONDecodeError as e:
+                        raise ToolValidationException(
+                            f"Argument '{key}' contains invalid JSON: {e}. "
+                            f"Ensure all inner quotes are properly escaped."
+                        ) from e
 
         try:
             return await self.run(**args, state=state)
