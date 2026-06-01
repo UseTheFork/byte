@@ -66,7 +66,7 @@ class WebCommand(Command, UserInteractive):
             )
             return
 
-        self.emit_tui(
+        content_panel_id = self.emit_tui(
             Messages.CreatePanel(
                 str(markdown_content),
                 f"Content: {url}",
@@ -79,7 +79,7 @@ class WebCommand(Command, UserInteractive):
                 "Add this content to the LLM context?",
                 [
                     Answer("Yes", "yes", True),
-                    Answer("Clean with LLM", "clean"),
+                    # Answer("Clean with LLM", "clean"),
                     Answer("No", "no"),
                 ],
             )
@@ -115,3 +115,6 @@ class WebCommand(Command, UserInteractive):
                 # console.print_warning("No cleaned content returned")
         else:
             await self.notify_warning("Content not added to context")
+
+        if content_panel_id:
+            self.emit_tui(Messages.RemovePanel(panel_id_to_remove=content_panel_id))

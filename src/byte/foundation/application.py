@@ -520,7 +520,7 @@ class Application(Container):
         return task_manager.dispatch_task(coro)
 
     # TODO: Docs strings
-    def emit_tui(self, payload: Message):
+    def emit_tui(self, payload: Message) -> str | None:
         """ """
         if hasattr(payload, "panel_id"):
             from byte.tui import TUIManagerService
@@ -530,3 +530,5 @@ class Application(Container):
 
         byte_tui = self.tui()
         byte_tui.conversation.post_message(payload)
+
+        return getattr(payload, "panel_id", None)

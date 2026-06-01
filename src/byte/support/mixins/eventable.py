@@ -43,7 +43,7 @@ class Eventable:
             payload,
         )
 
-    def emit_tui(self, payload: Message):
+    def emit_tui(self, payload: Message) -> str | None:
         """Emit a TUI event through the event bus system.
 
         Wraps the TuiEvents payload in Events.TuiEvent before emitting,
@@ -54,4 +54,4 @@ class Eventable:
         if not self.app:
             raise RuntimeError("No app available - ensure service is properly initialized")
 
-        self.app.emit_tui(payload)
+        return self.app.emit_tui(payload)

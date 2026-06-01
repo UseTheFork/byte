@@ -301,7 +301,7 @@ class Conversation(Widget):
     async def update_status(self, event: Messages.Status) -> None:
         """Show the loading indicator with an optional message."""
         if event.state == "loading":
-            self.status_bar.show_loading()
+            self.status_bar.show_loading(event.message if event.message is not None else "")
         else:
             self.status_bar.show_status(event.message if event.message is not None else "", state=event.state)
 
