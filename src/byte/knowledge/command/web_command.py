@@ -32,89 +32,96 @@ class WebCommand(Command, UserInteractive):
             prog=self.name,
             description="Fetch webpage using headless Chrome, convert HTML to markdown, display for review, and optionally add to LLM context",
         )
-        parser.add_argument("url", help="URL to scrape")
+        parser.add_argument("urls", nargs="+", help="One or more URLs to scrape (space, comma, or newline separated)")
         return parser
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """Execute the web scraping command.
 
-        Scrapes the provided URL, converts content to markdown, displays it
+        Scrapes the provided URLs, converts content to markdown, displays it
         in a formatted panel, and prompts user to add it to LLM context.
 
         Args:
-                args: URL to scrape
+                args: One or more URLs to scrape
 
-        Usage: Called when user types `/web <url>`
+        Usage: Called when user types `/web <url1> <url2> ...`
         """
 
         self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         session_context_service = self.app.make(SessionContextService)
 
-        url = args.url
+        urls: list[str] = []
+        for token in args.urls:
+            for item in token.split(","):
+                for url_str in item.split("\n"):
+                    stripped = url_str.strip()
+                    if stripped:
+                        urls.append(stripped)
 
-        try:
-            chromium_service = self.app.make(ChromiumService)
-            markdown_content = await chromium_service.do_scrape(url)
-        except ByteConfigException as e:
-            self.emit_tui(
+        for url in urls:
+            try:
+                chromium_service = self.app.make(ChromiumService)
+                markdown_content = await chromium_service.do_scrape(url)
+            except ByteConfigException as e:
+                self.emit_tui(
+                    Messages.CreatePanel(
+                        str(e),
+                        title="Configuration Error",
+                        border_style="error",
+                    )
+                )
+                return
+
+            content_panel_id = self.emit_tui(
                 Messages.CreatePanel(
-                    str(e),
-                    title="Configuration Error",
-                    border_style="error",
+                    str(markdown_content),
+                    f"Content: {url}",
                 )
             )
-            return
 
-        content_panel_id = self.emit_tui(
-            Messages.CreatePanel(
-                str(markdown_content),
-                f"Content: {url}",
-            )
-        )
+            try:
+                interaction_service = self.app.make(InteractionService)
+                choice = await interaction_service.select(
+                    "Add this content to the LLM context?",
+                    [
+                        Answer("Yes", "yes", True),
+                        # Answer("Clean with LLM", "clean"),
+                        Answer("No", "no"),
+                    ],
+                )
+            except InputCancelledError:
+                return
 
-        try:
-            interaction_service = self.app.make(InteractionService)
-            choice = await interaction_service.select(
-                "Add this content to the LLM context?",
-                [
-                    Answer("Yes", "yes", True),
-                    # Answer("Clean with LLM", "clean"),
-                    Answer("No", "no"),
-                ],
-            )
-        except InputCancelledError:
-            return
+            if choice.value == "yes":
+                await self.notify_success("Content added to context")
 
-        if choice.value == "yes":
-            await self.notify_success("Content added to context")
-
-            key = slugify(url)
-            model = self.app.make(SessionContextModel, type="web", key=key, content=markdown_content)
-            session_context_service.add_context(model)
-
-        elif choice.value == "clean":
-            # console.print_info("Cleaning content with LLM...")
-
-            # cleaner_agent = self.app.make(CleanerAgent)
-            # result = await cleaner_agent.execute(
-            #     f"# Extract only the relevant information from this web content:\n\n{markdown_content}",
-            #     display_mode="thinking",
-            # )
-
-            # cleaned_content = result.get("cleaned_content", "")
-            cleaned_content = None
-
-            if cleaned_content:
-                # console.print_success("Content cleaned and added to context")
-                key = slugify(raw_args)
-                model = self.app.make(SessionContextModel, type="web", key=key, content=cleaned_content)
+                key = slugify(url)
+                model = self.app.make(SessionContextModel, type="web", key=key, content=markdown_content)
                 session_context_service.add_context(model)
-            else:
-                pass
-                # console.print_warning("No cleaned content returned")
-        else:
-            await self.notify_warning("Content not added to context")
 
-        if content_panel_id:
-            self.emit_tui(Messages.RemovePanel(panel_id_to_remove=content_panel_id))
+            elif choice.value == "clean":
+                # console.print_info("Cleaning content with LLM...")
+
+                # cleaner_agent = self.app.make(CleanerAgent)
+                # result = await cleaner_agent.execute(
+                #     f"# Extract only the relevant information from this web content:\n\n{markdown_content}",
+                #     display_mode="thinking",
+                # )
+
+                # cleaned_content = result.get("cleaned_content", "")
+                cleaned_content = None
+
+                if cleaned_content:
+                    # console.print_success("Content cleaned and added to context")
+                    key = slugify(raw_args)
+                    model = self.app.make(SessionContextModel, type="web", key=key, content=cleaned_content)
+                    session_context_service.add_context(model)
+                else:
+                    pass
+                    # console.print_warning("No cleaned content returned")
+            else:
+                await self.notify_warning("Content not added to context")
+
+            if content_panel_id:
+                self.emit_tui(Messages.RemovePanel(panel_id_to_remove=content_panel_id))
