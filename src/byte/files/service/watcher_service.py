@@ -26,7 +26,7 @@ class FileWatcherService(Service):
             return True
 
         try:
-            spec = self.ignore_service.get_pathspec()
+            spec = getattr(self, "_cached_pathspec", None)
 
             if not spec:
                 return True
@@ -71,10 +71,18 @@ class FileWatcherService(Service):
         """Main file watching loop."""
         self.file_service = self.app.make(FileService)
         self.ignore_service = self.app.make(FileIgnoreService)
+        self._cached_pathspec = self.ignore_service.get_pathspec()
         self.file_discovery = self.app.make(FileDiscoveryService)
 
         try:
-            async for changes in awatch(str(self.app["path"]), watch_filter=self._watch_filter):
+            async for changes in awatch(
+                str(self.app["path"]),
+                watch_filter=self._watch_filter,
+                rust_timeout=5000,  # prevent indefinite blocking
+            ):
+                ignore_files = {".gitignore", ".byteignore"}
+                if any(Path(p).name in ignore_files for _, p in changes):
+                    self._cached_pathspec = self.ignore_service.get_pathspec()
                 for change_type, file_path_str in changes:
                     self.app["log"].debug(f"File changed: {change_type} -> {file_path_str}")
                     file_path = Path(file_path_str)
