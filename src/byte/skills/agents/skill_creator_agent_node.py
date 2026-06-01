@@ -14,6 +14,8 @@ from byte.system.tools.user_select_tool import UserSelectTool
 
 
 class SkillCreatorAgentNode(BaseAgentNode):
+    llm_tier: str = "reasoning"
+
     def get_user_template(self):
         return [
             Leaves.ConversationHistory(),
