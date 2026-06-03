@@ -7,6 +7,7 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.support.boundary import Boundary, BoundaryType
     from byte.support.boundary_extractor import BoundaryExtractor
+    from byte.support.command_runner import CommandRunner
     from byte.support.concerns.array_store import ArrayStore
     from byte.support.json import Json
     from byte.support.markdown import MD
@@ -16,13 +17,13 @@ if TYPE_CHECKING:
     from byte.support.state import State
     from byte.support.string import Str
     from byte.support.yaml import Yaml
-
 __all__ = (
     "MD",
     "ArrayStore",
     "Boundary",
     "BoundaryExtractor",
     "BoundaryType",
+    "CommandRunner",
     "Json",
     "Section",
     "SectionType",
@@ -39,15 +40,16 @@ _dynamic_imports = {
     "Boundary": "boundary",
     "BoundaryExtractor": "boundary_extractor",
     "BoundaryType": "boundary",
+    "CommandRunner": "command_runner",
+    "Json": "json",
+    "MD": "markdown",
     "Section": "section",
     "SectionType": "section",
     "Service": "service",
     "ServiceProvider": "service_provider",
     "State": "state",
     "Str": "string",
-    "Json": "json",
     "Yaml": "yaml",
-    "MD": "markdown",
     # keep-sorted end
 }
 
