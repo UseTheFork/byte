@@ -24,16 +24,13 @@ class BootConfig(BaseModel):
 
 
 class AppConfig(BaseModel):
-    env: str = Field(default="production", exclude=True, description="XXXX")
-    debug: bool = Field(default=False, exclude=True, description="XXXX")
-    version: str = Field(default="0.0.0", exclude=True, description="XXXX")
+    env: str = Field(default="production", exclude=True)
+    debug: bool = Field(default=False, exclude=True)
+    version: str = Field(default="0.0.0", exclude=True)
 
 
-class ByteConfig(BaseModel):
-    version: str = Field(default="0.0.0", exclude=True, description="XXXX")
-
+class ByteUserConfig(BaseModel):
     # keep-sorted start
-    app: AppConfig = Field(default_factory=AppConfig, exclude=True)
     boot: BootConfig = Field(default_factory=BootConfig)
     files: FilesConfig = Field(default_factory=FilesConfig)
     git: GitConfig = Field(default_factory=GitConfig)
@@ -42,5 +39,13 @@ class ByteConfig(BaseModel):
     lsp: LSPConfig = Field(default_factory=LSPConfig)
     presets: Optional[list[PresetsConfig]] = Field(default_factory=list)
     tui: TUIConfig = Field(default_factory=TUIConfig)
-    web: WebConfig = Field(default_factory=WebConfig)
+    # keep-sorted end
+
+
+class ByteConfig(ByteUserConfig):
+    version: str = Field(default="0.0.0", exclude=True)
+
+    # keep-sorted start
+    app: AppConfig = Field(default_factory=AppConfig, exclude=True)
+    web: WebConfig = Field(default_factory=WebConfig, exclude=True)
     # keep-sorted end

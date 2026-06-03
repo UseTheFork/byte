@@ -1,7 +1,8 @@
+import json
 from pathlib import Path
 from typing import Any, Dict
 
-from byte.config import ByteConfig
+from byte.config import ByteUserConfig
 
 
 def format_type(type_info: Any) -> str:
@@ -220,7 +221,12 @@ def main():
 
     Usage: `python src/scripts/settings_to_md.py`
     """
-    schema = ByteConfig.model_json_schema()
+    schema = ByteUserConfig.model_json_schema()
+    schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
+
+    schema_file = Path(__file__).parent.parent.parent / "schema.json"
+    schema_file.write_text(json.dumps(schema, indent=2), encoding="utf-8")
+
     markdown = schema_to_markdown(schema)
 
     # Write to docs/settings.md

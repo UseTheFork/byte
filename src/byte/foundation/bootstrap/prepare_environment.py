@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from byte.config import ByteConfig
 from byte.foundation.bootstrap.bootstrapper import Bootstrapper
 from byte.llm.config import LLMModelConfig
-from byte.support import Yaml
+from byte.support import Json, Yaml
 from byte.tui.rich.menu import Menu
 
 if TYPE_CHECKING:
@@ -13,6 +13,22 @@ if TYPE_CHECKING:
 
 class PrepareEnvironment(Bootstrapper):
     """"""
+
+    def _migrate_yaml_to_jsonc(self, app: Application) -> None:
+        """Migrate config.yaml to config.jsonc if it exists.
+
+        Checks if config.yaml exists, loads it using Yaml.load_as_dict(),
+        saves it as JSONC using Json.save(), and deletes the old file.
+        """
+        yaml_path = app.config_path("config.yaml")
+        jsonc_path = app.config_path("config.jsonc")
+
+        if yaml_path.exists():
+            data = Yaml.load_as_dict(yaml_path)
+            data["$schema"] = "https://raw.githubusercontent.com/UseTheFork/byte/refs/heads/main/schema.json"
+            Json.save(jsonc_path, data)
+            yaml_path.unlink()
+            app["console"].print_success("Migrated config.yaml to config.jsonc\n")
 
     def _prepare_directories(self, app: Application):
         """Check if this is the first time Byte is being run.
@@ -28,40 +44,6 @@ class PrepareEnvironment(Bootstrapper):
         session_context_path.mkdir(exist_ok=True)
 
         app.cache_path().mkdir(exist_ok=True)
-        app.conventions_path().mkdir(exist_ok=True)
-
-    # def _find_binary(self, binary_name: str) -> Optional[Path]:
-    #     """Find the full path to a binary using which.
-
-    #     Returns the absolute path to the binary if found, None otherwise.
-    #     Usage: `chrome_path = initializer.find_binary("google-chrome")`
-    #     Usage: `python_path = initializer.find_binary("python3")` -> Path("/usr/bin/python3")
-    #     """
-    #     result = shutil.which(binary_name)
-    #     return Path(result) if result else None
-
-    # def _init_web(self, app: Application, config: ByteConfig) -> ByteConfig:
-    #     """Initialize web configuration by detecting Chrome or Chromium binary.
-
-    #     Attempts to locate google-chrome-stable first, then falls back to chromium.
-    #     Updates the chrome_binary_location in the web config section.
-    #     Usage: `config = initializer._init_web(config)`
-    #     """
-    #     chrome_path = self._find_binary("google-chrome-stable")
-    #     if chrome_path is None:
-    #         chrome_path = self._find_binary("chromium")
-
-    #     if chrome_path is not None:
-    #         config.web.chrome_binary_location = chrome_path
-    #         config.web.enable = True
-    #         browser_name = "Chrome" if "chrome" in str(chrome_path) else "Chromium"
-    #         app["console"].print_success(f"Found {browser_name} at {chrome_path}")
-    #         app["console"].print_success("Web commands enabled\n")
-    #     else:
-    #         app["console"].print_warning("Chromium binary not found")
-    #         app["console"].print_warning("Web commands are disabled\n")
-
-    #     return config
 
     def _init_files(self, app: Application, config: ByteConfig) -> ByteConfig:
         """Initialize files configuration by asking if user wants to enable file watching.
@@ -140,14 +122,11 @@ class PrepareEnvironment(Bootstrapper):
         # Initialize LLM configuration
         config = self._init_llm(app, config)
 
-        # Initialize web configuration
-        # TODO: need to finish this.
-        # config = self._init_web(app, config)
-
-        # Write the configuration template to the YAML file
-
-        config_path = app.config_path("config.yaml")
-        Yaml.save(config_path, config.model_dump(mode="json"))
+        # Write the configuration template to the JSONC file
+        config_path = app.config_path("config.jsonc")
+        data = config.model_dump(mode="json")
+        data["$schema"] = "https://raw.githubusercontent.com/UseTheFork/byte/refs/heads/main/schema.json"
+        Json.save(config_path, data)
 
         app["console"].print_success(f"Created configuration file at {config_path}\n")
 
@@ -172,52 +151,18 @@ class PrepareEnvironment(Bootstrapper):
 
         app["console"].print_success("Created Byte directories")
 
-    def _setup_gitignore(self, app: Application):
-        """Ensure .gitignore exists and contains byte cache and session patterns.
+    def _setup_gitignore(self, app: Application) -> None:
+        """Ensure .gitignore exists in .byte/ config directory and contains byte cache and session patterns.
 
-        Usage: `config = self._apply_gitignore_config(config)`
+        This is a self-managed file that is overwritten on every bootstrap.
+        Usage: `self._setup_gitignore(app)`
         """
-        gitignore_path = app.path(".gitignore")
 
-        byte_patterns = [".byte/cache/*", ".byte/session_context/*"]
+        gitignore_path = app.config_path(".gitignore")
+        byte_patterns = ["cache/*", "session_context/*"]
+        gitignore_content = "\n".join(byte_patterns) + "\n"
 
-        # Check if .gitignore exists
-        if gitignore_path.exists():
-            # Read existing content
-            content = gitignore_path.read_text()
-
-            # Check which patterns are missing
-            missing_patterns = [pattern for pattern in byte_patterns if pattern not in content]
-
-            if missing_patterns:
-                # Ask user if they want to add missing patterns to gitignore
-                patterns_str = ", ".join(missing_patterns)
-                menu = Menu(title=f"Add {patterns_str} to .gitignore?", console=app["console"].console)
-                add_to_gitignore = menu.confirm(default=True)
-
-                if add_to_gitignore:
-                    # Add missing patterns
-                    with open(gitignore_path, "a") as f:
-                        # Add newline if file doesn't end with one
-                        if content and not content.endswith("\n"):
-                            f.write("\n")
-                        f.writelines(f"{pattern}\n" for pattern in missing_patterns)
-                    # app["console"].print_success(f"Added {patterns_str} to .gitignore\n")
-                else:
-                    pass
-                    # app["console"].print_info("Skipped adding patterns to .gitignore\n")
-        else:
-            # Ask user if they want to create .gitignore with byte patterns
-            menu = Menu(title="Create .gitignore with .byte patterns?", console=app["console"].console)
-            create_gitignore = menu.confirm(default=True)
-
-            if create_gitignore:
-                # Create .gitignore with byte patterns
-                gitignore_content = "\n".join(byte_patterns) + "\n"
-                gitignore_path.write_text(gitignore_content)
-                # app["console"].print_success("Created .gitignore with .byte patterns\n")
-            else:
-                pass
+        gitignore_path.write_text(gitignore_content)
 
     def _run_first_boot_setup(self, app: Application):
         self._setup_byte_directories(app)
@@ -226,7 +171,9 @@ class PrepareEnvironment(Bootstrapper):
 
     def bootstrap(self, app: Application) -> None:
         """ """
-        pass
+
+        # Temporary here to convert old yaml config to jsonc config
+        self._migrate_yaml_to_jsonc(app)
 
         self._prepare_directories(app)
 
@@ -239,4 +186,4 @@ class PrepareEnvironment(Bootstrapper):
         Usage: `if await initializer.is_first_boot(): ...`
         """
 
-        return not app.config_path("config.yaml").exists()
+        return not app.config_path("config.jsonc").exists()

@@ -3,15 +3,16 @@ name = "byte-ai-cli"
 version = "1.4.0"
 description = "A human-in-the-loop AI coding agent that keeps you in control."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 classifiers = [
     "Environment :: Console",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python",
     "Topic :: Software Development",
 ]
@@ -48,6 +49,7 @@ dependencies = [
     "langchain-mistralai>=1.1.2",
     "partial-json-parser>=0.2.1.1.post7",
     "uvloop>=0.22.1",
+    "json-with-comments>=1.2.10",
 ]
 
 [dependency-groups]
@@ -149,7 +151,7 @@ line-ending = "lf"
 combine-as-imports = true
 
 [build-system]
-requires = ["uv_build>=0.8.10,<0.10.0"]
+requires = ["uv_build>=0.8.10,<0.12.0"]
 build-backend = "uv_build"
 
 [tool.semantic_release]

@@ -11,20 +11,6 @@ Byte's configuration system uses a YAML file located at `.byte/config.yaml` to c
 | `read_only_files` | `array[string]` | - | Files to add to read-only context |
 | `editable_files` | `array[string]` | - | Files to add to editable context |
 
-## Cli
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `ui_theme` | `mocha, macchiato, latte, frappe` | `mocha` | Catppuccin theme variant for the CLI interface (mocha/macchiato are dark, latte is light, frappe is cool dark) |
-| `syntax_theme` | `github-dark, bw, sas, staroffice, xcode, monokai, lightbulb, rrt` | `monokai` | Pygments theme for code block syntax highlighting in CLI output |
-
-## Edit_Format
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `enable_shell_commands` | `boolean` | `false` | Enable execution of shell commands from AI responses. When disabled, shell command blocks will not be executed. |
-| `mask_message_count` | `integer` | `1` | Number of recent AI messages to exclude from masking. Messages older than this count will have their SEARCH/REPLACE blocks removed to reduce token usage. |
-
 ## Files
 
 | Field | Type | Default | Description |
@@ -42,7 +28,7 @@ Byte's configuration system uses a YAML file located at `.byte/config.yaml` to c
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `enable_scopes` | `boolean` | `false` | Enable scope selection for conventional commits |
-| `enable_breaking_changes` | `boolean` | `true` | Enable breaking change detection and confirmation |
+| `enable_breaking_changes` | `boolean` | `false` | Enable breaking change detection and confirmation |
 | `enable_body` | `boolean` | `true` | Enable commit message body generation |
 | `scopes` | `array[string]` | - | Available scopes for conventional commits |
 | `description_guidelines` | `array[string]` | - | Additional guidelines for commit descriptions |
@@ -69,27 +55,37 @@ Code linting and formatting configuration
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 
-## Llm > Main Model
+## Llm > Fast
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `model` | `string` | - | The model identifier to use |
+| `provider` | `string` | - | The models provider to use |
 | `extra_params` | `object` | - | Additional parameters to pass to the model initialization |
 
-## Llm > Weak Model
+## Llm > Standard
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `model` | `string` | - | The model identifier to use |
+| `provider` | `string` | - | The models provider to use |
 | `extra_params` | `object` | - | Additional parameters to pass to the model initialization |
 
-## Llm > Providers
+## Llm > Reasoning
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `gemini` | `LLMProviderConfig` | `{'enable': False, 'extra_params': {}}` |  |
-| `anthropic` | `LLMProviderConfig` | `{'enable': False, 'extra_params': {}}` |  |
-| `openai` | `LLMProviderConfig` | `{'enable': False, 'extra_params': {}}` |  |
+| `model` | `string` | - | The model identifier to use |
+| `provider` | `string` | - | The models provider to use |
+| `extra_params` | `object` | - | Additional parameters to pass to the model initialization |
+
+## Llm > Coding
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `model` | `string` | - | The model identifier to use |
+| `provider` | `string` | - | The models provider to use |
+| `extra_params` | `object` | - | Additional parameters to pass to the model initialization |
 
 ## Lsp
 
@@ -110,9 +106,9 @@ Code linting and formatting configuration
 | `prompt` | `string | null` | - | Preset prompt to load into chat input |
 | `load_on_boot` | `boolean` | `false` | Automatically load this preset when byte starts |
 
-## Web
+## Tui
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `enable` | `boolean` | `false` | Enable web commands |
-| `chrome_binary_location` | `string` | `/usr/bin/google-chrome` | Path to Chrome/Chromium binary executable for headless browser automation |
+| `ui_theme` | `mocha, macchiato, latte, frappe` | `mocha` | Catppuccin theme variant for the CLI interface (mocha/macchiato are dark, latte is light, frappe is cool dark) |
+| `syntax_theme` | `github-dark, bw, sas, staroffice, xcode, monokai, lightbulb, rrt` | `monokai` | Pygments theme for code block syntax highlighting in CLI output |

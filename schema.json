@@ -1,0 +1,549 @@
+{
+  "$defs": {
+    "BootConfig": {
+      "properties": {
+        "read_only_files": {
+          "description": "Files to add to read-only context",
+          "items": {
+            "type": "string"
+          },
+          "title": "Read Only Files",
+          "type": "array"
+        },
+        "editable_files": {
+          "description": "Files to add to editable context",
+          "items": {
+            "type": "string"
+          },
+          "title": "Editable Files",
+          "type": "array"
+        }
+      },
+      "title": "BootConfig",
+      "type": "object"
+    },
+    "ContainerServerConfig": {
+      "description": "Configuration for a containerized LSP server.",
+      "properties": {
+        "type": {
+          "const": "container",
+          "default": "container",
+          "title": "Type",
+          "type": "string"
+        },
+        "image": {
+          "description": "Docker image name (e.g., 'ghcr.io/lsp-client/pyright:latest')",
+          "title": "Image",
+          "type": "string"
+        },
+        "workspace_mount": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Custom workspace mount path in container",
+          "title": "Workspace Mount"
+        }
+      },
+      "required": [
+        "image"
+      ],
+      "title": "ContainerServerConfig",
+      "type": "object"
+    },
+    "CustomServerConfig": {
+      "description": "Configuration for a custom LSP server.",
+      "properties": {
+        "server": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalServerConfig"
+            },
+            {
+              "$ref": "#/$defs/ContainerServerConfig"
+            }
+          ],
+          "description": "Server configuration (local or container)",
+          "title": "Server"
+        },
+        "languages": {
+          "description": "List of language names this server handles",
+          "items": {
+            "type": "string"
+          },
+          "title": "Languages",
+          "type": "array"
+        },
+        "initialization_options": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Initialization options to pass to the LSP server",
+          "title": "Initialization Options"
+        }
+      },
+      "required": [
+        "server",
+        "languages"
+      ],
+      "title": "CustomServerConfig",
+      "type": "object"
+    },
+    "FilesConfig": {
+      "properties": {
+        "watch": {
+          "$ref": "#/$defs/WatchConfig",
+          "default": {
+            "enable": false
+          }
+        },
+        "ignore": {
+          "default": [
+            ".byte/cache",
+            ".ruff_cache",
+            ".idea",
+            ".venv",
+            ".env",
+            ".git",
+            ".pytest_cache",
+            "__pycache__",
+            "node_modules",
+            "dist"
+          ],
+          "description": "List of gitignore-style patterns to exclude from file discovery. Patterns support wildcards and are combined with .gitignore rules.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Ignore",
+          "type": "array"
+        }
+      },
+      "title": "FilesConfig",
+      "type": "object"
+    },
+    "GitConfig": {
+      "description": "Configuration for git domain operations and conventional commit behavior.\n\nControls features like scope selection, breaking change detection, and commit\nmessage body generation for AI-powered git commits.",
+      "properties": {
+        "enable_scopes": {
+          "default": false,
+          "description": "Enable scope selection for conventional commits",
+          "title": "Enable Scopes",
+          "type": "boolean"
+        },
+        "enable_breaking_changes": {
+          "default": false,
+          "description": "Enable breaking change detection and confirmation",
+          "title": "Enable Breaking Changes",
+          "type": "boolean"
+        },
+        "enable_body": {
+          "default": true,
+          "description": "Enable commit message body generation",
+          "title": "Enable Body",
+          "type": "boolean"
+        },
+        "scopes": {
+          "description": "Available scopes for conventional commits",
+          "items": {
+            "type": "string"
+          },
+          "title": "Scopes",
+          "type": "array"
+        },
+        "description_guidelines": {
+          "description": "Additional guidelines for commit descriptions",
+          "items": {
+            "type": "string"
+          },
+          "title": "Description Guidelines",
+          "type": "array"
+        },
+        "max_description_length": {
+          "default": 72,
+          "description": "Maximum character length for commit descriptions",
+          "title": "Max Description Length",
+          "type": "integer"
+        }
+      },
+      "title": "GitConfig",
+      "type": "object"
+    },
+    "LLMConfig": {
+      "description": "LLM domain configuration with provider-specific settings.",
+      "properties": {
+        "fast": {
+          "$ref": "#/$defs/LLMModelConfig",
+          "default": {
+            "model": "",
+            "provider": ""
+          }
+        },
+        "standard": {
+          "$ref": "#/$defs/LLMModelConfig",
+          "default": {
+            "model": "",
+            "provider": ""
+          }
+        },
+        "reasoning": {
+          "$ref": "#/$defs/LLMModelConfig",
+          "default": {
+            "model": "",
+            "provider": ""
+          }
+        },
+        "coding": {
+          "$ref": "#/$defs/LLMModelConfig",
+          "default": {
+            "model": "",
+            "provider": ""
+          }
+        }
+      },
+      "title": "LLMConfig",
+      "type": "object"
+    },
+    "LLMModelConfig": {
+      "description": "Configuration for a specific LLM model.",
+      "properties": {
+        "model": {
+          "default": "",
+          "description": "The model identifier to use",
+          "title": "Model",
+          "type": "string"
+        },
+        "provider": {
+          "default": "",
+          "description": "The models provider to use",
+          "title": "Provider",
+          "type": "string"
+        },
+        "extra_params": {
+          "additionalProperties": true,
+          "description": "Additional parameters to pass to the model initialization",
+          "title": "Extra Params",
+          "type": "object"
+        }
+      },
+      "title": "LLMModelConfig",
+      "type": "object"
+    },
+    "LSPConfig": {
+      "description": "LSP domain configuration with validation and defaults.",
+      "properties": {
+        "enable": {
+          "default": false,
+          "description": "Enable or disable LSP functionality",
+          "title": "Enable",
+          "type": "boolean"
+        },
+        "timeout": {
+          "default": 30,
+          "description": "Timeout in seconds for LSP requests",
+          "title": "Timeout",
+          "type": "integer"
+        },
+        "servers": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/PresetServerConfig"
+              },
+              {
+                "$ref": "#/$defs/CustomServerConfig"
+              }
+            ]
+          },
+          "description": "Map of server names to their configurations",
+          "title": "Servers",
+          "type": "object"
+        }
+      },
+      "title": "LSPConfig",
+      "type": "object"
+    },
+    "LintCommand": {
+      "properties": {
+        "command": {
+          "description": "Command and arguments to execute for linting (e.g., ['ruff', 'check', '--fix']). Use {file} placeholder to specify where the file path should be inserted, otherwise it will be appended to the end.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Command",
+          "type": "array"
+        },
+        "languages": {
+          "description": "List of language names this command handles (e.g., ['python', 'php']). Empty list means all files.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Languages",
+          "type": "array"
+        }
+      },
+      "required": [
+        "command",
+        "languages"
+      ],
+      "title": "LintCommand",
+      "type": "object"
+    },
+    "LintConfig": {
+      "description": "Lint domain configuration with validation and defaults.",
+      "properties": {
+        "enable": {
+          "default": false,
+          "description": "Enable or disable the linting functionality",
+          "title": "Enable",
+          "type": "boolean"
+        },
+        "commands": {
+          "default": [],
+          "description": "List of lint commands to run on files with their target extensions",
+          "items": {
+            "$ref": "#/$defs/LintCommand"
+          },
+          "title": "Commands",
+          "type": "array"
+        }
+      },
+      "title": "LintConfig",
+      "type": "object"
+    },
+    "LocalServerConfig": {
+      "description": "Configuration for a local LSP server.",
+      "properties": {
+        "type": {
+          "const": "local",
+          "default": "local",
+          "title": "Type",
+          "type": "string"
+        },
+        "program": {
+          "description": "Program name or path to execute",
+          "title": "Program",
+          "type": "string"
+        },
+        "args": {
+          "description": "Command line arguments",
+          "items": {
+            "type": "string"
+          },
+          "title": "Args",
+          "type": "array"
+        }
+      },
+      "required": [
+        "program"
+      ],
+      "title": "LocalServerConfig",
+      "type": "object"
+    },
+    "PresetServerConfig": {
+      "description": "Configuration using a prebuilt client from lsp-client.",
+      "properties": {
+        "preset": {
+          "description": "Name of the prebuilt LSP client",
+          "enum": [
+            "pyright",
+            "basedpyright",
+            "pyrefly",
+            "ty",
+            "rust_analyzer",
+            "deno",
+            "typescript",
+            "gopls"
+          ],
+          "title": "Preset",
+          "type": "string"
+        },
+        "server_type": {
+          "default": "container",
+          "description": "Whether to use local or container server (if both available)",
+          "enum": [
+            "local",
+            "container"
+          ],
+          "title": "Server Type",
+          "type": "string"
+        },
+        "initialization_options": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Custom initialization options to override defaults",
+          "title": "Initialization Options"
+        }
+      },
+      "required": [
+        "preset"
+      ],
+      "title": "PresetServerConfig",
+      "type": "object"
+    },
+    "PresetsConfig": {
+      "properties": {
+        "id": {
+          "description": "Unique identifier for the preset, used in /preset <id> command",
+          "title": "Id",
+          "type": "string"
+        },
+        "read_only_files": {
+          "description": "Files to add to read-only context",
+          "items": {
+            "type": "string"
+          },
+          "title": "Read Only Files",
+          "type": "array"
+        },
+        "editable_files": {
+          "description": "Files to add to editable context",
+          "items": {
+            "type": "string"
+          },
+          "title": "Editable Files",
+          "type": "array"
+        },
+        "conventions": {
+          "description": "Convention files to load",
+          "items": {
+            "type": "string"
+          },
+          "title": "Conventions",
+          "type": "array"
+        },
+        "prompt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Preset prompt to load into chat input",
+          "title": "Prompt"
+        },
+        "load_on_boot": {
+          "default": false,
+          "description": "Automatically load this preset when byte starts",
+          "title": "Load On Boot",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "PresetsConfig",
+      "type": "object"
+    },
+    "TUIConfig": {
+      "description": "TUI domain configuration with validation and defaults.",
+      "properties": {
+        "ui_theme": {
+          "default": "mocha",
+          "description": "Catppuccin theme variant for the CLI interface (mocha/macchiato are dark, latte is light, frappe is cool dark)",
+          "enum": [
+            "mocha",
+            "macchiato",
+            "latte",
+            "frappe"
+          ],
+          "title": "Ui Theme",
+          "type": "string"
+        },
+        "syntax_theme": {
+          "default": "monokai",
+          "description": "Pygments theme for code block syntax highlighting in CLI output",
+          "enum": [
+            "github-dark",
+            "bw",
+            "sas",
+            "staroffice",
+            "xcode",
+            "monokai",
+            "lightbulb",
+            "rrt"
+          ],
+          "title": "Syntax Theme",
+          "type": "string"
+        }
+      },
+      "title": "TUIConfig",
+      "type": "object"
+    },
+    "WatchConfig": {
+      "properties": {
+        "enable": {
+          "default": false,
+          "description": "Enable file watching for AI comment markers (AI:, AI@, AI?, AI!). When enabled, Byte automatically detects changes and processes AI instructions.",
+          "title": "Enable",
+          "type": "boolean"
+        }
+      },
+      "title": "WatchConfig",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "boot": {
+      "$ref": "#/$defs/BootConfig"
+    },
+    "files": {
+      "$ref": "#/$defs/FilesConfig"
+    },
+    "git": {
+      "$ref": "#/$defs/GitConfig"
+    },
+    "lint": {
+      "$ref": "#/$defs/LintConfig",
+      "description": "Code linting and formatting configuration"
+    },
+    "llm": {
+      "$ref": "#/$defs/LLMConfig"
+    },
+    "lsp": {
+      "$ref": "#/$defs/LSPConfig"
+    },
+    "presets": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/PresetsConfig"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Presets"
+    },
+    "tui": {
+      "$ref": "#/$defs/TUIConfig"
+    }
+  },
+  "title": "ByteUserConfig",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

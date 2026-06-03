@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from byte.support.boundary import Boundary, BoundaryType
     from byte.support.boundary_extractor import BoundaryExtractor
     from byte.support.concerns.array_store import ArrayStore
+    from byte.support.json import Json
     from byte.support.markdown import MD
     from byte.support.section import Section, SectionType
     from byte.support.service import Service
@@ -22,6 +23,7 @@ __all__ = (
     "Boundary",
     "BoundaryExtractor",
     "BoundaryType",
+    "Json",
     "Section",
     "SectionType",
     "Service",
@@ -43,6 +45,7 @@ _dynamic_imports = {
     "ServiceProvider": "service_provider",
     "State": "state",
     "Str": "string",
+    "Json": "json",
     "Yaml": "yaml",
     "MD": "markdown",
     # keep-sorted end
