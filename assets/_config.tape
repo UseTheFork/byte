@@ -12,3 +12,6 @@ Set Theme "catppuccin-mocha"
 
 Set Framerate 60
 Set TypingSpeed 0.1
+
+Env BYTE_DEBUG "false"
+Env BYTE_ENV "production"

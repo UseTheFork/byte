@@ -42,19 +42,19 @@ PROVIDERS = [
     AskServiceProvider,
     CoderServiceProvider,
     ConstitutionServiceProvider,
-    SpecsServiceProvider,
+    DevelopmentServiceProvider,
+    FileServiceProvider,
     # PresetsProvider,
     HarnessServiceProvider,
-    DevelopmentServiceProvider,
-    ResearchServiceProvider,
-    FileServiceProvider,
     KnowledgeServiceProvider,
     LLMServiceProvider,
     LSPServiceProvider,
     LintServiceProvider,
     MemoryServiceProvider,
     NodeServiceProvider,
+    ResearchServiceProvider,
     SkillsServiceProvider,
+    SpecsServiceProvider,
     SystemServiceProvider,
     TUIServiceProvider,
     WebServiceProvider,
@@ -63,8 +63,12 @@ PROVIDERS = [
 
 
 def cli():
-    """Byte CLI Assistant"""
+    """Configure and run the CLI application.
 
+    Configures the Application with the current working directory and service providers,
+    sets the asyncio event loop policy to uvloop, and runs the application's command
+    handler with sys.argv.
+    """
     try:
         application = Application.configure(Path.cwd(), PROVIDERS).create()  # ty:ignore[invalid-argument-type]
 

@@ -1,29 +1,19 @@
 Source assets/_config.tape
 Source assets/_boot.tape
 
-Wait+Line       />/
+Wait+Screen@30s       /╭─ Analytics/
 Sleep 2s
 
-Type "/rea"
-Sleep 500ms
-Down
+Type "/add"
 Sleep 500ms
 Type " git/"
 Sleep 2s
-Down
-Backspace 11
+Tab
+Backspace 12
 Type "**"
 Enter
 
-Wait+Line       />/
+Wait+Screen@30s       /╭─ Analytics/
 Sleep 2s
-
-Type "/add cli."
-Sleep 500ms
-Down
-Sleep 500ms
-Enter
-
-Sleep 3s
 
 Output docs/images/recording/command_file.gif
