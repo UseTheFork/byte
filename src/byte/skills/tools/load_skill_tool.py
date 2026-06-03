@@ -32,7 +32,7 @@ class LoadSkillTool(BaseTool):
         skill_loader_service = self.app.make(SkillLoaderService)
         skill = skill_loader_service.get_skill(skill_name)
         if skill is None:
-            return ToolValidationException(f"Skill '{skill_name}' not found.")
+            raise ToolValidationException(f"Skill '{skill_name}' not found.")
 
         return ToolResult(
             result={
