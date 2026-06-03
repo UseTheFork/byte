@@ -1,11 +1,8 @@
-from __future__ import annotations
-
 import shutil
-from importlib import metadata
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from byte.config import ByteConfig, Migrator
+from byte.config import ByteConfig
 from byte.foundation.bootstrap.bootstrapper import Bootstrapper
 from byte.support import Json
 
@@ -89,24 +86,6 @@ class LoadConfiguration(Bootstrapper):
                 config.web.enable = True
                 config.web.chrome_binary_location = chrome_binary
 
-    def _migrate(self, app: Application, config: dict) -> dict:
-        """Migrate configuration from older versions to current version.
-
-        Checks if config version matches current app version. If not, runs
-        sequential migrations to bring config up to date.
-        Usage: `config = self._migrate(app, config_dict)`
-        """
-
-        version = metadata.version("byte-ai-cli")
-        app.instance("version", version)
-
-        # Versions match no need to migrate.
-        if config.get("version", "0.0.0") == version:
-            return config
-
-        migrator = Migrator(app)
-        return migrator.handle(config)
-
     def bootstrap(self, app: Application) -> None:
         """
         Bootstrap environment variable loading.
@@ -115,12 +94,9 @@ class LoadConfiguration(Bootstrapper):
             app: The application instance.
         """
 
-        yaml_config = self._load_configuration_file(app)
+        user_config = self._load_configuration_file(app)
 
-        # Before we load the config we check to see if it needs to be migrated from an old version.
-        migrated_config = self._migrate(app, yaml_config)
-
-        config = app.instance("config", ByteConfig(**migrated_config))
+        config = app.instance("config", ByteConfig(**user_config))
         self._load_boot_config(app, config)
         self._configure_web_browser(config)
 
