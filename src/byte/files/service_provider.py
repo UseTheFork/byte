@@ -13,10 +13,8 @@ from byte.files import (
     FileWatcherService,
     ListFilesCommand,
     ListFilesTool,
-    ReadOnlyCommand,
     ReloadFilesCommand,
     ReplaceFileTool,
-    SwitchModeCommand,
     ToolFileService,
     WriteFileTool,
 )
@@ -45,9 +43,7 @@ class FileServiceProvider(ServiceProvider):
             AddFileCommand,
             DropFileCommand,
             ListFilesCommand,
-            ReadOnlyCommand,
             ReloadFilesCommand,
-            SwitchModeCommand,
             # keep-sorted end
         ]
 

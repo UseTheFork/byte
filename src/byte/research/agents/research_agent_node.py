@@ -75,7 +75,6 @@ class ResearchAgentNode(BaseAgentNode):
         return [
             Leaves.ReferenceMaterials(),
             Leaves.ProjectEnvironment(),
-            Leaves.ProjectHierarchy(),
             Leaves.HarnessWorkspaceFiles(),
             Leaves.HarnessWorkspaceReferenceFiles(),
             Leaves.Epilogue(

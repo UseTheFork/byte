@@ -2,7 +2,7 @@ from argparse import Namespace
 from typing import List
 
 from byte import ByteArgumentParser, Command
-from byte.files import FileMode, FileService
+from byte.files import FileService
 from byte.tui import Messages
 
 
@@ -40,7 +40,7 @@ class AddFileCommand(Command):
         file_path = args.file_path
 
         file_service = self.app.make(FileService)
-        result = await file_service.add_file(file_path, FileMode.EDITABLE)
+        result = await file_service.add_file(file_path)
 
         if not result:
             await self.notify_error(

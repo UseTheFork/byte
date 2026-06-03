@@ -143,8 +143,7 @@ class Messages:
 
     @dataclass
     class UpdateFiles(Message):
-        editable: int
-        read_only: int
+        count: int
 
     @dataclass
     class PromptUser(Message):

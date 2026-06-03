@@ -17,11 +17,11 @@ class FileContext(Leaf):
         """ """
         file_service = prompt_assembler.get_app().make(FileService)
 
-        read_only_files, editable_files = await file_service.generate_context_prompt_with_line_numbers()
+        files = await file_service.generate_context_prompt()
 
         lines = []
 
-        if not read_only_files and not editable_files:
+        if not files:
             return ""
 
         if self.as_section:
@@ -36,24 +36,11 @@ class FileContext(Leaf):
                 ]
             )
 
-        if read_only_files:
-            read_only_content = "\n".join(read_only_files)
+        if files:
+            editable_content = "\n".join(files)
             lines.extend(
                 [
-                    Section.sub_heading("Reference Files", 2, True),
-                    "Any edits to these files will be rejected",
-                    "",
-                    "```",
-                    f"{read_only_content}",
-                    "```",
-                ]
-            )
-
-        if editable_files:
-            editable_content = "\n".join(editable_files)
-            lines.extend(
-                [
-                    Section.sub_heading("Editable Files", 2, True),
+                    Section.sub_heading("Files", 2, True),
                     "",
                     "```",
                     f"{editable_content}",

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from byte import Service
-from byte.files import FileEvents, FileMode, FileService
+from byte.files import FileEvents, FileService
 from byte.orchestration import OrchestrationEvents
 from byte.support import MD
 from byte.support.utils import list_to_multiline_text
@@ -102,11 +102,10 @@ class AICommentWatcherService(Service):
     async def _scan_for_ai_comments(self, file_path: Path, content: str) -> Optional[dict]:
         """Scan file content for AI comment patterns.
 
-        Returns dict with line_nums, comments, and action_type, or None if no AI comments found.
+        Returns dict with comments and action_type, or None if no AI comments found.
         """
         comments = []
         action_type = None
-        file_mode = FileMode.EDITABLE
 
         # First pass: Extract all comment lines
         comment_blocks = self._extract_comment_lines(content)
@@ -117,12 +116,6 @@ class AICommentWatcherService(Service):
 
             if ai_match:
                 comments.append(comment_block)
-
-                # Determine file mode based on AI marker
-                if ai_match["marker"] == "@":
-                    file_mode = FileMode.READ_ONLY
-                elif ai_match["marker"] == ":":
-                    file_mode = FileMode.EDITABLE
 
                 # Track action type (prioritize ! over ?)
                 if ai_match["action"] == "!":
@@ -136,14 +129,13 @@ class AICommentWatcherService(Service):
         return {
             "comments": comments,
             "action_type": action_type,
-            "file_mode": file_mode,
             "file_path": file_path,
         }
 
-    async def _auto_add_file_to_context(self, file_path: Path, mode: FileMode = FileMode.EDITABLE) -> bool:
+    async def _auto_add_file_to_context(self, file_path: Path) -> bool:
         """Automatically add file to context when AI comment is detected."""
 
-        result = await self.file_service.add_file(file_path, mode)
+        result = await self.file_service.add_file(file_path)
         if result:
             await self.file_service.notify_file_stats()
 
@@ -156,15 +148,13 @@ class AICommentWatcherService(Service):
             ai_result = await self._scan_for_ai_comments(file_path, content)
 
             if ai_result:
-                # Use the determined file mode from the scan result
-                file_mode = ai_result["file_mode"]
-                auto_add_result = await self._auto_add_file_to_context(file_path, file_mode)
+                auto_add_result = await self._auto_add_file_to_context(file_path)
 
                 # Return true if file was added OR if any AI comments were found
                 return auto_add_result or bool(ai_result.get("action_type"))
 
             return False
-        except FileNotFoundError, PermissionError, UnicodeDecodeError:
+        except (FileNotFoundError, PermissionError, UnicodeDecodeError):
             return False
 
     async def handle_file_change(self, payload: FileEvents.FileChanged) -> FileEvents.FileChanged:

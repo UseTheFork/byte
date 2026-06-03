@@ -3,7 +3,7 @@ from argparse import Namespace
 from rich.columns import Columns
 
 from byte import ByteArgumentParser, Command
-from byte.files import FileMode, FileService
+from byte.files import FileService
 
 
 class ListFilesCommand(Command):
@@ -38,35 +38,18 @@ class ListFilesCommand(Command):
         console = self.app["console"]
         file_service = self.app.make(FileService)
 
-        # Get files by mode
-        read_only_files = file_service.list_files(FileMode.READ_ONLY)
-        editable_files = file_service.list_files(FileMode.EDITABLE)
+        # Get all files in context
+        files = file_service.list_files()
 
         # Check if context is empty
-        if not read_only_files and not editable_files:
+        if not files:
             console.print("[info]No files in context[/info]")
             return
 
-        # Create panels for each file mode
-        panels_to_show = []
-
-        if read_only_files:
-            file_paths = [f"[text]{f.relative_path}[/text]" for f in read_only_files]
-            read_only_panel = console.panel(
-                Columns(file_paths, equal=True, expand=True),
-                title=f"Read-Only Files ({len(read_only_files)})",
-            )
-            panels_to_show.append(read_only_panel)
-
-        if editable_files:
-            file_paths = [f"[text]{f.relative_path}[/text]" for f in editable_files]
-            editable_panel = console.panel(
-                Columns(file_paths, equal=True, expand=True),
-                title=f"Editable Files ({len(editable_files)})",
-            )
-            panels_to_show.append(editable_panel)
-
-        # Display panels in columns layout
-        if panels_to_show:
-            columns_panel = Columns(panels_to_show, equal=True, expand=True)
-            console.print(columns_panel)
+        # Display all files
+        file_paths = [f"[text]{f.relative_path}[/text]" for f in files]
+        panel = console.panel(
+            Columns(file_paths, equal=True, expand=True),
+            title=f"Files in Context ({len(files)})",
+        )
+        console.print(panel)

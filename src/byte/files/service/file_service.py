@@ -1,12 +1,11 @@
+import fnmatch
 import glob
 from os import PathLike
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 from byte import Service
-from byte.files import FileContext, FileDiscoveryService, FileEvents, FileMode
-from byte.support import Boundary, BoundaryType
-from byte.support.utils import list_to_multiline_text
+from byte.files import FileContext, FileDiscoveryService
 from byte.tui import Messages
 
 
@@ -23,31 +22,18 @@ class FileService(Service):
         """Initialize file service and ensure discovery service is ready."""
         self._context_files: Dict[str, FileContext] = {}
 
-    async def _notify_file_added(self, file_path: str, mode: FileMode):
-        """Notify system that a file was added to context"""
-
-        await self.emit(
-            FileEvents.FileAdded(
-                file_path=file_path,
-                mode=mode.value,
-            ),
-        )
-
     async def notify_file_stats(self):
-        """Notify system that a file was added or removed from context"""
+        """Notify system of current context file count."""
 
-        # Count editable and read-only files in context
-        editable_count = sum(1 for f in self._context_files.values() if f.mode == FileMode.EDITABLE)
-        read_only_count = sum(1 for f in self._context_files.values() if f.mode == FileMode.READ_ONLY)
+        count = len(self._context_files)
 
         self.emit_tui(
             Messages.UpdateFiles(
-                editable=editable_count,
-                read_only=read_only_count,
+                count=count,
             ),
         )
 
-    async def add_file(self, path: Union[str, PathLike], mode: FileMode) -> bool:
+    async def add_file(self, path: Union[str, PathLike]) -> bool:
         """Add a file to the active context for AI awareness.
 
         Supports wildcard patterns like 'byte/*' to add multiple files at once.
@@ -82,7 +68,7 @@ class FileService(Service):
                 # Only add files that are in the discovery service and are actual files
                 if path_obj.is_file() and str(path_obj) in discovered_file_paths:
                     key = str(path_obj)
-                    self._context_files[key] = FileContext(path=path_obj, mode=mode, root_path=self.app["path"])
+                    self._context_files[key] = FileContext(path=path_obj, root_path=self.app["path"])
                     success_count += 1
 
             return success_count > 0
@@ -90,7 +76,7 @@ class FileService(Service):
             # Handle single file path
             if not Path(path).is_absolute():
                 # Resolve relative paths from project base path
-                path_obj = (self.app.root_path(str(path))).resolve()
+                path_obj = (self.app["path"] / str(path)).resolve()
             else:
                 path_obj = Path(path).resolve()
 
@@ -104,9 +90,7 @@ class FileService(Service):
             if key in self._context_files:
                 return False
 
-            self._context_files[key] = FileContext(path=path_obj, mode=mode, root_path=self.app["path"])
-
-            await self._notify_file_added(key, mode)
+            self._context_files[key] = FileContext(path=path_obj, root_path=self.app["path"])
 
             # Emit event for UI updates and other interested components
             return True
@@ -138,11 +122,11 @@ class FileService(Service):
                 # Convert absolute path back to relative for pattern matching
                 try:
                     relative_path = str(Path(context_path).relative_to(self.app["path"]))
-                    if glob.fnmatch.fnmatch(relative_path, path_str) or glob.fnmatch.fnmatch(context_path, path_str):
+                    if fnmatch.fnmatch(relative_path, path_str) or fnmatch.fnmatch(context_path, path_str):
                         matching_paths.append(context_path)
                 except ValueError:
                     # If can't make relative, try matching absolute path
-                    if glob.fnmatch.fnmatch(context_path, path_str):
+                    if fnmatch.fnmatch(context_path, path_str):
                         matching_paths.append(context_path)
 
             if not matching_paths:
@@ -158,7 +142,7 @@ class FileService(Service):
             # Handle single file path
             if not Path(path).is_absolute():
                 # Resolve relative paths from project base path
-                path_obj = (self.app.path(str(path))).resolve()
+                path_obj = (self.app["path"] / str(path)).resolve()
             else:
                 path_obj = Path(path).resolve()
             key = str(path_obj)
@@ -170,37 +154,17 @@ class FileService(Service):
                 return True
             return False
 
-    def list_files(self, mode: Optional[FileMode] = None) -> List[FileContext]:
-        """List files in context, optionally filtered by access mode.
+    def list_files(self) -> List[FileContext]:
+        """List all files in context.
 
-        Enables UI components to display current context state and
-        distinguish between editable and read-only files.
-        Usage: `editable_files = service.list_files(FileMode.EDITABLE)`
+        Returns all files currently in the AI context,
+        sorted by relative path for consistent, user-friendly ordering.
+        Usage: `files = service.list_files()`
         """
         files = list(self._context_files.values())
 
-        if mode is not None:
-            files = [f for f in files if f.mode == mode]
-
         # Sort by relative path for consistent, user-friendly ordering
         return sorted(files, key=lambda f: f.relative_path)
-
-    async def set_file_mode(self, path: Union[str, PathLike], mode: FileMode) -> bool:
-        """Change file access mode between read-only and editable.
-
-        Allows users to adjust file permissions without removing and re-adding,
-        useful when transitioning from exploration to editing phases.
-        Usage: `await service.set_file_mode("main.py", FileMode.EDITABLE)`
-        """
-        path_obj = Path(path).resolve()
-        key = str(path_obj)
-
-        if key in self._context_files:
-            # Create a new FileContext with the updated mode
-            old_context = self._context_files[key]
-            self._context_files[key] = FileContext(path=old_context.path, mode=mode, root_path=self.app["path"])
-            return True
-        return False
 
     def get_file_context(self, path: Union[str, PathLike]) -> Optional[FileContext]:
         """Retrieve file context metadata for a specific path.
@@ -212,164 +176,26 @@ class FileService(Service):
         path_obj = Path(path).resolve()
         return self._context_files.get(str(path_obj))
 
-    async def generate_context_prompt(self) -> tuple[list[str], list[str]]:
-        """Generate structured file lists for read-only and editable files.
+    async def generate_context_prompt(self) -> list[str]:
+        """Generate flat list of formatted file strings for prompt context.
 
-        Returns two separate lists of formatted file strings, enabling
-        flexible assembly in the prompt context. The AI can understand
-        its permissions and make appropriate suggestions for each file type.
+        Returns a single list of all context files formatted for inclusion
+        in the AI prompt, without mode-based separation.
 
         Returns:
-                Tuple of (read_only_files, editable_files) as lists of strings
+                List of formatted file strings
 
-        Usage: `read_only, editable = await service.generate_context_prompt()`
+        Usage: `files = await service.generate_context_prompt()`
         """
-        read_only_files = []
-        editable_files = []
+        files = []
 
         if not self._context_files:
-            return (read_only_files, editable_files)
+            return files
 
-        # Separate files by mode for clear AI understanding
-        read_only = [f for f in self._context_files.values() if f.mode == FileMode.READ_ONLY]
-        editable = [f for f in self._context_files.values() if f.mode == FileMode.EDITABLE]
+        for file_ctx in sorted(self._context_files.values(), key=lambda f: f.relative_path):
+            files.append(file_ctx.to_boundary())
 
-        if read_only:
-            for file_ctx in sorted(read_only, key=lambda f: f.relative_path):
-                content = file_ctx.get_content()
-                if content is not None:
-                    language = file_ctx.language
-                    opening = Boundary.open(
-                        BoundaryType.FILE,
-                        meta={"source": file_ctx.relative_path, "language": language, "mode": "read-only"},
-                    )
-                    read_only_files.append(
-                        list_to_multiline_text(
-                            [
-                                f"{opening}",
-                                f"```{language}",
-                                f"{content}",
-                                "```",
-                                Boundary.close(BoundaryType.FILE),
-                            ]
-                        )
-                    )
-
-        if editable:
-            for file_ctx in sorted(editable, key=lambda f: f.relative_path):
-                content = file_ctx.get_content()
-                if content is not None:
-                    language = file_ctx.language
-                    opening = Boundary.open(
-                        BoundaryType.FILE,
-                        meta={"source": file_ctx.relative_path, "language": language, "mode": "editable"},
-                    )
-                    editable_files.append(
-                        list_to_multiline_text(
-                            [
-                                f"{opening}",
-                                f"```{language}",
-                                f"{content}",
-                                "```",
-                                Boundary.close(BoundaryType.FILE),
-                            ]
-                        )
-                    )
-
-        return (read_only_files, editable_files)
-
-    def generate_project_hierarchy_tree(
-        self,
-        path: Path,
-        prefix: str = "",
-        show_files: bool = True,
-        discovered_files: Optional[set] = None,
-        max_files_per_dir: int = 5,
-    ) -> str:
-        """Recursively builds the directory tree structure as a string, respecting gitignore."""
-        lines = []
-
-        if not path.is_dir():
-            return f"Error: '{path}' is not a directory."
-
-        # Get discovered files on first call
-        if discovered_files is None:
-            file_discovery = self.app.make(FileDiscoveryService)
-            discovered_files = set(file_discovery._all_files)
-
-        # sort items to ensure consistent order
-        contents = sorted(list(path.iterdir()))
-
-        # Filter and separate directories from files
-        filtered_dirs = []
-        filtered_files = []
-        for item in contents:
-            if item.is_dir():
-                # Include directory if it contains any discovered files
-                if any(f.is_relative_to(item) for f in discovered_files):
-                    filtered_dirs.append(item)
-            elif item in discovered_files:
-                # Include file if it's in discovered files
-                filtered_files.append(item)
-
-        # Limit files if needed (but show all files at root level)
-        is_root = path == self.app["path"]
-        if is_root:
-            files_to_show = filtered_files
-            remaining_files = 0
-        else:
-            files_to_show = filtered_files[:max_files_per_dir]
-            remaining_files = len(filtered_files) - len(files_to_show)
-
-        # Combine dirs and limited files for display
-        filtered_contents = filtered_dirs + files_to_show
-
-        # use different connectors for the last item in a directory
-        # Account for the "more files" message if present
-        has_more_message = remaining_files > 0
-        pointers = ["├── "] * (len(filtered_contents) - 1 + (1 if has_more_message else 0)) + ["└── "]
-
-        for pointer, item in zip(pointers, filtered_contents):
-            if item.is_dir():
-                lines.append(f"{prefix}{pointer}{item.name}/")
-                # Recurse into subdirectory with an updated prefix
-                extension = "│   " if pointer == "├── " else "    "
-                lines.append(
-                    self.generate_project_hierarchy_tree(
-                        item, prefix + extension, show_files, discovered_files, max_files_per_dir
-                    )
-                )
-            elif show_files:
-                lines.append(f"{prefix}{pointer}{item.name}")
-
-        # Add "more files" message if needed
-        if has_more_message:
-            lines.append(f"{prefix}└── ... {remaining_files} more files")
-
-        return "\n".join(lines)
-
-    async def generate_project_hierarchy(self) -> str:
-        """Generate a concise project hierarchy for LLM understanding.
-
-        Creates a tree-like structure showing directories and a sample of files,
-        with special attention to root-level configuration files. Shows a limited
-        number of files per directory with a count of additional files.
-
-        Args:
-                max_depth: Maximum directory depth to traverse (default: 8)
-                max_files_per_dir: Maximum number of files to show per directory (default: 5)
-
-        Returns:
-                Formatted string representing the project structure
-
-        Usage: `hierarchy = await service.generate_project_hierarchy()` -> tree structure
-        """
-        if not self.app["path"]:
-            return "No project root configured"
-
-        result = self.generate_project_hierarchy_tree(self.app["path"])
-
-        return f"Project Structure:\n{result}"
+        return files
 
     async def clear_context(self):
         """Clear all files from context for fresh start.
@@ -414,59 +240,3 @@ class FileService(Service):
         """
         path_obj = Path(path).resolve()
         return str(path_obj) in self._context_files
-
-    async def generate_context_prompt_with_line_numbers(self) -> tuple[list[str], list[str]]:
-        """Generate structured file lists with line numbers for read-only and editable files.
-
-        Similar to generate_context_prompt but includes line numbers for each line,
-        making it easier for the research agent to identify specific lines when
-        using LSP tools that require line numbers.
-
-        Returns:
-                Tuple of (read_only_files, editable_files) as lists of strings with line numbers
-
-        Usage: `read_only, editable = await service.generate_context_prompt_with_line_numbers()`
-        """
-        read_only_files = []
-        editable_files = []
-
-        if not self._context_files:
-            return (read_only_files, editable_files)
-
-        # Separate files by mode for clear AI understanding
-        read_only = [f for f in self._context_files.values() if f.mode == FileMode.READ_ONLY]
-        editable = [f for f in self._context_files.values() if f.mode == FileMode.EDITABLE]
-
-        if read_only:
-            for file_ctx in sorted(read_only, key=lambda f: f.relative_path):
-                content = file_ctx.get_content()
-                if content is not None:
-                    # Add line numbers to content
-                    lines = content.splitlines()
-                    numbered_lines = [f"{i:6d} | {line}" for i, line in enumerate(lines)]
-                    numbered_content = "\n".join(numbered_lines)
-                    language = file_ctx.language
-                    opening = Boundary.open(
-                        BoundaryType.FILE,
-                        meta={"source": file_ctx.relative_path, "language": language, "mode": "read-only"},
-                    )
-                    closing = Boundary.close(BoundaryType.FILE)
-                    read_only_files.append(f"{opening}\n{content}\n{closing}")
-
-        if editable:
-            for file_ctx in sorted(editable, key=lambda f: f.relative_path):
-                content = file_ctx.get_content()
-                if content is not None:
-                    # Add line numbers to content
-                    lines = content.splitlines()
-                    numbered_lines = [f"{i + 1:6d} | {line}" for i, line in enumerate(lines)]
-                    numbered_content = "\n".join(numbered_lines)
-                    language = file_ctx.language
-                    opening = Boundary.open(
-                        BoundaryType.FILE,
-                        meta={"source": file_ctx.relative_path, "language": language, "mode": "editable"},
-                    )
-                    closing = Boundary.close(BoundaryType.FILE)
-                    editable_files.append(f"{opening}\n{content}\n{closing}")
-
-        return (read_only_files, editable_files)

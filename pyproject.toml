@@ -50,6 +50,7 @@ dependencies = [
     "partial-json-parser>=0.2.1.1.post7",
     "uvloop>=0.22.1",
     "json-with-comments>=1.2.10",
+    "tree-sitter-language-pack>=1.8.1",
 ]
 
 [dependency-groups]

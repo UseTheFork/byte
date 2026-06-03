@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from byte import Service
-from byte.files import FileDiscoveryService, FileMode, FileService
+from byte.files import FileDiscoveryService, FileService
 from byte.tui import InteractionService, Messages
 
 
@@ -14,31 +14,24 @@ class ToolFileService(Service):
         self.file_service = self.app.make(FileService)
 
     def _prepare_file_path(self, path: str) -> Path:
-        """Validate file path exists and is not read-only.
+        """Validate file path is valid and within project.
 
         Returns:
-            Tuple of (is_valid, status_or_message). BlockStatus if invalid, empty string if valid.
+            Resolved Path object for the file.
 
-        Usage: `valid, status = self._validate_file_path()` -> (BlockStatus, "") or (BlockStatus, MESSAGE)
+        Usage: `path = self._prepare_file_path("file.py")` -> Path object
         """
 
-        file_service = self.app.make(FileService)
         file_path = Path(path)
 
         # If the path is relative, resolve it against the project root
         if not file_path.is_absolute():
-            resolved_file_path = self.app.root_path(str(file_path)).resolve()
+            resolved_file_path = (self.app["path"] / str(file_path)).resolve()
         else:
             resolved_file_path = file_path.resolve()
 
-        # Check if file is in read-only context
-        file_context = file_service.get_file_context(resolved_file_path)
-
-        if file_context and file_context.mode == FileMode.READ_ONLY:
-            raise Exception(f"Cannot edit read-only file `{path}`.")
-
         # Check if file is outside project
-        project_root = Path(self.app.root_path())
+        project_root = self.app["path"]
 
         try:
             resolved_file_path.resolve().relative_to(project_root.resolve())
@@ -106,7 +99,7 @@ class ToolFileService(Service):
                 full_path.write_text(content, encoding="utf-8")
 
                 await self.file_discovery_service.add_file(full_path)
-                await self.file_service.add_file(str(full_path), FileMode.EDITABLE)
+                await self.file_service.add_file(str(full_path))
 
                 return f"Successfully wrote {len(content)} characters to `{path}`"
             else:

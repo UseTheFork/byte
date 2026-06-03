@@ -36,19 +36,14 @@ class MemoryUsedInfo(Static):
 
 
 class FileInfo(Static):
-    editable: reactive[int] = reactive(0)
-    read_only: reactive[int] = reactive(0)
+    count: reactive[int] = reactive(0)
 
     def _format_file_info(self) -> str:
         """Format the file info display text."""
-        return f"Files: [@click=screen.request_manage_files()]{self.editable} Editable | {self.read_only} Read Only[/]"
+        return f"Files: [@click=screen.request_manage_files()]{self.count}[/]"
 
-    def watch_editable(self, editable: int) -> None:
-        """Update the label when editable changes."""
-        self.update(self._format_file_info())
-
-    def watch_read_only(self, read_only: int) -> None:
-        """Update the label when read_only changes."""
+    def watch_count(self, count: int) -> None:
+        """Update the label when count changes."""
         self.update(self._format_file_info())
 
 
@@ -106,7 +101,7 @@ class Analytics(containers.VerticalGroup):
                 width: 50%;
             }
         }
-        
+
     }
     """
 
@@ -115,8 +110,7 @@ class Analytics(containers.VerticalGroup):
     memory_used: reactive[str] = reactive("0%", layout=True)
     memory_percent: reactive[float] = reactive(0.0)
 
-    files_read_only: var[int] = var(0)
-    files_editable: reactive[int] = reactive(0)
+    files_count: reactive[int] = reactive(0)
     context_count: var[int] = var(0)
 
     def __init__(
@@ -139,9 +133,7 @@ class Analytics(containers.VerticalGroup):
             yield ProgressBar(total=100, classes="", id="memory-progress")
             yield MemoryUsedInfo(self.memory_used, classes="px-1").data_bind(memory_used=Analytics.memory_used)
         with HorizontalGroup(id="file-analytics"):
-            yield FileInfo(classes="px-1 text-left").data_bind(
-                editable=Analytics.files_editable, read_only=Analytics.files_read_only
-            )
+            yield FileInfo(classes="px-1 text-left").data_bind(count=Analytics.files_count)
             yield ContextInfo(classes="px-1 text-right").data_bind(context_count=Analytics.context_count)
         with HorizontalGroup(id="token-analytics"):
             yield TokensInfo(self.tokens_used, classes="px-1 text-left").data_bind(tokens_used=Analytics.tokens_used)
@@ -171,10 +163,9 @@ class Analytics(containers.VerticalGroup):
         """Update file counts display.
 
         Args:
-            event: UpdateFiles message containing editable and read_only file counts.
+            event: UpdateFiles message containing file count.
         """
-        self.files_editable = event.editable
-        self.files_read_only = event.read_only
+        self.files_count = event.count
 
     def update_context(self, event) -> None:
         """Update context count display.

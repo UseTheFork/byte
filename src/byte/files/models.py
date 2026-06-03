@@ -1,4 +1,3 @@
-from enum import StrEnum
 from pathlib import Path
 from typing import Optional
 
@@ -8,18 +7,10 @@ from byte.support import Boundary, BoundaryType
 from byte.support.utils import get_language_from_filename, list_to_multiline_text
 
 
-class FileMode(StrEnum):
-    """File access mode for AI context management."""
-
-    READ_ONLY = "read_only"
-    EDITABLE = "editable"
-
-
 class FileContext(BaseModel):
-    """Immutable file context containing path and access mode information."""
+    """Immutable file context containing path information."""
 
     path: Path
-    mode: FileMode
     root_path: Path
 
     @property

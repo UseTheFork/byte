@@ -11,7 +11,6 @@ class FileEvents:
         """Event emitted when a file is added to context."""
 
         file_path: str
-        mode: str
         action: str = "context_added"
 
     @dataclass

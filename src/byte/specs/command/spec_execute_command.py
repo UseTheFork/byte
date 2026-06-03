@@ -3,7 +3,7 @@ from typing import List
 
 from byte import ByteArgumentParser, Command
 from byte.coder import CoderWorkflow
-from byte.files import FileMode, FileService
+from byte.files import FileService
 from byte.orchestration import PhaseUtils, WorkflowService
 from byte.specs import SpecLoaderService
 from byte.tui import InteractionService, Messages
@@ -56,9 +56,9 @@ class SpecExecuteCommand(Command):
             await file_service.clear_context()
 
             for path in task.files.edit:
-                await file_service.add_file(path, FileMode.EDITABLE)
+                await file_service.add_file(path)
             for path in task.files.reference:
-                await file_service.add_file(path, FileMode.READ_ONLY)
+                await file_service.add_file(path)
 
             await workflow_service.execute(
                 coder_workflow,

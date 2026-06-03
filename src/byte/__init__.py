@@ -6,7 +6,6 @@ from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
     from byte.command import ByteArgumentParser, Command, CommandRegistryService
-    from byte.context import get_application, make
     from byte.event import Event, EventBus
     from byte.foundation import Application, TaskManager
     from byte.logging import LogService
@@ -27,8 +26,6 @@ __all__ = (
     "TaskManager",
     "dd",
     "dump",
-    "get_application",
-    "make",
 )
 
 _dynamic_imports = {
@@ -46,8 +43,6 @@ _dynamic_imports = {
     "TaskManager": "foundation",
     "dd": "support.utils",
     "dump": "support.utils",
-    "get_application": "context",
-    "make": "context",
     # keep-sorted end
 }
 

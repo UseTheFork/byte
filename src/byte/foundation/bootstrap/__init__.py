@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from byte.foundation.bootstrap.load_environment_variables import LoadEnvironmentVariables
     from byte.foundation.bootstrap.prepare_environment import PrepareEnvironment
     from byte.foundation.bootstrap.register_providers import RegisterProviders
-    from byte.foundation.bootstrap.set_context import SetContext
 
 __all__ = (
     "BootProviders",
@@ -22,7 +21,6 @@ __all__ = (
     "LoadEnvironmentVariables",
     "PrepareEnvironment",
     "RegisterProviders",
-    "SetContext",
 )
 
 _dynamic_imports = {
@@ -34,7 +32,6 @@ _dynamic_imports = {
     "LoadEnvironmentVariables": "load_environment_variables",
     "PrepareEnvironment": "prepare_environment",
     "RegisterProviders": "register_providers",
-    "SetContext": "set_context",
     # keep-sorted end
 }
 
