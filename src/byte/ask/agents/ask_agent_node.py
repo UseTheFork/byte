@@ -9,6 +9,7 @@ from byte.node import (
 )
 from byte.node.nodes import EndNode
 from byte.orchestration import AIMessage, BaseState, Leaves
+from byte.skills.tools.load_skill_tool import LoadSkillTool
 from byte.support import Section, SectionType, Str
 from byte.support.utils import extract_content_from_message
 
@@ -41,6 +42,7 @@ class AskAgentNode(BaseAgentNode):
     def get_system_template(self):
         return [
             Leaves.Preamble(role="Act as an expert software developer."),
+            Leaves.SkillsAvailable(),
             Leaves.CommunicationStyle(verbose=True),
             Leaves.WorkflowConstraints(
                 [
@@ -74,6 +76,11 @@ class AskAgentNode(BaseAgentNode):
                     "DO NOT provide full code implementations unless explicitly requested. Describe the changes needed first.",
                 ]
             ),
+        ]
+
+    def get_tools(self, state: BaseState):
+        return [
+            LoadSkillTool,
         ]
 
     async def __call__(
