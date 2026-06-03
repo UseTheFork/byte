@@ -52,3 +52,7 @@ class FileContext(BaseModel):
                 closing,
             ]
         )
+
+    def to_summary(self) -> Optional[str]:
+        # TODO: this will use tree-sitter
+        pass

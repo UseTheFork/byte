@@ -65,12 +65,16 @@ class CoderWorkflow(BaseWorkflow):
                     WriteFileTool,
                     DeleteFileTool,
                     ReplaceFileTool,
+                    UpdatePhaseTool,
+                ],
+                note=[
+                    f"To Complete this phase you may use the `{UpdatePhaseTool.name}` tool or one of the provided file tools.",
                 ],
                 executed_by=CoderAgentNode,
             ),
             PhaseModel(
                 id="linting",
-                content=f"Run the `{LintTool.name}`. If lint errors are reported, fix them using the available file tools and re-run the lint tool. Repeat until linting passes with no errors.",
+                content=f"Run the `{LintTool.name}` tool FIRST. If lint errors are reported, fix them using the available file tools and re-run the lint tool. Repeat until linting passes with no errors.",
                 tools=[
                     LintTool,
                     EditFileTool,
