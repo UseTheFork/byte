@@ -23,19 +23,12 @@ class LoadConfiguration(Bootstrapper):
         Returns:
             Path to the first found binary, or None if no binary is found.
         """
-        common_paths = [Path("/usr/bin"), Path("/usr/local/bin"), Path("/opt/homebrew/bin")]
 
         for binary_name in binary_names:
             # First try shutil.which for system PATH search
             which_result = shutil.which(binary_name)
             if which_result:
                 return Path(which_result)
-
-            # Then check common paths
-            for common_path in common_paths:
-                binary_path = common_path / binary_name
-                if binary_path.exists():
-                    return binary_path
 
         return None
 
@@ -81,7 +74,7 @@ class LoadConfiguration(Bootstrapper):
             config: The ByteConfig instance to update.
         """
         if not config.web.enable:
-            chrome_binary = self._find_binary(["google-chrome-stable", "chromium"])
+            chrome_binary = self._find_binary(["google-chrome", "google-chrome-stable", "chromium"])
             if chrome_binary:
                 config.web.enable = True
                 config.web.chrome_binary_location = chrome_binary

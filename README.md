@@ -28,6 +28,12 @@ For complete documentation, visit **[usethefork.github.io/byte](https://usethefo
 
 ---
 
+## A message from the developer
+
+This is one
+
+---
+
 ## Design Philosophy
 
 **Transparency First** - You see the complete prompt, not just your input. All interactions are logged for reference and debugging.
