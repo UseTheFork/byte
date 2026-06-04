@@ -24,11 +24,13 @@ class PrepareEnvironment(Bootstrapper):
         jsonc_path = app.config_path("config.jsonc")
 
         if yaml_path.exists():
-            data = Yaml.load_as_dict(yaml_path)
-            data["$schema"] = "https://raw.githubusercontent.com/UseTheFork/byte/refs/heads/main/schema.json"
+            data = {
+                "$schema": "https://raw.githubusercontent.com/UseTheFork/byte/refs/heads/main/schema.json",
+                **Yaml.load_as_dict(yaml_path),
+            }
             Json.save(jsonc_path, data)
             yaml_path.unlink()
-            app["console"].print_success("Migrated config.yaml to config.jsonc\n")
+            self.app["console"].print_boot_status("ok", "Migrated config.yaml to config.jsonc")
 
     def _prepare_directories(self, app: Application):
         """Check if this is the first time Byte is being run.
@@ -124,8 +126,10 @@ class PrepareEnvironment(Bootstrapper):
 
         # Write the configuration template to the JSONC file
         config_path = app.config_path("config.jsonc")
-        data = config.model_dump(mode="json")
-        data["$schema"] = "https://raw.githubusercontent.com/UseTheFork/byte/refs/heads/main/schema.json"
+        data = {
+            "$schema": "https://raw.githubusercontent.com/UseTheFork/byte/refs/heads/main/schema.json",
+            **config.model_dump(mode="json"),
+        }
         Json.save(config_path, data)
 
         app["console"].print_success(f"Created configuration file at {config_path}\n")
@@ -149,7 +153,7 @@ class PrepareEnvironment(Bootstrapper):
         # Create cache directory for temporary files
         app.cache_path().parent.mkdir(parents=True, exist_ok=True)
 
-        app["console"].print_success("Created Byte directories")
+        self.app["console"].print_boot_status("ok", "Created Byte directories")
 
     def _setup_gitignore(self, app: Application) -> None:
         """Ensure .gitignore exists in .byte/ config directory and contains byte cache and session patterns.
@@ -166,7 +170,6 @@ class PrepareEnvironment(Bootstrapper):
 
     def _run_first_boot_setup(self, app: Application):
         self._setup_byte_directories(app)
-        self._setup_gitignore(app)
         self._setup_config(app)
 
     def bootstrap(self, app: Application) -> None:
@@ -176,6 +179,7 @@ class PrepareEnvironment(Bootstrapper):
         self._migrate_yaml_to_jsonc(app)
 
         self._prepare_directories(app)
+        self._setup_gitignore(app)
 
         if self.is_first_boot(app):
             self._run_first_boot_setup(app)

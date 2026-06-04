@@ -82,20 +82,25 @@ class Console:
         """
         return self.console.height
 
-    def print_boot_status(self, status: Literal["ok", "fail", "warn"], message: str, **kwargs) -> None:
+    def print_boot_status(self, status: Literal["ok", "fail", "warn"], message: str, subject: str | None = None, **kwargs) -> None:
         """Print a boot status message in Linux-style format.
 
         Displays a message with a status indicator in the format [  STATUS  ] MESSAGE,
-        similar to Linux system boot messages. Status must be one of the valid options.
+        or with a subject in the format [  STATUS  ] [muted]MESSAGE[/muted] [text]SUBJECT[/text]
+        for dim-to-bright boot log style, similar to Linux system boot messages.
 
         Usage:
                 service.print_boot_status("ok", "System initialized")
+                service.print_boot_status("ok", "Registered", "ServiceClass")
                 service.print_boot_status("fail", "Network connection failed")
                 service.print_boot_status("warn", "Warning message")
 
         Args:
                 status: Boot status indicator - must be one of: 'ok', 'fail', 'warn'
                 message: Boot message to display
+                subject: Optional subject to display in bright text after the message.
+                         When provided, the message is displayed in muted style and
+                         the subject in text style for emphasis. Defaults to None.
                 **kwargs: Additional keyword arguments passed to Console.print()
         """
         valid_statuses = {"ok", "fail", "warn"}
@@ -115,7 +120,10 @@ class Console:
         display_status = message_map[status]
         style = style_map[status]
 
-        output = f"[  [{style}]{display_status}[/{style}]  ] {message}"
+        if subject is not None:
+            output = f"[  [{style}]{display_status}[/{style}]  ] [muted]{message}[/muted] [text]{subject}[/text]"
+        else:
+            output = f"[  [{style}]{display_status}[/{style}]  ] {message}"
         self.console.print(output, **kwargs)
 
     def print_success(self, message: str, **kwargs) -> None:

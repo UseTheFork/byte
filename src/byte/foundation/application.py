@@ -436,6 +436,7 @@ class Application(Container):
         """
         from byte.tui import TUIManagerService
 
+        # TODO: This needs to be fixed / updates
         try:
             tui = self.make(TUIManagerService)
 
