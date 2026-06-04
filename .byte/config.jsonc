@@ -26,14 +26,7 @@
         "languages": ["python"]
       },
       {
-        "command": [
-          "uv",
-          "run",
-          "ruff",
-          "format",
-          "--force-exclude",
-          "--respect-gitignore"
-        ],
+        "command": ["uv", "run", "ruff", "format", "--force-exclude", "--respect-gitignore"],
         "languages": ["python"]
       },
       {
@@ -51,17 +44,7 @@
     ]
   },
   "files": {
-    "ignore": [
-      ".byte/cache",
-      ".ruff_cache",
-      ".idea",
-      ".venv",
-      ".env",
-      ".git",
-      ".pytest_cache",
-      "__pycache__",
-      "node_modules"
-    ],
+    "ignore": [".byte/cache", ".ruff_cache", ".idea", ".venv", ".env", ".git", ".pytest_cache", "__pycache__", "node_modules"],
     "watch": {
       "enable": true
     }
