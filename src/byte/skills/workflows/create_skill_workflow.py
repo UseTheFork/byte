@@ -19,8 +19,8 @@ class CreateSkillWorkflow(BaseWorkflow):
                 id="1",
                 content="Capture intent — understand what the skill should do, when it triggers, and what the expected output looks like.",
                 note=[
-                    f"   - Use `{UserSelectTool.name}`, or `{UserConfirmTool.name}` to gather information from the user",
-                    f"   - Use `{ListFilesTool.name}`, `{AddFilesTool.name}`, or `{GitGrepTool.name}` to gather additional context if needed",
+                    f"Use `{UserSelectTool.name}`, or `{UserConfirmTool.name}` to gather information from the user",
+                    f"Use `{ListFilesTool.name}`, `{AddFilesTool.name}`, or `{GitGrepTool.name}` to gather additional context if needed",
                 ],
                 tools=[
                     UserSelectTool,
@@ -35,7 +35,7 @@ class CreateSkillWorkflow(BaseWorkflow):
                 id="2",
                 content=f"Generate a draft of the skill and confirm using the {UserConfirmOrInputTool.name}",
                 note=[
-                    f"   - You MUST use the `{UpdatePhaseTool.name}` tool to end complete this phase.",
+                    f"You MUST use the `{UpdatePhaseTool.name}` tool to end complete this phase.",
                 ],
                 tools=[
                     UserConfirmOrInputTool,

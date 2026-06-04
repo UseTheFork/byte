@@ -6,46 +6,40 @@ from byte.files.config import FilesConfig
 from byte.git.config import GitConfig
 from byte.lint.config import LintConfig
 from byte.llm.config import LLMConfig
-from byte.lsp.config import LSPConfig
 from byte.presets.config import PresetsConfig
 from byte.tui.config import TUIConfig
 from byte.web.config import WebConfig
 
 
-class CLIArgs(BaseModel):
-    read_only_files: list[str] = Field(default_factory=list, description="Files to add to read-only context")
-    editable_files: list[str] = Field(default_factory=list, description="Files to add to editable context")
-
-
-# TODO: should this be moved to a boot domain or to the syste, domain?
+# TODO: should this be moved to a boot domain or to the system domain?
 class BootConfig(BaseModel):
     read_only_files: list[str] = Field(default_factory=list, description="Files to add to read-only context")
     editable_files: list[str] = Field(default_factory=list, description="Files to add to editable context")
 
 
 class AppConfig(BaseModel):
-    env: str = Field(default="production", exclude=True)
-    debug: bool = Field(default=False, exclude=True)
-    version: str = Field(default="0.0.0", exclude=True)
+    env: str = Field(default="production")
+    debug: bool = Field(default=False)
+    version: str = Field(default="0.0.0")
 
 
 class ByteUserConfig(BaseModel):
     # keep-sorted start
-    boot: BootConfig = Field(default_factory=BootConfig)
     files: FilesConfig = Field(default_factory=FilesConfig)
     git: GitConfig = Field(default_factory=GitConfig)
     lint: LintConfig = Field(default_factory=LintConfig, description="Code linting and formatting configuration")
     llm: LLMConfig = Field(default_factory=LLMConfig)
-    lsp: LSPConfig = Field(default_factory=LSPConfig)
+    # lsp: LSPConfig = Field(default_factory=LSPConfig)
     presets: Optional[list[PresetsConfig]] = Field(default_factory=list)
     tui: TUIConfig = Field(default_factory=TUIConfig)
+    web: WebConfig = Field(default_factory=WebConfig)
     # keep-sorted end
 
 
 class ByteConfig(ByteUserConfig):
-    version: str = Field(default="0.0.0", exclude=True)
+    version: str = Field(default="0.0.0")
 
     # keep-sorted start
-    app: AppConfig = Field(default_factory=AppConfig, exclude=True)
-    web: WebConfig = Field(default_factory=WebConfig, exclude=True)
+    app: AppConfig = Field(default_factory=AppConfig)
+    boot: BootConfig = Field(default_factory=BootConfig)
     # keep-sorted end

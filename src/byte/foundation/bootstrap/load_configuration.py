@@ -45,7 +45,7 @@ class LoadConfiguration(Bootstrapper):
         config_file_path = app.config_path("config.jsonc")
         return Json.load_as_dict(config_file_path)
 
-    def _load_boot_config(self, app: Application, config: ByteConfig):
+    def _load_boot_config(self, app: Application, config: ByteConfig) -> ByteConfig:
         """Load boot configuration from CLI arguments.
 
         Merges boot config from YAML with CLI arguments, removing duplicates.
@@ -64,7 +64,9 @@ class LoadConfiguration(Bootstrapper):
         editable_files = list(set(config.boot.editable_files + editable_files))
         config.boot.editable_files = editable_files
 
-    def _configure_web_browser(self, config: ByteConfig) -> None:
+        return config
+
+    def _configure_web_browser(self, config: ByteConfig) -> ByteConfig:
         """Auto-detect and configure Chrome/Chromium binary.
 
         Searches for Chrome/Chromium binary if web config is not explicitly enabled,
@@ -73,11 +75,17 @@ class LoadConfiguration(Bootstrapper):
         Args:
             config: The ByteConfig instance to update.
         """
-        if not config.web.enable:
-            chrome_binary = self._find_binary(["google-chrome", "google-chrome-stable", "chromium"])
-            if chrome_binary:
-                config.web.enable = True
-                config.web.chrome_binary_location = chrome_binary
+
+        if config.web.chrome_binary_location:
+            config.web.enable = True
+            return config
+
+        chrome_binary = self._find_binary(["google-chrome", "google-chrome-stable", "chromium"])
+        if chrome_binary:
+            config.web.enable = True
+            config.web.chrome_binary_location = chrome_binary
+
+        return config
 
     def bootstrap(self, app: Application) -> None:
         """
@@ -89,9 +97,10 @@ class LoadConfiguration(Bootstrapper):
 
         user_config = self._load_configuration_file(app)
 
-        config = app.instance("config", ByteConfig(**user_config))
-        self._load_boot_config(app, config)
-        self._configure_web_browser(config)
+        pending_config = ByteConfig(**user_config)
+        pending_config = self._load_boot_config(app, pending_config)
+        pending_config = self._configure_web_browser(pending_config)
+        config = app.instance("config", pending_config)
 
         app.detect_environment(lambda: config.app.env)
         # app.resolve_environment_using(lambda environments: app.environment(*environments))

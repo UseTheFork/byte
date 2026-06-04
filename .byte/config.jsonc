@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/UseTheFork/byte/refs/heads/development/schema.json",
   "llm": {
     "reasoning": {
       "model": "claude-opus-4-6",
@@ -21,14 +22,8 @@
     "enable": true,
     "commands": [
       {
-        "command": [
-          "uv",
-          "run",
-          "ssort"
-        ],
-        "languages": [
-          "python"
-        ]
+        "command": ["uv", "run", "ssort"],
+        "languages": ["python"]
       },
       {
         "command": [
@@ -39,39 +34,19 @@
           "--force-exclude",
           "--respect-gitignore"
         ],
-        "languages": [
-          "python"
-        ]
+        "languages": ["python"]
       },
       {
-        "command": [
-          "uv",
-          "run",
-          "ruff",
-          "check",
-          "--fix",
-          "--force-exclude"
-        ],
-        "languages": [
-          "python"
-        ]
+        "command": ["uv", "run", "ruff", "check", "--fix", "--force-exclude"],
+        "languages": ["python"]
       },
       {
-        "command": [
-          "prettier",
-          "--write"
-        ],
-        "languages": [
-          "markdown"
-        ]
+        "command": ["prettier", "--write"],
+        "languages": ["markdown"]
       },
       {
-        "command": [
-          "keep-sorted"
-        ],
-        "languages": [
-          "*"
-        ]
+        "command": ["keep-sorted"],
+        "languages": ["*"]
       }
     ]
   },
@@ -91,7 +66,7 @@
       "enable": true
     }
   },
-  "cli": {
+  "tui": {
     "ui_theme": "mocha",
     "syntax_theme": "github-dark"
   },
@@ -102,209 +77,8 @@
       "python": {
         "preset": "ty",
         "server_type": "local",
-        "languages": [
-          "python"
-        ]
+        "languages": ["python"]
       }
     }
-  },
-  "presets": [
-    {
-      "id": "base",
-      "load_on_boot": false,
-      "conventions": [
-        "CODE_PATTERNS.md",
-        "COMMENT_STYLEGUIDE.md",
-        "PROJECT_ARCHITECTURE.md",
-        "PYTHON_STYLEGUIDE.md"
-      ],
-      "read_only_files": [
-        "src/byte/foundation/container.py",
-        "src/byte/foundation/application.py",
-        "src/byte/foundation/console/kernel.py",
-        "src/byte/foundation/console/console.py",
-        "src/byte/config/config.py",
-        "src/byte/support/utils/**",
-        "src/byte/support/service_provider.py",
-        "src/byte/support/service.py"
-      ],
-      "editable_files": [
-        "src/tests/base_test.py"
-      ]
-    },
-    {
-      "id": "files",
-      "load_on_boot": false,
-      "conventions": [
-        "CODE_PATTERNS.md",
-        "COMMENT_STYLEGUIDE.md",
-        "PROJECT_ARCHITECTURE.md",
-        "PYTHON_STYLEGUIDE.md"
-      ],
-      "read_only_files": [
-        "src/byte/foundation/container.py",
-        "src/byte/foundation/application.py",
-        "src/byte/foundation/console/kernel.py",
-        "src/byte/foundation/console/console.py",
-        "src/byte/config/config.py",
-        "src/byte/support/utils/**",
-        "src/byte/support/service_provider.py",
-        "src/byte/support/service.py"
-      ],
-      "editable_files": [
-        "src/tests/base_test.py",
-        "src/byte/files/**",
-        "src/tests/files/**"
-      ]
-    },
-    {
-      "id": "command",
-      "conventions": [
-        "CODE_PATTERNS.md",
-        "COMMENT_STYLEGUIDE.md",
-        "PROJECT_ARCHITECTURE.md",
-        "PYTHON_STYLEGUIDE.md"
-      ],
-      "read_only_files": [
-        "src/byte/foundation/container.py",
-        "src/byte/foundation/application.py",
-        "src/byte/foundation/console/kernel.py",
-        "src/byte/foundation/console/console.py",
-        "src/byte/config/config.py",
-        "src/byte/support/utils/**",
-        "src/byte/support/mixins/user_interactive.py",
-        "src/byte/cli/service/command_registry.py",
-        "src/byte/files/command/add_file_command.py",
-        "src/byte/files/command/drop_file_command.py",
-        "src/byte/knowledge/command/web_command.py",
-        "src/byte/git/command/commit_command.py"
-      ]
-    },
-    {
-      "id": "mkdocs",
-      "prompt": "Using the `MKDOCS_STYLEGUIDE` and existing docs as examples, document  ",
-      "conventions": [
-        "MKDOCS_STYLEGUIDE.md",
-        "PROJECT_ARCHITECTURE.md"
-      ],
-      "editable_files": [
-        "src/byte/README.md",
-        "docs/index.md",
-        "docs/concepts/index.md"
-      ],
-      "read_only_files": [
-        "docs/concepts/web.md",
-        "docs/concepts/lint.md",
-        "docs/concepts/file-context.md",
-        ".byte/config.yaml"
-      ]
-    },
-    {
-      "id": "agent",
-      "conventions": [
-        "CODE_STYLEGUIDE.md",
-        "COMMENT_STYLEGUIDE.md",
-        "PROJECT_ARCHITECTURE.md",
-        "PYTHON_STYLEGUIDE.md"
-      ],
-      "read_only_files": [
-        "src/byte/foundation/container.py",
-        "src/byte/foundation/application.py",
-        "src/byte/foundation/console/kernel.py",
-        "src/byte/foundation/console/console.py",
-        "src/byte/config/config.py",
-        "src/byte/support/utils/**",
-        "src/byte/support/mixins/**",
-        "src/byte/support/service_provider.py",
-        "src/byte/support/service.py"
-      ],
-      "editable_files": [
-        "src/byte/agent/state.py",
-        "src/byte/agent/reducers.py",
-        "src/byte/agent/schemas.py",
-        "src/byte/agent/service_provider.py",
-        "src/byte/agent/implementations/base.py",
-        "src/byte/agent/nodes/base_node.py",
-        "src/tests/agent/test_commit_agent.py",
-        "src/byte/agent/nodes/start_node.py",
-        "src/byte/agent/nodes/end_node.py",
-        "src/byte/agent/nodes/assistant_node.py"
-      ]
-    },
-    {
-      "id": "parser",
-      "conventions": [
-        "CODE_PATTERNS.md",
-        "COMMENT_STYLEGUIDE.md",
-        "PROJECT_ARCHITECTURE.md",
-        "PYTHON_STYLEGUIDE.md"
-      ],
-      "read_only_files": [
-        "src/byte/foundation/container.py",
-        "src/byte/foundation/application.py",
-        "src/byte/foundation/console/kernel.py",
-        "src/byte/foundation/console/console.py",
-        "src/byte/config/config.py",
-        "src/byte/support/utils/**",
-        "src/byte/support/service_provider.py",
-        "src/byte/support/service.py"
-      ],
-      "editable_files": [
-        "src/byte/agent/nodes/parse_blocks_node.py",
-        "src/tests/base_test.py",
-        "src/byte/prompt_format/**",
-        "src/tests/prompt_format/**"
-      ]
-    },
-    {
-      "id": "skill",
-      "read_only_files": [
-        "src/byte/agent/implementations/coder/prompt.py",
-        "src/byte/cli/__init__.py",
-        "src/byte/cli/argparse/base.py",
-        "src/byte/cli/config.py",
-        "src/byte/cli/exceptions.py",
-        "src/byte/cli/rich/code_block_navigator.py",
-        "src/byte/cli/rich/heading.py",
-        "src/byte/cli/rich/markdown.py",
-        "src/byte/cli/rich/menu.py",
-        "src/byte/cli/rich/panel_rule.py",
-        "src/byte/cli/rich/rune_spinner.py",
-        "src/byte/cli/schemas.py",
-        "src/byte/cli/service/command_registry.py",
-        "src/byte/cli/service/interactions_service.py",
-        "src/byte/cli/service/prompt_toolkit_service.py",
-        "src/byte/cli/service/stream_rendering_service.py",
-        "src/byte/cli/service/subprocess_service.py",
-        "src/byte/cli/service_provider.py",
-        "src/byte/cli/utils/formatters.py",
-        "src/byte/prompt_format/schemas.py",
-        "src/byte/prompt_format/service/parser_service_prompt.py",
-        "src/byte/prompt_format/utils/boundary.py"
-      ],
-      "editable_files": [
-        "src/byte/agent/utils/prompt_assembler.py",
-        "src/byte/parsing/__init__.py",
-        "src/byte/parsing/exceptions.py",
-        "src/byte/parsing/schemas.py",
-        "src/byte/parsing/service/__init__.py",
-        "src/byte/parsing/service/skill_parsing_service.py",
-        "src/byte/parsing/service_provider.py",
-        "src/byte/skills/__init__.py",
-        "src/byte/skills/base_skill.py",
-        "src/byte/skills/service_provider.py"
-      ],
-      "conventions": [
-        "CODE_PATTERNS.md",
-        "COMMENT_STYLEGUIDE.md",
-        "MKDOCS_STYLEGUIDE.md",
-        "PROJECT_ARCHITECTURE.md",
-        "PROJECT_TOOLING.md"
-      ],
-      "prompt": "None",
-      "load_on_boot": false
-    }
-  ],
-  "version": "1.0.0",
-  "$schema": "https://raw.githubusercontent.com/UseTheFork/byte/refs/heads/main/schema.json"
+  }
 }

@@ -40,7 +40,7 @@ class FileInfo(Static):
 
     def _format_file_info(self) -> str:
         """Format the file info display text."""
-        return f"Files: [@click=screen.request_manage_files()]{self.count}[/]"
+        return f"[@click=screen.request_manage_files()]Files: {self.count}[/]"
 
     def watch_count(self, count: int) -> None:
         """Update the label when count changes."""
@@ -52,7 +52,7 @@ class ContextInfo(Static):
 
     def _format_context_info(self) -> str:
         """Format the context info display text."""
-        return f"Context: [@click=screen.request_manage_context()]{self.context_count} Items[/]"
+        return f"[@click=screen.request_manage_context()]Context: {self.context_count}[/]"
 
     def watch_context_count(self, context_count: int) -> None:
         """Update the label when context_count changes."""
