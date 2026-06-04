@@ -72,6 +72,7 @@ class HandleExceptions(Bootstrapper):
         Args:
             app: The application instance.
         """
+        pass
 
         HandleExceptions.app = app
 

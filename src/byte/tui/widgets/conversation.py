@@ -7,6 +7,7 @@ from textual.containers import VerticalScroll
 from textual.css.query import NoMatches
 from textual.reactive import reactive
 from textual.widget import Widget
+from textual.worker import Worker, WorkerState
 
 from byte import EventBus
 from byte.support import Str
@@ -132,18 +133,22 @@ class Conversation(Widget):
         self.allow_input_submit = False
         self.emit_user_input_submitted(event)
 
-    @work(thread=True)
+    @work(thread=True, exit_on_error=False)
     async def emit_user_input_submitted(self, event: Messages.UserInputSubmitted):
-        try:
-            await self.event_bus.emit(
-                TuiEvents.UserInputSubmitted(
-                    event.body,
-                    interrupted=event.interrupted,
-                )
+        await self.event_bus.emit(
+            TuiEvents.UserInputSubmitted(
+                event.body,
+                interrupted=event.interrupted,
             )
-        except Exception as e:
+        )
+
+    @on(Worker.StateChanged)
+    async def handle_worker_state_changed(self, event: Worker.StateChanged) -> None:
+        """Called when the worker state changes."""
+        if event.state is WorkerState.ERROR:
             self.post_message(Messages.Status(state="error", message="Oof... Check the logs."))
-            raise e
+            self.move_focus_to_prompt()
+            self.allow_input_submit = True
 
     async def get_or_create_response_panel(self, panel_id: str | None) -> ResponsePanel:
         if panel_id is None:
@@ -200,7 +205,6 @@ class Conversation(Widget):
                 max_input_tokens=event.max_input_tokens,
             )
         )
-        self.scroll_to_latest_message()
 
     @on(Messages.AddStaticMarkdown)
     async def add_static_markdown(self, event: Messages.AddStaticMarkdown) -> None:

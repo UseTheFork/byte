@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-import asyncio
+import inspect
 from typing import TYPE_CHECKING, Awaitable, Callable, Dict, List, TypeVar, Union
 
 from byte.event import Event
@@ -42,18 +40,13 @@ class EventBus:
         current_event = event
 
         for listener in self._listeners[event_type]:
-            try:
-                if asyncio.iscoroutinefunction(listener):
-                    result = await listener(current_event)
-                else:
-                    result = listener(current_event)
+            if inspect.iscoroutinefunction(listener):
+                result = await listener(current_event)
+            else:
+                result = listener(current_event)
 
-                # Auto-chain: if listener returns an event, use it; otherwise keep current
-                if result is not None:
-                    current_event = result
-
-            except Exception as e:
-                self.app["log"].exception(e)
-                print(f"Error in event listener for '{event_type.__name__}': {e}")
+            # Auto-chain: if listener returns an event, use it; otherwise keep current
+            if result is not None:
+                current_event = result
 
         return current_event
