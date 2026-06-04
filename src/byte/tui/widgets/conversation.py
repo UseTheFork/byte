@@ -146,6 +146,7 @@ class Conversation(Widget):
     async def handle_worker_state_changed(self, event: Worker.StateChanged) -> None:
         """Called when the worker state changes."""
         if event.state is WorkerState.ERROR:
+            # TODO: we should maybe display some of the error in the console.
             self.post_message(Messages.Status(state="error", message="Oof... Check the logs."))
             self.move_focus_to_prompt()
             self.allow_input_submit = True
@@ -323,13 +324,7 @@ class Conversation(Widget):
 
     @on(Messages.Notify)
     async def flash(self, event: Messages.Notify) -> None:
-        """Flash a single-line message to the user.
-
-        Args:
-            content: Content to flash.
-            style: A semantic style.
-            duration: Duration in seconds of the flash, or `None` to use default in settings.
-        """
+        """Flash a single-line message to the user."""
         self.notify(
             str(event.content),
             # title="Clipboard error",
@@ -339,20 +334,12 @@ class Conversation(Widget):
 
     @on(Messages.UpdateContext)
     async def update_context(self, event: Messages.UpdateContext) -> None:
-        """Update context count display with current context statistics.
-
-        Args:
-            event: UpdateContext message containing context_count information.
-        """
+        """Update context count display with current context statistics."""
         self.query_one(Analytics).update_context(event)
 
     @on(Messages.UpdateAnalytics)
     async def analytics(self, event: Messages.UpdateAnalytics) -> None:
-        """Update analytics display with token usage and cost information.
-
-        Args:
-            event: UpdateAnalytics message containing token usage and cost information.
-        """
+        """Update analytics display with token usage and cost information."""
         self.query_one(Analytics).update_analytics(event)
 
     @on(Messages.UpdateMemory)
@@ -361,11 +348,7 @@ class Conversation(Widget):
 
     @on(Messages.UpdateFiles)
     async def update_files(self, event: Messages.UpdateFiles) -> None:
-        """Update file counts display with current context statistics.
-
-        Args:
-            event: UpdateFiles message containing editable and read_only file counts.
-        """
+        """Update file counts display with current context statistics."""
         self.query_one(Analytics).update_files(event)
 
     @on(Messages.Clear)
