@@ -51,6 +51,7 @@ dependencies = [
     "uvloop>=0.22.1",
     "json-with-comments>=1.2.10",
     "tree-sitter-language-pack>=1.8.1",
+    "websockets>=16.0",
 ]
 
 [dependency-groups]

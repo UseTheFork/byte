@@ -14,6 +14,7 @@ from byte.development import DevelopmentServiceProvider
 from byte.event import EventsServiceProvider
 from byte.files import FileServiceProvider
 from byte.foundation import Application
+from byte.gateway import GatewayServiceProvider
 from byte.git import GitServiceProvider
 from byte.harness import HarnessServiceProvider
 from byte.knowledge import KnowledgeServiceProvider
@@ -34,6 +35,7 @@ PROVIDERS = [
     EventsServiceProvider,
     ToolsServiceProvider,
     CommandServiceProvider,
+    GatewayServiceProvider,
     GitServiceProvider,
     OrchestrationServiceProvider,
     # keep-sorted start

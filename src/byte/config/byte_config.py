@@ -3,6 +3,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 from byte.files.config import FilesConfig
+from byte.gateway.config import GatewayConfig
 from byte.git.config import GitConfig
 from byte.lint.config import LintConfig
 from byte.llm.config import LLMConfig
@@ -26,6 +27,7 @@ class AppConfig(BaseModel):
 class ByteUserConfig(BaseModel):
     # keep-sorted start
     files: FilesConfig = Field(default_factory=FilesConfig)
+    gateway: GatewayConfig = Field(default_factory=GatewayConfig)
     git: GitConfig = Field(default_factory=GitConfig)
     lint: LintConfig = Field(default_factory=LintConfig, description="Code linting and formatting configuration")
     llm: LLMConfig = Field(default_factory=LLMConfig)

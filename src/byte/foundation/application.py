@@ -8,6 +8,7 @@ from textual.message import Message
 from byte import ServiceProvider, TaskManager
 from byte.foundation import Container, FoundationServiceProvider, Kernel
 from byte.foundation.bootstrap import RegisterProviders
+from byte.gateway import GatewayService
 from byte.logging import LogService, LogServiceProvider
 from byte.tui import ByteTUI, Console
 
@@ -341,6 +342,7 @@ class Application(Container):
 
     def emit_tui(self, payload: Message) -> str | None:
         """Emit a TUI message and return its panel ID."""
+
         if hasattr(payload, "panel_id"):
             from byte.tui import TUIManagerService
 
@@ -349,5 +351,8 @@ class Application(Container):
 
         byte_tui = self.tui()
         byte_tui.conversation.post_message(payload)
+
+        gateway_service = self.make(GatewayService)
+        gateway_service.post_message(payload)
 
         return getattr(payload, "panel_id", None)

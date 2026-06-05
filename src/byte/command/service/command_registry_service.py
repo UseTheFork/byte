@@ -1,10 +1,7 @@
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from byte import Command
 from byte.support import Service
-
-if TYPE_CHECKING:
-    pass
 
 
 class CommandRegistryService(Service):

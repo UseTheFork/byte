@@ -18,6 +18,9 @@
       "provider": "anthropic"
     }
   },
+  "gateway": {
+    "enable": true
+  },
   "lint": {
     "enable": true,
     "commands": [

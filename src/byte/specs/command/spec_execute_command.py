@@ -40,7 +40,6 @@ class SpecExecuteCommand(Command):
         self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         workflow_service = self.app.make(WorkflowService)
-        workflow_phases = PhaseUtils.to_phase_dict(coder_workflow.get_phases())
 
         # Specs are executed via the coder workflow one by one and are just passed in via a user request and a files context.
         spec_loader_service = self.app.make(SpecLoaderService)
@@ -50,13 +49,13 @@ class SpecExecuteCommand(Command):
             if task.status == "completed":
                 continue
 
-            task.status = "in_progress"
-            spec_loader_service.save_task(args.spec, task)
+            workflow_phases = PhaseUtils.to_phase_dict(coder_workflow.get_phases())
 
             await file_service.clear_context()
 
             for path in task.files.edit:
                 await file_service.add_file(path)
+
             for path in task.files.reference:
                 await file_service.add_file(path)
 
