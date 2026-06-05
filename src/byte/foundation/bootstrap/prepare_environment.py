@@ -1,7 +1,7 @@
 import shutil
 from typing import TYPE_CHECKING
 
-from byte.config import ByteConfig
+from byte.config import ByteConfig, ByteUserConfig
 from byte.foundation.bootstrap.bootstrapper import Bootstrapper
 from byte.llm.config import LLMModelConfig
 from byte.support import Json, Yaml
@@ -12,14 +12,10 @@ if TYPE_CHECKING:
 
 
 class PrepareEnvironment(Bootstrapper):
-    """"""
+    """Prepare the environment for Byte on first run and subsequent boots."""
 
     def _migrate_yaml_to_jsonc(self, app: Application) -> None:
-        """Migrate config.yaml to config.jsonc if it exists.
-
-        Checks if config.yaml exists, loads it using Yaml.load_as_dict(),
-        saves it as JSONC using Json.save(), and deletes the old file.
-        """
+        """Migrate config.yaml to config.jsonc if it exists."""
         yaml_path = app.config_path("config.yaml")
         jsonc_path = app.config_path("config.jsonc")
 
@@ -33,10 +29,7 @@ class PrepareEnvironment(Bootstrapper):
             app["console"].print_boot_status("ok", "Migrated config.yaml to config.jsonc")
 
     def _prepare_directories(self, app: Application):
-        """Check if this is the first time Byte is being run.
-
-        Usage: `if await initializer.is_first_boot(): ...`
-        """
+        """Prepare session context and cache directories for the current boot."""
 
         session_context_path = app.session_context_path()
 
@@ -48,11 +41,7 @@ class PrepareEnvironment(Bootstrapper):
         app.cache_path().mkdir(exist_ok=True)
 
     def _init_files(self, app: Application, config: ByteConfig) -> ByteConfig:
-        """Initialize files configuration by asking if user wants to enable file watching.
-
-        Prompts user with a confirmation dialog. If confirmed, sets watch.enable to true.
-        Usage: `config = initializer._init_files(config)`
-        """
+        """Initialize files configuration by prompting the user to enable file watching."""
 
         menu = Menu(
             title="Enable file watching for AI comment markers (AI:, AI@, AI?, AI!)?", console=app["console"].console
@@ -69,11 +58,7 @@ class PrepareEnvironment(Bootstrapper):
         return config
 
     def _init_llm(self, app: Application, config: ByteConfig) -> ByteConfig:
-        """Initialize LLM configuration by asking user to choose a provider.
-
-        Returns the selected provider name.
-        Usage: `model = initializer._init_llm()` -> "anthropic"
-        """
+        """Initialize LLM configuration by prompting the user to select a provider."""
 
         # Build list of enabled providers
         providers = [
@@ -112,6 +97,7 @@ class PrepareEnvironment(Bootstrapper):
         return config
 
     def _setup_config(self, app: Application) -> None:
+        """Set up the initial Byte configuration file with LLM and file watching preferences."""
 
         # TODO: need to make choosing a LLM smarter. Should load and let user select a provider if they want to.
 
@@ -126,20 +112,18 @@ class PrepareEnvironment(Bootstrapper):
 
         # Write the configuration template to the JSONC file
         config_path = app.config_path("config.jsonc")
+
+        user_fields = set(ByteUserConfig.model_fields.keys())
         data = {
             "$schema": "https://raw.githubusercontent.com/UseTheFork/byte/refs/heads/main/schema.json",
-            **config.model_dump(mode="json"),
+            **config.model_dump(mode="json", include=user_fields),
         }
         Json.save(config_path, data)
 
         app["console"].print_success(f"Created configuration file at {config_path}\n")
 
     def _setup_byte_directories(self, app: Application) -> None:
-        """Set up all necessary Byte directories.
-
-        Creates .byte, .byte/conventions, and .byte/cache directories.
-        Usage: `initializer._setup_byte_directories()`
-        """
+        """Set up all necessary Byte directories."""
 
         # Ensure the main .byte directory exists
         app.config_path().parent.mkdir(parents=True, exist_ok=True)
@@ -156,11 +140,7 @@ class PrepareEnvironment(Bootstrapper):
         app["console"].print_boot_status("ok", "Created Byte directories")
 
     def _setup_gitignore(self, app: Application) -> None:
-        """Ensure .gitignore exists in .byte/ config directory and contains byte cache and session patterns.
-
-        This is a self-managed file that is overwritten on every bootstrap.
-        Usage: `self._setup_gitignore(app)`
-        """
+        """Set up .gitignore in the .byte config directory with cache and session patterns."""
 
         gitignore_path = app.config_path(".gitignore")
         byte_patterns = ["cache/*", "session_context/*"]
@@ -168,12 +148,13 @@ class PrepareEnvironment(Bootstrapper):
 
         gitignore_path.write_text(gitignore_content)
 
-    def _run_first_boot_setup(self, app: Application):
+    def _run_first_boot_setup(self, app: Application) -> None:
+        """Run first-boot setup tasks including directory and configuration initialization."""
         self._setup_byte_directories(app)
         self._setup_config(app)
 
     def bootstrap(self, app: Application) -> None:
-        """ """
+        """Prepare the environment on boot, including first-boot setup if needed."""
 
         # Temporary here to convert old yaml config to jsonc config
         self._migrate_yaml_to_jsonc(app)
@@ -185,9 +166,6 @@ class PrepareEnvironment(Bootstrapper):
             self._run_first_boot_setup(app)
 
     def is_first_boot(self, app: Application) -> bool:
-        """Check if this is the first time Byte is being run.
-
-        Usage: `if await initializer.is_first_boot(): ...`
-        """
+        """Check if this is the first time Byte is being run."""
 
         return not app.config_path("config.jsonc").exists()
