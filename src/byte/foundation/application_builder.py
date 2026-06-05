@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import TYPE_CHECKING
 
 from byte.foundation import Kernel
@@ -15,27 +13,13 @@ class ApplicationBuilder:
         self._application = application
 
     def with_kernels(self) -> ApplicationBuilder:
-        """
-        Register the console kernel as a singleton.
-
-        Returns:
-            ApplicationBuilder instance for chaining.
-        """
+        """Register the console kernel as a singleton."""
         self._application.singleton(Kernel)
 
         return self
 
     def with_providers(self, providers: list[type] | None = None) -> ApplicationBuilder:
-        """
-        Register service providers with the application.
-
-        Args:
-            providers: List of provider classes to register.
-            with_bootstrap_providers: Whether to include bootstrap providers.
-
-        Returns:
-            ApplicationBuilder instance for chaining.
-        """
+        """Register service providers with the application."""
 
         if providers is None:
             providers = []
@@ -45,11 +29,6 @@ class ApplicationBuilder:
         return self
 
     def create(self) -> Application:
-        """
-        Get the application instance.
-
-        Returns:
-            Application instance.
-        """
+        """Get the application instance."""
 
         return self._application

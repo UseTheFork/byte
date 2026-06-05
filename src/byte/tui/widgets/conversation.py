@@ -135,12 +135,16 @@ class Conversation(Widget):
 
     @work(thread=True, exit_on_error=False)
     async def emit_user_input_submitted(self, event: Messages.UserInputSubmitted):
-        await self.event_bus.emit(
-            TuiEvents.UserInputSubmitted(
-                event.body,
-                interrupted=event.interrupted,
+        try:
+            await self.event_bus.emit(
+                TuiEvents.UserInputSubmitted(
+                    event.body,
+                    interrupted=event.interrupted,
+                )
             )
-        )
+        except Exception:
+            self.app.byte["log"].exception("Oops")
+            raise
 
     @on(Worker.StateChanged)
     async def handle_worker_state_changed(self, event: Worker.StateChanged) -> None:

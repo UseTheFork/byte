@@ -10,6 +10,7 @@ from byte.constitution import (
     DeleteSectionTool,
     UpdateMetaTool,
 )
+from byte.harness import BootstrapInstructionTool, HarnessAgentNode
 from byte.node.nodes import EndNode, ToolNode
 from byte.orchestration import (
     BaseWorkflow,
@@ -27,6 +28,22 @@ class ConstitutionWorkflow(BaseWorkflow):
 
     def get_phases(self, **kwargs):
         return [
+            PhaseModel(
+                id="create-instruction",
+                content="Consider the conversation history and the user's request to provide a clear, concise instruction describing the change that should be made to the constitution.",
+                executed_by=HarnessAgentNode,
+                note=[
+                    f"Use the `{BootstrapInstructionTool.name}` to provied a clear instruction on the changes that need to be made by the workflow",
+                    "The `Constitution Agent` that you bootstrap has no references to conversation history.",
+                    f"If the users request is ambiguous or unclear you may use one `{UserInputTextTool.name}`, `{UserConfirmTool.name}`, `{UserSelectTool.name}` to clarify the request. ONLY DO THIS IF YOU HAVE TO.",
+                ],
+                tools=[
+                    BootstrapInstructionTool,
+                    UserInputTextTool,
+                    UserConfirmTool,
+                    UserSelectTool,
+                ],
+            ),
             PhaseModel(
                 id="consider",
                 content=f"Consider the existing constitution at {Section.ref(SectionType.CONSTITUTION)}",
@@ -71,9 +88,10 @@ class ConstitutionWorkflow(BaseWorkflow):
     async def build(self):
         """ """
 
-        graph = self.app.make(GraphBuilder, start_node=ConstitutionAgentNode)
+        graph = self.app.make(GraphBuilder, start_node=HarnessAgentNode)
 
         # Add nodes
+        graph.add_node(HarnessAgentNode)
         graph.add_node(ConstitutionAgentNode)
         graph.add_node(ToolNode)
 

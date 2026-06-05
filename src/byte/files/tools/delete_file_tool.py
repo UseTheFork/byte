@@ -14,7 +14,7 @@ class DeleteFileTool(BaseTool):
         "properties": {
             "file_path": {
                 "type": "string",
-                "description": "The EXACT Path to file located in `<file>`. Use the `source` variable.",
+                "description": "The EXACT Path to a file.",
             },
         },
         "required": ["file_path"],

@@ -11,11 +11,11 @@ from byte.support import Section, SectionType
 
 
 class ConstitutionAgentNode(BaseAgentNode):
-    llm_tier: str = "reasoning"
+    llm_tier: str = "standard"
 
     def get_user_template(self):
         return [
-            Leaves.UserRequest(),
+            Leaves.HarnessInstruction(),
         ]
 
     def get_system_template(self):
@@ -39,11 +39,11 @@ class ConstitutionAgentNode(BaseAgentNode):
     def get_context_template(self):
         return [
             Leaves.Constitution(),
-            Leaves.ToolsLoaded(),
             Leaves.ProjectEnvironment(),
             Leaves.HarnessWorkspaceReferenceContext(),
             Leaves.WorkflowPending(),
             Leaves.Epilogue(),
+            Leaves.ToolsLoaded(),
         ]
 
     async def __call__(
