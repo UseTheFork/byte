@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import TYPE_CHECKING
 
 from byte.foundation.bootstrap.bootstrapper import Bootstrapper
@@ -9,17 +7,13 @@ if TYPE_CHECKING:
 
 
 class RegisterProviders(Bootstrapper):
+    """Register all service providers with the application."""
+
     _merge: list[type] = []
 
     @staticmethod
     def merge(providers: list[type]) -> None:
-        """
-        Merge the given providers into the provider configuration before registration.
-
-        Args:
-            providers: List of provider classes to merge.
-            bootstrap_provider_path: Optional path to bootstrap providers file.
-        """
+        """Merge provider classes into the provider configuration before registration."""
         # Remove duplicates while preserving order
         seen = set()
         unique = []
@@ -30,12 +24,7 @@ class RegisterProviders(Bootstrapper):
         RegisterProviders._merge = unique
 
     def bootstrap(self, app: Application) -> None:
-        """
-        Register all service providers with the application.
-
-        Args:
-            app: The application instance.
-        """
+        """Register all service providers with the application."""
         # Get providers from application configuration
         providers = RegisterProviders._merge
 

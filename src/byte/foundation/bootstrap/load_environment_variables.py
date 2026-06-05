@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import os
 from typing import TYPE_CHECKING
 
@@ -12,10 +10,10 @@ if TYPE_CHECKING:
 
 
 class LoadEnvironmentVariables(Bootstrapper):
-    """Bootstrap class for loading environment variables from .env file."""
+    """Load environment variables from .env file."""
 
-    def _check_llm_api_keys(self):
-        """"""
+    def _check_llm_api_keys(self) -> None:
+        """Validate that at least one LLM API key is configured."""
         # Auto-detect and configure Anthropic
         anthropic_key = os.getenv("ANTHROPIC_API_KEY")
         gemini_key = os.getenv("GEMINI_API_KEY")
@@ -29,12 +27,7 @@ class LoadEnvironmentVariables(Bootstrapper):
             )
 
     def bootstrap(self, app: Application) -> None:
-        """
-        Bootstrap environment variable loading.
-
-        Args:
-            app: The application instance.
-        """
+        """Load environment variables and validate LLM API keys."""
         env_file_path = app.environment_file_path()
 
         if env_file_path.exists():

@@ -11,18 +11,11 @@ if TYPE_CHECKING:
 
 
 class LoadConfiguration(Bootstrapper):
-    """Bootstrap class for loading configuration."""
+    """Load configuration from the application config file."""
 
     @staticmethod
     def _find_binary(binary_names: list[str]) -> Path | None:
-        """Search for a binary in common filesystem locations.
-
-        Args:
-            binary_names: List of binary names to search for.
-
-        Returns:
-            Path to the first found binary, or None if no binary is found.
-        """
+        """Search for a binary in common filesystem locations."""
 
         for binary_name in binary_names:
             # First try shutil.which for system PATH search
@@ -33,24 +26,13 @@ class LoadConfiguration(Bootstrapper):
         return None
 
     def _load_configuration_file(self, app: Application) -> dict:
-        """
-        Load the primary configuration file.
-
-        Args:
-            repository: The configuration repository.
-            name: The configuration key name.
-            path: The path to the configuration file.
-        """
+        """Load the primary configuration file."""
 
         config_file_path = app.config_path("config.jsonc")
         return Json.load_as_dict(config_file_path)
 
     def _load_boot_config(self, app: Application, config: ByteConfig) -> ByteConfig:
-        """Load boot configuration from CLI arguments.
-
-        Merges boot config from YAML with CLI arguments, removing duplicates.
-        Usage: `config = self._load_boot_config(config)`
-        """
+        """Load boot configuration from CLI arguments and merge with config."""
 
         args = app["args"]
         read_only_files = args.get("options", {}).get("read_only", [])
@@ -67,14 +49,7 @@ class LoadConfiguration(Bootstrapper):
         return config
 
     def _configure_web_browser(self, config: ByteConfig) -> ByteConfig:
-        """Auto-detect and configure Chrome/Chromium binary.
-
-        Searches for Chrome/Chromium binary if web config is not explicitly enabled,
-        and updates the config with the detected binary location.
-
-        Args:
-            config: The ByteConfig instance to update.
-        """
+        """Auto-detect and configure Chrome/Chromium binary."""
 
         if config.web.chrome_binary_location:
             config.web.enable = True
@@ -88,12 +63,7 @@ class LoadConfiguration(Bootstrapper):
         return config
 
     def bootstrap(self, app: Application) -> None:
-        """
-        Bootstrap environment variable loading.
-
-        Args:
-            app: The application instance.
-        """
+        """Load configuration and initialize app instance with loaded config."""
 
         user_config = self._load_configuration_file(app)
 

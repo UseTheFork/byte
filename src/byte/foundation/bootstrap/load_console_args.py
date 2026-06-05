@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import sys
 from typing import TYPE_CHECKING
 
@@ -10,31 +8,16 @@ if TYPE_CHECKING:
     from byte.foundation import Application
 
 
-# TODO: Doc String
 class LoadConsoleArgs(Bootstrapper):
-    """"""
+    """Load and parse command-line arguments."""
 
     def bootstrap(self, app: Application) -> None:
-        """
-        Bootstrap environment variable loading.
-
-        Args:
-            app: The application instance.
-        """
+        """Parse command-line arguments into the repository."""
         args = app.instance("args", Repository())
         self.parse_args(app, args)
 
-    def parse_args(self, app: Application, config: Repository):
-        """Parse command-line arguments into the repository.
-
-        Stores:
-        - raw: Full argv list
-        - script: Script name (argv[0])
-        - command: First positional argument (if any)
-        - flags: List of flags (--flag, -f)
-        - options: Dict of options (--key=value, --key value)
-        - positional: List of positional arguments
-        """
+    def parse_args(self, app: Application, config: Repository) -> None:
+        """Parse command-line arguments into the repository."""
         argv = sys.argv[1:]  # Skip script name
 
         config.add("raw", sys.argv)

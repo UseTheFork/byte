@@ -1,11 +1,8 @@
-""""""
-
 from typing import TYPE_CHECKING
 
 from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
-    from byte.foundation.bootstrap.boot_providers import BootProviders
     from byte.foundation.bootstrap.handle_exceptions import HandleExceptions
     from byte.foundation.bootstrap.load_configuration import LoadConfiguration
     from byte.foundation.bootstrap.load_console_args import LoadConsoleArgs
@@ -14,7 +11,6 @@ if TYPE_CHECKING:
     from byte.foundation.bootstrap.register_providers import RegisterProviders
 
 __all__ = (
-    "BootProviders",
     "HandleExceptions",
     "LoadConfiguration",
     "LoadConsoleArgs",
@@ -25,7 +21,6 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
-    "BootProviders": "boot_providers",
     "HandleExceptions": "handle_exceptions",
     "LoadConfiguration": "load_configuration",
     "LoadConsoleArgs": "load_console_args",

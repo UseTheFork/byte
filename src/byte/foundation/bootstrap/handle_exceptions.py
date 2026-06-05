@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import sys
 from typing import TYPE_CHECKING
 
@@ -17,12 +15,7 @@ class HandleExceptions(Bootstrapper):
     app: Application
 
     def _render_for_console(self, exception: Exception) -> None:
-        """
-        Render an exception for the console using Rich.
-
-        Args:
-            exception: The exception to render.
-        """
+        """Render an exception for the console using Rich."""
         console = HandleExceptions.app["console"]
 
         traceback = Traceback.from_exception(
@@ -38,23 +31,13 @@ class HandleExceptions(Bootstrapper):
         # console.print_error_panel(f"{e}", title="Oops")
 
     def _render_for_logging(self, exception: Exception) -> None:
-        """
-        Render an exception for logging.
-
-        Args:
-            exception: The exception to log.
-        """
+        """Render an exception for logging."""
         log = HandleExceptions.app["log"]
 
         log.exception(exception)
 
     def _make_exception_handler(self):
-        """
-        Create the exception handler callable.
-
-        Returns:
-            Callable exception handler.
-        """
+        """Create the exception handler callable."""
 
         def exception_handler(exc_type, exc_value, exc_traceback):
             """Handle uncaught exceptions."""
@@ -66,13 +49,7 @@ class HandleExceptions(Bootstrapper):
         return exception_handler
 
     def bootstrap(self, app: Application) -> None:
-        """
-        Bootstrap exception handling.
-
-        Args:
-            app: The application instance.
-        """
-        pass
+        """Bootstrap exception handling."""
 
         HandleExceptions.app = app
 
