@@ -30,7 +30,7 @@ class PrepareEnvironment(Bootstrapper):
             }
             Json.save(jsonc_path, data)
             yaml_path.unlink()
-            self.app["console"].print_boot_status("ok", "Migrated config.yaml to config.jsonc")
+            app["console"].print_boot_status("ok", "Migrated config.yaml to config.jsonc")
 
     def _prepare_directories(self, app: Application):
         """Check if this is the first time Byte is being run.
@@ -153,7 +153,7 @@ class PrepareEnvironment(Bootstrapper):
         # Create cache directory for temporary files
         app.cache_path().parent.mkdir(parents=True, exist_ok=True)
 
-        self.app["console"].print_boot_status("ok", "Created Byte directories")
+        app["console"].print_boot_status("ok", "Created Byte directories")
 
     def _setup_gitignore(self, app: Application) -> None:
         """Ensure .gitignore exists in .byte/ config directory and contains byte cache and session patterns.
