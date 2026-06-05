@@ -11,6 +11,8 @@ from byte.support import Section, SectionType
 
 
 class SpecTaskCreatorAgentNode(BaseAgentNode):
+    llm_tier: str = "standard"
+
     def get_user_template(self):
         return [
             Leaves.Spec(),

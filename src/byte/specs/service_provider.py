@@ -1,9 +1,11 @@
 from byte import ServiceProvider
 from byte.specs import (
+    CreateQuickSpecWorkflow,
     CreateRefractorWorkflow,
     CreateSpecTaskWorkflow,
     CreateSpecWorkflow,
     CreateTaskTool,
+    QuickSpecCommand,
     RefractorCommand,
     SpecCommand,
     SpecCreatorAgentNode,
@@ -51,15 +53,17 @@ class SpecsServiceProvider(ServiceProvider):
     def commands(self):
         return [
             # keep-sorted start
-            SpecExecuteCommand,
+            QuickSpecCommand,
             RefractorCommand,
             SpecCommand,
+            SpecExecuteCommand,
             # keep-sorted end
         ]
 
     def workflows(self):
         return [
             # keep-sorted start
+            CreateQuickSpecWorkflow,
             CreateRefractorWorkflow,
             CreateSpecTaskWorkflow,
             CreateSpecWorkflow,

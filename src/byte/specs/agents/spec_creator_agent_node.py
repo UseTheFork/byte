@@ -16,7 +16,7 @@ class SpecCreatorAgentNode(BaseAgentNode):
         return [
             Leaves.ReferenceMaterials(),
             Leaves.HarnessWorkspaceReferenceFiles(),
-            Leaves.UserRequest(),
+            Leaves.HarnessInstruction(),
         ]
 
     def get_system_template(self):

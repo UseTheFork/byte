@@ -14,7 +14,7 @@ class SpecExecuteCommand(Command):
 
     @property
     def name(self) -> str:
-        return "spec"
+        return "spec:execute"
 
     @property
     def category(self) -> str:

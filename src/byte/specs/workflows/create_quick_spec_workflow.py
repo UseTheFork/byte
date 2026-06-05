@@ -1,8 +1,4 @@
-from byte.files.tools.add_files_tool import AddFilesTool
-from byte.files.tools.list_files_tool import ListFilesTool
-from byte.git.tools.git_grep_tool import GitGrepTool
-from byte.harness import HarnessAgentNode
-from byte.harness.tools.bootstrap_agent_tool import BootstrapAgentTool
+from byte.harness import BootstrapInstructionTool, HarnessAgentNode
 from byte.node.nodes import EndNode, ToolNode
 from byte.orchestration import (
     BaseWorkflow,
@@ -13,55 +9,44 @@ from byte.orchestration import (
 )
 from byte.specs import CreateTaskTool, SpecCreatorAgentNode, SpecTaskCreatorAgentNode
 from byte.specs.tools.create_spec_tool import CreateSpecTool
-from byte.system import UserMultiSelectTool
-from byte.system.tools.user_confirm_tool import UserConfirmTool
-from byte.system.tools.user_select_tool import UserSelectTool
+from byte.system import UserConfirmOrInputTool, UserConfirmTool, UserInputTextTool, UserSelectTool
 
 
-class CreateRefractorWorkflow(BaseWorkflow):
-    """ """
+class CreateQuickSpecWorkflow(BaseWorkflow):
+    """Quick spec workflow without the analyze phase."""
 
     def get_phases(self, **kwargs):
         return [
             PhaseModel(
-                id="select-skills",
-                content="Identify and load the relevant skills based on the user's task",
+                id="create-instruction",
+                content="Consider the conversation history and the user's request to provide a clear, concise instruction describing the changes that should be made.",
                 executed_by=HarnessAgentNode,
-                tools=[
-                    BootstrapAgentTool,
-                ],
-            ),
-            PhaseModel(
-                id="analyze",
-                content="Analyze - review the loaded files/domain and provide recommendations on what should be refactored and how.",
                 note=[
-                    "Analyze code for refactoring opportunities: duplication, complexity, naming, structure, architectural patterns, error handling",
-                    "Present findings conversationally with specific examples from the analyzed code",
-                    "Focus on understanding the current state and identifying high-impact refactoring opportunities",
+                    f"Use the `{BootstrapInstructionTool.name}` to provide a clear instruction on the changes that need to be made by the workflow",
+                    "The `Spec Creator Agent` that you bootstrap has no references to conversation history.",
+                    f"If the users request is ambiguous or unclear you may use one `{UserInputTextTool.name}`, `{UserConfirmTool.name}`, `{UserSelectTool.name}` to clarify the request. ONLY DO THIS IF YOU HAVE TO.",
                 ],
                 tools=[
-                    UserSelectTool,
-                    UserMultiSelectTool,
+                    BootstrapInstructionTool,
+                    UserInputTextTool,
                     UserConfirmTool,
-                    ListFilesTool,
-                    AddFilesTool,
-                    GitGrepTool,
+                    UserSelectTool,
                 ],
-                executed_by=SpecCreatorAgentNode,
             ),
             PhaseModel(
                 id="clarify",
-                content="Ask clarifying questions - one at a time, understand which refactoring recommendations to pursue, scope, and priorities",
+                content="If the task is unclear, ask clarifying questions — one at a time, to understand which recommendations to pursue, scope, and priorities. If the task is already clear, skip directly to completing this phase.",
                 note=[
+                    "If the instruction is already clear and unambiguous, you may skip questions entirely and use the `UpdatePhaseTool.name` to complete this phase immediately.",
                     "Prefer multiple choice questions when possible, but open-ended is fine too",
                     "Only one question per message - if a topic needs more exploration, break it into multiple questions",
-                    "Focus on understanding: which refactoring recommendations the user wants to pursue, scope, priorities, and constraints",
-                    f"Once you believe you understand the refactoring plan, use the `{UpdatePhaseTool.name}` to complete this phase.",
+                    "Focus on understanding: which recommendations the user wants to pursue, scope, priorities, and constraints",
+                    f"Once you believe you understand the plan, use the `{UpdatePhaseTool.name}` to complete this phase.",
                 ],
                 tools=[
                     UserSelectTool,
-                    UserMultiSelectTool,
                     UserConfirmTool,
+                    UserConfirmOrInputTool,
                     UpdatePhaseTool,
                 ],
                 executed_by=SpecCreatorAgentNode,
@@ -89,14 +74,14 @@ class CreateRefractorWorkflow(BaseWorkflow):
         ]
 
     async def build(self):
-        """ """
+        """Build the workflow graph."""
 
         graph = self.app.make(GraphBuilder, start_node=HarnessAgentNode)
 
         # Add nodes
+        graph.add_node(HarnessAgentNode)
         graph.add_node(SpecCreatorAgentNode)
         graph.add_node(SpecTaskCreatorAgentNode)
-        graph.add_node(HarnessAgentNode)
         graph.add_node(ToolNode)
 
         # Compile graph with memory and configuration

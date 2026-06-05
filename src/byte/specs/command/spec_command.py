@@ -12,7 +12,7 @@ class SpecCommand(Command):
 
     @property
     def name(self) -> str:
-        return "spec-init"
+        return "spec:init"
 
     @property
     def category(self) -> str:

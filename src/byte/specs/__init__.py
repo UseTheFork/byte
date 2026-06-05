@@ -7,6 +7,7 @@ from byte._import_utils import import_attr
 if TYPE_CHECKING:
     from byte.specs.agents.spec_creator_agent_node import SpecCreatorAgentNode
     from byte.specs.agents.spec_task_creator_agent_node import SpecTaskCreatorAgentNode
+    from byte.specs.command.quick_spec_command import QuickSpecCommand
     from byte.specs.command.refractor_command import RefractorCommand
     from byte.specs.command.spec_command import SpecCommand
     from byte.specs.command.spec_execute_command import SpecExecuteCommand
@@ -16,17 +17,20 @@ if TYPE_CHECKING:
     from byte.specs.tools.create_spec_tool import CreateSpecTool
     from byte.specs.tools.create_task_tool import CreateTaskTool
     from byte.specs.tools.edit_task_tool import EditTaskTool
+    from byte.specs.workflows.create_quick_spec_workflow import CreateQuickSpecWorkflow
     from byte.specs.workflows.create_refractor_workflow import CreateRefractorWorkflow
     from byte.specs.workflows.create_spec_task_workflow import CreateSpecTaskWorkflow
     from byte.specs.workflows.create_spec_workflow import CreateSpecWorkflow
 
 __all__ = (
+    "CreateQuickSpecWorkflow",
     "CreateRefractorWorkflow",
     "CreateSpecTaskWorkflow",
     "CreateSpecTool",
     "CreateSpecWorkflow",
     "CreateTaskTool",
     "EditTaskTool",
+    "QuickSpecCommand",
     "RefractorCommand",
     "Spec",
     "SpecCommand",
@@ -40,12 +44,14 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
+    "CreateQuickSpecWorkflow": "workflows.create_quick_spec_workflow",
     "CreateRefractorWorkflow": "workflows.create_refractor_workflow",
     "CreateSpecTaskWorkflow": "workflows.create_spec_task_workflow",
     "CreateSpecTool": "tools.create_spec_tool",
     "CreateSpecWorkflow": "workflows.create_spec_workflow",
     "CreateTaskTool": "tools.create_task_tool",
     "EditTaskTool": "tools.edit_task_tool",
+    "QuickSpecCommand": "command.quick_spec_command",
     "RefractorCommand": "command.refractor_command",
     "Spec": "schemas",
     "SpecCommand": "command.spec_command",
