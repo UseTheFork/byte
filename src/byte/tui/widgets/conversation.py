@@ -282,8 +282,6 @@ class Conversation(Widget):
             )
             await response_panel.mount_input(ask)
 
-        self.scroll_to_latest_message()
-
     @on(Messages.Lint)
     async def handle_lint(self, event: Messages.Lint) -> None:
         """Handle linting operation with status-based dispatch."""
