@@ -17,15 +17,12 @@ if TYPE_CHECKING:
 
 
 class Container:
-    """Simple dependency injection container for managing service bindings.
-
-    Implements the Service Locator pattern with support for both transient
-    and singleton lifetimes. Services are resolved lazily on first access.
-    """
+    """Manage service bindings and dependency resolution."""
 
     _instance = None
 
     def __init__(self):
+        """Initialize the container with empty service registries."""
         self._singletons = {}
         self._transients = {}
         self._instances = {}
@@ -34,49 +31,23 @@ class Container:
 
     @classmethod
     def set_instance(cls, container):
-        """
-        Set the globally available instance of the container.
-
-        Args:
-            container: Container instance to set as singleton.
-
-        Returns:
-            The container instance.
-        """
+        """Set the globally available instance of the container."""
         cls._instance = container
         return container
 
     @classmethod
     def get_instance(cls):
-        """
-        Get the globally available instance of the container.
-
-        Returns:
-            Container instance.
-        """
+        """Get the globally available instance of the container."""
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
 
     def _normalize_abstract(self, abstract) -> str:
-        """
-        Normalize abstract type to string representation.
-
-        Args:
-            abstract: Abstract type identifier or class.
-
-        Returns:
-            String representation of the abstract type.
-        """
+        """Normalize abstract type to string representation."""
         return Str.class_to_string(abstract)
 
     def bind(self, service_class: Type[T], concrete: Optional[Callable[[], T]] = None) -> None:
-        """Register a transient service binding.
-
-        Usage:
-        container.bind(FileService, lambda: FileService(container))
-        container.bind(FileService)  # Auto-creates with container
-        """
+        """Register a transient service binding."""
         if concrete is None:
 
             def concrete():
@@ -87,12 +58,7 @@ class Container:
         self._transients[service_class_str] = concrete
 
     def singleton(self, service_class: Type[T], concrete: Optional[Callable[[], T]] = None) -> None:
-        """Register a singleton service binding.
-
-        Usage:
-        container.singleton(FileService, lambda: FileService(container))
-        container.singleton(FileService)  # Auto-creates with container
-        """
+        """Register a singleton service binding."""
         service_class_str = self._normalize_abstract(service_class)
 
         if concrete is None:
@@ -103,7 +69,7 @@ class Container:
         self._singletons[service_class_str] = concrete
 
     def _create_instance(self, factory: Callable, **kwargs) -> Any:
-        """Helper to create and boot instances."""
+        """Create and boot an instance from the given factory."""
         instance = factory()
 
         # TODO: Centralize this.
@@ -119,11 +85,7 @@ class Container:
     def make(self, abstract: str, **kwargs) -> Any: ...
 
     def make(self, abstract: Union[Type[T], str], **kwargs) -> Union[T, Any]:
-        """Resolve a service from the container.
-
-        Usage:
-        file_service = await container.make(FileService)
-        """
+        """Resolve a service from the container."""
 
         abstract_str = self._normalize_abstract(abstract)
 
@@ -150,10 +112,7 @@ class Container:
         raise ValueError(f"No binding found for {abstract_str}")
 
     def build(self, abstract: Type[T], **kwargs) -> T:
-        """Build an instance of the given type with container injection.
-
-        Usage: `instance = container.build(MyClass, extra_arg=value)`
-        """
+        """Build an instance of the given type with container injection."""
         # Pass self as app= along with any other kwargs
         instance = abstract(app=self, **kwargs)
 
@@ -163,26 +122,14 @@ class Container:
         return instance
 
     def flush(self) -> None:
-        """Reset the container state, clearing all bindings and instances.
-
-        Usage: `container.reset()` -> clears all state for fresh start
-        """
+        """Clear all bindings and instances from the container."""
         self._singletons.clear()
         self._transients.clear()
         self._instances.clear()
         self._service_providers.clear()
 
     def instance(self, abstract, instance: T) -> T:
-        """
-        Register an existing instance as shared in the container.
-
-        Args:
-            abstract: Abstract type identifier.
-            instance: The instance to register.
-
-        Returns:
-            The registered instance.
-        """
+        """Register an existing instance as shared in the container."""
         abstract_str = self._normalize_abstract(abstract)
 
         # Store the instance
@@ -191,15 +138,7 @@ class Container:
         return instance
 
     def bound(self, abstract) -> bool:
-        """
-        Determine if the given abstract type has been bound.
-
-        Args:
-            abstract: Abstract type identifier.
-
-        Returns:
-            bool
-        """
+        """Determine if the given abstract type has been bound."""
         abstract_str = self._normalize_abstract(abstract)
         return abstract_str in self._instances
 
@@ -252,8 +191,6 @@ class Container:
 
     def __setitem__(self, key, value: Any) -> None:
         """Register a binding or instance with the container."""
-        # If the value is a closure, we'll bind it as a factory.
-        # Otherwise, we'll register it as a concrete instance.
         if callable(value) and not inspect.isclass(value):
             self.bind(key, value)
         else:
