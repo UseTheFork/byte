@@ -1,13 +1,10 @@
 """Test suite for PrepareEnvironment bootstrapper."""
 
-from __future__ import annotations
-
 from typing import TYPE_CHECKING
 
 import pytest
-from pytest_mock import MockerFixture
-
 from byte.cli import Menu
+from pytest_mock import MockerFixture
 
 if TYPE_CHECKING:
     pass

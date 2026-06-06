@@ -58,23 +58,6 @@ class Application:
         #     self._output = f"Error executing command: {e!s}"
         #     return 1
 
-    async def run(self, input: list[str]) -> int:
-        """
-        Run the console application with command line arguments.
-
-        Returns:
-            Exit status code.
-        """
-        args = input[1:]
-
-        command_name = args[0]
-        remaining_args = args[1:]
-        print(1234)
-        print(1234)
-        print(1234)
-
-        return await self.call(command_name)
-
     def terminate(self) -> None:
         pass
 

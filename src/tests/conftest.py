@@ -1,18 +1,12 @@
-from __future__ import annotations
-
+import json
 import sys
-from importlib import metadata
-from typing import TYPE_CHECKING
+from pathlib import Path
 
 import git
 import pytest
 import pytest_asyncio
-import yaml
 
-from byte.config import ByteConfig
-
-if TYPE_CHECKING:
-    pass
+from byte.config import ByteUserConfig
 
 
 @pytest.fixture(scope="session")
@@ -50,11 +44,8 @@ async def application(git_repo, providers):
 
 
 @pytest.fixture
-def git_repo(tmp_path, config):
-    """Create a temporary git repository for testing.
-
-    Usage: Tests can use this fixture to get a Path to a git repo.
-    """
+def git_repo(tmp_path: Path, config: ByteUserConfig):
+    """Create a temporary git repository for testing."""
     repo_path = tmp_path / "test_repo"
     repo_path.mkdir()
     repo = git.Repo.init(repo_path)
@@ -64,30 +55,43 @@ def git_repo(tmp_path, config):
     readme.write_text("# Test Project\n\nThis is a test project.\n")
 
     gitignore = repo_path / ".gitignore"
-
-    gitignore.write_text("*.pyc\n__pycache__/\n.pytest_cache/\n.byte/*\n")
+    base_patterns = ["*.pyc", "__pycache__", ".pytest_cache"]
+    gitignore.write_text("\n".join(base_patterns) + "\n")
 
     # Create .byte directory
     byte_dir = repo_path / ".byte"
     byte_dir.mkdir()
 
+    byte_gitignore = byte_dir / ".gitignore"
+    byte_patterns = ["cache/*", "session_context/*"]
+    byte_gitignore.write_text("\n".join(byte_patterns) + "\n")
+
     # Create config.yaml with test configuration
     config_data = config.model_dump(exclude_none=True, mode="json")
 
-    version = metadata.version("byte-ai-cli")
-    config_data["version"] = version
+    config_data = {
+        "$schema": "https://raw.githubusercontent.com/UseTheFork/byte/refs/heads/main/schema.json",
+        **config_data,
+    }
 
-    config_path = byte_dir / "config.yaml"
+    config_path = byte_dir / "config.jsonc"
 
     with open(config_path, "w") as f:
-        yaml.safe_dump(config_data, f, default_flow_style=False, sort_keys=False)
+        json.dump(config_data, f, indent=2)
 
     # Create the other directories
     byte_cache_dir = repo_path / ".byte" / "cache"
     byte_cache_dir.mkdir()
 
     # Initial commit
-    repo.index.add(["README.md", ".gitignore", ".byte/config.yaml"])
+    repo.index.add(
+        [
+            "README.md",
+            ".gitignore",
+            ".byte/.gitignore",
+            ".byte/config.jsonc",
+        ]
+    )
     repo.index.commit("Initial commit")
 
     yield repo_path
@@ -104,8 +108,10 @@ def set_test_environment():
 
 @pytest.fixture
 def config():
-    """Create a ByteConfig instance with a temporary git repository.
+    """Create a ByteConfig instance with a temporary git repository."""
+    config = ByteUserConfig()
 
-    Usage: Tests can use this fixture to get a configured ByteConfig.
-    """
-    return ByteConfig()
+    # Change the default port as byte is usually running at the same time.
+    config.gateway.port = 9735
+
+    return config

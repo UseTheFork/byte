@@ -48,6 +48,7 @@ class GatewayService(Service):
     def _write_discovery_file(self) -> None:
         """Write the gateway discovery JSON so external clients can locate the server."""
         data = {
+            "host": self._config.host,
             "port": self._config.port,
             "pid": os.getpid(),
             "token_file": str(self._token_path().resolve()),
@@ -124,19 +125,20 @@ class GatewayService(Service):
         if not self._session:
             return
 
-        async def handle_event() -> None:
-            match event:
-                case Messages.Response():
-                    await self._session.notify(
-                        "stream/response", {"content": str(event.chunk), "done": event.status is Status.SUCCESS}
-                    )
-                case Messages.ToolResponse():
-                    await self._session.notify(
-                        "stream/tool", {"tool": str(event.tool_name), "content": str(event.chunk)}
-                    )
-                case Messages.CommandExecutionCompleted():
-                    await self._session.notify("stream/done", {})
-                case Messages.Status() if event.state == "error":
-                    await self._session.notify("stream/error", {"message": event.message or ""})
+        match event:
+            case Messages.Response():
+                coroutine = self._session.notify(
+                    "stream/response", {"content": str(event.chunk), "done": event.status is Status.SUCCESS}
+                )
+            case Messages.ToolResponse():
+                coroutine = self._session.notify(
+                    "stream/tool", {"tool": str(event.tool_name), "content": str(event.chunk)}
+                )
+            case Messages.CommandExecutionCompleted():
+                coroutine = self._session.notify("stream/done", {})
+            case Messages.Status() if event.state == "error":
+                coroutine = self._session.notify("stream/error", {"message": event.message or ""})
+            case _:
+                return
 
-        asyncio.create_task(handle_event())
+        asyncio.create_task(coroutine)

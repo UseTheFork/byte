@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import inspect
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Type, TypeVar, Union, overload
