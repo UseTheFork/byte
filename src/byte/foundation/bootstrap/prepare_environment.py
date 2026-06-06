@@ -8,7 +8,7 @@ from byte.support import Json, Yaml
 from byte.tui.rich.menu import Menu
 
 if TYPE_CHECKING:
-    from byte.foundation import Application
+    from byte import Application
 
 
 class PrepareEnvironment(Bootstrapper):
