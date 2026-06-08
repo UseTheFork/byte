@@ -12,6 +12,7 @@ from byte.gateway.protocol import (
     make_error_response,
 )
 from byte.support import Service
+from byte.tui import Messages
 
 
 class SessionService(Service):
@@ -37,23 +38,34 @@ class SessionService(Service):
         params = request.params or {}
         user_input: str = params.get("input", "")
 
+        # TODO: how would we modify `RpcRequest` to be more like `Messages` I dont want to handle the gateway the same way as the tui.
+        # depending on the RpcRequest.message that comes in I would like to change the params and allow for diffrent routing types etc.
+
         if not user_input:
             await self._send(make_error_response(request.id, ERR_INTERNAL, "Missing required param: input"))
             return
 
         try:
-            # Mirror exactly how TUIManagerService routes user input
-            if user_input.startswith("/"):
-                parts = user_input[1:].split(" ", 1)
-                command_name = parts[0]
-                args = parts[1] if len(parts) > 1 else ""
-                command = self._command_registry.get_slash_command(command_name)
-                if command:
-                    await command.handle(args)
-            else:
-                command = self._command_registry.get_slash_command("coder")
-                if command:
-                    await command.handle(user_input)
+            self.emit_tui(
+                Messages.UserInputSubmitted(
+                    body=user_input,
+                    interrupted=True,
+                ),
+            )
+            # # Mirror exactly how TUIManagerService routes user input
+            # if user_input.startswith("/"):
+            #     parts = user_input[1:].split(" ", 1)
+            #     command_name = parts[0]
+            #     args = parts[1] if len(parts) > 1 else ""
+            #     command = self._command_registry.get_slash_command(command_name)
+            #     if command:
+            #         await command.handle(args)
+            # else:
+            #     command = self._command_registry.get_slash_command("coder")
+            #     if command:
+            #         await command.handle(user_input)
+
+            # Messages.UserInputSubmitted
 
             await self._send(RpcResponse(id=request.id, result={"ok": True}))
         except Exception as exc:

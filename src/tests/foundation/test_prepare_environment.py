@@ -15,7 +15,7 @@ def providers():
     return []
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncios
 async def test_first_boot_creates_config_file(
     tmp_path,
     config,
