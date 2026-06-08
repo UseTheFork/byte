@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Callable, Optional, TypeVar
 
 from git import InvalidGitRepositoryError, Repo
+from textual.app import ScreenStackError
 from textual.message import Message
 
 from byte import ServiceProvider, TaskManager
@@ -349,8 +350,12 @@ class Application(Container):
             tui_manager_service = self.make(TUIManagerService)
             payload.panel_id = tui_manager_service.get_panel_id()  # ty:ignore[invalid-assignment]
 
-        byte_tui = self.tui()
-        byte_tui.conversation.post_message(payload)
+        try:
+            byte_tui = self.tui()
+            byte_tui.conversation.post_message(payload)
+        except ScreenStackError:
+            self["log"].debug("No screen found skipping message post.")
+            pass
 
         gateway_service = self.make(GatewayService)
         gateway_service.post_message(payload)

@@ -13,9 +13,9 @@ from byte.gateway.protocol import (
     ERR_UNAUTHORIZED,
     RpcRequest,
     RpcResponse,
-    make_error_response,
 )
 from byte.gateway.service.session_service import SessionService
+from byte.gateway.utils import GatewayUtils
 from byte.support import Service
 from byte.tui import Status
 from byte.tui.messages import Messages
@@ -63,19 +63,25 @@ class GatewayService(Service):
             request = RpcRequest.model_validate_json(raw)
         except Exception:
             self.app["log"].warning("Auth failure: malformed request")
-            await websocket.send(make_error_response(None, ERR_UNAUTHORIZED, "Auth required").model_dump_json())
+            await websocket.send(
+                GatewayUtils.make_error_response(None, ERR_UNAUTHORIZED, "Auth required").model_dump_json()
+            )
             await websocket.close()
             return
 
         if request.method != "auth" or not isinstance(request.params, dict):
             self.app["log"].warning("Auth failure: invalid auth method or params")
-            await websocket.send(make_error_response(request.id, ERR_UNAUTHORIZED, "Auth required").model_dump_json())
+            await websocket.send(
+                GatewayUtils.make_error_response(request.id, ERR_UNAUTHORIZED, "Auth required").model_dump_json()
+            )
             await websocket.close()
             return
 
         if request.params.get("token") != self._token:
             self.app["log"].warning("Auth failure: invalid token")
-            await websocket.send(make_error_response(request.id, ERR_UNAUTHORIZED, "Invalid token").model_dump_json())
+            await websocket.send(
+                GatewayUtils.make_error_response(request.id, ERR_UNAUTHORIZED, "Invalid token").model_dump_json()
+            )
             await websocket.close()
             return
 

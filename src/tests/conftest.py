@@ -104,6 +104,7 @@ def set_test_environment():
     import os
 
     os.environ["BYTE_ENV"] = "testing"
+    os.environ["ANTHROPIC_API_KEY"] = "foo"
 
 
 @pytest.fixture

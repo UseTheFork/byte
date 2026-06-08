@@ -50,11 +50,3 @@ class RpcNotification(BaseModel):
     jsonrpc: Literal["2.0"] = "2.0"
     method: str
     params: dict[str, Any]
-
-
-def make_error_response(id: str | int | None, code: int, message: str) -> RpcResponse:
-    """Build an RpcResponse carrying an RpcError for the given code and message."""
-    return RpcResponse(
-        id=id if id is not None else 0,
-        error=RpcError(code=code, message=message),
-    )

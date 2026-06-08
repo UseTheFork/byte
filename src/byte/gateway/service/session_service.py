@@ -1,22 +1,37 @@
-from typing import Any
+from pathlib import Path
+from typing import Any, Callable
 
 import websockets.exceptions
 
 from byte import CommandRegistryService
+from byte.files.service.file_service import FileService
 from byte.gateway.protocol import (
     ERR_INTERNAL,
     ERR_METHOD_NOT_FOUND,
     RpcNotification,
     RpcRequest,
     RpcResponse,
-    make_error_response,
 )
+from byte.gateway.requests import GatewayRequest, Requests
+from byte.gateway.utils import GatewayUtils, on
+from byte.knowledge import SessionContextModel, SessionContextService
 from byte.support import Service
-from byte.tui import Messages
 
 
 class SessionService(Service):
     """Handle a single authenticated WebSocket session — receive commands and stream events."""
+
+    def _build_dispatch_table(self) -> None:
+        """Scan methods for `_gateway_request_type` attribute and build dispatch table."""
+        self._handlers: dict[type[GatewayRequest], Callable] = {}
+        for method_name in dir(self):
+            try:
+                method = getattr(self, method_name)
+            except AttributeError:
+                continue
+            if callable(method) and hasattr(method, "_gateway_request_type"):
+                request_type: type[GatewayRequest] = getattr(method, "_gateway_request_type")
+                self._handlers[request_type] = method
 
     def boot(
         self,
@@ -25,6 +40,7 @@ class SessionService(Service):
         self._websocket = websocket
         self._command_registry = self.app.make(CommandRegistryService)
         self._subscriptions: list[Any] = []
+        self._build_dispatch_table()
 
     async def _send(self, message: RpcResponse | RpcNotification) -> None:
         """Serialize and send a message over the WebSocket, ignoring closed connection errors."""
@@ -33,57 +49,108 @@ class SessionService(Service):
         except websockets.exceptions.ConnectionClosed:
             pass
 
-    async def _handle_execute(self, request: RpcRequest) -> None:
-        """Execute a slash-command or plain text input on behalf of the remote client."""
-        params = request.params or {}
-        user_input: str = params.get("input", "")
+    @on(Requests.AddFile)
+    async def handle_add_file(self, request: Requests.AddFile) -> None:
+        file_service = self.app.make(FileService)
+        result = await file_service.add_file(request.file_path)
 
-        # TODO: how would we modify `RpcRequest` to be more like `Messages` I dont want to handle the gateway the same way as the tui.
-        # depending on the RpcRequest.message that comes in I would like to change the params and allow for diffrent routing types etc.
+        if not result:
+            await self._send(
+                GatewayUtils.make_error_response(
+                    request.id,
+                    ERR_INTERNAL,
+                    f"Failed to add {request.file_path} (file not found, not readable, or already in context)",
+                )
+            )
+            return
 
-        if not user_input:
-            await self._send(make_error_response(request.id, ERR_INTERNAL, "Missing required param: input"))
+        await file_service.notify_file_stats()
+        await self._send(RpcResponse(id=request.id, result={"ok": True, "file_path": request.file_path}))
+
+    @on(Requests.DropFile)
+    async def handle_drop_file(self, request: Requests.DropFile) -> None:
+        file_service = self.app.make(FileService)
+        result = await file_service.remove_file(request.file_path)
+
+        if not result:
+            await self._send(
+                GatewayUtils.make_error_response(
+                    request.id,
+                    ERR_INTERNAL,
+                    f"Failed to remove {request.file_path} (file not found, not readable, or already in context)",
+                )
+            )
+            return
+
+        await file_service.notify_file_stats()
+        await self._send(RpcResponse(id=request.id, result={"ok": True, "file_path": request.file_path}))
+
+    @on(Requests.ContextAddFile)
+    async def handle_context_add_file(self, request: Requests.ContextAddFile) -> None:
+        session_context_service = self.app.make(SessionContextService)
+
+        file_path = Path(request.file_path)
+        if not file_path.is_absolute():
+            file_path = self.app.root_path(str(file_path))
+
+        if not file_path.exists():
+            await self._send(
+                GatewayUtils.make_error_response(
+                    request.id,
+                    ERR_INTERNAL,
+                    f"File not found: {request.file_path}",
+                )
+            )
+            return
+
+        if not file_path.is_file():
+            await self._send(
+                GatewayUtils.make_error_response(
+                    request.id,
+                    ERR_INTERNAL,
+                    f"Path is not a file: {request.file_path}",
+                )
+            )
             return
 
         try:
-            self.emit_tui(
-                Messages.UserInputSubmitted(
-                    body=user_input,
-                    interrupted=True,
-                ),
+            content = file_path.read_text(encoding="utf-8")
+        except Exception as e:
+            await self._send(
+                GatewayUtils.make_error_response(
+                    request.id,
+                    ERR_INTERNAL,
+                    f"Error reading file: {e!s}",
+                )
             )
-            # # Mirror exactly how TUIManagerService routes user input
-            # if user_input.startswith("/"):
-            #     parts = user_input[1:].split(" ", 1)
-            #     command_name = parts[0]
-            #     args = parts[1] if len(parts) > 1 else ""
-            #     command = self._command_registry.get_slash_command(command_name)
-            #     if command:
-            #         await command.handle(args)
-            # else:
-            #     command = self._command_registry.get_slash_command("coder")
-            #     if command:
-            #         await command.handle(user_input)
+            return
 
-            # Messages.UserInputSubmitted
+        context_key = str(file_path.relative_to(self.app["path"]))
+        model = self.app.make(SessionContextModel, type="file", key=context_key, content=content)
+        session_context_service.add_context(model)
 
-            await self._send(RpcResponse(id=request.id, result={"ok": True}))
-        except Exception as exc:
-            self.app["log"].exception("Gateway execute error")
-            await self._send(make_error_response(request.id, ERR_INTERNAL, str(exc)))
+        await self._send(RpcResponse(id=request.id, result={"ok": True, "file_path": request.file_path}))
 
     async def _dispatch(self, raw: str) -> None:
         """Parse a raw JSON string as an RpcRequest and route to the correct handler."""
         try:
-            request = RpcRequest.model_validate_json(raw)
+            rpc = RpcRequest.model_validate_json(raw)
         except Exception:
-            await self._send(make_error_response(None, ERR_INTERNAL, "Invalid request"))
+            await self._send(GatewayUtils.make_error_response(None, ERR_INTERNAL, "Invalid request"))
             return
 
-        if request.method == "execute":
-            await self._handle_execute(request)
-        else:
-            await self._send(make_error_response(request.id, ERR_METHOD_NOT_FOUND, f"Unknown method: {request.method}"))
+        try:
+            request = GatewayUtils.parse_request(rpc)
+        except ValueError as exc:
+            await self._send(GatewayUtils.make_error_response(rpc.id, ERR_METHOD_NOT_FOUND, str(exc)))
+            return
+
+        handler = self._handlers.get(type(request))
+        if handler is None:
+            await self._send(GatewayUtils.make_error_response(request.id, ERR_METHOD_NOT_FOUND, "Unknown method type"))
+            return
+
+        await handler(request)
 
     async def notify(self, method: str, params: dict[str, Any]) -> None:
         """Build and send an RpcNotification for the given method and params."""
