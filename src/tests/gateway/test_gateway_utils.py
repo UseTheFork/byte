@@ -113,6 +113,27 @@ def test_parse_context_add_file_request() -> None:
     assert req.file_path == "src/context.py"
 
 
+def test_request_types_contains_context_drop_file() -> None:
+    """REQUEST_TYPES contains 'context_drop_file' key for Requests.ContextDropFile."""
+    assert "context_drop_file" in GatewayUtils.REQUEST_TYPES
+    assert GatewayUtils.REQUEST_TYPES["context_drop_file"] is Requests.ContextDropFile
+
+
+def test_parse_context_drop_file_request() -> None:
+    """parse_request converts RpcRequest to Requests.ContextDropFile."""
+    rpc = RpcRequest(
+        jsonrpc="2.0",
+        id="ctx-2",
+        method="context_drop_file",
+        params={"file_path": "src/context.py"},
+    )
+    req = GatewayUtils.parse_request(rpc)
+
+    assert isinstance(req, Requests.ContextDropFile)
+    assert req.id == "ctx-2"
+    assert req.file_path == "src/context.py"
+
+
 def test_parse_request_with_none_params() -> None:
     """parse_request handles None params gracefully."""
     rpc = RpcRequest(jsonrpc="2.0", id=4, method="add_file", params=None)

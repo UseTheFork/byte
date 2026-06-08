@@ -35,3 +35,9 @@ class Requests:
         """Add file contents to session context."""
 
         file_path: str
+
+    @dataclass
+    class ContextDropFile(GatewayRequest):
+        """Drop file contents from session context."""
+
+        file_path: str

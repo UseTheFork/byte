@@ -131,6 +131,29 @@ class SessionService(Service):
 
         await self._send(RpcResponse(id=request.id, result={"ok": True, "file_path": request.file_path}))
 
+    @on(Requests.ContextDropFile)
+    async def handle_context_drop_file(self, request: Requests.ContextDropFile) -> None:
+        session_context_service = self.app.make(SessionContextService)
+
+        file_path = Path(request.file_path)
+        if not file_path.is_absolute():
+            file_path = self.app.root_path(str(file_path))
+
+        try:
+            context_key = str(file_path.relative_to(self.app["path"]))
+        except ValueError:
+            await self._send(
+                GatewayUtils.make_error_response(
+                    request.id,
+                    ERR_INTERNAL,
+                    f"Cannot resolve path: {request.file_path}",
+                )
+            )
+            return
+
+        session_context_service.remove_context(context_key)
+        await self._send(RpcResponse(id=request.id, result={"ok": True, "file_path": request.file_path}))
+
     async def _dispatch(self, raw: str) -> None:
         """Parse a raw JSON string as an RpcRequest and route to the correct handler."""
         try:

@@ -76,3 +76,17 @@ def test_context_add_file_with_numeric_id() -> None:
     req = Requests.ContextAddFile(id=6, file_path="src/context.py")
     assert req.id == 6
     assert req.file_path == "src/context.py"
+
+
+def test_context_drop_file_instantiation() -> None:
+    """ContextDropFile request can be instantiated with id and file_path."""
+    req = Requests.ContextDropFile(id="req-1", file_path="/path/to/file.py")
+    assert req.id == "req-1"
+    assert req.file_path == "/path/to/file.py"
+
+
+def test_context_drop_file_with_numeric_id() -> None:
+    """ContextDropFile request supports numeric id."""
+    req = Requests.ContextDropFile(id=7, file_path="src/context.py")
+    assert req.id == 7
+    assert req.file_path == "src/context.py"
