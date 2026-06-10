@@ -29,6 +29,7 @@ class GatewayService(Service):
         self._token: str = ""
         self._server: Any | None = None  # websockets does not export a stable ServerConnection type
         self._session: SessionService | None = None
+        self._actual_port: int = 0
 
     def _token_path(self) -> Path:
         """Return the path to the gateway token file."""
@@ -49,7 +50,7 @@ class GatewayService(Service):
         """Write the gateway discovery JSON so external clients can locate the server."""
         data = {
             "host": self._config.host,
-            "port": self._config.port,
+            "port": self._actual_port,
             "pid": os.getpid(),
             "token_file": str(self._token_path().resolve()),
         }
@@ -98,7 +99,6 @@ class GatewayService(Service):
         """Generate the auth token, write discovery files, and start the WebSocket server."""
         self._token = secrets.token_urlsafe(32)
         self._write_token_file()
-        self._write_discovery_file()
 
         self.app["log"].info(f"Gateway server starting on {self._config.host}:{self._config.port}")
         self._server = await websockets.serve(
@@ -106,6 +106,10 @@ class GatewayService(Service):
             self._config.host,
             self._config.port,
         )
+        sock = self._server.sockets[0]
+        self._actual_port = sock.getsockname()[1]
+        self._write_discovery_file()
+        self.app["log"].info(f"Gateway server running on {self._config.host}:{self._actual_port}")
         await self._server.wait_closed()
 
     def _cleanup_files(self) -> None:

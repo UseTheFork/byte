@@ -6,4 +6,4 @@ class GatewayConfig(BaseModel):
 
     enable: bool = Field(default=False)
     host: str = Field(default="127.0.0.1")
-    port: int = Field(default=9731)
+    port: int = Field(default=0)
