@@ -88,7 +88,7 @@ class WorkflowService(Service):
                                     if tracked["type"] == "text":
                                         self.emit_tui(Messages.Response(status=Status.SUCCESS))
 
-                                    elif tracked["type"] == "tool_use":
+                                    elif tracked["type"] == "tool_use" and "id" in tracked:
                                         self.emit_tui(
                                             Messages.ToolResponse(
                                                 tool_id=self.message_chunks[idx]["id"],
@@ -123,14 +123,16 @@ class WorkflowService(Service):
                                 pass
 
                             if self._is_tool_call_chunk(block):
-                                self.emit_tui(
-                                    Messages.ToolResponse(
-                                        status=Status.RUNNING,
-                                        tool_id=self.message_chunks[block["index"]]["id"],
-                                        with_indicator=False,
-                                        chunk=block.get("partial_json", ""),
+                                tracked = self.message_chunks.get(block["index"], {})
+                                if "id" in tracked:
+                                    self.emit_tui(
+                                        Messages.ToolResponse(
+                                            status=Status.RUNNING,
+                                            tool_id=tracked["id"],
+                                            with_indicator=False,
+                                            chunk=block.get("partial_json", ""),
+                                        )
                                     )
-                                )
 
                             elif self._is_message_content_chunk(block):
                                 self.emit_tui(
@@ -149,7 +151,7 @@ class WorkflowService(Service):
                     if tracked["type"] == "text":
                         self.emit_tui(Messages.Response(status=Status.SUCCESS))
 
-                    elif tracked["type"] == "tool_use":
+                    elif tracked["type"] == "tool_use" and "id" in tracked:
                         self.emit_tui(
                             Messages.ToolResponse(tool_id=self.message_chunks[idx]["id"], status=Status.SUCCESS)
                         )
