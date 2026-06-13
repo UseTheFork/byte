@@ -19,8 +19,7 @@
     }
   },
   "gateway": {
-    "enable": true,
-    "port": 9732
+    "enable": true
   },
   "lint": {
     "enable": true,

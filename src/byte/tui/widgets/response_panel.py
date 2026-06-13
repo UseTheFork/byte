@@ -17,6 +17,7 @@ from byte.tui.widgets.ui.select import Select
 from byte.tui.widgets.ui.selectable_markdown import SelectableMarkdown
 from byte.tui.widgets.ui.text_input import TextInput
 from byte.tui.widgets.ui.text_rule import TextRule
+from byte.tui.widgets.ui.token_usage_rule import TokenUsageRule
 from byte.tui.widgets.ui.tool_call import ToolCall
 
 if TYPE_CHECKING:
@@ -43,6 +44,11 @@ class ResponsePanel(VerticalGroup):
         self.current_stream = None
         self.streams = {}
         self.current_linting: Linting | None = None
+        self.total_cost: float = 0.0
+        self.total_input_tokens: int = 0
+        self.total_output_tokens: int = 0
+        self.turn_count: int = 0
+        self.aggregate_usage: TokenUsageRule | None = None
 
     async def add_user_message(self, event: Messages.AddUserInput):
         await self.mount(HumanMessage(f"/{event.command} {event.body}"))
@@ -184,3 +190,32 @@ class ResponsePanel(VerticalGroup):
             tool_call.complete(status=event.status, content=event.content)
         except NoMatches:
             self.app.byte["log"].info(event)
+
+    async def update_aggregate_usage(self, event: Messages.CreateTokenUsage) -> None:
+        """Update the aggregate token usage widget that stays pinned at the bottom.
+
+        Accumulates token and cost data across all turns and keeps a persistent
+        widget that is always the last child in the panel.
+
+        Args:
+            event: CreateTokenUsage message with token/cost data for this turn
+        """
+        self.total_cost += event.cost
+        self.total_input_tokens += event.input_tokens
+        self.total_output_tokens += event.output_tokens
+        self.turn_count += 1
+
+        summary_text = (
+            f"Total: {self.total_input_tokens:,} in / {self.total_output_tokens:,} out "
+            f"· Cost: ${self.total_cost:.2f} ({self.turn_count} turns)"
+        )
+
+        if self.aggregate_usage is None:
+            self.aggregate_usage = TokenUsageRule(text=summary_text)
+            await self.mount(self.aggregate_usage)
+        else:
+            # Remove from DOM and re-mount at the bottom to ensure it stays last
+            await self.aggregate_usage.remove()
+            await self.mount(self.aggregate_usage)
+            # Update the text via the reactive property
+            self.aggregate_usage.text = summary_text

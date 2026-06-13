@@ -11,7 +11,7 @@ from byte.support import Section, SectionType
 
 
 class ConstitutionAgentNode(BaseAgentNode):
-    llm_tier: str = "standard"
+    llm_tier: str = "reasoning"
 
     def get_user_template(self):
         return [

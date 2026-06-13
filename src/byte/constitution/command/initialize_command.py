@@ -51,6 +51,7 @@ class InitializeCommand(Command):
                 name="Domain Driven Design",
                 description="All business logic MUST be organized into bounded-context domains under [DOMAIN_LOCATION]. Cross-domain communication MUST occur through explicit public interfaces — never by reaching into another domain's internals. New features MUST be placed in the appropriate existing domain or justify the creation of a new one.",
             )
+            user_request_lines.append("I want the project to follow Domain Driven Design (DDD).")
             principles[ddd.id] = ddd
 
         include = await interaction_service.confirm("Enable DRY (Don't Repeat Yourself)?", default=True)
@@ -61,6 +62,7 @@ class InitializeCommand(Command):
                 name="Don't Repeat Yourself (DRY)",
                 description="All code MUST avoid unnecessary duplication of logic, configuration, and data definitions. Shared behavior MUST be extracted into reusable services, utilities, or base classes and resolved through the application container or established import patterns. When identical or near-identical logic exists in more than one location, it MUST be consolidated into a single authoritative source. Duplication in test fixtures, schema definitions, and prompt templates MUST be reduced through shared factories, constants, or helper modules. Shared logic MUST be extracted into [SHARED_LOGIC_LOCATION]",
             )
+            user_request_lines.append("I want the project to follow Don't Repeat Yourself (DRY).")
             principles[dry.id] = dry
 
         include = await interaction_service.confirm("Enable TDD (Test Driven Development)?", default=True)
@@ -71,6 +73,7 @@ class InitializeCommand(Command):
                 name="TDD (Test Driven Development)",
                 description="All new functionality MUST be accompanied by tests written before or alongside the implementation. The test suite MUST pass before any code is considered complete. [TESTING_LOCATION]. [TESTING_FRAMEWORK] is the required testing framework.",
             )
+            user_request_lines.append("I want the project to follow TDD (Test Driven Development).")
             principles[tdd.id] = tdd
 
         include = await interaction_service.confirm("Enable YAGNI (You Aren't Gonna Need It)?", default=True)
@@ -81,6 +84,7 @@ class InitializeCommand(Command):
                 name="You Aren't Gonna Need It (YAGNI)",
                 description="Code MUST only be written to satisfy current, concrete requirements — never on speculation of future needs. Abstractions, configuration options, and extension points MUST NOT be introduced until a real use case demands them. Remove dead code promptly.",
             )
+            user_request_lines.append("I want the project to follow You Aren't Gonna Need It (YAGNI).")
             principles[yagni.id] = yagni
 
         include = await interaction_service.confirm("Enable TDA (Tell, Don't Ask)?", default=True)
@@ -91,6 +95,7 @@ class InitializeCommand(Command):
                 name="TDA (Tell, Don't Ask)",
                 description="Objects MUST expose behavior through commands that perform work internally rather than exposing state for external decision-making. Callers MUST tell objects what to do - not query their state and act on the result. Logic that depends on an object's internal state MUST reside within that object. Getter-heavy interfaces MUST be refactored to move the dependent logic into the owning class or module.",
             )
+            user_request_lines.append("I want the project to follow Tell, Don't Ask (TDA).")
             principles[tda.id] = tda
 
         include = await interaction_service.confirm("Enable Strict Typing?", default=True)
@@ -101,6 +106,7 @@ class InitializeCommand(Command):
                 name="Strict Typing",
                 description="All function signatures MUST include explicit type annotations for parameters and return types. All variables MUST have type annotations where types are not obvious from context. Use of `Any` is prohibited unless explicitly justified with a comment. Type-checking tools MUST pass cleanly with no errors or unresolved type issues.",
             )
+            user_request_lines.append("I want the project to follow Strict Typing.")
             principles[strict_typing.id] = strict_typing
 
         sections = {}
@@ -150,7 +156,7 @@ class InitializeCommand(Command):
             sections[tooling_section.id] = tooling_section
 
         confirmed, text_input = await interaction_service.confirm_or_input(
-            "Do you have any other comments to add?", "Enter your additional comments:", default_confirm=False
+            "Ready to Role?", "Enter your additional comments:", default_confirm=False
         )
         if confirmed and text_input:
             user_request_lines.append("")

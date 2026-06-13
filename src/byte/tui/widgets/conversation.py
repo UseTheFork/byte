@@ -210,6 +210,7 @@ class Conversation(Widget):
                 max_input_tokens=event.max_input_tokens,
             )
         )
+        await response_panel.update_aggregate_usage(event)
 
     @on(Messages.AddStaticMarkdown)
     async def add_static_markdown(self, event: Messages.AddStaticMarkdown) -> None:

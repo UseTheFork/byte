@@ -36,6 +36,9 @@ class InitializeWorkflow(ConstitutionWorkflow):
                         "The user might require less or more principles than the template provides. Respect their specification."
                     ),
                     MD.bullet("Clarify scope: which domains/areas does the constitution cover?"),
+                    MD.bullet(
+                        "Do NOT write or finalize the constitution during this phase. Constitution writing tools are only available in the 'create' phase."
+                    ),
                 ],
                 tools=[
                     GitGrepTool,
@@ -64,6 +67,9 @@ class InitializeWorkflow(ConstitutionWorkflow):
                     MD.bullet("MINOR: New principle/section added or materially expanded guidance.", 2),
                     MD.bullet("PATCH: Clarifications, wording, typo fixes, non-semantic refinements.", 2),
                     MD.bullet("If version bump type ambiguous, propose reasoning before finalizing."),
+                    MD.bullet(
+                        "Do NOT write or finalize the constitution during this phase. Focus only on gathering and deriving values. Writing tools become available in the 'create' phase."
+                    ),
                 ],
                 tools=[
                     GitGrepTool,

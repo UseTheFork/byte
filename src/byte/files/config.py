@@ -14,7 +14,7 @@ class FilesConfig(BaseModel):
     watch: WatchConfig = WatchConfig()
     ignore: List[str] = Field(
         default=[
-            ".byte/cache",
+            ".byte",
             ".ruff_cache",
             ".idea",
             ".venv",

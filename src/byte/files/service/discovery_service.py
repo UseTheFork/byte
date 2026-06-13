@@ -34,7 +34,7 @@ class FileDiscoveryService(Service):
 
         for path in git_service.get_tracked_files():
             full_path = root / path
-            if full_path.is_file():
+            if full_path.is_file() and not self._is_ignored(full_path):
                 self._all_files.add(full_path)
 
     def boot(self) -> None:

@@ -1,5 +1,6 @@
 from textual.app import ComposeResult
 from textual.containers import HorizontalGroup
+from textual.css.query import NoMatches
 from textual.reactive import reactive
 from textual.widgets import Rule, Static
 
@@ -60,6 +61,13 @@ class TokenUsageRule(HorizontalGroup, can_focus=False):
 
     def validate_text(self, text: str) -> str:
         return text.strip()
+
+    def watch_text(self, new_text: str) -> None:
+        """Update the Static widget when the reactive text property changes."""
+        try:
+            self.query_one(Static).update(new_text)
+        except NoMatches:
+            pass
 
     def compose(self) -> ComposeResult:
         yield Rule()
