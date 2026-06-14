@@ -2,6 +2,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
+from byte.documentation.config import DocumentationConfig
 from byte.files.config import FilesConfig
 from byte.gateway.config import GatewayConfig
 from byte.git.config import GitConfig
@@ -26,6 +27,7 @@ class AppConfig(BaseModel):
 
 class ByteUserConfig(BaseModel):
     # keep-sorted start
+    documentation: DocumentationConfig = Field(default_factory=DocumentationConfig)
     files: FilesConfig = Field(default_factory=FilesConfig)
     gateway: GatewayConfig = Field(default_factory=GatewayConfig)
     git: GitConfig = Field(default_factory=GitConfig)

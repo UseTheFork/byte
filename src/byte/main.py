@@ -11,6 +11,7 @@ from byte.coder import CoderServiceProvider
 from byte.command import CommandServiceProvider
 from byte.constitution import ConstitutionServiceProvider
 from byte.development import DevelopmentServiceProvider
+from byte.documentation import DocumentationServiceProvider
 from byte.event import EventsServiceProvider
 from byte.files import FileServiceProvider
 from byte.foundation import Application
@@ -44,6 +45,7 @@ PROVIDERS = [
     CoderServiceProvider,
     ConstitutionServiceProvider,
     DevelopmentServiceProvider,
+    DocumentationServiceProvider,
     FileServiceProvider,
     # PresetsProvider,
     HarnessServiceProvider,

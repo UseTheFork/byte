@@ -4,6 +4,7 @@ from byte.orchestration.leaves.communication_style import CommunicationStyle as 
 from byte.orchestration.leaves.constitution import Constitution as _Constitution
 from byte.orchestration.leaves.constraints import Constraints as _Constraints
 from byte.orchestration.leaves.conversation_history import ConversationHistory as _ConversationHistory
+from byte.orchestration.leaves.documentation_guidelines import DocumentationGuidelines as _DocumentationGuidelines
 from byte.orchestration.leaves.epilogue import Epilogue as _Epilogue
 from byte.orchestration.leaves.file_context import FileContext as _FileContext
 from byte.orchestration.leaves.git_diffs import GitDiffs as _GitDiffs
@@ -38,6 +39,7 @@ class Leaves:
     Constitution = _Constitution
     Constraints = _Constraints
     ConversationHistory = _ConversationHistory
+    DocumentationGuidelines = _DocumentationGuidelines
     Epilogue = _Epilogue
     FileContext = _FileContext
     GitDiffs = _GitDiffs
