@@ -1,7 +1,14 @@
-from byte.harness import BootstrapInstructionTool, HarnessAgentNode
+from byte.harness import BootstrapInstructionReferencesTool, HarnessAgentNode
 from byte.node.nodes import EndNode, ToolNode
 from byte.orchestration import BaseWorkflow, GraphBuilder, PhaseModel, RoutePhaseModel, UpdatePhaseTool
-from byte.skills import CreateSkillTool, SkillCreatorAgentNode
+from byte.skills import (
+    AddSkillReferenceTool,
+    CreateSkillTool,
+    DeleteSkillReferenceTool,
+    EditSkillTool,
+    PresentSkillTool,
+    SkillCreatorAgentNode,
+)
 from byte.system import UserConfirmOrInputTool, UserConfirmTool, UserInputTextTool, UserSelectTool
 
 
@@ -15,7 +22,7 @@ class CreateSkillWorkflow(BaseWorkflow):
     generation (phase 2), skill creation (phase 3), and termination (phase 4).
     """
 
-    def get_phases(self, **kwargs) -> list[PhaseModel | RoutePhaseModel]:
+    def get_phases(self, **kwargs):
         """Return the phases that define the workflow for creating a new skill."""
         return [
             PhaseModel(
@@ -23,12 +30,11 @@ class CreateSkillWorkflow(BaseWorkflow):
                 content="Consider the conversation history and the user's request to provide a clear, concise instruction describing the skill they would like created.",
                 executed_by=HarnessAgentNode,
                 note=[
-                    f"Use the `{BootstrapInstructionTool.name}` to provied a clear instruction on the changes that need to be made by the workflow",
                     "The `Skill Creator Agent` that you bootstrap has no references to conversation history.",
                     f"If the users request is ambiguous or unclear you may use one `{UserInputTextTool.name}`, `{UserConfirmTool.name}`, `{UserSelectTool.name}` to clarify the request. ONLY DO THIS IF YOU HAVE TO.",
                 ],
                 tools=[
-                    BootstrapInstructionTool,
+                    BootstrapInstructionReferencesTool,
                     UserInputTextTool,
                     UserConfirmTool,
                     UserSelectTool,
@@ -39,32 +45,31 @@ class CreateSkillWorkflow(BaseWorkflow):
                 content="Capture intent - understand what the skill should do, when it triggers, and what the expected output looks like.",
                 note=[
                     f"Use `{UserSelectTool.name}`, or `{UserConfirmTool.name}` to gather information from the user",
+                    f"The agent MUST use the `{UpdatePhaseTool.name}` to complete this phase.",
                 ],
                 tools=[
                     UserInputTextTool,
                     UserConfirmOrInputTool,
                     UserConfirmTool,
                     UserSelectTool,
-                ],
-                executed_by=SkillCreatorAgentNode,
-            ),
-            PhaseModel(
-                id="generate-draft",
-                content=f"Generate a draft of the skill and confirm using the {UserConfirmOrInputTool.name}",
-                note=[
-                    f"You MUST use the `{UpdatePhaseTool.name}` tool to end complete this phase.",
-                ],
-                tools=[
-                    UserConfirmOrInputTool,
                     UpdatePhaseTool,
                 ],
                 executed_by=SkillCreatorAgentNode,
             ),
             PhaseModel(
                 id="create-skill",
-                content="Create the skill - use available tools to create the skill with a clear name, description, and instructions.",
+                content="Create the skill - use available tools to create the skill with a clear name, description, and instructions. After creating or editing the skill, present it for user review using the PresentSkillTool.",
                 tools=[
                     CreateSkillTool,
+                    AddSkillReferenceTool,
+                    DeleteSkillReferenceTool,
+                    EditSkillTool,
+                    PresentSkillTool,
+                    UpdatePhaseTool,
+                ],
+                note=[
+                    f"The agent MUST use the `{PresentSkillTool.name}` before completing this phase.",
+                    f"The agent MUST use the `{UpdatePhaseTool.name}` to complete this phase.",
                 ],
                 executed_by=SkillCreatorAgentNode,
             ),

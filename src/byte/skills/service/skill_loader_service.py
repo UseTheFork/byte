@@ -63,15 +63,7 @@ class SkillLoaderService(Service):
 
         lines: list[str] = [Boundary.open(BoundaryType.AVAILABLE_SKILLS)]
         for skill in skills.values():
-            lines.append(f"  {Boundary.open(BoundaryType.SKILL)}")
-            lines.append(f"    {Boundary.open(BoundaryType.ID)}{skill.id}{Boundary.close(BoundaryType.ID)}")
-            lines.append(f"    {Boundary.open(BoundaryType.NAME)}{skill.name}{Boundary.close(BoundaryType.NAME)}")
-            lines.append(
-                f"    {Boundary.open(BoundaryType.DESCRIPTION)}{skill.description}{Boundary.close(BoundaryType.DESCRIPTION)}"
-            )
-            if skill.builtin:
-                lines.append(f"    {Boundary.open(BoundaryType.TYPE)}builtin{Boundary.close(BoundaryType.TYPE)}")
-            lines.append(f"  {Boundary.close(BoundaryType.SKILL)}")
+            lines.append(skill.to_xml())
         lines.append(Boundary.close(BoundaryType.AVAILABLE_SKILLS))
 
         return "\n".join(lines)

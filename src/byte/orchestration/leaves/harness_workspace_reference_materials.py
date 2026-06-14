@@ -9,28 +9,29 @@ if TYPE_CHECKING:
     from byte.orchestration import PromptAssembler
 
 
-class HarnessWorkspaceReferenceContext(Leaf):
+class HarnessWorkspaceReferenceMaterials(Leaf):
     async def assemble(self, prompt_assembler: PromptAssembler) -> str:
         harness = prompt_assembler.get_state().get("harness", {})
-        reference_context = harness.get("reference_context")
+        reference_materials = harness.get("reference_materials")
         session_context_service = prompt_assembler.get_app().make(SessionContextService)
 
         lines = []
 
-        if not reference_context:
+        if not reference_materials:
             return ""
 
         lines.extend(
             [
-                Section.start(SectionType.PROJECT_REFERENCE),
+                Section.start(SectionType.REFERENCE_MATERIALS),
                 "",
-                "Below are files for reference only. Any edits to these files will be rejected",
-                "",
+                # TODO: Better line of description below.
+                # "Below are files for reference only. Any edits to these files will be rejected",
+                # "",
                 "```",
             ]
         )
 
-        for context_key in reference_context:
+        for context_key in reference_materials:
             file_context = session_context_service.get_context(context_key)
             if file_context:
                 lines.append(file_context.to_boundary())

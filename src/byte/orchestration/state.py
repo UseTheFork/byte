@@ -21,7 +21,7 @@ class HarnessState(TypedDict):
     instruction: str | None
     skills: list[str]
     files: HarnessFiles
-    reference_context: list[str]
+    reference_materials: list[str]
 
 
 class RoutingState(TypedDict):

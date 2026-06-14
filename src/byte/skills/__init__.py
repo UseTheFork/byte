@@ -12,18 +12,22 @@ if TYPE_CHECKING:
     from byte.skills.service_provider import SkillsServiceProvider
     from byte.skills.tools.add_skill_reference_tool import AddSkillReferenceTool
     from byte.skills.tools.create_skill_tool import CreateSkillTool
+    from byte.skills.tools.delete_skill_reference_tool import DeleteSkillReferenceTool
     from byte.skills.tools.edit_skill_tool import EditSkillTool
     from byte.skills.tools.load_skill_reference_tool import LoadSkillReferenceTool
     from byte.skills.tools.load_skill_tool import LoadSkillTool
+    from byte.skills.tools.present_skill_tool import PresentSkillTool
     from byte.skills.workflows.create_skill_workflow import CreateSkillWorkflow
 
 __all__ = (
     "AddSkillReferenceTool",
     "CreateSkillTool",
     "CreateSkillWorkflow",
+    "DeleteSkillReferenceTool",
     "EditSkillTool",
     "LoadSkillReferenceTool",
     "LoadSkillTool",
+    "PresentSkillTool",
     "Skill",
     "SkillCommand",
     "SkillCreatorAgentNode",
@@ -36,9 +40,11 @@ _dynamic_imports = {
     "AddSkillReferenceTool": "tools.add_skill_reference_tool",
     "CreateSkillTool": "tools.create_skill_tool",
     "CreateSkillWorkflow": "workflows.create_skill_workflow",
+    "DeleteSkillReferenceTool": "tools.delete_skill_reference_tool",
     "EditSkillTool": "tools.edit_skill_tool",
     "LoadSkillReferenceTool": "tools.load_skill_reference_tool",
     "LoadSkillTool": "tools.load_skill_tool",
+    "PresentSkillTool": "tools.present_skill_tool",
     "Skill": "schemas",
     "SkillCommand": "command.skill_command",
     "SkillCreatorAgentNode": "agents.skill_creator_agent_node",

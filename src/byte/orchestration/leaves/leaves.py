@@ -9,11 +9,11 @@ from byte.orchestration.leaves.file_context import FileContext as _FileContext
 from byte.orchestration.leaves.git_diffs import GitDiffs as _GitDiffs
 from byte.orchestration.leaves.harness_instruction import HarnessInstruction as _HarnessInstruction
 from byte.orchestration.leaves.harness_workspace_files import HarnessWorkspaceFiles as _HarnessWorkspaceFiles
-from byte.orchestration.leaves.harness_workspace_reference_context import (
-    HarnessWorkspaceReferenceContext as _HarnessWorkspaceReferenceContext,
-)
 from byte.orchestration.leaves.harness_workspace_reference_files import (
     HarnessWorkspaceReferenceFiles as _HarnessWorkspaceReferenceFiles,
+)
+from byte.orchestration.leaves.harness_workspace_reference_materials import (
+    HarnessWorkspaceReferenceMaterials as _HarnessWorkspaceReferenceMaterials,
 )
 from byte.orchestration.leaves.operating_principles import OperatingPrinciples as _OperatingPrinciples
 from byte.orchestration.leaves.preamble import Preamble as _Preamble
@@ -56,6 +56,6 @@ class Leaves:
     HarnessWorkspaceFiles = _HarnessWorkspaceFiles
     SpecTasks = _SpecTasks
     HarnessWorkspaceReferenceFiles = _HarnessWorkspaceReferenceFiles
-    HarnessWorkspaceReferenceContext = _HarnessWorkspaceReferenceContext
+    HarnessWorkspaceReferenceMaterials = _HarnessWorkspaceReferenceMaterials
     HarnessInstruction = _HarnessInstruction
     # keep-sorted end

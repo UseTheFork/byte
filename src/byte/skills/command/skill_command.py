@@ -2,7 +2,7 @@ import argparse
 from argparse import Namespace
 
 from byte import ByteArgumentParser, Command
-from byte.orchestration import WorkflowService
+from byte.orchestration import PhaseUtils, WorkflowService
 from byte.skills import CreateSkillWorkflow
 from byte.tui import Messages
 
@@ -30,12 +30,15 @@ class SkillCommand(Command):
     async def execute(self, args: Namespace, raw_args: str) -> None:
         """ """
 
-        ask_workflow = self.app.make(CreateSkillWorkflow)
+        create_skill_workflow = self.app.make(CreateSkillWorkflow)
 
         self.emit_tui(Messages.CommandExecutionStarted())
         self.emit_tui(Messages.AddUserInput(raw_args, command=self.name))
 
         workflow_service = self.app.make(WorkflowService)
-        await workflow_service.execute(ask_workflow, {"user_request": raw_args})
+        workflow_phases = PhaseUtils.to_phase_dict(create_skill_workflow.get_phases())
+        await workflow_service.execute(
+            create_skill_workflow, {"user_request": raw_args, "workflow_phases": workflow_phases}
+        )
 
         self.emit_tui(Messages.CommandExecutionCompleted())

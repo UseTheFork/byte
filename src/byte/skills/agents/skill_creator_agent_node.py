@@ -6,7 +6,7 @@ from langgraph.types import Command
 from byte.node import (
     BaseAgentNode,
 )
-from byte.orchestration import BaseState, Leaves, PhaseUtils
+from byte.orchestration import BaseState, Leaves, PhaseModel, PhaseUtils
 
 
 class SkillCreatorAgentNode(BaseAgentNode):
@@ -29,7 +29,6 @@ class SkillCreatorAgentNode(BaseAgentNode):
                 [
                     "- Understand what the user wants the skill to do before writing anything",
                     "- If the request is ambiguous, ask clarifying questions about intent, expected output, and when the skill should trigger",
-                    "- Capture the skill's name, description, and instructions before creating it",
                     "- FIRST gather the necessary information, THEN use available tools to create the skill",
                     "- Keep skill instructions clear, concise, and actionable",
                 ]
@@ -39,8 +38,8 @@ class SkillCreatorAgentNode(BaseAgentNode):
     def get_context_template(self):
         return [
             Leaves.Constitution(),
-            Leaves.ProjectEnvironment(),
-            Leaves.HarnessWorkspaceReferenceContext(),
+            Leaves.HarnessWorkspaceReferenceFiles(),
+            Leaves.HarnessWorkspaceReferenceMaterials(),
             Leaves.WorkflowPending(),
             Leaves.Epilogue(),
             Leaves.ToolsLoaded(),
@@ -54,7 +53,14 @@ class SkillCreatorAgentNode(BaseAgentNode):
     ) -> Command[Literal["routing_node"]]:
 
         prompt_assembler = await self.generate_agent_state(state, config)
-        runnable = self.create_runnable(prompt_assembler)
+
+        # TODO: we should make this a static method in PhaseUtils
+        pending_phase = PhaseUtils.get_pending_phase(prompt_assembler.get_state())
+        if pending_phase is not None and isinstance(pending_phase, PhaseModel):
+            runnable = self.create_runnable(prompt_assembler, tool_choice=pending_phase.tool_choice)
+        else:
+            runnable = self.create_runnable(prompt_assembler)
+
         prompt = await self.generate_prompt(prompt_assembler)
 
         while True:

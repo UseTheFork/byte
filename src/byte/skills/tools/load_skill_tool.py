@@ -34,30 +34,17 @@ class LoadSkillTool(BaseTool):
         if skill is None:
             raise ToolValidationException(f"Skill '{skill_id}' not found.")
 
-        references = list(skill.references.keys())
-
         return ToolResult(
             result={
                 "skill_id": skill_id,
-                "content": skill.instructions,
-                "references": references,
+                "content": skill.to_markdown(),
             },
         )
 
     @classmethod
     def format_tool_message(cls, result: ToolResult) -> str:
         content = result.result.get("content", "")
-        references = result.result.get("references", [])
-
-        if not references:
-            return content
-
-        lines = [content, Boundary.open(BoundaryType.SKILL_REFERENCES)]
-        for name in references:
-            lines.append(f"    {Boundary.open(BoundaryType.NAME)}{name}{Boundary.close(BoundaryType.NAME)}")
-        lines.append(Boundary.close(BoundaryType.SKILL_REFERENCES))
-
-        return "\n".join(lines)
+        return content
 
     @classmethod
     def format_tui_message(cls, result: ToolResult) -> str:

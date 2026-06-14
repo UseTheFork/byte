@@ -3,9 +3,11 @@ from byte.skills import (
     AddSkillReferenceTool,
     CreateSkillTool,
     CreateSkillWorkflow,
+    DeleteSkillReferenceTool,
     EditSkillTool,
     LoadSkillReferenceTool,
     LoadSkillTool,
+    PresentSkillTool,
     SkillCommand,
     SkillCreatorAgentNode,
     SkillLoaderService,
@@ -33,9 +35,11 @@ class SkillsServiceProvider(ServiceProvider):
             # keep-sorted start
             AddSkillReferenceTool,
             CreateSkillTool,
+            DeleteSkillReferenceTool,
             EditSkillTool,
             LoadSkillReferenceTool,
             LoadSkillTool,
+            PresentSkillTool,
             # keep-sorted end
         ]
 

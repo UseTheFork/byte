@@ -26,20 +26,11 @@ class ReferenceMaterials(Leaf):
 
         project_context = await prompt_assembler.emit(OrchestrationEvents.GatherProjectContext())
 
+        # TODO: Add a descrption here.
         project_information_and_context = [
             Section.start(SectionType.REFERENCE_MATERIALS),
             "",
         ]
-        conventions = project_context.conventions
-        if conventions:
-            conventions = "\n\n".join(conventions)
-            project_information_and_context.extend(
-                [
-                    Boundary.open(BoundaryType.CONTEXT, meta={"type": "coding and project conventions"}),
-                    f"{conventions}",
-                    Boundary.close(BoundaryType.CONTEXT),
-                ]
-            )
 
         session_docs = project_context.session_docs
         if session_docs:

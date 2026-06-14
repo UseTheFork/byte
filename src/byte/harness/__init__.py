@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from byte.harness.agents.harness_agent_node import HarnessAgentNode
     from byte.harness.service_provider import HarnessServiceProvider
     from byte.harness.tools.bootstrap_agent_tool import BootstrapAgentTool
+    from byte.harness.tools.bootstrap_instruction_references_tool import BootstrapInstructionReferencesTool
     from byte.harness.tools.bootstrap_instruction_tool import BootstrapInstructionTool
     from byte.harness.tools.bootstrap_skills_files_tool import BootstrapSkillsFilesTool
     from byte.harness.tools.bootstrap_skills_tool import BootstrapSkillsTool
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
 __all__ = (
     "AgentHarnessWorkflow",
     "BootstrapAgentTool",
+    "BootstrapInstructionReferencesTool",
     "BootstrapInstructionTool",
     "BootstrapSkillsFilesTool",
     "BootstrapSkillsTool",
@@ -27,6 +29,7 @@ _dynamic_imports = {
     # keep-sorted start
     "AgentHarnessWorkflow": "workflows.agent_harness_workflow",
     "BootstrapAgentTool": "tools.bootstrap_agent_tool",
+    "BootstrapInstructionReferencesTool": "tools.bootstrap_instruction_references_tool",
     "BootstrapInstructionTool": "tools.bootstrap_instruction_tool",
     "BootstrapSkillsFilesTool": "tools.bootstrap_skills_files_tool",
     "BootstrapSkillsTool": "tools.bootstrap_skills_tool",

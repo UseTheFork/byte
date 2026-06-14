@@ -15,7 +15,7 @@ class BootstrapSkillsTool(BaseTool):
             "skills": {
                 "type": "array",
                 "items": {"type": "string"},
-                "description": "List of skill names to load into the harness.",
+                "description": "List of skill ids to load into the harness.",
             },
         },
     }
@@ -31,7 +31,7 @@ class BootstrapSkillsTool(BaseTool):
 
         skill_loader_service = self.app.make(SkillLoaderService)
 
-        invalid = [name for name in skills if skill_loader_service.get_skill(name) is None]
+        invalid = [skill_id for skill_id in skills if skill_loader_service.get_skill(skill_id) is None]
         if invalid:
             raise ToolValidationException(f"Unknown skill(s): {', '.join(invalid)}.")
 

@@ -40,7 +40,8 @@ class ConstitutionAgentNode(BaseAgentNode):
         return [
             Leaves.Constitution(),
             Leaves.ProjectEnvironment(),
-            Leaves.HarnessWorkspaceReferenceContext(),
+            Leaves.HarnessWorkspaceReferenceFiles(),
+            Leaves.HarnessWorkspaceReferenceMaterials(),
             Leaves.WorkflowPending(),
             Leaves.Epilogue(),
             Leaves.ToolsLoaded(),

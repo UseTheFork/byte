@@ -3,33 +3,20 @@ from typing import override
 from byte.files import FileService
 from byte.knowledge import SessionContextService
 from byte.orchestration import BaseState, HarnessStateUtils
-from byte.skills import SkillLoaderService
 from byte.support import Section, SectionType
 from byte.tools import BaseTool, ToolResult
 from byte.tools.exceptions import ToolValidationException
 
 
-class BootstrapAgentTool(BaseTool):
-    name: str = "bootstrap_tool"
-    description: str = (
-        "Load skills, editable files, and reference files into the agent harness based on the workflow requirements."
-    )
+class BootstrapInstructionReferencesTool(BaseTool):
+    name: str = "bootstrap_instruction_references_tool"
+    description: str = "Load instruction, reference files, and reference materials into the agent harness based on the workflow requirements."
     input_schema = {
         "type": "object",
         "properties": {
             "instruction": {
                 "type": "string",
                 "description": "A short, clear, concise instruction to pass to the coding agent on exactly what must be done to complete the users task.",
-            },
-            "skills": {
-                "type": "array",
-                "items": {"type": "string"},
-                "description": "List of skill names to load into the harness.",
-            },
-            "editable_files": {
-                "type": "array",
-                "items": {"type": "string"},
-                "description": f"List of file paths that can be edited in the current workflow. These are in the {Section.ref(SectionType.PROJECT_FILES)} section under {Section.sub_heading_ref('Editable Files')}. This should NOT include any new files that will be created.",
             },
             "reference_files": {
                 "type": "array",
@@ -50,34 +37,21 @@ class BootstrapAgentTool(BaseTool):
         self,
         state: BaseState,
         instruction: str,
-        skills: list[str] = [],
-        editable_files: list[str] = [],
         reference_files: list[str] = [],
         reference_materials: list[str] = [],
         **kwargs,
     ) -> ToolResult:
         harness = HarnessStateUtils.get_harness(state)
 
-        skill_loader_service = self.app.make(SkillLoaderService)
-
         harness["instruction"] = instruction
-
-        invalid = [name for name in skills if skill_loader_service.get_skill(name) is None]
-        if invalid:
-            raise ToolValidationException(f"Unknown skill(s): {', '.join(invalid)}.")
-
-        harness["skills"] = skills
 
         file_service = self.app.make(FileService)
 
-        missing_editable = [f for f in editable_files if file_service.get_file_context(f) is None]
         missing_reference = [f for f in reference_files if file_service.get_file_context(f) is None]
+        if missing_reference:
+            raise ToolValidationException(f"File(s) not found: {', '.join(missing_reference)}.")
 
-        all_missing = missing_editable + missing_reference
-        if all_missing:
-            raise ToolValidationException(f"File(s) not found: {', '.join(all_missing)}.")
-
-        harness = HarnessStateUtils.set_files(state, edit=editable_files, reference=reference_files)
+        harness = HarnessStateUtils.set_files(state, reference=reference_files)
 
         session_context_service = self.app.make(SessionContextService)
         missing_materials = [key for key in reference_materials if session_context_service.get_context(key) is None]
