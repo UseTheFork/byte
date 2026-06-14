@@ -8,32 +8,14 @@ from byte.support import Service
 
 
 class RecordResponseService(Service):
-    """Service for recording assistant responses to disk for debugging.
-
-    Writes LLM responses to cache files organized by agent name,
-    enabling inspection of prompts and responses during development.
-    Usage: `await service.cache_response(result, runtime.context)`
-    """
+    """Record assistant responses to disk for debugging."""
 
     async def record_response(
         self,
         messages: List[BaseMessage] | None,
         config: RunnableConfig,
     ):
-        """Write assistant response to a cache file.
-
-        Creates a cache file named after the agent and writes the response
-        content for later inspection during development and debugging.
-
-        Args:
-            result: The message result from the assistant
-            context: The assistant context containing agent information
-
-        Returns:
-            Path to the created cache file
-
-        Usage: `file_path = await service.cache_response(result, runtime.context)`
-        """
+        """Write assistant response to a cache file."""
 
         if not messages:
             return
@@ -43,7 +25,7 @@ class RecordResponseService(Service):
         langgraph_node = metadata.get("langgraph_node")
         langgraph_step = metadata.get("langgraph_step")
 
-        cache_file = self.app.cache_path(f"development/{workflow_name}/{langgraph_step}_{langgraph_node}.md")
+        cache_file = self.app.cache_path(f"conversations/{workflow_name}/{langgraph_step}_{langgraph_node}.md")
 
         # Ensure cache directory exists
         cache_file.parent.mkdir(parents=True, exist_ok=True)
@@ -73,30 +55,16 @@ class RecordResponseService(Service):
         content = "\n".join(content_parts)
         cache_file.write_text(content, encoding="utf-8")
 
-    async def clear_development_cache(self) -> None:
-        """Clear all files in the development cache directory.
-
-        Removes all cached response files from the development directory
-        when the application shuts down to prevent accumulation of debug files.
-
-        Usage: `await service.clear_development_cache()`
-        """
-
-        dev_cache_dir = self.app.cache_path("development")
-
-        if dev_cache_dir.exists() and dev_cache_dir.is_dir():
-            shutil.rmtree(dev_cache_dir)
-
     async def clear_cache(
         self,
         config: RunnableConfig,
     ) -> None:
-        """ """
+        """Clear cached development files for the current workflow."""
 
         metadata = config.get("metadata", {})
         workflow_name = metadata.get("workflow", "")
 
-        workflow_cache_path = self.app.cache_path(f"development/{workflow_name}")
+        workflow_cache_path = self.app.cache_path(f"conversations/{workflow_name}")
 
         if workflow_cache_path.exists() and workflow_cache_path.is_dir():
             shutil.rmtree(workflow_cache_path)

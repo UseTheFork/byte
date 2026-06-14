@@ -13,7 +13,7 @@ from byte.support import Section, SectionType
 class DocumentationAgentNode(BaseAgentNode):
     """Execute documentation operations using AI agents."""
 
-    llm_tier: str = "coding"
+    llm_tier: str = "standard"
 
     def get_user_template(self):
         return [

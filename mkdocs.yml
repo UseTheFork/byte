@@ -71,6 +71,12 @@ nav:
   - Explanation:
     - Architecture Overview: explanation/architecture-overview.md
     - The Constitution: explanation/the-constitution.md
+    - The Gateway:
+      - explanation/the-gateway.md
+      - Gateway Requests: explanation/gateway-requests.md
+    - The Commands:
+      - explanation/the-commands.md
+      - Available Commands: explanation/available-commands.md
 
 
 plugins:
