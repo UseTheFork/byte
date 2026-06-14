@@ -26,7 +26,7 @@ repo_name: byte
 site_author: UseTheFork
 site_url: https://usethefork.github.io/byte/
 site_dir: site/byte
-site_description: CLI-powered, human-in-the-loop flow coding agent.
+site_description: A CLI coding agent built for efficiency, not autonomy.
 
 markdown_extensions:
   - admonition
@@ -40,6 +40,10 @@ markdown_extensions:
   - md_in_html:
   - pymdownx.inlinehilite:
   - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - markdown.extensions.attr_list:
   - pymdownx.keys:
   - pymdownx.tasklist:
@@ -51,25 +55,15 @@ markdown_extensions:
 
 nav:
   - Introduction: index.md
-  - Getting Started:
-    - Overview: getting-started/index.md
-    - Installation: getting-started/installation.md
-    - First steps: getting-started/first-steps.md
-    - Workflow Example: getting-started/workflow-example.md
-  - Concepts:
-    - concepts/index.md
-    - Memory & Context: concepts/memory.md
-    - File Context: concepts/file-context.md
-    - File Watching: concepts/file-watching.md
-    - Conventions: concepts/conventions.md
-    - Linting: concepts/lint.md
-    - Commit: concepts/commit.md
-    - Web: concepts/web.md
-    - LSP: concepts/lsp.md
-  - References:
-    - Overview: reference/index.md
-    - Settings: reference/settings.md
-    - Commands: reference/commands.md
+  - Tutorials:
+    - Getting Started:
+      - Installation: tutorials/getting-started/installation.md
+  - How-to Guides:
+    - Configure Providers / Models: how-to-guides/configure-providers-models.md
+    - Adding Files: how-to-guides/adding-files.md
+  - Explanation:
+    - Architecture Overview: explanation/architecture-overview.md
+
 
 plugins:
 - search

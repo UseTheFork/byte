@@ -9,6 +9,7 @@ from byte.orchestration.leaves.epilogue import Epilogue as _Epilogue
 from byte.orchestration.leaves.file_context import FileContext as _FileContext
 from byte.orchestration.leaves.git_diffs import GitDiffs as _GitDiffs
 from byte.orchestration.leaves.harness_instruction import HarnessInstruction as _HarnessInstruction
+from byte.orchestration.leaves.harness_skills_loaded import HarnessSkillsLoaded as _HarnessSkillsLoaded
 from byte.orchestration.leaves.harness_workspace_files import HarnessWorkspaceFiles as _HarnessWorkspaceFiles
 from byte.orchestration.leaves.harness_workspace_reference_files import (
     HarnessWorkspaceReferenceFiles as _HarnessWorkspaceReferenceFiles,
@@ -43,21 +44,22 @@ class Leaves:
     Epilogue = _Epilogue
     FileContext = _FileContext
     GitDiffs = _GitDiffs
+    HarnessInstruction = _HarnessInstruction
+    HarnessSkillsLoaded = _HarnessSkillsLoaded
+    HarnessWorkspaceFiles = _HarnessWorkspaceFiles
+    HarnessWorkspaceReferenceFiles = _HarnessWorkspaceReferenceFiles
+    HarnessWorkspaceReferenceMaterials = _HarnessWorkspaceReferenceMaterials
     OperatingPrinciples = _OperatingPrinciples
     Preamble = _Preamble
     ProjectEnvironment = _ProjectEnvironment
     ReferenceMaterials = _ReferenceMaterials
     SkillsAll = _SkillsAll
     SkillsAvailable = _SkillsAvailable
+    Spec = _Spec
+    SpecTasks = _SpecTasks
     ToolsAll = _ToolsAll
     ToolsLoaded = _ToolsLoaded
     UserRequest = _UserRequest
     WorkflowConstraints = _WorkflowConstraints
     WorkflowPending = _WorkflowPending
-    Spec = _Spec
-    HarnessWorkspaceFiles = _HarnessWorkspaceFiles
-    SpecTasks = _SpecTasks
-    HarnessWorkspaceReferenceFiles = _HarnessWorkspaceReferenceFiles
-    HarnessWorkspaceReferenceMaterials = _HarnessWorkspaceReferenceMaterials
-    HarnessInstruction = _HarnessInstruction
     # keep-sorted end

@@ -17,6 +17,7 @@ class DocumentationAgentNode(BaseAgentNode):
 
     def get_user_template(self):
         return [
+            Leaves.HarnessSkillsLoaded(),
             Leaves.ReferenceMaterials(),
             Leaves.HarnessWorkspaceReferenceFiles(),
             Leaves.HarnessInstruction(),

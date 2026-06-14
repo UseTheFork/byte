@@ -1,7 +1,7 @@
 [project]
 name = "byte-ai-cli"
 version = "1.4.0"
-description = "A human-in-the-loop AI coding agent that keeps you in control."
+description = "A CLI coding agent built for efficiency, not autonomy."
 readme = "README.md"
 requires-python = ">=3.14"
 classifiers = [
