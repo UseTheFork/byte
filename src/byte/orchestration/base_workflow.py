@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Optional
 
+from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph.state import CompiledStateGraph, RunnableConfig
 
 from byte.memory import MemoryService
@@ -14,18 +15,18 @@ if TYPE_CHECKING:
 
 
 class BaseWorkflow(ABC, Bootable, Eventable, Configurable):
-    """ """
+    """Manage workflow execution with phases, routing, and state management."""
 
     _graph: Optional[CompiledStateGraph] = None
 
     @property
     def name(self) -> str:
-        """Workflow Name"""
+        """Get the workflow name."""
         return Str.class_to_snake_case(self.__class__.__name__)
 
     @property
     def human_name(self) -> str:
-        """Human readable workflow name"""
+        """Get the human-readable workflow name."""
         return Str.snake_to_title(self.name).strip()
 
     @abstractmethod
@@ -33,29 +34,13 @@ class BaseWorkflow(ABC, Bootable, Eventable, Configurable):
 
     @abstractmethod
     async def build(self) -> CompiledStateGraph:
-        """Build and compile the agent graph with memory and tools.
-
-        Must be implemented by subclasses to define their specific agent
-        behavior, routing logic, and tool integration patterns.
-        Usage: Override in subclass to create domain-specific agent graphs
-        """
+        """Build and compile the agent graph with memory and tools."""
         ...
 
     async def compile(
         self, request: dict, thread_id: Optional[str] = None
     ) -> tuple[CompiledStateGraph, BaseState, RunnableConfig]:
-        """Stream agent responses using astream_events for comprehensive event handling.
-
-        Yields events from the agent graph processing, enabling fine-grained
-        control over streaming display and tool execution visualization.
-
-        Args:
-                request: The request data to process
-                thread_id: Optional thread ID for conversation context
-                display_mode: Display mode - "verbose", "thinking", or "silent" (default: "verbose")
-
-        Usage: `async for event in agent.stream(request): ...`
-        """
+        """Compile the workflow with request data and optional thread ID."""
         # Get or create thread ID
         if thread_id is None:
             memory_service = self.app.make(MemoryService)
@@ -77,19 +62,14 @@ class BaseWorkflow(ABC, Bootable, Eventable, Configurable):
 
         return graph, initial_state, config
 
-    async def get_checkpointer(self):
-        # Get memory for persistence
+    async def get_checkpointer(self) -> InMemorySaver:
+        """Get the memory saver for persistence."""
         memory_service = self.app.make(MemoryService)
         checkpointer = await memory_service.get_saver()
         return checkpointer
 
     async def get_graph(self) -> CompiledStateGraph:
-        """Get or create the agent graph with current tools.
-
-        Lazy-loads the graph with all registered tools and memory integration.
-        The graph is cached until tools are modified to avoid rebuilding.
-        Usage: `graph = await agent_service.get_graph()` -> ready for agent tasks
-        """
+        """Get or create the compiled agent graph."""
         if self._graph is None:
             self._graph = await self.build()
         return self._graph

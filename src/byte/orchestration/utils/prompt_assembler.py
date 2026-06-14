@@ -20,15 +20,9 @@ T = TypeVar("T")
 
 
 class PromptAssembler(Bootable, Eventable):
-    """Assembles prompts from templates by gathering context from various services.
+    """Assemble prompts from templates by gathering context from various services."""
 
-    Coordinates collection of file context, project hierarchy, constraints,
-    reinforcement messages, and other prompt components, then assembles them
-    into a complete prompt using template replacement.
-
-    """
-
-    def boot(self, agent_node: BaseAgentNode | None, state: BaseState, extra: dict = {}, **kwargs):
+    def boot(self, agent_node: BaseAgentNode | None, state: BaseState, extra: dict | None = None, **kwargs) -> None:
 
         if agent_node is None:
             raise ValueError("agent_node is required and cannot be empty")
@@ -59,21 +53,27 @@ class PromptAssembler(Bootable, Eventable):
         self.merged_state = {**state, **extra}
 
     def get_app(self) -> Application:
+        """Retrieve the application instance."""
         return self.app
 
     def get_state(self) -> BaseState:
+        """Retrieve the current prompt state."""
         return self.prompt_state
 
     def get_agent_node(self) -> BaseAgentNode:
+        """Retrieve the agent node."""
         return self.agent_node
 
     def get_model_schema(self) -> ModelSchema:
+        """Retrieve the model schema."""
         return self.model_schema
 
     def get_assembled_state(self) -> dict:
+        """Retrieve the assembled prompt state."""
         return self.assembled_state
 
     def get_tools(self) -> List[Type[BaseTool]]:
+        """Collect tools from the phase and agent node."""
         tool_schemas = []
         tool_registry_service = self.app.make(ToolRegistryService)
 
@@ -95,6 +95,7 @@ class PromptAssembler(Bootable, Eventable):
         return tool_schemas
 
     async def generate_messages(self) -> dict:
+        """Assemble system, user, and context messages from templates and leaves."""
         templates = {
             "system_message": self.agent_node.get_system_template(),
             "user_message": self.agent_node.get_user_template(),
@@ -131,13 +132,7 @@ class PromptAssembler(Bootable, Eventable):
         return self.assembled_state
 
     def assemble_message(self, template: list[str]) -> str:
-        """Replace {placeholder} tokens in template with provided values.
-
-        Automatically removes lines containing only placeholders that don't have corresponding values.
-        Placeholders are expected to be on their own line with nothing else.
-
-        Usage: `assembler.assemble_system_message(name="World", age=30)`
-        """
+        """Replace placeholder tokens in template with values from state."""
 
         result_lines = []
         placeholder_pattern = r"^\{([^}]+)\}$"
@@ -159,6 +154,6 @@ class PromptAssembler(Bootable, Eventable):
         return list_to_multiline_text(result_lines)
 
     def generate_scratch_state(self) -> list[BaseMessage]:
-        """ """
+        """Retrieve scratch messages from the current state."""
 
         return self.prompt_state.get("scratch_messages", [])

@@ -11,6 +11,7 @@ from textual.widgets import Footer
 from byte import EventBus
 from byte.files import FileService
 from byte.knowledge import SessionContextService
+from byte.system import SystemEvents
 from byte.tui import Messages
 from byte.tui.screens.manage_context_screen import ManageContextScreen
 from byte.tui.screens.manage_files_screen import ManageFilesScreen
@@ -50,6 +51,7 @@ class ConversationScreen(Screen[None]):
 
         workflow_service = self.app.byte.make(WorkflowService)
         workflow_service.cancel()
+        self.post_message(Messages.Notify(content="Cancel requested — stopping after current step..."))
 
     def action_scroll_to_panel(self, panel_id: str) -> None:
         try:
@@ -82,8 +84,8 @@ class ConversationScreen(Screen[None]):
         event_bus = self.app.byte.make(EventBus)
 
         # Emit our post boot message to gather all needed info.
-        # payload = await event_bus.emit(SystemEvents.PostBoot(messages=[]))
-        # messages = payload.messages
+        payload = await event_bus.emit(SystemEvents.PostBoot(messages=[]))
+        messages = payload.messages
 
         styled_logo = []
         logo_lines = [
@@ -118,8 +120,7 @@ class ConversationScreen(Screen[None]):
 
             styled_logo.append(styled_line)
 
-        # response_chatbox = Bootbox("\n".join(styled_logo) + "\n\n" + "\n".join(messages))
-        response_chatbox = Bootbox("\n".join(styled_logo))
+        response_chatbox = Bootbox("\n".join(styled_logo) + "\n\n" + "\n".join(messages))
         self.conversation.chat_container.mount(response_chatbox)
 
     @work

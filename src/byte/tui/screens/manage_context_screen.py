@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 class ManageContextScreen(ModalScreen[None]):
-    """"""
+    """Display and manage session context items."""
 
     app: ByteTUI
 
@@ -22,7 +22,7 @@ class ManageContextScreen(ModalScreen[None]):
         ManageContextScreen {
             align: center middle;
             background: $background 60%;
-            
+
             & VerticalGroup {
                 padding: 0 1;
                 width: 80%;
@@ -30,7 +30,7 @@ class ManageContextScreen(ModalScreen[None]):
                 border: thick $background 80%;
                 background: $surface;
             }
-            
+
         }
         """
 
@@ -46,12 +46,14 @@ class ManageContextScreen(ModalScreen[None]):
     ]
 
     def compose(self) -> ComposeResult:
+        """Compose the screen layout with data table and footer."""
         yield VerticalGroup(
             DataTable(cursor_type="row"),
             Footer(show_command_palette=False),
         )
 
     def on_mount(self) -> None:
+        """Initialize the data table with session context items on mount."""
         table = self.query_one(DataTable)
         table.focus()
         table.add_columns("Key", "Type")
@@ -64,11 +66,13 @@ class ManageContextScreen(ModalScreen[None]):
 
     @on(DataTable.RowSelected)
     def handle_remove_context(self, event: DataTable.RowSelected) -> None:
+        """Remove selected context item from session and table."""
         row = event.data_table.get_row(event.row_key)
         session_context_service = self.app.byte.make(SessionContextService)
         session_context_service.remove_context(row[0])
 
         event.data_table.remove_row(event.row_key)
 
-    def action_dismiss_screen(self):
+    def action_dismiss_screen(self) -> None:
+        """Dismiss the modal screen."""
         self.dismiss()

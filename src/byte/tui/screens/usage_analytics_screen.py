@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from byte.tui import ByteTUI
 
 
+# AI:
 class UsageAnalyticsScreen(ModalScreen[None]):
     """Modal screen displaying per-model token usage and calculated costs."""
 

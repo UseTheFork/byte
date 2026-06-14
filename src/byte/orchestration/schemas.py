@@ -8,12 +8,7 @@ from pydantic.dataclasses import dataclass
 
 @dataclass
 class PromptSettingsSchema:
-    """Settings for controlling prompt behavior and content.
-
-    Boolean flags to enable or disable specific prompt features.
-
-    Usage: `settings = PromptSettingsSchema(has_project_hierarchy=True)`
-    """
+    """Configure prompt behavior settings."""
 
     has_project_hierarchy: bool = Field(default=False)
     has_project_information_and_context: bool = Field(default=True)
@@ -22,12 +17,7 @@ class PromptSettingsSchema:
 
 @dataclass
 class MetadataSchema:
-    """Metadata tracking for agent execution state.
-
-    Tracks execution metrics like current loop iteration for monitoring and debugging.
-
-    Usage: `metadata = MetadataSchema(iteration=1)`
-    """
+    """Track metadata for agent execution state."""
 
     iteration: int = Field(default=0)
     erase_history: bool = Field(default=False)
@@ -37,14 +27,7 @@ class MetadataSchema:
 
 @dataclass
 class ConstraintSchema:
-    """User-defined constraint to guide agent behavior during execution.
-
-    Constraints are suggestions or actions the agent should avoid or follow based on
-    user feedback, such as declined tool calls or rejected suggestions.
-
-    Usage: `constraint = ConstraintSchema(type="avoid", description="Do not suggest using ripgrep_search")`
-    Usage: `constraint = ConstraintSchema(type="require", description="Always use type hints", source="user_input")`
-    """
+    """Define user constraints to guide agent behavior."""
 
     type: Literal["avoid", "require"]  # Whether this is something to avoid or something required
     description: str  # Human-readable constraint description
@@ -53,7 +36,7 @@ class ConstraintSchema:
 
 @dataclass
 class AgentConfigSchema:
-    """Base schema for agent configuration settings."""
+    """Define base schema for agent configuration."""
 
     name: str  # Human-readable name of the setting
     description: str  # Human-readable description of the setting
@@ -61,33 +44,21 @@ class AgentConfigSchema:
 
 @dataclass
 class AgentConfigBoolSchema(AgentConfigSchema):
-    """Boolean configuration setting for agents."""
+    """Define boolean configuration setting for agents."""
 
     value: bool = Field(default=False)
 
 
 @dataclass
 class AgentConfigStringSchema(AgentConfigSchema):
-    """String configuration setting for agents."""
+    """Define string configuration setting for agents."""
 
     value: str = Field(default="")
 
 
 @dataclass
 class AssistantContextSchema:
-    """Configuration for agent assistant including LLM, runnable chain, and tools.
-
-    Different agents provide different components based on their needs:
-    - All agents provide the runnable (prompt | llm chain)
-    - Ask agent provides tools for ToolNode
-    - All agents provide main and weak llm references for different operations
-    - All agents provide their class name for identification
-    - Mode indicates whether the runnable uses main or weak AI
-
-    Usage: `config = await agent.get_assistant_runnable()`
-    Usage: `AssistantNode(runnable=config.runnable)`
-    Usage: `ToolNode(tools=config.tools) if config.tools else None`
-    """
+    """Configure assistant context with LLM, runnable, and tools."""
 
     mode: Literal["main", "weak", "reasoning", "none"]  # Which model the runnable uses
     prompt: BasePromptTemplate | None  # The prompt | llm chain to execute
@@ -100,12 +71,7 @@ class AssistantContextSchema:
 
 @dataclass
 class TokenUsageSchema:
-    """Token usage tracking for LLM interactions.
-
-    Tracks input, output, and total tokens consumed during LLM operations.
-
-    Usage: `usage = TokenUsageSchema(input_tokens=2897, output_tokens=229, total_tokens=3126)`
-    """
+    """Track token usage for LLM interactions."""
 
     input_tokens: int = 0
     input_token_cache_read: int = 0

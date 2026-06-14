@@ -7,7 +7,7 @@ from byte.support import Service, Yaml
 class LLMRegistryService(Service):
     """Central read-only registry for LLM models loaded from models_data.yaml."""
 
-    def boot(self):
+    def boot(self) -> None:
         """Load LLM models from models_data.yaml on boot."""
 
         models_data_path = self.app.app_path("llm/resources/models_data.yaml")
@@ -31,20 +31,9 @@ class LLMRegistryService(Service):
             self._models[model_id] = model
 
     def get_model(self, model_id: str) -> Optional[ModelSchema]:
-        """Retrieve a registered model by ID.
-
-        Args:
-            model_id: The model identifier (e.g., "claude-sonnet-4-5")
-
-        Returns:
-            Model data dictionary or None if not found
-        """
+        """Retrieve a registered model by ID."""
         return self._models.get(model_id)
 
     def get_all_models(self) -> Dict[str, ModelSchema]:
-        """Retrieve all registered models.
-
-        Returns:
-            Dictionary of all models keyed by model ID
-        """
+        """Retrieve all registered models."""
         return self._models.copy()

@@ -10,19 +10,13 @@ from byte.tui import Messages
 
 
 class FileService(Service):
-    """Simplified domain service for file context management with project discovery.
-
-    Manages the active set of files available to the AI assistant, with
-    integrated project file discovery for better completions and file operations.
-    Loads all project files on boot for fast reference and completion.
-    Usage: `await file_service.add_file("main.py", FileMode.EDITABLE)`
-    """
+    """Manage files and project discovery for AI context."""
 
     def boot(self, **kwargs) -> None:
-        """Initialize file service and ensure discovery service is ready."""
+        """Initialize file service and discovery."""
         self._context_files: Dict[str, FileContext] = {}
 
-    async def notify_file_stats(self):
+    async def notify_file_stats(self) -> None:
         """Notify system of current context file count."""
 
         count = len(self._context_files)
@@ -34,14 +28,7 @@ class FileService(Service):
         )
 
     async def add_file(self, path: Union[str, PathLike]) -> bool:
-        """Add a file to the active context for AI awareness.
-
-        Supports wildcard patterns like 'byte/*' to add multiple files at once.
-        Only adds files that are available in the FileDiscoveryService to ensure
-        they are valid project files that respect gitignore patterns.
-        Usage: `await service.add_file("config.py", FileMode.READ_ONLY)`
-        Usage: `await service.add_file("src/*.py", FileMode.EDITABLE)` -> adds all Python files
-        """
+        """Add a file to active context, supporting wildcard patterns."""
         file_discovery = self.app.make(FileDiscoveryService)
         discovered_files = await file_discovery.get_files()
         discovered_file_paths = {str(f.resolve()) for f in discovered_files}
@@ -96,14 +83,7 @@ class FileService(Service):
             return True
 
     async def remove_file(self, path: Union[str, PathLike]) -> bool:
-        """Remove a file from active context to reduce noise.
-
-        Supports wildcard patterns like 'byte/*' to remove multiple files at once.
-        Only removes files that are available in the FileDiscoveryService to ensure
-        consistency with project file management.
-        Usage: `await service.remove_file("old_file.py")`
-        Usage: `await service.remove_file("src/*.py")` -> removes all Python files
-        """
+        """Remove a file from active context, supporting wildcard patterns."""
         file_discovery = self.app.make(FileDiscoveryService)
         discovered_files = await file_discovery.get_files()
         discovered_file_paths = {str(f.resolve()) for f in discovered_files}
@@ -155,38 +135,19 @@ class FileService(Service):
             return False
 
     def list_files(self) -> List[FileContext]:
-        """List all files in context.
-
-        Returns all files currently in the AI context,
-        sorted by relative path for consistent, user-friendly ordering.
-        Usage: `files = service.list_files()`
-        """
+        """List all files in context sorted by relative path."""
         files = list(self._context_files.values())
 
         # Sort by relative path for consistent, user-friendly ordering
         return sorted(files, key=lambda f: f.relative_path)
 
     def get_file_context(self, path: Union[str, PathLike]) -> Optional[FileContext]:
-        """Retrieve file context metadata for a specific path.
-
-        Provides access to file mode and other metadata without reading
-        the full file content, useful for UI state management.
-        Usage: `context = service.get_file_context("main.py")`
-        """
+        """Retrieve file context metadata for a specific path."""
         path_obj = Path(path).resolve()
         return self._context_files.get(str(path_obj))
 
     async def generate_context_prompt(self) -> list[str]:
-        """Generate flat list of formatted file strings for prompt context.
-
-        Returns a single list of all context files formatted for inclusion
-        in the AI prompt, without mode-based separation.
-
-        Returns:
-                List of formatted file strings
-
-        Usage: `files = await service.generate_context_prompt()`
-        """
+        """Generate formatted file strings for prompt context."""
         files = []
 
         if not self._context_files:
@@ -197,33 +158,18 @@ class FileService(Service):
 
         return files
 
-    async def clear_context(self):
-        """Clear all files from context for fresh start.
-
-        Useful when switching tasks or when context becomes too large
-        for effective AI processing, enabling a clean slate approach.
-        Usage: `await service.clear_context()` -> empty context
-        """
+    async def clear_context(self) -> None:
+        """Clear all files from context for fresh start."""
         self._context_files.clear()
 
     # Project file discovery methods
     async def get_project_files(self, extension: Optional[str] = None) -> List[str]:
-        """Get all project files as relative path strings.
-
-        Uses the discovery service to provide fast access to all project files,
-        optionally filtered by extension for language-specific operations.
-        Usage: `py_files = service.get_project_files('.py')` -> Python files
-        """
+        """Get all project files as relative path strings, optionally filtered by extension."""
         file_discovery = self.app.make(FileDiscoveryService)
         return await file_discovery.get_relative_paths(extension)
 
     async def find_project_files(self, pattern: str) -> List[str]:
-        """Find project files matching a pattern for completions.
-
-        Provides fast file path completion by searching the cached project
-        file index, respecting gitignore patterns automatically.
-        Usage: `matches = service.find_project_files('src/main')` -> matching files
-        """
+        """Find project files matching a pattern for completions."""
         file_discovery = self.app.make(FileDiscoveryService)
         matches = await file_discovery.find_files(pattern)
 
@@ -232,11 +178,6 @@ class FileService(Service):
         return [str(f.relative_to(self.app["path"])) for f in matches]
 
     async def is_file_in_context(self, path: Union[str, PathLike]) -> bool:
-        """Check if a file is currently in the AI context.
-
-        Quick lookup to determine if a file is already being tracked,
-        useful for command validation and UI state management.
-        Usage: `in_context = service.is_file_in_context("main.py")`
-        """
+        """Check if a file is currently in the AI context."""
         path_obj = Path(path).resolve()
         return str(path_obj) in self._context_files

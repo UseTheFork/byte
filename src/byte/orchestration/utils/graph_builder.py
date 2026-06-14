@@ -19,7 +19,10 @@ T = TypeVar("T")
 
 
 class GraphBuilder:
-    def __init__(self, app: Application, start_node: Type[BaseNode] = DummyNode, **kwargs):
+    """Build and configure state graphs for workflow execution."""
+
+    def __init__(self, app: Application, start_node: Type[BaseNode] = DummyNode, **kwargs) -> None:
+        """Initialize the graph builder with application context and initial nodes."""
         if app is None:
             raise ValueError("app parameter is required")
         self.app = app
@@ -34,33 +37,13 @@ class GraphBuilder:
         self.add_node(EndNode)
 
     def discover_node_classes(self) -> dict[str, Type]:
-        """Discover all classes that extend the base Node class.
-
-        Returns:
-            Dictionary mapping node class names to their types
-
-        Usage: Called internally during GraphBuilder initialization
-        """
-
+        """Discover all available node classes from the node registry."""
         node_registry = self.app.make(NodeRegistry)
 
         return node_registry.all()
 
     def add_node(self, node: Type[BaseNode], **kwargs):
-        """Add a node to the graph builder.
-
-        Creates an instance of the node class using the app container and stores
-        it by the node's class name for later use in graph construction.
-
-        Args:
-            node_class: The Node subclass to instantiate
-            **kwargs: Additional keyword arguments passed to the node constructor
-
-        Returns:
-            The instantiated node instance
-
-        Usage: `builder.add_node(AssistantNode, goto="parse_blocks_node")`
-        """
+        """Add a node to the graph and register it for later use."""
         node_instance = self.app.make(node, **kwargs)
         node_name = Str.class_to_snake_case(node)
 
@@ -73,19 +56,7 @@ class GraphBuilder:
         return node_instance
 
     def build(self, checkpointer=None) -> StateGraph:
-        """Build and compile the state graph with all registered nodes.
-
-        Creates a StateGraph with BaseState and AssistantContextSchema, adds all
-        registered nodes and dummy nodes, then sets up entry and finish points.
-
-        Args:
-            checkpointer: Optional checkpointer for state persistence
-
-        Returns:
-            Configured StateGraph ready for compilation
-
-        Usage: `graph = builder.build()` -> returns configured state graph
-        """
+        """Build and compile the state graph with all registered nodes and entry/finish points."""
         graph = StateGraph(BaseState, context_schema=AssistantContextSchema)  # ty:ignore[invalid-argument-type]
 
         for node_name, node_instance in self._nodes.items():

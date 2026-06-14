@@ -13,32 +13,28 @@ from byte.tui import Messages, Status
 class WorkflowService(Service):
     """Service for executing workflows with compiled graphs."""
 
-    def boot(self):
+    def boot(self) -> None:
+        """Initialize workflow service with cancel event."""
         self.cancel_event = threading.Event()
 
-    def cancel(self):
+    def cancel(self) -> None:
         """Signal the current workflow execution to stop."""
         self.cancel_event.set()
 
     def _is_tool_call_chunk(self, block: dict) -> bool:
+        """Check if block is a tool call chunk."""
         return block.get("type") == ("input_json_delta")
 
     def _is_starting_tool_call_chunk(self, block: dict) -> bool:
+        """Check if block is a starting tool call chunk."""
         return block.get("type") == ("tool_use")
 
     def _is_message_content_chunk(self, block: dict) -> bool:
+        """Check if block is a message content chunk."""
         return block.get("type") == "text"
 
     async def _track_token_usage(self, usage_metadata: dict) -> None:
-        """Track token usage from callback metadata by provider.
-
-        Extracts usage metadata from the get_usage_metadata_callback result
-        and records it in the analytics service by provider.
-
-        Args:
-            usage_metadata: Dictionary with model IDs as keys and usage stats as values
-
-        """
+        """Track token usage from callback metadata by provider."""
         self.app["log"].info(usage_metadata)
 
         if usage_metadata:
@@ -54,13 +50,8 @@ class WorkflowService(Service):
                 )
                 await agent_analytics_service.update_usage_by_model(model_id, usage)
 
-    async def _handle_stream_event(self, chunk: dict[str, Any] | Any):
-        """Handle individual stream events for display and final message extraction.
-
-        Args:
-                mode: The stream mode ("values", "updates", "messages", or "custom")
-                chunk: The data chunk from that stream mode
-        """
+    async def _handle_stream_event(self, chunk: dict[str, Any] | Any) -> dict[str, Any] | Any:
+        """Handle individual stream events for display and final message extraction."""
 
         if chunk["type"] == "messages":
             message_chunk, metadata = chunk["data"]
@@ -166,15 +157,8 @@ class WorkflowService(Service):
         workflow: BaseWorkflow,
         request: dict,
         thread_id: Optional[str] = None,
-    ):
-        """Execute a workflow with the provided request.
-
-        Args:
-            workflow: The workflow to execute
-            request: The user request to process
-            thread_id: Optional thread ID for conversation context
-
-        """
+    ) -> dict[str, Any] | Any:
+        """Execute a workflow with the provided request."""
         graph, initial_state, config = await workflow.compile(request, thread_id)
 
         processed_event = None

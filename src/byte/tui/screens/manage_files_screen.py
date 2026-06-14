@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class ManageFilesScreen(ModalScreen[None]):
-    """"""
+    """Display and manage session files."""
 
     app: ByteTUI
 
@@ -55,12 +55,14 @@ class ManageFilesScreen(ModalScreen[None]):
     ]
 
     def compose(self) -> ComposeResult:
+        """Compose the screen layout with data table and footer."""
         yield VerticalGroup(
             DataTable(cursor_type="row"),
             Footer(show_command_palette=False),
         )
 
     def on_mount(self) -> None:
+        """Initialize the data table with files on mount."""
         table = self.query_one(DataTable)
         table.focus()
         self._col_file = table.add_columns("File")
@@ -71,6 +73,7 @@ class ManageFilesScreen(ModalScreen[None]):
             table.add_row(file.relative_path)
 
     async def action_delete_row(self) -> None:
+        """Remove the selected file from context and table."""
         table = self.query_one(DataTable)
         if table.cursor_row < 0:
             return
@@ -83,5 +86,6 @@ class ManageFilesScreen(ModalScreen[None]):
         if result:
             table.remove_row(row_key)
 
-    def action_dismiss_screen(self):
+    def action_dismiss_screen(self) -> None:
+        """Dismiss the modal screen."""
         self.dismiss()

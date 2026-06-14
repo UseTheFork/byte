@@ -7,14 +7,11 @@ if TYPE_CHECKING:
 
 
 class PhaseUtils:
-    """Phase helper utilities."""
+    """Manage workflow phase utilities."""
 
     @staticmethod
     def inject_phase_input_schema_args(tool_schema: Dict[str, Any] | None) -> Dict[str, Any]:
-        """Injects `phase_id` and `phase_status` args into a tool's input schema.
-
-        For testing purposes only.
-        """
+        """Inject phase_id and phase_status arguments into tool input schema."""
 
         if not tool_schema:
             return {}
@@ -50,7 +47,7 @@ class PhaseUtils:
 
     @staticmethod
     def to_phase_dict(phases: List[PhaseModel]) -> Dict[str, PhaseModel]:
-        """ """
+        """Convert phases list to dictionary keyed by phase ID."""
         phase_dict: Dict[str, PhaseModel] = {}
 
         for phase in phases:
@@ -60,7 +57,7 @@ class PhaseUtils:
 
     @staticmethod
     def get_pending_phase(state: BaseState) -> Union[RoutePhaseModel | PhaseModel] | None:
-        """ """
+        """Retrieve the first pending or in-progress phase from workflow."""
         workflow_phases = state.get("workflow_phases") or {}
         pending_phase = next(
             (phase for phase in workflow_phases.values() if phase.status in ("pending", "in_progress")), None
@@ -70,7 +67,7 @@ class PhaseUtils:
 
     @staticmethod
     def get_workflow_phases(state: BaseState) -> Dict[str, Union[RoutePhaseModel | PhaseModel]] | None:
-        """ """
+        """Get all workflow phases from state, or None if empty."""
         workflow_phases = state.get("workflow_phases") or {}
         if len(workflow_phases.keys()) <= 0:
             return None
@@ -79,7 +76,7 @@ class PhaseUtils:
 
     @staticmethod
     def is_workflow_complete(state: BaseState) -> bool:
-        """ """
+        """Check if all workflow phases are completed or blocked."""
         workflow_phases = state.get("workflow_phases") or {}
 
         # If this is not a workflow agent then we return true regardless
@@ -94,7 +91,7 @@ class PhaseUtils:
 
     @staticmethod
     def is_workflow_agent(state: BaseState) -> bool:
-        """ """
+        """Check if state contains workflow phases."""
         workflow_phases = state.get("workflow_phases") or {}
         return len(workflow_phases.keys()) > 0
 
@@ -102,7 +99,7 @@ class PhaseUtils:
     def update_phase_with_tool_args(
         tool_call: Dict[str, Any], workflow_phases: Dict[str, Union[RoutePhaseModel | PhaseModel]] = {}
     ) -> Dict[str, Union[RoutePhaseModel | PhaseModel]]:
-        """ """
+        """Update phase status based on tool call arguments."""
         tool_name = tool_call.get("name", None)
         if tool_name == UserConfirmPhaseTool.name:
             return workflow_phases
