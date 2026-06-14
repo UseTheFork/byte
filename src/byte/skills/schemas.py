@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
@@ -17,6 +17,7 @@ class Skill:
         version: Optional version string (from frontmatter).
     """
 
+    id: str
     name: str
     description: str
     instructions: str
@@ -26,3 +27,4 @@ class Skill:
     version: Optional[str] = None
     allowed_tools: Optional[list[str]] = None
     active: bool = True
+    references: dict[str, Path] = field(default_factory=dict)

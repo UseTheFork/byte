@@ -1,12 +1,13 @@
-import re
 from typing import override
 
 from byte.skills import SkillLoaderService
+from byte.support.string import Str
+from byte.support.yaml import Yaml
 from byte.tools import BaseTool, ToolResult
 
 
 class CreateSkillTool(BaseTool):
-    name: str = "create_skill"
+    name: str = "create_skill_tool"
     description: str = "Use this tool to create a new skill. Call this when you want to create a reusable skill with a name, description, and instructions."
     input_schema = {
         "type": "object",
@@ -37,17 +38,13 @@ class CreateSkillTool(BaseTool):
         instructions: str,
         **kwargs,
     ) -> ToolResult:
-        # Normalize the skill name: lowercase, replace invalid chars with hyphens,
-        # collapse consecutive hyphens, strip leading/trailing hyphens
-        name = name.lower()
-        name = re.sub(r"[^a-z0-9]+", "-", name)
-        name = re.sub(r"-+", "-", name)
-        name = name.strip("-")
+        # Normalize the skill name using utility class
+        name = Str.normalize_id(name)
 
         skill_file_path = self.app.skills_path(f"{name}/SKILL.md")
         skill_file_path.parent.mkdir(parents=True, exist_ok=True)
 
-        content = f"---\nname: {name}\ndescription: {description}\n---\n\n{instructions}\n"
+        content = Yaml.render_frontmatter({"name": name, "description": description}, instructions)
         skill_file_path.write_text(content, encoding="utf-8")
 
         skill_loader_service = self.app.make(SkillLoaderService)

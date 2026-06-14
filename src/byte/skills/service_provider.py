@@ -1,7 +1,10 @@
 from byte import ServiceProvider
 from byte.skills import (
+    AddSkillReferenceTool,
     CreateSkillTool,
     CreateSkillWorkflow,
+    EditSkillTool,
+    LoadSkillReferenceTool,
     LoadSkillTool,
     SkillCommand,
     SkillCreatorAgentNode,
@@ -28,7 +31,10 @@ class SkillsServiceProvider(ServiceProvider):
     def tools(self):
         return [
             # keep-sorted start
+            AddSkillReferenceTool,
             CreateSkillTool,
+            EditSkillTool,
+            LoadSkillReferenceTool,
             LoadSkillTool,
             # keep-sorted end
         ]

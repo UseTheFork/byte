@@ -4,6 +4,7 @@ from typing import Optional
 from byte import Service
 from byte.skills.schemas import Skill
 from byte.support.boundary import Boundary, BoundaryType
+from byte.support.string import Str
 from byte.support.yaml import Yaml
 
 SKILL_FILE_NAME = "SKILL.md"
@@ -63,12 +64,10 @@ class SkillLoaderService(Service):
         lines: list[str] = [Boundary.open(BoundaryType.AVAILABLE_SKILLS)]
         for skill in skills.values():
             lines.append(f"  {Boundary.open(BoundaryType.SKILL)}")
+            lines.append(f"    {Boundary.open(BoundaryType.ID)}{skill.id}{Boundary.close(BoundaryType.ID)}")
             lines.append(f"    {Boundary.open(BoundaryType.NAME)}{skill.name}{Boundary.close(BoundaryType.NAME)}")
             lines.append(
                 f"    {Boundary.open(BoundaryType.DESCRIPTION)}{skill.description}{Boundary.close(BoundaryType.DESCRIPTION)}"
-            )
-            lines.append(
-                f"    {Boundary.open(BoundaryType.LOCATION)}{skill.skill_file_path}{Boundary.close(BoundaryType.LOCATION)}"
             )
             if skill.builtin:
                 lines.append(f"    {Boundary.open(BoundaryType.TYPE)}builtin{Boundary.close(BoundaryType.TYPE)}")
@@ -144,23 +143,22 @@ class SkillLoaderService(Service):
         if version is not None and not isinstance(version, str):
             version = str(version)
 
-        metadata = frontmatter.get("metadata")
-        allowed_tools = None
-        if isinstance(metadata, dict):
-            allowed_tools = metadata.get("allowed-tools")
-            if allowed_tools is not None and not isinstance(allowed_tools, list):
-                self.app["log"].warning(f"'allowed-tools' in metadata of {skill_file} is not a list, ignoring")
-                allowed_tools = None
+        references_dir = skill_file.parent / "references"
+        references: dict[str, Path] = {}
+        if references_dir.is_dir():
+            for ref_file in sorted(references_dir.glob("*.md")):
+                references[Str.normalize_id(ref_file.stem)] = ref_file.resolve()
 
         return Skill(
+            id=Str.normalize_id(name),
             name=name.strip(),
             description=description.strip(),
             instructions=body,
             path=skill_file.parent,
             skill_file_path=skill_file,
             builtin=builtin,
-            allowed_tools=allowed_tools,
             version=version.strip() if isinstance(version, str) else None,
+            references=references,
         )
 
     # ------------------------------------------------------------------
@@ -175,7 +173,7 @@ class SkillLoaderService(Service):
             builtin:   Mark loaded skills as builtin when True.
 
         Returns:
-            Dict of successfully parsed Skill objects keyed by name (empty if dir missing).
+            Dict of successfully parsed Skill objects keyed by id (empty if dir missing).
         """
         if not directory.exists():
             self.app["log"].debug(f"Skills directory does not exist, skipping: {directory}")
@@ -190,7 +188,7 @@ class SkillLoaderService(Service):
         for skill_file in self._find_skill_files(directory):
             skill = self._parse_skill_file(skill_file, builtin=builtin)
             if skill is not None:
-                skills[skill.name] = skill
+                skills[skill.id] = skill
 
         self.app["log"].debug(f"Found {len(skills)} skill(s) in {directory}")
         return skills

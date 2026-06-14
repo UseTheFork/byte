@@ -7,10 +7,6 @@ from byte.node import (
     BaseAgentNode,
 )
 from byte.orchestration import BaseState, Leaves, PhaseUtils
-from byte.support import Boundary, BoundaryType, Section, SectionType
-from byte.system.tools.user_confirm_tool import UserConfirmTool
-from byte.system.tools.user_input_text_tool import UserInputTextTool
-from byte.system.tools.user_select_tool import UserSelectTool
 
 
 class SkillCreatorAgentNode(BaseAgentNode):
@@ -18,11 +14,7 @@ class SkillCreatorAgentNode(BaseAgentNode):
 
     def get_user_template(self):
         return [
-            Leaves.ConversationHistory(),
-            Leaves.UserRequest(),
-            Section.important(
-                f"All tool operations are applied immediately and are reflected in the next user message containing {Section.ref(SectionType.PROJECT_FILES)}."
-            ),
+            Leaves.HarnessInstruction(),
         ]
 
     def get_system_template(self):
@@ -30,8 +22,9 @@ class SkillCreatorAgentNode(BaseAgentNode):
             Leaves.Preamble(
                 role="Act as an expert skill creator. Your job is to help users design and create skills by understanding their intent, asking the right questions, and producing clear, well-structured skill definitions."
             ),
-            Leaves.SkillsAvailable(),
-            Leaves.OperatingPrinciples(),
+            Leaves.CommunicationStyle(
+                verbose=True,
+            ),
             Leaves.WorkflowConstraints(
                 [
                     "- Understand what the user wants the skill to do before writing anything",
@@ -41,61 +34,16 @@ class SkillCreatorAgentNode(BaseAgentNode):
                     "- Keep skill instructions clear, concise, and actionable",
                 ]
             ),
-            Section.start(SectionType.WORKFLOW),
-            "Your task is to help the user create a new skill. Follow these phases:",
-            "",
-            "- PHASE 1: Capture Intent — Understand what the skill should do, when it should trigger, and what the expected output looks like.",
-            "- PHASE 2: Interview — Ask about edge cases, input/output formats, and any dependencies. Come prepared with context.",
-            f"    - Use the `{UserInputTextTool.name}`, `{UserSelectTool.name}` or the `{UserConfirmTool.name}` tools to do this.",
-            "- PHASE 3: Create the Skill — Use the available tools to create the skill with a clear name, description, and instructions.",
-            Section.end(),
-            Section.start(SectionType.RESPONSE_FORMAT),
-            "Structure your responses as follows:",
-            "",
-            "```md",
-            "## Understanding",
-            "Summarise what the skill will do and when it should trigger.",
-            "",
-            "## Clarifying Questions (if needed)",
-            "List any questions before proceeding.",
-            "",
-            "## Skill Details",
-            "- **Name**: skill-name",
-            "- **Description**: When to trigger and what it does.",
-            "- **Instructions**: Step-by-step instructions the skill will follow.",
-            "",
-            "## Summary",
-            "**Summary** - SHORT, CONCISE bulleted list of what was created",
-            "```",
-            Section.end(),
-            Section.start(SectionType.EXAMPLES),
-            "```",
-            Boundary.open(BoundaryType.EXAMPLE),
-            "## Understanding",
-            "This skill will format raw CSV data into a structured markdown table whenever the user shares tabular data and asks for a clean output.",
-            "",
-            "## Skill Details",
-            "- **Name**: csv-to-markdown",
-            "- **Description**: Converts raw CSV data into a formatted markdown table. Use this skill whenever the user shares CSV data or asks for a table.",
-            "- **Instructions**: Read the CSV input, parse headers and rows, and output a properly formatted markdown table.",
-            "",
-            "## Summary",
-            "- Created `csv-to-markdown` skill",
-            "- Skill triggers when the user shares CSV data or requests a table",
-            Boundary.close(BoundaryType.EXAMPLE),
-            "```",
-            "",
-            Section.end(),
         ]
 
     def get_context_template(self):
         return [
-            Leaves.ToolsLoaded(),
-            Leaves.ReferenceMaterials(),
+            Leaves.Constitution(),
             Leaves.ProjectEnvironment(),
-            Leaves.FileContext(),
+            Leaves.HarnessWorkspaceReferenceContext(),
             Leaves.WorkflowPending(),
             Leaves.Epilogue(),
+            Leaves.ToolsLoaded(),
         ]
 
     async def __call__(

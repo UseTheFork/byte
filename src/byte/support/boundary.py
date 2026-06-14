@@ -11,6 +11,7 @@ class BoundaryType(StrEnum):
     ERROR = "error"
 
     # genaric
+    ID = "id"
     NAME = "name"
     DESCRIPTION = "description"
     LOCATION = "location"
@@ -36,6 +37,7 @@ class BoundaryType(StrEnum):
 
     # Skills
     AVAILABLE_SKILLS = "available_skills"
+    SKILL_REFERENCES = "skill_references"
     SKILL = "skill"
 
     # Operating Constraints

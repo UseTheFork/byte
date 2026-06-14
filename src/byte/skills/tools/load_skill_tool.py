@@ -14,38 +14,52 @@ class LoadSkillTool(BaseTool):
     input_schema = {
         "type": "object",
         "properties": {
-            "skill_name": {
+            "skill_id": {
                 "type": "string",
-                "description": f"The name of the skill to load. This must be from the {Section.ref(SectionType.AVALIABLE_SKILLS)} and is labeled by `{Boundary.open(BoundaryType.NAME)}`",
+                "description": f"The ID of the skill to load. This must be from the {Section.ref(SectionType.AVALIABLE_SKILLS)} and is labeled by `{Boundary.open(BoundaryType.ID)}`",
             },
         },
-        "required": ["skill_name"],
+        "required": ["skill_id"],
     }
 
     @override
     async def run(
         self,
-        skill_name: str,
+        skill_id: str,
         **kwargs,
     ) -> ToolResult:
 
         skill_loader_service = self.app.make(SkillLoaderService)
-        skill = skill_loader_service.get_skill(skill_name)
+        skill = skill_loader_service.get_skill(skill_id)
         if skill is None:
-            raise ToolValidationException(f"Skill '{skill_name}' not found.")
+            raise ToolValidationException(f"Skill '{skill_id}' not found.")
+
+        references = list(skill.references.keys())
 
         return ToolResult(
             result={
-                "name": skill_name,
+                "skill_id": skill_id,
                 "content": skill.instructions,
+                "references": references,
             },
         )
 
     @classmethod
     def format_tool_message(cls, result: ToolResult) -> str:
-        return result.result.get("content", "")
+        content = result.result.get("content", "")
+        references = result.result.get("references", [])
+
+        if not references:
+            return content
+
+        lines = [content, Boundary.open(BoundaryType.SKILL_REFERENCES)]
+        for name in references:
+            lines.append(f"    {Boundary.open(BoundaryType.NAME)}{name}{Boundary.close(BoundaryType.NAME)}")
+        lines.append(Boundary.close(BoundaryType.SKILL_REFERENCES))
+
+        return "\n".join(lines)
 
     @classmethod
     def format_tui_message(cls, result: ToolResult) -> str:
-        skill_name = result.result.get("name", "")
-        return f"Skill '{skill_name}' loaded."
+        skill_id = result.result.get("skill_id", "")
+        return f"Skill '{skill_id}' loaded."

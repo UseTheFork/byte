@@ -10,7 +10,7 @@ from byte.support.mixins import Bootable, Configurable, Eventable
 from byte.tui import TUIManagerService
 
 if TYPE_CHECKING:
-    from byte.orchestration import PhaseModel
+    from byte.orchestration import PhaseModel, RoutePhaseModel
 
 
 class BaseWorkflow(ABC, Bootable, Eventable, Configurable):
@@ -29,7 +29,7 @@ class BaseWorkflow(ABC, Bootable, Eventable, Configurable):
         return Str.snake_to_title(self.name).strip()
 
     @abstractmethod
-    def get_phases(self, **kwargs) -> List[PhaseModel] | None: ...
+    def get_phases(self, **kwargs) -> List[PhaseModel | RoutePhaseModel] | None: ...
 
     @abstractmethod
     async def build(self) -> CompiledStateGraph:
