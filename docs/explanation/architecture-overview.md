@@ -8,14 +8,16 @@ Byte's architecture is built around a command-driven workflow engine that coordi
 
 When you execute a slash command (e.g., `/coder`), you're invoking a `Command`. Commands are lightweight entry points that wire up a workflow and delegate execution to it. The workflow orchestrates everything that follows.
 
-```
-User runs /coder "implement feature X"
-    ↓
-CoderCommand.execute()
-    ↓
-CoderWorkflow (manages phases and state)
-    ↓
-Agent Graph (LangGraph StateGraph)
+```mermaid
+graph TD
+    A["User runs /coder<br/>implement feature X"]
+    B["CoderCommand.execute()"]
+    C["CoderWorkflow<br/>manages phases and state"]
+    D["Agent Graph<br/>LangGraph StateGraph"]
+
+    A --> B
+    B --> C
+    C --> D
 ```
 
 This separation of concerns means commands remain simple and focused—they don't contain business logic themselves. They simply prepare the request and hand it off to the workflow engine.
@@ -48,7 +50,46 @@ An **Agent Node** is a LangGraph node that runs an LLM-powered agent. It receive
 - **Phase-aware** — The agent sees which phase is pending and focuses only on that
 - **Stateless loop** — The node can be called repeatedly; state is managed by the workflow
 
-Different Agent Nodes can specialize in different tasks. `CoderAgentNode` is optimized for code generation; other domains might have specialized agents for their own workflows.
+Different Agent Nodes can specialize in different tasks. `Coder Agent` is optimized for code generation; other domains might have specialized agents for their own workflows.
+
+**Routing Node is not an agent.** Unlike Agent Nodes, `Routing Node` extends `Base Node`, not `Base Agent Node`. It contains no LLM invocation and makes routing decisions based purely on workflow state and phase status. It's a deterministic switch statement, not a reasoning engine.
+
+## Harness Agent: Context Preparation
+
+Before domain-specific agents execute, **Harness Agent** runs as the start node for every workflow except `ask`. Its single, critical job: analyze the user's request and conversation history, then prepare a scoped instruction for the downstream agent.
+
+**What it does:**
+
+Harness Agent acts as a **harness selector**. It examines the user's intent, identifies which skills are relevant, determines which files need editing, gathers reference materials, and synthesizes a clear, actionable instruction. It uses a `reasoning` tier LLM for this context-preparation work—a relatively expensive step, but essential for precision.
+
+**The separation that matters:**
+
+The downstream agent (e.g., `Coder Agent`, `Documentation Agent`) receives **no access to conversation history**. It only sees what Harness Agent has prepared: the skills list, editable files, reference materials, and the synthesized instruction. This is deliberate. It creates a clean boundary:
+
+- **Harness Agent** — Owns context selection, scoping, and instruction synthesis
+- **Domain Agent** — Owns execution against the prepared scope
+
+This separation prevents agents from being distracted by historical context and ensures they stay focused on the current task.
+
+**In the code:**
+
+Every workflow starts the same way:
+
+```python
+graph = GraphBuilder(start_node=HarnessAgentNode)
+```
+
+And the first phase always runs via Harness Agent:
+
+```python
+PhaseModel(
+    id="select-skills-and-files",
+    executed_by=HarnessAgentNode,
+    tools=[BootstrapAgentTool, UserInputTextTool, UserConfirmTool, UserSelectTool],
+)
+```
+
+Harness Agent uses `BootstrapAgentTool` to package everything it discovered into a coherent bootstrap instruction that seeds the domain agent's first invocation. The downstream agent then operates entirely from that bootstrap—no conversation history, no context drift.
 
 ## Tools: The Hands of the Agent
 
@@ -71,18 +112,20 @@ Tools have strict input schemas (JSON Schema), so the agent's requests are valid
 
 Under the hood, workflows are compiled into a **LangGraph StateGraph**—a directed graph of nodes and edges that orchestrates execution. The `GraphBuilder` creates this graph:
 
-```
-START
-  ↓
-start_node (HarnessAgentNode)
-  ↓
-coder_agent_node (CoderAgentNode)
-  ↓
-tool_node (ToolNode — routes tool calls)
-  ↓
-routing_node (RoutingNode — determines next step)
-  ↓
-END
+```mermaid
+graph TD
+    START["START"]
+    start_node["start_node<br/>(Harness Agent)"]
+    coder_agent_node["coder_agent_node<br/>(Coder Agent)"]
+    tool_node["tool_node<br/>(Tool Node — routes tool calls)"]
+    routing_node["routing_node<br/>(Routing Node — determines next step)"]
+    END["END"]
+
+    START --> start_node
+    start_node --> coder_agent_node
+    coder_agent_node --> tool_node
+    tool_node --> routing_node
+    routing_node --> END
 ```
 
 **Why this structure?**
@@ -108,13 +151,16 @@ When a tool executes (e.g., a file edit), it updates the relevant part of state.
 
 ## Routing: Deciding What Comes Next
 
-The `RoutingNode` looks at the workflow state after each agent response:
+The `Routing Node` is **not an agent**—it's a deterministic router. It extends `Base Node`, not `Base Agent Node`, and contains no LLM invocation. It's pure conditional state logic.
 
-1. **If phases remain pending** → Loop back to the agent node
-2. **If all phases are completed** → Move to the end node and finish
-3. **If a phase is blocked** → Optionally allow user intervention or fail gracefully
+After each agent response, Routing Node checks the workflow state:
 
-This routing logic keeps workflows moving forward without hardcoded branching logic.
+1. **Checks for cancellation** — If the cancel event is set, routes to `end_node` immediately
+2. **Checks if workflow is in an agent phase** — Calls `PhaseUtils.is_workflow_agent(state)` to determine if the current phase requires agent execution
+3. **Routes to pending phase's executor** — If a phase is pending, looks up its `executed_by` target and routes there
+4. **Falls back to routing state** — Otherwise uses the routing state's `target` to determine the next node
+
+This routing logic keeps workflows moving forward based purely on phase status and state conditions—no LLM, no reasoning, no autonomy. It's a switch statement.
 
 ## Why This Architecture?
 
@@ -136,25 +182,33 @@ graph TD
     GB["🏗️ GraphBuilder<br/>(compiles to LangGraph)"]
     Graph["📊 StateGraph<br/>(LangGraph)"]
 
-    Start["▶️ StartNode<br/>(HarnessAgentNode)"]
-    Agent["🤖 AgentNode<br/>(CoderAgentNode)"]
-    Tools["🔧 ToolNode<br/>(routes tool calls)"]
-    Router["🔀 RoutingNode<br/>(decide next step)"]
-    End["⏹️ EndNode"]
+    HarnessPhase["📋 Phase 1: select-skills-and-files<br/>(context preparation)"]
+    HarnessNode["🧠 Harness Agent<br/>(context selector)"]
+    BootstrapTool["🔌 BootstrapAgentTool<br/>(package instruction,<br/>skills, files)"]
+    Bootstrap["📦 Bootstrap Output<br/>(no conversation history<br/>seen by domain agent)"]
 
-    Phase["📋 Phases<br/>select-skills<br/>create-plan<br/>apply-changes<br/>linting<br/>summary"]
+    DomainPhases["📋 Phases 2+<br/>create-plan<br/>apply-changes<br/>linting<br/>summary"]
+    Agent["🤖 Domain Agent<br/>(Coder Agent,<br/>Documentation Agent, etc)"]
+    Tools["🔧 Tool Node<br/>(routes tool calls)"]
+    Tool1["EditFileTool<br/>WriteFileTool<br/>LintTool<br/>etc<br/>(phase_id & phase_status<br/>injected automatically)"]
+    Router["🔀 Routing Node<br/>(decide next step)"]
+    End["⏹️ End Node"]
 
     User -->|invokes| Cmd
     Cmd -->|prepares request| WF
     WF -->|provides phases| GB
     GB -->|builds| Graph
 
-    Graph -->|execution starts| Start
-    Start -->|assess context| Agent
+    Graph -->|execution starts| HarnessNode
+    HarnessNode -->|Phase 1| HarnessPhase
+    HarnessPhase -->|analyze user request<br/>& conversation history| HarnessNode
+    HarnessNode -->|invoke| BootstrapTool
+    BootstrapTool -->|identifies skills,<br/>editable files,<br/>reference materials| Bootstrap
 
-    Agent -->|pending phase| Phase
+    Bootstrap -->|seeds domain agent<br/>scoped instruction only| Agent
+    Agent -->|Phase 2+| DomainPhases
     Agent -->|invoke tools| Tools
-    Tools -->|execute| Tool1["EditFileTool<br/>WriteFileTool<br/>LintTool<br/>etc<br/>(phase_id & phase_status<br/>injected automatically)"]
+    Tools -->|execute| Tool1
     Tool1 -->|update state<br/>& phase status| Graph
     Tools -->|return result| Agent
 
@@ -163,19 +217,6 @@ graph TD
     Router -->|all complete| End
     Router -->|phase blocked| End
 
-    style User fill:#40E0D0
-    style Cmd fill:#FF6B6B
-    style WF fill:#FFD700
-    style GB fill:#87CEEB
-    style Graph fill:#DDA0DD
-    style Start fill:#98FB98
-    style Agent fill:#FFA07A
-    style Tools fill:#F08080
-    style Router fill:#87CEEB
-    style End fill:#FFB6C1
-    style Phase fill:#E6E6FA
-    style Tool1 fill:#D3D3D3
-    style UpdatePhaseTool fill:#D3D3D3
 ```
 
 ## Key Takeaways
@@ -184,7 +225,7 @@ graph TD
 2. **Workflows define phases** — a sequence of distinct, bounded work units
 3. **Agents are phase executors** — they see one pending phase and use available tools
 4. **Tools are the operations** — agents call tools; tools update state
-5. **RoutingNode drives flow** — it decides whether to loop, advance, or finish
+5. **Routing Node drives flow** — it decides whether to loop, advance, or finish
 6. **StateGraph is the engine** — LangGraph orchestrates all of this persistently and observably
 
 This design prioritizes **clarity, control, and composability** over speed or autonomy. Every workflow is understandable, observable, and can be extended without modifying core infrastructure.

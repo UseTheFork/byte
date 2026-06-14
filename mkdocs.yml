@@ -59,10 +59,18 @@ nav:
     - Getting Started:
       - Installation: tutorials/getting-started/installation.md
   - How-to Guides:
-    - Configure Providers / Models: how-to-guides/configure-providers-models.md
     - Adding Files: how-to-guides/adding-files.md
+    - Configure Linting: how-to-guides/configuring-linting.md
+    - Configure Providers / Models: how-to-guides/configure-providers-models.md
+    - Create & Manage Skills: how-to-guides/creating-and-managing-skills.md
+    - Create & Manage Specs: how-to-guides/creating-and-managing-specs.md
+    - Create AI-Powered Git Commits: how-to-guides/using-git-commits.md
+    - Manage File Context: how-to-guides/managing-file-context.md
+    - Manage Web Context: how-to-guides/managing-web-context.md
+    - Manage the Constitution: how-to-guides/managing-the-constitution.md
   - Explanation:
     - Architecture Overview: explanation/architecture-overview.md
+    - The Constitution: explanation/the-constitution.md
 
 
 plugins:

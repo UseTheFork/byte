@@ -45,6 +45,15 @@ All documentation covered by this skill MUST be written in an **opinionated and 
 
 ---
 
+## IMPORTANT style rules:
+
+- Follow the same opinionated/bold documentation tone as the existing docs (architecture-overview.md, creating-and-managing-skills.md)
+- Use friendly agent names (e.g., "Constitution Agent" not "ConstitutionAgentNode"), same pattern as existing docs
+- Do NOT reference internal class names like `ConstitutionService`, `ConstitutionAgentNode`, etc. — use plain language
+- DO NOT reference internal tool class names like `AddPrincipleTool` — describe what happens, not what classes do it
+
+---
+
 ## Structural Convention: Diátaxis (Default)
 
 This project uses the **Diátaxis** documentation framework as its default structural model. Content falls into four categories:
