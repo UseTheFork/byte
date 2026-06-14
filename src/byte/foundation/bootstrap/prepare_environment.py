@@ -128,9 +128,6 @@ class PrepareEnvironment(Bootstrapper):
         # Ensure the main .byte directory exists
         app.config_path().parent.mkdir(parents=True, exist_ok=True)
 
-        # Create conventions directory for style guides and project conventions
-        app.conventions_path().parent.mkdir(parents=True, exist_ok=True)
-
         # Create context directory for style guides and project context
         app.session_context_path().parent.mkdir(parents=True, exist_ok=True)
 

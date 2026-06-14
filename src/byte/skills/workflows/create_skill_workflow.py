@@ -58,7 +58,7 @@ class CreateSkillWorkflow(BaseWorkflow):
             ),
             PhaseModel(
                 id="create-skill",
-                content="Create the skill - use available tools to create the skill with a clear name, description, and instructions. After creating or editing the skill, present it for user review using the PresentSkillTool.",
+                content=f"Create the skill - use available tools to create the skill with a clear name, description, and instructions. After creating or editing the skill, present it for user review using the `{PresentSkillTool.name}`.",
                 tools=[
                     CreateSkillTool,
                     AddSkillReferenceTool,
