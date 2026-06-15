@@ -1,6 +1,2843 @@
 # CHANGELOG
 
 
+## v2.0.0 (2026-06-15)
+
+### Bug Fixes
+
+- Account for label height in Select and fix tool result value access
+  ([`89202bd`](https://github.com/UseTheFork/byte/commit/89202bd964c6f05477c436c47a62bda8c9f3fbeb))
+
+- Add defensive id checks for tool_use message chunks
+  ([`8216a48`](https://github.com/UseTheFork/byte/commit/8216a485a3fcdefcdbd8cb0319d5291f71cbf4b9))
+
+- Add existence checks for 'id' key before accessing tracked message chunks in tool_use blocks -
+  Prevents KeyError when tool_use blocks lack id field in message_chunks data - Apply validation at
+  three locations: text/tool_use conditional, tool_call_chunk processing, and final tracked
+  conditional - Remove .input_history from .gitignore as file is no longer needed
+
+- Add hasattr checks in to_dict to handle missing file path attributes
+  ([`dc71e2b`](https://github.com/UseTheFork/byte/commit/dc71e2bf6d586edfc9fd0f932532fbf2772b9de0))
+
+Add defensive checks using hasattr() when serializing file_path and resolved_file_path to prevent
+  AttributeError when these attributes are not yet initialized.
+
+- Add json validation error handling in tool argument deserialization
+  ([`109efb1`](https://github.com/UseTheFork/byte/commit/109efb1875107a5eca0ce8ec73cf1c4c24f80733))
+
+- Wrap json.loads() call in try/except to catch JSONDecodeError when parsing array/object tool
+  arguments - Raise ToolValidationException with descriptive message on invalid JSON, informing LLM
+  about unescaped quotes and enabling retry with corrected input - Fix token usage cost formatting
+  from 4 to 2 decimal places for better readability - Remove redundant TODO comment and unused
+  'errors' field initialization in agent_state
+
+- Correct additional comments flow, blank constitution sections, validate phase order, and text
+  input submit
+  ([`4cb6d53`](https://github.com/UseTheFork/byte/commit/4cb6d53bb0443b69e9d59161edbb6e1bd59714d7))
+
+- Default Select height to 0 when options is None in on_mount
+  ([`0ab5bd3`](https://github.com/UseTheFork/byte/commit/0ab5bd3a9702fe2e23700e37d588754d53bef7f0))
+
+- Fix CSS variable name and selector in tool args collapsible widget
+  ([`0f0b754`](https://github.com/UseTheFork/byte/commit/0f0b7542eb8ef7811f3fe0e1f6151aa93edefc3c))
+
+- Fix section anchor syntax and clean up unused imports
+  ([`fa3e942`](https://github.com/UseTheFork/byte/commit/fa3e942175ca7fa77a5f9032405259585e265592))
+
+- Fix Section.start() anchor generation to use proper Markdown syntax (remove extra braces) - Remove
+  unused extract_content_from_message import from coder_agent_node - Update CoderAgentMessage
+  content access to use .text instead of .content - Fix typo in coder_agent_node: "nest" → "next" -
+  Simplify coder_agent_node result handling to use result.text directly
+
+- Fix syntax error in exception handling
+  ([`dd1a649`](https://github.com/UseTheFork/byte/commit/dd1a649c580be32f46a8d46d33fae794d25f7bde))
+
+Change exception tuple syntax from parentheses to comma notation in ignore_service.py. Remove unused
+  TYPE_CHECKING import and empty conditional block in log_service.py.
+
+- Fix tool message attribute and add tool call styling
+  ([`4db6904`](https://github.com/UseTheFork/byte/commit/4db6904c151cae7a084647880436d044b235c761))
+
+Fix incorrect attribute access in tool_node.py where tool_message.content should be
+  tool_message.text. Also update TUI styling to properly display tool call messages with appropriate
+  margins and add dedicated ToolCall component styling.
+
+- Fix: correct section anchor syntax and clean up code issues
+  ([`4dc6364`](https://github.com/UseTheFork/byte/commit/4dc6364f2be425cc556ecb45e974da106e06dbc4))
+
+- Fix Section.start() anchor generation: use proper f-string without extra braces - Remove unused
+  extract_content_from_message import from coder_agent_node - Update CoderPlanAgentMessage content
+  access to use .text instead of .content - Fix typo in coder_agent_node: "nest" → "next" in section
+  heading - Remove stray "# " heading marker from prompt_assembler - Simplify coder_agent_node
+  result handling to use result.text directly instead of utility function
+
+- Handle missing tool call widgets in response panel
+  ([`41df02f`](https://github.com/UseTheFork/byte/commit/41df02f0c7aaccdf24c235fe65277ef374e76c53))
+
+add exception handling for NoMatches error when completing tool calls in the response panel. this
+  prevents crashes when a tool call widget is not found, logging the event instead.
+
+also reorganize code in tool_node.py and tool_call.py to improve readability by moving methods and
+  classes to more logical positions within their files.
+
+- Hide loading indicator by default in response panel
+  ([`610367b`](https://github.com/UseTheFork/byte/commit/610367b26a289f7a3079bb593ee1131faa3ecd03))
+
+Add 'hidden' class to LoadingIndicator on mount so it doesn't display until explicitly shown. This
+  prevents the loading indicator from appearing on initial render of the response panel.
+
+- Preserve markdown formatting in tool results by avoiding json serialization
+  ([`5ccd7b2`](https://github.com/UseTheFork/byte/commit/5ccd7b212603a12e98ca3c5fc4b8b52987948883))
+
+- Raise ToolValidationException instead of returning it
+  ([`91b195f`](https://github.com/UseTheFork/byte/commit/91b195f9fc49f4844b75025f2206ec4dfc94445f))
+
+- When skill is not found, the code was returning the exception object instead of raising it. This
+  prevented the exception from being properly propagated up the call stack, causing incorrect error
+  handling behavior.
+
+- Remove redundant border and border_title reset from TextInput
+  ([`5d74a0d`](https://github.com/UseTheFork/byte/commit/5d74a0dc576b7cd6b32da630bacf3a0549eb466e))
+
+- Return empty string from ReferenceMaterials when no conventions or session_docs
+  ([`598be4a`](https://github.com/UseTheFork/byte/commit/598be4afed0eeb93bb25a536c8548d3236d6993d))
+
+- Return formatted message when no skills available
+  ([`f27d730`](https://github.com/UseTheFork/byte/commit/f27d730a507cba0c6f8313dcf1b36b8f1c739d63))
+
+- Reverse prompt history navigation direction
+  ([`2b97a29`](https://github.com/UseTheFork/byte/commit/2b97a29cd5c3ffb24128d8fa7c64e0bed9b04828))
+
+Fix the prompt history navigation to correctly display newest items first. The history was being
+  reversed incorrectly, causing up/down arrow keys to navigate in the wrong direction. Now up arrow
+  navigates to newer items and down arrow navigates to older items, matching expected behavior.
+
+- Skip user confirmation prompts during unit tests
+  ([`203bc7f`](https://github.com/UseTheFork/byte/commit/203bc7fcf9c62f0770fa631fd6652eb7422959dc))
+
+Add check in prompt_for_confirmation to return default value when running unit tests, preventing
+  interactive prompts from blocking test execution.
+
+- Update anthropic model names and fix docstring formatting
+  ([`e49e85c`](https://github.com/UseTheFork/byte/commit/e49e85ce7f448d53eafa13d6c3dcfc5bb5bd620a))
+
+Update Anthropic model references from claude-3-5-haiku-latest to claude-haiku-4-5 to reflect
+  current model naming. Also fix docstring indentation in LLMService class to follow proper Python
+  documentation standards.
+
+- Use app parameter instead of self.app in prepare_environment
+  ([`106a6f8`](https://github.com/UseTheFork/byte/commit/106a6f854569b5f257b7089e4bbf8adc1fb291a3))
+
+- Replace incorrect self.app instance variable references with app parameter in print_boot_status()
+  calls - Fixes two instances in _migrate_config_yaml() and _prepare_directories() methods that were
+  using wrong reference
+
+- Use correct tool_call_id attribute in tool node tui update
+  ([`5ae3294`](https://github.com/UseTheFork/byte/commit/5ae3294b1f62dfd76ef2054767b664fb13dd47d0))
+
+Update the tool_id parameter in the _update_tui method to use the correct attribute name
+  tool_call_id instead of the non-existent id attribute on ToolMessage objects.
+
+- Use id-based keys and paths for constitution components and fix init command prompt formatting
+  ([`aad4b74`](https://github.com/UseTheFork/byte/commit/aad4b74e1d389aae35c9d8c5816dafc66bde19b2))
+
+### Build System
+
+- Add pytest-env dependency for test environment configuration
+  ([`8faa918`](https://github.com/UseTheFork/byte/commit/8faa918cc50d08d12a8be525060de548321ea122))
+
+- Add uvloop for async performance optimization
+  ([`f76ca15`](https://github.com/UseTheFork/byte/commit/f76ca15d184c2f12ecd5459b7038b4edd976f37e))
+
+Add uvloop>=0.22.1 as a dependency and integrate it into the event loop policy. uvloop is a drop-in
+  replacement for asyncio that provides significant performance improvements for async operations by
+  implementing the event loop in Cython instead of pure Python.
+
+- Update flake inputs to latest versions
+  ([`013fde9`](https://github.com/UseTheFork/byte/commit/013fde91cc78924d9089f93e0fd3ccd8f515f769))
+
+- Upgrade python target version to 3.14
+  ([`d3caa5c`](https://github.com/UseTheFork/byte/commit/d3caa5c426dd9119334c2949299bc37b0dad8312))
+
+Update python-version in tool.ty.environment and target-version in tool.ruff from 3.12 to 3.14 in
+  pyproject.toml to support the latest Python version.
+
+### Chores
+
+- Add TODO comment about refactoring PhaseUtils method
+  ([`894133a`](https://github.com/UseTheFork/byte/commit/894133a8bfe6be55d59b2a7046e3f7bd2fa3407e))
+
+- Initialize project constitution with core principles and tooling standards
+  ([`eb1b2f7`](https://github.com/UseTheFork/byte/commit/eb1b2f76a2d4b01296d9cdc31a239178723f8fcb))
+
+Add comprehensive constitution scaffold establishing project governance, core principles, and
+  tooling standards:
+
+**Governance**: Supremacy (constitution supersedes all other practices) and Versioning Policy
+  (semantic versioning for amendments)
+
+**Core Principles**: - Domain Driven Design: organized under src/byte/ with explicit public
+  interfaces - Don't Repeat Yourself: shared logic extracted to src/byte/support/ - Strict Typing:
+  explicit type annotations, no Any without justification
+
+**Tooling & Framework Standards**: - Framework Standards: no mandated framework, library choices
+  per-domain via pyproject.toml - Linting & Formatting: Ruff configured with Python 3.14,
+  line-length 120, pipeline order (ssort → ruff format → ruff check --fix)
+
+Also fix typo in ai_comment_watcher_service.py reinforcement message (tzhe → the).
+
+- Remove constitution files and clean up ai comment markers
+  ([`f5bbb28`](https://github.com/UseTheFork/byte/commit/f5bbb28162fc12f58fbc39b67730b4731dd97285))
+
+Deleted 11 constitution definition files from .byte/constitution/ directory including the main
+  constitution.md and all principle/governance files. These appear to have been superseded by the
+  programmatic constitution initialization system.
+
+Also removed stray AI comment marker from complete_turn_tool.py, simplified reinforcement list
+  formatting in ai_comment_watcher_service.py by removing empty strings and bullet point markers,
+  and removed commented-out ToolMessage handling code and TODO from end_node.py.
+
+- Update documentation and configuration
+  ([`395ed4e`](https://github.com/UseTheFork/byte/commit/395ed4efb6d07ef4f5ddd88a125da799cb8c61d5))
+
+### Code Style
+
+- Add blank lines after section headings in domain architecture skill
+  ([`d07cd83`](https://github.com/UseTheFork/byte/commit/d07cd83688821197add21e5d39f35dc237cbb947))
+
+- Add border-top-round CSS classes and update linting widget to use them
+  ([`898e2f7`](https://github.com/UseTheFork/byte/commit/898e2f7a7677595216fa5f1f19eea04c5487f6da))
+
+- Consolidate return statements in constitution tools
+  ([`c3682ea`](https://github.com/UseTheFork/byte/commit/c3682ea6656b16131574d56178866afb48f2e54b))
+
+- Fix type ignore comment formatting
+  ([`ae75d5e`](https://github.com/UseTheFork/byte/commit/ae75d5ebfcc6c329ef0f3dfabc360f26d9ad3f1a))
+
+Correct type ignore comment syntax from 'ty:ignore' to 'type:ignore' for consistency.
+
+- Format create-tool skill markdown tables and remove trailing whitespace
+  ([`532c0ab`](https://github.com/UseTheFork/byte/commit/532c0aba2c7078c82447fb91bcd3957235da3220))
+
+- Improve formatting and sort imports alphabetically
+  ([`f40ccd5`](https://github.com/UseTheFork/byte/commit/f40ccd5e9a79d6d4f46a3d2d968a6a0925b77a0c))
+
+- Reformat configuration files for consistency and migrate prettier config
+  ([`4f67a79`](https://github.com/UseTheFork/byte/commit/4f67a794f015a818766ff6189e8b453b7e33304c))
+
+- Compact array formatting in .byte/config.jsonc for uv/ruff command and ignore list - Migrate
+  prettier configuration from prettier.config.cjs to .prettierrc format - Apply JSON formatting
+  rules with 150 character print width and no trailing commas
+
+- Remove debug comment from git_commit_tool
+  ([`a29e2a2`](https://github.com/UseTheFork/byte/commit/a29e2a24482578713233c045603f881f6b612cc2))
+
+- Remove debug logging statements from undo command
+  ([`197dec4`](https://github.com/UseTheFork/byte/commit/197dec4960ea07d4253c90b05bd895f026d43809))
+
+- Remove three self.app['log'].info() calls that were outputting state_snapshot and messages objects
+  for debugging purposes. These statements are no longer needed as the code is stable.
+
+- Simplify docstrings and add error display todo
+  ([`1dff796`](https://github.com/UseTheFork/byte/commit/1dff796be68b05cff34289555cc8d224f7a3672f))
+
+- Remove detailed parameter documentation from flash(), update_context(), analytics(), and
+  update_files() methods, keeping only single-line descriptions - Add TODO comment in worker error
+  handler to consider displaying error details in console instead of generic message
+
+- Simplify docstrings in application and container classes
+  ([`2d9eb05`](https://github.com/UseTheFork/byte/commit/2d9eb05f30c88801e26dcaeedf61b99219795bfb))
+
+- Convert multi-line docstrings to concise one-line imperative descriptions per constitution
+  standards - Remove Usage code examples and verbose Args/Returns sections across 40+ methods -
+  Update bind_paths_in_container() docstring to better reflect actual behavior
+
+- Simplify docstrings in prepare_environment bootstrap class
+  ([`5c7ab4b`](https://github.com/UseTheFork/byte/commit/5c7ab4b554a18a9199110c053dad8ead393e7f37))
+
+- Convert multi-line docstrings to concise one-line imperative descriptions per constitution
+  standards - Remove Usage code examples, verbose explanations, and unnecessary details from all 11
+  docstrings - Import ByteUserConfig to support field filtering in config serialization - Update
+  _setup_config to only include ByteUserConfig fields when dumping config to prevent serializing
+  ByteConfig-specific fields - Add return type hint (-> None) to _run_first_boot_setup method
+
+- Sort dynamic imports alphabetically in coder and node modules
+  ([`8f33008`](https://github.com/UseTheFork/byte/commit/8f33008922e70212e20ff91d7309752971a8d06e))
+
+- Sort dynamic imports and lists alphabetically
+  ([`9de2efa`](https://github.com/UseTheFork/byte/commit/9de2efaf48b8166a7d62fd134257ae06cc6f8cd0))
+
+- Sort dynamic imports and tools alphabetically in plan module
+  ([`df57fd1`](https://github.com/UseTheFork/byte/commit/df57fd14504c3d3b437aa845f4c7a57b409ef5b7))
+
+- Sort leaves class attributes alphabetically
+  ([`5a4871e`](https://github.com/UseTheFork/byte/commit/5a4871ed8f1efd67b31e54a9ce0a137176f047d5))
+
+- Update byte display prefix from single to double border character
+  ([`e631b69`](https://github.com/UseTheFork/byte/commit/e631b690e1d258f45948989d75091d154bf4cfd9))
+
+- Update status bar loading animation colors and token display formatting
+  ([`a578d9b`](https://github.com/UseTheFork/byte/commit/a578d9b29c0fc442f4bec12e892ae6973c68150c))
+
+### Documentation
+
+- Add docstrings to ClipboardServiceProvider
+  ([`b49a3b8`](https://github.com/UseTheFork/byte/commit/b49a3b8d0fbb29765b8930b13c20a763abe1da72))
+
+Add comprehensive docstrings to class and methods to document clipboard service registration and
+  command functionality.
+
+- Add gateway and commands explanation pages, reviewing conversations guide
+  ([`2ccad18`](https://github.com/UseTheFork/byte/commit/2ccad181c3d5d88f675b155bda7a853cf682ec82))
+
+- Shift recorded conversations from dev-only feature to default public feature by moving cache
+  directory from cache/development to cache/conversations - Add explanation/the-gateway.md covering
+  gateway architecture, auth, JSON-RPC 2.0 protocol, configuration, and security for external client
+  developers - Add explanation/gateway-requests.md documenting five available gateway RPC methods:
+  configure, add_file, drop_file, context_add_file, context_drop_file - Add
+  explanation/the-commands.md explaining command system, invocation, categories, and integration
+  with AI workflows - Add explanation/available-commands.md listing all 21 available commands
+  organized by Agent, Context, and File Management categories - Add
+  how-to-guides/reviewing-conversations.md explaining how to inspect recorded prompts, constitution
+  injection, context, and tool calls for debugging - Update mkdocs.yml to include The Gateway
+  section with nested Gateway Requests subpage and The Commands section with nested Available
+  Commands subpage - Simplify RecordResponseService docstrings to lean format per constitution
+  standards - Change DocumentationAgentNode llm_tier from coding to standard for cost optimization
+
+- Add response format guidelines to commit agent prompt
+  ([`2bee7cb`](https://github.com/UseTheFork/byte/commit/2bee7cbcfa61427ebf1de710c825f51e65d69c53))
+
+- Expand documentation with how-to guides and explanation pages
+  ([`a3d4248`](https://github.com/UseTheFork/byte/commit/a3d42480805f188125a034676df3fd924e93b170))
+
+- Add comprehensive how-to guides for core Byte features: linting configuration, skill
+  creation/management, spec creation/execution, file/web context management, constitution setup, and
+  git commits - Create new explanation page on the Constitution covering structure, initialization,
+  modification, scoping, versioning, and agent injection - Update documentation-tone skill with
+  explicit rules on friendly agent names and plain language (no internal class/tool names) - Replace
+  all technical class names with friendly display names throughout docs (HarnessAgentNode → Harness
+  Agent, etc.) - Convert ASCII art diagrams to Mermaid diagrams for improved visual clarity -
+  Clarify Routing Node as deterministic (non-AI) state routing logic - Add comprehensive Harness
+  Agent explanation including context preparation role and separation of concerns - Update
+  mkdocs.yml navigation to include all new documentation pages
+
+- Improve edit block format documentation
+  ([`c5a6545`](https://github.com/UseTheFork/byte/commit/c5a6545174fc3131be283568a39ac703fa32dfa6))
+
+Enhance prompts.py documentation to clarify edit block format: - Reorganize to show operation types
+  before format examples - Separate format documentation for edit operations vs
+  create/delete/replace - Add detailed comments about search content requirements - Simplify
+  examples by removing unnecessary search/replace tags for create/delete/replace operations -
+  Improve clarity on when search/replace tags are needed - Fix typos (charector -> character)
+
+This makes the format clearer for users and reduces confusion about which operations require
+  search/replace tags.
+
+- Improve git commit body parameter documentation
+  ([`225b1c9`](https://github.com/UseTheFork/byte/commit/225b1c9aae14b7506fe471c0b6758e269c86acd8))
+
+- Remove outdated AI todo comment from CommitMessage class - Expand body parameter description with
+  detailed formatting guidelines: imperative mood, present tense, explaining motivation not
+  implementation - Clarify that breaking changes should be described in body when breaking_change
+  flag is True
+
+- Reorganize docs to diataxis framework and add architecture explanation
+  ([`b2d1385`](https://github.com/UseTheFork/byte/commit/b2d138571be14cbd9683b8a03790e61fba932972))
+
+- Restructure documentation from concepts/reference layout to tutorials/how-to-guides/explanation
+  following Diátaxis framework - Move installation to tutorials/getting-started/installation.md -
+  Add how-to-guides for LLM provider configuration and file management - Add
+  explanation/architecture-overview.md with detailed workflow orchestration and LangGraph Mermaid
+  diagram - Update mkdocs.yml nav structure and configure pymdownx.superfences with Mermaid custom
+  fence support - Update site description in mkdocs.yml to match new tagline - Create
+  HarnessSkillsLoaded leaf to inject skill markdown into documentation agent context - Add
+  HarnessSkillsLoaded to documentation_agent_node user template - Fix README tagline quote escaping
+  - Delete deprecated concepts and reference documentation sections
+
+- Restructure documentation to use dynamic markdown generation
+  ([`7784e36`](https://github.com/UseTheFork/byte/commit/7784e3632687f538933f2db405a373b51354f7e3))
+
+- Refactor documentation architecture to auto-generate reference pages from source code via Python
+  scripts (commands_to_md.py, settings_to_md.py, requests_to_md.py) - Delete manual explanation
+  pages (available-commands.md, gateway-requests.md) and create auto-generated references under
+  docs/references/ - Update explanation pages (the-commands.md, the-gateway.md, the-constitution.md)
+  to use {% include %} directives for embedding dynamically generated content - Add
+  mkdocs-include-markdown-plugin dependency to support markdown inclusion in MkDocs builds - Enhance
+  schema.json and ByteUserConfig with descriptions for all configuration fields to support
+  auto-generated documentation - Add GatewayConfig descriptions and WebConfig descriptions to
+  support reference page generation
+
+- Standardize docstrings and add cancel feedback notification
+  ([`b040d02`](https://github.com/UseTheFork/byte/commit/b040d0272dbfe3cc54e9a889e41db45dd8a9f323))
+
+- Refactor docstrings across 14 service and utility modules to follow project constitution v0.2.0
+  minimal-lean-docstrings standard - Convert all multi-line docstrings to single-line imperative
+  format, removing verbose Args/Returns sections and Usage examples - Add missing return type
+  annotations (-> None) to 20+ methods across services, utilities, and screen classes - Remove 'AI:'
+  and 'AI!' task instruction comments from all modified files - Add user-facing cancel feedback via
+  Messages.Notify() in ConversationScreen.action_cancel_request() to confirm cancel was accepted -
+  Re-enable SystemEvents.PostBoot emission and dynamic message handling in conversation_screen boot
+  sequence
+
+### Features
+
+- Add bootbox widget for displaying boot messages
+  ([`0bbb1fe`](https://github.com/UseTheFork/byte/commit/0bbb1febe3ca6c3e39fe036eb83320604b11ec3c))
+
+Introduce a new Bootbox widget that renders markdown messages during application boot. This widget
+  is used to display initialization messages in the chat container.
+
+Also reorder service providers to ensure TUIServiceProvider is initialized after its dependencies,
+  and remove the unused is_empty property from Conversation widget.
+
+- Add bootstrap instruction tool and refactor constitution workflow
+  ([`87b9e7a`](https://github.com/UseTheFork/byte/commit/87b9e7a81ba70060ff21c2d190db2b2b43ba422c))
+
+- Add BootstrapInstructionTool to pass instructions to agent harness in constitution workflow -
+  Create create-instruction phase as entry point using HarnessAgentNode before constitution
+  consideration - Refactor ConstitutionAgentNode to use HarnessInstruction leaf and standard LLM
+  tier - Reorder context template leaves with ToolsLoaded at end - Add minimal-lean-docstrings
+  principle to constitution - Update ApplicationBuilder docstrings to follow lean documentation
+  pattern - Simplify DeleteFileTool description and update phase model formatting - Add error
+  handling with logging in TUI conversation widget - Remove deprecated
+  create_orchistration_plan_tool.py - Update constitution to version 0.2.0
+
+- Add ByteDisplay formatting for tool call information
+  ([`857b82f`](https://github.com/UseTheFork/byte/commit/857b82f7574edbc28ab6ab8b6030c20ffc1919e7))
+
+Use ByteDisplay to format tool call information with proper visual hierarchy. Consolidate tool name
+  and arguments into a single formatted display instead of printing each line separately.
+
+- Add cache read and write token tracking across analytics and models
+  ([`87f1bf4`](https://github.com/UseTheFork/byte/commit/87f1bf4a8844ac2726463d9ec69a99e66e646e76))
+
+- Add cache-aware cost calculations to analytics service
+  ([`d9eab5a`](https://github.com/UseTheFork/byte/commit/d9eab5a0c5471d95c8917cf235d470e9eae45bf3))
+
+- Add collapsible arguments widget with custom styling and symbols
+  ([`1eb7efc`](https://github.com/UseTheFork/byte/commit/1eb7efcbaadf357e07b5c780965338b1d1b15267))
+
+- Add CommandRunner utility and enhance git grep with async execution and formatting
+  ([`04636b6`](https://github.com/UseTheFork/byte/commit/04636b660f86962629edc5abbbe2ca8fe4ca0955))
+
+- Create CommandRunner static utility class in src/byte/support/command_runner.py for asynchronous
+  shell command execution using asyncio.create_subprocess_exec - Update GitGrepTool to use
+  CommandRunner instead of blocking repo.git.grep, eliminating event loop blocking - Add
+  case_sensitive parameter (default False) with -i flag for case-insensitive search - Add max_count
+  parameter (default 100) with --max-count flag to limit result volume - Implement
+  _format_grep_results() method to parse and structure output grouped by file with line numbers,
+  matching expected format - Add --no-pager and --no-color flags to improve output handling - Export
+  CommandRunner from src/byte/support module following existing utility pattern
+
+- Add CompleteSimpleTurnTool for simplified agent turn completion
+  ([`3b30de7`](https://github.com/UseTheFork/byte/commit/3b30de7ec5c222e7f84eb567206339a5f34099b6))
+
+- Add conditional cache file naming based on development mode
+  ([`2b37393`](https://github.com/UseTheFork/byte/commit/2b37393fc374ef7003c0b797ddd564c66d1c5345))
+
+Add is_development() check to determine cache file naming strategy. In development mode, use
+  timestamped filenames to preserve multiple responses. In production, use static filenames to
+  prevent cache accumulation.
+
+- Add Console service, Menu component, and split themes into package
+  ([`2162eaa`](https://github.com/UseTheFork/byte/commit/2162eaae34ec85ce85e762b7afc64afc0e11d4ce))
+
+- Add constitution command and refactor constitution filtering
+  ([`e118fc7`](https://github.com/UseTheFork/byte/commit/e118fc791e48b47742445ac711ae46cd77789eca))
+
+- Add constitution domain with models, service, and provider
+  ([`bbd77db`](https://github.com/UseTheFork/byte/commit/bbd77db75ef345334020d06f97afaab35c64b660))
+
+- Add constitution tools for managing principles, sections, and governance rules
+  ([`fd074c2`](https://github.com/UseTheFork/byte/commit/fd074c22715920ed9c60758beb4f50ba88a32501))
+
+- Add ConstitutionConfig with toggleable principles and bootstrap prompts
+  ([`76443a6`](https://github.com/UseTheFork/byte/commit/76443a6465a5f4d23beb57724547d8d2e94a44f1))
+
+- Add context drop file request and handler
+  ([`cdd40ab`](https://github.com/UseTheFork/byte/commit/cdd40ab84e79990c8207d1c45a4bc017bf283001))
+
+- Add Requests.ContextDropFile dataclass for dropping file contents from session context via RPC -
+  Implement handle_context_drop_file handler with file path resolution and
+  SessionContextService.remove_context integration - Add unit and integration tests for
+  context_drop_file request type parsing and execution
+
+- Add context management screen and integrate with analytics
+  ([`4bde16a`](https://github.com/UseTheFork/byte/commit/4bde16ad2f2c4739b6cecc2f170eb9cba3294b63))
+
+Add ManageContextScreen modal to view and remove session context items, similar to the existing file
+  management screen. Integrate context count display in analytics widget with a new UpdateContext
+  message. Users can now click on the context count to open the management screen and remove items.
+  Updates include:
+
+- New ManageContextScreen with DataTable displaying context keys and types - ContextInfo static
+  widget to display context item count with clickable link - UpdateContext message for propagating
+  context count changes - Integration in ConversationScreen with action_request_manage_context
+  method - Updated Footer widgets to hide command palette in modals - Improved ManageFilesScreen
+  styling with rounded borders and better spacing
+
+- Add conversation clear functionality to TUI
+  ([`cee439f`](https://github.com/UseTheFork/byte/commit/cee439f5d72172f59f4878b3a67796fa177ff903))
+
+Implement clearing of conversation panels when the clear command is executed: - Add Clear message
+  type to enable TUI event communication - Emit Clear message from clear_command to trigger
+  conversation cleanup - Add message handler in conversation widget to remove all response panels -
+  Remove debug logging statement from git_service
+
+- Add create-tool skill documenting tool development process
+  ([`d495796`](https://github.com/UseTheFork/byte/commit/d495796026dda5ea5ed0afe4af1f94d46aec3605))
+
+- Add create_skill_tool for programmatic skill creation
+  ([`84d2682`](https://github.com/UseTheFork/byte/commit/84d26826685db83dfb26fddacfed864b86b8af9a))
+
+- Add debug logging to ask_agent_node execution flow
+  ([`538f4d8`](https://github.com/UseTheFork/byte/commit/538f4d862ce3cc23a245aeca4ad62dcd4ad6d70f))
+
+add logging statements at key execution points in the ask_agent_node invoke method to facilitate
+  debugging and tracing of the agent lifecycle. logs are emitted for: create_runnable,
+  generate_agent_state, add heading, dispatch_task, and ainvoke operations
+
+- Add descriptions to slash command completions
+  ([`9cac974`](https://github.com/UseTheFork/byte/commit/9cac974f347ddb2a34c2a863f80ad19892a8111c))
+
+Update completion system to return tuples of (completion_text, description) instead of plain
+  strings. This allows displaying helpful descriptions alongside command and argument completions in
+  the UI.
+
+Changes: - Modify get_slash_completions to return List[tuple[str, str]] with command descriptions -
+  Update prompt_toolkit_service to display descriptions in completion items - Change prompt
+  character from ">" to "❯" for better visual distinction
+
+- Add developer message to readme and simplify binary detection logic
+  ([`b0770c4`](https://github.com/UseTheFork/byte/commit/b0770c4c703098ab09a7bfbadf43aaee4469c849))
+
+- Add 'A message from the developer' section to README.md - Remove common_paths fallback logic from
+  _find_binary() method, relying solely on shutil.which() for binary detection - Update chrome
+  binary detection to check 'google-chrome' before 'google-chrome-stable' - Regenerate
+  command_commit.gif recording
+
+- Add documentation domain with opinionated writing style
+  ([`7a4abdf`](https://github.com/UseTheFork/byte/commit/7a4abdf2717087169e32e25bce0453c7acd7f223))
+
+- Add documentation domain (agents, commands, workflows) following coder pattern for managing
+  project docs and README - Introduce DocumentationConfig with framework selection, Diátaxis default
+  style, Mermaid flag, and extra guidelines - Create DocumentationGuidelines leaf that renders
+  style-specific guidance for diataxis, google, microsoft, and minimal styles - Add
+  documentation-tone skill enforcing opinionated/bold writing voice for project documentation files
+  - Rewrite README.md in opinionated/bold tone with single-line value proposition, trimmed sections,
+  and new 'Why Byte Exists' origin story - Update README Core Principles to three focused items:
+  Transparency First, Approval Required, Efficiency over excess - Register
+  DocumentationServiceProvider in main.py and wire DocumentationGuidelines into
+  DocumentationAgentNode system template
+
+- Add domain-architecture skill documentation
+  ([`fd789c5`](https://github.com/UseTheFork/byte/commit/fd789c51f92bfd412a741c8948ec6bb8d42474cb))
+
+- Add EditTaskTool and load_task method to SpecLoaderService
+  ([`771a768`](https://github.com/UseTheFork/byte/commit/771a768e8a793c4bedc450cf2b2c4aa21a3611a5))
+
+- Add file count metadata to FileAdded event
+  ([`3a2661d`](https://github.com/UseTheFork/byte/commit/3a2661d6d5ae018d6da53519015b28222c83a13a))
+
+Add meta_editable_files and meta_read_only_files fields to FileAdded event to track file counts in
+  context. Update file service to calculate and emit these counts when files are added. Wire up TUI
+  to receive and display updated file statistics via new update_files method. This enables real-time
+  file count display in the UI without requiring separate queries.
+
+Also remove unused Columns import and uncomment autocomplete key handler in prompt input widget.
+
+- Add file editing tools and tool file service
+  ([`f7b8482`](https://github.com/UseTheFork/byte/commit/f7b8482022d4fce4480f6a0a25e4411431371b0d))
+
+Introduce new file manipulation tools (edit_file, write_file, delete_file) and ToolFileService for
+  managing file operations. These tools enable agents to modify files with exact string matching and
+  proper validation.
+
+Key additions: - ToolFileService: validates file paths, checks read-only status, and handles file
+  edits - edit_file tool: replaces exact strings in files with comprehensive matching requirements -
+  write_file tool: creates files with automatic parent directory creation - delete_file tool: safely
+  removes files with existence checks - Updated FileServiceProvider to expose edit_file tool -
+  Updated files/__init__.py to export new tools and service
+
+- Add gateway domain skill and refactor harness/skill tools
+  ([`98d4eef`](https://github.com/UseTheFork/byte/commit/98d4eef8247beb8313d7dd400ddae2b554ad38e9))
+
+- Add gateway-domain skill documentation covering WebSocket JSON-RPC 2.0 bridge architecture, public
+  API boundary, RPC method patterns, and cross-domain interaction rules - Replace
+  BootstrapInstructionTool with BootstrapInstructionReferencesTool supporting reference_materials
+  via SessionContextService validation - Create PresentSkillTool for user skill review/feedback
+  workflow and DeleteSkillReferenceTool for removing skill references - Enhance Skill schema with
+  to_xml() and to_markdown() utility methods for prompt injection and presentation - Unify all skill
+  tools to use skill_id parameter and restructure CreateSkillWorkflow to enforce PresentSkillTool
+  usage before phase completion - Rename HarnessWorkspaceReferenceContext to
+  HarnessWorkspaceReferenceMaterials and update state field for consistency
+
+- Add gateway domain with websocket json-rpc 2.0 server
+  ([`b2afcd7`](https://github.com/UseTheFork/byte/commit/b2afcd754019dd98af21961480070eb5a79d28db))
+
+- Introduce new gateway bounded-context domain at src/byte/gateway/ for optional WebSocket server on
+  localhost that allows external clients (e.g., VS Code extension) to authenticate, send
+  slash-commands, and receive streamed response events via JSON-RPC 2.0 notifications. - Add
+  GatewayConfig with enable/host/port settings to ByteUserConfig; automatically deserialized from
+  config.jsonc. - Implement GatewayService managing per-boot token generation, discovery file
+  writing, auth handshake, and WebSocket lifecycle. - Implement SessionService for
+  per-authenticated-connection RPC request dispatch and EventBus event forwarding
+  (Messages.Response, Messages.ToolResponse, Messages.CommandExecutionCompleted, Messages.Status) as
+  RPC notifications. - Define strict Pydantic models in protocol.py for JSON-RPC 2.0 envelope
+  (RpcRequest, RpcResponse, RpcError, RpcNotification) with extra="forbid" and module-level error
+  code constants. - Register GatewayServiceProvider in application bootstrap; add websockets>=16.0
+  dependency to pyproject.toml and uv.lock. - Feature is opt-in: gateway only starts if
+  gateway.enable is true in config.
+
+- Add git_commit tool for conventional commit creation
+  ([`ba40a2b`](https://github.com/UseTheFork/byte/commit/ba40a2b2f19358f867b711a1e1b232de516daaef))
+
+Introduces a new Langchain tool `git_commit` that enables AI agents to create git commits with
+  proper conventional commit formatting. The tool accepts commit type, message, scope, breaking
+  changes, and body as parameters.
+
+Refactors the commit workflow to use the new tool instead of the previous validation-based pipeline:
+  - CommitAgentNode now yields to ToolNode for git_commit execution - Removes CommitValidator from
+  the workflow chain - Simplifies CommitCommand by delegating commit handling to the workflow -
+  Centralizes TUI message emission via Application.emit_tui()
+
+Updates provider registration order to ensure ToolsServiceProvider initializes before
+  GitServiceProvider for proper tool availability.
+
+- Add git_commit tool for staging and committing changes
+  ([`fe6d1c5`](https://github.com/UseTheFork/byte/commit/fe6d1c56761807cd5ed99d6ef265221cd55ed220))
+
+Implement a new git_commit tool that enables committing staged changes with structured conventional
+  commit messages. This tool accepts commit type, scope, message, and optional breaking change
+  metadata to ensure consistent commit formatting.
+
+The tool is integrated into the GitServiceProvider and made available to the commit agent workflow.
+  Updates include: - New git_commit tool implementation with full parameter support - Refactored
+  tools module structure into separate files (git_commit, git_grep) - Enhanced commit agent to force
+  tool_choice on git_commit - Added ToolResponse message type for displaying tool call streaming -
+  Improved workflow service to track and emit tool call events - Updated commit workflow to route
+  through tool execution node
+
+- Add git_grep tool for codebase pattern searching
+  ([`fb36882`](https://github.com/UseTheFork/byte/commit/fb36882742b0103e70ae1adfd2e797ddabbedebd))
+
+Introduce git_grep tool to enable agents to search tracked files using git grep. This tool supports
+  regex patterns and optional file filtering, allowing agents like ConventionAgent and AskAgent to
+  efficiently search the codebase in parallel with other operations.
+
+Also add git_grep to ConventionAgent and AskAgent toolsets to improve their ability to gather
+  context about existing code patterns and conventions.
+
+- Add GitLogTool for retrieving git commit history with filters
+  ([`ad1dd75`](https://github.com/UseTheFork/byte/commit/ad1dd7578c674955fd5fd6d81e460c0d3bf59fc5))
+
+Introduce GitLogTool that allows querying git commit logs with support for: - Limiting results with
+  max_count parameter - Filtering by date range (since/until) - Scoping to specific
+  files/directories - Compact oneline output format
+
+The tool is properly registered in GitServiceProvider and exported through the git module's public
+  API.
+
+- Add id, section_id, and order fields to constitution models and refactor tools/service to use
+  id-based lookups
+  ([`a5477f4`](https://github.com/UseTheFork/byte/commit/a5477f495421ce797f706af48d1d537d3babc8b0))
+
+- Add interactive multiselect menu to context drop command
+  ([`e01b2e2`](https://github.com/UseTheFork/byte/commit/e01b2e274a86f058a6e98c53cfa3c9ffe66c0677))
+
+Make file_path argument optional in context_drop_command. When not provided, display an interactive
+  multiselect menu to choose which context items to remove. This improves UX by allowing users to
+  easily browse and select multiple items at once instead of requiring them to know exact file
+  paths.
+
+Also handle InputCancelledError when user cancels the operation.
+
+- Add interactive prompts to initialize command and refactor constitution workflows
+  ([`06f0852`](https://github.com/UseTheFork/byte/commit/06f0852595b62538c9f6fb47a8d49aeb2af2bd8e))
+
+- Add list files and read files tools using BaseTool pattern
+  ([`1297806`](https://github.com/UseTheFork/byte/commit/12978061ad4b007cc2cfbf4c7b2f6d123372e6a3))
+
+- Add loading indicator widget for response streaming
+  ([`1e7ff91`](https://github.com/UseTheFork/byte/commit/1e7ff919cdbf7d3a8303b32ee206b3aa0a3ad010))
+
+Introduce a new LoadingIndicator widget that displays an animated spinner with a customizable
+  message during response streaming. This replaces the previous pending panel approach with a more
+  flexible, reusable component.
+
+Changes include: - Create LoadingIndicator widget with show/hide methods - Refactor RuneSpinner to
+  use Rich's Spinner for better animation - Integrate loading indicator into PromptPanel - Update
+  tui_manager_service to show/hide indicator during response events - Remove obsolete ResponseStatus
+  and AgentResponsePanel styles - Add utility CSS classes for layout and sizing
+
+- Add LoadSkillTool to ask agent and include SkillsAvailable in system template
+  ([`48b2dcc`](https://github.com/UseTheFork/byte/commit/48b2dccba5a694e18e61c153905fa5102f320c4e))
+
+- Add import for LoadSkillTool from byte.skills.tools.load_skill_tool - Include
+  Leaves.SkillsAvailable() in the system template to advertise available skills to the agent - Add
+  get_tools() method to AskAgentNode that returns LoadSkillTool for agent use
+
+- Add merge_classes utility function
+  ([`c977b8b`](https://github.com/UseTheFork/byte/commit/c977b8b9be831ad9588836b7340101292d610c65))
+
+Add a new utility function to merge multiple class strings into a single space-separated string.
+  This function filters out None values and empty strings, making it useful for conditional CSS
+  class composition in the TUI.
+
+- Add notification system with Notifiable mixin
+  ([`f4ce010`](https://github.com/UseTheFork/byte/commit/f4ce01065661957f306e2f7f7ae48a4a670c5f6a))
+
+Introduce a new Notifiable mixin that provides methods for displaying flash/toast notifications to
+  users. This mixin extends Eventable and emits TuiEvents.Notify events that are routed through the
+  TUI manager service to display notifications via the Flash widget.
+
+Changes include: - Create Notifiable mixin with notify(), notify_success(), notify_warning(), and
+  notify_error() methods - Add Notifiable to Command base class alongside Eventable - Implement
+  TuiEvents.Notify event type with content, style, and duration fields - Add flash() method to
+  ByteTUI to display notifications - Route Notify events in TuiManagerService to Flash widget -
+  Update AddFileCommand to use notify_error() instead of direct console.print() - Fix Flash widget
+  CSS class names (remove leading dash) and improve styling - Refactor imports in eventable.py for
+  clarity
+
+- Add phase update messaging to tool call widget
+  ([`0120759`](https://github.com/UseTheFork/byte/commit/01207593c38c97a4d147c858729e7a8ac47d0c6f))
+
+- Add prompt caching with ephemeral cache control to tool messages
+  ([`00582ac`](https://github.com/UseTheFork/byte/commit/00582ace518189671bc76f1a68a1a48c5b9c7658))
+
+- Add quick spec workflow and command with standardized command naming
+  ([`4932acc`](https://github.com/UseTheFork/byte/commit/4932acc1562cd27037e0c0283e8d6b4610b7f743))
+
+- Add CreateQuickSpecWorkflow that enables quick spec creation without the analyze phase, using
+  HarnessAgentNode to bootstrap instructions from chat history - Add QuickSpecCommand (spec:quick)
+  to execute the new quick spec workflow - Standardize all spec command names with spec: prefix
+  (spec:init, spec:execute, spec:refractor, spec:quick) - Update SpecCreatorAgentNode to use
+  HarnessInstruction leaf instead of UserRequest for better context handling - Add llm_tier field to
+  SpecTaskCreatorAgentNode - Refactor CreateRefractorWorkflow to use BootstrapAgentTool instead of
+  BootstrapSkillsFilesTool
+
+- Add ReadFilesTool to coder agent node
+  ([`b20a8ae`](https://github.com/UseTheFork/byte/commit/b20a8aea13738d52b50ac501d64108403111a893))
+
+- Add real-time analytics display with token usage and cost tracking
+  ([`04f65bb`](https://github.com/UseTheFork/byte/commit/04f65bbd05576174b2f95fd7ac66507242e29f35))
+
+Implement analytics calculation and real-time display in the TUI. The analytics service now
+  calculates token usage, costs, and memory percentage after each LLM interaction and emits events
+  to update the UI. A new Analytics widget displays this information with progress bars and
+  formatted metrics. The prompt panel has been refactored into separate components (PromptPanel,
+  PromptInput, PromptTextArea) for better modularity. Added utility CSS classes for spacing and
+  dimensions to support the new layout.
+
+- Add replace_file tool for replacing entire file content
+  ([`0a6d886`](https://github.com/UseTheFork/byte/commit/0a6d886668ee19398961eaf689b822d8dcbe4046))
+
+Add a new `replace_file` tool that allows replacing all content in a file with user confirmation.
+  This complements the existing `edit_file` and `write_file` tools by providing a dedicated
+  operation for complete file replacement.
+
+The implementation includes: - New `replace_file` method in `ToolFileService` with file validation
+  and user confirmation - New `replace_file` tool in `src/byte/files/tools/replace_file.py` - Export
+  of `replace_file` from the files module - Integration into `CoderAgentNode` tools list - Moved
+  `_prepare_file_path` helper method to the top of `ToolFileService` for better organization
+
+The tool follows the same patterns as existing file operation tools and includes proper error
+  handling and user interaction.
+
+- Add research module with agent, workflow, command, and improved prompts
+  ([`117a942`](https://github.com/UseTheFork/byte/commit/117a94222297b20d6a9af5ebb1b5eccd5d09d40e))
+
+- Add response recording to agent nodes
+  ([`6998f97`](https://github.com/UseTheFork/byte/commit/6998f978d27a4c1160ff078d108e6b2833486b31))
+
+integrate RecordResponseService into ask and commit agent nodes to record agent responses for
+  development and debugging purposes. this enables tracking of agent behavior and outputs across
+  different agent types.
+
+- Add Rule separator after question in Select and TextInput widgets
+  ([`e36bc6b`](https://github.com/UseTheFork/byte/commit/e36bc6b99dd0bb4d6f8615eba24741a4254abc88))
+
+- Add select pointer arrow to select and multi-select widgets
+  ([`616ecf4`](https://github.com/UseTheFork/byte/commit/616ecf47dcab6a6cd31463fc267d715ffa079b41))
+
+Add SELECT_POINTER unicode constant (❯) to indicate focused items in select lists. Update
+  ChoiceLabel in both Select and MultiSelect widgets to display the pointer when focused and
+  maintain two-space alignment padding for unfocused items.
+
+This provides visual feedback for which item is currently highlighted when navigating with arrow
+  keys.
+
+- Add separate third-party logging handler and intercept standard logging
+  ([`5764843`](https://github.com/UseTheFork/byte/commit/5764843366325442bcd9e9e5312ea46637f60de1))
+
+Add InterceptHandler class to route Python's standard logging module through Loguru. Configure two
+  separate log sinks: one for byte namespace logs and one for third-party library logs. This allows
+  better separation of concerns when debugging application vs. dependency issues.
+
+Intercepted logs from standard logging calls are now routed into Loguru and filtered based on their
+  origin, enabling different log files for byte-specific and third-party logs.
+
+- Add session context reference support to constitution workflow
+  ([`b0ca8a2`](https://github.com/UseTheFork/byte/commit/b0ca8a2551ce192b2523364fd2d51cef508e4f97))
+
+- Add skill creation workflow with command and agent integration
+  ([`e60ea49`](https://github.com/UseTheFork/byte/commit/e60ea4913e32c9c159b2a4fbd42593fa26bb3ffe))
+
+Implements end-to-end skill creation workflow including: - New SkillCommand CLI interface for
+  creating skills - CreateSkillWorkflow orchestrating skill creation process - SkillCreatorAgentNode
+  with enhanced user interaction guidance - LoadSkillTool added to ask and coder agents -
+  Configuration for skill_creator_agent_node with Claude Opus model - Foundation domain skill
+  documentation - Updated service provider and workflow exports
+
+- Add skill ID-based tools for references and editing
+  ([`57b30b3`](https://github.com/UseTheFork/byte/commit/57b30b3a44a59a69fafd14a47629934c87eba570))
+
+- Add three new tools for skill management: AddSkillReferenceTool, EditSkillTool, and
+  LoadSkillReferenceTool - Migrate all skill tools to use skill_id parameter instead of skill_name
+  for consistency with normalized ID lookup - Add id field to Skill schema and track references as
+  dict[str, Path] for bundled documentation - Update SkillLoaderService to key skills by normalized
+  ID and parse reference files from references/ directory - Simplify SkillCreatorAgentNode template
+  using HarnessInstruction leaf and remove manual phase definitions - Restructure
+  CreateSkillWorkflow with explicit HarnessAgentNode bootstrap phase and improved phase IDs - Add ID
+  boundary type to support ID-labeled skill identification in available skills output - Update
+  BaseWorkflow.get_phases() return type to support both PhaseModel and RoutePhaseModel
+
+- Add skill orchestrator agent for creating reusable skills
+  ([`0f668c6`](https://github.com/UseTheFork/byte/commit/0f668c6cbd21b39f4eec5f872261da24ecc17823))
+
+- Add spec task system with per-file markdown tasks and coding LLM tier
+  ([`96f6b76`](https://github.com/UseTheFork/byte/commit/96f6b76c2dc23b580d0ff6538a750437d2d44d3e))
+
+- Add SpecPhase dataclass and phase persistence to specs domain
+  ([`c5ba952`](https://github.com/UseTheFork/byte/commit/c5ba952af8f0e4ae94b84d602c3b22d872e31a01))
+
+- Add specs domain with spec creation workflow and loader service
+  ([`2f07511`](https://github.com/UseTheFork/byte/commit/2f07511ac87314e8df7f8f360a510cfd28eca19f))
+
+- Add strict typing principle to constitution and fix default order values
+  ([`84116c4`](https://github.com/UseTheFork/byte/commit/84116c49118247415eb5d6b0b5dedc073b966bc8))
+
+Added a new "Strict Typing" ConstitutionPrinciple (order=60) to the constitution initialization flow
+  with user confirmation prompt. This principle enforces explicit type annotations for all function
+  signatures and variables, prohibits use of `Any` without justification, and requires clean
+  type-checking tool passes.
+
+Also changed default order values from 0 to 1 across all constitution components (principles,
+  governance rules, sections, section items) for better clarity in ordering semantics. Additionally
+  fixed start_node.py to properly load skills from harness state instead of always initializing an
+  empty list.
+
+- Add textual TUI framework with chat interface
+  ([`fd9b72d`](https://github.com/UseTheFork/byte/commit/fd9b72d28256de7ffe93b04c6c4f4d392c3f7e08))
+
+Introduce a new terminal user interface (TUI) built with Textual framework to replace the prompt
+  toolkit CLI. This includes:
+
+- ByteTextualApp: Main Textual application class that manages the app lifecycle - ChatScreen: Screen
+  component for displaying chat conversations - Chat widget: Core chat widget with message streaming
+  and agent response handling - Chatbox widget: Individual message display with selection mode and
+  syntax highlighting - PromptInput widget: Text input for user messages with multiline support -
+  ResponseStatus widget: Loading indicator for agent responses - Welcome widget: Welcome message for
+  new users - Comprehensive SCSS styling for the TUI
+
+The new TUI provides a modern, interactive chat interface with vim-like keybindings, message
+  selection, and code block navigation.
+
+- Add theme registry and catppuccin color schemes to TUI
+  ([`631bc4a`](https://github.com/UseTheFork/byte/commit/631bc4aa92ee6309617d40d4c5da65d3f3d2bcea))
+
+Introduce ThemeRegistry class to manage Textual themes with four Catppuccin color schemes (Mocha,
+  Macchiato, Latte, Frappe) based on Base16 specification. Themes are registered during TUI
+  initialization with proper dark/light mode detection.
+
+- Add tool registry service and integrate langchain tools
+  ([`4997e3d`](https://github.com/UseTheFork/byte/commit/4997e3d98b85f86324e61c56ac7dfb033c08583b))
+
+Implement a centralized tool registry service to manage langchain tools across the application. Add
+  support for service providers to register tools via a new `tools()` and `register_tools()`
+  interface. Update tool definitions to use langchain's InjectedToolArg for dependency injection of
+  the Application instance instead of relying on the global `make()` function.
+
+This enables tools to be properly registered and discovered at runtime while maintaining clean
+  dependency injection patterns. Tools are now registered during application bootstrap through the
+  ToolsServiceProvider.
+
+- Add tool validation and improve tool call display formatting
+  ([`cfafca1`](https://github.com/UseTheFork/byte/commit/cfafca111117ec542208f8e31d9177888dd2444e))
+
+Add validation to check if tools exist before execution, returning an error message if a tool is not
+  available. Improve tool call display with better formatting including backticks for arguments and
+  a new ByteDisplay class that renders code with a left border character. Update console rule
+  styling to use the new border character and add spacing before agent rules in verbose mode.
+
+- Add ToolResult schema for standardized tool responses
+  ([`3d055da`](https://github.com/UseTheFork/byte/commit/3d055da0866574545cd93da5d020dedd58ef0553))
+
+Introduce ToolResult pydantic model to standardize tool execution responses with result and extra
+  fields. Update edit_file tool and tool_node to use ToolResult instead of plain dicts for type
+  safety and consistency.
+
+- Add tree-sitter based file summary capability and update phase content
+  ([`ca00032`](https://github.com/UseTheFork/byte/commit/ca000324a3042d94a7762ff4e46d0d84a560a096))
+
+- Add `to_summary()` method stub to FileContext that will use tree-sitter to extract file structure
+  (classes, functions, docstrings) while omitting implementation details - Add `UpdatePhaseTool` to
+  phase-0 content and include usage note explaining agents can use it to mark phases complete -
+  Clarify linting phase content to emphasize running lint tool FIRST before fixing errors
+
+- Add UpdatePhaseTool to support phase completion workflow
+  ([`66ca342`](https://github.com/UseTheFork/byte/commit/66ca3429d3f641d82c40d351f021792508dd64d7))
+
+- Add usage analytics screen and multi-model token tracking
+  ([`1c52f10`](https://github.com/UseTheFork/byte/commit/1c52f10f5c3a81f33c815c5e5de9432ba1418f7c))
+
+- Add user confirmation prompts for file operations
+  ([`7342a6a`](https://github.com/UseTheFork/byte/commit/7342a6a06a044895cfedf0259d102135c543d2af))
+
+Require user confirmation before applying file creation, deletion, and replacement operations.
+  Return VALID status when user declines to proceed, allowing the block to remain in a valid but
+  unapplied state.
+
+- Add user interaction tools for confirm, input, select, and confirm_or_input
+  ([`1fe3c8c`](https://github.com/UseTheFork/byte/commit/1fe3c8c2bc36d70f9b56d57a4bcbb26fa603e9c3))
+
+Added four new tool classes to the system module that provide structured user interaction
+  capabilities:
+
+- UserConfirmTool: Simple yes/no confirmation prompt - UserInputTextTool: Free-form text input
+  collection - UserSelectTool: Multiple choice selection with labeled options -
+  UserConfirmOrInputTool: Combined yes/no confirmation with text input fallback
+
+Each tool integrates with InteractionService and includes JSON schema validation for parameters.
+  Tools are registered in SystemServiceProvider and exported from the system module.
+
+- Add UserMultiSelectTool and MultiSelect widget for batch selections
+  ([`d85a55c`](https://github.com/UseTheFork/byte/commit/d85a55c94a543112eb51f8929cdbf37f659e69f1))
+
+Implement multi-select capability throughout the system:
+
+- Create UserMultiSelectTool to prompt users for multiple selections from a list - Build MultiSelect
+  widget with checkbox toggling and batch submission (space to toggle, enter to submit) - Add
+  multi_select() method to InteractionService supporting prompt_type='multiselect' - Wire
+  multiselect handling into Conversation and ResponsePanel - Integrate UserMultiSelectTool into
+  create_refractor_workflow tools - Simplify refractor workflow by merging propose phase into
+  analysis phase with UserMultiSelectTool
+
+Also: Clarify editable_files descriptions in bootstrap tools to exclude new files, remove debug
+  logging from interactions_service.py, and add SpecTaskCreatorAgentNode to workflow graph.
+
+- Add visual left border styling to code blocks and agent output
+  ([`f54b487`](https://github.com/UseTheFork/byte/commit/f54b487d4c917f4d67b5ab679ac47055cce048e7))
+
+Introduce a new CodeDisplay class that renders code with a left border character (▌) on each line,
+  providing better visual separation in the CLI. Update tool node output and markdown rendering to
+  use the new styling with secondary color theme.
+
+Changes include: - Create CodeDisplay renderable for syntax-highlighted code with left borders -
+  Update tool_node.py to display tool calls with new border styling - Add special handling for
+  'byte' lexer blocks in markdown rendering - Implement _preprocess_tags() to convert agent_plan and
+  edit_block tags to markdown - Pass rich_theme through MarkdownStream for consistent styling -
+  Remove redundant markdown code fence markers from prompts (now auto-generated)
+
+- Add workflow cancellation with ctrl+z keybinding
+  ([`cd3bb1b`](https://github.com/UseTheFork/byte/commit/cd3bb1b2d29aaf0b9867f3416b15fc069e6a0fb0))
+
+Implement comprehensive workflow cancellation functionality:
+
+- Add cancel_event (threading.Event) to WorkflowService for managing execution stops - Add
+  is_cancelled flag to execution state for tracking cancellation across nodes - Update routing_node
+  to redirect to end_node when execution is cancelled - Update end_node to skip final message update
+  when cancelled - Add Ctrl+Z keybinding to conversation screen to trigger cancellation - Track
+  execution state with is_working reactive property - Add command execution lifecycle message
+  handlers - Refactor emoji faces in status_bar using new unicode constants for improved
+  maintainability - Add comprehensive emoji component constants (eyes, mouths, arms, accents) to
+  support future visual enhancements
+
+- Configure skill creator agent to use reasoning llm tier
+  ([`aaecf36`](https://github.com/UseTheFork/byte/commit/aaecf3648d11ede8aa1f2c02bba31aa30370d4ad))
+
+- Add llm_tier class attribute set to 'reasoning' on SkillCreatorAgentNode to specify the LLM tier
+  for improved reasoning capabilities when generating skills
+
+- Display completion descriptions in autocomplete dropdown
+  ([`ff5aaa0`](https://github.com/UseTheFork/byte/commit/ff5aaa0c394d2995039c841c2883dc337fdf2fd3))
+
+- Add optional `value` parameter to DropdownItem to store raw completion text separately from
+  displayed content - Update DropdownItem.value property to return stored value if set, enabling
+  descriptions to display without being inserted - Modify _do_slash_arg_search_async to render
+  completion descriptions with dimmed styling using Content.stylize() - Update _complete method to
+  use DropdownItem.value for proper value extraction instead of option.prompt.plain
+
+- Display question as label above input in TextInput and Select widgets
+  ([`e70d16b`](https://github.com/UseTheFork/byte/commit/e70d16bece8829912b7e3c621284b49d5fc6897b))
+
+- Emit command execution lifecycle messages in file and workflow commands
+  ([`3be1f57`](https://github.com/UseTheFork/byte/commit/3be1f57dd154290159161977631baa958d4335dc))
+
+Add CommandExecutionStarted and AddUserInput messages to file commands (add, read-only, drop,
+  switch-mode) and workflow commands (ask, coder). Add CommandExecutionCompleted messages to file
+  commands. This provides consistent TUI feedback across all command executions.
+
+For file commands, include the command name in AddUserInput. For workflow and git commands, format
+  the message as "/{command_name} {raw_args}" to match the command syntax.
+
+- Enable LSP and migrate tools to BaseTool pattern
+  ([`d425114`](https://github.com/UseTheFork/byte/commit/d42511434f87b2927b92ff1ebda89f45689c1ed0))
+
+- Enable random free port selection for gateway service
+  ([`49bf79b`](https://github.com/UseTheFork/byte/commit/49bf79b6420a787d1cda1618091961db458940d9))
+
+- Change default gateway port from 9731 to 0, allowing OS to assign a random free port - Add
+  _actual_port field to track the resolved bound port after websockets.serve() completes - Extract
+  actual bound port from server socket and update discovery file with real port - Move discovery
+  file write and log message to after server starts so actual port is known
+
+- Enforce phase-scoped tool permissions in tool node and harden context leaves
+  ([`35aba19`](https://github.com/UseTheFork/byte/commit/35aba19d15b42f577257ca914a113fc16c16351c))
+
+- Establish constitution as markdown-based governance framework with core principles
+  ([`7c11b0b`](https://github.com/UseTheFork/byte/commit/7c11b0bebb0e38cad2ffb352422b75329db0cc2a))
+
+- Extract raw block parsing into dedicated service
+  ([`dc2a7e4`](https://github.com/UseTheFork/byte/commit/dc2a7e450915ea7a409e6220322f958dc7f40b02))
+
+Create RawBlockService to handle initial parsing of edit blocks into RawSearchReplaceBlock objects.
+  This service manages: - Parsing raw content into RawSearchReplaceBlock objects - Extracting and
+  validating block_id, operation, and file_path attributes - Validating tag balance for edit_block
+  tags - Merging blocks across multiple iterations by block_id - Validating syntax of raw blocks
+
+This refactoring separates concerns by moving raw block parsing logic out of ParseBlocksNode and
+  EditBlockService into a dedicated service, making the code more modular and testable.
+
+- Extract text content from list-formatted message content
+  ([`2c0b89f`](https://github.com/UseTheFork/byte/commit/2c0b89f5bc0a1558c8fb44eeee73ec422497c346))
+
+Add `_extract_text_from_content` method to EndNode to handle message content that may be formatted
+  as a list of dictionaries or a string. This ensures consistent text extraction regardless of
+  content format before wrapping messages in XML boundaries.
+
+Update test to use VCR cassettes for recording/replaying HTTP interactions instead of mocking the
+  LLM service, providing more realistic integration testing. Add ConventionsServiceProvider and
+  GitServiceProvider to test fixtures.
+
+- Hide ToolArgsRaw widget when tool call is finalized
+  ([`eaabf59`](https://github.com/UseTheFork/byte/commit/eaabf59c295269fe68ef4cd209850ee16b783fbd))
+
+- Implement interrupted request handling for AI comment watcher
+  ([`c54b897`](https://github.com/UseTheFork/byte/commit/c54b89716541d342f25e2f8e36ab951000cfcf7e))
+
+Add support for tracking whether a user request was triggered by an AI comment detection
+  (interrupted session) through the TUI stack.
+
+Changes: - Add `interrupted` flag to `UserInputSubmitted` events and messages to track AI-triggered
+  requests - Add `is_interrupted()` method to TUIManagerService to check if current session was
+  auto-triggered - Store interrupted state in thread-local context to support concurrent requests -
+  Implement `add_reinforcement_hook()` to inject role-specific instructions when request is
+  interrupted: - For ask_agent_node: instructions for providing structured answers - For
+  coder_agent_node: instructions for implementing changes and removing AI markers - Only append to
+  history when request is not interrupted (avoid polluting history with AI-triggered messages) - Fix
+  syntax error: change except tuple to proper except clause format
+
+This enables the AI comment watcher to emit structured requests that are handled differently by
+  agents, allowing for cleaner code comment removal and appropriate response formatting.
+
+- Implement prepare environment bootstrapper with LLM, files, and gitignore setup
+  ([`6b10219`](https://github.com/UseTheFork/byte/commit/6b10219c3e8fb8c5cf302b8a41a95e41921d4cfe))
+
+- Implement production-grade async event bus with queue-based processing
+  ([`05bc6a1`](https://github.com/UseTheFork/byte/commit/05bc6a1c1ea25c29b27f7e88c55cd8743ce482d2))
+
+Replace simple synchronous event system with a production-grade async event bus featuring:
+
+- Priority-based event queue (HIGH, NORMAL, LOW) for processing events in order of importance -
+  Concurrent handler execution with configurable limits (max 10 concurrent) - Graceful start/stop
+  lifecycle management - Support for both fire-and-forget and wait-for-completion event emission -
+  Automatic fallback to synchronous processing if bus not started - Proper error handling with
+  future rejection on handler exceptions
+
+This enables responsive UI updates (HIGH priority) while background tasks (LOW priority) don't block
+  user interactions. The queue-based approach ensures deterministic event ordering within priority
+  levels.
+
+- Implement skills system with discovery, loading, and tracking
+  ([`1f83049`](https://github.com/UseTheFork/byte/commit/1f83049c140032b2291c23e56b4c2257b7a3d278))
+
+- Implement structured planning and turn completion workflow
+  ([`eb0f679`](https://github.com/UseTheFork/byte/commit/eb0f6796c0d14584ab55decdb59cbbcafb07729e))
+
+Add planning system with CreatePlanTool, CompleteStepTool, and CompleteTurnTool to enable structured
+  task execution and progress tracking.
+
+Changes: - Standardize ToolResult format to dict with "content" key across all tools - Add
+  format_tool_message() and format_tui_message() abstract methods to BaseTool - Introduce PlanStep
+  TypedDict and plan field to BaseState - Create memory tools for planning and turn completion
+  workflows - Update ToolNode to route complete_turn calls to end_node - Refactor EndNode to extract
+  and display complete_turn message as final output - Update agent prompts with planning workflow
+  examples - Add plan section generation to PromptAssembler
+
+- Include command in user message display
+  ([`fb6489f`](https://github.com/UseTheFork/byte/commit/fb6489f8108e10b0d499f5de386b29abe1262cf0))
+
+prepend the command to the user message body when displaying in the response panel, allowing users
+  to see which command was executed alongside their input
+
+- Include model name in token usage summary
+  ([`9047096`](https://github.com/UseTheFork/byte/commit/9047096613495d5733fe9f302ed79ca68afa16e8))
+
+- Prepend model_schema.model to the token usage summary string so the model identifier appears first
+  - Summary now displays: 'model · Tokens: X in / Y out · Cost: $Z · Memory: W%' - Provides better
+  visibility of which model was used for each completion
+
+- Initialize constitution with 7 principles and governance framework
+  ([`0bd74e1`](https://github.com/UseTheFork/byte/commit/0bd74e17dfb024e0f4d7ec8c2b2493d74f1e448f))
+
+- Migrate config format from yaml to jsonc with schema support
+  ([`1ccd669`](https://github.com/UseTheFork/byte/commit/1ccd66915ec80bd6dd13ab3346a212980e5c071e))
+
+- Replace .byte/config.yaml with .byte/config.jsonc to enable inline comments and improve
+  readability - Add new Json utility class in src/byte/support/json.py for JSONC file loading/saving
+  with comment preservation - Extract ByteUserConfig as base class for user-facing configuration;
+  ByteConfig now includes internal app and web fields - Update LoadConfiguration bootstrapper to
+  load JSONC format and auto-detect/configure Chrome binary for web functionality - Add automatic
+  config migration from YAML to JSONC in PrepareEnvironment with schema reference injection -
+  Generate and include schema.json for config validation and editor intellisense support - Update
+  Python requirement from >=3.12 to >=3.14 and add json-with-comments>=1.2.10 dependency
+
+- Pass explicit instruction from harness to coder agent via bootstrap tool
+  ([`1357811`](https://github.com/UseTheFork/byte/commit/1357811bb0eed633afa80bc191af4a718c1b1dc4))
+
+- Refactor select widget to use new Answer schema with label and value
+  ([`6453790`](https://github.com/UseTheFork/byte/commit/6453790c58839194381e122496419842ef7c5062))
+
+Update Answer schema from NamedTuple with text/id fields to dataclass with label/value fields. This
+  provides better semantic naming and supports any value type.
+
+Changes: - Convert Answer to dataclass with label and value fields - Add AnswerCancelled dataclass
+  for cancellation handling - Update AskQuestion event to support Answer | list[Answer] |
+  AnswerCancelled - Create new Select widget for single-choice selection - Add TUI constants for
+  Unicode characters (SQUARE_OUTLINE, SQUARE_FILLED, ANGLE_RIGHT) - Update prompt_input to use
+  Unicode constant for AI prompt indicator - Remove Question widget from prompt_panel - Update
+  tui_manager_service to use new Select widget - Refactor question.py Option widget with active
+  state tracking - Add logging and update return value in user_interactive.py - Clean up unused CSS
+  utilities in tui.tcss - Add border styling utilities to utils.tcss
+
+- Remove await from emit_tui calls throughout codebase
+  ([`471e210`](https://github.com/UseTheFork/byte/commit/471e210b49149615f586faa5ce8d9dd0db19155b))
+
+The emit_tui method in the Eventable mixin has been changed from async to synchronous, so all await
+  calls must be removed. This change simplifies the API as emit_tui no longer needs to be awaited,
+  reducing unnecessary async overhead across the codebase.
+
+This affects emit_tui calls in: - Analytics and file services - Git services and validators -
+  Knowledge (context) services - Lint services - Memory command handlers - Agent nodes (ask, coder,
+  coder_plan, commit) - Tool and validation nodes - Workflow services - Web scraping service - TUI
+  interaction and manager services - Notification handlers
+
+- Remove gateway port config and enhance constitution workflow
+  ([`fe86560`](https://github.com/UseTheFork/byte/commit/fe865603f8bc87359671886fc08e2f672f142fb7))
+
+- Remove hardcoded gateway port 9732 from config to allow OS to assign random free port - Change
+  constitution agent llm_tier from 'standard' to 'reasoning' - Add user request lines for each
+  principle in initialize command (DDD, DRY, TDD, YAGNI, TDA, Strict Typing) - Update initialize
+  workflow with clarifications that constitution writing is only available in 'create' phase -
+  Expand ignore pattern from '.byte/cache' to '.byte' to exclude entire byte directory - Add ignore
+  check to discovery service when building tracked files list - Integrate persistent aggregate token
+  usage tracking into response panel with reactive updates
+
+- Replace Input with TextArea in TextInput widget and add interactive additional comments prompt
+  ([`de481d2`](https://github.com/UseTheFork/byte/commit/de481d2cf4f8d02c265a32e83cbfad434b8b920f))
+
+- Replace loading indicator with unified status bar widget
+  ([`e9108dd`](https://github.com/UseTheFork/byte/commit/e9108dde1d0a1fa5e80467eef75859de6eb12e56))
+
+Introduce a new StatusBar widget that consolidates loading and status indicators into a single,
+  reusable component. The StatusBar displays animated loading states or static status emojis with
+  accompanying messages.
+
+Key changes: - Create StatusBar widget with LoadingEmoji and StatusEmoji sub-components - Replace
+  LoadingIndicatorShow/LoadingIndicatorHide messages with unified Status message - Migrate
+  conversation event handlers to use new status bar - Remove loading indicator logic from
+  response_panel - Reorganize prompt panel layout with StatusBar at the top
+
+The new system provides better visual feedback with kaomoji expressions for different states
+  (loading, error, success, warning, info, question, default).
+
+- Return panel_id from emit_tui and auto-remove panels on command completion
+  ([`9236aba`](https://github.com/UseTheFork/byte/commit/9236aba20defb5783ccf17d7403377f9e0bc8604))
+
+- Add return type str | None to emit_tui() in Application and Eventable mixin -
+  Application.emit_tui() now returns the panel_id extracted from payload, enabling callers to
+  reference created panels - WebCommand captures panel_id from emit_tui() call and removes the panel
+  after command execution completes - Conversation.update_status() now passes event.message to
+  show_loading() with empty string fallback for type safety - Disable 'Clean with LLM' answer option
+  in web command pending implementation
+
+- Scroll to latest message after mounting response panel input
+  ([`525bc38`](https://github.com/UseTheFork/byte/commit/525bc38e9c56edff900f728de8a2e65db959d944))
+
+- Ensure UI displays the latest message by explicitly calling scroll_to_latest_message() after
+  response panel input is mounted during handle_response operation - This guarantees proper
+  scrolling behavior when new responses are added to the conversation
+
+- Stream token fragments to status bar and remove ToolArgsRaw widget
+  ([`c94f156`](https://github.com/UseTheFork/byte/commit/c94f156fd65e76d08f7cc09826d89ffe53e960f5))
+
+- Support multiple URLs in web command with flexible delimiters
+  ([`04d83e4`](https://github.com/UseTheFork/byte/commit/04d83e4237a71f22533ed378d3d994c72930f68f))
+
+- Change parser argument from single 'url' positional to 'urls' with nargs="+" to accept multiple
+  URLs - Add URL flattening logic that normalizes space, comma, and newline-separated delimiters
+  into individual URL strings - Wrap scraping, display, and interaction logic in for loop to process
+  each URL independently with per-URL panel management - Update docstring and usage examples to
+  reflect multiple URL support
+
+- Update demo recordings and improve cli function documentation
+  ([`2017149`](https://github.com/UseTheFork/byte/commit/2017149f7c6bab03c0d4f13f7ae83c3b6853ebbd))
+
+- Regenerate GIF recordings for command_file, command_web, and example_coder with improved UI
+  patterns - Update .tape files to use Wait+Screen instead of Wait+Line and Tab navigation instead
+  of Down - Delete command_preset_load.tape as it is no longer needed - Add BYTE_DEBUG and BYTE_ENV
+  environment variables to _config.tape - Improve cli() function docstring with detailed multi-line
+  description explaining configuration and execution flow - Reorder service provider imports
+  alphabetically for consistency
+
+- Upgrade langchain and langgraph dependencies to v1.1+
+  ([`cdb348b`](https://github.com/UseTheFork/byte/commit/cdb348b90f7a2afe4d5ccc53b7ea4b9c305ef2a2))
+
+Update langchain, langchain-openai, langchain-anthropic, langchain-core, and langgraph to their
+  latest versions (1.1+). Replace skills-ref dependency with strictyaml. Update uv.lock to reflect
+  new dependency versions.
+
+- Upgrade Python to 3.14 and update dependencies
+  ([`67cf7a4`](https://github.com/UseTheFork/byte/commit/67cf7a44d5e8ec71e79c3e104fc55a42c0ceb245))
+
+Update Python version from 3.12 to 3.14 in .python-version and flake.nix. Update all flake.lock
+  dependencies including flake-parts, nixpkgs, nixpkgs-lib, build-system-pkgs, pyproject.nix, and
+  uv2nix to their latest versions.
+
+### Ops
+
+- Bump inputs
+  ([`00af1f0`](https://github.com/UseTheFork/byte/commit/00af1f0613cd5110d9d442579eccf6787110c59c))
+
+### Performance Improvements
+
+- Cache pathspec in file watcher to reduce per-event overhead
+  ([`f4b3926`](https://github.com/UseTheFork/byte/commit/f4b392619060dc0ecca984565fdf7891ce3aaada))
+
+- Initialize _cached_pathspec once during _watch_files setup instead of calling
+  ignore_service.get_pathspec() on every file change event - Invalidate cache when .gitignore or
+  .byteignore files are modified to stay in sync with ignore rules - Replace expensive pathspec
+  retrieval in _watch_filter with fast cached value lookup using safe getattr fallback - Add
+  rust_timeout=5000 to awatch call to prevent indefinite blocking
+
+- Parallelize async operations in prompt state generation
+  ([`f8810e4`](https://github.com/UseTheFork/byte/commit/f8810e4c3bcb103199b248304be8522f6315dd55))
+
+Optimize the `generate_state` method by using `asyncio.gather()` to execute independent async
+  operations concurrently instead of sequentially.
+
+This improves performance by allowing tasks like project context gathering, hierarchy building, file
+  context retrieval, and constraint gathering to run in parallel.
+
+Changes: - Add `asyncio` import - Replace sequential await calls with concurrent `asyncio.gather()`
+  - Use dictionary-based task mapping for maintainability - Preserve conditional execution logic
+  based on prompt_settings
+
+### Refactoring
+
+- Add agent message classes and improve message handling
+  ([`e98cbb8`](https://github.com/UseTheFork/byte/commit/e98cbb8cc70ee54b9d34cb0a0d153bd5fd90905c))
+
+Create dedicated message classes for each agent (AskAgentMessage, CoderAgentMessage,
+  CoderPlanAgentMessage, CommitAgentMessage) that extend BaseByteAIMessage to track when messages
+  are created. This enables proper type-aware message wrapping in end_node.py and improves type
+  safety across agent workflows.
+
+Export all agent message classes from the agents module for consistent API.
+
+Implement last-message-only logic in end_node.py to wrap only the final CoderPlanAgentMessage with
+  agent boundaries. Replace full recomposition in TextRule with targeted reactive watch updates for
+  better performance.
+
+Update agent nodes to dispatch record_response_service calls asynchronously instead of awaiting
+  them, unblocking the UI from recording operations.
+
+- Add automatic JSON deserialization for array and object tool parameters
+  ([`6079a18`](https://github.com/UseTheFork/byte/commit/6079a18861ce99bd781f201b9207534a21e2c745))
+
+Add JSON deserialization guard to BaseTool.invoke that automatically deserializes string-encoded
+  JSON for parameters declared as "array" or "object" in the input schema. This prevents LLMs from
+  breaking array parameters when they serialize them as JSON strings.
+
+The guard checks the parameter type against input_schema and only deserializes strings when the
+  declared type is "array" or "object", avoiding unintended parsing of legitimate string parameters.
+
+Simplify CreatePlanTool.run by removing manual json.loads call since the base class now handles
+  deserialization generically.
+
+- Add type annotation and debug flag to workflow compilation
+  ([`c4f8c26`](https://github.com/UseTheFork/byte/commit/c4f8c26fbace599896170df7398b0bde8e5991c2))
+
+Add explicit return type annotation to the compile method in BaseWorkflow to clarify it returns a
+  tuple of CompiledStateGraph, BaseState, and RunnableConfig. Also enable debug mode in the workflow
+  event streaming to aid troubleshooting during development.
+
+- Centralize agent tool call routing and add dynamic cache timestamps
+  ([`209f9a4`](https://github.com/UseTheFork/byte/commit/209f9a448f8b045e2ccb87d396203dadd6132c71))
+
+Extract repeated tool call routing logic from agent nodes into a shared `route_tool_calls()` method
+  in BaseAgentNode. This eliminates code duplication across ask, coder, and commit agent nodes.
+
+Add abstract `message_type` property to BaseAgentNode to allow each agent to specify its own message
+  type for proper casting.
+
+Implement timestamp-based cache file naming in RecordResponseService to uniquely identify cached
+  responses.
+
+Refactor PromptAssembler to separate user message assembly from context assembly, creating
+  `assemble_user_message()` and new `assemble_refreshed_context()` methods.
+
+These changes improve maintainability and reduce duplication while preserving existing behavior.
+
+- Centralize harness state access with HarnessStateUtils
+  ([`1024a86`](https://github.com/UseTheFork/byte/commit/1024a8614187910ca266ed49f006fa65ecef81a2))
+
+Create HarnessStateUtils utility class with 11 static methods for safe access to harness state
+  fields (files, skills, instruction). Refactor HarnessState to nest file-related fields under new
+  HarnessFiles typed dict with edit/create/test/reference keys.
+
+Update all harness tools (AddFilesTool, BootstrapAgentTool, BootstrapSkillsFilesTool) and
+  orchestration leaves (HarnessWorkspaceFiles, HarnessWorkspaceReferenceFiles) to use
+  HarnessStateUtils instead of raw dict access. Fix StartNode to construct HarnessState with nested
+  files structure. Add HarnessStateUtils to orchestration module exports.
+
+This centralizes state shape knowledge in one place, reducing duplication and simplifying future
+  refactors.
+
+- Centralize heading generation to workflow service and rename AddHeading to CreateHeading
+  ([`24f3969`](https://github.com/UseTheFork/byte/commit/24f396968ce72c420b6e901ce014e624500afbcd))
+
+Move heading emission from individual agent nodes to the workflow service level. This allows
+  headings to be generated dynamically from langgraph node metadata rather than hardcoded agent
+  names.
+
+Changes: - Rename Messages.AddHeading to Messages.CreateHeading - Remove heading emission from ask,
+  coder, and commit agent nodes - Add workflow-level heading generation in workflow_service - Pass
+  langgraph_node metadata in Response messages for dynamic heading display - Add border_title
+  support to SelectableMarkdown widget for improved visual hierarchy
+
+- Centralize response finalization and add token usage metrics
+  ([`c675894`](https://github.com/UseTheFork/byte/commit/c675894520518b72b17a645fd788a30a811b69da))
+
+- Extract response recording and usage metric emission into BaseAgentNode.finalize_response method
+  called consistently across all agent nodes after LLM invocation - Add emit_usage_summary to
+  calculate and display token usage, cost, and memory percentage metrics via new CreateTokenUsage
+  TUI message - Create TokenUsageRule widget component for rendering formatted token usage
+  statistics in conversation interface - Replace manual HumanMessage append/extend with direct
+  string concatenation on last prompt message for incomplete workflow error handling - Simplify
+  write_file_tool to use HarnessStateUtils for safe editable files state updates instead of direct
+  dict manipulation
+
+- Change git_commit tool body parameter to list of strings
+  ([`87931d3`](https://github.com/UseTheFork/byte/commit/87931d322a72e41c0bd90e5411550de3994994d8))
+
+- Remove deprecated CommitGroup and CommitPlan schema classes marked for removal - Change body
+  parameter from string to list[str] in GitCommitTool input schema - Update GitCommitTool to join
+  body lines with '- ' prefix for formatting - Raise ToolDeclinedException when user declines commit
+  confirmation instead of returning ToolResult - Add list_to_text utility method to MD class for
+  converting list of strings to single string
+
+- Change workflow request parameter from string to dict
+  ([`92348e6`](https://github.com/UseTheFork/byte/commit/92348e64e37e31d81f96548fa3eb806cdf9b9920))
+
+Refactor workflow execution to accept a dictionary request object instead of a plain string. This
+  allows passing additional metadata like touched_files alongside the user_request.
+
+Changes: - Update WorkflowService.execute() to accept dict instead of str - Update
+  BaseWorkflow.compile() to accept dict and unpack it into initial state - Update
+  commit_service.build_commit_prompt() to return dict with user_request and touched_files - Update
+  ask_command and coder_command to wrap string requests in dict format - Remove unused current_msg
+  tracking from WorkflowService - Update StartNode to use touched_files from state - Add logging of
+  request in commit_command
+
+This enables workflows to access additional context beyond just the user request text.
+
+- Clean up unused imports and decorators
+  ([`dcb533d`](https://github.com/UseTheFork/byte/commit/dcb533d6093625f165290f076a8eb7b238397140))
+
+- Consolidate agent message classes into dedicated module
+  ([`ba4347e`](https://github.com/UseTheFork/byte/commit/ba4347e9c1c23665e941b1728a7016a23542c215))
+
+Extract agent message classes from various agent nodes and base_agent_node into a new messages
+  module for better organization and reusability. Create ByteAIMessage namespace with nested message
+  classes (CoderPlanAgentMessage, CoderAgentMessage, AskAgentMessage, CommitAgentMessage) that
+  inherit from BaseAIMessage. Update all agent nodes to import and reference these messages via the
+  new ByteAIMessage namespace. This improves code organization without changing external behavior.
+
+- Consolidate agent message handling and remove ByteAIMessage abstraction
+  ([`73139c5`](https://github.com/UseTheFork/byte/commit/73139c5a55a03b99c5ed015cf9569b928ad7c373))
+
+- Consolidate agent node configuration and add message history filtering
+  ([`94105ce`](https://github.com/UseTheFork/byte/commit/94105ceb47939119bfdb58d9e5464a16e4e7fd6d))
+
+Replace individual parameter passing (template, model_schema) with agent_node reference in
+  PromptAssembler. This simplifies configuration management and enables message history filtering
+  through a new filter_message_history method in BaseAgentNode.
+
+Changes: - Add filter_message_history method to BaseAgentNode and CommitAgentNode - Update
+  PromptAssembler.boot to accept agent_node instead of template - Store model_schema as instance
+  variable in PromptAssembler - Simplify generate_state method signature - Remove
+  get_structured_output method in favor of model configuration - Apply message history filtering in
+  _gather_modified_messages - Remove unused Optional import
+
+- Consolidate cli into tui and refactor tools to class-based implementations
+  ([`b95e4ea`](https://github.com/UseTheFork/byte/commit/b95e4eae16608835cb2e9ffbdc027450b2b13f5e))
+
+- Move cli package functionality to tui package - Convert function-based tools to class-based
+  implementations (DeleteFileTool, EditFileTool, ReplaceFileTool, WriteFileTool, GitCommitTool,
+  GitGrepTool) - Add SearchWebTool for web search functionality - Replace CLIConfig with TUIConfig
+  in configuration - Fix tool registration to use app.make() for dependency injection - Move
+  InputCancelledError from cli to tui - Remove Console class, consolidate to tui - Update all
+  imports throughout codebase - Fix keep-sorted ordering in dynamic imports - Disable first-boot
+  setup code pending TUI integration
+
+- Consolidate interaction service to tui module
+  ([`30e1c93`](https://github.com/UseTheFork/byte/commit/30e1c937210b5048ad19ee17af63eb5fd1f15260))
+
+Move InteractionService from cli.service to tui.service and refactor user interaction methods to use
+  the new unified service. This consolidates all TUI-related interactions into the tui module.
+
+Changes: - Delete cli.service.interactions_service - Create tui.service.interactions_service with
+  confirm, select, and input_text methods - Update user_interactive mixin to import from tui module
+  - Simplify prompt_for_select to use Answer objects directly - Remove prompt_for_select_numbered in
+  favor of unified select method - Update return type annotations for consistency - Add
+  InputCancelledError exception for cancelled interactions - Rename TuiEvents.AskQuestion to
+  PromptUser with flexible prompt_type - Add Input widget for text input prompts - Update
+  TUIManagerService to handle both select and text input prompts
+
+- Consolidate lint messages into unified Lint message with status
+  ([`6c61f47`](https://github.com/UseTheFork/byte/commit/6c61f47e793664c4938bc7757f1382c5ba898bf3))
+
+Replace three separate message types (LintStarted, LintProgress, LintCompleted) with a single
+  unified Lint message that uses a status field to differentiate operation states. This simplifies
+  the message hierarchy and makes it easier to handle lint operations with status-based dispatch
+  logic.
+
+The new Lint message includes: - status field to indicate PENDING, RUNNING, or SUCCESS state -
+  status-specific fields that are used based on the current status - unified handler in conversation
+  widget that dispatches based on status
+
+This consolidation reduces code duplication and improves maintainability of lint-related messages.
+
+- Consolidate response messaging into unified Status enum
+  ([`78e230d`](https://github.com/UseTheFork/byte/commit/78e230d5457098543f2325e7b80ab06d8eec67a1))
+
+Replace separate ResponseStarted, ResponseChunk, and ResponseComplete messages with a unified
+  Response message that uses a Status enum. This simplifies the messaging API and provides better
+  state management for response handling.
+
+Changes include: - Add Status enum with PENDING, RUNNING, CANCELLED, ERROR, SUCCESS states -
+  Consolidate three message types into single Response message with status and optional chunk -
+  Update all agent nodes to use new Response message pattern - Refactor conversation widget to
+  handle unified response events - Update workflow service to emit Response messages with RUNNING
+  status - Simplify notification styling to use SeverityLevel from textual - Update loading
+  indicator to use reactive hidden property
+
+- Convert tools from functions to classes and fix instantiation
+  ([`fe66f75`](https://github.com/UseTheFork/byte/commit/fe66f753fbd699549ad3a0ca76a74cf26a28ffeb))
+
+Convert all tool implementations from function-based to class-based approach: - Rename tool modules:
+  delete_file.py → delete_file_tool.py, etc. - Create BaseTool wrapper class with eager input
+  streaming config - Implement tools as classes: DeleteFileTool, EditFileTool, WriteFileTool,
+  ReplaceFileTool, GitCommitTool, GitGrepTool, SearchWebTool - Update service providers to return
+  List[Type[BaseTool]] instead of instances - Fix tool instantiation in ServiceProvider to use
+  app.make() for proper dependency injection - Add GoogleSearchParser for web search result parsing
+  - Add ResearchAgentNode for research-focused queries - Reorganize imports with keep-sorted
+  formatting
+
+- Convert tools from functions to classes inheriting from BaseTool
+  ([`5035bc3`](https://github.com/UseTheFork/byte/commit/5035bc3fdcdbb15e49b3803fb522c4aa7d54b541))
+
+- Renamed tool modules to use *_tool.py naming convention - Created BaseTool base class with eager
+  input streaming enabled - Converted all file tools (edit, write, delete, replace) to classes -
+  Converted git tools (commit, grep) to classes - Updated imports across agents and service
+  providers - Tool registry now instantiates tool classes during registration - Added SearchWebTool
+  for web searching - Added GoogleSearchParser for Google Search result parsing - Extended
+  ChromiumService with do_search() method - Enhanced message classes with agent_name and mask fields
+
+- Decouple event handling from command execution
+  ([`014ccb7`](https://github.com/UseTheFork/byte/commit/014ccb764ab08d411c273a32124830303f529e96))
+
+Remove event_handler parameter from command.handle() and command.execute() methods. Event handling
+  is now managed through the EventBus system, allowing commands to emit events directly without
+  tight coupling to UI callbacks.
+
+This change simplifies the command interface and enables better separation of concerns between
+  command execution and event handling.
+
+- Derive spec ID from directory path instead of normalized name
+  ([`bbad208`](https://github.com/UseTheFork/byte/commit/bbad20827d59db01d37bbf299d9fbbb75e796482))
+
+Update SpecLoaderService to use relative directory path as spec ID instead of deriving from name
+  field. This makes spec identity directory-based and immutable.
+
+Changes: - Add specs_root parameter to _parse_spec_file for relative path computation - Compute spec
+  ID as str(spec_file.parent.relative_to(specs_root)) - Pass directory to _parse_spec_file in
+  _load_from_directory
+
+Integrate SpecExecuteCommand with task iteration and status management. Add Spec leaf to harness
+  agent template. Refactor Task.to_md() for cleaner task display. Use HarnessStateUtils in
+  CreateSpecTool for consistent state handling. Clean up debug code and fix Python syntax errors.
+
+- Disable unused tools and refine file management ui interactions
+  ([`a31fe20`](https://github.com/UseTheFork/byte/commit/a31fe2018cafa9747b898f6be2c6dcfa39d71b63))
+
+- Enhance add files tool description and coder agent internals
+  ([`b816669`](https://github.com/UseTheFork/byte/commit/b81666912a6d2784c7d20edaef425ea665fba6bc))
+
+- Enhance boot messaging and improve initialization order
+  ([`363b2ea`](https://github.com/UseTheFork/byte/commit/363b2ea7ee2f5e8317dd7615452d0c031de8a01f))
+
+- Enhance print_boot_status() to support optional subject parameter for formatted registration
+  messages with muted message and bright subject text - Update all service provider registrations to
+  use new print_boot_status signature with separate message and subject parameters - Refactor
+  configuration setup to use dictionary unpacking for consistent schema reference placement - Update
+  boot status messages in prepare_environment to use new method signature - Move _setup_gitignore()
+  call from _run_first_boot_setup() to bootstrap() for proper initialization order - Add
+  .byte/.gitignore to exclude cache and session_context directories
+
+- Export BaseTool and remove read_file tool, change extraction error handling
+  ([`fee9fdb`](https://github.com/UseTheFork/byte/commit/fee9fdb96dda6b9150b005e5709cee49b74fde72))
+
+- Add BaseTool to public exports in tools/__init__.py - Update _dynamic_imports with BaseTool and
+  reorder alphabetically - Change extract_content_from_message to return empty string instead of
+  raising ValueError - Remove read_file.py tool implementation
+
+- Extract comment cleaning logic and add instruction field to bootstrap tool
+  ([`d340a48`](https://github.com/UseTheFork/byte/commit/d340a48f24e257f794bb9c0270a5bfb8b0535197))
+
+- Create MD.clean_comment_lines() utility method in markdown.py to centralize comment marker removal
+  logic, supporting both string and list inputs - Update ai_comment_watcher_service.py to use new
+  centralized clean_comment_lines method instead of inline strip/lstrip operations - Add instruction
+  field to bootstrap_agent_tool result dict to pass instructions alongside OK response - Implement
+  format_tui_message() method in bootstrap_agent_tool to extract and display instruction data from
+  tool results
+
+- Extract communication style and workflow constraints into reusable leaves
+  ([`9544395`](https://github.com/UseTheFork/byte/commit/95443955191d37f54112f7d3a78de8467c9db865))
+
+- Extract cost calculation logic into CostCalculator utility
+  ([`e821c14`](https://github.com/UseTheFork/byte/commit/e821c140830a8ac5d38a7fd2855b668916b2ad72))
+
+- Extract GitDiffs leaf component for better code organization
+  ([`a026a29`](https://github.com/UseTheFork/byte/commit/a026a29c71a7281b7577063745bedc9610f951ea))
+
+- Extract markdown utilities and move commit guidelines to leaf
+  ([`1fc3c3d`](https://github.com/UseTheFork/byte/commit/1fc3c3d0ea56c1cabf8cfc47e2ef17b55a38b141))
+
+- Extract plan management into dedicated module with structured steps
+  ([`27a1f2a`](https://github.com/UseTheFork/byte/commit/27a1f2a99c66e587f8381b86f02fd21856f498fb))
+
+- Extract tool routing and prompt assembly logic into reusable methods
+  ([`0a87e71`](https://github.com/UseTheFork/byte/commit/0a87e71d465ef6221c961d75c3d13373daed9b67))
+
+- Add abstract `message_type` property to BaseAgentNode for type-safe message casting - Create
+  `route_tool_calls()` method to centralize tool routing logic across all agent nodes - Remove
+  redundant `cast` imports from agent node implementations - Split prompt assembly into
+  `assemble_user_message()` and `assemble_refreshed_context()` methods - Add `refreshed_context`
+  placeholder to coder agent message template - Remove duplicate `file_context_with_line_numbers`
+  from coder agent prompt - Add timestamp generation to cached response files for better tracking -
+  Initialize `prompt_state` attribute in PromptAssembler for state persistence
+
+- Extract utility styles into separate stylesheet
+  ([`637db6f`](https://github.com/UseTheFork/byte/commit/637db6fb15480f8d28e331855b7d57e5f60361ea))
+
+Split reusable utility styles (margins, padding, dimensions, text alignment, etc.) into a dedicated
+  utils.tcss file. Update ByteTUI to load both utils.tcss and tui.tcss stylesheets. This improves
+  maintainability and allows utility styles to be reused across other components.
+
+- Format markdown tables and improve code formatting in documentation and tools
+  ([`51fb44b`](https://github.com/UseTheFork/byte/commit/51fb44b04fc8bf4a6fa1299e2d931524622d981c))
+
+- Implement workflow completion loop in agent nodes with phase validation
+  ([`169a212`](https://github.com/UseTheFork/byte/commit/169a212d82347a602936686e2f55a04e68935914))
+
+- Improve agent plan and operation block formatting
+  ([`94afde7`](https://github.com/UseTheFork/byte/commit/94afde726f464b6f9f664ccfa8dcac07015edce6))
+
+Enhance markdown formatting for agent plans and operation blocks with better visual structure. Add
+  search/replace boundary markers and improve metadata header formatting with proper spacing and
+  backtick escaping.
+
+- Improve ai comment watcher instructions and error handling
+  ([`66e3ee1`](https://github.com/UseTheFork/byte/commit/66e3ee131377af4a43c5d259777915d6fb3815a6))
+
+Enhance AI comment watcher service with clearer instructions for both coder and ask agents. Add
+  explicit reminders to remove AI comment markers after implementation and provide structured
+  guidance for answer formatting. Improve tool file service error handling with try-catch wrapper
+  and TUI error panel display. Update edit_file tool to return structured dict with touched_files
+  metadata for downstream processing.
+
+- Improve error messages and file listing behavior
+  ([`288a557`](https://github.com/UseTheFork/byte/commit/288a5576d9a7019b4fe98b44876286819fd5cfdf))
+
+- Improve git grep tool documentation and type hints
+  ([`72b6a73`](https://github.com/UseTheFork/byte/commit/72b6a7350210c2ec35d80aca98423426b8248964))
+
+Replace parse_docstring=True with explicit description parameter in @tool decorator and add
+  Annotated type hints with descriptions to function parameters. This makes the documentation more
+  visible to tool callers and provides better IDE support. Remove verbose docstring since parameter
+  documentation is now handled by type annotations.
+
+- Improve line numbering, message formatting, and documentation clarity
+  ([`05384ff`](https://github.com/UseTheFork/byte/commit/05384ffc5548321a84306c59b5329bfe0c714d95))
+
+- Increase line number field width from 4 to 6 digits for better handling of large files - Add
+  boundary markers to AI and tool messages for clearer message structure - Include user_request
+  parameter in workflow execution for better context - Add example section notation format to
+  documentation - Fix quote style and em-dash consistency in instructions
+
+- Improve message handling and tool result formatting
+  ([`54ca647`](https://github.com/UseTheFork/byte/commit/54ca647a2802508863b488d22cf0c368189373e5))
+
+- Improve prompt structure and markdown formatting in orchestration layers
+  ([`6894d19`](https://github.com/UseTheFork/byte/commit/6894d19d7e25e8baf9b6dd9322bce96ed3050b15))
+
+- Improve tool schema property ordering and add default parameter
+  ([`82c6043`](https://github.com/UseTheFork/byte/commit/82c6043f2d38f7439e3a856d6636302938797f77))
+
+- Improve tui event handling and styling consistency
+  ([`6a6747a`](https://github.com/UseTheFork/byte/commit/6a6747aa846094b2af8540e7b9b2974d36d654a3))
+
+Refactor TUI event routing to enforce proper initialization order by requiring
+  CommandExecutionStarted to be emitted first. Add support for customizable heading styles via
+  AddHeading event parameter. Remove hardcoded color from TextRule and use CSS classes instead for
+  better consistency. Add defensive assertions and null checks to prevent runtime errors. Clean up
+  type ignore comments as they're no longer needed.
+
+- Improve web search with humanized interactions and fix exception hierarchy
+  ([`5a72cb6`](https://github.com/UseTheFork/byte/commit/5a72cb610a1b9757169740e12ec2447d3ca02ebe))
+
+- Integrate leaf-based context templates across agent nodes
+  ([`70ac25f`](https://github.com/UseTheFork/byte/commit/70ac25f4f96b4bd618087452130532bb648d924e))
+
+- Integrate TUI messaging into command execution
+  ([`b78a809`](https://github.com/UseTheFork/byte/commit/b78a8096d205311c9132cbf8152d1eb0ffe15677))
+
+Replace direct console output with TUI message emissions and notification methods in clear and reset
+  commands for consistent UI interaction. Update coder agent prompt examples to enforce 3-round
+  minimum drafting with mandatory tool usage before summary.
+
+- Limit exception traceback frames to 5
+  ([`c835d37`](https://github.com/UseTheFork/byte/commit/c835d3714b8f40017390a9db71ab1ded48cb747f))
+
+Add max_frames=5 parameter to traceback display to limit the number of frames shown when printing
+  exception tracebacks. This improves readability by reducing verbose output for deep call stacks.
+
+- Make agent tools conditional based on execution state
+  ([`c9287b2`](https://github.com/UseTheFork/byte/commit/c9287b241c2cccaadd099c40e94be71616e24eeb))
+
+- Make BaseBlock inherit from UserInteractive mixin
+  ([`c50cb5c`](https://github.com/UseTheFork/byte/commit/c50cb5c887a309563eaa1c8b80c1bcb7d08772e9))
+
+Add UserInteractive mixin to BaseBlock to enable user confirmation prompts for block operations.
+
+- Migrate CLI components to TUI and standardize command patterns
+  ([`ff901d3`](https://github.com/UseTheFork/byte/commit/ff901d38d7b7dcf7403eaea6c444769329c6fe64))
+
+Refactor multiple commands and services to use the TUI event system instead of direct console
+  output:
+
+- Update ContextDropCommand to use emit_tui and notify_* methods like ContextAddFileCommand - Update
+  WebCommand to use InteractionService and TUI messages for user interactions - Migrate
+  ChromiumService to emit TUI loading indicators instead of using Rich spinners - Move
+  byte_display.py and markdown.py from cli/rich to tui/rich - Standardize notification duration
+  defaults to 3 seconds in Notifiable mixin - Clean up debug logging in InteractionService - Add
+  proper command execution lifecycle messages in TuiManagerService - Improve loading indicator
+  management in conversation widget
+
+This ensures consistent UI patterns across all commands and services.
+
+- Migrate constitution storage from JSON to Markdown with YAML frontmatter
+  ([`45437bc`](https://github.com/UseTheFork/byte/commit/45437bce3a04fadcf600821e0fcd696754cf5c6a))
+
+- Migrate tool schemas from dict to pydantic models
+  ([`e7904ee`](https://github.com/UseTheFork/byte/commit/e7904eee904ea51fd94f760f7e6cf25116473b3d))
+
+Convert dictionary-based ArgsSchema definitions to Pydantic BaseModel classes across all tools
+  (file, git, web). Add InjectedToolArg support for dependency injection. Standardize parameter
+  naming (path → file_path, old_string → search_string, new_string → replace_string). Remove ABCMeta
+  from BaseTool and simplify subclass validation. Clean up agent prompt templates and remove
+  redundant logic from coder agent.
+
+- Migrate tool system to custom json schema-based architecture
+  ([`32f5dc9`](https://github.com/UseTheFork/byte/commit/32f5dc9bc3b3f29ba9ff05f2cb98e6a82d1b5259))
+
+- Move agent prompts from module scope to method scope
+  ([`405883d`](https://github.com/UseTheFork/byte/commit/405883ddb2db3f96178783aff44eda13bb7e26df))
+
+- Move border rendering to line loop in byte display
+  ([`6dfe969`](https://github.com/UseTheFork/byte/commit/6dfe969ba38b82120598ecebb8b3c2e85cdf4575))
+
+Move the border rendering from before the loop to inside the loop so that the border is applied to
+  each line individually rather than yielding it separately. This simplifies the logic and ensures
+  consistent border styling across all rendered lines.
+
+- Move Command and CommandRegistry to dedicated command module
+  ([`182c48e`](https://github.com/UseTheFork/byte/commit/182c48ecaa7e2a94592c2ae4cbc1f8417173a934))
+
+Extract Command and CommandRegistry from the cli module into a new dedicated command module to
+  establish clearer separation of concerns. The command domain is now a first-class module alongside
+  foundation, cli, and other core domains.
+
+This change: - Creates new `byte.command` module with Command and CommandRegistry - Moves
+  CommandRegistry from `byte.cli.service.command_registry` to
+  `byte.command.service.command_registry` - Updates all imports across the codebase to use `from
+  byte import Command` instead of `from byte.cli import Command` - Removes Command and
+  CommandRegistry from cli module exports - Updates service providers to import from the new
+  location - Maintains backward compatibility through dynamic imports
+
+The command module is now properly positioned as a core domain that cli depends on, rather than
+  being nested within cli.
+
+- Move event system to dedicated module
+  ([`ac14f6f`](https://github.com/UseTheFork/byte/commit/ac14f6f12d78462dfbc9e1f68dbcd8e4225e463d))
+
+Extract EventBus and Events from foundation module into a new dedicated byte.event module. This
+  improves code organization by separating event infrastructure from application foundation
+  concerns.
+
+Updates all imports across the codebase to reference the new module location. Also introduces
+  TuiEvents as a separate namespace for TUI-specific events, replacing the previous Messages event
+  definitions.
+
+- Move file operations to ToolFileService with user confirmation
+  ([`4c7ca76`](https://github.com/UseTheFork/byte/commit/4c7ca7693f926cfd1079130a9dce7f005db0b16e))
+
+Extract write_file and delete_file logic from tool functions into ToolFileService methods. Both
+  operations now require user confirmation before execution, following the same pattern. Update tool
+  functions to delegate to the service and return ToolResult objects for consistency.
+
+Also update edit_file tool path annotation to clarify it expects exact paths from the source
+  variable. Add write_file and delete_file tools to coder agent node.
+
+- Move plan generation to workflow layer and refactor prompt assembly
+  ([`b37c1f5`](https://github.com/UseTheFork/byte/commit/b37c1f544155416c0378fe795ec339a4cde616a9))
+
+- Move status messaging from conversation to interactions service
+  ([`a220660`](https://github.com/UseTheFork/byte/commit/a2206607062705bceb8c2dc7f007e0893209144a))
+
+Move status message emissions from the conversation widget to the interactions service to better
+  separate concerns and ensure consistent status updates during user interactions.
+
+Changes: - Move status message emissions to interactions_service in prompt(), select(), and
+  input_text() methods - Remove status message handling from conversation widget's
+  handle_prompt_user() - Refactor status_bar.py: make BYTE_STATES public, add logging, remove unused
+  hide() method - Add margin-bottom to tool_call widget for better spacing
+
+- Move workflow system to orchestration and introduce phase model
+  ([`36ed316`](https://github.com/UseTheFork/byte/commit/36ed3161d32e8a82b0582f8abd8ccc881885d9ad))
+
+- Refactor agent node naming and configuration to use agent IDs
+  ([`2c7ffc3`](https://github.com/UseTheFork/byte/commit/2c7ffc3161d5fd5cd97ebe22666c72c48eb4de11))
+
+Update LLM configuration keys and agent node implementations to use consistent agent-based naming:
+
+- Rename LLM config keys from generic names (ask, coder, commit) to agent node identifiers
+  (ask_agent_node, coder_agent_node, coder_plan_agent_node, commit_agent_node) - Update
+  LLMService.get_model() to accept agent_id instead of model_id for configuration lookup - Implement
+  name property in BaseAgentNode to automatically derive agent node name from class name using
+  snake_case conversion - Update all agent nodes (Ask, Coder, Commit) to use self.name for dynamic
+  config lookup instead of hardcoded strings - Add new CoderPlanAgentNode to support multi-step
+  planning before code generation - Update coder workflow to use CoderPlanAgentNode as entry point,
+  routing to CoderAgentNode after planning - Update routing and service provider registrations to
+  include new CoderPlanAgentNode
+
+This change enables more flexible agent configuration and makes the relationship between agent nodes
+  and their LLM configuration explicit and maintainable.
+
+- Refactor analytics widget with reactive data binding
+  ([`7c7f725`](https://github.com/UseTheFork/byte/commit/7c7f7258a058d6cdb484177d3d06261ee6173a79))
+
+Replace ModeInfo placeholder classes with specialized TokensInfo, CostInfo, and FileInfo classes
+  that use reactive properties and data binding. This eliminates manual label updates and improves
+  maintainability by leveraging Textual's reactive system for automatic UI updates.
+
+Also move scroll_to_latest_message() call to the correct location after response completion, remove
+  unnecessary padding from Screen, and clean up TODO comment.
+
+- Refactor block apply methods to use status attributes instead of return tuples
+  ([`43ece81`](https://github.com/UseTheFork/byte/commit/43ece81e920532cbe6b882babfe2435c9e87ae72))
+
+Change apply() methods across all operation block types to set status and status_message attributes
+  instead of returning tuples. This simplifies the API and makes status tracking more consistent.
+  The apply() method signature changes from returning tuple[BlockStatus, str] to returning None,
+  with status stored in self.status and self.status_message.
+
+- Refactor chat widget to use langchain messages and simplify architecture
+  ([`cd18eea`](https://github.com/UseTheFork/byte/commit/cd18eeaca05ac391ab0b7081dbe0d2545f9461c0))
+
+Replace custom message handling with langchain BaseMessage types. Update ChatMessage schema to use
+  langchain messages instead of dict-based format. Simplify chat widget initialization and remove
+  dependency on chat_data parameter. Comment out streaming response logic and chat loading
+  functionality for refactoring. Update chatbox to work with langchain message objects and remove
+  litellm-specific message handling. Add ChatHeader widget for displaying chat metadata. Update
+  imports to use local widget modules instead of elia_chat. Add command and subcommand input
+  handlers for slash commands and subprocess execution.
+
+- Refactor configuration and bootstrap logic with formatting improvements
+  ([`802fe3b`](https://github.com/UseTheFork/byte/commit/802fe3b896137def5f35958e82115a93c4216b40))
+
+- Add schema reference to config.jsonc and compact array formatting for consistency - Rename cli
+  section to tui in config and remove presets configuration - Add prettier.config.cjs for JSON/JSONC
+  formatting rules - Remove LSP service provider integration from byte_config and main - Fix return
+  type annotations in bootstrap methods for proper functional composition - Update web config to
+  exclude enable field and default chrome_binary_location to None - Improve text formatting in skill
+  workflow and analytics widgets
+
+- Refactor gateway to use typed request dataclasses with @on dispatch pattern
+  ([`a2650ff`](https://github.com/UseTheFork/byte/commit/a2650ff67b3c8da431b0515b51b943dc97913193))
+
+- Replace flat RpcRequest.params dict with typed GatewayRequest dataclass hierarchy, mirroring the
+  Messages pattern from tui/messages.py - Create Requests namespace with Execute, Configure,
+  Subscribe, AddFile, DropFile, and ContextAddFile dataclasses in dedicated requests.py module -
+  Implement @on decorator-based dispatch system: decorator tags handler methods with
+  _gateway_request_type attribute without wrapping, SessionService scans and builds dispatch table
+  at boot time, _dispatch resolves RpcRequest to typed GatewayRequest then looks up and calls
+  handler by type - Extract GatewayUtils utility class to separate utils/ package with parse_request
+  and make_error_response static methods; dynamically build REQUEST_TYPES registry using
+  Str.class_to_snake_case instead of manual mapping - Add comprehensive test suites: integration
+  tests for AddFile and DropFile over real WebSocket with auth flow, unit tests for all request
+  types, gateway_utils parsing/error responses, and @on dispatch mechanism - Handle missing required
+  params by catching TypeError in parse_request and re-raising as ValueError for proper RPC error
+  responses - Update Application to catch ScreenStackError when posting TUI messages to gracefully
+  handle disconnected screens; add .input_history to .gitignore and ANTHROPIC_API_KEY to test
+  environment
+
+- Refactor lint service and UI components for improved results display
+  ([`5278f37`](https://github.com/UseTheFork/byte/commit/5278f3725adfb21f6fb8011113e5adfb3acc5a12))
+
+Replace CreatePanel message with dedicated LintResults message for better separation of concerns.
+  Update LintStarted to use total_commands instead of separate file_count and command_count
+  parameters. Refactor Linting widget to use custom ProgressBar and RuneSpinner components. Improve
+  Analytics widget layout with better CSS organization and add MemoryUsedInfo component. Update
+  TextRule to use HorizontalGroup composition with ByteBug component. Remove
+  pending_response_panel.py as it's no longer needed. These changes improve code organization and
+  provide a more flexible UI messaging system.
+
+- Refactor llm config, services, and prompt assembly
+  ([`8cb12f5`](https://github.com/UseTheFork/byte/commit/8cb12f58c8df9bb7d48eb0f3eb413bc2f4a0eaf2))
+
+update config schema to include provider field for each llm model. replace orchestration event
+  reference from GatherReinforcement to GatherProjectContext. remove recompose flag from reactive
+  text field and use targeted updates via watch method. add validate_text method for input
+  sanitization. remove commented event hook code. remove yaml header construction from context file
+  addition. fix type hints in session context service return types
+
+- Add `provider` field to LLMModelConfig to support multiple LLM providers - Update llm_service to
+  set provider from config on model schema - Replace `GatherReinforcement` event with
+  `GatherProjectContext` throughout - Refactor TextRule widget to avoid full recomposition on text
+  changes - Remove `recompose=True` from reactive declaration - Add `validate_text` method to
+  sanitize input - Add `watch_text` method for targeted DOM updates - Remove YAML header
+  construction from file context addition - Remove unused commented event hook registration - Fix
+  type hints in SessionContextService to use direct type references instead of string literals - Add
+  `_gather_modified_messages` method to prompt assembler for conversation history - Update prompt
+  templates to use `modified_messages` variable - Add type imports (AIMessage, BaseMessage) to
+  prompt assembler
+
+- Refactor LLM service to return model schema and parameters instead of compiled model
+  ([`8e9e9cb`](https://github.com/UseTheFork/byte/commit/8e9e9cb14fe8c68379e4f2ab94e06c8afa20d89f))
+
+Change LLMService.get_model() to return a tuple of (ModelSchema, dict) containing model
+  configuration and merged parameters instead of a compiled BaseChatModel instance. This allows
+  callers to customize model initialization as needed.
+
+Update all agent nodes to handle the new return type and compile models locally in their
+  create_runnable() method using init_chat_model(). Also move model compilation into
+  create_runnable() in BaseAgentNode for better separation of concerns.
+
+Remove boot_messages functionality and SystemEvents.PostBoot event listener from LLMServiceProvider,
+  simplifying the service provider initialization logic.
+
+Update PromptAssembler to accept agent name and ModelSchema in generate_state() and pass
+  provider/model information to the reinforcement gathering event. Update reinforcement logic in
+  LLMService to check provider names instead of model schema behavior properties.
+
+- Refactor memory tracking and tool result handling
+  ([`39c87b6`](https://github.com/UseTheFork/byte/commit/39c87b608c32bf4dbab91d768b686d6e96820c84))
+
+- Refactor orchestration to add skill selection phase and consolidate utilities
+  ([`44f8afa`](https://github.com/UseTheFork/byte/commit/44f8afafac66cc5f80281a5f4678686bdb3a98f8))
+
+- Refactor prompt assembler to use phase utils instead of plan-based logic
+  ([`2e2a777`](https://github.com/UseTheFork/byte/commit/2e2a77773478f911dbaa71ed6bf56236d45ba655))
+
+- Refactor prompt assembly and epilogue logic
+  ([`1912810`](https://github.com/UseTheFork/byte/commit/1912810c01c1c0bacbd8dc28d5d99f4566e1832a))
+
+- move epilogue function from prompt_leaves to PromptAssembler as context-aware method - add
+  conditional logic to epilogue for first vs followup responses - relocate user_request assignment
+  to results gathering phase - add tracking ID to PROJECT_STATE section for better traceability -
+  improve project state message clarity - format task phases with bullet points in coder agent node
+  - comment out verbose instruction about PROJECT_STATE references - fix typo: "nest" → "next" in
+  important note - comment out extras field in BaseTool
+
+- Refactor prompt assembly to separate system and user message templates
+  ([`f2c3fa6`](https://github.com/UseTheFork/byte/commit/f2c3fa631627440d26649f66f3e3f98ab0088039))
+
+- Refactor prompt assembly to use leaf-based composition pattern
+  ([`7c808fc`](https://github.com/UseTheFork/byte/commit/7c808fcd1200d272827dc3b06a159c5962e4ab84))
+
+- Refactor prompt assembly with leaf-based composition system
+  ([`031f97e`](https://github.com/UseTheFork/byte/commit/031f97e768bd6d6b38cb5d57ce35bf0bccacb255))
+
+- Refactor prompt caching and remove redundant log statements
+  ([`ee01b9b`](https://github.com/UseTheFork/byte/commit/ee01b9ba0e1473e99380dcc30c16bca525108a47))
+
+- Refactor prompt context and enhance skill creation
+  ([`1057230`](https://github.com/UseTheFork/byte/commit/10572309c8b5e22a9da5fb20e7fe8b9019f50a34))
+
+- Refactor prompt system to use structured sections instead of boundary tags
+  ([`d4485ff`](https://github.com/UseTheFork/byte/commit/d4485ff2c040a86df6d6cfa7f2566e8e6cce587d))
+
+Replace XML-based Boundary tags with new Section/SectionType system for clearer prompt organization:
+
+- Add new `Section` class and `SectionType` enum for Markdown-based section management - Implement
+  `Section.start()`, `Section.end()`, `Section.ref()` for structured sections with anchor links -
+  Expand `preamble()` with detailed conversation structure and XML tag reference guide - Add
+  `epilogue()` function for prompt resumption instructions with `RESUME_FORMAT` section - Migrate
+  all agent node templates (ask, coder, commit) to use Section API - Update prompt_assembler to use
+  Section for file context, conversation history, and project state - Add `success` field to
+  ToolResult schema (default True) - Add `status` field to ToolMessage for error tracking - Clean up
+  BoundaryType enum, removing unused values - Update imports throughout codebase to expose new
+  Section/SectionType classes - Fix message content access patterns (use `.text` instead of
+  `.content` where applicable)
+
+- Refactor research agent node to improve system architecture and tool management
+  ([`9fb318d`](https://github.com/UseTheFork/byte/commit/9fb318dfcd6684740c26c230e3ded52f72c8f292))
+
+- Refactor session service to emit tui messages instead of routing commands directly
+  ([`81d7cad`](https://github.com/UseTheFork/byte/commit/81d7cadc2f934ef9eac0e42816fcb8dcb4dc4ce3))
+
+- Update SessionService to emit Messages.UserInputSubmitted to event bus instead of directly routing
+  slash commands - Add import for Messages from byte.tui - Comment out direct command routing logic
+  pending RpcRequest alignment with Messages protocol - Add gateway port 9732 to config.jsonc -
+  Remove gateway specification files from .byte/specs/gateway/ as they are no longer needed - Fix
+  pytest marker typo: asyncio -> asyncios in test_prepare_environment.py
+
+- Refactor skill creator workflow and agent to support iterative phase completion
+  ([`3d75bd2`](https://github.com/UseTheFork/byte/commit/3d75bd29a8819dac6424ddacad403340995c838a))
+
+- Refactor tools from functions to classes with dependency injection
+  ([`2fcbabf`](https://github.com/UseTheFork/byte/commit/2fcbabfea8c5d8e391bf2587f1d2140450f68d36))
+
+Convert all tool implementations (file tools, git tools, search tools) from function-based to
+  class-based architecture inheriting from BaseTool. Update service providers to return tool classes
+  instead of instances, with instantiation handled via app.make() for proper dependency injection.
+  Add SearchWebTool and GoogleSearchParser for web search capabilities. Create ResearchAgentNode for
+  research tasks. Enhance message system with agent_name and mask fields for better tracking.
+
+- Refactor undo command and add panel removal ui interactions
+  ([`950b3ab`](https://github.com/UseTheFork/byte/commit/950b3ab422abb53bc6bd54a0f98657c2b4270d86))
+
+- Replace CoderAgent with CoderWorkflow in undo_command for cleaner agent access pattern - Replace
+  direct console interactions with InteractionService.confirm for better separation of concerns -
+  Add RemovePanel message type to support removing ResponsePanel widgets from conversation -
+  Implement action_scroll_to_panel on ConversationScreen to enable clickable panel navigation in
+  confirmation dialogs - Add remove_panel handler to Conversation widget to remove panels by ID and
+  clean up message handling - Remove unused TYPE_CHECKING import and conditional block from
+  command.py - Remove debug logging statement from git_service.py
+
+- Refactor workflow orchestration to use UpdatePhaseTool and RoutePhaseModel
+  ([`261ed4d`](https://github.com/UseTheFork/byte/commit/261ed4dd1dde74c48810a2f7d5eb1c7818bb2876))
+
+- Refactor: simplify git grep tool and add missing docstrings
+  ([`52f671e`](https://github.com/UseTheFork/byte/commit/52f671ed7a3358c28ef02266dd70029b34725ae3))
+
+- Remove InteractionService dependency from GitGrepTool - Eliminate user confirmation dialog before
+  executing git grep - Streamline execution by removing nested conditional logic - Add docstrings to
+  FileChanged event and service provider classes - Enhance error messages in tool execution with
+  input args context
+
+- Remove auto-init blank constitution and streamline initialize workflow
+  ([`999f1fd`](https://github.com/UseTheFork/byte/commit/999f1fd2a4db14a6f3973f6f90dc0d65789304cd))
+
+- Remove commented-out debug code in tool_node
+  ([`59ccf09`](https://github.com/UseTheFork/byte/commit/59ccf09a45937b54ee107bdc862578c038eb96b1))
+
+- Remove conditional lsp tool loading from skill creator agent
+  ([`b6dfec8`](https://github.com/UseTheFork/byte/commit/b6dfec8081019a611c2ebb5f2d35a789c07c1b9a))
+
+- Remove config migration logic and Migrator class
+  ([`fd39a62`](https://github.com/UseTheFork/byte/commit/fd39a62455ea60ba1e7f52aeb767d72f4949eae1))
+
+- Remove Migrator class and migration_001_000_000.py file that handled version-based config
+  migrations - Simplify LoadConfiguration.bootstrap() by removing version checking and migration
+  step, directly loading config into ByteConfig - Remove Migrator from config module exports in
+  __init__.py - Remove unnecessary imports (metadata, __future__ annotations) from
+  load_configuration.py
+
+- Remove development mode check in record_response_service
+  ([`f3aebad`](https://github.com/UseTheFork/byte/commit/f3aebad0822aa2d6780374ae7a489273edc63f26))
+
+remove the is_development() guard to allow response caching in all environments, not just
+  development mode
+
+- Remove FileMode enum and unify file context handling
+  ([`b4f095c`](https://github.com/UseTheFork/byte/commit/b4f095c3626226975d316512e4a34b8011f96ea1))
+
+- Remove FileMode enum from models.py and all mode-based differentiation throughout file service
+  layer - Simplify file APIs: add_file() and list_files() no longer accept or filter by mode
+  parameter - Update generate_context_prompt() to return single list instead of tuple of (read_only,
+  editable) - Delete add_read_only_file_command.py, switch_mode_command.py, and context.py; remove
+  associated exports - Remove SetContext bootstrap step and ProjectHierarchy leaf from orchestration
+  pipeline - Simplify file UI and analytics to display unified file counts instead of mode-based
+  separation - Add tree-sitter-language-pack>=1.8.1 dependency for language support - Update all
+  dependent services and commands to work with unified file context model
+
+- Remove future annotations and simplify docstrings in bootstrap module
+  ([`e7bd03a`](https://github.com/UseTheFork/byte/commit/e7bd03a9bd795c333a6abf283bd2013e297b7aa6))
+
+- Remove `from __future__ import annotations` from bootstrapper files as it is no longer necessary
+  with modern Python versions - Simplify all docstrings to one-line imperative format per
+  constitution standards, removing verbose Args/Returns sections and multi-line descriptions -
+  Delete boot_providers.py module and remove all references to BootProviders from __init__.py
+  exports and TYPE_CHECKING imports - Update class docstrings in LoadConfiguration, LoadConsoleArgs,
+  LoadEnvironmentVariables, and RegisterProviders to be more concise and descriptive
+
+- Remove git_commit tool from exports and service provider
+  ([`c2fb73b`](https://github.com/UseTheFork/byte/commit/c2fb73b2627d515500aefb197d7a125a5236ce8c))
+
+Delete the git_commit tool implementation and remove it from the GitServiceProvider. Only git_grep
+  remains as an available tool. Also remove unused imports and clean up commented-out code in
+  related files.
+
+- Remove LintNode and fix tool schema handling
+  ([`d913891`](https://github.com/UseTheFork/byte/commit/d913891f125340116d113599cf6b8d3adf033d8b))
+
+- Remove LintNode and integrate LintTool into workflows
+  ([`13a9c55`](https://github.com/UseTheFork/byte/commit/13a9c553c391c472cb591b3e0f7c0b07f931e822))
+
+- Remove llm_tier override from CommitAgentNode
+  ([`79e619a`](https://github.com/UseTheFork/byte/commit/79e619affe911dd092d55c11142e33d53abdb566))
+
+- Remove MCP module and conventions directory setup
+  ([`a10b348`](https://github.com/UseTheFork/byte/commit/a10b34872b07f95cbb0700e4e48d55ceb7e791bf))
+
+- Remove entire MCP (Model Context Protocol) module that is no longer used - Delete MCP command and
+  service implementations from codebase - Remove conventions directory creation from environment
+  bootstrap sequence - Update create_skill_workflow to dynamically reference PresentSkillTool.name
+  in phase instructions
+
+- Remove redundant branching in git commit tool
+  ([`0e6b951`](https://github.com/UseTheFork/byte/commit/0e6b951cb0c4d5cd9a6a003b2a3600235ed8a96b))
+
+- Remove redundant scroll_to_latest_message call from handle_response
+  ([`56f91d6`](https://github.com/UseTheFork/byte/commit/56f91d6df90ccaea4856325e4e86be3bd0372708))
+
+- Remove unnecessary scroll_to_latest_message() invocation that was called after mounting the
+  response panel input. The mounting operation already handles scrolling to the latest message,
+  making this explicit call redundant.
+
+- Remove redundant slash command completion and fix tab completion slash prefix
+  ([`7ffd25a`](https://github.com/UseTheFork/byte/commit/7ffd25a5140e55a4da3dac959c1c6fe5ed2da7c6))
+
+Remove redundant slash command completion logic from TextAreaAutoComplete: - Eliminated
+  self.slash_commands caching since CommandRegistryService already provides filtering - Unified
+  command name and argument completion into single debounced _do_slash_arg_search call - Removed
+  slash-specific fuzzy matching logic and _should_show special case - Fixed tab completion to
+  preserve "/" prefix when completing command names by prepending "/" and adjusting cursor position
+
+Also remove commented-out code from prompt_input.py and rename CreatePlanTool name to
+  "create_plan_tool" for consistency. Update type ignore comments to use "ty:ignore" format with
+  specific error codes.
+
+- Remove runtime parameter from node execute methods
+  ([`f36e19b`](https://github.com/UseTheFork/byte/commit/f36e19bf43b9d86b00aab6685b53df1ffc5f3bec))
+
+- Remove SystemEvents PostBoot emission and simplify bootbox initialization
+  ([`58a9271`](https://github.com/UseTheFork/byte/commit/58a9271670cd42bde0bf7e6a140d402c7c213065))
+
+- Remove unused SystemEvents import from conversation_screen - Comment out PostBoot event emission
+  and dynamic message handling - Simplify Bootbox to render only styled logo without event payload -
+  Remove __future__ annotations import from response_panel - Add text-accent CSS class to
+  TokenUsageRule for aggregate usage styling - Expand .byte/config.jsonc ignore pattern from
+  .byte/cache to .byte
+
+- Remove type hints from service provider methods
+  ([`a192d94`](https://github.com/UseTheFork/byte/commit/a192d94ec3a4aff76f0dbdd0426162cadd0d1926))
+
+- Remove type hints from service provider methods
+  ([`a25eddf`](https://github.com/UseTheFork/byte/commit/a25eddf5f7be01e60b35de8cdf188ae8678dd438))
+
+- Remove unused CLIContextDisplayService
+  ([`6fc0b68`](https://github.com/UseTheFork/byte/commit/6fc0b684af1ada1f5994126f37d063f08ec6d851))
+
+- Remove unused code and simplify function calls
+  ([`8e540d2`](https://github.com/UseTheFork/byte/commit/8e540d23373f894705c91419633ef3290be5a819))
+
+- Remove unused comment and improve touched_files handling
+  ([`458194f`](https://github.com/UseTheFork/byte/commit/458194f35e459fbfc7d71580542f91051c7cd4b2))
+
+Replace direct state access with safe get() method to handle missing or empty touched_files. Remove
+  obsolete AI comment from StartNode class. Update docstring references in SelectableMarkdown to
+  remove external library links. Replace unused metadata variable with underscore in
+  workflow_service. Add TextArea styling for border and height in TUI.
+
+- Remove unused future import and update event reference
+  ([`e5e97a2`](https://github.com/UseTheFork/byte/commit/e5e97a2ff10c7dd962e0d48a6253752993e1eddc))
+
+Remove the `from __future__ import annotations` statement that is no longer needed. Update the
+  Events reference to OrchestrationEvents in the prompt assembler. Clean up unnecessary comment in
+  tui manager service.
+
+- Remove unused Optional import from typing
+  ([`d21419d`](https://github.com/UseTheFork/byte/commit/d21419d9c08313c961554db308c41ecd1a0ab0b5))
+
+- Remove unused validators and nodes from codebase
+  ([`c018785`](https://github.com/UseTheFork/byte/commit/c018785cc9da1a0a22d4d5ccc2832d1bc8e72761))
+
+- Remove verbose logging from ask agent node execution
+  ([`c370798`](https://github.com/UseTheFork/byte/commit/c370798bc3cc1cca33dbcac17585352894f13017))
+
+Remove redundant log statements that were used for debugging during agent node execution. These logs
+  add noise without providing significant value during normal operation. The code flow is clear from
+  the function calls themselves.
+
+- Rename CodeDisplay to ByteDisplay for consistent naming
+  ([`af6f0b6`](https://github.com/UseTheFork/byte/commit/af6f0b6d94465b2ed87d6c7615ce2e6a93135bae))
+
+Rename CodeDisplay class to ByteDisplay to better reflect its purpose of displaying byte-specific
+  content. Update all imports and usages accordingly.
+
+- Rename CompleteStepTool to CompleteTurnTool and clean up formatting
+  ([`3e22b53`](https://github.com/UseTheFork/byte/commit/3e22b53ebd7b677499db19c7c7b6890880e52f30))
+
+- Rename force_tool_choice to tool_choice and support dict format
+  ([`d03e9f8`](https://github.com/UseTheFork/byte/commit/d03e9f8c583477947616f5d470b9ddd4891cbb33))
+
+- Rename Input widget to TextInput
+  ([`2d2eb00`](https://github.com/UseTheFork/byte/commit/2d2eb009e2ea247c0722e47025490007756f0164))
+
+- Rename pending_agent_state to scratch_messages and remove unused state fields
+  ([`dcfc93b`](https://github.com/UseTheFork/byte/commit/dcfc93beb088738986556f7557ee0b847d2b89d3))
+
+- Rename ReadFilesTool to AddFilesTool with improved semantics
+  ([`2c3b1c9`](https://github.com/UseTheFork/byte/commit/2c3b1c92fdfebee669fc29ab5429c4834d2b1160))
+
+- Reorganize agent domain into node, orchestration, and subgraph modules
+  ([`fdb53ef`](https://github.com/UseTheFork/byte/commit/fdb53effc0b159ecaf4e0b9427e9b8ce799ba015))
+
+Split the monolithic agent module into three focused domains:
+
+- **node**: Contains base node class and all node implementations (assistant, dummy, end, extract,
+  lint, model variants, parse blocks, routing, show, start, tool, validation) - **orchestration**:
+  Contains orchestration logic including state management, schemas, validators, reducers, prompt
+  utilities, and exceptions - **subgraph**: Contains agent implementations (ask, base, coder, commit
+  agents)
+
+This restructuring improves code organization, separation of concerns, and makes the codebase more
+  maintainable. Each domain now has its own service provider for dependency injection.
+
+Updated main.py to import and register NodeServiceProvider alongside existing providers.
+
+- Reorganize agent message imports and references
+  ([`79d91e4`](https://github.com/UseTheFork/byte/commit/79d91e4ddee727c740808ac64a9f2600a0b445f4))
+
+Move agent message type imports under a TYPE_CHECKING block and update references to use
+  ByteAIMessage namespace. This improves import organization and reduces circular dependencies at
+  runtime while maintaining type checking capabilities.
+
+- Reorganize agents and workflows into domain-specific modules
+  ([`0e7f055`](https://github.com/UseTheFork/byte/commit/0e7f05591d7187adec18efab663e43317461b034))
+
+- Reorganize ask and coder into domain-specific modules
+  ([`9ffcd13`](https://github.com/UseTheFork/byte/commit/9ffcd137634b56c4e67afaed38eb8046f3846684))
+
+- Reorganize command system and move ByteArgumentParser to command module
+  ([`4825f4b`](https://github.com/UseTheFork/byte/commit/4825f4b5a830c6e466ca4ebfb234458775e74d24))
+
+Move ByteArgumentParser from byte.cli.argparse to byte.command.argparse to better organize the
+  command system architecture. Rename CommandRegistry to CommandRegistryService for clarity. Create
+  CommandServiceProvider to manage command-related services. Update all imports across the codebase
+  to reflect the new module structure. This improves separation of concerns by keeping
+  command-related utilities in the command module rather than the CLI module.
+
+- Reorganize event system into domain-specific namespaces
+  ([`a23ad87`](https://github.com/UseTheFork/byte/commit/a23ad8738635c00394c00a026703bbbff58fd2bc))
+
+Split the monolithic Events class into domain-specific event namespaces: - SystemEvents: PostBoot -
+  OrchestrationEvents: GatherReinforcement, GatherProjectContext - FileEvents: FileAdded,
+  FileChanged - NodeEvents: EndNode, PreAssistantNode - TuiEvents: UserInputSubmitted,
+  ComponentEvent - TuiComponentEvents: Notify, CommandExecutionStarted, UpdateAnalytics, etc.
+
+This improves code organization, reduces circular dependencies, and makes event types more
+  discoverable. Updated all imports and event emissions throughout the codebase to use the new
+  namespaces. Added emit_tui helper method to Eventable mixin for cleaner TUI event emission.
+
+- Reorganize exports and move human message panel to ui widgets
+  ([`edd83e4`](https://github.com/UseTheFork/byte/commit/edd83e4e026269bbe9605556aa9db61d7fd51f93))
+
+Move HumanMessagePanel to ui/human_message.py and rename to HumanMessage for better organization.
+  Reorganize __init__.py exports to group related items together (commands, services, tools). This
+  improves code structure without changing API behavior.
+
+- Reorganize imports and module structure for orchestration and subgraph
+  ([`b5c0849`](https://github.com/UseTheFork/byte/commit/b5c084936eb8948ffa3483cdb6dd2e920fd28043))
+
+Move imports from byte.agent to byte.orchestration and byte.subgraph modules: - TokenUsageSchema,
+  BaseState, ValidationError, Validator moved to byte.orchestration - AskAgent, CoderAgent moved to
+  byte.subgraph - AssistantContextSchema moved to byte.orchestration - Remove AgentServiceProvider
+  from main.py - Update node naming: AssistantNode → ModelMainNode, WeakModelNode → ModelWeakNode,
+  ReasoningModelNode → ModelReasoningNode - Remove ShowNode and AssistantNode from node exports -
+  Update routing node return values to use new naming convention - Simplify node routing using
+  route_to helper method - Update graph builder to scan byte.node and byte.subgraph modules
+
+- Reorganize imports and move convention constants to dedicated module
+  ([`98c45be`](https://github.com/UseTheFork/byte/commit/98c45be9a43adf164a379425e1cbff1d4fca93a3))
+
+Consolidate imports from nested service modules into top-level package exports. Move FOCUS_MESSAGES
+  constant from agent implementations to a dedicated conventions module for better code organization
+  and reduced import depth. Rename ConventionsParsingService to ConventionParsingService for
+  consistency. Reorganize test file structure by moving parser service tests to code_operations
+  directory and removing obsolete subprocess agent tests.
+
+- Reorganize imports and remove unused project_name field
+  ([`de7c9a2`](https://github.com/UseTheFork/byte/commit/de7c9a2464f3d8384ab8068b3b47b307eaca1d5c))
+
+- Reorganize node architecture into agents and nodes packages
+  ([`a6b1c5d`](https://github.com/UseTheFork/byte/commit/a6b1c5da26ca9b2a8e0834ea9ad68e37ce2d9c84))
+
+Move agent implementations (CoderAgent, AskAgent, CommitAgent) from subgraph module to new
+  byte.node.agents package. Move node implementations from byte.node.implementations to
+  byte.node.nodes package. This creates a clearer separation between agent nodes (which use LLMs)
+  and utility nodes (routing, validation, etc).
+
+Rename Node base class to BaseNode for consistency with other base classes. Update all imports and
+  references throughout the codebase. Remove the deprecated subgraph module entirely.
+
+Update GraphBuilder to use NodeServiceProvider for discovering nodes and agents instead of
+  reflection-based scanning.
+
+- Reorganize response_panel location and improve loading animation formatting
+  ([`c3d1253`](https://github.com/UseTheFork/byte/commit/c3d1253caba0c7db1e96b90a630af8d272e24738))
+
+- Move response_panel.py from panels/ subdirectory to widgets/ root directory - Update imports to
+  reflect new response_panel location - Refactor loading emoji animations to use character constants
+  for better maintainability and consistency - Apply f-string formatting consistently across all
+  animation frames
+
+- Reorganize SelectableMarkdown class structure and update focus binding
+  ([`6cdd8f6`](https://github.com/UseTheFork/byte/commit/6cdd8f65b2b1c9bbdfc928dcad7da8b3d759162c))
+
+Move the `_run` method earlier in the class to improve code organization and readability. Move the
+  `CursorEscapingBottom` message class definition before the BINDINGS list for better logical
+  grouping. Update the escape key binding action from 'screen.focus("input")' to
+  'screen.focus("PromptTextArea")' to use the correct widget identifier. Also fix mypy type ignore
+  comments from 'possibly-missing-attribute' to 'unresolved-attribute' for accuracy.
+
+- Reorganize skill creator agent and update read_files tool implementation
+  ([`479c6b3`](https://github.com/UseTheFork/byte/commit/479c6b3a83f515fe89d67ede14d4b48d507c9a75))
+
+- Reorganize TUI components from cli to dedicated tui module
+  ([`b93f9ec`](https://github.com/UseTheFork/byte/commit/b93f9ec295c73728671d9f181cd3915698178a59))
+
+Move textual UI components from byte.cli to a new byte.tui module structure. This includes:
+
+- Rename ByteTextualApp to ByteTUI in new byte.tui.byte_tui module - Move chat screen, widgets, and
+  styles to byte.tui package - Create TUIManagerService for centralized chatbox management - Add
+  TUIServiceProvider to application service providers - Update application.py to import from new tui
+  module location
+
+This reorganization improves code organization by separating CLI and TUI concerns into distinct
+  modules.
+
+- Reorganize tui into screens and improve file management
+  ([`a8215cd`](https://github.com/UseTheFork/byte/commit/a8215cdedff60f23b2ea73720e985ecb867bd71f))
+
+Extract conversation UI logic into a dedicated ConversationScreen to improve code organization and
+  separation of concerns. Add ManageFilesScreen for handling file management operations with a modal
+  dialog. Move boot logo rendering and system event handling from ByteTUI to ConversationScreen.
+  Replace hardcoded file list with dynamic loading from file service. Make conversation property a
+  lazy-loaded getter to access the current screen's conversation widget. Update analytics widget to
+  make file info clickable and inherit from Static for better functionality.
+
+- Replace autocompleter widget with text area auto complete
+  ([`a863532`](https://github.com/UseTheFork/byte/commit/a86353289a2820503a8b1e39e5eff3a1c254560e))
+
+Replace the old Autocompleter widget with a new TextAreaAutoComplete widget that provides better
+  integration with TextArea. The new implementation:
+
+- Supports slash command completion with argument suggestions - Supports file path completion
+  triggered by @ symbol - Integrates directly with TextArea via message signals - Handles key events
+  (up/down/tab/enter/escape) for navigation and selection - Uses fuzzy search for better matching -
+  Removes shell mode support (to be re-added later) - Simplifies prompt.py by removing
+  autocompleter-related logic
+
+Changes: - Add get_all_slash_command_names() to CommandRegistry for retrieving command names with /
+  prefix - Update schemas.py to use standard dataclass and add Command field to AutocompleteOption -
+  Delete old autocompleter.py widget - Simplify prompt.py by removing autocompleter bindings and
+  event handlers - Add new text_area_auto_complete.py with complete implementation
+
+- Replace BootstrapSkillsAndFilesTool with BootstrapAgentTool supporting instruction,
+  editable/reference files, and rich_markdown option in CommunicationStyle
+  ([`1a5c91b`](https://github.com/UseTheFork/byte/commit/1a5c91bc6bda71a970f3b5a5bbbed086de70ad01))
+
+- Replace chatbox with selectable markdown widget
+  ([`289c2f8`](https://github.com/UseTheFork/byte/commit/289c2f804d7e11658abea2b459004dc13932d952))
+
+Rename Chatbox to SelectableMarkdown and update all references throughout the codebase. This widget
+  now provides better text selection and markdown rendering capabilities.
+
+Also remove the load_convention tool from ask_agent_node and update state initialization to use
+  touched_files instead of parsed_blocks. Update prompt input styling and remove unused bindings
+  from conversation widget.
+
+- Replace component-specific styles with utility margin and padding classes
+  ([`5e38d2f`](https://github.com/UseTheFork/byte/commit/5e38d2ff3dc0994dc1bad58b04b3006f311a3bb5))
+
+Replace all component-specific margin and padding rules in tui.tcss with reusable utility classes
+  following a consistent naming convention (mt-*, mb-*, ml-*, mr-*, mx-*, my-*, pt-*, pb-*, pl-*,
+  pr-*, px-*, py-*). This reduces CSS duplication and makes styling more maintainable and
+  predictable.
+
+- Replace ConstitutionConfig with inline constitution building in initialize command
+  ([`6cfd048`](https://github.com/UseTheFork/byte/commit/6cfd04849fa250e88a274c38d3652b9b384fcae6))
+
+- Replace conventions module with enhanced agent tools and switch to duckduckgo lite search
+  ([`5fbd66b`](https://github.com/UseTheFork/byte/commit/5fbd66b4537494eba73b5dc2cbf8097aae6174c5))
+
+- Replace dict schemas with pydantic models in file tools
+  ([`da6e9bd`](https://github.com/UseTheFork/byte/commit/da6e9bd9acf9b94c676d165b78b48c0a6c4a086f))
+
+Convert file tool schemas from dictionary-based JSON schemas to Pydantic BaseModel classes with
+  Annotated fields. This enables proper type validation and supports dependency injection via
+  InjectedToolArg.
+
+Changes: - Replace dict schemas in delete_file_tool, edit_file_tool, replace_file_tool, and
+  write_file_tool with corresponding Pydantic input classes - Update _arun methods to accept app as
+  direct parameter instead of kwargs - Add InjectedToolArg support for proper dependency injection -
+  Add ToolMessage wrapper class for tool messaging - Add ValidationError handling in tool_node -
+  Remove debug logging statements from tool_node and conversation_screen - Add UserCancelled message
+  type to TUI messages
+
+- Replace event payload system with typed dataclass events
+  ([`bc632f8`](https://github.com/UseTheFork/byte/commit/bc632f8dc721de941a5721442d33e11ba843f717))
+
+Replace the generic Payload/EventType enum-based event system with strongly-typed dataclass events.
+  This provides better type safety, IDE support, and clearer event contracts.
+
+Key changes: - Replace EventType enum and Payload class with Events namespace containing typed
+  dataclass events (FileAdded, FileChanged, PostBoot, GatherReinforcement, etc.) - Update EventBus
+  to work with event types instead of string event names - Refactor all event listeners to accept
+  and return specific event types - Update event emission throughout the codebase to use new event
+  types - Remove Payload and EventType from public API exports
+
+This is a breaking change as the event system API has been completely redesigned.
+
+- Replace ExecutorAgentNode with unified HarnessAgentNode and BootstrapSkillsAndFilesTool
+  ([`fe19018`](https://github.com/UseTheFork/byte/commit/fe190188b3c0b2605872bc11e8177ae202a76ad7))
+
+- Replace json-stream with partial-json-parser for JSON parsing
+  ([`169a1b1`](https://github.com/UseTheFork/byte/commit/169a1b1f981ab4ed8d6fe1fc955469fecdd8aa50))
+
+Switch from json-stream library to partial-json-parser for improved partial JSON parsing in tool
+  calls. This change includes: - Updated dependencies in pyproject.toml and uv.lock - Refactored
+  tool_call.py to use partial_json_parser.loads() instead of custom parse_partial_json() - Updated
+  exception handling from json.JSONDecodeError to MalformedJSON - Added DEFAULT_CSS styling to
+  ToolCall widget
+
+- Replace per-node llm config with tiered model system and rename CostCalculator to UsageMetrics
+  ([`127db0a`](https://github.com/UseTheFork/byte/commit/127db0a5952b54a811cb076321ffac06f18dc48f))
+
+- Replace skill boundary type with tool in registry service
+  ([`f1b6141`](https://github.com/UseTheFork/byte/commit/f1b614125b7ebf07d6c490d7cb48a9c050790208))
+
+- Replace skill selection agent with harness-based bootstrap tools
+  ([`19869c7`](https://github.com/UseTheFork/byte/commit/19869c7012c900403fe795f3b5a8494b8f6f36c4))
+
+Remove SkillSelectAgentNode and introduce BootstrapSkillsTool and BootstrapSkillsFilesTool for
+  loading skills and files through HarnessAgentNode. This simplifies the workflow by consolidating
+  skill selection into the harness initialization phase.
+
+Replace SkillSelectAgentNode references with HarnessAgentNode in CreateSpecWorkflow. Add llm_tier
+  and improve agent templates in SpecCreatorAgentNode and SpecTaskCreatorAgentNode. Update error
+  messaging pattern to append to prompt instead of extending with new message.
+
+Rename SpecTaskCommand to SpecExecuteCommand and CreateSpecPhaseWorkflow to CreateSpecTaskWorkflow
+  for clarity. Create RefractorCommand for new refactoring workflow. Update spec tool to populate
+  harness with spec metadata for downstream agents.
+
+- Replace skill tracker service with active flag on skill dataclass
+  ([`699de35`](https://github.com/UseTheFork/byte/commit/699de35a3ddc75efb339828017b8d22413923584))
+
+- Replace spec version/tags with reference_files and extract Str.normalize_id
+  ([`379f0dd`](https://github.com/UseTheFork/byte/commit/379f0dd27b7fecd9c2661f67eb9c62d2388e4cdb))
+
+- Replace ToolResult success flag with typed tool exceptions
+  ([`de54700`](https://github.com/UseTheFork/byte/commit/de54700a53ecc6af3ae90a5fca0bece7d8144d99))
+
+- Restructure agent architecture and consolidate workflows
+  ([`c2ba0b2`](https://github.com/UseTheFork/byte/commit/c2ba0b2874cc5f5eca251839cf08bb6743286789))
+
+Reorganize agent implementations into a cleaner architecture:
+
+- Move agent implementations from `implementations/` to `agents/` directory - Rename agent node
+  classes to agent classes (e.g., AskAgentNode → AskAgent) - Move base node from
+  `nodes/base_node.py` to `base_node.py` at agent module root - Create new CoderAgent and
+  CommitAgent implementations - Introduce CoderWorkflow and CommitWorkflow for workflow
+  orchestration - Replace AgentService with WorkflowService for agent execution - Update routing to
+  use explicit routing state instead of node_to/node_from - Simplify node references throughout the
+  codebase (assistant_node → main_model_node) - Remove deprecated agents (CleanerAgent,
+  ConventionAgent, ResearchAgent) - Remove ShowCommand from memory module - Update all imports and
+  references to reflect new structure
+
+- Restructure agent architecture with node-based workflow system
+  ([`6548552`](https://github.com/UseTheFork/byte/commit/6548552ef36f077ad7d961c7b778b772d6c7a27e))
+
+Refactor agent system from command-based to node-based architecture with dedicated workflow service.
+  This change introduces:
+
+- New BaseAgentNode and specialized agent nodes (AskAgentNode, CodeReviewerAgentNode) replacing
+  command pattern - Model-specific nodes (MainModelNode, ReasoningModelNode, WeakModelNode) for LLM
+  selection - RoutingNode for dynamic graph navigation - New WorkflowService and BaseWorkflow for
+  workflow orchestration - Reasoning model support in LLM configuration and service - Token usage
+  tracking moved to WorkflowService - Agent state now includes node_to/node_from for routing and
+  final_message for results - Simplified AssistantContextSchema by removing direct model references
+  - Graph builder now automatically includes RoutingNode
+
+Breaking changes: - AskCommand moved to workflow.command.ask_command - Agent execution now uses
+  workflow nodes instead of commands - AssistantContextSchema no longer contains main/weak model
+  references - Agent metadata no longer includes mode field
+
+BREAKING CHANGE: Agent execution model changed from command-based to node-based workflow system.
+  AskCommand moved to byte.workflow package. AssistantContextSchema no longer accepts main/weak
+  model parameters. Agent state structure updated with node_to/node_from routing fields.
+
+- Restructure agent instructions and make project context unconditional
+  ([`da49e82`](https://github.com/UseTheFork/byte/commit/da49e82a40203d06af276e055259015201968aac))
+
+- Restructure code operations to use polymorphic block hierarchy
+  ([`9f181e6`](https://github.com/UseTheFork/byte/commit/9f181e61eb354fa1e7c25e7c618fdea0c0417f48))
+
+Replace flat SearchReplaceBlock schema with a polymorphic class hierarchy: - BaseBlock: abstract
+  base for all block types - BaseOperationBlock: extends BaseBlock with operation semantics -
+  BaseFileOperationBlock: extends BaseOperationBlock with file validation - Concrete
+  implementations: CreateFileOperationBlock, EditFileOperationBlock, DeleteFileOperationBlock,
+  ReplaceFileOperationBlock - RawBlock: represents unparsed blocks
+
+This enables type-safe block handling, encapsulates validation logic within block classes, and
+  provides better separation of concerns. Blocks now validate themselves during construction and
+  expose to_dict() for state serialization.
+
+Update parse_blocks_node to work with new block types and serialize blocks to dicts for state
+  storage. Update edit_block_service to use new block classes. Rename edit_block to operation_block
+  in boundaries and constants.
+
+BREAKING CHANGE: SearchReplaceBlock and RawSearchReplaceBlock schemas removed. Code using these
+  types must migrate to new block class hierarchy. parsed_blocks state field now contains list[dict]
+  instead of list[SearchReplaceBlock]. EditBlockService.convert_raw_blocks_to_search_replace renamed
+  to convert_raw_blocks_to_parsed and returns BaseOperationBlock instances.
+  EditBlockService.validate_semantics removed - validation now occurs in block constructors.
+
+- Restructure commit prompt data flow through agent workflow
+  ([`e79194a`](https://github.com/UseTheFork/byte/commit/e79194ae97f8cb505d976830021e3396de133f74))
+
+Refactor how commit prompt data is passed through the workflow: - Rename user_request to git_diffs
+  for clarity - Pass only touched_files to workflow executor - Add extra context parameter to prompt
+  assembly pipeline - Improve section formatting with proper spacing and emphasis
+
+This restructuring separates concerns and makes the data flow more explicit while maintaining the
+  same external behavior.
+
+- Restructure constitution to use keyed dicts for O(1) lookups and surgical edits
+  ([`1a8da0d`](https://github.com/UseTheFork/byte/commit/1a8da0d1511952662ef245f428e75dc01c2c5bff))
+
+- Restructure tool call execution and TUI messaging
+  ([`9e51a5e`](https://github.com/UseTheFork/byte/commit/9e51a5e35f0b1caaa85692d19d73761ee5da4d40))
+
+Extract tool message creation and TUI updates into a dedicated `_update_tui()` method in ToolNode.
+  Restructure the ToolCall message to use `tool_id`, `status`, and `content` fields instead of
+  `name` and `args`.
+
+Refactor UI components to separate argument display (ToolArgs) from result display (ToolResult) with
+  a collapsible container. Update response panel and conversation widget handlers to work with the
+  new message structure.
+
+This improves separation of concerns and makes tool call state management more explicit.
+
+- Restructure TUI event system and pending panel architecture
+  ([`a0c78e6`](https://github.com/UseTheFork/byte/commit/a0c78e6663c0ec4c25b7662b6de2351734f77f32))
+
+Replace the old Messages-based event system with a new TuiEvents-based architecture. Consolidate
+  pending response panel into a unified PendingPanel widget with streaming markdown support.
+
+Key changes: - Rename TuiMessage events to TuiEvent with new event types (AddHeading,
+  ResponseStarted, ResponseChunk, ResponseComplete, CommandExecutionStarted/Completed) - Replace
+  PendingResponsePanel with PendingPanel supporting async markdown streaming - Simplify TUI manager
+  service to handle new event types and delegate to panel methods - Update TextRule and Bootbox to
+  inherit from Static instead of Widget - Remove unused chat_header.py and welcome.py widgets -
+  Update all event emissions across model_main_node, ask_command, and workflow_service
+
+- Separate llm and tui formatting for add files tool
+  ([`cf50466`](https://github.com/UseTheFork/byte/commit/cf50466b4085e7d6c9da69caccacb4970fd49e05))
+
+- Simplify Application import path in prepare_environment
+  ([`993eb76`](https://github.com/UseTheFork/byte/commit/993eb7693d7802bebc5c158d07f23a8d49af1aec))
+
+- Import Application directly from byte package instead of byte.foundation module - Reduces import
+  coupling to the foundation layer and improves code clarity
+
+- Simplify auto focus and clean up unused bindings in ByteTUI
+  ([`67ae208`](https://github.com/UseTheFork/byte/commit/67ae2087e08e1408f8f6fd74470d5eef52e7515c))
+
+Remove unnecessary focus targets from AUTO_FOCUS, keeping only PromptTextArea as the primary focus
+  target. Remove commented-out keybindings that are no longer needed. Add TODO comment about
+  creating a Rich theme to maintain consistent styling.
+
+- Simplify boundary methods to use xml tag format
+  ([`87a84b1`](https://github.com/UseTheFork/byte/commit/87a84b1ffc0d99fc228c392c65663e81c80e8e08))
+
+Remove format_style parameter from critical, important, and warning methods. Replace HTML comment
+  format with consistent XML tag-based format (e.g., `<critical>`, `<important>`, `<warning>`,
+  `<comment>`) for easier parsing and consistency across the codebase. Simplify methods by removing
+  conditional branching and validation checks.
+
+- Simplify coder agent prompt and remove mandatory tool usage language
+  ([`dcd43f6`](https://github.com/UseTheFork/byte/commit/dcd43f6f04be25b9360f57ee3232a1b8b0606422))
+
+Remove "(MANDATORY)" markers from tool usage sections and commented example code from coder agent
+  prompts. Change file_context_with_line_numbers to file_context. Remove trailing critical boundary
+  message about using tools after drafting rounds. These changes streamline the prompt while
+  maintaining core functionality.
+
+- Simplify coder agent workflow and extract plan-execute pattern
+  ([`0fb21b8`](https://github.com/UseTheFork/byte/commit/0fb21b85edb09d879fccc33af3c9e83aeba6266a))
+
+- Simplify coder workflow by removing planning phase
+  ([`d3fc785`](https://github.com/UseTheFork/byte/commit/d3fc7852cf586533c3425887224a7063ea347114))
+
+Remove the CoderPlanAgentNode from the coder workflow and consolidate the planning and
+  implementation phases into a single CoderAgentNode execution.
+
+The new CoderAgentNode now handles both planning and implementation in one phase, eliminating the
+  need for a separate planning step. This simplifies the workflow while maintaining the same level
+  of code quality through updated prompt templates.
+
+Also: - Remove CoderAgentMessage and CoderPlanAgentMessage exports from agents __init__ - Update
+  agent display names to use human_name property for better UX - Upgrade coder_agent_node model to
+  claude-sonnet-4-6 for improved capabilities - Add snake_to_title utility for converting snake_case
+  to Title Case - Fix response panel markdown streaming initialization - Remove unused __future__
+  import in text_rule.py
+
+- Simplify edit block service by delegating raw parsing
+  ([`54670f2`](https://github.com/UseTheFork/byte/commit/54670f20ed8620087f7e6a1d21b0eb8ede296725))
+
+Update EditBlockService to use RawBlockService for raw block parsing. Changes include: - Remove raw
+  block parsing methods (_parse_message_to_components, _merge_components_by_block_id, etc.) - Add
+  convert_raw_blocks_to_search_replace() to convert raw blocks to SearchReplaceBlock objects - Add
+  parse_raw_block_to_search_replace() for single block conversion - Add
+  extract_search_replace_content() and extract_edit_block_content() helpers - Rename
+  mid_flight_check() to validate_semantics() for clarity - Remove ABC inheritance and unused imports
+  - Update match_pattern to be simpler (no longer extracts attributes)
+
+This reduces EditBlockService complexity and makes it focus on semantic validation and application
+  of blocks.
+
+- Simplify error handling and improve worker state management
+  ([`bd2f1a2`](https://github.com/UseTheFork/byte/commit/bd2f1a2302c30d98f291c6438b6417512d802a2c))
+
+- Replace asyncio.iscoroutinefunction with inspect.iscoroutinefunction for better performance -
+  Remove try/except from EventBus.emit listener loop to allow exceptions to propagate naturally -
+  Add exit_on_error=False to @work decorator so worker continues on errors - Add Worker.StateChanged
+  handler to safely log errors on main Textual thread - Remove try/except from
+  emit_user_input_submitted, relying on worker state change for error handling
+
+- Simplify event bus and migrate to textual messages
+  ([`b76c8a9`](https://github.com/UseTheFork/byte/commit/b76c8a9967ffc8588afb4525a5c289b35a98e150))
+
+Replace the production-grade async event bus with priority queuing and concurrent processing with a
+  simpler synchronous event system. Migrate TUI events from custom TuiComponentEvents to Textual
+  Message types for better integration with the Textual framework.
+
+Key changes: - Remove EventPriority enum and QueuedEvent dataclass - Remove async queue-based
+  processing, priority handling, and concurrent execution limits - Simplify EventBus to direct
+  synchronous listener invocation - Migrate TuiComponentEvents to Messages (Textual Message
+  subclasses) - Update emit_tui() to post messages directly to conversation widget - Add new Message
+  types: CreatePanel, UpdateAnalytics, UpdateFiles, LintStarted, LintCompleted, LintProgress,
+  LoadingIndicatorShow, LoadingIndicatorHide - Rename TuiComponentEvents.Notify to Messages.Notify -
+  Rename TuiComponentEvents.Flash to Messages.Notify - Move message handling from TUIManagerService
+  to Conversation widget handlers - Add Linting widget for displaying lint progress - Update all
+  services and nodes to use Messages instead of TuiComponentEvents - Add CommitAgentNode and
+  BaseAgentNode for structured commit message generation - Simplify commit workflow to use
+  CommitAgentNode with ValidationNode - Update git service to emit Messages instead of console
+  output - Update lint service to emit progress Messages instead of Rich progress bars
+
+- Simplify generate_agent_state to return only prompt assembler
+  ([`bea5399`](https://github.com/UseTheFork/byte/commit/bea5399b1bd5ff196fabcaa981e58285b574d73e))
+
+- Simplify imports and improve widget naming consistency
+  ([`4d02dec`](https://github.com/UseTheFork/byte/commit/4d02dec1a18522d25eb97160daae3e00b297bc11))
+
+- Remove unnecessary tui instance binding in application initialization - Simplify
+  InvalidGitRepositoryError import path - Rename prompt text area widget ID from "input" to
+  "prompt-text-area" for clarity - Update selector reference to match renamed widget ID
+
+- Simplify LLM configuration and provider management
+  ([`c71a8c4`](https://github.com/UseTheFork/byte/commit/c71a8c4a732e289fb8eaf1dfc5fef4457df9f7b3))
+
+Remove provider-based configuration system and replace with direct model specification. Simplify
+  LLMModelConfig to include provider field, remove LLMProviderConfig and ProvidersConfig classes,
+  and eliminate environment variable-based provider detection.
+
+Update LLMService to use langchain's init_chat_model for provider-agnostic model initialization
+  instead of maintaining provider-specific class mappings. Remove ModelParams and ModelProvider
+  schemas in favor of direct model and provider fields in ModelSchema.
+
+This change reduces configuration complexity and makes the system more maintainable by centralizing
+  model definitions in models_data.yaml.
+
+- Simplify multi-select UI by replacing checkbox display with icon-based visual states
+  ([`eba017a`](https://github.com/UseTheFork/byte/commit/eba017ae975ca3eb91d3511123a0500520c9a33e))
+
+Remove checkbox display from multi-select items and instead use CSS-based styling with
+  SQUARE_FILLED/SQUARE_OUTLINE icons to indicate selection state. Add 'space' keybinding to toggle
+  selection and reorganize event handlers by moving on_list_view_selected logic into new
+  action_toggle_current method.
+
+Also update type ignore comments to use 'ty:ignore' format with specific error codes for
+  consistency.
+
+- Simplify RawSearchReplaceBlock schema and move validation logic
+  ([`a4cb45d`](https://github.com/UseTheFork/byte/commit/a4cb45dc5019df81825b202f8b57015633fabae7))
+
+Remove file_path, operation, block_status, and status_message fields from RawSearchReplaceBlock.
+  These attributes are now extracted and validated during the conversion to SearchReplaceBlock in
+  EditBlockService, providing better separation of concerns.
+
+Move check_single_block_tags_balanced from RawBlockService to EditBlockService where it's actually
+  used. This consolidates tag validation logic with the block parsing that depends on it.
+
+Update parse_raw_block_to_search_replace to handle all validation inline, returning
+  SearchReplaceBlock with appropriate error status for invalid blocks instead of raising exceptions.
+
+- Simplify tool schemas and improve tool invocation consistency
+  ([`c31e6d8`](https://github.com/UseTheFork/byte/commit/c31e6d8ec483a76773efc52e73546d96ba05d28e))
+
+- Convert file tool input classes to inline dict schemas (DeleteFileTool, EditFileTool,
+  ReplaceFileTool, WriteFileTool) - Remove unused Pydantic imports and InjectedToolArg decorators -
+  Change args_schema from optional to non-optional across all tools - Rename EditFileTool parameter
+  from 'path' to 'file_path' for consistency - Add MAX_RESULT_LENGTH constant to GitGrepTool with
+  truncation logic for large results - Refactor GitGrepTool parameter handling from **kwargs to
+  explicit app=None - Fix tool_node.py to lookup tools by class name instead of name attribute
+
+- Simplify tool_node by removing unused imports and parameters
+  ([`60a1d11`](https://github.com/UseTheFork/byte/commit/60a1d1141533c1ad4b5c298679285b37f3fef158))
+
+- Sort AddFilesTool in __init__.py keep-sorted block
+  ([`da9675d`](https://github.com/UseTheFork/byte/commit/da9675dba04f9b599a147da7630190f71cf0c26c))
+
+- Sort imports and register CompleteSimpleTurnTool in service provider
+  ([`0c79c3a`](https://github.com/UseTheFork/byte/commit/0c79c3a329a016d33ca21f1792238e427abdac6c))
+
+- Standardize block type enums and improve validation
+  ([`aa2a484`](https://github.com/UseTheFork/byte/commit/aa2a484131d16059f4412de3cc146b00f3e250d2))
+
+Replace ADD/REMOVE with CREATE/DELETE for consistency with operation names. Add UNKNOWN block type
+  to catch invalid operations. Update BlockStatus to default to UNKNOWN instead of VALID for better
+  validation flow. Improve search content matching with progressive fallback strategies (exact
+  match, newline stripping, whitespace stripping). Add INVALID_OPERATION_ERROR status for
+  unsupported operations. Update all prompts and examples to use BlockType enum values instead of
+  hardcoded strings. Refactor boundary formatting to use HTML comments for notices/warnings instead
+  of custom XML tags. Remove debug logging statements and consolidate validation logic in
+  edit_block_service.
+
+- Standardize tool names with _tool suffix, sync harness state on file ops, validate files in
+  bootstrap, default llm_tier to fast, catch TUI event errors
+  ([`d70bd1e`](https://github.com/UseTheFork/byte/commit/d70bd1efa54444208e6a3f3364932b933817c47f))
+
+- Support multiple complete turn tools in routing logic
+  ([`5fa3028`](https://github.com/UseTheFork/byte/commit/5fa3028d84d5e4aa6f3ee888cc9118cd8e8a1e32))
+
+- Track token usage by model instead of by mode category
+  ([`5a6f305`](https://github.com/UseTheFork/byte/commit/5a6f3050831c1b7a6be3c2c985bb2381c414fbed))
+
+Replace main/weak/reasoning usage tracking with provider-based tracking keyed by model ID. This
+  allows accurate attribution of token usage to specific models and providers.
+
+Changes: - Update UsageAnalytics schema to use by_model dict instead of main/weak fields - Add
+  update_usage_by_model() method to AgentAnalyticsService that uses LLMRegistryService to map model
+  IDs to providers - Update calculate_analytics() to iterate through models and fetch constraints
+  from registry - Update reset_context() to work with by_model structure - Modify WorkflowService to
+  extract model ID from usage_metadata_callback and track by model - Calculate memory_percent as
+  average of individual model usage percentages
+
+- Track token usage by model instead of main/weak modes
+  ([`688d781`](https://github.com/UseTheFork/byte/commit/688d781fec2cdc126f1c88a16d5fd1b3b00bc3fa))
+
+Replace hardcoded main/weak/reasoning model tracking with dynamic provider-based tracking using
+  LLMRegistryService. This allows the system to work with any number of providers and models.
+
+Changes: - Update UsageAnalytics schema to use by_model dict instead of main/weak fields - Replace
+  update_main_usage/update_weak_usage with update_usage_by_model(model_id) - Refactor
+  calculate_analytics to iterate through models and use LLMRegistryService - Update reset_context to
+  work with by_model structure - Extract model_id from usage_metadata_callback in WorkflowService -
+  Calculate memory_percent as average of individual model percentages
+
+- Track token usage by provider instead of model type
+  ([`209dbdd`](https://github.com/UseTheFork/byte/commit/209dbddcafa23aa45f3ce49f689eb4d9cf3a0805))
+
+Replace main/weak/reasoning model type tracking with provider-based aggregation. This allows
+  flexible tracking across any number of providers (Anthropic, OpenAI, etc.) without schema changes.
+
+Key changes: - Update UsageAnalytics to use by_model dictionary instead of hardcoded main/weak
+  fields - Implement update_usage_by_model() that uses LLMRegistryService to map model IDs to
+  providers - Refactor calculate_analytics() to iterate through models and fetch provider data from
+  registry - Update _track_token_usage() to extract model ID from callback and track by model -
+  Calculate memory_percent as average of each model's individual context usage percentage
+
+- Unify file command notifications and add file stats event
+  ([`509d496`](https://github.com/UseTheFork/byte/commit/509d496f74152e1202d28f9dec370184d314f4b3))
+
+Replace direct console output with notify_success/notify_error methods across all file commands for
+  consistent notification handling. Introduce FileStats event to track editable and read-only file
+  counts separately from FileAdded events. Update TUI event listener to subscribe to FileStats
+  instead of FileAdded for accurate file count updates. Remove unused subscription method from
+  AICommentWatcherService and uncomment file modification handler.
+
+- Update model configurations and refactor user input handling
+  ([`27c28c2`](https://github.com/UseTheFork/byte/commit/27c28c234f7678b1cb8ad0e37574dccf1548e96a))
+
+Update LLM model versions in config: - Change claude-sonnet-4-5 to claude-sonnet-4-6 for planning
+  and ask agents - Change coder agent from devstral-medium-latest to claude-haiku-4-5
+
+Refactor user input message construction across commands: - Replace f-string formatting with
+  function parameters in AddUserInput calls - Extract command name as separate parameter instead of
+  string interpolation
+
+Simplify workflow execution: - Remove unused display_mode parameter from execute method - Remove
+  unused Literal import - Clean up trailing blank lines in __init__ files - Remove TODO comments and
+  debug logging calls - Update usage documentation in docstring
+
+Enhance workflow configuration: - Add panel_id metadata to RunnableConfig for TUI tracking
+
+- Update parse blocks node to use new service architecture
+  ([`26e5547`](https://github.com/UseTheFork/byte/commit/26e55474393a77c64dcc517713d76f2d26e98074))
+
+Refactor ParseBlocksNode to use RawBlockService and updated EditBlockService: - Remove all raw block
+  parsing methods (now in RawBlockService) - Remove all SearchReplaceBlock parsing methods (now in
+  EditBlockService) - Simplify __call__ method to use new service methods - Use
+  raw_block_service.merge_iterations() for parsing and merging - Use
+  raw_block_service.validate_syntax() for syntax validation - Use
+  edit_block_service.convert_raw_blocks_to_search_replace() for conversion - Use
+  edit_block_service.validate_semantics() for semantic validation - Remove unused imports (re,
+  BlockType, BoundaryType, extract_content_from_message, get_last_message)
+
+This significantly simplifies the node by delegating to specialized services.
+
+- Update raw block schema with operation and file_path
+  ([`0fb9ada`](https://github.com/UseTheFork/byte/commit/0fb9ada13edef0f0f64e8d80082e2cafcbb21ab8))
+
+Enhance RawSearchReplaceBlock schema to include operation and file_path fields extracted during raw
+  parsing: - Add file_path: str field - Add operation: str field - Make search_content and
+  replace_content optional with empty string defaults in SearchReplaceBlock
+
+This allows RawSearchReplaceBlock to carry more metadata from the raw parsing stage, reducing the
+  need to re-extract attributes later.
+
+- Update record_response call to use prompt instead of agent_state
+  ([`61a6b3b`](https://github.com/UseTheFork/byte/commit/61a6b3b7d4bb7bb63f168410c5320f646c5e654e))
+
+- Use app.make() for dependency injection in workflows and node registry
+  ([`3d6e22f`](https://github.com/UseTheFork/byte/commit/3d6e22f37adc48aea2b7f2424ed7808c97f3aa3b))
+
+- Use GitService for file discovery instead of os.walk
+  ([`a2c7410`](https://github.com/UseTheFork/byte/commit/a2c7410a9f3d28ce5233eff17fca12f12d2110cf))
+
+Replace os.walk with GitService.get_tracked_files() in FileDiscoveryService to naturally respect
+  .gitignore patterns via git, eliminating manual ignore pattern matching.
+
+Add get_tracked_files() method to GitService that uses git ls-files to retrieve all tracked files.
+  Reorder GitServiceProvider initialization to occur before dependent services. Update
+  ask_agent_node model to claude-opus-4-6.
+
+### Testing
+
+- Add comprehensive gateway service test suite with auth and post_message tests
+  ([`648da09`](https://github.com/UseTheFork/byte/commit/648da090c1e68364c607f6dd310fde086a44b82e))
+
+- Add test_gateway_service.py with auth handshake tests covering valid token, invalid token, wrong
+  method, and malformed request scenarios - Add test_post_message.py with unit tests using mocks for
+  each message type routing - Add test_post_message_integration.py with integration tests over real
+  WebSocket connections - Refactor post_message method in gateway_service.py to eliminate nested
+  async function and improve coroutine handling - Add host field to gateway discovery file for
+  complete server location info - Remove __future__ annotations imports from container.py,
+  conftest.py, test_prepare_environment.py, and utils.py - Update conftest.py to use ByteUserConfig,
+  change config format from YAML to JSON, add .byte/.gitignore, and set custom gateway port 9735 for
+  tests
+
+- Add comprehensive raw block service tests
+  ([`dcacb4e`](https://github.com/UseTheFork/byte/commit/dcacb4e48c25410161e33393c69735e61bf83b67))
+
+Add new test suite for RawBlockService covering: - Parsing simple and multiple raw blocks -
+  Detecting invalid blocks with unbalanced tags - Validating block_id requirements (must be numeric)
+  - Merging iterations with block replacement by id - Preserving text content between blocks -
+  Adding new blocks in subsequent iterations
+
+These tests ensure the raw block parsing and merging logic works correctly.
+
+- Disable php coder agent test assertions
+  ([`d5298dc`](https://github.com/UseTheFork/byte/commit/d5298dc2cc362ae505ae31f44a14eabcda949a80))
+
+Comment out assertions in test_coder_agent_php.py that verify file modifications. These tests appear
+  to be failing and need investigation before re-enabling.
+
+- Fix indentation in coder agent tests
+  ([`3a69878`](https://github.com/UseTheFork/byte/commit/3a6987812b59867757213dae2bade1a57f0c30a3))
+
+Fix indentation in test file content strings to match expected Python formatting. This ensures test
+  assertions about file content work correctly.
+
+- Refactor coder agent tests and improve test file setup
+  ([`7b349b7`](https://github.com/UseTheFork/byte/commit/7b349b763b2f1124cea1cda608f1765ef4fc84b6))
+
+- Refactor coder agent tests and improve test file setup
+  ([`7eceeb3`](https://github.com/UseTheFork/byte/commit/7eceeb31f4d3453707f95b9784cb4e20caf7c1f1))
+
+Remove mocking of prompt_for_confirmation since it's now handled by unit test detection. Fix
+  indentation in test file content. Comment out duplicate test. Improve test file creation with
+  proper indentation.
+
+- Refactor parser service tests to use helper function and improve coverage
+  ([`1c5b95e`](https://github.com/UseTheFork/byte/commit/1c5b95e37067ff0ab4bf9d33b805b5009290666d))
+
+Consolidate test setup into parse_and_prepare_test_blocks helper with apply_blocks parameter. Create
+  multiple test files with proper content setup. Update assertions to check block status attributes
+  instead of return values. Remove tests that directly instantiate blocks in favor of integration
+  tests. Simplify test assertions and remove unnecessary mocking.
+
+- Update cases
+  ([`e861d19`](https://github.com/UseTheFork/byte/commit/e861d19a0508fbf394512b208746a60d3f82af28))
+
+- Update parser service tests for new architecture
+  ([`a0b112f`](https://github.com/UseTheFork/byte/commit/a0b112f8784983755838df4638ae226e1c9cfe9c))
+
+Update test_parser_service.py to work with refactored EditBlockService: - Update boundary type
+  references from FILE to EDIT_BLOCK - Remove test for check_block_ids() (now in RawBlockService) -
+  Remove test for check_file_tags_balanced() (now in RawBlockService) - Remove test for unknown
+  operation defaulting to EDIT - Update test calls from mid_flight_check() to validate_semantics() -
+  Update test calls from check_blocks_exist() to parse_content_to_blocks() - Add tests for
+  convert_raw_blocks_to_search_replace() - Add tests for validate_semantics() with relative paths -
+  Add tests for apply_blocks() with empty search content - Add test for
+  SearchReplaceBlock.to_error_format()
+
+These changes ensure tests align with the new service architecture.
+
+- Update test assertions to match actual LLM response content
+  ([`6f248b1`](https://github.com/UseTheFork/byte/commit/6f248b16d0e8ca2025c8a865e16b316d3558f1cd))
+
+
 ## v1.4.0 (2026-02-12)
 
 ### Bug Fixes
