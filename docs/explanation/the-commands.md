@@ -66,5 +66,6 @@ The command registry maintains a central dispatch table. When you type a command
 
 ## Available Commands
 
-The complete list of available commands and their detailed usage is documented on the [Available Commands](available-commands.md) subpage. Commands are organized by category for quick lookup.
+The reference below is generated directly from the command registry via `src/scripts/commands_to_md.py` — it always reflects exactly what's registered in Byte. Nothing here is manually maintained; the source code is the authority.
 
+{% include "references/commands.md" %}

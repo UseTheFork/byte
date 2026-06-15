@@ -2,19 +2,19 @@
 
 **Category**: Explanation
 
-Byte's gateway is a WebSocket JSON-RPC 2.0 bridge that exposes an authenticated RPC interface for external clients. Editors, IDE plugins, and custom tooling connect to the gateway and invoke methods on Byte remotely—adding files to context, configuring models, receiving streaming responses in real time. The gateway handles everything: auth, session lifecycle, request dispatch, and pushing notifications back to clients.
+Byte's gateway is a WebSocket JSON-RPC 2.0 server that exposes an authenticated RPC interface for external clients. Editors, IDE plugins, and custom tooling connect to the gateway and invoke Byte remotely—adding files to context, configuring models, receiving streaming responses in real time. The gateway owns the full connection lifecycle: auth handshake, session management, request dispatch, and asynchronous notifications back to the client.
 
 ## What Is the Gateway?
 
-The gateway is not a REST API or a CLI wrapper. It's a persistent, stateful WebSocket server that maintains a single authenticated session per client connection. When a client connects, it must authenticate with a token. Once authenticated, it can issue RPC requests and receive streaming notifications.
+The gateway is not a REST API or a CLI wrapper. It's a persistent, stateful WebSocket server that maintains a single authenticated session per client connection. Connect, authenticate, then issue RPC requests and receive streaming notifications for as long as the session is alive.
 
-The design is deliberate: a single session per connection means client-side state stays in sync with Byte's internal state. There's no polling, no request batching ambiguity, no stateless HTTP headaches. Messages flow bidirectionally in real time.
+The design is deliberate: one session per connection keeps client-side state in sync with Byte's internal state. No polling, no request batching ambiguity, no stateless HTTP overhead. Messages flow bidirectionally in real time.
 
 ## How It Works
 
 ### Auth Handshake
 
-The first message on any new WebSocket connection **must** be an `auth` request with a token parameter:
+The first message on any new WebSocket connection **must** be an `auth` request with a valid token:
 
 ```json
 {
@@ -25,27 +25,25 @@ The first message on any new WebSocket connection **must** be an `auth` request 
 }
 ```
 
-The token is generated when the gateway server starts and written to disk at `.byte/cache/gateway.token` with permissions `0o600` (readable only by the user). External clients read this file to authenticate. If the token is invalid, the connection closes. If it's valid, the server responds with an OK and the session begins.
-
-This token-based handshake is simple and secure enough for local development workflows. For distributed scenarios, you'd implement a different auth mechanism.
+The token is generated when the gateway starts and written to `.byte/cache/gateway.token` with `0o600` permissions—readable only by the user running Byte. External clients read that file to authenticate. An invalid token closes the connection immediately. A valid token opens the session.
 
 ### Session Lifecycle
 
-Once authenticated, a `SessionService` instance is created for that connection. The session processes inbound RPC requests, routes them to handlers, and sends back `RpcResponse` objects (success or error). It also receives application events from other parts of Byte and pushes `RpcNotification` objects to the client asynchronously.
+Once authenticated, a session is created for the connection. It processes inbound RPC requests, routes them to handlers, and returns `RpcResponse` objects (success or error). It also receives events from other parts of Byte and pushes `RpcNotification` objects to the client asynchronously.
 
-The session runs until the client disconnects or an error occurs. One session per connection; state is tied to that session.
+The session lives until the client disconnects or an error occurs. State is tied to the connection—one session, one client, one coherent view of Byte's state.
 
 ### Streaming Notifications
 
-Responses are synchronous — each RPC request gets a single `RpcResponse` back. But notifications are asynchronous and flow only from server to client. When Byte has updates to push (e.g., chunks of a streamed response, a tool execution result, status changes), it sends `RpcNotification` objects to the client. Your client receives these interleaved with response completions, enabling real-time bidirectional communication. See [The Protocol](#the-protocol) section below for the notification format.
+RPC requests get a single `RpcResponse` back—synchronous, one-to-one. Notifications are different: they flow asynchronously from server to client only. When Byte has updates to push—streamed response chunks, tool execution results, status changes—it sends `RpcNotification` objects without waiting for a request. Your client receives these interleaved with response completions, enabling real-time updates throughout the session.
 
 ## The Protocol
 
-The gateway speaks JSON-RPC 2.0. All messages are JSON objects with a `jsonrpc` field set to `"2.0"`.
+The gateway speaks JSON-RPC 2.0. Every message is a JSON object with `"jsonrpc": "2.0"`.
 
 ### RpcRequest
 
-Inbound requests from the client. Required fields: `jsonrpc`, `id`, `method`. Optional field: `params`.
+Inbound requests from the client. Required fields: `jsonrpc`, `id`, `method`. Optional: `params`.
 
 ```json
 {
@@ -58,7 +56,7 @@ Inbound requests from the client. Required fields: `jsonrpc`, `id`, `method`. Op
 
 ### RpcResponse
 
-The final result (success or error) for a request id. Contains either `result` (success) or `error` (failure), never both.
+The final result for a request. Contains either `result` (success) or `error` (failure)—never both.
 
 ```json
 {
@@ -70,7 +68,7 @@ The final result (success or error) for a request id. Contains either `result` (
 
 ### RpcNotification
 
-Outbound streaming events with no request id. Sent asynchronously.
+Outbound streaming events with no request id. Sent asynchronously by the server.
 
 ```json
 {
@@ -92,7 +90,37 @@ Embedded in error responses. Contains `code` (integer), `message` (string), and 
 }
 ```
 
-Standard JSON-RPC error codes are used: `-32700` (Parse Error), `-32600` (Invalid Request), `-32601` (Method Not Found), and custom codes like `-32000` (Unauthorized) and `-32001` (Internal Error).
+Standard JSON-RPC error codes apply: `-32700` (Parse Error), `-32600` (Invalid Request), `-32601` (Method Not Found). Custom codes: `-32000` (Unauthorized), `-32001` (Internal Error).
+
+## Connection Flow
+
+```mermaid
+graph TD
+    Client["🖥️ External Client<br/>(editor, plugin, tooling)"]
+    Connect["WebSocket Connect"]
+    Auth["auth request<br/>{ token: '...' }"]
+    Validate["Token Validation"]
+    Reject["Connection Closed<br/>(invalid token)"]
+    Session["Session Created<br/>(authenticated)"]
+    RPC["RPC Request<br/>method + params"]
+    Handler["Request Handler<br/>(dispatch to Byte)"]
+    Response["RpcResponse<br/>(result or error)"]
+    Notify["RpcNotification<br/>(async push to client)"]
+    Disconnect["Client Disconnects<br/>Session Ends"]
+
+    Client -->|opens connection| Connect
+    Connect --> Auth
+    Auth --> Validate
+    Validate -->|invalid| Reject
+    Validate -->|valid| Session
+    Session -->|send request| RPC
+    RPC --> Handler
+    Handler -->|returns| Response
+    Response --> Session
+    Session -->|push updates| Notify
+    Notify --> Client
+    Session -->|on disconnect| Disconnect
+```
 
 ## Configuration
 
@@ -110,18 +138,30 @@ Enable and configure the gateway in `.byte/config.jsonc`:
 
 - `enable` — Whether the gateway server starts at boot. Defaults to `false`.
 - `host` — The hostname to bind to. Defaults to `"127.0.0.1"` (localhost only).
-- `port` — The port to bind to. Defaults to `0` (let the OS choose an available port). If you set a fixed port, you must manage port conflicts yourself.
+- `port` — The port to bind to. Defaults to `0` (OS assigns an available port). Set a fixed port if your client needs a stable address—you own managing port conflicts.
 
-When the gateway starts, it writes a discovery file to `.byte/cache/gateway.json` containing the actual host, port, and token file path. External clients read this file to know where to connect.
+When the gateway starts, it writes a discovery file to `.byte/cache/gateway.json` with the actual host, port, and token file path. External clients read this file to locate the server.
 
 ## Security
 
-**Token-based authentication** is the first line of defense. The token is generated using `secrets.token_urlsafe(32)` (cryptographically strong) and written to disk with `0o600` permissions (readable only by the user). External clients must read this file to authenticate.
+The gateway is built for local development and scoped accordingly.
 
-**Discovery file** (`.byte/cache/gateway.json`) tells clients where the server is running and where to find the token file. It's written every time the server starts.
+**Token authentication** is the primary control. The token is generated with `secrets.token_urlsafe(32)`—cryptographically strong—and written to disk with `0o600` permissions. Only the user who started Byte can read it.
 
-**Localhost by default** — The gateway binds to `127.0.0.1` by default, rejecting remote connections. If you expose the gateway to a network, the token becomes your only protection. For distributed development, you'd layer additional auth (mutual TLS, API keys, OAuth) on top.
+**Discovery file** (`.byte/cache/gateway.json`) tells clients where the server is running and where to find the token. It's regenerated on every startup.
+
+**Localhost by default.** The gateway binds to `127.0.0.1`, rejecting all remote connections. Built for developers who want a secure local interface without network exposure. If you expose the gateway to a network, the token becomes your only protection—layer additional auth (mutual TLS, API keys, OAuth) on top for distributed scenarios.
 
 ## Available Requests
 
-The gateway exposes a set of RPC methods that external clients can invoke. Each method is defined as a dataclass on the `Requests` namespace in `src/byte/gateway/requests.py`. The full list and detailed documentation is available on the [Gateway Requests](gateway-requests.md) subpage.
+{% include "references/gateway-requests.md" %}
+
+## Key Takeaways
+
+1. **The gateway is a persistent WebSocket server** — not a REST API; the connection stays open for the lifetime of the session
+2. **Authentication is mandatory** — every connection must send an `auth` request as its first message; invalid tokens are rejected immediately
+3. **One session per connection** — state is tied to the connection, keeping client and server in sync without polling
+4. **Requests are synchronous, notifications are async** — RPC requests get a single response; notifications flow from server to client whenever Byte has updates to push
+5. **JSON-RPC 2.0 is the protocol** — standard error codes, structured messages, and bidirectional communication
+6. **Localhost by default** — the gateway binds to `127.0.0.1`; exposing it to a network requires you to add additional auth on top
+7. **Discovery is file-based** — `.byte/cache/gateway.json` tells clients where to connect; `.byte/cache/gateway.token` holds the auth token

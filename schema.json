@@ -1,104 +1,36 @@
 {
   "$defs": {
-    "BootConfig": {
+    "DocumentationConfig": {
+      "description": "Configure documentation framework, features, and writing style.",
       "properties": {
-        "read_only_files": {
-          "description": "Files to add to read-only context",
-          "items": {
-            "type": "string"
-          },
-          "title": "Read Only Files",
-          "type": "array"
+        "enable_mermaid": {
+          "default": true,
+          "description": "Use Mermaid for diagrams and charts",
+          "title": "Enable Mermaid",
+          "type": "boolean"
         },
-        "editable_files": {
-          "description": "Files to add to editable context",
-          "items": {
-            "type": "string"
-          },
-          "title": "Editable Files",
-          "type": "array"
-        }
-      },
-      "title": "BootConfig",
-      "type": "object"
-    },
-    "ContainerServerConfig": {
-      "description": "Configuration for a containerized LSP server.",
-      "properties": {
-        "type": {
-          "const": "container",
-          "default": "container",
-          "title": "Type",
+        "framework": {
+          "default": "mkdocs",
+          "description": "Documentation framework (e.g. mkdocs, vitepress, docusaurus, sphinx)",
+          "title": "Framework",
           "type": "string"
         },
-        "image": {
-          "description": "Docker image name (e.g., 'ghcr.io/lsp-client/pyright:latest')",
-          "title": "Image",
-          "type": "string"
-        },
-        "workspace_mount": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Custom workspace mount path in container",
-          "title": "Workspace Mount"
-        }
-      },
-      "required": [
-        "image"
-      ],
-      "title": "ContainerServerConfig",
-      "type": "object"
-    },
-    "CustomServerConfig": {
-      "description": "Configuration for a custom LSP server.",
-      "properties": {
-        "server": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/LocalServerConfig"
-            },
-            {
-              "$ref": "#/$defs/ContainerServerConfig"
-            }
-          ],
-          "description": "Server configuration (local or container)",
-          "title": "Server"
-        },
-        "languages": {
-          "description": "List of language names this server handles",
+        "extra_guidelines": {
+          "description": "Additional documentation guidelines",
           "items": {
             "type": "string"
           },
-          "title": "Languages",
+          "title": "Extra Guidelines",
           "type": "array"
         },
-        "initialization_options": {
-          "anyOf": [
-            {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Initialization options to pass to the LSP server",
-          "title": "Initialization Options"
+        "style": {
+          "default": "diataxis",
+          "description": "Documentation writing style (e.g. diataxis, google, microsoft, minimal)",
+          "title": "Style",
+          "type": "string"
         }
       },
-      "required": [
-        "server",
-        "languages"
-      ],
-      "title": "CustomServerConfig",
+      "title": "DocumentationConfig",
       "type": "object"
     },
     "FilesConfig": {
@@ -111,7 +43,7 @@
         },
         "ignore": {
           "default": [
-            ".byte/cache",
+            ".byte",
             ".ruff_cache",
             ".idea",
             ".venv",
@@ -131,6 +63,31 @@
         }
       },
       "title": "FilesConfig",
+      "type": "object"
+    },
+    "GatewayConfig": {
+      "description": "Gateway domain configuration.",
+      "properties": {
+        "enable": {
+          "default": false,
+          "description": "Whether the gateway server starts at boot",
+          "title": "Enable",
+          "type": "boolean"
+        },
+        "host": {
+          "default": "127.0.0.1",
+          "description": "Hostname to bind the gateway server to",
+          "title": "Host",
+          "type": "string"
+        },
+        "port": {
+          "default": 0,
+          "description": "Port to bind the gateway server to (0 lets the OS choose an available port)",
+          "title": "Port",
+          "type": "integer"
+        }
+      },
+      "title": "GatewayConfig",
       "type": "object"
     },
     "GitConfig": {
@@ -240,40 +197,6 @@
       "title": "LLMModelConfig",
       "type": "object"
     },
-    "LSPConfig": {
-      "description": "LSP domain configuration with validation and defaults.",
-      "properties": {
-        "enable": {
-          "default": false,
-          "description": "Enable or disable LSP functionality",
-          "title": "Enable",
-          "type": "boolean"
-        },
-        "timeout": {
-          "default": 30,
-          "description": "Timeout in seconds for LSP requests",
-          "title": "Timeout",
-          "type": "integer"
-        },
-        "servers": {
-          "additionalProperties": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/PresetServerConfig"
-              },
-              {
-                "$ref": "#/$defs/CustomServerConfig"
-              }
-            ]
-          },
-          "description": "Map of server names to their configurations",
-          "title": "Servers",
-          "type": "object"
-        }
-      },
-      "title": "LSPConfig",
-      "type": "object"
-    },
     "LintCommand": {
       "properties": {
         "command": {
@@ -320,84 +243,6 @@
         }
       },
       "title": "LintConfig",
-      "type": "object"
-    },
-    "LocalServerConfig": {
-      "description": "Configuration for a local LSP server.",
-      "properties": {
-        "type": {
-          "const": "local",
-          "default": "local",
-          "title": "Type",
-          "type": "string"
-        },
-        "program": {
-          "description": "Program name or path to execute",
-          "title": "Program",
-          "type": "string"
-        },
-        "args": {
-          "description": "Command line arguments",
-          "items": {
-            "type": "string"
-          },
-          "title": "Args",
-          "type": "array"
-        }
-      },
-      "required": [
-        "program"
-      ],
-      "title": "LocalServerConfig",
-      "type": "object"
-    },
-    "PresetServerConfig": {
-      "description": "Configuration using a prebuilt client from lsp-client.",
-      "properties": {
-        "preset": {
-          "description": "Name of the prebuilt LSP client",
-          "enum": [
-            "pyright",
-            "basedpyright",
-            "pyrefly",
-            "ty",
-            "rust_analyzer",
-            "deno",
-            "typescript",
-            "gopls"
-          ],
-          "title": "Preset",
-          "type": "string"
-        },
-        "server_type": {
-          "default": "container",
-          "description": "Whether to use local or container server (if both available)",
-          "enum": [
-            "local",
-            "container"
-          ],
-          "title": "Server Type",
-          "type": "string"
-        },
-        "initialization_options": {
-          "anyOf": [
-            {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Custom initialization options to override defaults",
-          "title": "Initialization Options"
-        }
-      },
-      "required": [
-        "preset"
-      ],
-      "title": "PresetServerConfig",
       "type": "object"
     },
     "PresetsConfig": {
@@ -503,27 +348,59 @@
       },
       "title": "WatchConfig",
       "type": "object"
+    },
+    "WebConfig": {
+      "description": "Configuration for web browser automation and scraping.\n\nDefines settings for headless Chrome browser operations including\nbinary location and browser behavior customization.",
+      "properties": {
+        "enable": {
+          "default": false,
+          "description": "Enable web commands",
+          "title": "Enable",
+          "type": "boolean"
+        },
+        "chrome_binary_location": {
+          "anyOf": [
+            {
+              "format": "path",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to Chrome/Chromium binary executable for headless browser automation",
+          "title": "Chrome Binary Location"
+        }
+      },
+      "title": "WebConfig",
+      "type": "object"
     }
   },
   "properties": {
-    "boot": {
-      "$ref": "#/$defs/BootConfig"
+    "documentation": {
+      "$ref": "#/$defs/DocumentationConfig",
+      "description": "Documentation framework, features, and writing style configuration"
     },
     "files": {
-      "$ref": "#/$defs/FilesConfig"
+      "$ref": "#/$defs/FilesConfig",
+      "description": "File discovery, watching, and ignore pattern configuration"
+    },
+    "gateway": {
+      "$ref": "#/$defs/GatewayConfig",
+      "description": "WebSocket JSON-RPC 2.0 gateway server configuration"
     },
     "git": {
-      "$ref": "#/$defs/GitConfig"
+      "$ref": "#/$defs/GitConfig",
+      "description": "Git operations and conventional commit behavior configuration"
     },
     "lint": {
       "$ref": "#/$defs/LintConfig",
       "description": "Code linting and formatting configuration"
     },
     "llm": {
-      "$ref": "#/$defs/LLMConfig"
-    },
-    "lsp": {
-      "$ref": "#/$defs/LSPConfig"
+      "$ref": "#/$defs/LLMConfig",
+      "description": "LLM provider and model assignment configuration"
     },
     "presets": {
       "anyOf": [
@@ -537,10 +414,16 @@
           "type": "null"
         }
       ],
+      "description": "Predefined context and prompt presets",
       "title": "Presets"
     },
     "tui": {
-      "$ref": "#/$defs/TUIConfig"
+      "$ref": "#/$defs/TUIConfig",
+      "description": "Terminal UI theme and syntax highlighting configuration"
+    },
+    "web": {
+      "$ref": "#/$defs/WebConfig",
+      "description": "Web browser automation and scraping configuration"
     }
   },
   "title": "ByteUserConfig",

@@ -1,4 +1,4 @@
-"""Generate commands.md documentation from registered commands.
+"""Generate available-commands.md documentation from registered commands.
 
 This script bootstraps the application to access the CommandRegistry,
 extracts command metadata, and generates formatted markdown documentation.
@@ -6,15 +6,13 @@ extracts command metadata, and generates formatted markdown documentation.
 Usage: `uv run python src/scripts/commands_to_md.py`
 """
 
+import argparse
 import asyncio
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
 
-# from byte.domain.cli.service.command_registry import Command, CommandRegistry
-from byte import Application, Command
-from byte.cli import CommandRegistry
-from byte.foundation import Kernel
+from byte import Command, CommandRegistryService
 from byte.main import PROVIDERS
 
 
@@ -39,43 +37,113 @@ def group_commands_by_category(commands: Dict[str, Command]) -> Dict[str, List[t
     return dict(by_category)
 
 
+def extract_parameters(command: Command) -> List[str]:
+    """Extract parameter documentation from command's parser.
+
+    Returns a list of formatted parameter lines suitable for markdown.
+    Identifies argument name, type hints, and required/optional status.
+
+    Usage: `extract_parameters(command)` -> ["- `query` (string, required) — The search query"]
+    """
+    parser = command.parser
+    params = []
+
+    # Filter out help action and other built-in actions
+    for action in parser._actions:
+        if action.dest == "help":
+            continue
+
+        param_name = action.dest
+        help_text = action.help or ""
+
+        # Determine if required
+        is_required = action.required if hasattr(action, "required") else action.nargs != "?"
+        required_str = "required" if is_required else "optional"
+
+        # Determine type
+        if action.type:
+            type_str = action.type.__name__
+        else:
+            type_str = "string"
+
+        # Handle nargs
+        nargs_info = ""
+        if action.nargs == argparse.REMAINDER:
+            nargs_info = " (takes all remaining arguments)"
+            required_str = "required"
+        elif action.nargs == "?":
+            required_str = "optional"
+        elif action.nargs == "*":
+            required_str = "optional"
+
+        params.append(f"- `{param_name}` ({type_str}, {required_str}) — {help_text}{nargs_info}")
+
+    return params or ["None"]
+
+
+def generate_usage_example(name: str, command: Command) -> str:
+    """Generate example usage line for a command.
+
+    Usage: `generate_usage_example("add", command)` -> "/add src/main.py"
+    """
+    # Check if command has any arguments
+    has_args = False
+    for action in command.parser._actions:
+        if action.dest != "help":
+            has_args = True
+            break
+
+    if not has_args:
+        return f"`/{name}`"
+
+    # Build a simple example based on parser structure
+    # For now, return generic pattern
+    return f"`/{name}` or `/{name} <args>`"
+
+
 def create_commands_markdown(slash_commands: Dict[str, Command]) -> str:
     """Generate markdown documentation for all registered commands.
 
     Creates a structured document with commands grouped by category,
-    showing command syntax and descriptions using ArgumentParser help output.
+    showing command syntax, parameters, and usage examples in rich format.
 
     Usage: `create_commands_markdown(registry._slash_commands)` -> markdown string
     """
-    lines = [
-        "# Commands\n",
-        "Byte provides a comprehensive set of commands for interacting with your codebase, managing context, and controlling the AI assistant. Commands are organized by category for easy reference.\n",
-        "---\n",
-        "",
-    ]
-
-    # Add hardcoded subprocess command
-    lines.append("## System\n")
-    lines.append("`!<command>` - Execute a shell command and optionally add output to conversation context\n")
-    lines.append("")
+    lines = []
 
     # Group commands by category
     by_category = group_commands_by_category(slash_commands)
 
     # Generate sections for each category
     for category in sorted(by_category.keys()):
-        lines.append(f"## {category}\n")
+        lines.append(f"## {category} Commands")
+        lines.append("")
 
         for name, command in by_category[category]:
-            # Get the parser's formatted help text
             parser = command.parser
-            help_text = parser.format_help()
+            description = parser.description or "No description available"
 
-            # Add command section with help output in code block
-            lines.append(f"### `/{name}`\n")
-            lines.append("```")
-            lines.append(help_text)
-            lines.append("```\n")
+            # Add command heading and description
+            lines.append(f"### /{name}")
+            lines.append("")
+            lines.append(description)
+            lines.append("")
+
+            # Method name
+            lines.append(f"**Method name**: `{name}`")
+            lines.append("")
+
+            # Parameters section
+            lines.append("**Parameters**:")
+            lines.append("")
+            params = extract_parameters(command)
+            for param in params:
+                lines.append(param)
+            lines.append("")
+
+            # Usage section
+            lines.append("**Usage**: " + generate_usage_example(name, command))
+            lines.append("")
 
         lines.append("")
 
@@ -83,15 +151,12 @@ def create_commands_markdown(slash_commands: Dict[str, Command]) -> str:
 
 
 async def generate_commands_md() -> None:
-    """Generate commands.md from registered commands.
+    """Generate available-commands.md from registered commands."""
 
-    Bootstraps the application, extracts command information from the registry,
-    and writes formatted markdown to docs/reference/commands.md.
+    from byte import Application
+    from byte.foundation import Kernel
 
-    Usage: `await generate_commands_md()`
-    """
-
-    app = Application.configure(Path(__file__).parent, PROVIDERS).create()
+    app = Application.configure(Path(__file__).parent, PROVIDERS).create()  # ty:ignore[invalid-argument-type]
 
     kernel = app.make(Kernel, app=app)
     kernel.bootstrap()
@@ -99,12 +164,12 @@ async def generate_commands_md() -> None:
     # Now we can Async boot all the providers
     await kernel.app.boot()
 
-    registry = app.make(CommandRegistry)
+    registry = app.make(CommandRegistryService)
 
     markdown = create_commands_markdown(registry._slash_commands)
 
-    # Write to docs/reference/commands.md
-    output_file = Path(__file__).parent.parent.parent / "docs" / "reference" / "commands.md"
+    # Write to docs/explanation/commands.md
+    output_file = Path(__file__).parent.parent.parent / "docs" / "references" / "commands.md"
     output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_text(markdown, encoding="utf-8")
 

@@ -70,18 +70,16 @@ nav:
     - Manage the Constitution: how-to-guides/managing-the-constitution.md
   - Explanation:
     - Architecture Overview: explanation/architecture-overview.md
+    - Configuration: explanation/configuration.md
     - The Constitution: explanation/the-constitution.md
-    - The Gateway:
-      - explanation/the-gateway.md
-      - Gateway Requests: explanation/gateway-requests.md
-    - The Commands:
-      - explanation/the-commands.md
-      - Available Commands: explanation/available-commands.md
+    - The Gateway: explanation/the-gateway.md
+    - The Commands: explanation/the-commands.md
 
 
 plugins:
 - search
 - mkdocstrings
+- include-markdown
 
 validation:
   omitted_files: warn
