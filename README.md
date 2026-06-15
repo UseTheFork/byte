@@ -5,7 +5,7 @@
     <a href="https://github.com/UseTheFork/byte/releases"><img src="https://img.shields.io/github/release/UseTheFork/byte" alt="Latest Release"></a>
 </p>
 
-<p align="center">A CLI coding agent built for efficiency, not autonomy.</p>
+<p align="center">(⁠   ^⁠‿⁠^⁠) .｡oO  ( A CLI coding agent built for efficiency, not autonomy. )</p>
 
 <p align="center"><img width="800" alt="Byte Demo" src="https://raw.githubusercontent.com/usethefork/byte/main/docs/images/recording/example_coder.gif" /></p>
 

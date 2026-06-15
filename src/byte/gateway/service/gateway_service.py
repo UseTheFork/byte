@@ -138,16 +138,18 @@ class GatewayService(Service):
         match event:
             case Messages.Response():
                 coroutine = self._session.notify(
-                    "stream/response", {"content": str(event.chunk), "done": event.status is Status.SUCCESS}
+                    "messages/response", {"content": str(event.chunk), "done": event.status is Status.SUCCESS}
                 )
-            case Messages.ToolResponse():
-                coroutine = self._session.notify(
-                    "stream/tool", {"tool": str(event.tool_name), "content": str(event.chunk)}
-                )
+            case Messages.UpdateFiles():
+                coroutine = self._session.notify("messages/update_files", {"count": event.count})
+            case Messages.UpdateContext():
+                coroutine = self._session.notify("messages/update_context", {"context_count": event.context_count})
+            case Messages.CommandExecutionStarted():
+                coroutine = self._session.notify("messages/command_execution_started", {})
             case Messages.CommandExecutionCompleted():
-                coroutine = self._session.notify("stream/done", {})
+                coroutine = self._session.notify("messages/command_execution_completed", {})
             case Messages.Status() if event.state == "error":
-                coroutine = self._session.notify("stream/error", {"message": event.message or ""})
+                coroutine = self._session.notify("messages/status", {"message": event.message or ""})
             case _:
                 return
 
