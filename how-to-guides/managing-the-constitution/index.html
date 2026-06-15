@@ -1,0 +1,1555 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A CLI coding agent built for efficiency, not autonomy.">
+      
+      
+        <meta name="author" content="UseTheFork">
+      
+      
+        <link rel="canonical" href="https://usethefork.github.io/byte/how-to-guides/managing-the-constitution/">
+      
+      
+        <link rel="prev" href="../managing-web-context/">
+      
+      
+        <link rel="next" href="../../explanation/architecture-overview/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../images/assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Manage the Constitution - Byte</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#manage-your-constitution" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Byte" class="md-header__button md-logo" aria-label="Byte" data-md-component="logo">
+      
+  <img src="../../images/assets/logo-square.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Byte
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Manage the Constitution
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/UseTheFork/byte" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    byte
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Byte" class="md-nav__button md-logo" aria-label="Byte" data-md-component="logo">
+      
+  <img src="../../images/assets/logo-square.svg" alt="logo">
+
+    </a>
+    Byte
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/UseTheFork/byte" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    byte
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-to Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-to Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adding-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuring-linting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configure Linting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configure-providers-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configure Providers / Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../creating-and-managing-skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create & Manage Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../creating-and-managing-specs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create & Manage Specs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../using-git-commits/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create AI-Powered Git Commits
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../managing-file-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manage File Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../managing-web-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manage Web Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manage the Constitution
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manage the Constitution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-initialize-your-constitution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Initialize Your Constitution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-review-what-gets-created" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Review What Gets Created
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-modify-your-constitution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Modify Your Constitution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Modify Your Constitution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-modification-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Modification Tasks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-scope-sections-to-file-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Scope Sections to File Patterns
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-understand-semantic-versioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Understand Semantic Versioning
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-verify-your-constitution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Verify Your Constitution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-build-a-constitution-from-scratch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Build a Constitution from Scratch
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Explanation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Explanation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/architecture-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/the-constitution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Constitution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/the-gateway/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Gateway
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/the-commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-initialize-your-constitution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Initialize Your Constitution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-review-what-gets-created" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Review What Gets Created
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-modify-your-constitution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Modify Your Constitution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Modify Your Constitution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-modification-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Modification Tasks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-scope-sections-to-file-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Scope Sections to File Patterns
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-understand-semantic-versioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Understand Semantic Versioning
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-verify-your-constitution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Verify Your Constitution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-build-a-constitution-from-scratch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Build a Constitution from Scratch
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../adding-files/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    How-to Guides
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="manage-your-constitution"><a class="toclink" href="#manage-your-constitution">Manage Your Constitution</a></h1>
+<p><strong>Category</strong>: How-to Guide</p>
+<p>This guide walks you through initializing, modifying, and maintaining your project constitution using Byte's built-in commands. You'll learn how to set up your constitution, make changes with natural language requests, and scope rules to specific files.</p>
+<h2 id="prerequisites"><a class="toclink" href="#prerequisites">Prerequisites</a></h2>
+<ul>
+<li>Byte installed on your system</li>
+<li>A project with a git repository (required for initialization)</li>
+<li>Basic understanding of YAML and markdown</li>
+</ul>
+<h2 id="step-1-initialize-your-constitution"><a class="toclink" href="#step-1-initialize-your-constitution">Step 1: Initialize Your Constitution</a></h2>
+<p>The first step is to create your project constitution. Run the initialization command:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>/init
+</code></pre></div>
+<p>The Initialization Workflow walks you through an interactive questionnaire about your project's values and standards:</p>
+<p><strong>Foundational Principles</strong> — You'll be asked whether to enable:
+- <strong>DDD</strong> (Domain Driven Design) — Organize business logic into bounded-context domains
+- <strong>DRY</strong> (Don't Repeat Yourself) — Eliminate code duplication
+- <strong>TDD</strong> (Test Driven Development) — Write tests before implementation
+- <strong>YAGNI</strong> (You Aren't Gonna Need It) — Build only for current requirements, not speculation
+- <strong>TDA</strong> (Tell, Don't Ask) — Objects expose behavior, not state
+- <strong>Strict Typing</strong> — Explicit type annotations on all functions and variables</p>
+<p><strong>Framework &amp; Tooling</strong> — You'll specify which frameworks and linting tools your project uses.</p>
+<p><strong>Additional Input</strong> — You can add custom comments or clarifications.</p>
+<p>Answer the prompts honestly. You can change these answers later using the <code>/constitution</code> command.</p>
+<h2 id="step-2-review-what-gets-created"><a class="toclink" href="#step-2-review-what-gets-created">Step 2: Review What Gets Created</a></h2>
+<p>After initialization completes, your constitution is saved at <code>.byte/constitution/</code> as a directory of markdown files with YAML frontmatter:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>.byte/constitution/
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>├── constitution.md              # Metadata: version, ratified, last_amended
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>├── principles/
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>│   ├── ddd.md                   # Domain Driven Design principle
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>│   ├── dry.md                   # Don&#39;t Repeat Yourself principle
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│   ├── tdd.md                   # TDD principle
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>│   └── ... (one per enabled principle)
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>├── governance/
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>│   ├── supremacy.md             # Constitution supersedes other practices
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>│   └── versioning-policy.md     # How to version the constitution
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>└── sections/
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    └── tooling-framework-standards/
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>        ├── section.md
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        └── items/
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>            ├── framework-standards.md
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>            └── linting-formatting.md
+</code></pre></div>
+<p>Each file is human-readable, version-controlled, and easy to edit. You can peek inside any <code>.md</code> file to see the content and structure.</p>
+<h2 id="step-3-modify-your-constitution"><a class="toclink" href="#step-3-modify-your-constitution">Step 3: Modify Your Constitution</a></h2>
+<p>After initialization, use the <code>/constitution</code> command to request changes in plain language:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>/constitution<span class="w"> </span>Add<span class="w"> </span>a<span class="w"> </span>new<span class="w"> </span>principle<span class="w"> </span>about<span class="w"> </span>error<span class="w"> </span>handling
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>/constitution<span class="w"> </span>Remove<span class="w"> </span>the<span class="w"> </span>TDD<span class="w"> </span>principle
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>/constitution<span class="w"> </span>Update<span class="w"> </span>the<span class="w"> </span>versioning<span class="w"> </span>policy<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span>calendar<span class="w"> </span>versioning
+</code></pre></div>
+<p>The Constitution Agent reads your request, presents the current constitution, and makes surgical edits — only the changes you asked for are modified. Nothing else is touched.</p>
+<h3 id="common-modification-tasks"><a class="toclink" href="#common-modification-tasks">Common Modification Tasks</a></h3>
+<p><strong>Add a principle:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>/constitution<span class="w"> </span>Add<span class="w"> </span>a<span class="w"> </span>principle:<span class="w"> </span><span class="s2">&quot;Configuration as Code — All configuration must be version-controlled and environment-specific.&quot;</span>
+</code></pre></div>
+<p><strong>Add a section with items:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>/constitution<span class="w"> </span>Add<span class="w"> </span>a<span class="w"> </span>new<span class="w"> </span>section<span class="w"> </span>called<span class="w"> </span><span class="s2">&quot;Security Requirements&quot;</span><span class="w"> </span>with<span class="w"> </span>these<span class="w"> </span>items:<span class="w"> </span><span class="o">(</span><span class="m">1</span><span class="o">)</span><span class="w"> </span>Secret<span class="w"> </span>Management,<span class="w"> </span><span class="o">(</span><span class="m">2</span><span class="o">)</span><span class="w"> </span>API<span class="w"> </span>Authentication
+</code></pre></div>
+<p><strong>Delete a section:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>/constitution<span class="w"> </span>Remove<span class="w"> </span>the<span class="w"> </span><span class="s2">&quot;Security Requirements&quot;</span><span class="w"> </span>section
+</code></pre></div>
+<p><strong>Update a governance rule:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>/constitution<span class="w"> </span>Change<span class="w"> </span>the<span class="w"> </span>Supremacy<span class="w"> </span>rule<span class="w"> </span>to<span class="w"> </span>reflect<span class="w"> </span>that<span class="w"> </span>the<span class="w"> </span>constitution<span class="w"> </span>can<span class="w"> </span>be<span class="w"> </span>overridden<span class="w"> </span>by<span class="w"> </span>explicit<span class="w"> </span>board<span class="w"> </span>decision
+</code></pre></div>
+<h2 id="step-4-scope-sections-to-file-patterns"><a class="toclink" href="#step-4-scope-sections-to-file-patterns">Step 4: Scope Sections to File Patterns</a></h2>
+<p>Sections can be scoped to specific directories or file patterns using glob patterns. This lets you enforce different rules for different parts of your codebase.</p>
+<p><strong>Request a scoped section:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>/constitution<span class="w"> </span>Add<span class="w"> </span>a<span class="w"> </span>section<span class="w"> </span>called<span class="w"> </span><span class="s2">&quot;Authentication Standards&quot;</span><span class="w"> </span>that<span class="w"> </span>applies<span class="w"> </span>only<span class="w"> </span>to<span class="w"> </span>src/byte/auth/**<span class="w"> </span>and<span class="w"> </span>src/byte/api/**
+</code></pre></div>
+<p>When you make this request, the Constitution Agent adds the <code>applies_to</code> field to the section:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nn">---</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">authentication-standards</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Authentication Standards</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="nt">applies_to</span><span class="p">:</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;src/byte/auth/**&quot;</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;src/byte/api/**&quot;</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="nt">order</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="nn">---</span>
+</code></pre></div>
+<p>When agents work on files matching these patterns, they see the authentication standards. When they work on unrelated files, they don't. This keeps the constitution focused and relevant.</p>
+<p><strong>Update the scope:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>/constitution<span class="w"> </span>Change<span class="w"> </span>the<span class="w"> </span>applies_to<span class="w"> </span>patterns<span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="s2">&quot;Authentication Standards&quot;</span><span class="w"> </span>to<span class="w"> </span>include<span class="w"> </span>src/byte/oauth/**<span class="w"> </span>as<span class="w"> </span>well
+</code></pre></div>
+<h2 id="step-5-understand-semantic-versioning"><a class="toclink" href="#step-5-understand-semantic-versioning">Step 5: Understand Semantic Versioning</a></h2>
+<p>Your constitution version follows semantic versioning. Each time you request a change, the Constitution Agent proposes a version bump:</p>
+<ul>
+<li><strong>MAJOR</strong> — Backward-incompatible changes: removing a principle, redefining governance rules, or fundamentally altering existing guidance</li>
+<li><strong>MINOR</strong> — Adding new principles, adding new sections, or materially expanding existing guidance</li>
+<li><strong>PATCH</strong> — Wording clarifications, typo fixes, reorganization, or other non-semantic refinements</li>
+</ul>
+<p>Example: If your constitution is at version <code>0.2.0</code> and you add a new principle, the agent proposes bumping to <code>0.3.0</code> (MINOR).</p>
+<p>You can accept the proposed version or override it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>/constitution<span class="w"> </span>Add<span class="w"> </span>a<span class="w"> </span>principle<span class="w"> </span>about<span class="w"> </span>documentation.<span class="w"> </span>Bump<span class="w"> </span>the<span class="w"> </span>version<span class="w"> </span>to<span class="w"> </span><span class="m">1</span>.0.0<span class="w"> </span>instead.
+</code></pre></div>
+<p>The version is stored in <code>.byte/constitution/constitution.md</code> and is always visible when you review the constitution.</p>
+<h2 id="step-6-verify-your-constitution"><a class="toclink" href="#step-6-verify-your-constitution">Step 6: Verify Your Constitution</a></h2>
+<p>At any time, you can view the rendered constitution by checking <code>.byte/constitution/constitution.md</code> or by running a query:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>/constitution<span class="w"> </span>Show<span class="w"> </span>me<span class="w"> </span>the<span class="w"> </span>current<span class="w"> </span>constitution
+</code></pre></div>
+<p>This displays the full text with all principles, sections, and governance rules.</p>
+<h2 id="example-build-a-constitution-from-scratch"><a class="toclink" href="#example-build-a-constitution-from-scratch">Example: Build a Constitution from Scratch</a></h2>
+<p>Here's a realistic sequence:</p>
+<p><strong>Initialize with defaults:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>/init
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="c1"># Answer: Yes to DDD, DRY, TDD, YAGNI, TDA, Strict Typing</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="c1"># Framework: FastAPI</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1"># Linting: Ruff</span>
+</code></pre></div>
+<p><strong>Add a custom principle:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>/constitution<span class="w"> </span>Add<span class="w"> </span>a<span class="w"> </span>principle:<span class="w"> </span><span class="s2">&quot;Error Handling — All errors must be logged with context and never silently swallowed.&quot;</span>
+</code></pre></div>
+<p><strong>Add a security section for auth code:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>/constitution<span class="w"> </span>Add<span class="w"> </span>a<span class="w"> </span>section<span class="w"> </span>called<span class="w"> </span><span class="s2">&quot;Security Standards&quot;</span><span class="w"> </span>with<span class="w"> </span>items:<span class="w"> </span><span class="o">(</span><span class="m">1</span><span class="o">)</span><span class="w"> </span>Secret<span class="w"> </span>Management<span class="w"> </span>—<span class="w"> </span>No<span class="w"> </span>hardcoded<span class="w"> </span>secrets,<span class="w"> </span><span class="o">(</span><span class="m">2</span><span class="o">)</span><span class="w"> </span>Authentication<span class="w"> </span>—<span class="w"> </span>Use<span class="w"> </span>standard<span class="w"> </span>libraries,<span class="w"> </span>never<span class="w"> </span>roll<span class="w"> </span>your<span class="w"> </span>own.<span class="w"> </span>Apply<span class="w"> </span>this<span class="w"> </span>section<span class="w"> </span>only<span class="w"> </span>to<span class="w"> </span>src/byte/auth/**
+</code></pre></div>
+<p><strong>Refine the DRY principle:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>/constitution<span class="w"> </span>Update<span class="w"> </span>the<span class="w"> </span>DRY<span class="w"> </span>principle<span class="w"> </span>to<span class="w"> </span>emphasize<span class="w"> </span>that<span class="w"> </span>shared<span class="w"> </span>logic<span class="w"> </span>must<span class="w"> </span>live<span class="w"> </span><span class="k">in</span><span class="w"> </span>src/byte/support/
+</code></pre></div>
+<p>Your constitution now reflects your project's actual values and enforces them on every AI-assisted change.</p>
+<h2 id="next-steps"><a class="toclink" href="#next-steps">Next Steps</a></h2>
+<p>Now that you've created and modified your constitution, review the Explanation section to understand the deeper concepts: how the constitution is loaded, how it reaches agents, and how to think about governance.</p>
+<p>Check the <code>/constitution</code> command output for any feedback or clarifications the agent provides during each change.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../managing-web-context/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Manage Web Context">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Manage Web Context
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../../explanation/architecture-overview/" class="md-footer__link md-footer__link--next" aria-label="Next: Architecture Overview">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Architecture Overview
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.path", "navigation.instant", "navigation.instant.prefetch", "navigation.instant.progress", "navigation.sections", "navigation.indexes", "navigation.tracking", "content.code.annotate", "toc.follow", "navigation.footer", "navigation.top", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

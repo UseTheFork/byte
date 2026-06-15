@@ -1,0 +1,2024 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A CLI coding agent built for efficiency, not autonomy.">
+      
+      
+        <meta name="author" content="UseTheFork">
+      
+      
+        <link rel="canonical" href="https://usethefork.github.io/byte/how-to-guides/using-git-commits/">
+      
+      
+        <link rel="prev" href="../creating-and-managing-specs/">
+      
+      
+        <link rel="next" href="../managing-file-context/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../images/assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Create AI-Powered Git Commits - Byte</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#create-ai-powered-git-commits" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Byte" class="md-header__button md-logo" aria-label="Byte" data-md-component="logo">
+      
+  <img src="../../images/assets/logo-square.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Byte
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Create AI-Powered Git Commits
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/UseTheFork/byte" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    byte
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Byte" class="md-nav__button md-logo" aria-label="Byte" data-md-component="logo">
+      
+  <img src="../../images/assets/logo-square.svg" alt="logo">
+
+    </a>
+    Byte
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/UseTheFork/byte" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    byte
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-to Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-to Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adding-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuring-linting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configure Linting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configure-providers-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configure Providers / Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../creating-and-managing-skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create & Manage Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../creating-and-managing-specs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create & Manage Specs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create AI-Powered Git Commits
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create AI-Powered Git Commits
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-configure-git-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Configure Git Behavior
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Configure Git Behavior">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-strict-conventional-commits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Strict Conventional Commits
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-minimal-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Minimal Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-understand-the-commit-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Understand the Commit Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Understand the Commit Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stage-1-staging-and-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 1: Staging and Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-2-linting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 2: Linting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-3-commit-workflow-analysis-commit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 3: Commit Workflow (Analysis → Commit)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-understand-conventional-commit-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Understand Conventional Commit Format
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Understand Conventional Commit Format">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Type
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scope-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Description
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#body-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Body (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#breaking-change-footer-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking Change Footer (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-run-the-commit-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Run the Commit Command
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-review-and-approve-the-generated-commit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Review and Approve the Generated Commit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-verify-your-commit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Verify Your Commit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Workflows
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scenario-1-quick-bugfix-with-scopes-enabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 1: Quick Bugfix with Scopes Enabled
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-2-feature-with-breaking-change" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 2: Feature with Breaking Change
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-3-customizing-the-message" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 3: Customizing the Message
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../managing-file-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manage File Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../managing-web-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manage Web Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../managing-the-constitution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manage the Constitution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Explanation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Explanation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/architecture-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/the-constitution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Constitution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/the-gateway/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Gateway
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/the-commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-configure-git-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Configure Git Behavior
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Configure Git Behavior">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-strict-conventional-commits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Strict Conventional Commits
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-minimal-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Minimal Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-understand-the-commit-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Understand the Commit Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Understand the Commit Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stage-1-staging-and-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 1: Staging and Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-2-linting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 2: Linting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-3-commit-workflow-analysis-commit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 3: Commit Workflow (Analysis → Commit)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-understand-conventional-commit-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Understand Conventional Commit Format
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Understand Conventional Commit Format">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Type
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scope-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Description
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#body-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Body (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#breaking-change-footer-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking Change Footer (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-run-the-commit-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Run the Commit Command
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-review-and-approve-the-generated-commit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Review and Approve the Generated Commit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-verify-your-commit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Verify Your Commit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Workflows
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scenario-1-quick-bugfix-with-scopes-enabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 1: Quick Bugfix with Scopes Enabled
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-2-feature-with-breaking-change" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 2: Feature with Breaking Change
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-3-customizing-the-message" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 3: Customizing the Message
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../adding-files/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    How-to Guides
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="create-ai-powered-git-commits"><a class="toclink" href="#create-ai-powered-git-commits">Create AI-Powered Git Commits</a></h1>
+<p><strong>Category</strong>: How-to Guide</p>
+<p>This guide shows you how to use Byte's <code>/commit</code> command to create intelligent, well-formatted git commits. You'll learn how to configure commit behavior, understand the commit workflow, and review AI-generated commit messages before committing.</p>
+<h2 id="prerequisites"><a class="toclink" href="#prerequisites">Prerequisites</a></h2>
+<ul>
+<li>Byte installed on your system</li>
+<li>A git repository initialized in your project</li>
+<li>Linting configured (see <a href="../configuring-linting/">Configure Linting</a>) - commits validate code with your linters before finalizing</li>
+<li>A <code>.byte/config.jsonc</code> file (created during initialization)</li>
+</ul>
+<h2 id="step-1-configure-git-behavior"><a class="toclink" href="#step-1-configure-git-behavior">Step 1: Configure Git Behavior</a></h2>
+<p>Git behavior is controlled in <code>.byte/config.jsonc</code> under the <code>git</code> key. Open your config and add or update the git section:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>{
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  &quot;git&quot;: {
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    &quot;enable_scopes&quot;: false,
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    &quot;enable_breaking_changes&quot;: false,
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    &quot;enable_body&quot;: true,
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    &quot;scopes&quot;: [&quot;api&quot;, &quot;auth&quot;, &quot;cli&quot;, &quot;config&quot;, &quot;core&quot;, &quot;db&quot;, &quot;deps&quot;, &quot;docs&quot;, &quot;test&quot;, &quot;ui&quot;],
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    &quot;description_guidelines&quot;: [],
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    &quot;max_description_length&quot;: 72,
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>  },
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>}
+</code></pre></div>
+<h3 id="configuration-options"><a class="toclink" href="#configuration-options">Configuration Options</a></h3>
+<p><strong><code>enable_scopes</code></strong> - Whether to include optional scopes in commit messages. If <code>true</code>, the Commit Agent will ask you to select a scope from the <code>scopes</code> list. Default: <code>false</code>.</p>
+<p><strong><code>enable_breaking_changes</code></strong> - Whether to detect and flag breaking changes. If <code>true</code>, the Commit Agent will ask for confirmation when a commit is marked as breaking. Default: <code>false</code>.</p>
+<p><strong><code>enable_body</code></strong> - Whether to include an optional body section that explains the <em>why</em> behind the change. Default: <code>true</code>.</p>
+<p><strong><code>scopes</code></strong> - An array of allowed scope values. Used only if <code>enable_scopes</code> is <code>true</code>. Examples: <code>api</code>, <code>auth</code>, <code>cli</code>, <code>docs</code>, <code>test</code>. Define scopes that match your project's logical domains.</p>
+<p><strong><code>description_guidelines</code></strong> - An array of custom guidelines for commit descriptions. These are passed to the Commit Agent to influence message quality. Leave empty for default behavior. Example: <code>["Use past tense for consistency", "Reference ticket numbers when applicable"]</code>.</p>
+<p><strong><code>max_description_length</code></strong> - Maximum character length for the commit description line (the first line after the type and scope). Default: 72. Conventional Commits recommends 50–72 characters.</p>
+<h3 id="example-strict-conventional-commits"><a class="toclink" href="#example-strict-conventional-commits">Example: Strict Conventional Commits</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>{
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  &quot;git&quot;: {
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    &quot;enable_scopes&quot;: true,
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    &quot;enable_breaking_changes&quot;: true,
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    &quot;enable_body&quot;: true,
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    &quot;scopes&quot;: [&quot;api&quot;, &quot;auth&quot;, &quot;db&quot;, &quot;ui&quot;],
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    &quot;description_guidelines&quot;: [&quot;Use imperative mood: &#39;add&#39; not &#39;added&#39;&quot;, &quot;Reference issue numbers: &#39;fixes #123&#39;&quot;],
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    &quot;max_description_length&quot;: 72,
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  },
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>}
+</code></pre></div>
+<h3 id="example-minimal-configuration"><a class="toclink" href="#example-minimal-configuration">Example: Minimal Configuration</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>{
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  &quot;git&quot;: {
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    &quot;enable_scopes&quot;: false,
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    &quot;enable_breaking_changes&quot;: false,
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    &quot;enable_body&quot;: false,
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  },
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>}
+</code></pre></div>
+<h2 id="step-2-understand-the-commit-workflow"><a class="toclink" href="#step-2-understand-the-commit-workflow">Step 2: Understand the Commit Workflow</a></h2>
+<p>When you run <code>/commit</code>, Byte executes a three-stage workflow:</p>
+<h3 id="stage-1-staging-and-validation"><a class="toclink" href="#stage-1-staging-and-validation">Stage 1: Staging and Validation</a></h3>
+<p>Byte stages all changes in your working directory and validates that staged changes exist. If nothing is staged, the command exits early - no empty commits allowed.</p>
+<h3 id="stage-2-linting"><a class="toclink" href="#stage-2-linting">Stage 2: Linting</a></h3>
+<p>If linting is enabled, Byte runs your configured linters on the staged files and reports any errors. This ensures you're committing code that passes your project's quality standards.</p>
+<h3 id="stage-3-commit-workflow-analysis-commit"><a class="toclink" href="#stage-3-commit-workflow-analysis-commit">Stage 3: Commit Workflow (Analysis → Commit)</a></h3>
+<p>The Commit Agent analyzes the staged changes and generates an intelligent commit message:</p>
+<ol>
+<li>
+<p><strong>Analysis Phase</strong> - The Commit Agent reviews your diffs and creates a SHORT list of observations (1–5 bullets) about what changed.</p>
+</li>
+<li>
+<p><strong>Commit Phase</strong> - Using those observations, the Commit Agent generates a commit message following conventional commit standards. The message includes:</p>
+</li>
+<li><strong>Type</strong> (e.g., <code>feat</code>, <code>fix</code>, <code>docs</code>, <code>test</code>, <code>refactor</code>)</li>
+<li><strong>Optional Scope</strong> (if enabled in config)</li>
+<li><strong>Description</strong> - A clear, imperative-mood summary of the change</li>
+<li><strong>Optional Body</strong> (if enabled in config) - Why the change was made, not what was changed</li>
+<li><strong>Optional Breaking Change Footer</strong> (if marked as breaking)</li>
+</ol>
+<h2 id="step-3-understand-conventional-commit-format"><a class="toclink" href="#step-3-understand-conventional-commit-format">Step 3: Understand Conventional Commit Format</a></h2>
+<p>Byte generates commits following the Conventional Commits specification. Understanding the format helps you work effectively with the generated message.</p>
+<h3 id="the-format"><a class="toclink" href="#the-format">The Format</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>&lt;type&gt;[optional scope][!]: &lt;description&gt;
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>[optional body]
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>[optional BREAKING CHANGE footer]
+</code></pre></div>
+<h3 id="type"><a class="toclink" href="#type">Type</a></h3>
+<p>The type categorizes the change:</p>
+<ul>
+<li><strong><code>feat</code></strong> - A new feature for users</li>
+<li><strong><code>fix</code></strong> - A bug fix for users</li>
+<li><strong><code>docs</code></strong> - Documentation-only changes</li>
+<li><strong><code>test</code></strong> - Adding or updating tests</li>
+<li><strong><code>refactor</code></strong> - Code changes that neither fix bugs nor add features</li>
+<li><strong><code>perf</code></strong> - Performance improvements</li>
+<li><strong><code>chore</code></strong> - Changes to build scripts, dependencies, or tooling</li>
+<li><strong><code>ci</code></strong> - Changes to CI/CD configuration</li>
+</ul>
+<h3 id="scope-optional"><a class="toclink" href="#scope-optional">Scope (Optional)</a></h3>
+<p>If scopes are enabled, a scope provides additional context. Examples: <code>(api)</code>, <code>(auth)</code>, <code>(database)</code>. The scope narrows the type to a specific part of your codebase.</p>
+<h3 id="description"><a class="toclink" href="#description">Description</a></h3>
+<p>A one-line imperative statement summarizing the change. Always use lowercase, never end with a period, and keep it under the configured <code>max_description_length</code> (default 72 characters).</p>
+<p><strong>Good:</strong></p>
+<ul>
+<li><code>add user authentication to admin panel</code></li>
+<li><code>fix off-by-one error in pagination logic</code></li>
+<li><code>refactor database connection pooling</code></li>
+</ul>
+<p><strong>Avoid:</strong></p>
+<ul>
+<li><code>Added user authentication</code> (use imperative mood)</li>
+<li><code>This commit adds user authentication to the admin panel which previously didn't have it and now does</code> (too long)</li>
+<li><code>Add user authentication.</code> (no trailing period)</li>
+</ul>
+<h3 id="body-optional"><a class="toclink" href="#body-optional">Body (Optional)</a></h3>
+<p>Explains <em>why</em> the change was made, not <em>what</em> was changed (the diff shows that). Written in imperative, present tense. Use this when the description alone doesn't fully convey the motivation.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>fix: correct user role permission check
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>The previous implementation only checked the admin role and ignored
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>custom role assignments. This prevented users with custom roles from
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>accessing protected endpoints even when explicitly granted permission.
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>This fix loads the full role hierarchy from the database and evaluates
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>all assigned roles, ensuring permission checks are comprehensive.
+</code></pre></div>
+<h3 id="breaking-change-footer-optional"><a class="toclink" href="#breaking-change-footer-optional">Breaking Change Footer (Optional)</a></h3>
+<p>If a change breaks backward compatibility, add a footer:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>BREAKING CHANGE: Authentication now requires the new token format.
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>Clients using the old format will receive a 401 Unauthorized response.
+</code></pre></div>
+<p>If <code>enable_breaking_changes</code> is true in your config, the Commit Agent asks for confirmation before marking a commit as breaking.</p>
+<h3 id="examples"><a class="toclink" href="#examples">Examples</a></h3>
+<p><strong>Simple feature:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>feat: add dark mode toggle to settings
+</code></pre></div>
+<p><strong>Fix with scope:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>fix(auth): resolve session timeout on refresh
+</code></pre></div>
+<p><strong>Breaking change:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>feat!: restructure API response format for consistency
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>BREAKING CHANGE: The /api/users endpoint now returns a &#39;data&#39; wrapper
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>object. Clients must update their response parsing logic.
+</code></pre></div>
+<p><strong>Full example with body and scope:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>refactor(database): optimize connection pool configuration
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>The previous pool settings were conservative and caused connection
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>timeouts under moderate load. Profiling showed we were frequently
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>hitting the pool limit during peak usage.
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>This change increases the pool size to 25 connections and enables
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>connection reuse, reducing latency by ~30% in benchmarks.
+</code></pre></div>
+<h2 id="step-4-run-the-commit-command"><a class="toclink" href="#step-4-run-the-commit-command">Step 4: Run the Commit Command</a></h2>
+<p>To create a commit, type:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>/commit
+</code></pre></div>
+<p>Byte will:</p>
+<ol>
+<li><strong>Stage all changes</strong> in your working directory</li>
+<li><strong>Validate</strong> that changes exist (no empty commits)</li>
+<li><strong>Run linting</strong> on staged files (if enabled)</li>
+<li><strong>Launch the Commit Workflow</strong>:</li>
+<li>The Commit Agent analyzes your diffs</li>
+<li>A commit message is generated and presented to you</li>
+<li><strong>Pause for approval</strong> - you see the generated message and decide</li>
+</ol>
+<p>That's it. No additional arguments needed. The entire workflow is guided and interactive.</p>
+<h2 id="step-5-review-and-approve-the-generated-commit"><a class="toclink" href="#step-5-review-and-approve-the-generated-commit">Step 5: Review and Approve the Generated Commit</a></h2>
+<p>When the Commit Agent finishes generating the message, you'll see a panel displaying the full commit. You have two options:</p>
+<p><strong>Option 1: Approve the Commit</strong></p>
+<p>If the message looks good, confirm it. Byte commits the message immediately and returns to the prompt.</p>
+<p><strong>Option 2: Request Changes</strong></p>
+<p>If something needs adjusting, tell Byte what to change. For example:</p>
+<ul>
+<li><code>"The description should mention the API endpoint change"</code></li>
+<li><code>"Add a body explaining the performance impact"</code></li>
+<li><code>"Mark this as a breaking change"</code></li>
+</ul>
+<p>Byte will revise the message based on your feedback and present it again for approval. You can request changes as many times as needed until the message is exactly right.</p>
+<h2 id="step-6-verify-your-commit"><a class="toclink" href="#step-6-verify-your-commit">Step 6: Verify Your Commit</a></h2>
+<p>After approval, Byte commits the message to your repository. To confirm the commit was created, check your recent commits:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>git<span class="w"> </span>log<span class="w"> </span>--oneline<span class="w"> </span>-5
+</code></pre></div>
+<p>You should see your new commit at the top with the formatted message.</p>
+<h2 id="common-workflows"><a class="toclink" href="#common-workflows">Common Workflows</a></h2>
+<h3 id="scenario-1-quick-bugfix-with-scopes-enabled"><a class="toclink" href="#scenario-1-quick-bugfix-with-scopes-enabled">Scenario 1: Quick Bugfix with Scopes Enabled</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>{
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>  &quot;git&quot;: {
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>    &quot;enable_scopes&quot;: true,
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    &quot;scopes&quot;: [&quot;api&quot;, &quot;auth&quot;, &quot;ui&quot;],
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>  },
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>}
+</code></pre></div>
+<p>Run <code>/commit</code>. The Commit Agent analyzes your changes and generates:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>fix(auth): reset user session on password change
+</code></pre></div>
+<p>You approve it. Done.</p>
+<h3 id="scenario-2-feature-with-breaking-change"><a class="toclink" href="#scenario-2-feature-with-breaking-change">Scenario 2: Feature with Breaking Change</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>{
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>  &quot;git&quot;: {
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>    &quot;enable_breaking_changes&quot;: true,
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>    &quot;enable_body&quot;: true,
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>  },
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>}
+</code></pre></div>
+<p>Run <code>/commit</code>. The Commit Agent detects that your change breaks backward compatibility and marks it accordingly:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>feat!: redesign authentication API
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>The login endpoint now expects JWT tokens in the Authorization header
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>instead of cookies. Clients using the old cookie-based auth will need
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>to update their integration.
+</code></pre></div>
+<p>You approve it. Done.</p>
+<h3 id="scenario-3-customizing-the-message"><a class="toclink" href="#scenario-3-customizing-the-message">Scenario 3: Customizing the Message</a></h3>
+<p>Run <code>/commit</code>. The generated message appears:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>refactor: clean up database queries
+</code></pre></div>
+<p>You request: <code>"The description should mention performance improvements"</code>. The Commit Agent revises it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>refactor: optimize database query performance
+</code></pre></div>
+<p>You approve it. Done.</p>
+<h2 id="next-steps"><a class="toclink" href="#next-steps">Next Steps</a></h2>
+<p>Now that you understand how to create commits, explore how commits integrate with the broader development workflow:</p>
+<ul>
+<li><strong>Configure Linting</strong> - Ensure your commits always pass quality checks</li>
+<li><strong>Manage the Constitution</strong> - Set coding standards that guide the Commit Agent's message generation</li>
+</ul>
+<p>For deeper understanding of how conventional commits work and why they're valuable, see the Explanation section.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../creating-and-managing-specs/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Create &amp; Manage Specs">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Create & Manage Specs
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../managing-file-context/" class="md-footer__link md-footer__link--next" aria-label="Next: Manage File Context">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Manage File Context
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.path", "navigation.instant", "navigation.instant.prefetch", "navigation.instant.progress", "navigation.sections", "navigation.indexes", "navigation.tracking", "content.code.annotate", "toc.follow", "navigation.footer", "navigation.top", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

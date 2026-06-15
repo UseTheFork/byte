@@ -1,0 +1,2131 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A CLI coding agent built for efficiency, not autonomy.">
+      
+      
+        <meta name="author" content="UseTheFork">
+      
+      
+        <link rel="canonical" href="https://usethefork.github.io/byte/how-to-guides/managing-web-context/">
+      
+      
+        <link rel="prev" href="../managing-file-context/">
+      
+      
+        <link rel="next" href="../managing-the-constitution/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../images/assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Manage Web Context - Byte</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#manage-web-context" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Byte" class="md-header__button md-logo" aria-label="Byte" data-md-component="logo">
+      
+  <img src="../../images/assets/logo-square.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Byte
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Manage Web Context
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/UseTheFork/byte" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    byte
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Byte" class="md-nav__button md-logo" aria-label="Byte" data-md-component="logo">
+      
+  <img src="../../images/assets/logo-square.svg" alt="logo">
+
+    </a>
+    Byte
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/UseTheFork/byte" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    byte
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-to Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-to Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adding-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuring-linting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configure Linting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configure-providers-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configure Providers / Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../creating-and-managing-skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create & Manage Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../creating-and-managing-specs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create & Manage Specs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../using-git-commits/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create AI-Powered Git Commits
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../managing-file-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manage File Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manage Web Context
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manage Web Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-enable-web-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Enable Web Features
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Enable Web Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#finding-your-chrome-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Finding Your Chrome Binary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-understand-web-scraping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Understand Web Scraping
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-add-a-web-page-with-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Add a Web Page with /context
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Add a Web Page with /context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-add-multiple-urls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Add Multiple URLs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-add-a-web-page-directly-with-web" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Add a Web Page Directly with /web
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Add a Web Page Directly with /web">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add-multiple-urls-at-once" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add Multiple URLs at Once
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#valid-url-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Valid URL Formats
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-review-scraped-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Review Scraped Content
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-site-type-auto-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Site Type Auto-Detection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-list-all-context-items" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: List All Context Items
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-remove-web-context-items" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: Remove Web Context Items
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: Remove Web Context Items">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#remove-a-specific-web-page-by-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remove a Specific Web Page by Key
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove-multiple-items-interactively" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remove Multiple Items Interactively
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-remove-items" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Remove Items?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-how-web-context-reaches-the-ai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: How Web Context Reaches the AI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-understand-persistence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: Understand Persistence
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#combining-file-and-web-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Combining File and Web Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Workflows
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#learning-a-new-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning a New Framework
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-hunting-in-third-party-libraries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug Hunting in Third-Party Libraries
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation-review" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation Review
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#web-commands-are-not-enabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Web commands are not enabled"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scraped-content-looks-wrong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scraped Content Looks Wrong
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chrome-binary-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chrome Binary Not Found
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../managing-the-constitution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manage the Constitution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Explanation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Explanation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/architecture-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/the-constitution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Constitution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/the-gateway/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Gateway
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/the-commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-enable-web-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Enable Web Features
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Enable Web Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#finding-your-chrome-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Finding Your Chrome Binary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-understand-web-scraping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Understand Web Scraping
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-add-a-web-page-with-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Add a Web Page with /context
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Add a Web Page with /context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-add-multiple-urls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Add Multiple URLs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-add-a-web-page-directly-with-web" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Add a Web Page Directly with /web
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Add a Web Page Directly with /web">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add-multiple-urls-at-once" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add Multiple URLs at Once
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#valid-url-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Valid URL Formats
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-review-scraped-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Review Scraped Content
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-site-type-auto-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Site Type Auto-Detection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-list-all-context-items" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: List All Context Items
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-remove-web-context-items" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: Remove Web Context Items
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: Remove Web Context Items">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#remove-a-specific-web-page-by-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remove a Specific Web Page by Key
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove-multiple-items-interactively" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remove Multiple Items Interactively
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-remove-items" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Remove Items?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-how-web-context-reaches-the-ai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: How Web Context Reaches the AI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-understand-persistence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: Understand Persistence
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#combining-file-and-web-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Combining File and Web Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Workflows
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#learning-a-new-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning a New Framework
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-hunting-in-third-party-libraries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug Hunting in Third-Party Libraries
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation-review" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation Review
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#web-commands-are-not-enabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Web commands are not enabled"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scraped-content-looks-wrong" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scraped Content Looks Wrong
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chrome-binary-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chrome Binary Not Found
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../adding-files/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    How-to Guides
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="manage-web-context"><a class="toclink" href="#manage-web-context">Manage Web Context</a></h1>
+<p><strong>Category</strong>: How-to Guide</p>
+<p>This guide shows you how to add, view, and remove web pages from your session context. Web pages become available to the AI during your conversation, letting you reference external documentation, articles, and guides without copying content manually.</p>
+<h2 id="prerequisites"><a class="toclink" href="#prerequisites">Prerequisites</a></h2>
+<ul>
+<li>Byte installed on your system</li>
+<li>Web features enabled in your <code>.byte/config.jsonc</code></li>
+<li>A URL you want to add to context</li>
+</ul>
+<h2 id="step-1-enable-web-features"><a class="toclink" href="#step-1-enable-web-features">Step 1: Enable Web Features</a></h2>
+<p>Before you can scrape and add web pages, enable web commands in your configuration.</p>
+<p>Open <code>.byte/config.jsonc</code> and add or update the <code>web</code> section:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>{
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  &quot;web&quot;: {
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    &quot;enable&quot;: true,
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    &quot;chrome_binary_location&quot;: &quot;/path/to/chrome&quot;
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  }
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>}
+</code></pre></div>
+<p>The two required fields are:</p>
+<ul>
+<li><strong><code>enable</code></strong> — Set to <code>true</code> to activate web scraping</li>
+<li><strong><code>chrome_binary_location</code></strong> — Full path to your Chrome or Chromium binary</li>
+</ul>
+<h3 id="finding-your-chrome-binary"><a class="toclink" href="#finding-your-chrome-binary">Finding Your Chrome Binary</a></h3>
+<p><strong>On macOS:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>/Applications/Google<span class="se">\ </span>Chrome.app/Contents/MacOS/Google<span class="se">\ </span>Chrome
+</code></pre></div>
+<p>Or if you use Chromium:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>/Applications/Chromium.app/Contents/MacOS/Chromium
+</code></pre></div>
+<p><strong>On Linux:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>/usr/bin/google-chrome
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># or</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>/usr/bin/chromium-browser
+</code></pre></div>
+<p><strong>On Windows:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>C:\Program Files\Google\Chrome\Application\chrome.exe
+</code></pre></div>
+<p>Copy the full path into your config and save. Byte will validate it on startup.</p>
+<h2 id="step-2-understand-web-scraping"><a class="toclink" href="#step-2-understand-web-scraping">Step 2: Understand Web Scraping</a></h2>
+<p>When you add a web page to context, Byte:</p>
+<ol>
+<li><strong>Launches a headless Chrome browser</strong> — Opens the page without a GUI</li>
+<li><strong>Waits for content to load</strong> — Ensures JavaScript-rendered content is captured</li>
+<li><strong>Detects the site type</strong> — Sphinx, GitBook, GitHub, MkDocs, or generic HTML</li>
+<li><strong>Applies site-specific parsing</strong> — Extracts the most relevant content (navigation removed, ads stripped)</li>
+<li><strong>Converts to markdown</strong> — HTML is transformed into clean, readable markdown</li>
+<li><strong>Shows you the result</strong> — Displays the scraped content for review</li>
+<li><strong>Asks for confirmation</strong> — Only adds it to context if you approve</li>
+</ol>
+<p>This process ensures you get clean, readable content without boilerplate or noise.</p>
+<h2 id="step-3-add-a-web-page-with-context"><a class="toclink" href="#step-3-add-a-web-page-with-context">Step 3: Add a Web Page with <code>/context</code></a></h2>
+<p>The simplest way to add a web page is the smart <code>/context</code> command, which auto-detects whether you're adding a file or URL:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>/context<span class="w"> </span>https://docs.example.com/api-reference
+</code></pre></div>
+<p>This command:</p>
+<ol>
+<li>Detects the URL (starts with <code>http://</code> or <code>https://</code>)</li>
+<li>Launches the browser and scrapes the page</li>
+<li>Auto-detects the site type (Sphinx, GitBook, etc.) and applies appropriate parsing</li>
+<li>Displays the scraped content in a formatted panel</li>
+<li>Prompts: "Add this content to the LLM context?"</li>
+<li>If you answer <strong>Yes</strong>, adds it to context; if <strong>No</strong>, discards it</li>
+</ol>
+<h3 id="example-add-multiple-urls"><a class="toclink" href="#example-add-multiple-urls">Example: Add Multiple URLs</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>/context<span class="w"> </span>https://docs.example.com/api
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>/context<span class="w"> </span>https://docs.example.com/guides
+</code></pre></div>
+<p>Each URL is scraped, shown, and you confirm each one separately.</p>
+<h2 id="step-4-add-a-web-page-directly-with-web"><a class="toclink" href="#step-4-add-a-web-page-directly-with-web">Step 4: Add a Web Page Directly with <code>/web</code></a></h2>
+<p>For explicit web operations, use the direct <code>/web</code> command:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>/web<span class="w"> </span>https://docs.example.com/tutorial
+</code></pre></div>
+<p>This is identical to <code>/context</code> for URLs. Use this when you want to be explicit, or when you're adding multiple URLs in rapid succession.</p>
+<h3 id="add-multiple-urls-at-once"><a class="toclink" href="#add-multiple-urls-at-once">Add Multiple URLs at Once</a></h3>
+<p>The <code>/web</code> command accepts multiple URLs separated by spaces, commas, or newlines:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>/web<span class="w"> </span>https://docs.example.com/api<span class="w"> </span>https://docs.example.com/guide
+</code></pre></div>
+<p>Or:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>/web<span class="w"> </span>https://docs.example.com/api,<span class="w"> </span>https://docs.example.com/guide,<span class="w"> </span>https://docs.example.com/faq
+</code></pre></div>
+<p>Each URL is scraped, displayed, and you confirm each one independently before it's added to context.</p>
+<h3 id="valid-url-formats"><a class="toclink" href="#valid-url-formats">Valid URL Formats</a></h3>
+<p>URLs must start with <code>http://</code> or <code>https://</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>/web<span class="w"> </span>https://github.com/user/repo<span class="w">  </span><span class="c1"># ✓ Valid</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>/web<span class="w"> </span>http://example.com<span class="w">            </span><span class="c1"># ✓ Valid</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>/web<span class="w"> </span>example.com<span class="w">                    </span><span class="c1"># ✗ Invalid (missing scheme)</span>
+</code></pre></div>
+<h2 id="step-5-review-scraped-content"><a class="toclink" href="#step-5-review-scraped-content">Step 5: Review Scraped Content</a></h2>
+<p>After you add a URL, Byte scrapes the page and displays the result:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>╭──────────────────────────────────────────────────╮
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>│ Content: https://docs.example.com/api-reference │
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>├──────────────────────────────────────────────────┤
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>│                                                  │
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>│ # API Reference                                 │
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>│                                                 │
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>│ ## Authentication                               │
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>│ POST /auth/login                                │
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>│ ...                                             │
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>│                                                 │
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>╰──────────────────────────────────────────────────╯
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>? Add this content to the LLM context?
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>❯ Yes
+<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>  No
+</code></pre></div>
+<p>Review the markdown content. If it looks good, select <strong>Yes</strong>. If the parsing missed important content or included too much noise, select <strong>No</strong> and try a different approach (e.g., adding a more specific URL).</p>
+<h2 id="step-6-site-type-auto-detection"><a class="toclink" href="#step-6-site-type-auto-detection">Step 6: Site Type Auto-Detection</a></h2>
+<p>Byte automatically detects which type of documentation site you're scraping and applies the best parsing strategy:</p>
+<ul>
+<li><strong>Sphinx</strong> — Python documentation sites (removes navigation, sidebars)</li>
+<li><strong>GitBook</strong> — Technical documentation platforms (extracts main content)</li>
+<li><strong>GitHub</strong> — Repository READMEs and wikis (cleans markdown)</li>
+<li><strong>MkDocs</strong> — Material-themed documentation (removes theme chrome)</li>
+<li><strong>Generic</strong> — Fallback for standard HTML (best-effort extraction)</li>
+</ul>
+<p>You don't need to do anything — detection is automatic. If parsing isn't optimal for a particular site, you can try a different URL (e.g., add a more specific page instead of the homepage).</p>
+<h2 id="step-7-list-all-context-items"><a class="toclink" href="#step-7-list-all-context-items">Step 7: List All Context Items</a></h2>
+<p>View everything currently in your session context, including both files and web pages:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>/ctx:ls
+</code></pre></div>
+<p>Output shows all items by key:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>╭────────────────────────────────────────────────────────╮
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>│ Session Context Items (4)                              │
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>├────────────────────────────────────────────────────────┤
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>│ src/byte/config.py                                     │
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>│ https-docs-example-com-api                             │
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>│ https-docs-example-com-guide                           │
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>│ pyproject.toml                                         │
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>╰────────────────────────────────────────────────────────╯
+</code></pre></div>
+<p>Web context keys are generated from the URL (slugified for readability). File context keys match the file paths you added.</p>
+<h2 id="step-8-remove-web-context-items"><a class="toclink" href="#step-8-remove-web-context-items">Step 8: Remove Web Context Items</a></h2>
+<p>Use the same <code>/ctx:drop</code> command to remove web pages:</p>
+<h3 id="remove-a-specific-web-page-by-key"><a class="toclink" href="#remove-a-specific-web-page-by-key">Remove a Specific Web Page by Key</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>/ctx:drop<span class="w"> </span>https-docs-example-com-api
+</code></pre></div>
+<p>Byte confirms: "Removed https-docs-example-com-api from session context"</p>
+<h3 id="remove-multiple-items-interactively"><a class="toclink" href="#remove-multiple-items-interactively">Remove Multiple Items Interactively</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>/ctx:drop
+</code></pre></div>
+<p>A menu appears with all context items (files and web pages). Select the ones you want to remove and press Enter.</p>
+<h3 id="why-remove-items"><a class="toclink" href="#why-remove-items">Why Remove Items?</a></h3>
+<p>Web content can be large and consume many tokens. Remove pages you've finished referencing to keep context efficient.</p>
+<h2 id="step-9-how-web-context-reaches-the-ai"><a class="toclink" href="#step-9-how-web-context-reaches-the-ai">Step 9: How Web Context Reaches the AI</a></h2>
+<p>When you send a message, Byte automatically injects all context items (both files and web pages) into the AI's prompt. Each web page is wrapped with metadata tags:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>&lt;session_context type=&quot;web&quot; key=&quot;https-docs-example-com-api&quot;&gt;
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>[web page markdown here]
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>&lt;/session_context&gt;
+</code></pre></div>
+<p>The AI can see all web pages in context and reference them by key. You don't need to manually include URLs in your prompt — the actual content is already available.</p>
+<h2 id="step-10-understand-persistence"><a class="toclink" href="#step-10-understand-persistence">Step 10: Understand Persistence</a></h2>
+<p><strong>Session persistence:</strong> Web content is stored in <code>.byte/session_context/</code> on your disk as markdown files. They persist across prompts within the same session.</p>
+<p><strong>Session boundaries:</strong> When you end your session and start a fresh one, web context is cleared. You need to re-add URLs if you want them in the new session.</p>
+<p>To start fresh immediately:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>/ctx:drop
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="c1"># Select all items and confirm removal</span>
+</code></pre></div>
+<p>Then add the URLs you need for the current task.</p>
+<h2 id="combining-file-and-web-context"><a class="toclink" href="#combining-file-and-web-context">Combining File and Web Context</a></h2>
+<p>You can mix file and web context seamlessly. Add source code files and external documentation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>/context<span class="w"> </span>src/byte/cli.py
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>/context<span class="w"> </span>https://docs.python.org/cli-argparse
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>/ctx:ls<span class="w">  </span><span class="c1"># Shows both types together</span>
+</code></pre></div>
+<p>Both are injected into the AI's prompt when you send a message, letting you reference internal and external knowledge in one conversation.</p>
+<h2 id="common-workflows"><a class="toclink" href="#common-workflows">Common Workflows</a></h2>
+<h3 id="learning-a-new-framework"><a class="toclink" href="#learning-a-new-framework">Learning a New Framework</a></h3>
+<p>Add the framework documentation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>/web<span class="w"> </span>https://docs.framework.com/getting-started
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>/web<span class="w"> </span>https://docs.framework.com/api-reference
+</code></pre></div>
+<p>Ask the AI to explain concepts or help you build examples. The AI has the official docs in context.</p>
+<h3 id="bug-hunting-in-third-party-libraries"><a class="toclink" href="#bug-hunting-in-third-party-libraries">Bug Hunting in Third-Party Libraries</a></h3>
+<p>Add your code and the library's documentation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>/context<span class="w"> </span>src/my_app/handler.py
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>/web<span class="w"> </span>https://github.com/library/repo/blob/main/README.md
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>/web<span class="w"> </span>https://library-docs.com/troubleshooting
+</code></pre></div>
+<p>Describe the issue. The AI can see your code and the library docs together.</p>
+<h3 id="api-integration"><a class="toclink" href="#api-integration">API Integration</a></h3>
+<p>Add your service code and the external API documentation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>/context<span class="w"> </span>src/services/payment_service.py
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>/web<span class="w"> </span>https://api.payment-provider.com/docs
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>/web<span class="w"> </span>https://api.payment-provider.com/authentication
+</code></pre></div>
+<p>Ask the AI to review your integration or help debug API calls. All relevant docs are available.</p>
+<h3 id="documentation-review"><a class="toclink" href="#documentation-review">Documentation Review</a></h3>
+<p>Add your docs and related API docs:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>/context<span class="w"> </span>docs/api.md
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>/web<span class="w"> </span>https://openapi-spec.io/
+</code></pre></div>
+<p>Ask the AI to improve your documentation against industry standards. It sees both.</p>
+<h2 id="troubleshooting"><a class="toclink" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="web-commands-are-not-enabled"><a class="toclink" href="#web-commands-are-not-enabled">"Web commands are not enabled"</a></h3>
+<p>Check your <code>.byte/config.jsonc</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>{
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>  &quot;web&quot;: {
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>    &quot;enable&quot;: true,
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>    &quot;chrome_binary_location&quot;: &quot;/path/to/chrome&quot;
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>  }
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>}
+</code></pre></div>
+<p>Make sure <code>enable</code> is <code>true</code> and the Chrome path is valid.</p>
+<h3 id="scraped-content-looks-wrong"><a class="toclink" href="#scraped-content-looks-wrong">Scraped Content Looks Wrong</a></h3>
+<p>The page might use heavy JavaScript or non-standard HTML. Try:</p>
+<ol>
+<li>Adding a more specific URL (e.g., <code>/docs/api</code> instead of <code>/</code>)</li>
+<li>Removing the page and using a different documentation source</li>
+<li>Adding relevant source code files instead and letting the AI reference those</li>
+</ol>
+<h3 id="chrome-binary-not-found"><a class="toclink" href="#chrome-binary-not-found">Chrome Binary Not Found</a></h3>
+<p>Double-check the path:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>ls<span class="w"> </span>-la<span class="w"> </span>/path/to/chrome<span class="w">  </span><span class="c1"># macOS / Linux</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>where<span class="w"> </span>chrome<span class="w">            </span><span class="c1"># Windows</span>
+</code></pre></div>
+<p>Copy the exact path from the output into your config.</p>
+<h2 id="next-steps"><a class="toclink" href="#next-steps">Next Steps</a></h2>
+<p>Now that you can manage web context, combine it with file context to build rich, multi-source conversations. For advanced context workflows, see the explanation section on how context is structured and injected into prompts.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../managing-file-context/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Manage File Context">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Manage File Context
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../managing-the-constitution/" class="md-footer__link md-footer__link--next" aria-label="Next: Manage the Constitution">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Manage the Constitution
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.path", "navigation.instant", "navigation.instant.prefetch", "navigation.instant.progress", "navigation.sections", "navigation.indexes", "navigation.tracking", "content.code.annotate", "toc.follow", "navigation.footer", "navigation.top", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -2,74 +2,82 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://usethefork.github.io/byte/</loc>
-         <lastmod>2026-02-12</lastmod>
+         <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://usethefork.github.io/byte/concepts/</loc>
-         <lastmod>2026-02-12</lastmod>
+         <loc>https://usethefork.github.io/byte/explanation/architecture-overview/</loc>
+         <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://usethefork.github.io/byte/concepts/commit/</loc>
-         <lastmod>2026-02-12</lastmod>
+         <loc>https://usethefork.github.io/byte/explanation/configuration/</loc>
+         <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://usethefork.github.io/byte/concepts/conventions/</loc>
-         <lastmod>2026-02-12</lastmod>
+         <loc>https://usethefork.github.io/byte/explanation/the-commands/</loc>
+         <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://usethefork.github.io/byte/concepts/file-context/</loc>
-         <lastmod>2026-02-12</lastmod>
+         <loc>https://usethefork.github.io/byte/explanation/the-constitution/</loc>
+         <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://usethefork.github.io/byte/concepts/file-watching/</loc>
-         <lastmod>2026-02-12</lastmod>
+         <loc>https://usethefork.github.io/byte/explanation/the-gateway/</loc>
+         <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://usethefork.github.io/byte/concepts/lint/</loc>
-         <lastmod>2026-02-12</lastmod>
+         <loc>https://usethefork.github.io/byte/how-to-guides/adding-files/</loc>
+         <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://usethefork.github.io/byte/concepts/lsp/</loc>
-         <lastmod>2026-02-12</lastmod>
+         <loc>https://usethefork.github.io/byte/how-to-guides/configure-providers-models/</loc>
+         <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://usethefork.github.io/byte/concepts/memory/</loc>
-         <lastmod>2026-02-12</lastmod>
+         <loc>https://usethefork.github.io/byte/how-to-guides/configuring-linting/</loc>
+         <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://usethefork.github.io/byte/concepts/presets/</loc>
-         <lastmod>2026-02-12</lastmod>
+         <loc>https://usethefork.github.io/byte/how-to-guides/creating-and-managing-skills/</loc>
+         <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://usethefork.github.io/byte/concepts/web/</loc>
-         <lastmod>2026-02-12</lastmod>
+         <loc>https://usethefork.github.io/byte/how-to-guides/creating-and-managing-specs/</loc>
+         <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://usethefork.github.io/byte/getting-started/</loc>
-         <lastmod>2026-02-12</lastmod>
+         <loc>https://usethefork.github.io/byte/how-to-guides/managing-file-context/</loc>
+         <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://usethefork.github.io/byte/getting-started/first-steps/</loc>
-         <lastmod>2026-02-12</lastmod>
+         <loc>https://usethefork.github.io/byte/how-to-guides/managing-the-constitution/</loc>
+         <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://usethefork.github.io/byte/getting-started/installation/</loc>
-         <lastmod>2026-02-12</lastmod>
+         <loc>https://usethefork.github.io/byte/how-to-guides/managing-web-context/</loc>
+         <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://usethefork.github.io/byte/getting-started/workflow-example/</loc>
-         <lastmod>2026-02-12</lastmod>
+         <loc>https://usethefork.github.io/byte/how-to-guides/reviewing-conversations/</loc>
+         <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://usethefork.github.io/byte/reference/</loc>
-         <lastmod>2026-02-12</lastmod>
+         <loc>https://usethefork.github.io/byte/how-to-guides/using-git-commits/</loc>
+         <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://usethefork.github.io/byte/reference/commands/</loc>
-         <lastmod>2026-02-12</lastmod>
+         <loc>https://usethefork.github.io/byte/references/commands/</loc>
+         <lastmod>1980-01-01</lastmod>
     </url>
     <url>
-         <loc>https://usethefork.github.io/byte/reference/settings/</loc>
-         <lastmod>2026-02-12</lastmod>
+         <loc>https://usethefork.github.io/byte/references/configuration/</loc>
+         <lastmod>1980-01-01</lastmod>
+    </url>
+    <url>
+         <loc>https://usethefork.github.io/byte/references/gateway-requests/</loc>
+         <lastmod>1980-01-01</lastmod>
+    </url>
+    <url>
+         <loc>https://usethefork.github.io/byte/tutorials/getting-started/installation/</loc>
+         <lastmod>1980-01-01</lastmod>
     </url>
 </urlset>

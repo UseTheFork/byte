@@ -1,0 +1,1501 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A CLI coding agent built for efficiency, not autonomy.">
+      
+      
+        <meta name="author" content="UseTheFork">
+      
+      
+        <link rel="canonical" href="https://usethefork.github.io/byte/how-to-guides/reviewing-conversations/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../images/assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Review Recorded Conversations - Byte</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#review-recorded-conversations" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Byte" class="md-header__button md-logo" aria-label="Byte" data-md-component="logo">
+      
+  <img src="../../images/assets/logo-square.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Byte
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Review Recorded Conversations
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/UseTheFork/byte" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    byte
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Byte" class="md-nav__button md-logo" aria-label="Byte" data-md-component="logo">
+      
+  <img src="../../images/assets/logo-square.svg" alt="logo">
+
+    </a>
+    Byte
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/UseTheFork/byte" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    byte
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-to Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-to Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adding-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuring-linting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configure Linting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configure-providers-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configure Providers / Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../creating-and-managing-skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create & Manage Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../creating-and-managing-specs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create & Manage Specs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../using-git-commits/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create AI-Powered Git Commits
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../managing-file-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manage File Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../managing-web-context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manage Web Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../managing-the-constitution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manage the Constitution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Explanation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Explanation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/architecture-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/the-constitution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Constitution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/the-gateway/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Gateway
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/the-commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-understand-the-cache-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Understand the Cache Structure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-open-a-recorded-conversation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Open a Recorded Conversation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-interpret-message-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Interpret Message Types
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Interpret Message Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#systemmessage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SystemMessage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#humanmessage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HumanMessage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aimessage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AIMessage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-message-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other Message Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-read-through-a-conversation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Read Through a Conversation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Read Through a Conversation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#find-the-constitution-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Find the Constitution Injection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#find-the-injected-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Find the Injected Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#review-tool-calls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Review Tool Calls
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trace-workflow-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trace Workflow Decisions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Use Cases
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Use Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#debugging-an-unexpected-tool-call" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Debugging an Unexpected Tool Call
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verifying-constitution-enforcement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verifying Constitution Enforcement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inspecting-context-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inspecting Context Injection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checking-tool-execution-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checking Tool Execution Order
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analyzing-prompt-size-and-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analyzing Prompt Size and Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understanding-cache-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding Cache Lifecycle
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips-for-effective-review" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tips for Effective Review
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="review-recorded-conversations"><a class="toclink" href="#review-recorded-conversations">Review Recorded Conversations</a></h1>
+<p><strong>Category</strong>: How-to Guide</p>
+<p>Byte records every LLM interaction to your local cache. Each recorded conversation is a snapshot of the exact prompt sent to the model — system messages, constitution, injected context, user instructions, and all tool calls. This gives you full visibility into how Byte reasons through tasks. Use recordings to debug prompt design, verify that the constitution is being applied correctly, inspect what context was available to the model, and understand how the system reached specific decisions.</p>
+<h2 id="prerequisites"><a class="toclink" href="#prerequisites">Prerequisites</a></h2>
+<ul>
+<li>Byte installed on your system</li>
+<li>At least one completed workflow run</li>
+<li>Basic familiarity with Byte's workflow system</li>
+</ul>
+<h2 id="step-1-understand-the-cache-structure"><a class="toclink" href="#step-1-understand-the-cache-structure">Step 1: Understand the Cache Structure</a></h2>
+<p>Byte stores recorded conversations at <code>.byte/cache/conversations/{workflow_name}/{step}_{node}.md</code> in your project root.</p>
+<ul>
+<li><strong>workflow_name</strong>: The name of the workflow that ran (e.g., <code>documentation-workflow</code>, <code>code-review</code>)</li>
+<li><strong>step</strong>: The execution step number within the workflow (e.g., <code>0</code>, <code>1</code>, <code>2</code>)</li>
+<li><strong>node</strong>: The name of the agent node that processed the step (e.g., <code>assistant_node</code>, <code>tool_node</code>)</li>
+</ul>
+<p>Example path: <code>.byte/cache/conversations/documentation-workflow/1_assistant_node.md</code></p>
+<p>Each file contains the complete prompt history for a single agent invocation — everything the LLM received before generating its response.</p>
+<h2 id="step-2-open-a-recorded-conversation"><a class="toclink" href="#step-2-open-a-recorded-conversation">Step 2: Open a Recorded Conversation</a></h2>
+<p>Navigate to <code>.byte/cache/conversations/</code> in your project and open any <code>.md</code> file:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># List all recorded conversations</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>ls<span class="w"> </span>.byte/cache/conversations/
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Open a specific conversation</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>cat<span class="w"> </span>.byte/cache/conversations/my-workflow/0_assistant_node.md
+</code></pre></div>
+<p>The file is plain markdown, readable in any text editor or terminal. Each section is separated by a clear header:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>======== SystemMessage ========
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>[system message content]
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>======== HumanMessage ========
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>[user message content]
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>======== AIMessage ========
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>[model response]
+</code></pre></div>
+<h2 id="step-3-interpret-message-types"><a class="toclink" href="#step-3-interpret-message-types">Step 3: Interpret Message Types</a></h2>
+<p>A recorded conversation contains several message types. Each represents a distinct part of the prompt sent to the LLM.</p>
+<h3 id="systemmessage"><a class="toclink" href="#systemmessage">SystemMessage</a></h3>
+<p>The system message sets the LLM's role, behavior, and constraints. This includes:</p>
+<ul>
+<li>Byte's core system prompt defining its identity as a CLI agent</li>
+<li>Your project's constitution (all governance principles and standards)</li>
+<li>Behavioral guidelines for the specific workflow</li>
+<li>Instructions on how to structure responses</li>
+</ul>
+<p>If you suspect the constitution isn't being applied, check the SystemMessage section first.</p>
+<h3 id="humanmessage"><a class="toclink" href="#humanmessage">HumanMessage</a></h3>
+<p>The human message contains the actual task or request. This includes:</p>
+<ul>
+<li>The user's original instruction or query</li>
+<li>Task-specific guidance and context</li>
+<li>Details about files being edited, created, or referenced</li>
+<li>Workflow metadata and phase information</li>
+</ul>
+<h3 id="aimessage"><a class="toclink" href="#aimessage">AIMessage</a></h3>
+<p>The AI message is the model's response. It contains:</p>
+<ul>
+<li>Reasoning or explanation of the approach</li>
+<li>Tool calls made by the model (structured JSON with tool names and arguments)</li>
+<li>Any follow-up decisions or status updates</li>
+</ul>
+<p>If tool calls are present, they appear formatted as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Tool Calls:
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  - tool_name: {&quot;arg1&quot;: &quot;value1&quot;, &quot;arg2&quot;: &quot;value2&quot;}
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  - another_tool: {&quot;param&quot;: &quot;data&quot;}
+</code></pre></div>
+<h3 id="other-message-types"><a class="toclink" href="#other-message-types">Other Message Types</a></h3>
+<p>Depending on the workflow, you may see:</p>
+<ul>
+<li><strong>ToolMessage</strong>: Results returned from executed tools (e.g., file contents, command output)</li>
+<li><strong>ToolErrorMessage</strong>: Errors encountered during tool execution</li>
+<li><strong>MessageHistory</strong>: Previous conversation turns (when multi-turn interactions are involved)</li>
+</ul>
+<h2 id="step-4-read-through-a-conversation"><a class="toclink" href="#step-4-read-through-a-conversation">Step 4: Read Through a Conversation</a></h2>
+<p>Open a conversation file and scan for what you need to verify:</p>
+<h3 id="find-the-constitution-injection"><a class="toclink" href="#find-the-constitution-injection">Find the Constitution Injection</a></h3>
+<p>In the SystemMessage, look for the constitution principles. Search for headers like:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>## Core Principles
+</code></pre></div>
+<p>This confirms that governance rules were injected into the prompt. If the constitution is missing or incomplete, that explains why the model didn't follow expected constraints.</p>
+<h3 id="find-the-injected-context"><a class="toclink" href="#find-the-injected-context">Find the Injected Context</a></h3>
+<p>In the HumanMessage, look for section tags like:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>&lt;session_context type=&quot;file&quot; key=&quot;...&quot;&gt;
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>[file or web content here]
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>&lt;/session_context&gt;
+</code></pre></div>
+<p>These sections show what external context the model had access to. If you added files via <code>/context</code> but don't see them here, context injection failed.</p>
+<h3 id="review-tool-calls"><a class="toclink" href="#review-tool-calls">Review Tool Calls</a></h3>
+<p>In the AIMessage, the Tool Calls section shows exactly what the model attempted to do. Check:</p>
+<ul>
+<li>Are tool names correct and spelled right?</li>
+<li>Do argument values make sense for the task?</li>
+<li>Are file paths correct?</li>
+<li>Did the model use the right tools in the right order?</li>
+</ul>
+<p>If a tool call looks wrong, you've found where the model went off track.</p>
+<h3 id="trace-workflow-decisions"><a class="toclink" href="#trace-workflow-decisions">Trace Workflow Decisions</a></h3>
+<p>For multi-step workflows, open the files in sequence (0_assistant_node.md, then 1_assistant_node.md, etc.). Each file shows what the model knew at that step and what decisions it made. This traces the exact path the workflow took.</p>
+<h2 id="common-use-cases"><a class="toclink" href="#common-use-cases">Common Use Cases</a></h2>
+<h3 id="debugging-an-unexpected-tool-call"><a class="toclink" href="#debugging-an-unexpected-tool-call">Debugging an Unexpected Tool Call</a></h3>
+<p>The model called the wrong tool or passed incorrect arguments. Open the conversation file and check:</p>
+<ol>
+<li>What was in the HumanMessage? Was the task clear?</li>
+<li>What was in the SystemMessage? Were tool descriptions correct?</li>
+<li>What tool calls appear in the AIMessage? What went wrong?</li>
+</ol>
+<p>Example: If the model tried to edit a file that doesn't exist, check whether the file path in HumanMessage was correct and whether the model's understanding of the project structure (from SystemMessage) was accurate.</p>
+<h3 id="verifying-constitution-enforcement"><a class="toclink" href="#verifying-constitution-enforcement">Verifying Constitution Enforcement</a></h3>
+<p>You want to confirm that your project's governance principles are being applied. Check:</p>
+<ol>
+<li>Open the SystemMessage section</li>
+<li>Search for your constitution principles by name or ID (e.g., "domain-driven-design", "strict-typing")</li>
+<li>Verify they appear in full and are readable</li>
+</ol>
+<p>If they're missing or truncated, the model may not have been constrained by them.</p>
+<h3 id="inspecting-context-injection"><a class="toclink" href="#inspecting-context-injection">Inspecting Context Injection</a></h3>
+<p>You added files via <code>/context</code> and want to confirm the model received them:</p>
+<ol>
+<li>Open the HumanMessage section</li>
+<li>Search for <code>&lt;session_context&gt;</code></li>
+<li>Verify that your files appear with correct keys</li>
+<li>Check that file content is present (not just file names)</li>
+</ol>
+<p>If files are missing, re-add them with <code>/context</code> and run the workflow again.</p>
+<h3 id="checking-tool-execution-order"><a class="toclink" href="#checking-tool-execution-order">Checking Tool Execution Order</a></h3>
+<p>Multi-step workflows use tool nodes to execute actions. If the workflow took an unexpected path:</p>
+<ol>
+<li>Open the first assistant_node file (step 0)</li>
+<li>Check what tool it called and with what arguments</li>
+<li>Open the corresponding tool_node file (step 0_tool_node)</li>
+<li>See what result was returned</li>
+<li>Open the next assistant_node file (step 1)</li>
+<li>Check whether the model's next action made sense given the previous result</li>
+</ol>
+<p>This traces cause-and-effect through the workflow.</p>
+<h3 id="analyzing-prompt-size-and-structure"><a class="toclink" href="#analyzing-prompt-size-and-structure">Analyzing Prompt Size and Structure</a></h3>
+<p>Open a conversation file and visually scan its size:</p>
+<ul>
+<li><strong>Small files</strong> (~1-5 KB): Minimal context, simple task</li>
+<li><strong>Medium files</strong> (~10-50 KB): Normal complexity with some context</li>
+<li><strong>Large files</strong> (&gt;100 KB): Heavy context, large codebase, or accumulated message history</li>
+</ul>
+<p>If files are growing very large, context may be bloating. This can reduce model quality and increase cost. Consider clearing session context or breaking workflows into smaller pieces.</p>
+<h2 id="understanding-cache-lifecycle"><a class="toclink" href="#understanding-cache-lifecycle">Understanding Cache Lifecycle</a></h2>
+<p>The conversation cache is cleared at the start of every workflow run. When you run a new workflow:</p>
+<ol>
+<li>Byte deletes all previous conversations for that workflow (from <code>.byte/cache/conversations/{workflow_name}/</code>)</li>
+<li>New conversations are recorded as the workflow executes</li>
+<li>When the workflow ends, files remain on disk for review</li>
+</ol>
+<p><strong>Important</strong>: Conversations are only kept for the most recent run of each workflow. If you run the same workflow twice, the first run's recordings are deleted.</p>
+<p>To preserve conversations for long-term analysis, copy them to another directory before running the workflow again:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Save conversations before re-running</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>cp<span class="w"> </span>-r<span class="w"> </span>.byte/cache/conversations/my-workflow<span class="w"> </span>~/my-workflow-archive/run-1
+</code></pre></div>
+<h2 id="tips-for-effective-review"><a class="toclink" href="#tips-for-effective-review">Tips for Effective Review</a></h2>
+<ul>
+<li><strong>Start from the end and work backward</strong>: Open the final step first to see what the model concluded, then trace back through earlier steps to understand how it got there.</li>
+<li><strong>Compare multiple runs</strong>: Run the same workflow twice with different inputs or context and compare their conversation files side-by-side.</li>
+<li><strong>Search for keywords</strong>: Use <code>grep</code> to search all conversations for specific terms: <code>grep -r "constitution" .byte/cache/conversations/</code></li>
+<li><strong>Monitor token usage</strong>: Conversation files don't show token counts directly, but the TUI output during workflow execution does. Combine that with conversation review to understand cost drivers.</li>
+</ul>
+<h2 id="next-steps"><a class="toclink" href="#next-steps">Next Steps</a></h2>
+<p>Now that you can review conversations, explore how to use this information to:</p>
+<ul>
+<li>Refine prompts and system messages in your workflows</li>
+<li>Debug tool integrations and verify correct execution</li>
+<li>Optimize context injection for better model performance</li>
+<li>Understand the constitution application in real workflows</li>
+</ul>
+<p>For deeper insights into how Byte assembles prompts and manages state, see the explanation section on workflow execution and prompt assembly.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.path", "navigation.instant", "navigation.instant.prefetch", "navigation.instant.progress", "navigation.sections", "navigation.indexes", "navigation.tracking", "content.code.annotate", "toc.follow", "navigation.footer", "navigation.top", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
