@@ -156,6 +156,55 @@ The gateway is built for local development and scoped accordingly.
 
 {% include "references/gateway-requests.md" %}
 
+## Available Notifications
+
+The gateway pushes notifications to connected clients asynchronously—no request required. Your client receives these whenever Byte has state changes to report. All notifications follow the `RpcNotification` format with no `id` field.
+
+### messages/response
+
+Streamed response chunks from Byte. Sent repeatedly as the response generates, with `done: true` on the final chunk.
+
+**Parameters**:
+
+- `content` (string) — The response text fragment
+- `done` (boolean) — `true` on the final chunk; `false` for all intermediate chunks
+
+### messages/update_files
+
+Reports the current number of files tracked in the AI context.
+
+**Parameters**:
+
+- `count` (integer) — The total number of files currently in context
+
+### messages/update_context
+
+Reports the current number of items in the session context.
+
+**Parameters**:
+
+- `context_count` (integer) — The total number of context items currently loaded
+
+### messages/command_execution_started
+
+Signals that Byte has begun executing a command. No parameters.
+
+**Parameters**: `{}`
+
+### messages/command_execution_completed
+
+Signals that Byte has finished executing a command. No parameters.
+
+**Parameters**: `{}`
+
+### messages/status
+
+Sent when Byte encounters an error condition. Only fired on error state—not for informational or success status updates.
+
+**Parameters**:
+
+- `message` (string) — A human-readable description of the error
+
 ## Key Takeaways
 
 1. **The gateway is a persistent WebSocket server** — not a REST API; the connection stays open for the lifetime of the session
