@@ -1,7 +1,5 @@
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
 
 permissions:
   contents: write
@@ -149,7 +147,7 @@ jobs:
 
       # - name: Setup | Generate commands documentation
       #   run: uv run python src/scripts/commands_to_md.py
-      
+
       # - name: Setup | Generate settings documentation
       #   run: uv run python src/scripts/settings_to_md.py
 
@@ -207,16 +205,16 @@ jobs:
     needs: [deploy]
     if: needs.deploy.result == 'success'
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
         python-version: '3.12'
-    
+
     - name: Wait for package availability
       run: sleep 30
-    
+
     - name: Install from PyPI
       run: |
         pip install byte-ai-cli
@@ -227,41 +225,41 @@ jobs:
     needs: [build, release]
     if: needs.release.outputs.released == 'true'
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: write
-    
+
     steps:
       - name: Setup | Checkout Repository
         uses: actions/checkout@v6
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
-      
+
       - name: Setup | Configure Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-      
+
       - name: Setup | Fetch staging branch
         run: git fetch origin staging:staging
-      
+
       - name: Setup | Merge changes to staging
         run: |
           git checkout staging
           git merge ${{ github.ref_name }} --no-edit
-      
+
       - name: Setup | Push changes to staging
         run: git push origin staging
-      
+
       - name: Setup | Fetch development branch
         run: git fetch origin development:development
-      
+
       - name: Setup | Merge changes to development
         run: |
           git checkout development
           git merge staging --no-edit
-      
+
       - name: Setup | Push changes to development
         run: git push origin development
 

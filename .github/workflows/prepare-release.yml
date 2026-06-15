@@ -1,7 +1,5 @@
 on:
-  push:
-    branches:
-      - staging
+  workflow_call:
 
 permissions:
   contents: write
@@ -75,7 +73,7 @@ jobs:
 
       - name:  Docs | Update available commands
         run: uv run python src/scripts/commands_to_md.py
-      
+
       - name:  Docs | Update Setting options
         run: uv run python src/scripts/settings_to_md.py
 
@@ -84,16 +82,16 @@ jobs:
 
       - name: Setup | Stage updated documentation
         run: git add .
-      
+
       - name: Setup | Configure Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-      
+
       - name: Setup | Commit changes
         run: |
           git commit -m "chore: update documentation and configuration"
-      
+
       - name: Setup | Push changes to staging
         run: git push origin ${{ github.ref_name }}
 
