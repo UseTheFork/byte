@@ -109,10 +109,14 @@ def main() -> None:
         ["git", "add", "src/byte/llm/resources/models_data.yaml"],
         "Staging models_data.yaml",
     )
-    run_command(
-        ["git", "commit", "-m", "docs: update generated documentation and models"],
-        "Committing generated files",
-    )
+    diff_result = subprocess.run(["git", "diff", "--cached", "--quiet"], capture_output=True)
+    if diff_result.returncode == 0:
+        console.print("[dim]i[/] No generated file changes to commit, skipping")
+    else:
+        run_command(
+            ["git", "commit", "-m", "docs: update generated documentation and models"],
+            "Committing generated files",
+        )
 
     # Step: Build next version artifacts
     console.print("\n=== Step: Build next version artifacts ===")
