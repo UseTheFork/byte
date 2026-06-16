@@ -1,6 +1,6 @@
 [project]
 name = "byte-ai-cli"
-version = "2.0.0"
+version = "2.1.0"
 description = "A CLI coding agent built for efficiency, not autonomy."
 readme = "README.md"
 requires-python = ">=3.14"
@@ -64,7 +64,7 @@ dev = [
     "pytest-env>=1.5.1",
     "pytest-mock>=3.15.1",
     "pytest-recording>=0.13.4",
-    "python-semantic-release>=9.21.1",
+    "python-semantic-release>=10",
     "ruff>=0.12.12",
     "ssort>=0.16.0",
     "textual-dev>=1.8.0",
@@ -164,9 +164,13 @@ build-backend = "uv_build"
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
 build_command = """
-  uv lock --upgrade-package byte-ai-cli
-  uv build
+    uv build
 """
+# build_command = """
+#     uv lock --upgrade-package byte-ai-cli
+#     git add uv.lock
+#     uv build
+# """
 commit_subject = "chore: release v{version}"
 commit_message = "chore: release v{version}"
 commit_parser = "conventional"

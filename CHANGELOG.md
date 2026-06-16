@@ -1,6 +1,53 @@
 # CHANGELOG
 
 
+## v2.1.0 (2026-06-15)
+
+### Bug Fixes
+
+- Skip commit when no generated file changes exist
+  ([`f9e894f`](https://github.com/UseTheFork/byte/commit/f9e894f8284835175b1064773b6cce492bcb9021))
+
+- Check for staged changes using git diff --cached --quiet before attempting to commit generated
+  files - If no staged changes exist, print informational message and skip commit instead of failing
+  - Prevents release script from aborting when generated docs and models have not changed since last
+  commit - This is the expected case when releasing without documentation or model updates
+
+### Build System
+
+- Convert release workflows to workflow_call and add local release script
+  ([`ec38919`](https://github.com/UseTheFork/byte/commit/ec38919e65c24e9beee668b3d72c74d11c110dde))
+
+- Convert prepare-release.yml and release.yml from push triggers to workflow_call for manual
+  invocation - Add src/scripts/release.py for local release automation: documentation generation,
+  git staging/committing, semantic versioning, GitHub release creation, and PyPI publishing - Add
+  site/ to .gitignore to exclude MkDocs build output - Standardize whitespace formatting in workflow
+  files
+
+### Documentation
+
+- Document available gateway notifications in the-gateway.md
+  ([`ab076ad`](https://github.com/UseTheFork/byte/commit/ab076ad780090609da3fd36e303b8bff881afca8))
+
+- Add 'Available Notifications' section documenting all six push notifications sent by the gateway -
+  Include messages/response, messages/update_files, messages/update_context,
+  messages/command_execution_started, messages/command_execution_completed, and messages/status -
+  Each notification entry documents parameters and behavior following the existing gateway-requests
+  style - Notifications section placed immediately after 'Available Requests' for logical
+  documentation flow
+
+### Features
+
+- Refactor gateway event notifications to messages namespace and add new event types
+  ([`32569b3`](https://github.com/UseTheFork/byte/commit/32569b3395c650b006caf720be1f38e73e4a1358))
+
+- Rename notification channels from stream/* to messages/* for consistent messaging architecture -
+  Add CommandExecutionStarted, UpdateFiles, and UpdateContext message handlers - Remove deprecated
+  ToolResponse message type from event dispatcher - Update docs/index.md with comprehensive landing
+  page content covering core principles, quick start guides, and inspirations - Enhance README.md
+  tagline with branded ASCII art styling
+
+
 ## v2.0.0 (2026-06-15)
 
 ### Bug Fixes
