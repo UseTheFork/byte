@@ -1181,6 +1181,89 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#available-notifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Notifications
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Available Notifications">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#messagesresponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        messages/response
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messagesupdate_files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        messages/update_files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messagesupdate_context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        messages/update_context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messagescommand_execution_started" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        messages/command_execution_started
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messagescommand_execution_completed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        messages/command_execution_completed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messagesstatus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        messages/status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#key-takeaways" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1489,6 +1572,89 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#available-notifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Notifications
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Available Notifications">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#messagesresponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        messages/response
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messagesupdate_files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        messages/update_files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messagesupdate_context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        messages/update_context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messagescommand_execution_started" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        messages/command_execution_started
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messagescommand_execution_completed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        messages/command_execution_completed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#messagesstatus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        messages/status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#key-takeaways" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1719,6 +1885,39 @@
 </ul>
 <p><strong>Response</strong>: <code>{"ok": true}</code></p>
 <p><strong>Errors</strong>: <code>-32001</code> (Internal Error) if operation fails</p>
+<h2 id="available-notifications"><a class="toclink" href="#available-notifications">Available Notifications</a></h2>
+<p>The gateway pushes notifications to connected clients asynchronously—no request required. Your client receives these whenever Byte has state changes to report. All notifications follow the <code>RpcNotification</code> format with no <code>id</code> field.</p>
+<h3 id="messagesresponse"><a class="toclink" href="#messagesresponse">messages/response</a></h3>
+<p>Streamed response chunks from Byte. Sent repeatedly as the response generates, with <code>done: true</code> on the final chunk.</p>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>content</code> (string) — The response text fragment</li>
+<li><code>done</code> (boolean) — <code>true</code> on the final chunk; <code>false</code> for all intermediate chunks</li>
+</ul>
+<h3 id="messagesupdate_files"><a class="toclink" href="#messagesupdate_files">messages/update_files</a></h3>
+<p>Reports the current number of files tracked in the AI context.</p>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>count</code> (integer) — The total number of files currently in context</li>
+</ul>
+<h3 id="messagesupdate_context"><a class="toclink" href="#messagesupdate_context">messages/update_context</a></h3>
+<p>Reports the current number of items in the session context.</p>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>context_count</code> (integer) — The total number of context items currently loaded</li>
+</ul>
+<h3 id="messagescommand_execution_started"><a class="toclink" href="#messagescommand_execution_started">messages/command_execution_started</a></h3>
+<p>Signals that Byte has begun executing a command. No parameters.</p>
+<p><strong>Parameters</strong>: <code>{}</code></p>
+<h3 id="messagescommand_execution_completed"><a class="toclink" href="#messagescommand_execution_completed">messages/command_execution_completed</a></h3>
+<p>Signals that Byte has finished executing a command. No parameters.</p>
+<p><strong>Parameters</strong>: <code>{}</code></p>
+<h3 id="messagesstatus"><a class="toclink" href="#messagesstatus">messages/status</a></h3>
+<p>Sent when Byte encounters an error condition. Only fired on error state—not for informational or success status updates.</p>
+<p><strong>Parameters</strong>:</p>
+<ul>
+<li><code>message</code> (string) — A human-readable description of the error</li>
+</ul>
 <h2 id="key-takeaways"><a class="toclink" href="#key-takeaways">Key Takeaways</a></h2>
 <ol>
 <li><strong>The gateway is a persistent WebSocket server</strong> — not a REST API; the connection stays open for the lifetime of the session</li>
