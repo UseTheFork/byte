@@ -121,7 +121,7 @@ def main() -> None:
     # Step: Build next version artifacts
     console.print("\n=== Step: Build next version artifacts ===")
     result = run_command(
-        ["uv", "run", "semantic-release", "-v", "version", "--no-changelog", "--no-commit", "--no-tag"],
+        ["uv", "run", "semantic-release", "-v", "version"],
         "Building version and artifacts",
     )
 
@@ -156,3 +156,12 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+# semantic-release -v version --skip-build --no-commit --no-tag --no-changelog
+# uv lock --upgrade-package byte-ai-cli
+# git add uv.lock
+# gh release create v2.1.0 --title "v2.1.0" --notes "so many changes it crashes the api"
+# uv build
+# gh release upload v2.1.0 dist/*
+# uv run --all-groups mkdocs gh-deploy --force
