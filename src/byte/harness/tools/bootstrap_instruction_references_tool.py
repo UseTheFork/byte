@@ -6,6 +6,7 @@ from byte.orchestration import BaseState, HarnessStateUtils
 from byte.support import Section, SectionType
 from byte.tools import BaseTool, ToolResult
 from byte.tools.exceptions import ToolValidationException
+from byte.tui import InteractionService
 
 
 class BootstrapInstructionReferencesTool(BaseTool):
@@ -47,9 +48,25 @@ class BootstrapInstructionReferencesTool(BaseTool):
 
         file_service = self.app.make(FileService)
 
+        interaction_service = self.app.make(InteractionService)
+
         missing_reference = [f for f in reference_files if file_service.get_file_context(f) is None]
-        if missing_reference:
-            raise ToolValidationException(f"File(s) not found: {', '.join(missing_reference)}.")
+        still_missing = []
+
+        for path in missing_reference:
+            confirmed = await interaction_service.confirm(f"File `{path}` is not in context. Add it?", default=True)
+            if confirmed:
+                added = await file_service.add_file(path)
+                if not added:
+                    still_missing.append(path)
+            else:
+                still_missing.append(path)
+
+        if missing_reference and not still_missing:
+            await file_service.notify_file_stats()
+
+        if still_missing:
+            raise ToolValidationException(f"File(s) not found: {', '.join(still_missing)}.")
 
         harness = HarnessStateUtils.set_files(state, reference=reference_files)
 

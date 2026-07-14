@@ -6,6 +6,7 @@ from byte.skills import SkillLoaderService
 from byte.support import Section, SectionType
 from byte.tools import BaseTool, ToolResult
 from byte.tools.exceptions import ToolValidationException
+from byte.tui import InteractionService
 
 
 class BootstrapSkillsFilesTool(BaseTool):
@@ -61,12 +62,28 @@ class BootstrapSkillsFilesTool(BaseTool):
 
         file_service = self.app.make(FileService)
 
+        interaction_service = self.app.make(InteractionService)
+
         missing_editable = [f for f in editable_files if file_service.get_file_context(f) is None]
         missing_reference = [f for f in reference_files if file_service.get_file_context(f) is None]
 
         all_missing = missing_editable + missing_reference
-        if all_missing:
-            raise ToolValidationException(f"File(s) not found: {', '.join(all_missing)}.")
+        still_missing = []
+
+        for path in all_missing:
+            confirmed = await interaction_service.confirm(f"File `{path}` is not in context. Add it?", default=True)
+            if confirmed:
+                added = await file_service.add_file(path)
+                if not added:
+                    still_missing.append(path)
+            else:
+                still_missing.append(path)
+
+        if all_missing and not still_missing:
+            await file_service.notify_file_stats()
+
+        if still_missing:
+            raise ToolValidationException(f"File(s) not found: {', '.join(still_missing)}.")
 
         harness = HarnessStateUtils.set_files(
             state, edit=editable_files, create=create_files, reference=reference_files
