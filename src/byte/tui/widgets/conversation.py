@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 from textual import getters, on, work
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import VerticalScroll
 from textual.css.query import NoMatches
 from textual.reactive import reactive
 from textual.widget import Widget
@@ -21,6 +20,7 @@ from byte.tui.widgets.prompt.status_bar import StatusBar
 from byte.tui.widgets.response_panel import ResponsePanel
 from byte.tui.widgets.ui.selectable_markdown import SelectableMarkdown
 from byte.tui.widgets.ui.token_usage_rule import TokenUsageRule
+from byte.tui.widgets.ui.virtualized_vertical_scroll import VirtualizedVerticalScroll
 
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
@@ -55,7 +55,7 @@ class Conversation(Widget):
     prompt = getters.query_one("#prompt", PromptPanel)
     prompt_text_area = getters.query_one(PromptTextArea)
     status_bar = getters.query_one(StatusBar)
-    chat_container = getters.query_one("#chat-container", VerticalScroll)
+    chat_container = getters.query_one("#chat-container", VirtualizedVerticalScroll)
 
     def __init__(
         self,
@@ -74,8 +74,8 @@ class Conversation(Widget):
         self.event_bus = self.app.byte.make(EventBus)
 
     def compose(self) -> ComposeResult:
-        with VerticalScroll(id="chat-container") as vertical_scroll:
-            vertical_scroll.can_focus = False
+        with VirtualizedVerticalScroll(id="chat-container") as virtualized_scroll:
+            virtualized_scroll.can_focus = False
         yield PromptPanel(id="prompt").data_bind(allow_input_submit=Conversation.allow_input_submit)
 
     def scroll_to_latest_message(self):
@@ -159,14 +159,16 @@ class Conversation(Widget):
         if panel_id is None:
             raise ValueError("panel_id cannot be None")
 
-        try:
-            pending_panel = self.query_one(f"#{panel_id}", ResponsePanel)
-            return pending_panel
-        except NoMatches:
-            pending_panel = ResponsePanel(id=panel_id)
-            await self.chat_container.mount(pending_panel)
-            self.chat_container.refresh(layout=True)
-            return pending_panel
+        # Check if panel exists in virtualized container
+        existing_panel = self.chat_container.get_panel(panel_id)
+        if existing_panel is not None:
+            return existing_panel
+
+        # Create new panel
+        pending_panel = ResponsePanel(id=panel_id)
+        await self.chat_container.add_panel(pending_panel)
+        self.chat_container.refresh(layout=True)
+        return pending_panel
 
     @on(Messages.CommandExecutionStarted)
     async def command_execution_started(self, event: Messages.CommandExecutionStarted) -> None:
@@ -174,6 +176,7 @@ class Conversation(Widget):
 
     @on(Messages.CommandExecutionCompleted)
     async def command_execution_completed(self, event: Messages.CommandExecutionCompleted) -> None:
+        self.chat_container.clear_active()
         self.post_message(Messages.Status())
         self.move_focus_to_prompt()
         self.allow_input_submit = True
@@ -231,6 +234,7 @@ class Conversation(Widget):
         if event.status is Status.PENDING:
             heading = Str.snake_to_title(str(event.chunk)).replace(" Node", "").strip()
             await response_panel.start_markdown_stream(heading)
+            self.chat_container.mark_active(event.panel_id)
         elif event.status is Status.RUNNING:
             await response_panel.add_markdown_chunk(str(event.chunk))
         elif event.status is Status.SUCCESS:
@@ -249,6 +253,7 @@ class Conversation(Widget):
                 tool_name=str(event.tool_name),
                 tool_id=str(event.tool_id),
             )
+            self.chat_container.mark_active(event.panel_id)
         elif event.status is Status.RUNNING:
             await response_panel.add_tool_chunk(event.tool_id, str(event.chunk))
         elif event.status is Status.SUCCESS:
@@ -291,6 +296,7 @@ class Conversation(Widget):
         response_panel = await self.get_or_create_response_panel(event.panel_id)
 
         if event.status is Status.PENDING:
+            self.chat_container.mark_active(event.panel_id)
             await response_panel.create_linting(event)
         elif event.status is Status.RUNNING:
             await response_panel.update_linting_progress(str(event.current_file), event.completed, event.total)
@@ -358,16 +364,8 @@ class Conversation(Widget):
 
     @on(Messages.Clear)
     async def clear_conversation(self, event: Messages.Clear) -> None:
-        try:
-            for child in self.chat_container.query(ResponsePanel).results():
-                await child.remove()
-        except Exception:
-            pass
+        await self.chat_container.remove_all_panels()
 
     @on(Messages.RemovePanel)
     async def remove_panel(self, event: Messages.RemovePanel) -> None:
-        try:
-            panel = self.query_one(f"#{event.panel_id_to_remove}", ResponsePanel)
-            await panel.remove()
-        except NoMatches:
-            pass
+        await self.chat_container.remove_panel(event.panel_id_to_remove)

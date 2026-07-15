@@ -53,12 +53,8 @@ class ConversationScreen(Screen[None]):
         workflow_service.cancel()
         self.post_message(Messages.Notify(content="Cancel requested — stopping after current step..."))
 
-    def action_scroll_to_panel(self, panel_id: str) -> None:
-        try:
-            panel = self.conversation.chat_container.query_one(f"#{panel_id}", ResponsePanel)
-            panel.scroll_visible(animate=True)
-        except NoMatches:
-            pass
+    async def action_scroll_to_panel(self, panel_id: str) -> None:
+        await self.conversation.chat_container.ensure_panel_visible(panel_id)
 
     def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
         if action == "cancel_request":
@@ -121,7 +117,7 @@ class ConversationScreen(Screen[None]):
             styled_logo.append(styled_line)
 
         response_chatbox = Bootbox("\n".join(styled_logo) + "\n\n" + "\n".join(messages))
-        self.conversation.chat_container.mount(response_chatbox)
+        await self.conversation.chat_container.add_panel(response_chatbox)
 
     @work
     async def action_request_manage_files(self) -> None:
