@@ -80,7 +80,7 @@ class Conversation(Widget):
 
     def scroll_to_latest_message(self):
         container = self.chat_container
-        container.refresh()
+        container.refresh(layout=True)
         container.scroll_end(animate=False, force=True)
 
     # @on(PromptPanel.CursorEscapingTop)

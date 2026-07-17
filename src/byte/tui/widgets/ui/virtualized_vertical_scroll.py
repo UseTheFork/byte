@@ -150,6 +150,7 @@ class VirtualizedVerticalScroll(ScrollableContainer):
             slot.is_mounted = True
             # Cache height after mounting
             await self._cache_panel_height(slot)
+            self.refresh(layout=True)
         except Exception:
             pass
 
@@ -178,6 +179,7 @@ class VirtualizedVerticalScroll(ScrollableContainer):
 
         # Mount the panel
         await self.mount(panel)
+        self.refresh(layout=True)
 
     def mark_active(self, panel_id: str) -> None:
         """Mark a panel as the active streaming panel (never virtualized).
