@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, ClassVar
 from textual import getters, on, work
 from textual.app import ComposeResult
 from textual.binding import Binding, BindingType
-from textual.css.query import NoMatches
 from textual.reactive import reactive
 from textual.screen import Screen
 from textual.widgets import Footer
@@ -18,7 +17,6 @@ from byte.tui.screens.manage_files_screen import ManageFilesScreen
 from byte.tui.screens.usage_analytics_screen import UsageAnalyticsScreen
 from byte.tui.widgets.bootbox import Bootbox
 from byte.tui.widgets.conversation import Conversation
-from byte.tui.widgets.response_panel import ResponsePanel
 
 if TYPE_CHECKING:
     from byte.tui import ByteTUI
@@ -117,7 +115,11 @@ class ConversationScreen(Screen[None]):
             styled_logo.append(styled_line)
 
         response_chatbox = Bootbox("\n".join(styled_logo) + "\n\n" + "\n".join(messages))
-        await self.conversation.chat_container.add_panel(response_chatbox)
+        await self.conversation.chat_container.mount(response_chatbox)
+
+    #         await self.conversation.chat_container.add_panel(boot_panel)
+    #       await boot_panel.mount(response_chatbox)
+    # await self.conversation.chat_container.add_panel(response_chatbox)
 
     @work
     async def action_request_manage_files(self) -> None:

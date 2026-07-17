@@ -267,9 +267,9 @@ class VirtualizedVerticalScroll(ScrollableContainer):
     def _schedule_reconcile(self) -> None:
         """Schedule reconciliation with debouncing (0.2s)."""
         if self._reconcile_timer_handle is not None:
-            self.remove_timer(self._reconcile_timer_handle)
+            self._reconcile_timer_handle.stop()
 
-        self._reconcile_timer_handle = self.set_timer(self._reconcile, delay=0.2)
+        self._reconcile_timer_handle = self.set_timer(0.2, self._reconcile)
 
     def clear_active(self) -> None:
         """Clear the active panel marker."""
