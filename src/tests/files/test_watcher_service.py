@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from byte.config import ByteConfig
+from byte.files import FileEvents
 from tests.utils import create_test_file
 
 if TYPE_CHECKING:
@@ -106,7 +107,7 @@ async def test_ignores_files_matching_ignore_patterns(application: Application):
 @pytest.mark.asyncio
 async def test_removes_file_from_context_when_deleted(application: Application):
     """Test that watcher removes files from context when they are deleted."""
-    from byte.files import FileDiscoveryService, FileMode, FileService
+    from byte.files import FileDiscoveryService, FileService
 
     # Create a file and add it to context
     context_file = application.base_path("context_file.py")
@@ -120,7 +121,7 @@ async def test_removes_file_from_context_when_deleted(application: Application):
     await discovery_service.refresh()
 
     file_service = application.make(FileService)
-    await file_service.add_file(context_file, FileMode.EDITABLE)
+    await file_service.add_file(context_file)
 
     # Verify file is in context
     assert await file_service.is_file_in_context(context_file) is True
@@ -237,18 +238,18 @@ async def test_handles_rapid_file_changes(application: Application):
 
 @pytest.mark.asyncio
 async def test_emits_file_changed_event(application: Application):
-    """Test that watcher emits FILE_CHANGED events."""
-    from byte import EventBus, EventType
+    """Test that watcher emits FileEvents.FileChanged events."""
+    from byte import EventBus
 
     event_bus = application.make(EventBus)
     events_received = []
 
-    # Register listener for FILE_CHANGED events
+    # Register listener for FileEvents.FileChanged events
     async def capture_event(payload):
         events_received.append(payload)
         return payload
 
-    event_bus.on(EventType.FILE_CHANGED.value, capture_event)
+    event_bus.on(FileEvents.FileChanged, capture_event)
 
     # Create a new file
     new_file = application.base_path("event_test.py")
@@ -257,19 +258,19 @@ async def test_emits_file_changed_event(application: Application):
     # Wait for watcher to process and emit event
     await asyncio.sleep(0.5)
 
-    # Should have received at least one FILE_CHANGED event
+    # Should have received at least one FileEvents.FileChanged event
     assert len(events_received) > 0
 
     # Check event payload structure
     event = events_received[0]
-    assert event.get("file_path") is not None
-    assert event.get("change_type") in ["added", "modified", "deleted"]
+    assert event.file_path is not None
+    assert event.change_type in ["added", "modified", "deleted"]
 
 
 @pytest.mark.asyncio
 async def test_handles_file_modification(application: Application):
     """Test that watcher detects file modifications."""
-    from byte import EventBus, EventType
+    from byte import EventBus
 
     # Create a file first
     test_file = application.base_path("modify_test.py")
@@ -285,7 +286,7 @@ async def test_handles_file_modification(application: Application):
         events_received.append(payload)
         return payload
 
-    event_bus.on(EventType.FILE_CHANGED.value, capture_event)
+    event_bus.on(FileEvents.FileChanged, capture_event)
 
     # Modify the file
     test_file.write_text("# modified content")
