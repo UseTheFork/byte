@@ -170,7 +170,7 @@ class Select(VerticalGroup):
         for idx, option in enumerate(self.options):  # ty:ignore[invalid-argument-type]
             list_item = ListItem(ChoiceLabel(option))  # ty:ignore[invalid-argument-type]
             items.append(list_item)
-            if self.default and option == self.default:
+            if option.is_default:  # ty:ignore[unresolved-attribute]
                 initial_index = idx
         self.list_view = ListView(*items, initial_index=initial_index)  # ty:ignore[invalid-assignment]
         yield self.list_view

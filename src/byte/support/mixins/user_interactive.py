@@ -19,7 +19,7 @@ class UserInteractive:
 
     app: Application
 
-    async def prompt_for_input(self, message) -> str:
+    async def prompt_for_input(self, message) -> Answer:
         """Prompt the user for general input via the input actor.
 
         Sends a request to the UserInteractionActor to display the input prompt,
@@ -66,7 +66,7 @@ class UserInteractive:
 
     async def prompt_for_confirm_or_input(
         self, confirm_message: str, input_message: str, default_confirm: bool = True
-    ) -> tuple[bool, Optional[str]]:
+    ) -> tuple[bool, Optional[Answer]]:
         """Prompt user for confirmation, then text input if they decline.
 
         First asks for yes/no confirmation. If user declines, prompts for text input.
