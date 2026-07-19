@@ -20,6 +20,8 @@ class BootstrapAgentTool(BaseTool):
         "properties": {
             "instruction": {
                 "type": "string",
+                "minLength": 10,
+                "maxLength": 500,
                 "description": "A short, clear, concise instruction to pass to the coding agent on exactly what must be done to complete the users task.",
             },
             "skills": {
@@ -110,7 +112,9 @@ class BootstrapAgentTool(BaseTool):
 
     @classmethod
     def format_tool_message(cls, result: ToolResult) -> str:
-        return result.result.get("content", "")
+        content = result.result.get("content", "")
+        instruction = result.result.get("instruction", "")
+        return f"{content}\n\nInstruction:\n{instruction}"
 
     @classmethod
     def format_tui_message(cls, result: ToolResult) -> str:
