@@ -352,11 +352,12 @@ class VirtualizedVerticalScroll(ScrollableContainer):
         except Exception:
             pass
 
-    def watch_scroll_y(self, _old_value: float, _new_value: float) -> None:
+    def watch_scroll_y(self, old_value: float, new_value: float) -> None:
         """Debounce scroll events and trigger reconciliation.
 
         Args:
             _old_value: Previous scroll Y position.
             _new_value: New scroll Y position.
         """
+        super().watch_scroll_y(old_value, new_value)
         self._schedule_reconcile()
