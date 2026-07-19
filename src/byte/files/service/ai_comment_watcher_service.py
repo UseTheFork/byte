@@ -35,6 +35,17 @@ class AICommentWatcherService(Service):
 
         self.file_service = self.app.make(FileService)
 
+    def _clean_block_comment_text(self, text: str) -> str:
+        """Strip decorative leading asterisks and whitespace from block comment text."""
+        lines = text.split("\n")
+        cleaned_lines = []
+        for line in lines:
+            # Strip leading and trailing whitespace, then remove leading * characters
+            stripped = line.strip()
+            stripped = stripped.lstrip("*").strip()
+            cleaned_lines.append(stripped)
+        return "\n".join(cleaned_lines)
+
     def _extract_comment_lines(self, content: str) -> List[str]:
         """Extract comment blocks from content.
 
@@ -42,6 +53,23 @@ class AICommentWatcherService(Service):
         Returns list of (starting_line_number, combined_comment_text) tuples.
         """
         comment_blocks = []
+
+        # Block comment patterns (excluding Python docstrings)
+        block_patterns = [
+            (r"/\*(.+?)\*/", "c-style"),  # C-style /* */
+            (r"<!--(.+?)-->", "html-xml"),  # HTML/XML <!-- -->
+            (r"\{%\s*comment\s*%\}(.+?)\{%\s*endcomment\s*%\}", "django-jinja"),  # Django/Jinja/Liquid
+            (r"\{#(.+?)#\}", "jinja2"),  # Jinja2 {# #}
+        ]
+
+        # Extract block comments
+        for pattern, pattern_type in block_patterns:
+            matches = re.finditer(pattern, content, re.DOTALL)
+            for match in matches:
+                inner_text = match.group(1)
+                cleaned_text = self._clean_block_comment_text(inner_text)
+                if cleaned_text.strip():
+                    comment_blocks.append(cleaned_text)
 
         # Common single-line comment patterns across languages
         single_line_markers = ["#", "//", "--", ";", "%"]
@@ -91,11 +119,10 @@ class AICommentWatcherService(Service):
 
         # Determine action type (! or ?)
         action = None
-        comment_text = comment_text.lower().strip()
-        if comment_text.endswith("ai!"):
-            action = "!"
-        elif comment_text.endswith("ai?"):
-            action = "?"
+        action_pattern = re.compile(r"\bai([!?])\s*$", re.IGNORECASE | re.MULTILINE)
+        action_match = action_pattern.search(comment_text)
+        if action_match:
+            action = action_match.group(1)
 
         return {"marker": marker, "action": action}
 
