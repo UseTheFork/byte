@@ -41,9 +41,28 @@
 .strike {text-style: strike;}
 
 .text-primary {color: $primary;}
+.text-primary-90 {color: $primary 90%;}
+.text-primary-70 {color: $primary 70%;}
+.text-primary-50 {color: $primary 50%;}
+.text-primary-30 {color: $primary 30%;}
+
 .text-secondary {color: $secondary;}
+.text-secondary-90 {color: $secondary 90%;}
+.text-secondary-70 {color: $secondary 70%;}
+.text-secondary-50 {color: $secondary 50%;}
+.text-secondary-30 {color: $secondary 30%;}
+
 .text-accent {color: $accent;}
+.text-accent-90 {color: $accent 90%;}
+.text-accent-70 {color: $accent 70%;}
+.text-accent-50 {color: $accent 50%;}
+.text-accent-30 {color: $accent 30%;}
+
 .text-muted {color: $text-muted;}
+.text-muted-90 {color: $text-muted 90%;}
+.text-muted-70 {color: $text-muted 70%;}
+.text-muted-50 {color: $text-muted 50%;}
+.text-muted-30 {color: $text-muted 30%;}
 
 
 # #####

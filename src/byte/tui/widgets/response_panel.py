@@ -209,7 +209,7 @@ class ResponsePanel(VerticalGroup):
         )
 
         if self.aggregate_usage is None:
-            self.aggregate_usage = TokenUsageRule(text=summary_text, classes="text-accent")
+            self.aggregate_usage = TokenUsageRule(text=summary_text, classes="text-secondary-50")
             await self.mount(self.aggregate_usage)
         else:
             # Remove from DOM and re-mount at the bottom to ensure it stays last
