@@ -1,24 +1,55 @@
 from rich.console import RenderableType
+from textual.app import ComposeResult
+from textual.containers import Vertical
 from textual.widgets import Static
 
 
-class Bootbox(Static):
-    #     MESSAGE = """
-    # To get started, type a message in the box at the top of the
-    # screen and press [b u]ctrl+j[/] or [b u]alt+enter[/] to send it.
+class ByteLogo(Static):
+    """Render the Byte logo with diagonal progress styling."""
 
-    # Change the model and system prompt by pressing [b u]ctrl+o[/].
+    DEFAULT_CSS = """
+    ByteLogo {
+        width: 100%;
+        height: auto;
+        overflow-x: hidden;
+    }
+    """
 
-    # Make sure you've set any required API keys first (e.g. [b]OPENAI_API_KEY[/])!
+    def render(self) -> RenderableType:
+        """Render the Byte logo with diagonal progress styling and fill remaining width."""
+        logo_lines = [
+            "░       ░░░  ░░░░  ░░        ░░        ░",
+            "▒  ▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒▒▒",
+            "▓       ▓▓▓▓▓    ▓▓▓▓▓▓▓  ▓▓▓▓▓      ▓▓▓",
+            "█  ████  █████  ████████  █████  ███████",
+            "█       ██████  ████████  █████        █",
+        ]
 
-    # If you have any issues or feedback, please let me know [@click='open_issues'][b r]on GitHub[/][/]!
+        styled_logo: list[str] = []
+        for row_idx, line in enumerate(logo_lines):
+            styled_line = ""
+            for col_idx, char in enumerate(line):
+                diagonal_progress = (row_idx + col_idx) / (len(logo_lines) + len(line) - 2)
+                if diagonal_progress < 0.5:
+                    styled_line += f"[$primary]{char}[/$primary]"
+                else:
+                    styled_line += f"[$secondary]{char}[/$secondary]"
 
-    # Finally, please consider starring the repo and sharing it with your friends and colleagues!
+            logo_width = len(line)
+            remaining_width = self.size.width - logo_width
+            if remaining_width > 0:
+                last_char = line[-1] if line else " "
+                last_diagonal_progress = (row_idx + len(line) - 1) / (len(logo_lines) + len(line) - 2)
+                style = "$primary" if last_diagonal_progress < 0.5 else "$secondary"
+                styled_line += f"[{style}]{last_char * remaining_width}[/{style}]"
 
-    # [@click='open_repo'][b r]https://github.com/darrenburns/elia[/][/]
-    # """
+            styled_logo.append(styled_line)
 
-    #     BORDER_TITLE = "Welcome to Byte!"
+        return "\n".join(styled_logo)
+
+
+class Bootbox(Vertical):
+    """Container for boot messages with logo."""
 
     DEFAULT_CSS = """
     Bootbox {
@@ -29,12 +60,13 @@ class Bootbox(Static):
         margin: 0 1;
         padding: 0 2;
         border: round $primary;
+        overflow-x: hidden;
     }
     """
 
     def __init__(
         self,
-        message: str,
+        messages: list[str],
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
@@ -46,7 +78,10 @@ class Bootbox(Static):
             classes=classes,
             disabled=disabled,
         )
-        self.message = message
+        self.messages = messages
 
-    def render(self) -> RenderableType:
-        return self.message
+    def compose(self) -> ComposeResult:
+        """Compose ByteLogo and messages."""
+        yield ByteLogo()
+        if self.messages:
+            yield Static("\n".join(self.messages))

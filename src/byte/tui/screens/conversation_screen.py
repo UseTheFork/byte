@@ -23,6 +23,8 @@ if TYPE_CHECKING:
 
 
 class ConversationScreen(Screen[None]):
+    """Display and manage the conversation interface."""
+
     app: ByteTUI
 
     conversation = getters.query_one(Conversation)
@@ -49,6 +51,7 @@ class ConversationScreen(Screen[None]):
     ]
 
     def action_cancel_request(self) -> None:
+        """Cancel the current workflow execution."""
         from byte.orchestration import WorkflowService
 
         self.is_cancelling = True
@@ -58,9 +61,11 @@ class ConversationScreen(Screen[None]):
         workflow_service.cancel()
 
     async def action_scroll_to_panel(self, panel_id: str) -> None:
+        """Scroll to ensure the specified panel is visible."""
         await self.conversation.chat_container.ensure_panel_visible(panel_id)
 
     def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
+        """Validate if an action is allowed to execute."""
         if action == "cancel_request":
             if self.is_cancelling:
                 return None
@@ -70,77 +75,46 @@ class ConversationScreen(Screen[None]):
 
     @on(Messages.CommandExecutionStarted)
     async def command_execution_started(self, event: Messages.CommandExecutionStarted) -> None:
+        """Mark the workflow as executing."""
         self.is_working = True
 
     @on(Messages.CommandExecutionCompleted)
     async def command_execution_completed(self, event: Messages.CommandExecutionCompleted) -> None:
+        """Mark the workflow as complete."""
         self.is_working = False
         self.is_cancelling = False
 
     def compose(self) -> ComposeResult:
+        """Compose the screen layout with conversation widget and footer."""
         yield Conversation()
         yield Footer(show_command_palette=False)
 
-    async def on_mount(self):
-
-        # TODO: This should not be here I think.
+    async def on_mount(self) -> None:
+        """Initialize the screen with post-boot messages."""
         event_bus = self.app.byte.make(EventBus)
 
         # Emit our post boot message to gather all needed info.
         payload = await event_bus.emit(SystemEvents.PostBoot(messages=[]))
         messages = payload.messages
 
-        styled_logo = []
-        logo_lines = [
-            "░       ░░░  ░░░░  ░░        ░░        ░",
-            "▒  ▒▒▒▒  ▒▒▒  ▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒  ▒▒▒▒▒▒▒",
-            "▓       ▓▓▓▓▓    ▓▓▓▓▓▓▓  ▓▓▓▓▓      ▓▓▓",
-            "█  ████  █████  ████████  █████  ███████",
-            "█       ██████  ████████  █████        █",
-        ]
-
-        for row_idx, line in enumerate(logo_lines):
-            styled_line = ""
-            for col_idx, char in enumerate(line):
-                # Calculate diagonal position (0.0 = top-left, 1.0 = bottom-right)
-                diagonal_progress = (row_idx + col_idx) / (len(logo_lines) + len(line) - 2)
-
-                # Use primary for first half, secondary for second half of diagonal
-                if diagonal_progress < 0.5:
-                    styled_line += f"[$primary]{char}[/$primary]"
-                else:
-                    styled_line += f"[$secondary]{char}[/$secondary]"
-
-            # Fill remaining width with the last character
-            logo_width = len(line)
-            remaining_width = self.size.width - logo_width - 20
-
-            if remaining_width > 0:
-                last_char = line[-1] if line else " "
-                last_diagonal_progress = (row_idx + len(line) - 1) / (len(logo_lines) + len(line) - 2)
-                style = "$primary" if last_diagonal_progress < 0.5 else "$secondary"
-                styled_line += f"[{style}]{last_char * remaining_width}[/{style}]"
-
-            styled_logo.append(styled_line)
-
-        response_chatbox = Bootbox("\n".join(styled_logo) + "\n\n" + "\n".join(messages))
+        response_chatbox = Bootbox(messages=messages)
         await self.conversation.chat_container.mount(response_chatbox)
 
     @work
     async def action_request_manage_files(self) -> None:
-        """"""
+        """Display the manage files screen and refresh file statistics."""
         await self.app.push_screen_wait(ManageFilesScreen())
         file_service = self.app.byte.make(FileService)
         await file_service.notify_file_stats()
 
     @work
     async def action_request_manage_context(self) -> None:
-        """"""
+        """Display the manage context screen and refresh context statistics."""
         await self.app.push_screen_wait(ManageContextScreen())
         session_context_service = self.app.byte.make(SessionContextService)
         session_context_service.notify_context_stats()
 
     @work
     async def action_request_usage_analytics(self) -> None:
-        """"""
+        """Display the usage analytics screen."""
         await self.app.push_screen_wait(UsageAnalyticsScreen())
