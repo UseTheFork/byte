@@ -89,6 +89,7 @@ class ContextDropCommand(Command):
             self.emit_tui(Messages.CommandExecutionCompleted())
             return
 
+        session_context_service.notify_context_stats()
         self.emit_tui(Messages.CommandExecutionCompleted())
 
     async def get_completions(self, text: str) -> List[str]:

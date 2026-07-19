@@ -99,6 +99,7 @@ class WebCommand(Command, UserInteractive):
                 key = slugify(url)
                 model = self.app.make(SessionContextModel, type="web", key=key, content=markdown_content)
                 session_context_service.add_context(model)
+                session_context_service.notify_context_stats()
 
             elif choice.value == "clean":
                 # console.print_info("Cleaning content with LLM...")

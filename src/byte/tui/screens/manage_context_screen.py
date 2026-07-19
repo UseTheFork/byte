@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING, ClassVar
 
-from textual import on
 from textual.app import ComposeResult
 from textual.binding import Binding, BindingType
 from textual.containers import VerticalGroup
@@ -43,6 +42,13 @@ class ManageContextScreen(ModalScreen[None]):
             show=True,
             priority=True,
         ),
+        Binding(
+            "d",
+            "delete_context",
+            "Delete Context",
+            tooltip="Remove the selected context from the session.",
+            show=True,
+        ),
     ]
 
     def compose(self) -> ComposeResult:
@@ -64,14 +70,18 @@ class ManageContextScreen(ModalScreen[None]):
         for key, model in all_context.items():
             table.add_row(model.key, model.type)
 
-    @on(DataTable.RowSelected)
-    def handle_remove_context(self, event: DataTable.RowSelected) -> None:
-        """Remove selected context item from session and table."""
-        row = event.data_table.get_row(event.row_key)
+    def action_delete_context(self) -> None:
+        """Remove the selected context from session and table."""
+        table = self.query_one(DataTable)
+        if table.cursor_row < 0:
+            return
+
+        row_key, _ = table.coordinate_to_cell_key(table.cursor_coordinate)
+        row = table.get_row(row_key)
         session_context_service = self.app.byte.make(SessionContextService)
         session_context_service.remove_context(row[0])
 
-        event.data_table.remove_row(event.row_key)
+        table.remove_row(row_key)
 
     def action_dismiss_screen(self) -> None:
         """Dismiss the modal screen."""

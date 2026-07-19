@@ -27,7 +27,6 @@ class SessionContextService(Service):
     def add_context(self, model: SessionContextModel) -> SessionContextService:
         """Add a context item to the session store."""
         self.session_context.add(model.key, model)
-        self.notify_context_stats()
         return self
 
     def remove_context(self, key: str) -> SessionContextService:
@@ -36,7 +35,6 @@ class SessionContextService(Service):
         if model:
             model.delete()
         self.session_context.remove(key)
-        self.notify_context_stats()
         return self
 
     def get_context(self, key: str) -> Optional[SessionContextModel]:
@@ -48,7 +46,6 @@ class SessionContextService(Service):
         for _, model in self.session_context.all().items():
             model.delete()
         self.session_context.set({})
-        self.notify_context_stats()
         return self
 
     def get_all_context(self) -> dict[str, SessionContextModel]:
