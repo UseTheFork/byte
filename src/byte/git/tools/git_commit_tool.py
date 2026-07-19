@@ -74,7 +74,7 @@ class GitCommitTool(BaseTool):
             body="\n".join(f"- {line}" for line in body) if body else None,
         )
 
-        formatted_message = commit.format()
+        formatted_message = await commit_service.format_conventional_commit(commit)
 
         self.app.emit_tui(
             Messages.CreatePanel(
@@ -100,7 +100,6 @@ class GitCommitTool(BaseTool):
 
         if confirmed:
             try:
-                formatted_message = await commit_service.format_conventional_commit(commit)
                 await git_service.commit(formatted_message)
 
                 return ToolResult(result={"content": f"Successfully created commit: {formatted_message}"})

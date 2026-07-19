@@ -123,10 +123,6 @@ class ConversationScreen(Screen[None]):
         response_chatbox = Bootbox("\n".join(styled_logo) + "\n\n" + "\n".join(messages))
         await self.conversation.chat_container.mount(response_chatbox)
 
-    #         await self.conversation.chat_container.add_panel(boot_panel)
-    #       await boot_panel.mount(response_chatbox)
-    # await self.conversation.chat_container.add_panel(response_chatbox)
-
     @work
     async def action_request_manage_files(self) -> None:
         """"""
