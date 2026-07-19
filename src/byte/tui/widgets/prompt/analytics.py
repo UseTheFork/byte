@@ -8,6 +8,8 @@ from byte.tui.widgets.ui.progress_bar import ProgressBar
 
 
 class TokensInfo(Static):
+    """Display token usage information."""
+
     tokens_used: reactive[str] = reactive("")
 
     def watch_tokens_used(self, tokens_used: str) -> None:
@@ -16,6 +18,8 @@ class TokensInfo(Static):
 
 
 class CostInfo(Static):
+    """Display cost information."""
+
     cost: reactive[str] = reactive("")
 
     def _format_cost_info(self) -> str:
@@ -28,14 +32,18 @@ class CostInfo(Static):
 
 
 class MemoryUsedInfo(Static):
+    """Display memory usage information."""
+
     memory_used: reactive[str] = reactive("")
 
     def watch_memory_used(self, memory_used: str) -> None:
-        """Update the label when cost changes."""
+        """Update the label when memory_used changes."""
         self.update(memory_used)
 
 
 class FileInfo(Static):
+    """Display file count information."""
+
     count: reactive[int] = reactive(0)
 
     def _format_file_info(self) -> str:
@@ -48,6 +56,8 @@ class FileInfo(Static):
 
 
 class ContextInfo(Static):
+    """Display context count information."""
+
     context_count: reactive[int] = reactive(0)
 
     def _format_context_info(self) -> str:
@@ -60,6 +70,8 @@ class ContextInfo(Static):
 
 
 class Analytics(containers.VerticalGroup):
+    """Display token usage, cost, memory, file, and context analytics."""
+
     BORDER_TITLE = "Analytics"
 
     DEFAULT_CSS = """
@@ -128,6 +140,7 @@ class Analytics(containers.VerticalGroup):
         )
 
     def compose(self) -> ComposeResult:
+        """Compose the analytics display with memory, file, context, and token sections."""
         with HorizontalGroup(id="memory-analytics"):
             yield Label("Memory Used", classes="px-1")
             yield ProgressBar(total=100, classes="", id="memory-progress")
@@ -140,18 +153,14 @@ class Analytics(containers.VerticalGroup):
             yield CostInfo(self.cost, classes="px-1 text-right").data_bind(cost=Analytics.cost)
 
     def update_analytics(self, event) -> None:
-        """Update analytics display with current usage statistics.
-
-        Args:
-            event: UpdateAnalytics message containing token usage and cost information.
-        """
+        """Update analytics display with current usage statistics."""
         self.tokens_used = (
             f"Tokens: {self.humanizer(event.tokens_sent)} sent, {self.humanizer(event.tokens_received)} received"
         )
         self.cost = f"Cost: ${event.message_cost:.2f} message, ${event.session_cost:.2f} session."
 
     def update_memory(self, event) -> None:
-
+        """Update memory usage display and progress bar."""
         self.memory_used = f"{event.memory_percent:.1f}%"
         self.memory_percent = event.memory_percent
 
@@ -160,22 +169,15 @@ class Analytics(containers.VerticalGroup):
         progress_bar.update(completed=event.memory_percent)
 
     def update_files(self, event) -> None:
-        """Update file counts display.
-
-        Args:
-            event: UpdateFiles message containing file count.
-        """
+        """Update file counts display."""
         self.files_count = event.count
 
     def update_context(self, event) -> None:
-        """Update context count display.
-
-        Args:
-            event: Event containing context_count information.
-        """
+        """Update context count display."""
         self.context_count = event.context_count
 
     def humanizer(self, number: int | float) -> str:
+        """Format large numbers with K, M, B, T suffixes."""
         divisor = 1
         for suffix in ("K", "M", "B", "T"):
             divisor *= 1000

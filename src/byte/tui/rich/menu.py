@@ -22,12 +22,7 @@ class MenuStyle(BaseModel):
     unselected_char: str = Field(default="◻", description="Character for unselected items in multiselect")
 
     def as_finalized(self) -> MenuStyle:
-        """Return a new style configured for finalized state.
-
-        Creates a copy with muted colors and no indicator characters.
-
-        Usage: `finalized_style = style.as_finalized()`
-        """
+        """Return a new style configured for finalized state."""
         return MenuStyle(
             color=self.color,
             selected_color=self.selected_color,
@@ -96,13 +91,7 @@ class MenuState:
 
     @property
     def visible_options(self) -> tuple[tuple[int, str], ...]:
-        """Get the currently visible options with their absolute indices.
-
-        Returns:
-                Tuple of (absolute_index, option) pairs for visible options.
-
-        Usage: `for idx, option in state.visible_options: ...`
-        """
+        """Get the currently visible options with their absolute indices."""
         if len(self.options) <= self.window_size:
             return tuple(enumerate(self.options))
 
@@ -125,12 +114,7 @@ class MenuInputHandler:
 
     @staticmethod
     def get_action() -> str | None:
-        """Map keyboard input to menu actions.
-
-        Returns action name or None if input not recognized.
-
-        Usage: `action = handler.get_action()` -> "confirm", "up", "down", etc.
-        """
+        """Map keyboard input to menu actions."""
         match click.getchar():
             case "\r":
                 return "confirm"
@@ -159,13 +143,7 @@ class MenuRenderer:
         self.title = title
 
     def render_horizontal(self) -> Panel:
-        """Render the menu horizontally for confirm dialogs.
-
-        Creates a horizontal layout with options side-by-side,
-        using filled/hollow squares to show selection state.
-
-        Usage: `panel = renderer.render_horizontal()` -> display horizontal menu
-        """
+        """Render the menu horizontally for confirm dialogs."""
         from rich.text import Text
 
         # Build horizontal menu line
@@ -191,20 +169,7 @@ class MenuRenderer:
         )
 
     def _get_scrollbar_char(self, row_idx: int, visible_count: int) -> str:
-        """Get the scrollbar character for a given row.
-
-        Creates a visual scrollbar showing position in the full list.
-        Uses █ for the thumb position and │ for the track.
-
-        Args:
-                row_idx: Current row index (0 to visible_count-1)
-                visible_count: Number of visible rows
-
-        Returns:
-                Scrollbar character for this row
-
-        Usage: `char = self._get_scrollbar_char(2, 5)` -> get scrollbar for row 2
-        """
+        """Get the scrollbar character for a given row."""
         # If all options fit, no scrollbar needed
         if len(self.state.options) <= self.state.window_size:
             return ""
@@ -224,13 +189,7 @@ class MenuRenderer:
             return f"[{self.style.color}]░[/{self.style.color}]"
 
     def render(self) -> Panel:
-        """Render the menu as a Rich Panel.
-
-        Creates a table grid with current selection, indicators, and options.
-        Shows a scrollbar in the fourth column when there are more options than fit.
-
-        Usage: `panel = renderer.render()` -> display menu
-        """
+        """Render the menu as a Rich Panel."""
         grid = Table.grid(expand=True)
         # First column: selection indicator
         grid.add_column()
@@ -319,10 +278,7 @@ class Menu:
         self.live: Optional[Live] = None
 
     def _create_live_display(self) -> Live:
-        """Create a Live display context for the menu.
-
-        Usage: `with self._create_live_display() as live: ...`
-        """
+        """Create a Live display context for the menu."""
         return Live(
             self.renderer.render(),
             auto_refresh=False,
@@ -331,17 +287,11 @@ class Menu:
         )
 
     def _update_display(self, live: Live) -> None:
-        """Update the live display with current menu state.
-
-        Usage: `self._update_display(live)` -> refresh display
-        """
+        """Update the live display with current menu state."""
         live.update(self.renderer.render(), refresh=True)
 
     def _handle_navigation(self, action: str, live: Live) -> None:
-        """Handle up/down navigation actions.
-
-        Usage: `self._handle_navigation("up", live)` -> move selection up
-        """
+        """Handle up/down navigation actions."""
         if action == "up":
             self.state.move_up()
         elif action == "down":
@@ -349,12 +299,7 @@ class Menu:
         self._update_display(live)
 
     def _cancel(self, live: Live) -> None:
-        """Handle menu cancellation with danger styling.
-
-        Sets border to danger, title to error, and all options to muted color.
-
-        Usage: `self._cancel(live)` -> show cancelled state
-        """
+        """Display menu cancellation with danger styling."""
         self.style.border_style = "danger"
         self.style.title_color = "error"
         self.style.color = "muted"
@@ -364,13 +309,7 @@ class Menu:
         self._update_display(live)
 
     def _finalize(self, live: Live, selected: str | list[str]) -> None:
-        """Finalize menu display after selection.
-
-        Updates style to finalized state, shows only selected options,
-        then restores original state for reusability.
-
-        Usage: `self._finalize(live, selected_option)` -> show final state
-        """
+        """Finalize menu display after selection."""
         # Store original state
         original_options = self.state.options
         original_style = self.style
@@ -394,18 +333,7 @@ class Menu:
         self.renderer.style = self.style
 
     def select(self, esc: bool = True) -> str | None:
-        """Single selection mode.
-
-        Navigate with arrow keys or hjkl/wasd, confirm with Enter, cancel with Esc.
-
-        Args:
-                esc: Allow cancellation with Esc key
-
-        Returns:
-                Selected option or None if cancelled
-
-        Usage: `choice = menu.select()` -> get user's selection
-        """
+        """Perform single selection mode with keyboard navigation."""
         with self._create_live_display() as live:
             self.live = live
             self._update_display(live)
@@ -430,19 +358,7 @@ class Menu:
                     raise KeyboardInterrupt
 
     def multiselect(self, esc: bool = True) -> list[str] | None:
-        """Multiple selection mode.
-
-        Navigate with arrow keys or hjkl/wasd, toggle with Space,
-        confirm with Enter, cancel with Esc.
-
-        Args:
-                esc: Allow cancellation with Esc key
-
-        Returns:
-                List of selected options or None if cancelled
-
-        Usage: `choices = menu.multiselect()` -> get multiple selections
-        """
+        """Perform multiple selection mode with toggle support."""
         self.state.selected_options = []
 
         with self._create_live_display() as live:
@@ -472,10 +388,7 @@ class Menu:
                     raise KeyboardInterrupt
 
     def _handle_horizontal_navigation(self, action: str, live: Live) -> None:
-        """Handle left/right navigation for horizontal menu.
-
-        Usage: `self._handle_horizontal_navigation("left", live)` -> move left
-        """
+        """Handle left/right navigation for horizontal menu."""
         if action == "left":
             self.state.move_left()
         elif action == "right":
@@ -484,12 +397,7 @@ class Menu:
         live.update(self.renderer.render_horizontal(), refresh=True)
 
     def _finalize_confirm(self, live: Live, selected: bool) -> None:
-        """Finalize confirm dialog after selection.
-
-        Shows only the selected option (Yes or No) with finalized styling.
-
-        Usage: `self._finalize_confirm(live, True)` -> finalize Yes selection
-        """
+        """Finalize confirm dialog after selection."""
         # Store original state
         original_options = self.state.options
         original_style = self.style
@@ -512,21 +420,7 @@ class Menu:
         self.renderer.style = self.style
 
     def confirm(self, default: bool = True, esc: bool = True) -> bool | None:
-        """Confirmation dialog with Yes/No selection using left/right navigation.
-
-        Navigate with left/right arrow keys or h/l, confirm with Enter,
-        cancel with Esc. Uses horizontal layout with filled/hollow squares.
-
-        Args:
-                default: Default selection - True for Yes, False for No
-                esc: Allow cancellation with Esc key
-
-        Returns:
-                True for Yes, False for No, None if cancelled
-
-        Usage: `confirmed = menu.confirm()` -> get yes/no confirmation
-        Usage: `confirmed = menu.confirm(default=False)` -> default to No
-        """
+        """Display a confirmation dialog with Yes/No selection using left/right navigation."""
         # Set up Yes/No options with appropriate default
         self.state.options = ("Yes", "No")
         self.state.index = 0 if default else 1

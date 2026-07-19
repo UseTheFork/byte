@@ -53,7 +53,7 @@ BYTE_STATES: dict[StatusState, str] = {
 
 
 class LoadingEmoji(Static):
-    """Animated emoji that cycles through LOADING_EMOJIS."""
+    """Cycle through animated loading emojis."""
 
     DEFAULT_CSS = """
     LoadingEmoji {
@@ -65,20 +65,24 @@ class LoadingEmoji(Static):
     emoji_index: reactive[int] = reactive(0)
 
     def _cycle_emoji(self) -> None:
+        """Cycle to the next emoji index."""
         self.emoji_index = (self.emoji_index + 1) % len(LOADING_EMOJIS)
 
     def on_mount(self) -> None:
+        """Start the emoji cycling timer."""
         self._timer = self.set_interval(0.1, self._cycle_emoji)
 
     def watch_emoji_index(self, index: int) -> None:
+        """Update the display with the current emoji."""
         self.update(LOADING_EMOJIS[index])
 
-    def render(self):
+    def render(self) -> str:
+        """Render the current emoji."""
         return LOADING_EMOJIS[self.emoji_index]
 
 
 class StatusEmoji(Static):
-    """Non-animated emoji that displays a static kaomoji based on the current state."""
+    """Display a static status emoji based on the current state."""
 
     app: ByteTUI
 
@@ -92,20 +96,16 @@ class StatusEmoji(Static):
     state: reactive[StatusState] = reactive("default")
 
     def watch_state(self, state: StatusState) -> None:
+        """Update the display with the new state emoji."""
         self.update(BYTE_STATES.get(state, BYTE_STATES["default"]))
 
-    def render(self):
+    def render(self) -> str:
+        """Render the current state emoji."""
         return BYTE_STATES.get(self.state, BYTE_STATES["default"])
 
 
 class StatusBar(HorizontalGroup, can_focus=False):
-    """A status bar widget with either an animated loading emoji or a static status emoji,
-    a message, and a rule.
-
-    Use `show_loading(text)` to display the animated loading state.
-    Use `show_status(text, state)` to display a static status emoji.
-    Use `hide()` to hide the bar.
-    """
+    """Display a status bar with emoji, message, and rule."""
 
     DEFAULT_CSS = """
     StatusBar {
@@ -153,22 +153,21 @@ class StatusBar(HorizontalGroup, can_focus=False):
 
     def show_loading(self, text: str = "") -> None:
         """Show the status bar in animated loading mode."""
-
         self.text = text
         self.is_loading = True
 
     def show_status(self, text: str = "", state: StatusState = "default") -> None:
         """Show the status bar with a static status emoji."""
-
         self.text = text
         self.is_loading = False
         self.query_one(StatusEmoji).state = state
 
     def update_text(self, text: str) -> None:
-        """Update only the text in the status bar."""
+        """Update the text in the status bar."""
         self.text = text
 
     def watch_is_loading(self, loading: bool) -> None:
+        """Update emoji display based on loading state."""
         try:
             self.query_one(LoadingEmoji).display = loading
             self.query_one(StatusEmoji).display = not loading
@@ -176,6 +175,7 @@ class StatusBar(HorizontalGroup, can_focus=False):
             pass
 
     def watch_text(self, text: str) -> None:
+        """Update the status label text."""
         try:
             label = self.query_one("#status-label", Static)
             label.update(text)
@@ -183,6 +183,7 @@ class StatusBar(HorizontalGroup, can_focus=False):
             pass
 
     def compose(self) -> ComposeResult:
+        """Compose the status bar with loading emoji, status emoji, label, and rule."""
         loading_emoji = LoadingEmoji()
         loading_emoji.display = False
         yield loading_emoji

@@ -4,12 +4,7 @@ from rich.text import Text
 
 
 class ByteDisplay:
-    """A Rich renderable that displays code with a left border character on each line.
-
-    Displays code with `▌▌` prefix on each line, providing a visual left border.
-
-    Usage: `display = ByteDisplay(code)`
-    """
+    """Render code with a left border character on each line."""
 
     def __init__(
         self,
@@ -19,16 +14,7 @@ class ByteDisplay:
         theme: str = "monokai",
         padding: int = 1,
     ):
-        """Initialize the code display.
-
-        Args:
-            code: The code content to display
-            language: Programming language for syntax highlighting
-            line_numbers: Whether to show line numbers
-            word_wrap: Whether to wrap long lines
-            theme: Syntax highlighting theme
-            padding: Number of blank lines above and below code (default: 1)
-        """
+        """Initialize the code display with rendering options."""
         self.code = code
         self.line_numbers = line_numbers
         self.word_wrap = word_wrap
@@ -36,15 +22,7 @@ class ByteDisplay:
         self.padding = padding
 
     def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
-        """Render the code with left border characters.
-
-        Args:
-            console: Rich console instance
-            options: Console rendering options
-
-        Yields:
-            Text objects for each line with border prefix
-        """
+        """Render the code with left border characters."""
         # Add padding to the code itself so it becomes part of rendered_lines
         padded_code = "\n" * self.padding + self.code + "\n" * self.padding
 

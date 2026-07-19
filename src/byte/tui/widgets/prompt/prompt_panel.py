@@ -16,21 +16,20 @@ if TYPE_CHECKING:
 
 
 class PromptInputContainer(containers.VerticalGroup):
+    """Manage the prompt input area layout."""
+
     pass
 
 
 class PromptContainer(containers.HorizontalGroup):
+    """Manage the prompt display container."""
+
     pass
-    # def on_mouse_down(self, event: events.MouseUp) -> None:
-    #     for child in self.query("*"):
-    #         if child.has_focus:
-    #             return
-    #     prompt_text_area = self.query_one(PromptTextArea)
-    #     if not prompt_text_area.has_focus:
-    #         prompt_text_area.focus()
 
 
 class PromptPanel(containers.VerticalGroup):
+    """Manage the main prompt input panel with analytics and status."""
+
     prompt_input_container = getters.query_one(PromptInputContainer)
     prompt_container = getters.query_one("#prompt-container", PromptContainer)
     prompt_text_area = getters.query_one(PromptTextArea)
@@ -47,17 +46,21 @@ class PromptPanel(containers.VerticalGroup):
 
     @property
     def text(self) -> str:
+        """Retrieve the prompt text."""
         return self.prompt_text_area.text
 
     @text.setter
     def text(self, text: str) -> None:
+        """Set the prompt text with cursor at end."""
         self.prompt_text_area.text = text
         self.prompt_text_area.selection = Selection.cursor(self.prompt_text_area.get_cursor_line_end_location())
 
     def append(self, text: str) -> None:
+        """Append text to the prompt input."""
         self.query_one(PromptTextArea).insert(text, maintain_selection_offset=False)
 
     def compose(self) -> ComposeResult:
+        """Compose the prompt panel with status bar, input area, and analytics."""
         yield StatusBar()
         with PromptInputContainer():
             yield TextAreaAutoComplete("#prompt-text-area")
@@ -67,6 +70,7 @@ class PromptPanel(containers.VerticalGroup):
             yield Analytics(id="analytics-panel")
 
     def watch_allow_input_submit(self, allow_input_submit: bool) -> None:
+        """Update input submission state based on allow_input_submit flag."""
         self.prompt_input_container.set_class(not allow_input_submit, "hidden")
         self.prompt_input_container.disabled = not allow_input_submit
         self.app.conversation.scroll_to_latest_message()

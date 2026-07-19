@@ -16,17 +16,25 @@ if TYPE_CHECKING:
 
 
 class PromptTextArea(TextArea):
+    """Manage prompt input with history navigation and multi-line support."""
+
     class Submitted(Message):
+        """Emit when prompt text is submitted."""
+
         def __init__(self, markdown: str) -> None:
             self.markdown = markdown
             super().__init__()
 
     @dataclass
     class CursorEscapingTop(Message):
+        """Emit when cursor escapes to the top of the text area."""
+
         pass
 
     @dataclass
     class CursorEscapingBottom(Message):
+        """Emit when cursor escapes to the bottom of the text area."""
+
         pass
 
     BINDING_GROUP_TITLE = "Prompt"
@@ -73,7 +81,8 @@ class PromptTextArea(TextArea):
         id: str | None = None,
         classes: str | None = None,
         disabled: bool = False,
-    ):
+    ) -> None:
+        """Initialize the prompt text area."""
         super().__init__(name=name, id=id, classes=classes, disabled=disabled)
         self._history_index = -1  # -1 means no history item selected
         self._autocomplete = None
@@ -113,6 +122,7 @@ class PromptTextArea(TextArea):
         self.cursor_location = (len(self.text.split("\n")) - 1, len(self.text.split("\n")[-1]))
 
     async def _on_key(self, event) -> None:
+        """Handle key events for history navigation and autocompletion."""
         if self._autocomplete and self._autocomplete.handle_key(event.key):
             event.prevent_default()
             event.stop()
@@ -131,6 +141,7 @@ class PromptTextArea(TextArea):
         await super()._on_key(event)
 
     def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
+        """Validate if an action should be enabled based on current mode."""
         if action == "newline" and self.multi_line:
             return False
         if action == "submit" and self.multi_line:
@@ -140,18 +151,23 @@ class PromptTextArea(TextArea):
         return True
 
     def action_multiline_submit(self) -> None:
+        """Submit prompt and clear the text area."""
         self.post_message(Messages.UserInputSubmitted(self.text))
         self.clear()
 
     def action_submit(self) -> None:
+        """Submit prompt and clear the text area."""
         self.post_message(Messages.UserInputSubmitted(self.text))
         self.clear()
 
     def action_newline(self) -> None:
+        """Insert a new line character."""
         self.insert("\n")
 
 
 class PromptInput(containers.VerticalGroup):
+    """Display the prompt input area with dynamic label based on input mode."""
+
     PROMPT_NULL = " "
     PROMPT_AI = Content.styled("\u276f", "$text-secondary")
     PROMPT_MULTILINE = Content.styled("\u2630", "$text-secondary")
@@ -163,20 +179,22 @@ class PromptInput(containers.VerticalGroup):
 
     @on(TextArea.Changed)
     async def on_text_area_changed(self, event: TextArea.Changed) -> None:
+        """Update multi-line mode based on text content."""
         text = event.text_area.text
 
         self.multi_line = "\n" in text or "```" in text
 
         self.update_prompt()
 
-    def update_prompt(self):
-        """Update the prompt according to the current mode."""
+    def update_prompt(self) -> None:
+        """Update the prompt label based on current input mode."""
         self.prompt_label.update(
             self.PROMPT_MULTILINE if self.multi_line else self.PROMPT_AI,
             layout=False,
         )
 
     def compose(self) -> ComposeResult:
+        """Compose the prompt input area with label and text area."""
         with containers.HorizontalGroup(id="text-prompt"):
             yield Label(self.PROMPT_AI, id="prompt-label", markup=False)
             yield PromptTextArea(id="prompt-text-area").data_bind(multi_line=PromptInput.multi_line)

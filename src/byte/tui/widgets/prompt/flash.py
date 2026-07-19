@@ -10,6 +10,8 @@ if TYPE_CHECKING:
 
 
 class Flash(Static):
+    """Display a temporary flash notification."""
+
     DEFAULT_CSS = """
     Flash {
         height: 1;
@@ -22,12 +24,12 @@ class Flash(Static):
             background: $primary 10%;
             color: $text-primary;
         }
-        
+
         &.success {
             background: $success 10%;
             color: $text-success;
         }
-        
+
         &.warning {
             background: $warning 10%;
             color: $text-warning;
@@ -51,13 +53,7 @@ class Flash(Static):
         duration: float | None = None,
         style: Literal["default", "success", "warning", "error"] = "default",
     ) -> None:
-        """Flash the content for a brief period.
-
-        Args:
-            content: Content to show.
-            duration: Duration in seconds to show content.
-            style: A semantic style.
-        """
+        """Display content briefly with optional duration and style."""
 
         if self.flash_timer is not None:
             self.flash_timer.stop()

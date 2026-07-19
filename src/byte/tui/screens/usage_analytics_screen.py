@@ -13,7 +13,6 @@ if TYPE_CHECKING:
     from byte.tui import ByteTUI
 
 
-# AI:
 class UsageAnalyticsScreen(ModalScreen[None]):
     """Modal screen displaying per-model token usage and calculated costs."""
 
@@ -62,6 +61,7 @@ class UsageAnalyticsScreen(ModalScreen[None]):
     ]
 
     def compose(self) -> ComposeResult:
+        """Compose the screen layout with usage analytics table and footer."""
         yield VerticalGroup(
             Label("Usage by Model"),
             DataTable(cursor_type="row"),
@@ -69,6 +69,7 @@ class UsageAnalyticsScreen(ModalScreen[None]):
         )
 
     def on_mount(self) -> None:
+        """Initialize the data table with per-model usage metrics on mount."""
         table = self.query_one(DataTable)
         table.focus()
         table.add_columns(
@@ -99,4 +100,5 @@ class UsageAnalyticsScreen(ModalScreen[None]):
             )
 
     def action_dismiss_screen(self) -> None:
+        """Dismiss the modal screen."""
         self.dismiss()
