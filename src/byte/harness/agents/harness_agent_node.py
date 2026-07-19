@@ -14,6 +14,7 @@ class HarnessAgentNode(BaseAgentNode):
 
     def get_user_template(self):
         return [
+            Leaves.Constitution(),
             Leaves.ConversationHistory(),
             Leaves.Spec(),
             Leaves.UserRequest(),

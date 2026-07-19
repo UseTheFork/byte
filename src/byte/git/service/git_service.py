@@ -164,7 +164,7 @@ class GitService(Service, UserInteractive, Notifiable):
             )
 
             if not force:
-                user_input = await self.prompt_for_confirmation("Add unstaged and untracked changes to commit?", True)
+                user_input = await self.prompt_for_confirmation("Add unstaged and untracked changes to commit?", False)
             else:
                 user_input = True
 
@@ -258,12 +258,17 @@ class GitService(Service, UserInteractive, Notifiable):
                             staged_data = self._repo.odb.stream(staged_entry.binsha).read().decode("utf-8")
                             head_data_str = head_data.decode("utf-8")
 
-                            for line in unified_diff(
-                                head_data_str.splitlines(),
-                                staged_data.splitlines(),
-                                lineterm="",
-                            ):
-                                diff_content += line + "\n"
+                            diff_content = (
+                                "\n".join(
+                                    unified_diff(
+                                        head_data_str.splitlines(),
+                                        staged_data.splitlines(),
+                                        lineterm="",
+                                    )
+                                )
+                                + "\n"
+                            )
+
                     else:
                         # Binary file - don't include diff content
                         diff_content = None
