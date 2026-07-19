@@ -234,6 +234,7 @@ class Conversation(Widget):
         if event.status is Status.PENDING:
             heading = Str.snake_to_title(str(event.chunk)).replace(" Node", "").strip()
             await response_panel.start_markdown_stream(heading)
+            assert event.panel_id is not None
             self.chat_container.mark_active(event.panel_id)
         elif event.status is Status.RUNNING:
             await response_panel.add_markdown_chunk(str(event.chunk))
@@ -253,6 +254,7 @@ class Conversation(Widget):
                 tool_name=str(event.tool_name),
                 tool_id=str(event.tool_id),
             )
+            assert event.panel_id is not None
             self.chat_container.mark_active(event.panel_id)
         elif event.status is Status.RUNNING:
             await response_panel.add_tool_chunk(event.tool_id, str(event.chunk))
@@ -296,6 +298,7 @@ class Conversation(Widget):
         response_panel = await self.get_or_create_response_panel(event.panel_id)
 
         if event.status is Status.PENDING:
+            assert event.panel_id is not None
             self.chat_container.mark_active(event.panel_id)
             await response_panel.create_linting(event)
         elif event.status is Status.RUNNING:

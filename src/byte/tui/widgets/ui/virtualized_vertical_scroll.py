@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from textual.containers import ScrollableContainer
+from textual.timer import Timer
 from textual.widget import Widget
 
 if TYPE_CHECKING:
@@ -113,7 +114,7 @@ class VirtualizedVerticalScroll(ScrollableContainer):
         )
         self._slots: list[PanelSlot] = []
         self.active_panel_id: str | None = None
-        self._reconcile_timer_handle: object | None = None
+        self._reconcile_timer_handle: Timer | None = None
 
     async def _cache_panel_height(self, slot: PanelSlot) -> None:
         """Cache the height of a panel.
