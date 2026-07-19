@@ -38,8 +38,15 @@ Tooltip {
 
 
 Conversation {
+  #chat-container {
+      height: 1fr;
+      min-height: 30%;
+  }
+
   PromptPanel {
     height: auto;
+    max-height: 40%;
+    overflow: hidden;
     padding: 0 0 0 0;
 
     Autocompleter {
@@ -85,6 +92,7 @@ Conversation {
       height: auto;
       margin: 0;
       border: round $primary-lighten-1 50%;
+      overflow-y: auto;
 
       &:focus-within {
         border: round $primary-lighten-1;
@@ -103,7 +111,7 @@ Conversation {
         background: transparent;
         border: none;
         height: auto;
-        max-height: 50vh;
+        max-height: 20vh;
 
         &:blur {
           text-opacity: 0.5;
@@ -135,7 +143,7 @@ SelectableMarkdown {
 
     border: none;
     height: auto;
-    
+
     & .text-area--selection {
       background: $primary 23%;
       color: white 93%;
@@ -158,7 +166,7 @@ ToolCall {
   margin: 1 0;
   padding: 0;
   border-top: round $secondary;
-  
+
 }
 
 

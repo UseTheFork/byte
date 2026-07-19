@@ -31,7 +31,10 @@ class ConversationScreen(Screen[None]):
 
     DEFAULT_CSS = """
         ConversationScreen {
-
+            Conversation {
+                height: 1fr;
+                overflow:hidden;
+            }
         }
         """
 

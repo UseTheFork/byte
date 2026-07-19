@@ -21,6 +21,9 @@
   "gateway": {
     "enable": true
   },
+  "git": {
+    "enable_body": false
+  },
   "lint": {
     "enable": true,
     "commands": [
