@@ -15,7 +15,7 @@ from byte.tui.schemas import Answer, AnswerCancelled, Ask
 
 
 class ChoiceLabel(Label):
-    """Label for multi-select choices with checkbox indicator."""
+    """Display a label for multi-select choices with checkbox indicator."""
 
     DEFAULT_CSS = """
         ChoiceLabel {
@@ -57,7 +57,7 @@ class ChoiceLabel(Label):
 
 
 class MultiSelect(VerticalGroup):
-    """A multi-select widget that allows selection of multiple items from a list."""
+    """Display a multi-select widget for choosing multiple items from a list."""
 
     BINDINGS = [
         Binding(
@@ -130,15 +130,7 @@ class MultiSelect(VerticalGroup):
         classes: str | None = "border-round",
         disabled: bool = False,
     ) -> None:
-        """Initialize MultiSelect widget.
-
-        Args:
-            ask: Ask schema containing question, options, and result_future
-            name: Optional widget name
-            id: Optional widget id
-            classes: Optional CSS classes
-            disabled: Whether widget is initially disabled
-        """
+        """Initialize a multi-select widget from an Ask schema."""
         super().__init__(name=name, id=id, classes=classes, disabled=disabled)
         self.ask = ask
         self.options = ask.options
@@ -153,7 +145,7 @@ class MultiSelect(VerticalGroup):
         self.submit_current_value(AnswerCancelled())
 
     def _get_selected_answers(self) -> list[Answer]:
-        """Get list of Answer objects for all selected indices."""
+        """Get Answer objects for all selected indices."""
         selected: list[Answer] = []
         if self.options:
             for idx in sorted(self.selected_indices):
@@ -162,7 +154,7 @@ class MultiSelect(VerticalGroup):
         return selected
 
     def action_submit_selection(self) -> None:
-        """Submit the current selection (enter key)."""
+        """Submit the current selection and resolve the future."""
         selected_answers = self._get_selected_answers()
         self.submit_current_value(selected_answers)
 
@@ -192,7 +184,7 @@ class MultiSelect(VerticalGroup):
                 self.selected_label.toggle_selection()
 
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
-        """Handle ListView highlight (cursor movement)."""
+        """Update pointer position when ListView highlight changes."""
         if self.selected_label:
             self.selected_label.remove_pointer()
         label = event.item.query_one(ChoiceLabel)  # ty:ignore[unresolved-attribute]
@@ -200,7 +192,7 @@ class MultiSelect(VerticalGroup):
         self.selected_label = label
 
     def focus(self, scroll_visible: bool = True) -> Self:
-        """Focus the ListView."""
+        """Focus the ListView and return self."""
         if self.list_view:
             self.list_view.focus(scroll_visible)
             return self
@@ -208,7 +200,7 @@ class MultiSelect(VerticalGroup):
             return super().focus(scroll_visible)
 
     def compose(self) -> ComposeResult:
-        """Compose the widget structure."""
+        """Compose the multi-select widget with question, rule, and list items."""
         if self.ask:
             yield Markdown(self.ask.question)
         yield Rule()
@@ -226,11 +218,7 @@ class MultiSelect(VerticalGroup):
         yield self.list_view
 
     def submit_current_value(self, answer: list[Answer] | AnswerCancelled) -> None:
-        """Submit the selection and resolve the future.
-
-        Args:
-            answer: Either a list of Answer objects or AnswerCancelled
-        """
+        """Submit the selection and resolve the future."""
         if self._result_future and not self._result_future.done():
             loop = self._result_future.get_loop()
             loop.call_soon_threadsafe(self._result_future.set_result, answer)

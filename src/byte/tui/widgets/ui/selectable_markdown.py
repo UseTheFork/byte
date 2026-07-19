@@ -18,17 +18,9 @@ from byte.tui import Messages
 
 
 class MarkdownStream:
-    """An object to manage streaming markdown.
-
-    This will accumulate markdown fragments if they can't be rendered fast enough.
-
-    """
+    """Manage streaming markdown."""
 
     def __init__(self, markdown_widget: SelectableMarkdown) -> None:
-        """
-        Args:
-            markdown_widget: Markdown widget to update.
-        """
         self.markdown_widget = markdown_widget
         self._task: asyncio.Task | None = None
         self._new_markup = asyncio.Event()
@@ -52,11 +44,7 @@ class MarkdownStream:
             await self.markdown_widget.append(new_markdown)
 
     def start(self) -> None:
-        """Start the updater running in the background.
-
-        No need to call this, if the object was created by SelectableMarkdown.get_stream.
-
-        """
+        """Start the updater running in the background."""
         if self._task is None:
             self._task = asyncio.create_task(self._run())
 
@@ -69,11 +57,7 @@ class MarkdownStream:
             self._stopped = True
 
     async def write(self, markdown_fragment: str) -> None:
-        """Append or enqueue a markdown fragment.
-
-        Args:
-            markdown_fragment: A string to append at the end of the document.
-        """
+        """Append or enqueue a markdown fragment."""
         if self._stopped:
             raise RuntimeError("Can't write to the stream after it has stopped.")
         if not markdown_fragment:
@@ -275,6 +259,8 @@ class SelectionTextArea(TextArea):
 
 
 class SelectableMarkdown(Widget, can_focus=True):
+    """Display selectable, copyable markdown content."""
+
     class CursorEscapingBottom(Message):
         """Sent when the cursor moves down from the bottom message."""
 
@@ -308,6 +294,7 @@ class SelectableMarkdown(Widget, can_focus=True):
         classes: str | None = None,
         disabled: bool = False,
     ) -> None:
+        """Initialize a selectable markdown widget."""
         super().__init__(
             name=name,
             id=id,
@@ -402,7 +389,6 @@ class SelectableMarkdown(Widget, can_focus=True):
             content = ""
 
         return Markdown(content)
-        # return Markdown(content, code_theme=self.app.launch_config.message_code_theme)
 
     def render(self) -> RenderableType:
         if self.selection_mode:
@@ -413,7 +399,7 @@ class SelectableMarkdown(Widget, can_focus=True):
         return self.markdown
 
     async def append(self, chunk: str) -> None:
-        """Append a chunk of text to the end of the message."""
+        """Append a chunk of text to the message."""
         content = self.message
         if isinstance(content, str):
             content += chunk
@@ -422,7 +408,7 @@ class SelectableMarkdown(Widget, can_focus=True):
 
     @classmethod
     def get_stream(cls, markdown: SelectableMarkdown) -> MarkdownStream:
-        """ """
+        """Create and start a MarkdownStream for the widget."""
         updater = MarkdownStream(markdown)
         updater.start()
         return updater

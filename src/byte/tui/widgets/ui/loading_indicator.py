@@ -38,7 +38,6 @@ class LoadingIndicator(HorizontalGroup):
         classes: str | None = None,
         disabled: bool = False,
     ) -> None:
-        """ """
         super().__init__(
             name=name,
             id=id,
@@ -48,12 +47,15 @@ class LoadingIndicator(HorizontalGroup):
         self.spinner_size = size
 
     def compose(self) -> ComposeResult:
+        """Compose the loading indicator with spinner and message label."""
         yield RuneSpinner(self.spinner_size)
         yield Label(f"{self.message}", classes="pl-1")
 
     def watch_hidden(self, hidden: bool) -> None:
+        """Toggle the hidden CSS class based on hidden state."""
         self.set_class(hidden, "is-hidden")
 
     def watch_message(self, message: str) -> None:
+        """Show the indicator and refresh layout when message changes."""
         self.hidden = False
         self.refresh(layout=True)

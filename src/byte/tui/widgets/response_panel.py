@@ -116,14 +116,7 @@ class ResponsePanel(VerticalGroup):
         return input_widget
 
     async def mount_panel(self, panel: Messages.CreatePanel) -> Markdown:
-        """Mount a generic panel with content from the Panel schema.
-
-        Args:
-            panel: Panel schema containing content, title, and border_style
-
-        Returns:
-            The mounted Markdown widget
-        """
+        """Mount a generic panel."""
         markdown = Markdown(panel.content)
 
         if panel.title:
@@ -146,14 +139,7 @@ class ResponsePanel(VerticalGroup):
         return markdown
 
     async def create_linting(self, event: Messages.Lint) -> Linting:
-        """Create and mount a new Linting widget.
-
-        Args:
-            event: Lint message containing total_commands
-
-        Returns:
-            The mounted Linting widget
-        """
+        """Create and mount a linting widget."""
         linting = Linting()
         await self.mount(linting)
         await linting.start_linting(event.total_commands)
@@ -161,24 +147,12 @@ class ResponsePanel(VerticalGroup):
         return linting
 
     async def update_linting_progress(self, current_file: str, completed: int, total: int) -> None:
-        """Update progress on the current Linting widget.
-
-        Args:
-            current_file: Name of file currently being linted
-            completed: Number of files completed
-            total: Total number of files
-        """
+        """Update linting progress."""
         if self.current_linting is not None:
             await self.current_linting.update_progress(current_file, completed, total)
 
     async def complete_linting(self, total_files: int, failed_files: int, success: bool) -> None:
-        """Complete the linting operation on the current Linting widget.
-
-        Args:
-            total_files: Total files processed
-            failed_files: Number of files with lint errors
-            success: Whether all lints passed (no errors)
-        """
+        """Complete the linting operation."""
         if self.current_linting is not None:
             await self.current_linting.complete_linting(total_files, failed_files, success)
 
@@ -190,14 +164,7 @@ class ResponsePanel(VerticalGroup):
             self.app.byte["log"].info(event)
 
     async def update_aggregate_usage(self, event: Messages.CreateTokenUsage) -> None:
-        """Update the aggregate token usage widget that stays pinned at the bottom.
-
-        Accumulates token and cost data across all turns and keeps a persistent
-        widget that is always the last child in the panel.
-
-        Args:
-            event: CreateTokenUsage message with token/cost data for this turn
-        """
+        """Update the aggregate token usage widget."""
         self.total_cost += event.cost
         self.total_input_tokens += event.input_tokens
         self.total_output_tokens += event.output_tokens

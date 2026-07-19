@@ -16,6 +16,8 @@ from byte.tui.schemas import Answer, AnswerCancelled, Ask
 
 # Credits to https://github.com/robvanderleek/inquirer-textual/blob/main/inquirer_textual/widgets/InquirerSelect.py
 class ChoiceLabel(Label):
+    """Display a label for select choices with checkbox indicator."""
+
     DEFAULT_CSS = """
         ChoiceLabel {
             background: transparent;
@@ -32,10 +34,12 @@ class ChoiceLabel(Label):
         super().__init__(Text(f"  {SQUARE_OUTLINE} ").append_text(self._text))
         self.item = item
 
-    def add_pointer(self):
+    def add_pointer(self) -> None:
+        """Show pointer (highlight) for currently focused item."""
         self.update(Text(f"{SELECT_POINTER} {SQUARE_FILLED} ").append_text(self._text))
 
-    def remove_pointer(self):
+    def remove_pointer(self) -> None:
+        """Hide pointer for unfocused item."""
         self.update(Text(f"  {SQUARE_OUTLINE} ").append_text(self._text))
 
 
@@ -107,13 +111,8 @@ class Select(VerticalGroup):
         id: str | None = None,
         classes: str | None = "border-round",
         disabled: bool = False,
-    ):
-        """
-        Args:
-            default (str | Choice | None): The default choice to pre-select.
-            mandatory (bool): Whether a response is mandatory.
-            height (int | str | None): If None, for inline apps the height will be determined based on the number of choices.
-        """
+    ) -> None:
+        """Initialize the select widget from an Ask schema."""
         super().__init__(name=name, id=id, classes=classes, disabled=disabled)
         self.ask = ask
 
@@ -133,13 +132,15 @@ class Select(VerticalGroup):
     # Add extra padding for the Label as well.
     # self.styles.height = len(self.options) + 4 if self.options else 4
 
-    def action_exit_now(self):
+    def action_exit_now(self) -> None:
+        """Cancel selection and resolve with AnswerCancelled."""
         if self.selected_label:
             self.selected_label.remove_pointer()
 
         self.submit_current_value(AnswerCancelled())
 
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
+        """Update pointer position when ListView highlight changes."""
         if self.selected_label:
             self.selected_label.remove_pointer()
         label = event.item.query_one(ChoiceLabel)  # ty:ignore[unresolved-attribute]
@@ -147,20 +148,24 @@ class Select(VerticalGroup):
         self.selected_label = label
         self.selected_item = label.item
 
-    def on_list_view_selected(self, _: ListView.Selected):
+    def on_list_view_selected(self, _: ListView.Selected) -> None:
+        """Submit the selection when an item is selected."""
         self.submit_current_value(self.selected_item)
 
     def focus(self, scroll_visible: bool = True) -> Self:
+        """Focus the ListView and return self."""
         if self.list_view:
             self.list_view.focus(scroll_visible)
             return self
         else:
             return super().focus(scroll_visible)
 
-    def current_value(self):
+    def current_value(self) -> Answer | AnswerCancelled:
+        """Get the currently selected item."""
         return self.selected_item
 
     def compose(self) -> ComposeResult:
+        """Compose the select widget with question, rule, and list items."""
         if self.ask:
             yield Markdown(self.ask.question)
         yield Rule()
@@ -175,7 +180,8 @@ class Select(VerticalGroup):
         self.list_view = ListView(*items, initial_index=initial_index)  # ty:ignore[invalid-assignment]
         yield self.list_view
 
-    def submit_current_value(self, answer: Answer | AnswerCancelled):
+    def submit_current_value(self, answer: Answer | AnswerCancelled) -> None:
+        """Submit the selection and resolve the future."""
         # Resolve the future if present in the other loop since this is usually done via a worker.
         if self._result_future and not self._result_future.done():
             loop = self._result_future.get_loop()

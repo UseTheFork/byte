@@ -6,7 +6,7 @@ from textual.widgets import Static
 
 
 class ByteBug(Static):
-    """ """
+    """Display the Byte bug indicator."""
 
     DEFAULT_CSS = """
     ByteBug {
@@ -16,5 +16,5 @@ class ByteBug(Static):
     """
 
     def render(self) -> RenderResult:
-        """Render the text followed by a horizontal rule."""
+        """Render the Byte bug indicator."""
         return Content.from_markup("[$primary]▌[/][$secondary]▌[/]")

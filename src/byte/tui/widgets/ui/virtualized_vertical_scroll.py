@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class HeightPlaceholder(Widget):
-    """Lightweight widget that preserves height via min-height CSS. Renders nothing."""
+    """Preserve height via min-height CSS."""
 
     DEFAULT_CSS = """
     HeightPlaceholder {
@@ -29,45 +29,29 @@ class HeightPlaceholder(Widget):
         classes: str | None = None,
         disabled: bool = False,
     ) -> None:
-        """Initialize placeholder with cached height.
-
-        Args:
-            panel_id: The panel ID this placeholder represents.
-            height: The cached height in cells.
-            name: Optional widget name.
-            classes: Optional CSS classes.
-            disabled: Whether disabled.
-        """
+        """Initialize placeholder with cached height."""
         super().__init__(name=name, id=f"placeholder-{panel_id}", classes=classes, disabled=disabled)
         self.panel_id = panel_id
         self.height = height
         self.styles.min_height = height
 
     def render(self) -> str:
-        """Render nothing."""
+        """Return empty string."""
         return ""
 
 
 @dataclass
 class PanelSlot:
-    """Metadata for a panel in the virtualized container."""
+    """Store metadata for a panel in the virtualized container."""
 
     panel_id: str
     measured_height: int | None = None
     is_mounted: bool = True
     panel: ResponsePanel | None = None
-    """ID of the panel."""
-    """Cached height after layout (None if not yet measured)."""
-    """Whether the real panel is currently mounted in the DOM."""
-    """Reference to the ResponsePanel (kept in memory even when not in DOM)."""
 
 
 class VirtualizedVerticalScroll(ScrollableContainer):
-    """Virtualized vertical scroll container that manages panel lifecycle based on viewport.
-
-    Panels are mount/unmounted as the user scrolls, with height-preserving placeholders
-    keeping the scroll position intact. The active streaming panel is never virtualized.
-    """
+    """Manage virtualized panel lifecycle based on viewport visibility."""
 
     DEFAULT_CSS = """
     VirtualizedVerticalScroll {
@@ -90,18 +74,7 @@ class VirtualizedVerticalScroll(ScrollableContainer):
         can_focus_children: bool | None = None,
         can_maximize: bool | None = None,
     ) -> None:
-        """Initialize virtualized scroll container.
-
-        Args:
-            *children: Child widgets (typically empty).
-            name: Optional widget name.
-            id: Optional widget ID.
-            classes: Optional CSS classes.
-            disabled: Whether disabled.
-            can_focus: Whether this container can be focused.
-            can_focus_children: Whether children can be focused.
-            can_maximize: Whether this can be maximized.
-        """
+        """Initialize virtualized scroll container."""
         super().__init__(
             *children,
             name=name,
@@ -117,11 +90,7 @@ class VirtualizedVerticalScroll(ScrollableContainer):
         self._reconcile_timer_handle: Timer | None = None
 
     async def _cache_panel_height(self, slot: PanelSlot) -> None:
-        """Cache the height of a panel.
-
-        Args:
-            slot: The slot containing the panel.
-        """
+        """Cache the height of a panel."""
         if slot.panel is None or slot.measured_height is not None:
             return
 
@@ -130,11 +99,7 @@ class VirtualizedVerticalScroll(ScrollableContainer):
             slot.measured_height = slot.panel.outer_size.height
 
     async def _mount_panel(self, slot: PanelSlot) -> None:
-        """Mount a panel and remove its placeholder if it exists.
-
-        Args:
-            slot: The slot containing the panel.
-        """
+        """Mount a panel and remove its placeholder if it exists."""
         if slot.panel is None:
             return
 
@@ -156,11 +121,7 @@ class VirtualizedVerticalScroll(ScrollableContainer):
             pass
 
     async def add_panel(self, panel: ResponsePanel) -> None:
-        """Mount a panel and create a slot for it.
-
-        Args:
-            panel: The ResponsePanel to add.
-        """
+        """Mount a panel and create a slot for it."""
         if panel.id is None:
             raise ValueError("Panel must have an ID")
 
@@ -183,19 +144,11 @@ class VirtualizedVerticalScroll(ScrollableContainer):
         self.refresh(layout=True)
 
     def mark_active(self, panel_id: str) -> None:
-        """Mark a panel as the active streaming panel (never virtualized).
-
-        Args:
-            panel_id: The ID of the panel to mark as active.
-        """
+        """Mark a panel as the active streaming panel (never virtualized)."""
         self.active_panel_id = panel_id
 
     async def _unmount_panel_and_place_holder(self, slot: PanelSlot) -> None:
-        """Unmount a panel and replace with a placeholder.
-
-        Args:
-            slot: The slot containing the panel.
-        """
+        """Unmount a panel and replace with a placeholder."""
         if slot.panel is None:
             return
 
@@ -222,10 +175,7 @@ class VirtualizedVerticalScroll(ScrollableContainer):
                 pass
 
     async def _reconcile(self) -> None:
-        """Reconcile mount/unmount state of panels based on viewport visibility.
-
-        Uses a 2x viewport height buffer to pre-load panels before they enter view.
-        """
+        """Reconcile mount/unmount state of panels based on viewport visibility."""
         self._reconcile_timer_handle = None
 
         if not self._slots:
@@ -268,7 +218,7 @@ class VirtualizedVerticalScroll(ScrollableContainer):
                 await self._unmount_panel_and_place_holder(slot)
 
     def _schedule_reconcile(self) -> None:
-        """Schedule reconciliation with debouncing (0.2s)."""
+        """Schedule reconciliation with debouncing."""
         if self._reconcile_timer_handle is not None:
             self._reconcile_timer_handle.stop()
 
@@ -277,29 +227,17 @@ class VirtualizedVerticalScroll(ScrollableContainer):
     def clear_active(self) -> None:
         """Clear the active panel marker."""
         self.active_panel_id = None
-        # Trigger reconciliation to potentially virtualize the panel
         self._schedule_reconcile()
 
     def get_panel(self, panel_id: str) -> ResponsePanel | None:
-        """Get a panel by ID (mounted or cached).
-
-        Args:
-            panel_id: The ID to look up.
-
-        Returns:
-            The ResponsePanel if found, else None.
-        """
+        """Get a panel by ID (mounted or cached)."""
         for slot in self._slots:
             if slot.panel_id == panel_id and slot.panel is not None:
                 return slot.panel
         return None
 
     async def remove_panel(self, panel_id: str) -> None:
-        """Remove a panel and its slot.
-
-        Args:
-            panel_id: The ID of the panel to remove.
-        """
+        """Remove a panel and its slot."""
         slot_index = None
         for i, slot in enumerate(self._slots):
             if slot.panel_id == panel_id:
@@ -322,17 +260,12 @@ class VirtualizedVerticalScroll(ScrollableContainer):
 
     async def remove_all_panels(self) -> None:
         """Remove all panels and slots."""
-        # Make a copy of slots list since we'll be modifying it
         slots_copy = self._slots.copy()
         for slot in slots_copy:
             await self.remove_panel(slot.panel_id)
 
     async def ensure_panel_visible(self, panel_id: str) -> None:
-        """Restore a panel from placeholder (if needed) and scroll to it.
-
-        Args:
-            panel_id: The ID of the panel to make visible.
-        """
+        """Restore a panel from placeholder (if needed) and scroll to it."""
         # Find the slot
         slot = None
         for s in self._slots:
@@ -354,11 +287,6 @@ class VirtualizedVerticalScroll(ScrollableContainer):
             pass
 
     def watch_scroll_y(self, old_value: float, new_value: float) -> None:
-        """Debounce scroll events and trigger reconciliation.
-
-        Args:
-            _old_value: Previous scroll Y position.
-            _new_value: New scroll Y position.
-        """
+        """Debounce scroll events and trigger reconciliation."""
         super().watch_scroll_y(old_value, new_value)
         self._schedule_reconcile()

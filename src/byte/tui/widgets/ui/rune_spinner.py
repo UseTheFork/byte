@@ -6,12 +6,7 @@ from textual.widgets import Static
 
 # Credits To https://github.com/charmbracelet/crush/blob/main/internal/tui/components/anim/anim.go
 class RichRuneSpinner(Spinner):
-    """A custom spinner that animates random runes with theme-based colors.
-
-    Extends Rich's Spinner to display cycling random characters with gradient colors
-    based on the console's theme primary and secondary colors.
-    Usage: `spinner = RichRuneSpinner(size=8)`
-    """
+    """Animate random runes with theme-based colors."""
 
     def __init__(
         self,
@@ -20,29 +15,14 @@ class RichRuneSpinner(Spinner):
         size: int = 8,
         colors: list[str] | None = None,
     ) -> None:
-        """Initialize the animated spinner.
-
-        Args:
-                name: Base spinner name (used for timing)
-                text: Text to display next to spinner
-                style: Style override (optional)
-                speed: Animation speed multiplier
-                size: Number of animated characters to display
-        """
+        """Initialize the animated spinner."""
         super().__init__("dots", "", style=None, speed=speed)
         self.size = size
         self.runes = list("0123456789abcdefABCDEF~!@#$%^&*()+=_")
         self.colors = colors if colors is not None else ["$primary", "$secondary", "$primary-text", "$secondary-text"]
 
     def render(self, time: float) -> RenderResult:  # ty:ignore[invalid-method-override]
-        """Render the animated spinner with cycling runes.
-
-        Args:
-                time: Current time in seconds
-
-        Returns:
-                Text object with animated runes and optional text
-        """
+        """Render the animated spinner with cycling runes."""
         if self.start_time is None:
             self.start_time = time
 
@@ -71,6 +51,8 @@ class RichRuneSpinner(Spinner):
 
 # Credits To https://github.com/charmbracelet/crush/blob/main/internal/tui/components/anim/anim.go
 class RuneSpinner(Static):
+    """Display an animated rune spinner widget."""
+
     def __init__(
         self,
         size: int = 8,
@@ -80,7 +62,6 @@ class RuneSpinner(Static):
         classes: str | None = None,
         disabled: bool = False,
     ) -> None:
-        """ """
         super().__init__(
             name=name,
             id=id,
@@ -91,7 +72,9 @@ class RuneSpinner(Static):
         self.styles.max_width = size
 
     def on_mount(self) -> None:
+        """Initialize the spinner animation interval on mount."""
         self.update_render = self.set_interval(1 / 60, self.update_spinner)
 
     def update_spinner(self) -> None:
+        """Update the spinner display."""
         self.update(self._spinner)

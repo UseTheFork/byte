@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 
 class ToolArgs(Widget, can_focus=False):
-    """Displays streaming tool call arguments."""
+    """Display streaming tool call arguments."""
 
     app: ByteTUI
 
@@ -50,7 +50,7 @@ class ToolArgs(Widget, can_focus=False):
         self.raw_args = ""
 
     def render(self) -> RenderableType:
-        """Render the tool call display."""
+        """Render the tool call display with parsed arguments."""
         try:
             parsed = loads(self.raw_args, OBJ)
         except Exception:
@@ -75,6 +75,7 @@ class ToolArgs(Widget, can_focus=False):
         return output
 
     async def append(self, fragment: str) -> None:
+        """Append a fragment to raw arguments."""
         self.raw_args = self.raw_args + fragment
         self.refresh(layout=True)
 
@@ -83,16 +84,9 @@ class ToolArgs(Widget, can_focus=False):
 
 
 class ToolCallStream:
-    """An object to manage streaming tool call arguments.
-
-    This will accumulate argument fragments if they can't be rendered fast enough.
-    """
+    """Manage streaming tool call arguments."""
 
     def __init__(self, tool_call_display: ToolArgs) -> None:
-        """
-        Args:
-            tool_call_display: ToolCallDisplay widget to update.
-        """
         self.tool_call_display = tool_call_display
         self._task: asyncio.Task | None = None
         self._new_markup = asyncio.Event()
@@ -116,10 +110,7 @@ class ToolCallStream:
             await self.tool_call_display.append(new_args)
 
     def start(self) -> None:
-        """Start the updater running in the background.
-
-        No need to call this, if the object was created by ToolCallDisplay.get_stream.
-        """
+        """Start the updater in the background."""
         if self._task is None:
             self._task = asyncio.create_task(self._run())
 
@@ -132,11 +123,7 @@ class ToolCallStream:
             self._stopped = True
 
     async def write(self, fragment: str) -> None:
-        """Append or enqueue an argument fragment.
-
-        Args:
-            fragment: A string to append at the end of the arguments.
-        """
+        """Append or enqueue an argument fragment."""
         if self._stopped:
             raise RuntimeError("Can't write to the stream after it has stopped.")
         if not fragment:
@@ -152,7 +139,7 @@ class ToolCallStream:
 
 
 class ToolResult(Widget, can_focus=False):
-    """Displays the final result of a tool call."""
+    """Display the final result of a tool call."""
 
     DEFAULT_CSS = """
     ToolResult {
@@ -172,6 +159,7 @@ class ToolResult(Widget, can_focus=False):
         # return Markdown(content, code_theme=self.app.launch_config.message_code_theme)
 
     def render(self) -> RenderableType:
+        """Render the result as Markdown."""
         return self.markdown
 
 
@@ -196,7 +184,7 @@ class ToolArgsCollapsible(Collapsible):
 
 
 class ToolCall(Widget, can_focus=False):
-    """A widget that displays tool call information with streaming support."""
+    """Display tool call information with streaming support."""
 
     raw_args = reactive("")
 
@@ -230,6 +218,7 @@ class ToolCall(Widget, can_focus=False):
         # label.border_subtitle = "Textual Rocks"
 
     def compose(self) -> ComposeResult:
+        """Compose the tool call widget with arguments and result sections."""
         with ToolArgsCollapsible(
             title="Arguments", collapsed=False, collapsed_symbol=ANGLE_RIGHT, expanded_symbol=ANGLE_DOWN
         ):
@@ -238,6 +227,7 @@ class ToolCall(Widget, can_focus=False):
 
     @on(Messages.PhaseUpdated)
     def phase_updated(self, event: Messages.PhaseUpdated) -> None:
+        """Update border subtitle with phase information."""
         parts = []
         if event.phase_id:
             parts.append(f"  {event.phase_id}")
@@ -247,7 +237,7 @@ class ToolCall(Widget, can_focus=False):
             self.border_subtitle = " · ".join(parts)
 
     def complete(self, status: str = "success", content: str | None = None) -> None:
-        """Collapse args and show result."""
+        """Collapse arguments and display the result."""
         collapsible = self.query_one(ToolArgsCollapsible)
         collapsible.collapsed = True
 
@@ -262,6 +252,7 @@ class ToolCall(Widget, can_focus=False):
 
     @classmethod
     def get_stream(cls, widget: ToolCall) -> ToolCallStream:
+        """Create and start a ToolCallStream for the widget."""
         tool_args = widget.query_one(ToolArgs)
         stream = ToolCallStream(tool_args)  # Stream targets ToolArgs now
         stream.start()

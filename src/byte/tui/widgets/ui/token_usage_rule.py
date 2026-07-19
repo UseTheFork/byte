@@ -6,11 +6,7 @@ from textual.widgets import Rule, Static
 
 
 class TokenUsageRule(HorizontalGroup, can_focus=False):
-    """A horizontal rule with token usage text on the right side.
-
-    Example:
-        ─────────────────── Tokens: 1,234 in / 567 out · Cost: $0.0042
-    """
+    """Render a horizontal rule with token usage text on the right side."""
 
     DEFAULT_CSS = """
     TokenUsageRule {
@@ -18,10 +14,10 @@ class TokenUsageRule(HorizontalGroup, can_focus=False):
         width: 1fr;
         margin-bottom: 1;
         padding-right: 1;
-        & Rule { 
+        & Rule {
             width: 1fr;
         }
-        & Static { 
+        & Static {
             width: auto;
             padding-left: 1;
         }
@@ -45,6 +41,7 @@ class TokenUsageRule(HorizontalGroup, can_focus=False):
         classes: str | None = None,
         disabled: bool = False,
     ) -> None:
+        """Initialize a token usage rule widget."""
         super().__init__(
             name=name,
             id=id,
@@ -60,6 +57,7 @@ class TokenUsageRule(HorizontalGroup, can_focus=False):
         self.max_input_tokens = max_input_tokens
 
     def validate_text(self, text: str) -> str:
+        """Validate the text by stripping whitespace."""
         return text.strip()
 
     def watch_text(self, new_text: str) -> None:
@@ -70,6 +68,7 @@ class TokenUsageRule(HorizontalGroup, can_focus=False):
             pass
 
     def compose(self) -> ComposeResult:
+        """Compose the widget's child components."""
         yield Rule()
         summary_text = Static(self.text)
         yield summary_text

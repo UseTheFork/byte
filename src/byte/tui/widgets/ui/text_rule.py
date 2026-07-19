@@ -7,11 +7,7 @@ from byte.tui.widgets.ui.byte_bug import ByteBug
 
 
 class TextRule(HorizontalGroup, can_focus=False):
-    """A horizontal rule with text on the left side.
-
-    Example:
-        Analytics ───────────────────
-    """
+    """Render a horizontal rule with text on the left side."""
 
     DEFAULT_CSS = """
     TextRule {
@@ -19,11 +15,11 @@ class TextRule(HorizontalGroup, can_focus=False):
         width: 1fr;
         margin-bottom: 1;
         padding-right: 1;
-        & Static { 
+        & Static {
             width: auto;
             padding-right: 1;
         }
-        & Rule { 
+        & Rule {
             width: 1fr;
         }
     }
@@ -40,6 +36,7 @@ class TextRule(HorizontalGroup, can_focus=False):
         classes: str | None = None,
         disabled: bool = False,
     ) -> None:
+        """Initialize a text rule widget."""
         super().__init__(
             name=name,
             id=id,
@@ -49,9 +46,11 @@ class TextRule(HorizontalGroup, can_focus=False):
         self.text = text
 
     def validate_text(self, text: str) -> str:
+        """Validate the text by stripping whitespace."""
         return text.strip()
 
     def compose(self) -> ComposeResult:
+        """Compose the widget's child components."""
         header = Static(self.text)
         yield ByteBug()
         yield header

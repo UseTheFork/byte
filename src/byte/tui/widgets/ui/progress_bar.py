@@ -1,20 +1,10 @@
-from typing import Optional
-
 from rich.console import RenderableType
 from rich.progress_bar import ProgressBar as RichProgressBar
 from textual.widget import Widget
 
 
 class ProgressBar(Widget):
-    """A progress bar widget that uses Rich's Progress for rendering.
-
-    This widget extends Textual's Static but uses Rich's Progress
-    rendering system for more advanced progress bar visualization.
-
-    Example:
-        progress = ProgressBar(total=100)
-        progress.update(progress=50)
-    """
+    """Render the progress bar using Rich's Progress."""
 
     DEFAULT_CSS = """
     ProgressBar {
@@ -32,15 +22,7 @@ class ProgressBar(Widget):
         classes: str | None = None,
         disabled: bool = False,
     ) -> None:
-        """Initialize the Rich progress bar.
-
-        Args:
-            total: Total number of steps for the progress bar
-            name: The name of the widget
-            id: The ID of the widget in the DOM
-            classes: The CSS classes for the widget
-            disabled: Whether the widget is disabled
-        """
+        """Initialize the progress bar widget."""
         super().__init__(
             name=name,
             id=id,
@@ -53,21 +35,11 @@ class ProgressBar(Widget):
         )
 
     def render(self) -> RenderableType:
-        """Render the progress bar using Rich's Progress.
-
-        Returns:
-            Rich Progress renderable
-        """
+        """Render the progress bar."""
         return self._progress
 
-    def update(self, *, completed: float, total: Optional[float] = None) -> None:
-        """Update the progress bar.
-
-        Args:
-            total: New total value
-            progress: New progress value
-            advance: Amount to advance progress by
-        """
+    def update(self, *, completed: float, total: float | None = None) -> None:
+        """Update the progress bar with new values."""
         # Update Rich progress task
         total = total if total is not None else self._progress.total
         self._progress.update(completed=completed, total=total)

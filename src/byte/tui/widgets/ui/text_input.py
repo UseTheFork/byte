@@ -19,7 +19,11 @@ if TYPE_CHECKING:
 
 
 class TextInputTextArea(TextArea):
+    """A text area for multiline input with submit and newline actions."""
+
     class Submitted(Message):
+        """Posted when the user submits input via Enter."""
+
         def __init__(self, markdown: str) -> None:
             self.markdown = markdown
             super().__init__()
@@ -55,15 +59,18 @@ class TextInputTextArea(TextArea):
         disabled: bool = False,
         compact: bool = True,
         placeholder: str | Content = "",
-    ):
+    ) -> None:
+        """Initialize the text input area."""
         super().__init__(name=name, id=id, classes=classes, disabled=disabled, compact=compact, placeholder=placeholder)
         self._autocomplete = None
 
     def on_mount(self) -> None:
+        """Configure the text area on mount."""
         self.highlight_cursor_line = False
         self.hide_suggestion_on_blur = False
 
     def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
+        """Determine whether an action should be executed."""
         if action == "newline" and self.multi_line:
             return False
         if action == "submit" and self.multi_line:
@@ -73,14 +80,17 @@ class TextInputTextArea(TextArea):
         return True
 
     def action_multiline_submit(self) -> None:
+        """Submit the current text and clear the input."""
         self.post_message(Messages.UserInputSubmitted(self.text))
         self.clear()
 
     def action_submit(self) -> None:
+        """Submit the current text and clear the input."""
         self.post_message(TextInputTextArea.Submitted(self.text))
         self.clear()
 
     def action_newline(self) -> None:
+        """Insert a new line character."""
         self.insert("\n")
 
 
@@ -100,21 +110,21 @@ class TextInput(VerticalGroup):
         TextInput {
             background: transparent;
             height: auto;
-            
+
             & VerticalGroup {
                 background: transparent;
             }
-            
+
             & Markdown {
                 height: auto;
             }
-            
+
             & TextArea {
                 background: transparent;
                 border: none;
                 padding: 0 1;
                 height: auto;
-                
+
                 &:focus {
                     border: none;
                 }
@@ -141,13 +151,8 @@ class TextInput(VerticalGroup):
         id: str | None = None,
         classes: str | None = "border-round",
         disabled: bool = False,
-    ):
-        """
-        Args:
-            ask: The Ask object containing question and result future.
-            default: The default text value.
-            mandatory: Whether a response is mandatory.
-        """
+    ) -> None:
+        """Initialize the text input widget from an Ask schema."""
         super().__init__(name=name, id=id, classes=classes, disabled=disabled)
         self.ask = ask
 
@@ -157,17 +162,19 @@ class TextInput(VerticalGroup):
         self.default = default
         self.mandatory = mandatory
 
-    def action_exit_now(self):
+    def action_exit_now(self) -> None:
+        """Cancel input and resolve with AnswerCancelled."""
         if not self.submitted:
             self.submit_value(AnswerCancelled())
 
     def on_text_input_text_area_submitted(self, event: TextInputTextArea.Submitted) -> None:
-        """Handle when user presses Enter in the input field."""
+        """Submit the input when the user presses Enter."""
         if not self.submitted:
             value = event.markdown.strip()
             self.submit_value(value)
 
     def focus(self, scroll_visible: bool = True) -> Self:
+        """Focus the text input area and return self."""
         if self.text_input:
             self.text_input.focus(scroll_visible)
             return self
@@ -175,6 +182,7 @@ class TextInput(VerticalGroup):
             return super().focus(scroll_visible)
 
     def compose(self) -> ComposeResult:
+        """Compose the text input widget with question, rule, and text area."""
         if self.ask:
             yield Markdown(self.ask.question)
         yield Rule()
@@ -184,7 +192,7 @@ class TextInput(VerticalGroup):
         )
         yield self.text_input
 
-    def submit_value(self, value: str | AnswerCancelled):
+    def submit_value(self, value: str | AnswerCancelled) -> None:
         """Submit the current value and disable the input."""
         self.submitted = True
 

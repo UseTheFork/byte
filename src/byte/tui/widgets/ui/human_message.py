@@ -5,9 +5,15 @@ from textual.content import Content
 from textual.widget import Widget
 from textual.widgets import Label
 
+from byte.tui.constants import (
+    SELECT_POINTER,
+)
+
 
 class HumanMessage(Widget, can_focus=False):
-    PROMPT_AI = Content.styled("❯", "$secondary")  # noqa: RUF001
+    """Display a human message with markdown formatting."""
+
+    PROMPT_AI = Content.styled(SELECT_POINTER, "$secondary")
 
     def __init__(
         self,
@@ -28,12 +34,11 @@ class HumanMessage(Widget, can_focus=False):
     @property
     def markdown(self) -> Markdown:
         """Return the content as a Rich Markdown object."""
-
         return Markdown(self.content)
         # return Markdown(content, code_theme=self.app.launch_config.message_code_theme)
 
     def compose(self) -> ComposeResult:
-        # yield PathSearch(self.project_path).data_bind(root=Prompt.project_path)
+        """Compose the human message widget with label and markdown content."""
         with HorizontalGroup(classes="text-prompt"):
             yield Label(self.PROMPT_AI, classes="carrot", markup=False)
             yield Label(self.markdown, classes="message", markup=False)

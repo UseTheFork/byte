@@ -82,11 +82,7 @@ class Linting(VerticalGroup):
         yield Markdown("", id="lint-results")
 
     async def start_linting(self, total_commands: int) -> None:
-        """Start linting operation.
-
-        Args:
-            total_commands: Total number of command executions
-        """
+        """Start the linting operation."""
         self.is_active = True
         self.completed = 0
         self.total = total_commands
@@ -100,13 +96,7 @@ class Linting(VerticalGroup):
         label.update(f"Running {total_commands} lint commands...")
 
     async def update_progress(self, current_file: str, completed: int, total: int) -> None:
-        """Update linting progress.
-
-        Args:
-            current_file: Name of file currently being linted
-            completed: Number of files completed
-            total: Total number of files
-        """
+        """Update the linting progress."""
         self.current_file = current_file
         self.completed = completed
         self.total = total
@@ -120,13 +110,7 @@ class Linting(VerticalGroup):
         label.update(f"Linting: {current_file} ({completed}/{total})")
 
     async def complete_linting(self, total_files: int, failed_files: int, success: bool) -> None:
-        """Complete linting operation.
-
-        Args:
-            total_files: Total files processed
-            failed_files: Number of files with lint errors
-            success: Whether all lints passed (no errors)
-        """
+        """Complete the linting operation."""
         self.is_active = False
 
         # Hide loading indicator
@@ -151,11 +135,7 @@ class Linting(VerticalGroup):
         self.refresh(layout=True)
 
     async def display_results(self, content: str) -> None:
-        """Display lint results in the markdown widget.
-
-        Args:
-            content: Formatted markdown content with lint results
-        """
+        """Display lint results in the markdown widget."""
         results_widget = self.query_one("#lint-results", Markdown)
         await results_widget.update(content)
         results_widget.styles.display = "block"
