@@ -8,16 +8,11 @@ from git import InvalidGitRepositoryError
 from byte import Service
 from byte.support.mixins import Notifiable, UserInteractive
 from byte.tui import Messages
+from byte.tui.schemas import Answer
 
 
 class GitService(Service, UserInteractive, Notifiable):
-    """Domain service for git repository operations and file tracking.
-
-    Provides utilities for discovering changed files, repository status,
-    and git operations. Integrates with other domains that need to work
-    with modified or staged files in the repository.
-    Usage: `changed_files = await git_service.get_changed_files()` -> list of modified files
-    """
+    """Domain service for git repository operations and file tracking."""
 
     def boot(self):
         # Initialize git repository using the project root from config
@@ -29,10 +24,7 @@ class GitService(Service, UserInteractive, Notifiable):
             )
 
     async def get_repo(self) -> git.Repo:
-        """Get the git repository instance, ensuring service is booted.
-
-        Usage: `repo = await git_service.get_repo()` -> git.Repo instance
-        """
+        """Get the git repository instance, ensuring service is booted."""
         self.ensure_booted()
         return self._repo
 
@@ -41,11 +33,6 @@ class GitService(Service, UserInteractive, Notifiable):
 
         Args:
                 include_untracked: Include untracked files in the results
-
-        Returns:
-                List of Path objects for changed files
-
-        Usage: `files = git_service.get_changed_files()` -> all changed files including untracked
         """
         if not self._repo:
             return []
@@ -72,8 +59,6 @@ class GitService(Service, UserInteractive, Notifiable):
 
         Args:
                 commit_message: The commit message to use
-
-        Usage: `await git_service.commit("feat: add new feature")` -> creates commit with message
         """
 
         continue_commit = True
@@ -128,59 +113,48 @@ class GitService(Service, UserInteractive, Notifiable):
                     continue_commit = False
 
     async def stage_changes(self, force: bool = False) -> None:
-        """Check for unstaged changes and offer to add them to the commit.
-
-        Args:
-                repo: Git repository instance
-                console: Rich console for output
-
-        Usage: Called internally during commit process to handle unstaged files
-        """
+        """Check for unstaged changes and offer to add them to the commit."""
 
         unstaged_changes = self._repo.index.diff(None)  # None compares working tree to index
         untracked_files = self._repo.untracked_files
 
         if unstaged_changes or untracked_files:
-            file_list = []
-            for change in unstaged_changes:
-                change_type = (
-                    "modified" if change.change_type == "M" else "new" if change.change_type == "A" else "deleted"
-                )
-                file_list.append(f" - {change.a_path} ({change_type})")
-
-            for untracked in untracked_files:  # Add this loop
-                file_list.append(f" - {untracked} (new)")
-
-            files_display = "\n".join(file_list)
-
-            total_changes = len(unstaged_changes) + len(untracked_files)
-
-            self.emit_tui(
-                Messages.CreatePanel(
-                    f"Found {len(unstaged_changes)} unstaged changes and {len(untracked_files)} untracked changes:\n\n{files_display}",
-                    title="Unstaged Changes",
-                    border_style="warning",
-                )
-            )
-
             if not force:
-                user_input = await self.prompt_for_confirmation("Add unstaged and untracked changes to commit?", False)
-            else:
-                user_input = True
+                # Build Answer choices with all files pre-selected
+                choices: list[Answer] = []
+                for change in unstaged_changes:
+                    change_type = (
+                        "modified" if change.change_type == "M" else "new" if change.change_type == "A" else "deleted"
+                    )
+                    display_label = f"{change.a_path} ({change_type})"
+                    choices.append(Answer(label=display_label, value=change.a_path, is_default=True))
 
-            if user_input:
-                # Add all unstaged changes
-                self._repo.git.add("--all")
-                await self.notify_success(f"Added {total_changes} changes to commit")
+                for untracked in untracked_files:
+                    display_label = f"{untracked} (new)"
+                    choices.append(Answer(label=display_label, value=untracked, is_default=True))
+
+                selected_files = await self.prompt_for_multiselect("Select files to stage:", choices)
+            else:
+                # When force is True, stage all files
+                selected_files = []
+                for change in unstaged_changes:
+                    if change.a_path is not None:
+                        selected_files.append(Answer(label=change.a_path, value=change.a_path, is_default=True))
+
+                for untracked in untracked_files:
+                    selected_files.append(Answer(label=untracked, value=untracked, is_default=True))
+
+            # Add selected files to the index
+            for answer in selected_files:
+                self._repo.git.add(answer.value)
+
+            await self.notify_success(f"Added {len(selected_files)} changes to commit")
 
     async def reset(self, file_path: str | None = None) -> None:
         """Unstage files from the git index.
 
         Args:
                 file_path: Optional path to specific file to unstage. If None, unstages all files.
-
-        Usage: `await git_service.reset("config.py")` -> unstages specific file
-        Usage: `await git_service.reset()` -> unstages all files
         """
         if file_path:
             self._repo.index.reset(paths=[file_path])
@@ -192,8 +166,6 @@ class GitService(Service, UserInteractive, Notifiable):
 
         Args:
                 file_path: Path to the file to stage
-
-        Usage: `await git_service.add("config.py")` -> stages specific file
         """
         self._repo.index.add([file_path])
 
@@ -202,19 +174,11 @@ class GitService(Service, UserInteractive, Notifiable):
 
         Args:
                 file_path: Path to the deleted file to stage
-
-        Usage: `await git_service.remove("config.py")` -> stages file deletion
         """
         self._repo.index.remove([file_path])
 
     async def get_diff(self) -> List[dict]:
-        """Get structured diff data for changes in the repository.
-
-        Returns:
-                List of dictionaries containing diff information for each changed file
-
-        Usage: `await git_service.get_diff()` -> get staged changes
-        """
+        """Get structured diff data for changes in the repository."""
 
         staged_diff = self._repo.head.commit.diff()
 
@@ -296,10 +260,7 @@ class GitService(Service, UserInteractive, Notifiable):
         return diff_data
 
     def get_tracked_files(self) -> List[Path]:
-        """Get all files tracked by git plus untracked files not ignored by .gitignore.
-
-        Usage: `files = git_service.get_tracked_files()` -> all tracked and untracked non-ignored files
-        """
+        """Get all files tracked by git plus untracked files not ignored by .gitignore."""
         tracked = self._repo.git.ls_files().splitlines()
         untracked = self._repo.untracked_files
         return [Path(f) for f in tracked] + [Path(f) for f in untracked]
@@ -309,11 +270,6 @@ class GitService(Service, UserInteractive, Notifiable):
 
         Args:
                 count: Number of recent commits to retrieve (default: 5)
-
-        Returns:
-                List of dictionaries containing commit information
-
-        Usage: `commits = await git_service.get_recent_commits(5)` -> last 5 commits
         """
         self.ensure_booted()
 

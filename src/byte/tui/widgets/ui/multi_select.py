@@ -32,7 +32,8 @@ class ChoiceLabel(Label):
 
     def __init__(self, item: Answer, selected: bool = False):
         self._text = self._get_text(item)
-        super().__init__(Text(f"  {SQUARE_OUTLINE} ").append_text(self._text))
+        icon = SQUARE_FILLED if selected else SQUARE_OUTLINE
+        super().__init__(Text(f"  {icon} ").append_text(self._text))
         self.item = item
         self.selected = selected
         if selected:
@@ -214,8 +215,11 @@ class MultiSelect(VerticalGroup):
 
         items: list[ListItem] = []
         if self.options:
-            for option in self.options:
-                list_item = ListItem(ChoiceLabel(option, selected=False))
+            for idx, option in enumerate(self.options):
+                selected = option.is_default
+                list_item = ListItem(ChoiceLabel(option, selected=selected))
+                if selected:
+                    self.selected_indices.add(idx)
                 items.append(list_item)
 
         self.list_view = ListView(*items)  # ty:ignore[invalid-assignment]
