@@ -79,7 +79,6 @@ class ResearchAgentNode(BaseAgentNode):
             Leaves.HarnessWorkspaceReferenceFiles(),
             Leaves.Epilogue(
                 enforcements=[
-                    "NEVER use XML-style tags in your responses (e.g., <file>, <search>, <replace>). These are for internal parsing only.",
                     "Always use the GitGrepTool and ListFilesTool to explore the codebase and ground your analysis in actual code.",
                     "Prioritize evidence-based findings over assumptions—verify claims with code references.",
                 ]

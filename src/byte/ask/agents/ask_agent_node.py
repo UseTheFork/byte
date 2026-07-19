@@ -72,7 +72,6 @@ class AskAgentNode(BaseAgentNode):
             Leaves.FileContext(),
             Leaves.Epilogue(
                 enforcements=[
-                    "NEVER use XML-style tags in your responses (e.g., <file>, <search>, <replace>). These are for internal parsing only.",
                     "DO NOT provide full code implementations unless explicitly requested. Describe the changes needed first.",
                 ]
             ),

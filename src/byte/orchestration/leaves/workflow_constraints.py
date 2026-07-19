@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from byte.orchestration import Leaf
-from byte.support import MD
+from byte.support import MD, Boundary, BoundaryType
 from byte.support.section import Section, SectionType
 from byte.support.utils import list_to_multiline_text
 
@@ -19,7 +19,7 @@ class WorkflowConstraints(Leaf):
         constraints = [
             Section.start(SectionType.WORKFLOW_CONSTRAINTS),
             MD.bullet(
-                "Never use XML-style tags in your responses (e.g., <file>, <search>, <replace>). These are for internal parsing only."
+                f"Never use XML-style tags in your responses (e.g., {Boundary.open(BoundaryType.FILE)}, {Boundary.open(BoundaryType.AGENT_MESSAGE)}, {Boundary.open(BoundaryType.AVAILABLE_TOOLS)}). These are for internal parsing only."
             ),
         ]
 
