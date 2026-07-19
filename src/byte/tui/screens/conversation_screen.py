@@ -27,6 +27,7 @@ class ConversationScreen(Screen[None]):
 
     conversation = getters.query_one(Conversation)
     is_working = reactive(False, bindings=True)
+    is_cancelling = reactive(False, bindings=True)
 
     DEFAULT_CSS = """
         ConversationScreen {
@@ -47,15 +48,19 @@ class ConversationScreen(Screen[None]):
     def action_cancel_request(self) -> None:
         from byte.orchestration import WorkflowService
 
+        self.is_cancelling = True
+        self.conversation.post_message(Messages.Notify(content="Cancel requested - stopping after current step."))
+
         workflow_service = self.app.byte.make(WorkflowService)
         workflow_service.cancel()
-        self.post_message(Messages.Notify(content="Cancel requested — stopping after current step..."))
 
     async def action_scroll_to_panel(self, panel_id: str) -> None:
         await self.conversation.chat_container.ensure_panel_visible(panel_id)
 
     def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
         if action == "cancel_request":
+            if self.is_cancelling:
+                return None
             if not self.is_working:
                 return False
         return True
@@ -67,6 +72,7 @@ class ConversationScreen(Screen[None]):
     @on(Messages.CommandExecutionCompleted)
     async def command_execution_completed(self, event: Messages.CommandExecutionCompleted) -> None:
         self.is_working = False
+        self.is_cancelling = False
 
     def compose(self) -> ComposeResult:
         yield Conversation()
