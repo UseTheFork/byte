@@ -7,13 +7,13 @@ from byte.tools.exceptions import ToolRunException
 
 class EditFileTool(BaseTool):
     name: str = "edit_file_tool"
-    description: str = """Edit a file by replacing a specific string. The search_string must match exactly character for character.\n\n > **Critical **: The tool is extremely literal. Text must match **EXACTLY**"""
+    description: str = """Edit a file by replacing a specific string. The search_string must match exactly character for character.\n\n **Critical **: The tool is extremely literal. Text must match **EXACTLY**"""
     input_schema = {
         "type": "object",
         "properties": {
             "file_path": {
                 "type": "string",
-                "description": "The EXACT Path to a `editable` file located in `<file>`. Use the `source` variable.",
+                "description": "The EXACT Path to a `editable` file located in `<file>`.",
             },
             "search_string": {"type": "string", "description": "The exact string to find and replace"},
             "replace_string": {"type": "string", "description": "The string to replace with"},

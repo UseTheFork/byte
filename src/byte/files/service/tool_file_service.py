@@ -6,21 +6,15 @@ from byte.tui import InteractionService, Messages
 
 
 class ToolFileService(Service):
-    """ """
+    """Manage file operations for tool interactions."""
 
     def boot(self, **kwargs) -> None:
-        """Initialize file service and ensure discovery service is ready."""
+        """Initialize the file service dependencies."""
         self.file_discovery_service = self.app.make(FileDiscoveryService)
         self.file_service = self.app.make(FileService)
 
     def _prepare_file_path(self, path: str) -> Path:
-        """Validate file path is valid and within project.
-
-        Returns:
-            Resolved Path object for the file.
-
-        Usage: `path = self._prepare_file_path("file.py")` -> Path object
-        """
+        """Validate file path is valid and within project."""
 
         file_path = Path(path)
 
@@ -41,6 +35,7 @@ class ToolFileService(Service):
         return resolved_file_path
 
     async def edit_file(self, path: str, old_string: str, new_string: str) -> str:
+        """Replace a substring in a file with exact matching."""
         try:
             full_path = self._prepare_file_path(path)
 
@@ -76,15 +71,7 @@ class ToolFileService(Service):
             raise e
 
     async def write_file(self, path: str, content: str) -> str:
-        """Write content to a file. Creates parent directories if needed.
-
-        Confirms with the user before creating the file.
-
-        Returns:
-            Success or error message
-
-        Usage: `result = await service.write_file(path, content)` -> "Successfully wrote X characters to 'path'"
-        """
+        """Write content to a file and create parent directories if needed."""
         try:
             full_path = self._prepare_file_path(path)
             interaction_service = self.app.make(InteractionService)
@@ -116,30 +103,15 @@ class ToolFileService(Service):
             raise e
 
     async def replace_file(self, path: str, content: str) -> str:
-        """Replace all content of a file.
-
-        Confirms with the user before replacing the file content.
-
-        Returns:
-            Success or error message
-
-        Usage: `result = await service.replace_file(path, content)` -> "Successfully replaced content in 'path'"
-        """
+        """Replace all content in a file."""
         try:
             full_path = self._prepare_file_path(path)
-            interaction_service = self.app.make(InteractionService)
 
             if not full_path.exists():
                 raise Exception(f"Error: File `{path}` does not exist")
 
-            if await interaction_service.confirm(
-                f"Replace all content in `{path}`?",
-                True,
-            ):
-                full_path.write_text(content, encoding="utf-8")
-                return f"Successfully replaced content in `{path}`"
-            else:
-                raise Exception("User declined request to replace file.")
+            full_path.write_text(content, encoding="utf-8")
+            return f"Successfully replaced content in `{path}`"
 
         except Exception as e:
             self.emit_tui(
@@ -152,17 +124,7 @@ class ToolFileService(Service):
             raise e
 
     async def delete_file(self, path: str) -> str:
-        """Apply the delete operation to the file system.
-
-        Deletes the file and removes it from both the file discovery service
-        and file service context to ensure it's no longer tracked.
-
-        Returns:
-            Tuple of (status, error_message). BlockStatus.APPLIED if successful,
-            appropriate error status otherwise with error message.
-
-        Usage: `status, error = block.apply()` -> (BlockStatus.APPLIED, "") or (BlockStatus.INVALID, "error message")
-        """
+        """Delete a file and remove it from tracking services."""
         try:
             interaction_service = self.app.make(InteractionService)
             resolved_file_path = self._prepare_file_path(path)

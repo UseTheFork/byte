@@ -8,7 +8,7 @@ from byte.tools.exceptions import ToolRunException
 
 class WriteFileTool(BaseTool):
     name: str = "write_file_tool"
-    description: str = "Write content to a file. Creates parent directories if needed."
+    description: str = "Create a new file with content. Creates parent directories if needed."
     input_schema = {
         "type": "object",
         "properties": {

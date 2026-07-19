@@ -7,7 +7,7 @@ from byte.tools.exceptions import ToolRunException
 
 class ReplaceFileTool(BaseTool):
     name: str = "replace_file_tool"
-    description: str = "Replace all content in a file."
+    description: str = "Replace all existing contents of a file with new content."
     input_schema = {
         "type": "object",
         "properties": {
