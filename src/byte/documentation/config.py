@@ -15,8 +15,7 @@ class DocumentationConfig(BaseModel):
         description="Documentation framework (e.g. mkdocs, vitepress, docusaurus, sphinx)",
     )
     extra_guidelines: List[str] = Field(
-        default_factory=list,
-        description="Additional documentation guidelines",
+        default_factory=list, description="Additional documentation guidelines", exclude=True
     )
     style: str = Field(
         default="diataxis",

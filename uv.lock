@@ -358,7 +358,7 @@ requires-dist = [
 dev = [
     { name = "debugpy", specifier = ">=1.8.20" },
     { name = "grandalf", specifier = ">=0.8" },
-    { name = "pytest", specifier = ">=8.4.2" },
+    { name = "pytest", specifier = ">=9.0.0" },
     { name = "pytest-asyncio", specifier = ">=1.2.0" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
     { name = "pytest-env", specifier = ">=1.5.1" },

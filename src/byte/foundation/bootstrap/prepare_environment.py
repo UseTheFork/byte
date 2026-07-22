@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from byte.config import ByteConfig, ByteUserConfig
 from byte.foundation.bootstrap.bootstrapper import Bootstrapper
 from byte.llm.config import LLMModelConfig
-from byte.support import Json, Yaml
+from byte.support import Json
 from byte.tui.rich.menu import Menu
 
 if TYPE_CHECKING:
@@ -13,20 +13,6 @@ if TYPE_CHECKING:
 
 class PrepareEnvironment(Bootstrapper):
     """Prepare the environment for Byte on first run and subsequent boots."""
-
-    def _migrate_yaml_to_jsonc(self, app: Application) -> None:
-        """Migrate config.yaml to config.jsonc if it exists."""
-        yaml_path = app.config_path("config.yaml")
-        jsonc_path = app.config_path("config.jsonc")
-
-        if yaml_path.exists():
-            data = {
-                "$schema": "https://raw.githubusercontent.com/UseTheFork/byte/refs/heads/main/schema.json",
-                **Yaml.load_as_dict(yaml_path),
-            }
-            Json.save(jsonc_path, data)
-            yaml_path.unlink()
-            app["console"].print_boot_status("ok", "Migrated config.yaml to config.jsonc")
 
     def _prepare_directories(self, app: Application):
         """Prepare session context and cache directories for the current boot."""
@@ -114,10 +100,16 @@ class PrepareEnvironment(Bootstrapper):
         config_path = app.config_path("config.jsonc")
 
         user_fields = set(ByteUserConfig.model_fields.keys())
+
         data = {
             "$schema": "https://raw.githubusercontent.com/UseTheFork/byte/refs/heads/main/schema.json",
-            **config.model_dump(mode="json", include=user_fields),
+            **config.model_dump(
+                mode="json",
+                include=user_fields,
+                exclude={"gateway": {"host", "port"}, "presets": True, "web": True},
+            ),
         }
+
         Json.save(config_path, data)
 
         app["console"].print_success(f"Created configuration file at {config_path}\n")
@@ -152,9 +144,6 @@ class PrepareEnvironment(Bootstrapper):
 
     def bootstrap(self, app: Application) -> None:
         """Prepare the environment on boot, including first-boot setup if needed."""
-
-        # Temporary here to convert old yaml config to jsonc config
-        self._migrate_yaml_to_jsonc(app)
 
         self._prepare_directories(app)
         self._setup_gitignore(app)
