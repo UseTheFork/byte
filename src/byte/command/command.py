@@ -8,64 +8,36 @@ from byte.support.mixins import Bootable, Eventable, Notifiable, UserInteractive
 
 
 class Command(ABC, Bootable, UserInteractive, Notifiable, Eventable):
-    """Base class for all commands implementing the Command pattern.
-
-    Provides a consistent interface for executable commands with support for
-    tab completion, help text, and pre-prompt status display.
-    Usage: `class MyCommand(Command): ...` then register with CommandRegistryService
-    """
+    """Base class for all commands implementing the Command pattern."""
 
     @property
     @abstractmethod
     def name(self) -> str:
-        """Command name used for invocation (without prefix).
-
-        Usage: return "add" for /add command
-        """
+        """Provide the command name used for invocation."""
         pass
 
     @property
     def category(self) -> str:
-        """Category for grouping in documentation.
-
-        Override to organize commands into specific categories in generated docs.
-        Usage: return "File Management" for file-related commands
-        """
+        """Provide the category for grouping in documentation."""
         return "General"
 
     @property
     def description(self) -> str:
-        """Human-readable description for help system.
-
-        By default, extracts description from the argument parser.
-        Can be overridden for custom descriptions.
-        """
+        """Provide a human-readable description for the help system."""
         parser: ByteArgumentParser = self.parser
         return parser.description or "No description available"
 
     @property
     @abstractmethod
     def parser(self) -> ByteArgumentParser:
-        """Get the argument parser for this command.
-
-        Override to define command-specific arguments. The parser's description
-        will be used for help text and documentation generation.
-
-        Usage: Override in subclass to add arguments
-        """
+        """Provide the argument parser for this command."""
         pass
 
     async def handle(self, args: str) -> None:
-        """Parse and execute the command with the provided arguments.
-
-        Parses the raw argument string using the command's parser, handles
-        any parsing errors by displaying usage information, and executes
-        the command with the parsed arguments.
+        """Parse and execute the command with provided arguments.
 
         Args:
-            args: Raw argument string from user input
-
-        Usage: Called by CommandRegistryService when command is invoked
+            args: Raw argument string to parse.
         """
         parser = self.parser
 
@@ -83,17 +55,11 @@ class Command(ABC, Bootable, UserInteractive, Notifiable, Eventable):
         """Execute the command with provided arguments.
 
         Args:
-            args: Parsed arguments from the argument parser
-            raw_args: Raw argument string for commands that need custom parsing
-
-        Commands can choose to use either parsed args or raw_args depending on their needs.
+            args: Parsed arguments from the argument parser.
+            raw_args: Raw argument string before parsing.
         """
         pass
 
     async def get_completions(self, text: str) -> List[str]:
-        """Return tab completion suggestions for command arguments.
-
-        Override to provide context-aware completions like file paths.
-        Usage: return ["file1.py", "file2.py"] for file path completions
-        """
+        """Provide tab completion suggestions for command arguments."""
         return []

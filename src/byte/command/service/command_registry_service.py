@@ -5,22 +5,14 @@ from byte.support import Service
 
 
 class CommandRegistryService(Service):
-    """Central registry for command discovery and routing.
-
-    Manages command registration and provides lookup services for both
-    slash commands (/add) and @ commands (@mention). Supports tab completion
-    for improved user experience.
-    """
+    """Manage command registration and provide lookup services for slash and @ commands."""
 
     def boot(self):
         # Separate namespaces for different command types
         self._slash_commands: Dict[str, Command] = {}
 
     def register_slash_command(self, command: Command):
-        """Register a slash command for /command syntax.
-
-        Usage: `await registry.register_slash_command(AddFileCommand())`
-        """
+        """Register a slash command for /command syntax."""
         self._slash_commands[command.name] = command
 
     def get_slash_command(self, name: str) -> Optional[Command]:
@@ -28,34 +20,19 @@ class CommandRegistryService(Service):
         return self._slash_commands.get(name)
 
     def get_all_commands(self) -> List[Command]:
-        """Retrieve all registered commands (both slash and @ commands).
-
-        Returns:
-            List of all Command instances registered in the registry
-
-        Usage: `commands = registry.get_all_commands()`
-        """
+        """Retrieve all registered commands (both slash and @ commands)."""
         all_commands = list(self._slash_commands.values())
         return all_commands
 
     def get_all_slash_command_names(self) -> List[str]:
-        """Retrieve all registered slash command names prefixed with /.
-
-        Returns:
-            List of command names with / prefix (e.g., ["/add", "/drop"])
-
-        Usage: `command_names = registry.get_all_slash_command_names()`
-        """
+        """Retrieve all registered slash command names prefixed with /."""
         return [f"/{name}" for name in self._slash_commands.keys()]
 
     async def get_slash_completions(self, text: str) -> List[tuple[str, str]]:
         """Generate tab completions for slash commands and their arguments.
 
-        Handles both command name completion and argument completion by
-        delegating to individual command completion handlers.
-
         Returns:
-            List of tuples containing (completion_text, description)
+            Tuples of (completion_text, description) for matching commands or arguments.
         """
         if not text.startswith("/"):
             return []
