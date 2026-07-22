@@ -4,5 +4,5 @@
   "python.testing.pytestArgs": ["src"],
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
-  "cSpell.words": ["tcss"]
+  "cSpell.words": ["langchain", "loguru", "tcss"]
 }

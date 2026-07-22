@@ -1,5 +1,6 @@
 import inspect
 import logging
+from collections.abc import Callable
 
 from loguru import logger
 
@@ -29,15 +30,7 @@ class InterceptHandler(logging.Handler):
 
 
 class LogService(Service):
-    """Logging service wrapper for Loguru with Rich integration.
-
-    Configures logging with file output and Rich console handler,
-    automatically clearing log files on boot and filtering console
-    output based on live mode state.
-
-    Usage: `log.info("message")` -> logs to file and console
-    Usage: `log.debug("debug info")` -> logs debug information
-    """
+    """Configure logging with file output and Rich console handler."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -60,23 +53,46 @@ class LogService(Service):
                     "level": "DEBUG",
                     "serialize": False,
                     "backtrace": True,
-                    "filter": lambda record: record["name"].startswith("byte"),
+                    "filter": LogService._make_byte_log_filter(),
                 },
                 {
                     "sink": third_party_log_file,
                     "level": "DEBUG",
                     "serialize": False,
-                    "filter": lambda record: not record["name"].startswith("byte"),
+                    "filter": LogService._make_third_party_log_filter(),
                 },
             ],
         }
 
         # TODO: Check env before setting up above sinks.
-        logger.configure(**config)
+        logger.configure(**config)  # ty:ignore[invalid-argument-type]
 
         logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
 
         self.log = logger
+
+    @staticmethod
+    def _make_byte_log_filter() -> Callable[[dict], bool]:
+        """Create a log filter that returns True when record name starts with any prefix."""
+
+        def filter_func(record: dict) -> bool:
+            return any(record["name"].startswith(prefix) for prefix in ["byte"])
+
+        return filter_func
+
+    @staticmethod
+    def _make_third_party_log_filter() -> Callable[[dict], bool]:
+        """Create a log filter that excludes third_party.log and filters by prefix."""
+
+        prefixes = ["byte"]
+        filtered_messages = ["third_party.log", "rust notify timeout"]
+
+        def filter_func(record: dict) -> bool:
+            if any(msg in record["message"] for msg in filtered_messages):
+                return False
+            return not any(record["name"].startswith(prefix) for prefix in prefixes)
+
+        return filter_func
 
     # TODO: need to figure this out.
     def _should_log_to_console(self, record) -> bool:
@@ -88,12 +104,5 @@ class LogService(Service):
             return True
 
     def __getattr__(self, name: str):
-        """Proxy unknown method calls to the underlying Loguru logger.
-
-        Allows direct access to Loguru logger methods not explicitly wrapped
-        by this service, enabling full Loguru API access.
-
-        Usage: `log.debug("message")` -> calls `log.log.debug("message")`
-        Usage: `log.info("message")` -> calls `log.log.info("message")`
-        """
+        """Proxy unknown method calls to the underlying Loguru logger."""
         return getattr(self.log, name)
