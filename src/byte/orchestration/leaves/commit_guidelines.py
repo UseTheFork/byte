@@ -67,7 +67,7 @@ class CommitGuidelines(Leaf):
         if not config.git.enable_scopes:
             field_rules.append(MD.bullet("DO NOT include `scope` in the commit message"))
         if not config.git.enable_body:
-            field_rules.append(MD.bullet("DO NOT include `body` in the commit message"))
+            field_rules.append(MD.bullet("DO NOT include `body` in the commit message. **IT WILL BE IGNORED**"))
         if not config.git.enable_breaking_changes:
             field_rules.append(
                 MD.bullet("DO NOT include `breaking_change` or `breaking_change_message` in the commit message")
