@@ -217,8 +217,8 @@ class TextAreaAutoComplete(Widget):
         option_list = self.option_list
         option_list.clear_options()
         if candidates:
-            option_list.add_options(list(reversed(candidates)))
-            option_list.highlighted = len(candidates) - 1
+            option_list.add_options(candidates)
+            option_list.highlighted = 0
 
         if option_list.option_count > 0:
             self.action_show()
@@ -345,8 +345,8 @@ class TextAreaAutoComplete(Widget):
 
         if matches:
             # Reverse order so best match is at bottom (near cursor)
-            option_list.add_options(list(reversed(matches)))
-            option_list.highlighted = len(matches) - 1  # Select bottom item
+            option_list.add_options(matches)
+            option_list.highlighted = 0
 
     def _show_options(self, state: TargetState) -> None:
         """Build and show options for current state."""
@@ -397,8 +397,8 @@ class TextAreaAutoComplete(Widget):
         option_list = self.option_list
         option_list.clear_options()
         if candidates:
-            option_list.add_options(list(reversed(candidates)))
-            option_list.highlighted = len(candidates) - 1
+            option_list.add_options(candidates)
+            option_list.highlighted = 0
 
         search = self._get_search_string(current_state)
         if option_list.option_count > 0 and self._should_show(search):

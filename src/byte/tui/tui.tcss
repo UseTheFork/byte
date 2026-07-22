@@ -49,44 +49,6 @@ Conversation {
     overflow: hidden;
     padding: 0 0 0 0;
 
-    Autocompleter {
-      display: none;
-      overlay: screen;
-      offset-y: -16;
-      height: 16;
-      Input {
-        margin: 0 1;
-        padding: 0 1;
-      }
-      OptionList,
-      FuzzyPathOptionList {
-        border: none;
-        height: 1fr;
-        padding: 0;
-        margin: 0 1;
-        overflow: hidden;
-        text-wrap: nowrap;
-        text-overflow: ellipsis;
-        & > .option-list--option {
-          padding: 0 1;
-        }
-      }
-
-      .message {
-        background: $foreground 8%;
-        color: $text 40%;
-        margin: 0 1;
-        padding: 0 1;
-      }
-    }
-
-    &.-show-auto-complete {
-        Autocompleter {
-            display: block;
-        }
-    }
-
-
     PromptContainer {
       background: $background;
       height: auto;

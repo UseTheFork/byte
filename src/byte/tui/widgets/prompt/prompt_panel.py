@@ -63,9 +63,9 @@ class PromptPanel(containers.VerticalGroup):
         """Compose the prompt panel with status bar, input area, and analytics."""
         yield StatusBar()
         with PromptInputContainer():
-            yield TextAreaAutoComplete("#prompt-text-area")
             with PromptContainer(id="prompt-container"):
                 yield PromptInput(id="prompt-input")
+            yield TextAreaAutoComplete("#prompt-text-area")
 
             yield Analytics(id="analytics-panel")
 

@@ -154,11 +154,13 @@ class PromptTextArea(TextArea):
         """Submit prompt and clear the text area."""
         self.post_message(Messages.UserInputSubmitted(self.text))
         self.clear()
+        self._history_index = -1
 
     def action_submit(self) -> None:
         """Submit prompt and clear the text area."""
         self.post_message(Messages.UserInputSubmitted(self.text))
         self.clear()
+        self._history_index = -1
 
     def action_newline(self) -> None:
         """Insert a new line character."""
