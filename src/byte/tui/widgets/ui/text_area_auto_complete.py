@@ -554,10 +554,11 @@ class TextAreaAutoComplete(Widget):
         def hide_and_reset():
             self._completing = False
             self.action_hide()
-            # Only auto-submit for slash commands (complete actions)
-            # File paths are usually part of a larger message
             if submit and self._mode == "slash" and hasattr(self.target, "action_submit"):
                 self.target.action_submit()  # ty:ignore[call-non-callable]
+            elif not submit:
+                # Re-evaluate for chained completions (e.g., /add → file args)
+                self._handle_text_change()
 
         self.call_after_refresh(hide_and_reset)
 
