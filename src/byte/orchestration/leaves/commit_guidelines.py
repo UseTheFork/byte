@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 COMMIT_TYPES = {
     "feat": "Commits that add or remove a new feature to the API or UI",
     "fix": "Commits that fix an API or UI bug of a preceded feat commit",
-    "refactor": "Commits that rewrite/restructure code without changing API or UI behaviour",
+    "refactor": "Commits that rewrite/restructure code without changing API or UI behavior",
     "perf": "Commits that improve performance (special refactor commits)",
     "style": "Commits that do not affect meaning (white-space, formatting, missing semi-colons, etc)",
     "test": "Commits that add missing tests or correct existing tests",
