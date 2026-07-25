@@ -7,7 +7,6 @@ permissions:
   id-token: write
 
 jobs:
-
   # test-e2e:
   #   needs: build
   #   runs-on: ubuntu-latest
@@ -46,8 +45,8 @@ jobs:
     env:
       ANTHROPIC_API_KEY: fake-key
     # needs:
-      # - build
-      # - test-e2e
+    # - build
+    # - test-e2e
 
     concurrency:
       group: ${{ github.workflow }}-pre-release-${{ github.ref_name }}
@@ -71,10 +70,10 @@ jobs:
         with:
           enable-cache: true
 
-      - name:  Docs | Update available commands
+      - name: Docs | Update available commands
         run: uv run python src/scripts/commands_to_md.py
 
-      - name:  Docs | Update Setting options
+      - name: Docs | Update Setting options
         run: uv run python src/scripts/settings_to_md.py
 
       - name: Docs | Update Models

@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 def providers():
     """Provide AgentServiceProvider for commit agent tests."""
     from byte.agent import AgentServiceProvider
+
     from byte.git import GitServiceProvider
 
     return [AgentServiceProvider, GitServiceProvider]
@@ -32,6 +33,7 @@ async def test_commit_plan_agent_generates_commit_message(
 ):
     """Test that Commit Plan Agent generates a structured commit message."""
     from byte.agent.implementations.commit.agent import CommitPlanAgent
+
     from byte.git import GitService
 
     # Mock user confirmation to return True
@@ -80,6 +82,7 @@ async def test_commit_plan_agent_generates_separate_commits_for_multiple_files(
 ):
     """Test that Commit Plan Agent generates separate commits for multiple files."""
     from byte.agent.implementations.commit.agent import CommitPlanAgent
+
     from byte.git import GitService
 
     # Mock user confirmation to return True

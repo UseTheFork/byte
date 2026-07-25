@@ -132,7 +132,6 @@ Have an agent create a new refactoring spec
 
 **Usage**: `/spec:refractor` or `/spec:refractor <args>`
 
-
 ## Files Commands
 
 ### /add
@@ -183,7 +182,6 @@ None
 
 **Usage**: `/reload`
 
-
 ## General Commands
 
 ### /commit
@@ -222,7 +220,6 @@ None
 
 **Usage**: `/lint`
 
-
 ## Memory Commands
 
 ### /clear
@@ -260,7 +257,6 @@ Undo the last conversation step by removing the most recent human message and al
 None
 
 **Usage**: `/undo`
-
 
 ## Session Context Commands
 
@@ -323,4 +319,3 @@ Fetch webpage using headless Chrome, convert HTML to markdown, display for revie
 - `urls` (string, required) — One or more URLs to scrape (space, comma, or newline separated)
 
 **Usage**: `/web` or `/web <args>`
-

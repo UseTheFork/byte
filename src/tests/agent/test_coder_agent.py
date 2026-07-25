@@ -5,9 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
+from byte.code_operations import PromptFormatProvider
 from pytest_mock import MockerFixture
 
-from byte.code_operations import PromptFormatProvider
 from byte.files import FileMode, FileService
 from byte.support.mixins import UserInteractive
 from tests.utils import create_test_file
@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 def providers():
     """Provide service providers for coder agent tests."""
     from byte.agent import AgentServiceProvider
+
     from byte.files import FileServiceProvider
 
     return [

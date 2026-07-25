@@ -5,11 +5,11 @@ from io import StringIO
 from typing import TYPE_CHECKING
 
 import pytest
+from byte.cli import ByteTheme, ThemeRegistry
 from pytest_mock import MockerFixture
 from rich.console import Console as RichConsole
 from rich.theme import Theme
 
-from byte.cli import ByteTheme, ThemeRegistry
 from byte.foundation import Console
 from byte.git import CommitCommand
 from byte.support.mixins import UserInteractive

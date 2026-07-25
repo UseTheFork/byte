@@ -15,6 +15,7 @@ def providers():
     """Provide AgentServiceProvider for ask agent tests."""
     from byte.agent import AgentServiceProvider
     from byte.conventions import ConventionsServiceProvider
+
     from byte.git import GitServiceProvider
 
     return [AgentServiceProvider, ConventionsServiceProvider, GitServiceProvider]

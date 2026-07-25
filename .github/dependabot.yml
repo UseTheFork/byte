@@ -10,7 +10,7 @@ updates:
     target-branch: "development"
     commit-message:
       prefix: "fix"
-      
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

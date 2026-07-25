@@ -8,9 +8,7 @@ from byte.tools.exceptions import ToolValidationException
 
 class LoadSkillReferenceTool(BaseTool):
     name: str = "load_skill_reference_tool"
-    description: str = (
-        "Use this tool to load a reference file from a skill. Call this when you want to access additional documentation or resources attached to a skill."
-    )
+    description: str = "Use this tool to load a reference file from a skill. Call this when you want to access additional documentation or resources attached to a skill."
     input_schema = {
         "type": "object",
         "properties": {
@@ -42,16 +40,12 @@ class LoadSkillReferenceTool(BaseTool):
         normalized_reference_name = Str.normalize_id(reference_name)
         reference_path = skill.references.get(normalized_reference_name)
         if reference_path is None:
-            raise ToolValidationException(
-                f"Reference '{reference_name}' not found in skill '{skill_id}'."
-            )
+            raise ToolValidationException(f"Reference '{reference_name}' not found in skill '{skill_id}'.")
 
         try:
             content = reference_path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError) as exc:
-            raise ToolValidationException(
-                f"Could not read reference file '{reference_name}': {exc}"
-            ) from exc
+            raise ToolValidationException(f"Could not read reference file '{reference_name}': {exc}") from exc
 
         return ToolResult(
             result={

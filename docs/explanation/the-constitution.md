@@ -136,33 +136,33 @@ graph TD
     Questionnaire["Interactive Questionnaire<br/>(DDD? DRY? TDD? YAGNI? TDA? Strict Typing?)"]
     InitWF["Initialize Workflow<br/>(collect → derive → create → validate)"]
     OnDisk["Saved to<br/>.byte/constitution/"]
-    
+
     Modify["/constitution command"]
     ModifyWF["Constitution Workflow<br/>(understand → present → change → update metadata)"]
     OnDiskMod["Updated in<br/>.byte/constitution/"]
-    
+
     Startup["Byte Startup"]
     Load["Constitution Leaf<br/>Reads .byte/constitution/"]
     Memory["In-Memory Constitution<br/>ready for injection"]
-    
+
     Agent["Any Agent<br/>(/coder, /docs, etc)"]
     Filter["Filter by<br/>applies_to patterns"]
     Prompt["Constitution rendered<br/>in system prompt"]
-    
+
     User -->|first setup| Init
     Init --> Questionnaire
     Questionnaire --> InitWF
     InitWF --> OnDisk
-    
+
     User -->|request change| Modify
     Modify --> ModifyWF
     ModifyWF --> OnDiskMod
-    
+
     OnDisk --> Startup
     OnDiskMod --> Startup
     Startup --> Load
     Load --> Memory
-    
+
     Agent --> Filter
     Memory --> Filter
     Filter --> Prompt

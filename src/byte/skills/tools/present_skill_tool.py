@@ -34,12 +34,12 @@ class PresentSkillTool(BaseTool):
 
         interaction_service = self.app.make(InteractionService)
 
-        confirm_message = f"Skill '{skill_id}' is at: {skill.skill_file_path}\nPlease review. Are you satisfied with the skill?"
+        confirm_message = (
+            f"Skill '{skill_id}' is at: {skill.skill_file_path}\nPlease review. Are you satisfied with the skill?"
+        )
         input_message = "Please provide your feedback:"
 
-        confirmed, text_input = await interaction_service.confirm_or_input(
-            confirm_message, input_message
-        )
+        confirmed, text_input = await interaction_service.confirm_or_input(confirm_message, input_message)
 
         if confirmed:
             return ToolResult(result={"content": "User approved the skill.", "approved": True})

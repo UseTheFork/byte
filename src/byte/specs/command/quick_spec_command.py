@@ -24,9 +24,7 @@ class QuickSpecCommand(Command):
             prog=self.name,
             description="Have an agent create a new quick spec",
         )
-        parser.add_argument(
-            "spec_query", nargs=argparse.REMAINDER, help="The user's query to generate the spec for"
-        )
+        parser.add_argument("spec_query", nargs=argparse.REMAINDER, help="The user's query to generate the spec for")
         return parser
 
     async def execute(self, args: Namespace, raw_args: str) -> None:

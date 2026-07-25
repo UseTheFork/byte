@@ -1,8 +1,9 @@
 from argparse import Namespace
 from typing import List
 
-from byte.analytics import AgentAnalyticsService
 from byte.conventions import ConventionContextService
+
+from byte.analytics import AgentAnalyticsService
 from byte.files import FileMode, FileService
 from byte.memory import MemoryService
 from byte.tui import ByteArgumentParser, Command, PromptToolkitService

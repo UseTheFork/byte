@@ -7,7 +7,9 @@ from byte.tui.schemas import Answer
 
 class UserMultiSelectTool(BaseTool):
     name: str = "user_multi_select_tool"
-    description: str = "Present the user with a list of choices and return their selections (multiple selections allowed)."
+    description: str = (
+        "Present the user with a list of choices and return their selections (multiple selections allowed)."
+    )
     input_schema = {
         "type": "object",
         "properties": {

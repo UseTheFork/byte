@@ -32,8 +32,8 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "AutocompleteOption": "schemas",
-    "Console": "console",
     "ByteTUI": "byte_tui",
+    "Console": "console",
     "InputCancelledError": "exceptions",
     "InteractionService": "service.interactions_service",
     "Messages": "messages",

@@ -19,8 +19,8 @@ __all__ = (
 _dynamic_imports = {
     # keep-sorted start
     "ByteConfig": "byte_config",
-    "ByteUserConfig": "byte_config",
     "ByteConfigException": "exceptions",
+    "ByteUserConfig": "byte_config",
     "Repository": "repository",
     # keep-sorted end
 }

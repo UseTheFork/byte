@@ -5,10 +5,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
-from pytest_mock import MockerFixture
-
 from byte.agent import ConventionAgent
 from byte.conventions import FOCUS_MESSAGES
+from pytest_mock import MockerFixture
+
 from byte.support.mixins import UserInteractive
 from tests.utils import create_test_file
 
@@ -21,6 +21,7 @@ def providers():
     """Provide service providers for convention agent tests."""
 
     from byte.agent import AgentServiceProvider
+
     from byte.files import FileServiceProvider
     from byte.git import GitServiceProvider
 

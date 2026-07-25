@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from fractions import Fraction
 from typing import Iterable, Iterator, Literal, TypeVar
 
@@ -15,7 +13,7 @@ from textual.visual import RenderOptions, Visual
 T = TypeVar("T")
 
 
-def loop_last(values: Iterable[T]) -> Iterable[tuple[bool, T]]:
+def loop_last[T](values: Iterable[T]) -> Iterable[tuple[bool, T]]:
     """Iterate and generate a tuple with a flag for last value."""
     iter_values = iter(values)
     try:
@@ -88,8 +86,7 @@ class Columns:
         self._optimal_width_cache: int | None = None
 
     def __rich_repr__(self) -> rich.repr.Result:
-        for column in self.columns:
-            yield column
+        yield from self.columns
         yield "gutter", self.gutter, 1
         yield "style", self.style, ""
 
@@ -264,7 +261,7 @@ if __name__ == "__main__":
         DEFAULT_CSS = """
         .row1 {
             background: blue;
-           
+
         }
         """
 

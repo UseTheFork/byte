@@ -37,9 +37,7 @@ class DeleteSkillReferenceTool(BaseTool):
             raise ToolValidationException(f"Skill '{skill_id}' not found.")
 
         if reference_name not in skill.references:
-            raise ToolValidationException(
-                f"Reference '{reference_name}' not found in skill '{skill_id}'."
-            )
+            raise ToolValidationException(f"Reference '{reference_name}' not found in skill '{skill_id}'.")
 
         reference_file = skill.references[reference_name]
         try:

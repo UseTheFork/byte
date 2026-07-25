@@ -64,21 +64,21 @@ Byte allocates models across four slots, each optimized for different tasks. Edi
   "llm": {
     "fast": {
       "model": "claude-haiku-4-5",
-      "provider": "anthropic"
+      "provider": "anthropic",
     },
     "standard": {
       "model": "claude-sonnet-4-6",
-      "provider": "anthropic"
+      "provider": "anthropic",
     },
     "reasoning": {
       "model": "claude-opus-4-6",
-      "provider": "anthropic"
+      "provider": "anthropic",
     },
     "coding": {
       "model": "claude-haiku-4-5",
-      "provider": "anthropic"
-    }
-  }
+      "provider": "anthropic",
+    },
+  },
 }
 ```
 
@@ -100,21 +100,21 @@ All models from Anthropic:
   "llm": {
     "fast": {
       "model": "claude-haiku-4-5",
-      "provider": "anthropic"
+      "provider": "anthropic",
     },
     "standard": {
       "model": "claude-sonnet-4-6",
-      "provider": "anthropic"
+      "provider": "anthropic",
     },
     "reasoning": {
       "model": "claude-opus-4-6",
-      "provider": "anthropic"
+      "provider": "anthropic",
     },
     "coding": {
       "model": "claude-haiku-4-5",
-      "provider": "anthropic"
-    }
-  }
+      "provider": "anthropic",
+    },
+  },
 }
 ```
 
@@ -129,21 +129,21 @@ All models from Google Gemini:
   "llm": {
     "fast": {
       "model": "gemini-3.5-flash",
-      "provider": "gemini"
+      "provider": "gemini",
     },
     "standard": {
       "model": "gemini-3.5-flash",
-      "provider": "gemini"
+      "provider": "gemini",
     },
     "reasoning": {
       "model": "gemini-3.1-pro-preview",
-      "provider": "gemini"
+      "provider": "gemini",
     },
     "coding": {
       "model": "gemini-3.5-flash",
-      "provider": "gemini"
-    }
-  }
+      "provider": "gemini",
+    },
+  },
 }
 ```
 
@@ -158,21 +158,21 @@ All models from OpenAI:
   "llm": {
     "fast": {
       "model": "gpt-5.4-mini",
-      "provider": "openai"
+      "provider": "openai",
     },
     "standard": {
       "model": "gpt-5.4",
-      "provider": "openai"
+      "provider": "openai",
     },
     "reasoning": {
       "model": "gpt-5.5",
-      "provider": "openai"
+      "provider": "openai",
     },
     "coding": {
       "model": "gpt-5.4",
-      "provider": "openai"
-    }
-  }
+      "provider": "openai",
+    },
+  },
 }
 ```
 
@@ -187,25 +187,26 @@ Combine providers to optimize cost and performance:
   "llm": {
     "fast": {
       "model": "gemini-3.5-flash",
-      "provider": "gemini"
+      "provider": "gemini",
     },
     "standard": {
       "model": "claude-sonnet-4-6",
-      "provider": "anthropic"
+      "provider": "anthropic",
     },
     "reasoning": {
       "model": "gpt-5.5",
-      "provider": "openai"
+      "provider": "openai",
     },
     "coding": {
       "model": "claude-haiku-4-5",
-      "provider": "anthropic"
-    }
-  }
+      "provider": "anthropic",
+    },
+  },
 }
 ```
 
 In this example:
+
 - Gemini handles fast tasks (lowest cost)
 - Anthropic handles standard and coding tasks (balanced performance)
 - OpenAI handles reasoning tasks (highest capability)

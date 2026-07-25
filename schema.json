@@ -216,10 +216,7 @@
           "type": "array"
         }
       },
-      "required": [
-        "command",
-        "languages"
-      ],
+      "required": ["command", "languages"],
       "title": "LintCommand",
       "type": "object"
     },
@@ -296,9 +293,7 @@
           "type": "boolean"
         }
       },
-      "required": [
-        "id"
-      ],
+      "required": ["id"],
       "title": "PresetsConfig",
       "type": "object"
     },
@@ -308,12 +303,7 @@
         "ui_theme": {
           "default": "mocha",
           "description": "Catppuccin theme variant for the CLI interface (mocha/macchiato are dark, latte is light, frappe is cool dark)",
-          "enum": [
-            "mocha",
-            "macchiato",
-            "latte",
-            "frappe"
-          ],
+          "enum": ["mocha", "macchiato", "latte", "frappe"],
           "title": "Ui Theme",
           "type": "string"
         },

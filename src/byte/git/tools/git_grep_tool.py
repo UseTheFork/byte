@@ -48,59 +48,6 @@ class GitGrepTool(BaseTool):
     def format_tool_message(cls, result: ToolResult) -> str:
         return result.result.get("content", "")
 
-    @override
-    async def run(
-        self,
-        pattern: str = "",
-        case_sensitive: bool = False,
-        max_count: int = GIT_GREP_MAX_COUNT,
-        file_pattern: str = "",
-        **kwargs,
-    ) -> ToolResult:
-
-        git_service = self.app.make(GitService)
-
-        try:
-            repo = await git_service.get_repo()
-
-            # Build git grep command arguments
-            grep_args = ["--no-pager", "grep"]
-
-            # Add case-sensitivity flag
-            if not case_sensitive:
-                grep_args.append("-i")
-
-            # Add regex and other flags
-            grep_args.extend(["-E", "-n", "--no-color", "--max-count", str(max_count), "--", pattern])
-
-            # Add file pattern if provided
-            if file_pattern:
-                grep_args.append(file_pattern)
-
-            # Execute git grep
-            try:
-                result = await CommandRunner.run("git", *grep_args, cwd=repo.working_dir)
-                if not result:
-                    return ToolResult(result={"content": "No matches found"})
-
-                # Parse the output and format results
-                formatted_result = self._format_grep_results(result, max_count)
-
-                if len(formatted_result) > MAX_RESULT_LENGTH:
-                    formatted_result = formatted_result[:MAX_RESULT_LENGTH] + "\n... [results truncated]"
-
-                return ToolResult(result={"content": formatted_result})
-
-            except RuntimeError as grep_error:
-                # Git grep returns exit code 1 when no matches found
-                error_msg = str(grep_error)
-                if "exit code 1" in error_msg:
-                    return ToolResult(result={"content": "No matches found"})
-                raise
-
-        except Exception as e:
-            raise ToolRunException(f"Error executing git grep for pattern '{pattern}': {e!s}") from e
-
     @staticmethod
     def _format_grep_results(output: str, max_count: int) -> str:
         """Parse git grep output and format it as structured results grouped by file.
@@ -161,3 +108,56 @@ class GitGrepTool(BaseTool):
             result_parts.append("")
 
         return "\n".join(result_parts)
+
+    @override
+    async def run(
+        self,
+        pattern: str = "",
+        case_sensitive: bool = False,
+        max_count: int = GIT_GREP_MAX_COUNT,
+        file_pattern: str = "",
+        **kwargs,
+    ) -> ToolResult:
+
+        git_service = self.app.make(GitService)
+
+        try:
+            repo = await git_service.get_repo()
+
+            # Build git grep command arguments
+            grep_args = ["--no-pager", "grep"]
+
+            # Add case-sensitivity flag
+            if not case_sensitive:
+                grep_args.append("-i")
+
+            # Add regex and other flags
+            grep_args.extend(["-E", "-n", "--no-color", "--max-count", str(max_count), "--", pattern])
+
+            # Add file pattern if provided
+            if file_pattern:
+                grep_args.append(file_pattern)
+
+            # Execute git grep
+            try:
+                result = await CommandRunner.run("git", *grep_args, cwd=repo.working_dir)
+                if not result:
+                    return ToolResult(result={"content": "No matches found"})
+
+                # Parse the output and format results
+                formatted_result = self._format_grep_results(result, max_count)
+
+                if len(formatted_result) > MAX_RESULT_LENGTH:
+                    formatted_result = formatted_result[:MAX_RESULT_LENGTH] + "\n... [results truncated]"
+
+                return ToolResult(result={"content": formatted_result})
+
+            except RuntimeError as grep_error:
+                # Git grep returns exit code 1 when no matches found
+                error_msg = str(grep_error)
+                if "exit code 1" in error_msg:
+                    return ToolResult(result={"content": "No matches found"})
+                raise
+
+        except Exception as e:
+            raise ToolRunException(f"Error executing git grep for pattern '{pattern}': {e!s}") from e

@@ -29,6 +29,7 @@ __all__ = (
 
 _dynamic_imports = {
     # keep-sorted start
+    "AddFilesToContextTool": "tools.add_files_to_context_tool",
     "ContextAddCommand": "command.context_add_command",
     "ContextAddFileCommand": "command.context_add_file_command",
     "ContextDropCommand": "command.context_drop_command",
@@ -37,7 +38,6 @@ _dynamic_imports = {
     "SessionContextModel": "models",
     "SessionContextService": "service.session_context_service",
     "WebCommand": "command.web_command",
-    "AddFilesToContextTool": "tools.add_files_to_context_tool",
     # keep-sorted end
 }
 

@@ -22,7 +22,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.ref_name }}
-      
+
       - name: Checkout
         run: |
           git config user.name github-actions[bot]

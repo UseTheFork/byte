@@ -78,7 +78,7 @@ class LLMService(Service):
                 ]
             )
 
-        elif payload.provider in ["google"]:
+        elif payload.provider == "google":
             # Add gentle reinforcement for lazy mode
             reinforcement.extend(
                 [

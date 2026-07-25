@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 def providers():
     """Provide AgentServiceProvider for commit agent tests."""
     from byte.agent import AgentServiceProvider
+
     from byte.files import FileServiceProvider
     from byte.git import GitServiceProvider
 
@@ -37,6 +38,7 @@ async def test_commit_agent_generates_commit_message(
 ):
     """Test that Commit Agent generates a structured commit message."""
     from byte.agent.implementations.commit.agent import CommitAgent
+
     from byte.git import GitService
 
     # Mock user confirmation to return True
@@ -95,6 +97,7 @@ async def test_commit_agent_generates_commit_message_with_multiple_files(
 ):
     """Test that Commit Agent generates a commit message for multiple file changes."""
     from byte.agent.implementations.commit.agent import CommitAgent
+
     from byte.git import GitService
 
     # Mock user confirmation to return True
@@ -133,6 +136,7 @@ async def test_commit_agent_generates_commit_message_with_multiple_files(
 async def test_commit_agent_detects_breaking_change(application: Application, mocker: MockerFixture):
     """Test that Commit Agent detects and marks breaking changes."""
     from byte.agent.implementations.commit.agent import CommitAgent
+
     from byte.git import GitService
 
     # Mock user confirmation to return True
@@ -198,6 +202,7 @@ async def test_commit_agent_handles_validation_rejection_and_retry(
 ):
     """Test that Commit Agent handles user rejection and successfully retries with revised message."""
     from byte.agent.implementations.commit.agent import CommitAgent
+
     from byte.git import GitService
 
     # Mock user confirmation to return True

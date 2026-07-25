@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 def providers():
     """Provide service providers for coder agent tests."""
     from byte.agent import AgentServiceProvider
+
     from byte.files import FileServiceProvider
 
     return [

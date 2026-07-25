@@ -5,9 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
+from byte.agent import TokenUsageSchema
 
 from byte import EventType
-from byte.agent import TokenUsageSchema
 
 if TYPE_CHECKING:
     from byte import Application

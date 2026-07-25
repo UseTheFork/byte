@@ -20,8 +20,8 @@ Open `.byte/config.jsonc` and add or update the `web` section:
 {
   "web": {
     "enable": true,
-    "chrome_binary_location": "/path/to/chrome"
-  }
+    "chrome_binary_location": "/path/to/chrome",
+  },
 }
 ```
 
@@ -317,8 +317,8 @@ Check your `.byte/config.jsonc`:
 {
   "web": {
     "enable": true,
-    "chrome_binary_location": "/path/to/chrome"
-  }
+    "chrome_binary_location": "/path/to/chrome",
+  },
 }
 ```
 
@@ -346,4 +346,3 @@ Copy the exact path from the output into your config.
 ## Next Steps
 
 Now that you can manage web context, combine it with file context to build rich, multi-source conversations. For advanced context workflows, see the explanation section on how context is structured and injected into prompts.
-

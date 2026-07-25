@@ -383,7 +383,7 @@ class LSPClient:
                 if self.process.returncode is None:
                     self.process.terminate()
                     await asyncio.wait_for(self.process.wait(), timeout=5.0)
-            except (ProcessLookupError, TimeoutError):
+            except ProcessLookupError, TimeoutError:
                 # Process already gone or timeout - try kill
                 try:
                     if self.process.returncode is None:

@@ -51,7 +51,10 @@ Git behavior is controlled in `.byte/config.jsonc` under the `git` key. Open you
     "enable_breaking_changes": true,
     "enable_body": true,
     "scopes": ["api", "auth", "db", "ui"],
-    "description_guidelines": ["Use imperative mood: 'add' not 'added'", "Reference issue numbers: 'fixes #123'"],
+    "description_guidelines": [
+      "Use imperative mood: 'add' not 'added'",
+      "Reference issue numbers: 'fixes #123'",
+    ],
     "max_description_length": 72,
   },
 }

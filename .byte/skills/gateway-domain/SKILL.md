@@ -4,6 +4,7 @@ description: Guides development within the gateway domain (src/byte/gateway/) �
   @on dispatch pattern, adding new RPC methods, and cross-domain interaction rules.
 name: gateway-domain
 ---
+
 ## When This Skill Applies
 
 Use this skill when:
@@ -21,16 +22,16 @@ The gateway domain is a **WebSocket JSON-RPC 2.0 bridge** that exposes an authen
 
 ### File Map
 
-| File | Purpose |
-|---|---|
-| `config.py` | `GatewayConfig` — `enable`, `host`, `port` settings |
-| `protocol.py` | JSON-RPC 2.0 models: `RpcRequest`, `RpcResponse`, `RpcNotification`, `RpcError`, error code constants |
-| `requests.py` | Typed request dataclasses: `GatewayRequest` base, `Requests` namespace (`Configure`, `AddFile`, `DropFile`, `ContextAddFile`, `ContextDropFile`) |
-| `service/gateway_service.py` | `GatewayService` — server lifecycle, auth handshake, discovery file, event routing via `post_message` |
-| `service/session_service.py` | `SessionService` — single-session dispatch loop, `@on`-decorated handlers, `notify()` for outbound notifications |
-| `service_provider.py` | `GatewayServiceProvider` — registers singleton, boots server in background task, handles shutdown |
-| `utils/dispatch.py` | `@on` decorator — tags methods with `_gateway_request_type` for dispatch table building |
-| `utils/gateway_utils.py` | `GatewayUtils` — `parse_request`, `make_error_response`, `REQUEST_TYPES` auto-discovery |
+| File                         | Purpose                                                                                                                                          |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `config.py`                  | `GatewayConfig` — `enable`, `host`, `port` settings                                                                                              |
+| `protocol.py`                | JSON-RPC 2.0 models: `RpcRequest`, `RpcResponse`, `RpcNotification`, `RpcError`, error code constants                                            |
+| `requests.py`                | Typed request dataclasses: `GatewayRequest` base, `Requests` namespace (`Configure`, `AddFile`, `DropFile`, `ContextAddFile`, `ContextDropFile`) |
+| `service/gateway_service.py` | `GatewayService` — server lifecycle, auth handshake, discovery file, event routing via `post_message`                                            |
+| `service/session_service.py` | `SessionService` — single-session dispatch loop, `@on`-decorated handlers, `notify()` for outbound notifications                                 |
+| `service_provider.py`        | `GatewayServiceProvider` — registers singleton, boots server in background task, handles shutdown                                                |
+| `utils/dispatch.py`          | `@on` decorator — tags methods with `_gateway_request_type` for dispatch table building                                                          |
+| `utils/gateway_utils.py`     | `GatewayUtils` — `parse_request`, `make_error_response`, `REQUEST_TYPES` auto-discovery                                                          |
 
 ---
 
@@ -57,12 +58,12 @@ External domains that need to communicate with connected WebSocket clients **mus
 
 `GatewayService.post_message` routes application events to the active session's notification stream using pattern matching:
 
-| Event Type | Notification Method | Params |
-|---|---|---|
-| `Messages.Response` | `stream/response` | `content`, `done` |
-| `Messages.ToolResponse` | `stream/tool` | `tool`, `content` |
-| `Messages.CommandExecutionCompleted` | `stream/done` | `{}` |
-| `Messages.Status` (error) | `stream/error` | `message` |
+| Event Type                           | Notification Method | Params            |
+| ------------------------------------ | ------------------- | ----------------- |
+| `Messages.Response`                  | `stream/response`   | `content`, `done` |
+| `Messages.ToolResponse`              | `stream/tool`       | `tool`, `content` |
+| `Messages.CommandExecutionCompleted` | `stream/done`       | `{}`              |
+| `Messages.Status` (error)            | `stream/error`      | `message`         |
 
 ---
 
@@ -106,25 +107,31 @@ No manual registration is needed. `GatewayUtils.REQUEST_TYPES` auto-discovers al
 ## Key Patterns
 
 ### Auth Flow
+
 The first message on any new WebSocket connection **must** be `method: "auth"` with a `token` param matching the token written to disk. `GatewayService._handle_new_connection` enforces this before handing off to `SessionService`.
 
 ### Dispatch Mechanism
+
 1. `SessionService._dispatch` parses raw JSON into `RpcRequest`
 2. `GatewayUtils.parse_request` maps the method name to a typed `GatewayRequest` subclass
 3. `SessionService._handlers` (built by `_build_dispatch_table`) routes by request type to the `@on`-decorated method
 
 ### The `@on` Decorator
+
 - Non-wrapping: sets `method._gateway_request_type = request_type` and returns the method unaltered
 - Used exclusively in `SessionService` for dispatch registration
 - Must not be used outside the gateway domain
 
 ### Streaming Notifications
+
 - Outbound-only, no request id — uses `RpcNotification`
 - Sent via `SessionService.notify(method, params)`
 - Triggered by `GatewayService.post_message` which creates `asyncio` tasks for each notification
 
 ### Error Responses
+
 Use `GatewayUtils.make_error_response(id, code, message)` with the predefined error constants from `protocol.py`:
+
 - `ERR_PARSE` (-32700)
 - `ERR_INVALID_REQUEST` (-32600)
 - `ERR_METHOD_NOT_FOUND` (-32601)

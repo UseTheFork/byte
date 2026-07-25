@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 import yaml
-
 from byte.config.migrator import Migrator
 
 if TYPE_CHECKING:

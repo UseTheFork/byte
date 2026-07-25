@@ -25,11 +25,11 @@ _dynamic_imports = {
     # keep-sorted start
     "AgentAnalyticsService": "service.agent_analytics_service",
     "AnalyticsProvider": "service_provider",
-    "UsageMetrics": "utils.usage_metrics",
     "LastMessageUsage": "schemas",
     "ModelUsage": "schemas",
     "TokenCount": "schemas",
     "UsageAnalytics": "schemas",
+    "UsageMetrics": "utils.usage_metrics",
     # keep-sorted end
 }
 

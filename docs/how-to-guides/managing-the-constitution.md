@@ -21,6 +21,7 @@ The first step is to create your project constitution. Run the initialization co
 The Initialization Workflow walks you through an interactive questionnaire about your project's values and standards:
 
 **Foundational Principles** — You'll be asked whether to enable:
+
 - **DDD** (Domain Driven Design) — Organize business logic into bounded-context domains
 - **DRY** (Don't Repeat Yourself) — Eliminate code duplication
 - **TDD** (Test Driven Development) — Write tests before implementation
@@ -200,4 +201,3 @@ Your constitution now reflects your project's actual values and enforces them on
 Now that you've created and modified your constitution, review the Explanation section to understand the deeper concepts: how the constitution is loaded, how it reaches agents, and how to think about governance.
 
 Check the `/constitution` command output for any feedback or clarifications the agent provides during each change.
-

@@ -34,9 +34,9 @@ _dynamic_imports = {
     "ToolException": "exceptions",
     "ToolMessage": "tool_message",
     "ToolNotFoundException": "exceptions",
-    "ToolRunException": "exceptions",
     "ToolRegistryService": "service.tool_registry_service",
     "ToolResult": "schemas",
+    "ToolRunException": "exceptions",
     "ToolsServiceProvider": "service_provider",
     # keep-sorted end
 }

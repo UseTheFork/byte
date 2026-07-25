@@ -26,8 +26,6 @@ class AppConfig(BaseModel):
 
 
 class ByteUserConfig(BaseModel):
-    # keep-sorted start
-
     documentation: DocumentationConfig = Field(
         default_factory=DocumentationConfig,
         description="Documentation framework, features, and writing style configuration",
@@ -51,13 +49,10 @@ class ByteUserConfig(BaseModel):
         default_factory=TUIConfig, description="Terminal UI theme and syntax highlighting configuration"
     )
     web: WebConfig = Field(default_factory=WebConfig, description="Web browser automation and scraping configuration")
-    # keep-sorted end
 
 
 class ByteConfig(ByteUserConfig):
     version: str = Field(default="0.0.0")
 
-    # keep-sorted start
     app: AppConfig = Field(default_factory=AppConfig)
     boot: BootConfig = Field(default_factory=BootConfig)
-    # keep-sorted end
