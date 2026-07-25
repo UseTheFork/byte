@@ -1,5 +1,7 @@
 from byte import ServiceProvider
-from byte.lint import LintCommand, LintService, LintTool
+from byte.lint.command.lint_command import LintCommand
+from byte.lint.service.lint_service import LintService
+from byte.lint.tools.lint_tool import LintTool
 
 
 class LintServiceProvider(ServiceProvider):

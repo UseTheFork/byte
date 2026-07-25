@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import override
 
-from byte.lint import LintService
+from byte.lint.service.lint_service import LintService
 from byte.tools import BaseTool, ToolResult
 
 

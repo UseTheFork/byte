@@ -5,19 +5,11 @@ from pydantic.dataclasses import dataclass
 
 
 @dataclass
-class LintFile:
-    """Dataclass representing the result of executing a lint command on a specific file."""
+class LintTask:
+    """Dataclass representing a lint command with multiple files to process."""
 
     command: List[str]
-    file: Path
+    files: List[Path]
     exit_code: int | None = None
     stdout: str = ""
     stderr: str = ""
-
-
-@dataclass
-class LintCommandType:
-    """Dataclass representing a lint command with results for multiple files."""
-
-    command: List[str]
-    results: List[LintFile]

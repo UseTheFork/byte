@@ -4,7 +4,7 @@ from byte import ByteArgumentParser, Command
 from byte.coder import CoderWorkflow
 from byte.config import ByteConfigException
 from byte.git import GitService
-from byte.lint import LintService
+from byte.lint.service.lint_service import LintService
 from byte.orchestration import WorkflowService
 from byte.tui import Messages
 

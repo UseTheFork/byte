@@ -6,30 +6,33 @@ from byte._import_utils import import_attr
 
 if TYPE_CHECKING:
     from byte.lint.command.lint_command import LintCommand
+    from byte.lint.config import LintCommandConfig
     from byte.lint.exceptions import LintConfigException
     from byte.lint.service.lint_service import LintService
     from byte.lint.service_provider import LintServiceProvider
     from byte.lint.tools.lint_tool import LintTool
-    from byte.lint.types import LintCommandType, LintFile
+    from byte.lint.types import LintTask
 
 __all__ = (
     "LintCommand",
-    "LintCommandType",
+    "LintCommandConfig",
     "LintConfigException",
-    "LintFile",
     "LintService",
     "LintServiceProvider",
+    "LintTask",
     "LintTool",
 )
 
 _dynamic_imports = {
-    "LintServiceProvider": "service_provider",
+    # keep-sorted start
     "LintCommand": "command.lint_command",
-    "LintCommandType": "types",
+    "LintCommandConfig": "config",
     "LintConfigException": "exceptions",
-    "LintFile": "types",
-    "LintTool": "tools.lint_tool",
     "LintService": "service.lint_service",
+    "LintServiceProvider": "service_provider",
+    "LintTask": "types",
+    "LintTool": "tools.lint_tool",
+    # keep-sorted end
 }
 
 

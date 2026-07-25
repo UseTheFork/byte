@@ -1,7 +1,5 @@
 """Test suite for LintService."""
 
-from __future__ import annotations
-
 from typing import TYPE_CHECKING
 
 import pytest
@@ -23,12 +21,12 @@ def providers():
 def config():
     """Create a ByteConfig instance with lint enabled."""
     from byte.config import ByteConfig
-    from byte.lint.config import LintCommand
+    from byte.lint.config import LintCommandConfig
 
     config = ByteConfig()
     config.lint.enable = True
     config.lint.commands = [
-        LintCommand(command=["echo", "linting"], languages=["python"]),
+        LintCommandConfig(command=["echo", "linting"], languages=["python"]),
     ]
     return config
 
@@ -109,22 +107,22 @@ async def test_lint_changed_files_filters_removed_files(application: Application
     test_file.unlink()
 
     service = application.make(LintService)
-    results = await service.lint_changed_files()
+    results = await service.handle()
 
     # Should not include the deleted file
-    assert not any(r.file == test_file for r in results)
+    assert not any(r.files == test_file for r in results)
 
 
 @pytest.mark.asyncio
 async def test_lint_files_creates_lint_file_for_each_command(application: Application):
     """Test that lint_files creates LintFile for each command/file combination."""
     from byte.lint import LintService
-    from byte.lint.config import LintCommand
+    from byte.lint.config import LintCommandConfig
 
     # Add multiple commands
     application["config"].lint.commands = [
-        LintCommand(command=["echo", "lint1"], languages=["python"]),
-        LintCommand(command=["echo", "lint2"], languages=["python"]),
+        LintCommandConfig(command=["echo", "lint1"], languages=["python"]),
+        LintCommandConfig(command=["echo", "lint2"], languages=["python"]),
     ]
 
     # Create a test file
@@ -142,11 +140,11 @@ async def test_lint_files_creates_lint_file_for_each_command(application: Applic
 async def test_lint_files_filters_by_language(application: Application):
     """Test that lint_files filters files by language."""
     from byte.lint import LintService
-    from byte.lint.config import LintCommand
+    from byte.lint.config import LintCommandConfig
 
     # Add command that only handles python
     application["config"].lint.commands = [
-        LintCommand(command=["echo", "lint"], languages=["python"]),
+        LintCommandConfig(command=["echo", "lint"], languages=["python"]),
     ]
 
     # Create python and javascript files
@@ -161,18 +159,18 @@ async def test_lint_files_filters_by_language(application: Application):
 
     # Should only lint python file
     assert len(results) == 1
-    assert results[0].file == py_file
+    assert results[0].files == py_file
 
 
 @pytest.mark.asyncio
 async def test_lint_files_processes_all_files_when_no_languages(application: Application):
     """Test that lint_files processes all files when no languages specified."""
     from byte.lint import LintService
-    from byte.lint.config import LintCommand
+    from byte.lint.config import LintCommandConfig
 
     # Add command with no language filter
     application["config"].lint.commands = [
-        LintCommand(command=["echo", "lint"], languages=[]),
+        LintCommandConfig(command=["echo", "lint"], languages=[]),
     ]
 
     # Create files of different types
@@ -193,11 +191,11 @@ async def test_lint_files_processes_all_files_when_no_languages(application: App
 async def test_lint_files_processes_all_files_with_wildcard(application: Application):
     """Test that lint_files processes all files when languages contains '*'."""
     from byte.lint import LintService
-    from byte.lint.config import LintCommand
+    from byte.lint.config import LintCommandConfig
 
     # Add command with wildcard
     application["config"].lint.commands = [
-        LintCommand(command=["echo", "lint"], languages=["*"]),
+        LintCommandConfig(command=["echo", "lint"], languages=["*"]),
     ]
 
     # Create files of different types
@@ -235,11 +233,11 @@ async def test_lint_files_executes_commands(application: Application):
 async def test_lint_files_captures_stdout(application: Application):
     """Test that lint_files captures stdout from commands."""
     from byte.lint import LintService
-    from byte.lint.config import LintCommand
+    from byte.lint.config import LintCommandConfig
 
     # Add command that outputs to stdout
     application["config"].lint.commands = [
-        LintCommand(command=["echo", "test output"], languages=["python"]),
+        LintCommandConfig(command=["echo", "test output"], languages=["python"]),
     ]
 
     test_file = application.root_path("test.py")
@@ -256,11 +254,11 @@ async def test_lint_files_captures_stdout(application: Application):
 async def test_lint_files_captures_stderr(application: Application):
     """Test that lint_files captures stderr from commands."""
     from byte.lint import LintService
-    from byte.lint.config import LintCommand
+    from byte.lint.config import LintCommandConfig
 
     # Add command that outputs to stderr using {file} placeholder
     application["config"].lint.commands = [
-        LintCommand(command=["sh", "-c", "echo error message for {file} >&2"], languages=["python"]),
+        LintCommandConfig(command=["sh", "-c", "echo error message for {file} >&2"], languages=["python"]),
     ]
 
     test_file = application.root_path("test.py")
@@ -277,11 +275,11 @@ async def test_lint_files_captures_stderr(application: Application):
 async def test_lint_files_records_exit_code(application: Application):
     """Test that lint_files records exit code from commands."""
     from byte.lint import LintService
-    from byte.lint.config import LintCommand
+    from byte.lint.config import LintCommandConfig
 
     # Add command that exits with non-zero
     application["config"].lint.commands = [
-        LintCommand(command=["sh", "-c", "exit 1"], languages=["python"]),
+        LintCommandConfig(command=["sh", "-c", "exit 1"], languages=["python"]),
     ]
 
     test_file = application.root_path("test.py")
@@ -297,15 +295,15 @@ async def test_lint_files_records_exit_code(application: Application):
 @pytest.mark.asyncio
 async def test_display_results_summary_returns_false_when_no_issues(application: Application):
     """Test that display_results_summary returns (False, []) when no issues found."""
-    from byte.lint import LintFile, LintService
+    from byte.lint import LintService, LintTask
 
     service = application.make(LintService)
 
     # Create successful lint result
     test_file = application.root_path("test.py")
-    lint_result = LintFile(
+    lint_result = LintTask(
         command=["echo", "test"],
-        file=test_file,
+        files=[test_file],
         exit_code=0,
     )
 
@@ -319,15 +317,15 @@ async def test_display_results_summary_returns_false_when_no_issues(application:
 async def test_display_results_summary_returns_failed_commands(application: Application, mocker):
     """Test that display_results_summary returns failed commands."""
 
-    from byte.lint import LintFile, LintService
+    from byte.lint import LintService, LintTask
 
     service = application.make(LintService)
 
     # Create failed lint result
     test_file = application.root_path("test.py")
-    lint_result = LintFile(
+    lint_result = LintTask(
         command=["echo", "test"],
-        file=test_file,
+        files=[test_file],
         exit_code=1,
         stderr="error message",
     )
@@ -343,14 +341,14 @@ async def test_display_results_summary_returns_failed_commands(application: Appl
 @pytest.mark.asyncio
 async def test_format_lint_errors_wraps_errors_in_boundaries(application: Application):
     """Test that format_lint_errors wraps errors in boundary tags."""
-    from byte.lint import LintFile, LintService
+    from byte.lint import LintService, LintTask
 
     service = application.make(LintService)
 
     test_file = application.root_path("test.py")
-    lint_result = LintFile(
+    lint_result = LintTask(
         command=["echo", "test"],
-        file=test_file,
+        files=[test_file],
         exit_code=1,
         stderr="lint error",
     )
@@ -365,14 +363,14 @@ async def test_format_lint_errors_wraps_errors_in_boundaries(application: Applic
 @pytest.mark.asyncio
 async def test_format_lint_errors_includes_file_source(application: Application):
     """Test that format_lint_errors includes file source in metadata."""
-    from byte.lint import LintFile, LintService
+    from byte.lint import LintService, LintTask
 
     service = application.make(LintService)
 
     test_file = application.root_path("test.py")
-    lint_result = LintFile(
+    lint_result = LintTask(
         command=["echo", "test"],
-        file=test_file,
+        files=[test_file],
         exit_code=1,
         stderr="lint error",
     )
@@ -386,14 +384,14 @@ async def test_format_lint_errors_includes_file_source(application: Application)
 @pytest.mark.asyncio
 async def test_format_lint_errors_uses_stdout_when_no_stderr(application: Application):
     """Test that format_lint_errors uses stdout when stderr is empty."""
-    from byte.lint import LintFile, LintService
+    from byte.lint import LintService, LintTask
 
     service = application.make(LintService)
 
     test_file = application.root_path("test.py")
-    lint_result = LintFile(
+    lint_result = LintTask(
         command=["echo", "test"],
-        file=test_file,
+        files=[test_file],
         exit_code=1,
         stdout="stdout message",
         stderr="",
@@ -407,14 +405,14 @@ async def test_format_lint_errors_uses_stdout_when_no_stderr(application: Applic
 @pytest.mark.asyncio
 async def test_format_lint_errors_includes_header(application: Application):
     """Test that format_lint_errors includes header message."""
-    from byte.lint import LintFile, LintService
+    from byte.lint import LintService, LintTask
 
     service = application.make(LintService)
 
     test_file = application.root_path("test.py")
-    lint_result = LintFile(
+    lint_result = LintTask(
         command=["echo", "test"],
-        file=test_file,
+        files=[test_file],
         exit_code=1,
         stderr="error",
     )

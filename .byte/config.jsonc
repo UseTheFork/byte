@@ -28,22 +28,6 @@
     "enable": true,
     "commands": [
       {
-        "command": ["uv", "run", "ssort"],
-        "languages": ["python"],
-      },
-      {
-        "command": ["uv", "run", "ruff", "format", "--force-exclude", "--respect-gitignore"],
-        "languages": ["python"],
-      },
-      {
-        "command": ["uv", "run", "ruff", "check", "--fix", "--force-exclude"],
-        "languages": ["python"],
-      },
-      {
-        "command": ["prettier", "--write"],
-        "languages": ["markdown"],
-      },
-      {
         "command": ["hk", "run", "fix"],
         "languages": ["*"],
       },

@@ -1,11 +1,10 @@
 import asyncio
-from itertools import groupby
 from pathlib import Path
 from typing import List
 
 from byte import Service
 from byte.git import GitService
-from byte.lint import LintConfigException, LintFile
+from byte.lint import LintConfigException, LintTask
 from byte.support import Boundary, BoundaryType
 from byte.support.mixins import UserInteractive
 from byte.support.utils import get_language_from_filename, list_to_multiline_text
@@ -13,28 +12,10 @@ from byte.tui import Messages, Status
 
 
 class LintService(Service, UserInteractive):
-    """Domain service for code linting and formatting operations.
-
-    Orchestrates multiple linting commands configured in config.yaml to analyze
-    and optionally fix code quality issues. Integrates with git service to
-    target only changed files for efficient linting workflows.
-    Usage: `await lint_service.lint_changed_files()` -> runs configured linters on git changes
-    """
+    """Orchestrate linting and formatting operations on configured files."""
 
     async def validate(self) -> bool:
-        """Validate lint service configuration before execution.
-
-        Checks that linting is enabled and at least one lint command is configured.
-        Raises LintConfigException if configuration is invalid.
-
-        Returns:
-                True if validation passes.
-
-        Raises:
-                LintConfigException: If linting is disabled or no commands configured.
-
-        Usage: `await service.validate()` -> ensure lint config is valid
-        """
+        """Validate lint service configuration before execution."""
         if not self.app["config"].lint.enable:
             raise LintConfigException(
                 "Linting is disabled. Set 'lint.enable' to true in your .byte/config.yaml to use lint commands."
@@ -48,34 +29,21 @@ class LintService(Service, UserInteractive):
 
         return True
 
-    async def handle(self, **kwargs) -> List[LintFile]:
-        """Handle lint service execution - main entry point for linting operations."""
-
-        return await self.lint_changed_files()
-
-    async def lint_changed_files(self) -> List[LintFile]:
-        """Run configured linters on git changed files.
-
-        Returns:
-                List of LintCommandType objects with results
-
-        Usage: `results = await lint_service.lint_changed_files()` -> lint changed files
-        """
+    async def handle(self, **kwargs) -> List[LintTask]:
+        """Run configured linters on git changed files."""
 
         git_service = self.app.make(GitService)
         all_changed_files = await git_service.get_changed_files()
         self.app["log"].info(all_changed_files)
 
-        # Filter out removed files - only lint files that actually exist
-        changed_files = [f for f in all_changed_files if f.exists()]
+        return await self.lint_files(all_changed_files)
 
-        return await self.lint_files(changed_files)
-
-    async def _execute_lint_command(self, lint_file: LintFile, git_root) -> LintFile:
+    async def _execute_lint_task(self, lint_task: LintTask, git_root: str) -> LintTask:
+        """Execute a lint command with all batched files and capture output."""
         try:
             # Run the command and capture output
             process = await asyncio.create_subprocess_exec(
-                *lint_file.command,
+                *lint_task.command,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
                 cwd=git_root,
@@ -86,32 +54,27 @@ class LintService(Service, UserInteractive):
 
             self.app["log"].debug(
                 "Executed lint command: {} in {} with exit code {}",
-                " ".join(lint_file.command),
+                " ".join(lint_task.command),
                 git_root,
                 exit_code,
             )
             self.app["log"].debug("stdout: {}", stdout.decode("utf-8", errors="ignore"))
             self.app["log"].debug("stderr: {}", stderr.decode("utf-8", errors="ignore"))
 
-            lint_file.exit_code = exit_code
-            lint_file.stdout = stdout.decode("utf-8", errors="ignore")
-            lint_file.stderr = stderr.decode("utf-8", errors="ignore")
-
-            # Return updated LintFile with results
-            return lint_file
+            lint_task.exit_code = exit_code
+            lint_task.stdout = stdout.decode("utf-8", errors="ignore")
+            lint_task.stderr = stderr.decode("utf-8", errors="ignore")
 
         except Exception as e:
             # Handle command execution errors
-            lint_file.exit_code = -1
-            lint_file.stderr = f"Error executing command: {e!s}"
-            return lint_file
+            lint_task.exit_code = -1
+            lint_task.stderr = f"Error executing command: {e!s}"
 
-    async def display_results_summary(self, lint_results: List[LintFile]) -> tuple[bool, list]:
-        """Display a summary panel of linting results.
+        # Return updated LintTask with results
+        return lint_task
 
-        Args:
-                lint_commands: List of LintCommandType objects with results
-        """
+    async def display_results_summary(self, lint_results: List[LintTask]) -> tuple[bool, list]:
+        """Display a summary panel of linting results."""
 
         if not lint_results:
             return (False, [])
@@ -121,55 +84,50 @@ class LintService(Service, UserInteractive):
         commands_with_issues = []
         failed_commands = []
 
-        # Get files with issues for this command
-        failed_files = [lint_file for lint_file in lint_results if lint_file.exit_code != 0]
+        # Get commands with issues
+        failed_cmds = [lint_cmd for lint_cmd in lint_results if lint_cmd.exit_code != 0]
 
-        if failed_files:
-            total_issues += len(failed_files)
+        if failed_cmds:
+            total_issues += len(failed_cmds)
 
-            # Append failed files to failed_commands list
-            failed_commands.extend(failed_files)
+            # Append failed commands to failed_commands list
+            failed_commands.extend(failed_cmds)
 
-            # Sort by command first so groupby works correctly
-            failed_files_sorted = sorted(failed_files, key=lambda lf: " ".join(lf.command))
-
-            # Group by command
-            for command_key, files_iter in groupby(failed_files_sorted, key=lambda lf: " ".join(lf.command)):
-                files_for_command = list(files_iter)
-                command_str = command_key
+            # Group by command string
+            for lint_cmd in failed_cmds:
+                command_str = " ".join(lint_cmd.command)
 
                 # Add command header
-                commands_with_issues.append(f"# **{command_str}** ({len(files_for_command)} files)\n")
+                commands_with_issues.append(f"# **{command_str}** ({len(lint_cmd.files)} files)\n")
 
-                # Add individual file errors with cleaner formatting
-                for lint_file in files_for_command[:3]:  # Show first 3 files
-                    error_msg = lint_file.stderr.strip() or lint_file.stdout.strip()
-
-                    # Add file name
-                    commands_with_issues.append(f"\n`{lint_file.file}`\n")
-
-                    if error_msg:
-                        # Take first 5 lines of error for better context
-                        error_lines = error_msg.split("\n")
-                        if error_lines:
-                            commands_with_issues.append("```\n" + "\n".join(error_lines) + "\n```")
+                # Add individual file list with cleaner formatting
+                for file_path in lint_cmd.files[:3]:  # Show first 3 files
+                    commands_with_issues.append(f"\n`{file_path}`\n")
 
                     # Add separator between files (except for last one)
-                    if lint_file != files_for_command[min(2, len(files_for_command) - 1)]:
+                    if file_path != lint_cmd.files[min(2, len(lint_cmd.files) - 1)]:
                         commands_with_issues.append("---")
 
+                # Extract error message from stdout/stderr
+                error_msg = lint_cmd.stderr.strip() or lint_cmd.stdout.strip()
+                if error_msg:
+                    # Take first 5 lines of error for better context
+                    error_lines = error_msg.split("\n")
+                    if error_lines:
+                        commands_with_issues.append("```\n" + "\n".join(error_lines[:5]) + "\n```")
+
                 # Show count if more files have errors
-                if len(files_for_command) > 3:
-                    commands_with_issues.append(f"... and {len(files_for_command) - 3} more files with errors")
+                if len(lint_cmd.files) > 3:
+                    commands_with_issues.append(f"... and {len(lint_cmd.files) - 3} more files")
 
         # Create markdown string for summary
         num_commands = len(lint_results)
-        markdown_content = f"**Files processed:** {num_commands} command executions\n\n"
+        markdown_content = f"**Commands executed:** {num_commands}\n\n"
 
         if total_issues == 0:
             markdown_content += "**No issues found**"
         else:
-            markdown_content += f"**{total_issues} issues found**\n\n"
+            markdown_content += f"**{total_issues} commands with issues**\n\n"
             for command_issue in commands_with_issues:
                 markdown_content += f"{command_issue}\n"
 
@@ -190,38 +148,8 @@ class LintService(Service, UserInteractive):
 
         return (False, [])
 
-    # Group tasks by file, run commands sequentially per file, files in parallel
-    async def _lint_file_sequential(self, file_path: Path, lint_files: List[LintFile], git_root: str) -> List[LintFile]:
-        """Execute lint commands sequentially for a single file."""
-        results = []
-        for lint_file in lint_files:
-            result = await self._execute_lint_command(lint_file, git_root)
-            results.append(result)
-
-            # Emit progress update
-            self._completed_count += 1
-            self.emit_tui(
-                Messages.Lint(
-                    status=Status.RUNNING,
-                    current_file=str(file_path),
-                    completed=self._completed_count,
-                    total=self._total_commands,
-                )
-            )
-
-        return results
-
-    async def lint_files(self, changed_files: List[Path]) -> List[LintFile]:
-        """Run configured linters on specified files.
-
-        Args:
-                file_paths: Specific files to lint
-
-        Returns:
-                Dict mapping command names to lists of issues found
-
-
-        """
+    async def lint_files(self, changed_files: List[Path]) -> List[LintTask]:
+        """Run configured linters on specified files."""
         # Filter out deleted/missing files - only lint files that exist on disk
         changed_files = [f for f in changed_files if f.exists()]
 
@@ -234,48 +162,64 @@ class LintService(Service, UserInteractive):
         repo = await git_service.get_repo()
         git_root = repo.working_dir
 
-        self._lint_stack = {}
+        lint_commands_to_execute: List[LintTask] = []
 
         # Handle commands as a list of command strings
         if self.app["config"].lint.enable and self.app["config"].lint.commands:
-            # Create array of command/file combinations
-            for command in self.app["config"].lint.commands:
-                for file_path in changed_files:
-                    if str(file_path) not in self._lint_stack:
-                        self._lint_stack[str(file_path)] = []
+            # Group files by command (outer loop over commands)
+            for config_command in self.app["config"].lint.commands:
+                matching_files: List[Path] = []
 
+                # Collect all files that match this command's language filter
+                for file_path in changed_files:
                     # Get the language for this file using Pygments
                     file_language = get_language_from_filename(str(file_path))
 
                     # Check if file should be processed by this command based on language
-                    if command.languages:
+                    if config_command.languages:
                         # If "*" is in languages, process all files
-                        if "*" not in command.languages:
-                            # If languages are specified, only process files with matching language  (case-insensitive)
+                        if "*" not in config_command.languages:
+                            # If languages are specified, only process files with matching language (case-insensitive)
                             if not file_language or file_language.lower() not in [
-                                lang.lower() for lang in command.languages
+                                lang.lower() for lang in config_command.languages
                             ]:
                                 continue
                     # If no languages specified, process all files
 
-                    # Check if any command part contains {file} placeholder
-                    if any("{file}" in part for part in command.command):
-                        # Replace {file} with actual file path
-                        command_parts = [part.replace("{file}", str(file_path)) for part in command.command]
-                    else:
-                        # Fallback to appending file path (current behavior)
-                        command_parts = command.command + [str(file_path)]
+                    matching_files.append(file_path)
 
-                    self._lint_stack[str(file_path)].append(
-                        LintFile(
-                            command=command_parts,
-                            file=file_path,
-                            exit_code=0,
-                        )
+                # Only create a LintTask if there are matching files
+                if matching_files:
+                    # Build command with {files} placeholder replacement
+                    command_parts = list(config_command.command)  # Copy command template
+
+                    # Check if any command part contains {files} placeholder
+                    has_files_placeholder = any("{files}" in part for part in command_parts)
+
+                    if has_files_placeholder:
+                        # Replace {files} placeholder by splicing file paths into that position
+                        expanded_command = []
+                        for part in command_parts:
+                            if "{files}" in part:
+                                # Splice in all file paths at this position
+                                expanded_command.extend(str(f) for f in matching_files)
+                            else:
+                                expanded_command.append(part)
+                        command_parts = expanded_command
+                    else:
+                        # Fallback to appending all files at end
+                        command_parts.extend(str(f) for f in matching_files)
+
+                    # Create single LintTask for this command with all matching files
+                    lint_cmd = LintTask(
+                        command=command_parts,
+                        files=matching_files,
+                        exit_code=0,
                     )
+                    lint_commands_to_execute.append(lint_cmd)
 
             # Calculate total commands for progress tracking
-            self._total_commands = sum(len(lint_files) for lint_files in self._lint_stack.values())
+            self._total_commands = len(lint_commands_to_execute)
             self._completed_count = 0
 
             self.app["log"].info(changed_files)
@@ -288,26 +232,26 @@ class LintService(Service, UserInteractive):
                 )
             )
 
-            # Execute linting
-            file_tasks = [
-                self._lint_file_sequential(Path(file_path_str), lint_files, git_root)
-                for file_path_str, lint_files in self._lint_stack.items()
-            ]
+            # Execute all batched commands in parallel
+            if lint_commands_to_execute:
+                command_tasks = [
+                    self._execute_lint_task(lint_cmd, str(git_root)) for lint_cmd in lint_commands_to_execute
+                ]
 
-            all_results = await asyncio.gather(*file_tasks)
-            # Flatten results
-            results = [result for file_results in all_results for result in file_results]
+                results = await asyncio.gather(*command_tasks)
 
-            # Emit lint completed event
-            failed_count = len([r for r in results if r.exit_code != 0])
-            self.emit_tui(
-                Messages.Lint(
-                    status=Status.SUCCESS,
-                    total_files=len(changed_files),
-                    failed_files=failed_count,
-                    success=failed_count == 0,
+                # Emit lint completed event
+                failed_count = len([r for r in results if r.exit_code != 0])
+                self.emit_tui(
+                    Messages.Lint(
+                        status=Status.SUCCESS,
+                        total_files=len(changed_files),
+                        failed_files=failed_count,
+                        success=failed_count == 0,
+                    )
                 )
-            )
+            else:
+                results = []
         else:
             results = []
 
@@ -315,24 +259,17 @@ class LintService(Service, UserInteractive):
 
         return results
 
-    def format_lint_errors(self, failed_commands: List[LintFile]) -> str:
-        """Format lint errors into a string for AI consumption.
-
-        Args:
-                failed_commands: List of LintFile objects that failed linting
-
-        Returns:
-                Formatted string with lint errors wrapped in boundary tags
-
-        Usage: `error_msg = service.format_lint_errors(failed_files)` -> format for AI
-        """
+    def format_lint_errors(self, failed_commands: List[LintTask]) -> str:
+        """Format lint errors into a string for AI consumption."""
         lint_errors = []
-        for lint_file in failed_commands:
-            error_msg = lint_file.stderr.strip() or lint_file.stdout.strip()
+        for lint_cmd in failed_commands:
+            error_msg = lint_cmd.stderr.strip() or lint_cmd.stdout.strip()
 
+            # Create error message for all files in this command
+            file_list = ", ".join(str(f) for f in lint_cmd.files)
             lint_error_message = list_to_multiline_text(
                 [
-                    Boundary.open(BoundaryType.ERROR, meta={"type": "lint", "source": str(lint_file.file)}),
+                    Boundary.open(BoundaryType.ERROR, meta={"type": "lint", "source": file_list}),
                     f"{error_msg}",
                     Boundary.close(BoundaryType.ERROR),
                 ]
