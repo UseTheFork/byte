@@ -3,61 +3,71 @@
   "llm": {
     "reasoning": {
       "model": "claude-opus-4-6",
-      "provider": "anthropic"
+      "provider": "anthropic",
     },
     "standard": {
       "model": "claude-sonnet-4-6",
-      "provider": "anthropic"
+      "provider": "anthropic",
     },
     "coding": {
       "model": "claude-haiku-4-5",
-      "provider": "anthropic"
+      "provider": "anthropic",
     },
     "fast": {
       "model": "claude-haiku-4-5",
-      "provider": "anthropic"
-    }
+      "provider": "anthropic",
+    },
   },
   "gateway": {
-    "enable": true
+    "enable": true,
   },
   "git": {
-    "enable_body": false
+    "enable_body": false,
   },
   "lint": {
     "enable": true,
     "commands": [
       {
         "command": ["uv", "run", "ssort"],
-        "languages": ["python"]
+        "languages": ["python"],
       },
       {
         "command": ["uv", "run", "ruff", "format", "--force-exclude", "--respect-gitignore"],
-        "languages": ["python"]
+        "languages": ["python"],
       },
       {
         "command": ["uv", "run", "ruff", "check", "--fix", "--force-exclude"],
-        "languages": ["python"]
+        "languages": ["python"],
       },
       {
         "command": ["prettier", "--write"],
-        "languages": ["markdown"]
+        "languages": ["markdown"],
       },
       {
-        "command": ["keep-sorted"],
-        "languages": ["*"]
-      }
-    ]
+        "command": ["hk", "run", "fix"],
+        "languages": ["*"],
+      },
+    ],
   },
   "files": {
-    "ignore": [".byte", ".ruff_cache", ".idea", ".venv", ".env", ".git", ".pytest_cache", "__pycache__", "node_modules"],
+    "ignore": [
+      ".byte",
+      ".ruff_cache",
+      ".idea",
+      ".venv",
+      ".env",
+      ".git",
+      ".pytest_cache",
+      "__pycache__",
+      "node_modules",
+    ],
     "watch": {
-      "enable": true
-    }
+      "enable": true,
+    },
   },
   "tui": {
     "ui_theme": "mocha",
-    "syntax_theme": "github-dark"
+    "syntax_theme": "github-dark",
   },
   "lsp": {
     "enable": false,
@@ -66,8 +76,8 @@
       "python": {
         "preset": "ty",
         "server_type": "local",
-        "languages": ["python"]
-      }
-    }
-  }
+        "languages": ["python"],
+      },
+    },
+  },
 }

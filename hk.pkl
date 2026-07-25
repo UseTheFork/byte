@@ -1,0 +1,65 @@
+amends "package://github.com/jdx/hk/releases/download/v1.50.0/hk@1.50.0#/Config.pkl"
+
+import "package://github.com/jdx/hk/releases/download/v1.50.0/hk@1.50.0#/Builtins.pkl"
+
+local linters = new {
+  ["ox_lint"] = (Builtins.ox_lint) {
+    check = "pnpm oxlint --deny-warnings {{ files }}"
+    fix = "pnpm oxlint --deny-warnings --fix {{ files }}"
+  }
+  ["ruff"] = (Builtins.ruff) {
+    check = "uv run ruff check {{ files }}"
+    fix = "uv run ruff check --fix {{ files }}"
+  }
+}
+
+local formatter = new {
+  ["newlines"] = Builtins.newlines
+  ["fix-smart-quotes"] = Builtins.fix_smart_quotes
+  ["oxfmt"] = (Builtins.oxfmt) {
+    check = "pnpm oxfmt --check {{ files }}"
+    fix = "pnpm oxfmt --write {{ files }}"
+    exclude = List("**/pnpm-lock.yaml", "**/npins/sources.json")
+  }
+  ["ssort"] = new Step {
+    glob = List("**/*.py")
+    fix = "uv run ssort {{ files }}"
+  }
+  ["ruff-format"] = (Builtins.ruff_format) {
+    depends = List("ssort")
+    check = "uv run ruff format --quiet --respect-gitignore --force-exclude --diff {{ files }}"
+    fix = "uv run ruff format --quiet --respect-gitignore --force-exclude {{ files }}"
+  }
+  ["alejandra"] = Builtins.alejandra
+  ["pkl-format"] = Builtins.pkl_format
+  ["shfmt"] = Builtins.shfmt
+  ["just-format"] = Builtins.just_format
+  ["keep-sorted"] = new Step {
+    check = "keep-sorted --mode lint {{ files }}"
+    fix = "keep-sorted {{ files }}"
+  }
+}
+
+hooks {
+  ["pre-commit"] {
+    fix = true
+    stash = "git"
+    steps {
+      ...linters
+      ...formatter
+    }
+  }
+  ["fix"] {
+    fix = true
+    steps {
+      ...linters
+      ...formatter
+    }
+  }
+  ["check"] {
+    steps {
+      ...linters
+      ...formatter
+    }
+  }
+}
