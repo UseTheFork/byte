@@ -1,15 +1,11 @@
 from argparse import Namespace
 
 from byte import ByteArgumentParser, Command
+from byte.tui import TUIManagerService
 
 
 class ExitCommand(Command):
-    """Command to gracefully shutdown the Byte application.
-
-    Sends a shutdown message to the coordinator actor to initiate
-    a clean application exit with proper resource cleanup.
-    Usage: `/exit` -> terminates the application
-    """
+    """Exit the Byte application gracefully."""
 
     @property
     def name(self) -> str:
@@ -24,5 +20,6 @@ class ExitCommand(Command):
         return parser
 
     async def execute(self, args: Namespace, raw_args: str) -> None:
-        """Execute the exit command by sending shutdown message to coordinator."""
-        raise KeyboardInterrupt
+        """Exit the application by signaling the TUI manager."""
+        tui_manager_service = self.app.make(TUIManagerService)
+        tui_manager_service.exit()
