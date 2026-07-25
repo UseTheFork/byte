@@ -48,7 +48,6 @@ class FileServiceProvider(ServiceProvider):
         ]
 
     def tools(self):
-        """"""
         return [
             # keep-sorted start
             AddFilesTool,
@@ -67,9 +66,7 @@ class FileServiceProvider(ServiceProvider):
         file_watcher_service = self.app.make(FileWatcherService)
         self.app.booted(file_watcher_service._start_watching)
 
-        # Set up event listener for PRE_PROMPT_TOOLKIT
         event_bus = self.app.make(EventBus)
-        # file_service = self.app.make(FileService)
 
         # Boot AI comment watcher if enabled
         config = self.app["config"]
@@ -103,6 +100,7 @@ class FileServiceProvider(ServiceProvider):
         file_discovery = self.app.make(FileDiscoveryService)
 
         found_files = await file_discovery.get_files()
+        event.messages.append(f"[$text-muted]Files Root:[/$text-muted] [$primary]{self.app['path.root']}[/$primary]")
         event.messages.append(f"[$text-muted]Files Discovered:[/$text-muted] [$primary]{len(found_files)}[/$primary]")
 
         return event

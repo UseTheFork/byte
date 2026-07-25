@@ -31,7 +31,6 @@ class DevelopmentServiceProvider(ServiceProvider):
             event.messages.append("[$primary]Debug Info:[/$primary]")
             event.messages.append("Paths")
             event.messages.append(f"[$text-muted]Start:[/$text-muted] [$primary]{self.app['path']}[/$primary]")
-            event.messages.append(f"[$text-muted]Root:[/$text-muted] [$primary]{self.app['path.root']}[/$primary]")
             event.messages.append(f"[$text-muted]Config:[/$text-muted] [$primary]{self.app['path.config']}[/$primary]")
 
         return event

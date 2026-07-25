@@ -1,7 +1,7 @@
 from rich.console import RenderableType
 from textual.app import ComposeResult
 from textual.containers import Vertical
-from textual.widgets import Static
+from textual.widgets import Rule, Static
 
 
 class ByteLogo(Static):
@@ -57,8 +57,8 @@ class Bootbox(Vertical):
         width: 100%;
         min-width: 12;
         max-width: 1fr;
-        margin: 0 1;
-        padding: 0 2;
+        margin: 0 0;
+        padding: 0 0;
         border: round $primary;
         overflow-x: hidden;
     }
@@ -83,5 +83,6 @@ class Bootbox(Vertical):
     def compose(self) -> ComposeResult:
         """Compose ByteLogo and messages."""
         yield ByteLogo()
+        yield Rule()
         if self.messages:
             yield Static("\n".join(self.messages))
