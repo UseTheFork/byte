@@ -39,7 +39,7 @@ class LLMService(Service):
 
         model_id_from_config = model_config.model
 
-        model_schema = cast(ModelSchema, self.llm_registry.get_model(model_id_from_config))
+        model_schema = cast(ModelSchema, self.llm_registry.get_model(str(model_config.provider), model_id_from_config))
         model_schema.provider = str(model_config.provider)
         if model_schema is None:
             raise ValueError(f"Unknown configuration: {agent_id}")

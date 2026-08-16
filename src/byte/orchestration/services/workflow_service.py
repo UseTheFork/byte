@@ -2,11 +2,9 @@ import threading
 from typing import Any, Optional
 
 from langchain.messages import AIMessageChunk
-from langchain_core.callbacks import get_usage_metadata_callback
 
 from byte import Service
-from byte.analytics import AgentAnalyticsService
-from byte.orchestration import BaseWorkflow, TokenUsageSchema
+from byte.orchestration import BaseWorkflow
 from byte.tui import Messages, Status
 
 
@@ -32,23 +30,6 @@ class WorkflowService(Service):
     def _is_message_content_chunk(self, block: dict) -> bool:
         """Check if block is a message content chunk."""
         return block.get("type") == "text"
-
-    async def _track_token_usage(self, usage_metadata: dict) -> None:
-        """Track token usage from callback metadata by provider."""
-        self.app["log"].info(usage_metadata)
-
-        if usage_metadata:
-            agent_analytics_service = self.app.make(AgentAnalyticsService)
-
-            for model_id, model_usage in usage_metadata.items():
-                usage = TokenUsageSchema(
-                    input_tokens=model_usage.get("input_tokens", 0),
-                    input_token_cache_read=model_usage.get("input_token_details", {}).get("cache_read", 0),
-                    input_token_cache_creation=model_usage.get("input_token_details", {}).get("cache_creation", 0),
-                    output_tokens=model_usage.get("output_tokens", 0),
-                    total_tokens=model_usage.get("total_tokens", 0),
-                )
-                await agent_analytics_service.update_usage_by_model(model_id, usage)
 
     async def _handle_stream_event(self, chunk: dict[str, Any] | Any) -> dict[str, Any] | Any:
         """Handle individual stream events for display and final message extraction."""
@@ -169,18 +150,13 @@ class WorkflowService(Service):
 
         self.emit_tui(Messages.CreateHeading(workflow.human_name, "text-primary"))
 
-        with get_usage_metadata_callback() as usage_metadata_callback:
-            async for chunk in graph.astream(
-                input=initial_state,
-                config=config,
-                stream_mode=["messages", "tasks"],
-                version="v2",
-                subgraphs=True,
-            ):
-                processed_event = await self._handle_stream_event(chunk)
-
-            # await event_bus.emit(Events.TextualMessageReceived(Messages.AgentResponseComplete()))
-
-            await self._track_token_usage(usage_metadata_callback.usage_metadata)
+        async for chunk in graph.astream(
+            input=initial_state,
+            config=config,
+            stream_mode=["messages", "tasks"],
+            version="v2",
+            subgraphs=True,
+        ):
+            processed_event = await self._handle_stream_event(chunk)
 
         return processed_event

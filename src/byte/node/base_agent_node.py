@@ -9,7 +9,7 @@ from langchain_core.runnables import Runnable
 from langgraph.graph.state import RunnableConfig
 from langgraph.types import Command
 
-from byte.analytics import LastMessageUsage, UsageMetrics
+from byte.analytics import AgentAnalyticsService, LastMessageUsage, UsageMetrics
 from byte.development import RecordResponseService
 from byte.llm import LLMRegistryService, LLMService, ModelSchema
 from byte.node import (
@@ -22,6 +22,7 @@ from byte.orchestration import (
     PhaseModel,
     PhaseUtils,
     PromptAssembler,
+    TokenUsageSchema,
 )
 from byte.support import Str
 from byte.tools import ToolRegistryService
@@ -147,7 +148,7 @@ class BaseAgentNode(BaseNode):
 
         # Get constraints and calculate cost
         llm_registry = self.app.make(LLMRegistryService)
-        model_data = llm_registry.get_model(model_schema.model)
+        model_data = llm_registry.get_model(model_schema.provider, model_schema.model)
 
         if model_data is None:
             return
@@ -173,6 +174,19 @@ class BaseAgentNode(BaseNode):
                 cost=cost,
                 max_input_tokens=model_data.constraints.max_input_tokens,
             )
+        )
+
+        # Report usage to analytics service with full provider context
+        token_usage_schema = TokenUsageSchema(
+            input_tokens=last_usage.input,
+            input_token_cache_read=last_usage.input_cache_read,
+            input_token_cache_creation=last_usage.input_cache_creation,
+            output_tokens=last_usage.output,
+            total_tokens=last_usage.input + last_usage.output,
+        )
+        agent_analytics_service = self.app.make(AgentAnalyticsService)
+        self.app.dispatch_task(
+            agent_analytics_service.update_usage_by_model(model_schema.provider, model_schema.model, token_usage_schema)
         )
 
     async def generate_agent_state(self, state: BaseState, config, extra: dict = {}) -> PromptAssembler:

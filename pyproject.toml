@@ -50,6 +50,7 @@ dependencies = [
   "json-with-comments>=1.2.10",
   "tree-sitter-language-pack>=1.8.1",
   "websockets>=16.0",
+  "langchain-openrouter>=0.2.7",
 ]
 
 [dependency-groups]

@@ -73,6 +73,7 @@ class UsageAnalyticsScreen(ModalScreen[None]):
         table = self.query_one(DataTable)
         table.focus()
         table.add_columns(
+            "Provider",
             "Model",
             "Input Tokens",
             "Cache Read",
@@ -84,13 +85,17 @@ class UsageAnalyticsScreen(ModalScreen[None]):
         analytics_service = self.app.byte.make(AgentAnalyticsService)
         llm_registry = self.app.byte.make(LLMRegistryService)
 
+        model_providers: dict[str, str] = getattr(analytics_service, "_model_providers", {})
         for model_id, usage in analytics_service.usage.by_model.items():
-            model_data = llm_registry.get_model(model_id)
+            provider = model_providers.get(model_id)
             cost = 0.0
-            if model_data:
-                cost = UsageMetrics.model_cost(usage, model_data.constraints)
+            if provider:
+                model_data = llm_registry.get_model(provider, model_id)
+                if model_data:
+                    cost = UsageMetrics.model_cost(usage, model_data.constraints)
 
             table.add_row(
+                provider or "Unknown",
                 model_id,
                 f"{usage.total.input:,}",
                 f"{usage.total.input_cache_read:,}",

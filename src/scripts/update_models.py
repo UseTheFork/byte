@@ -49,7 +49,7 @@ def main():
     response = requests.get(API_URL)
     data = response.json()
 
-    providers = ["anthropic", "openai", "google", "mistral"]
+    providers = ["anthropic", "openai", "google", "mistral", "openrouter"]
     models_resource = {}
 
     # TODO: Need to update `mistral` to `mistralai`
@@ -59,11 +59,12 @@ def main():
             continue
 
         provider_models = data[provider].get("models", {})
+        models_resource[provider] = {}
 
         for model_id, model_data in provider_models.items():
             model_info = extract_model_info(model_data, provider)
             if model_info is not None:
-                models_resource[model_id] = model_info
+                models_resource[provider][model_id] = model_info
 
     output_path = Path(__file__).parent.parent / "byte" / "llm" / "resources" / "models_data.yaml"
     output_path.parent.mkdir(parents=True, exist_ok=True)

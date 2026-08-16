@@ -11,16 +11,18 @@ class AgentAnalyticsService(Service):
     def boot(self) -> None:
         """Initialize analytics service and register event listeners."""
         self.usage = UsageAnalytics()
+        self._model_providers: dict[str, str] = {}
 
-    async def update_usage_by_model(self, model_id: str, token_usage: TokenUsageSchema) -> None:
+    async def update_usage_by_model(self, provider: str, model_id: str, token_usage: TokenUsageSchema) -> None:
         """Track token usage by model and aggregate by provider."""
 
         llm_registry = self.app.make(LLMRegistryService)
-        model_data = llm_registry.get_model(model_id)
+        model_data = llm_registry.get_model(provider, model_id)
         if model_data:
             # Initialize provider entry if needed
             if model_id not in self.usage.by_model:
                 self.usage.by_model[model_id] = ModelUsage()
+                self._model_providers[model_id] = provider
 
             # Update provider's usage
             self.usage.by_model[model_id].total.input += token_usage.input_tokens
@@ -40,20 +42,25 @@ class AgentAnalyticsService(Service):
         """Calculate current analytics metrics for token usage and costs."""
 
         llm_registry = self.app.make(LLMRegistryService)
+        model_providers: dict[str, str] = self._model_providers
 
         # Calculate session cost across all models
         session_cost = 0.0
         for model_id, usage in self.usage.by_model.items():
-            model_data = llm_registry.get_model(model_id)
-            if model_data:
-                session_cost += UsageMetrics.model_cost(usage, model_data.constraints)
+            provider = model_providers.get(model_id)
+            if provider:
+                model_data = llm_registry.get_model(provider, model_id)
+                if model_data:
+                    session_cost += UsageMetrics.model_cost(usage, model_data.constraints)
 
         # Calculate last message cost based on model
         last_message_cost = 0.0
         if self.usage.last.type:
-            model_data = llm_registry.get_model(self.usage.last.type)
-            if model_data:
-                last_message_cost = UsageMetrics.message_cost(self.usage.last, model_data.constraints)
+            provider = model_providers.get(self.usage.last.type)
+            if provider:
+                model_data = llm_registry.get_model(provider, self.usage.last.type)
+                if model_data:
+                    last_message_cost = UsageMetrics.message_cost(self.usage.last, model_data.constraints)
 
         self.emit_tui(
             Messages.UpdateAnalytics(
@@ -67,6 +74,7 @@ class AgentAnalyticsService(Service):
     def reset_usage(self) -> None:
         """Reset token usage counters to zero."""
         self.usage = UsageAnalytics()
+        self._model_providers = {}
 
     def reset_context(self) -> None:
         """Reset context token counters for all models."""
