@@ -2,20 +2,30 @@
   "$schema": "https://raw.githubusercontent.com/UseTheFork/byte/refs/heads/development/schema.json",
   "llm": {
     "reasoning": {
-      "model": "claude-opus-4-6",
-      "provider": "anthropic",
+      "model": "google/gemini-2.5-pro",
+      "provider": "openrouter",
+      "extra_params": {
+        "reasoning": {
+          "effort": "none",
+        },
+      },
     },
     "standard": {
-      "model": "claude-sonnet-4-6",
-      "provider": "anthropic",
+      "model": "google/gemini-2.5-pro",
+      "provider": "openrouter",
+      "extra_params": {
+        "reasoning": {
+          "effort": "none",
+        },
+      },
     },
     "coding": {
-      "model": "claude-haiku-4-5",
-      "provider": "anthropic",
+      "model": "deepseek/deepseek-r1",
+      "provider": "openrouter",
     },
     "fast": {
-      "model": "claude-haiku-4-5",
-      "provider": "anthropic",
+      "model": "anthropic/claude-haiku-4.5",
+      "provider": "openrouter",
     },
   },
   "gateway": {

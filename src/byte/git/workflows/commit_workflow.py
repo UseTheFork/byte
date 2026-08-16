@@ -1,3 +1,5 @@
+from typing import List
+
 from byte.git import CommitAgentNode, GitCommitTool
 from byte.node.nodes import EndNode
 from byte.orchestration import (
@@ -13,7 +15,7 @@ from byte.support import Section, SectionType
 class CommitWorkflow(BaseWorkflow):
     """ """
 
-    def get_phases(self):
+    def get_phases(self, **kwargs) -> List[PhaseModel | RoutePhaseModel] | None:
         return [
             PhaseModel(
                 id="analysis",

@@ -51,6 +51,7 @@ class PrepareEnvironment(Bootstrapper):
             "anthropic",
             "gemini",
             "openai",
+            "openrouter",
         ]
 
         # Multiple providers available - ask user to choose
@@ -75,6 +76,15 @@ class PrepareEnvironment(Bootstrapper):
             config.llm.standard = LLMModelConfig(model="gemini-3.5-flash", provider="gemini")
             config.llm.coding = LLMModelConfig(model="gemini-3.5-flash", provider="gemini")
             config.llm.fast = LLMModelConfig(model="gemini-3.5-flash", provider="gemini")
+        elif selected == "openrouter":
+            config.llm.reasoning = LLMModelConfig(
+                model="google/gemini-2.5-pro", provider="openrouter", extra_params={"reasoning": {"effort": "medium"}}
+            )
+            config.llm.standard = LLMModelConfig(
+                model="google/gemini-2.5-pro", provider="openrouter", extra_params={"reasoning": {"effort": "none"}}
+            )
+            config.llm.coding = LLMModelConfig(model="deepseek/deepseek-r1", provider="openrouter")
+            config.llm.fast = LLMModelConfig(model="anthropic/claude-haiku-4.5", provider="openrouter")
         else:
             config.llm.reasoning = LLMModelConfig(model="gpt-5.5", provider="openai")
             config.llm.standard = LLMModelConfig(model="gpt-5.4", provider="openai")

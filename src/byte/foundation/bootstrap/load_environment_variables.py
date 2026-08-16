@@ -18,12 +18,13 @@ class LoadEnvironmentVariables(Bootstrapper):
         anthropic_key = os.getenv("ANTHROPIC_API_KEY")
         gemini_key = os.getenv("GEMINI_API_KEY")
         openai_key = os.getenv("OPENAI_API_KEY")
+        openrouter_key = os.getenv("OPENROUTER_API_KEY")
 
         # Validate that at least one provider is configured
-        if not (anthropic_key or gemini_key or openai_key):
+        if not (anthropic_key or gemini_key or openai_key or openrouter_key):
             raise ValueError(
                 "Missing required API key. Please set at least one of: "
-                "ANTHROPIC_API_KEY, GEMINI_API_KEY, or OPENAI_API_KEY environment variable."
+                "ANTHROPIC_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY, or OPENAI_API_KEY environment variable."
             )
 
     def bootstrap(self, app: Application) -> None:

@@ -16,18 +16,18 @@ def extract_model_info(model_data: dict, provider: str) -> dict | None:
 
     modalities = model_data.get("modalities", {})
     output_modalities = modalities.get("output", [])
+
     if "text" not in output_modalities:
         return None
 
     cost = model_data.get("cost", {})
     limit = model_data.get("limit", {})
 
-    print(model_data)
-
     return {
         "id": model_data.get("id", ""),
         "name": model_data.get("name", ""),
         "provider": provider,
+        "reasoning": model_data.get("reasoning", False),
         "cost": {
             "input": cost.get("input", 0),
             "output": cost.get("output", 0),
@@ -49,10 +49,8 @@ def main():
     response = requests.get(API_URL)
     data = response.json()
 
-    providers = ["anthropic", "openai", "google", "mistral", "openrouter"]
+    providers = ["anthropic", "openai", "google", "openrouter"]
     models_resource = {}
-
-    # TODO: Need to update `mistral` to `mistralai`
 
     for provider in providers:
         if provider not in data:

@@ -37,18 +37,28 @@ class WorkflowService(Service):
         if chunk["type"] == "messages":
             message_chunk, metadata = chunk["data"]
             if isinstance(message_chunk, AIMessageChunk):
-                # self.app["log"].debug(chunk)
-                # self.app["log"].debug(metadata)
+                self.app["log"].debug(chunk)
 
                 # Handle agents that dont have tools. they respond with just string content.
                 if isinstance(message_chunk.content, str):
-                    self.emit_tui(
-                        Messages.Response(
-                            status=Status.RUNNING,
-                            with_indicator=False,
-                            chunk=message_chunk.content,
+                    # Only process non-empty content
+                    if message_chunk.content:
+                        # Check if this is the start of a text stream
+                        if "__text__" not in self.message_chunks:
+                            self.message_chunks["__text__"] = {"completed": False, "type": "text"}
+                            self.emit_tui(
+                                Messages.Response(status=Status.PENDING, chunk=metadata.get("langgraph_node"))
+                            )
+
+                        # Stream the content
+                        self.emit_tui(
+                            Messages.Response(
+                                status=Status.RUNNING,
+                                with_indicator=False,
+                                chunk=message_chunk.content,
+                            )
                         )
-                    )
+
                 else:
                     for block in message_chunk.content:
                         if isinstance(block, dict):
