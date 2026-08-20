@@ -73,6 +73,23 @@ class WorkflowService(Service):
                             )
                         )
 
+                    elif block_type == "tool_call_chunk":
+                        tool_id = block.get("id")
+                        tool_name = block.get("name")
+                        self.message_chunks[index] = {
+                            "type": "tool_call_chunk",
+                            "completed": False,
+                            "id": tool_id,
+                            "name": tool_name,
+                        }
+                        self.emit_tui(
+                            Messages.ToolResponse(
+                                status=Status.PENDING,
+                                tool_name=tool_name,
+                                tool_id=tool_id,
+                            )
+                        )
+
                 case "content-block-delta":
                     delta = data.get("delta", {})
                     delta_type = delta.get("type")
@@ -108,6 +125,20 @@ class WorkflowService(Service):
                                 )
                             )
 
+                    elif delta_type == "block-delta":
+                        fields = delta.get("fields", {})
+                        if fields.get("type") == "tool_call_chunk":
+                            tracked = self.message_chunks.get(index, {})
+                            if "id" in tracked:
+                                self.emit_tui(
+                                    Messages.ToolResponse(
+                                        status=Status.RUNNING,
+                                        tool_id=tracked["id"],
+                                        with_indicator=False,
+                                        chunk=fields.get("args", ""),
+                                    )
+                                )
+
                 case "content-block-finish":
                     index = data.get("index", 0)
                     tracked = self.message_chunks.get(index, {})
@@ -117,7 +148,7 @@ class WorkflowService(Service):
                         self.emit_tui(Messages.Response(status=Status.SUCCESS))
                     elif tracked.get("type") == "reasoning":
                         self.emit_tui(Messages.ReasoningResponse(status=Status.SUCCESS))
-                    elif tracked.get("type") == "tool_use" and "id" in tracked:
+                    elif tracked.get("type") in ("tool_use", "tool_call_chunk") and "id" in tracked:
                         self.emit_tui(
                             Messages.ToolResponse(
                                 tool_id=tracked["id"],
