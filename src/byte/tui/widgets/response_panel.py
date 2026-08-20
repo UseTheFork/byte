@@ -11,6 +11,7 @@ from byte.tui.widgets.ui.human_message import HumanMessage
 from byte.tui.widgets.ui.linting import Linting
 from byte.tui.widgets.ui.loading_indicator import LoadingIndicator
 from byte.tui.widgets.ui.multi_select import MultiSelect
+from byte.tui.widgets.ui.reasoning_markdown import ReasoningMarkdown
 from byte.tui.widgets.ui.select import Select
 from byte.tui.widgets.ui.selectable_markdown import SelectableMarkdown
 from byte.tui.widgets.ui.text_input import TextInput
@@ -76,6 +77,31 @@ class ResponsePanel(VerticalGroup):
             return
 
         await self.current_stream.stop()
+
+    async def start_reasoning_stream(self, border_title: str = "Reasoning"):
+        reasoning_widget = ReasoningMarkdown(border_title=border_title)
+        await self.mount(reasoning_widget)
+        self.current_reasoning_widget = reasoning_widget
+        self.current_reasoning_stream = ReasoningMarkdown.get_stream(reasoning_widget)
+        return self.current_reasoning_stream
+
+    async def add_reasoning_chunk(self, chunk: str):
+        if not hasattr(self, "current_reasoning_stream") or self.current_reasoning_stream is None:
+            await self.start_reasoning_stream()
+
+        assert self.current_reasoning_stream is not None, (
+            "start_reasoning_stream() must be called before add_reasoning_chunk()"
+        )
+        await self.current_reasoning_stream.write(chunk)
+
+    async def end_reasoning_stream(self):
+        if not hasattr(self, "current_reasoning_stream") or self.current_reasoning_stream is None:
+            return
+
+        await self.current_reasoning_stream.stop()
+        if hasattr(self, "current_reasoning_widget") and self.current_reasoning_widget is not None:
+            self.current_reasoning_widget.complete()
+            self.current_reasoning_widget = None
 
     async def start_tool_stream(
         self,

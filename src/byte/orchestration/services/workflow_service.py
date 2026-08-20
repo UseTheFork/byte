@@ -1,7 +1,6 @@
+import asyncio
 import threading
 from typing import Any, Optional
-
-from langchain.messages import AIMessageChunk
 
 from byte import Service
 from byte.orchestration import BaseWorkflow
@@ -12,136 +11,128 @@ class WorkflowService(Service):
     """Service for executing workflows with compiled graphs."""
 
     def boot(self) -> None:
-        """Initialize workflow service with cancel event."""
+        """Initialize workflow service with cancel event and stream handlers."""
         self.cancel_event = threading.Event()
 
     def cancel(self) -> None:
         """Signal the current workflow execution to stop."""
         self.cancel_event.set()
 
-    def _is_tool_call_chunk(self, block: dict) -> bool:
-        """Check if block is a tool call chunk."""
-        return block.get("type") == ("input_json_delta")
+    async def consume_messages(self, stream):
+        async for event in stream:
+            self.app["log"].info(event)
 
-    def _is_starting_tool_call_chunk(self, block: dict) -> bool:
-        """Check if block is a starting tool call chunk."""
-        return block.get("type") == ("tool_use")
+            if event["method"] != "messages":
+                continue
 
-    def _is_message_content_chunk(self, block: dict) -> bool:
-        """Check if block is a message content chunk."""
-        return block.get("type") == "text"
+            data = event["params"]["data"][0]
+            metadata = event["params"]["data"][1] if len(event["params"]["data"]) > 1 else {}
+            if not isinstance(data, dict):
+                continue
 
-    async def _handle_stream_event(self, chunk: dict[str, Any] | Any) -> dict[str, Any] | Any:
-        """Handle individual stream events for display and final message extraction."""
+            # namespace = event["params"]["namespace"]
+            evt = data.get("event")
 
-        if chunk["type"] == "messages":
-            message_chunk, metadata = chunk["data"]
-            if isinstance(message_chunk, AIMessageChunk):
-                self.app["log"].debug(chunk)
+            # self.app["log"].info(event)
 
-                # Handle agents that dont have tools. they respond with just string content.
-                if isinstance(message_chunk.content, str):
-                    # Only process non-empty content
-                    if message_chunk.content:
-                        # Check if this is the start of a text stream
-                        if "__text__" not in self.message_chunks:
-                            self.message_chunks["__text__"] = {"completed": False, "type": "text"}
-                            self.emit_tui(
-                                Messages.Response(status=Status.PENDING, chunk=metadata.get("langgraph_node"))
+            match evt:
+                case "message-start":
+                    # Reset tracking state for a new message
+                    # Optionally extract the node name from namespace
+                    self.message_chunks = {}
+
+                case "content-block-start":
+                    block = data.get("content", {})
+                    block_type = block.get("type")
+                    index = data.get("index", 0)
+
+                    if block_type == "text":
+                        self.message_chunks[index] = {"type": "text", "completed": False}
+                        self.emit_tui(Messages.Response(status=Status.PENDING, chunk=metadata.get("langgraph_node")))
+
+                    elif block_type == "reasoning":
+                        self.message_chunks[index] = {"type": "reasoning", "completed": False}
+                        self.emit_tui(
+                            Messages.ReasoningResponse(status=Status.PENDING, chunk=metadata.get("langgraph_node"))
+                        )
+
+                    elif block_type == "tool_use":
+                        tool_id = block.get("id")
+                        tool_name = block.get("name")
+                        self.message_chunks[index] = {
+                            "type": "tool_use",
+                            "completed": False,
+                            "id": tool_id,
+                            "name": tool_name,
+                        }
+                        self.emit_tui(
+                            Messages.ToolResponse(
+                                status=Status.PENDING,
+                                tool_name=tool_name,
+                                tool_id=tool_id,
                             )
+                        )
 
-                        # Stream the content
+                case "content-block-delta":
+                    delta = data.get("delta", {})
+                    delta_type = delta.get("type")
+                    index = data.get("index", 0)
+
+                    if delta_type == "text-delta":
                         self.emit_tui(
                             Messages.Response(
                                 status=Status.RUNNING,
                                 with_indicator=False,
-                                chunk=message_chunk.content,
+                                chunk=delta.get("text", ""),
                             )
                         )
 
-                else:
-                    for block in message_chunk.content:
-                        if isinstance(block, dict):
-                            # First we try and complete any open streams.
-                            for idx, tracked in self.message_chunks.items():
-                                if idx != block["index"] and tracked["completed"] == False:
-                                    self.message_chunks[idx]["completed"] = True
-
-                                    if tracked["type"] == "text":
-                                        self.emit_tui(Messages.Response(status=Status.SUCCESS))
-
-                                    elif tracked["type"] == "tool_use" and "id" in tracked:
-                                        self.emit_tui(
-                                            Messages.ToolResponse(
-                                                tool_id=self.message_chunks[idx]["id"],
-                                                status=Status.SUCCESS,
-                                            )
-                                        )
-
-                            # Next start a new stream if needed
-                            if not self.message_chunks.get(block["index"]):
-                                self.message_chunks[block["index"]] = {
-                                    "completed": False,
-                                    "type": block.get("type"),
-                                }
-
-                                if block.get("type") == "text":
-                                    self.emit_tui(
-                                        Messages.Response(status=Status.PENDING, chunk=metadata.get("langgraph_node"))
-                                    )
-
-                                elif block.get("type") == "tool_use":
-                                    self.message_chunks[block["index"]]["id"] = block.get("id")
-                                    self.message_chunks[block["index"]]["name"] = block.get("name")
-                                    self.emit_tui(
-                                        Messages.ToolResponse(
-                                            status=Status.PENDING,
-                                            tool_name=block.get("name"),
-                                            tool_id=block.get("id"),
-                                        )
-                                    )
-
-                            if self._is_starting_tool_call_chunk(block):
-                                pass
-
-                            if self._is_tool_call_chunk(block):
-                                tracked = self.message_chunks.get(block["index"], {})
-                                if "id" in tracked:
-                                    self.emit_tui(
-                                        Messages.ToolResponse(
-                                            status=Status.RUNNING,
-                                            tool_id=tracked["id"],
-                                            with_indicator=False,
-                                            chunk=block.get("partial_json", ""),
-                                        )
-                                    )
-
-                            elif self._is_message_content_chunk(block):
-                                self.emit_tui(
-                                    Messages.Response(
-                                        status=Status.RUNNING,
-                                        with_indicator=False,
-                                        chunk=block.get("text", ""),
-                                    )
-                                )
-
-        elif chunk["type"] == "tasks":
-            # Close any open streams when we switch tasks
-            for idx, tracked in self.message_chunks.items():
-                self.message_chunks[idx]["completed"] = True
-                if tracked["completed"] == False:
-                    if tracked["type"] == "text":
-                        self.emit_tui(Messages.Response(status=Status.SUCCESS))
-
-                    elif tracked["type"] == "tool_use" and "id" in tracked:
+                    elif delta_type == "reasoning-delta":
                         self.emit_tui(
-                            Messages.ToolResponse(tool_id=self.message_chunks[idx]["id"], status=Status.SUCCESS)
+                            Messages.ReasoningResponse(
+                                status=Status.RUNNING,
+                                with_indicator=False,
+                                chunk=delta.get("reasoning", ""),
+                            )
                         )
 
-            # Reset message_chunks betwean tasks
-            self.message_chunks = {}
+                    elif delta_type == "input-json-delta":
+                        tracked = self.message_chunks.get(index, {})
+                        if "id" in tracked:
+                            self.emit_tui(
+                                Messages.ToolResponse(
+                                    status=Status.RUNNING,
+                                    tool_id=tracked["id"],
+                                    with_indicator=False,
+                                    chunk=delta.get("partial_json", ""),
+                                )
+                            )
 
-        return chunk
+                case "content-block-finish":
+                    index = data.get("index", 0)
+                    tracked = self.message_chunks.get(index, {})
+                    tracked["completed"] = True
+
+                    if tracked.get("type") == "text":
+                        self.emit_tui(Messages.Response(status=Status.SUCCESS))
+                    elif tracked.get("type") == "reasoning":
+                        self.emit_tui(Messages.ReasoningResponse(status=Status.SUCCESS))
+                    elif tracked.get("type") == "tool_use" and "id" in tracked:
+                        self.emit_tui(
+                            Messages.ToolResponse(
+                                tool_id=tracked["id"],
+                                status=Status.SUCCESS,
+                            )
+                        )
+
+                case "message-finish":
+                    # Capture usage metadata if present
+                    usage = data.get("usage", {})
+                    self.app["log"].info(f"[usage] {usage}")
+                    # Safety net: close any blocks not yet finished
+                    for idx, tracked in self.message_chunks.items():
+                        if not tracked.get("completed"):
+                            tracked["completed"] = True
 
     async def execute(
         self,
@@ -152,21 +143,14 @@ class WorkflowService(Service):
         """Execute a workflow with the provided request."""
         graph, initial_state, config = await workflow.compile(request, thread_id)
 
-        processed_event = None
-
         # Reset Message chunks and our cancel Listener
         self.message_chunks = {}
         self.cancel_event = threading.Event()
 
         self.emit_tui(Messages.CreateHeading(workflow.human_name, "text-primary"))
 
-        async for chunk in graph.astream(
-            input=initial_state,
-            config=config,
-            stream_mode=["messages", "tasks"],
-            version="v2",
-            subgraphs=True,
-        ):
-            processed_event = await self._handle_stream_event(chunk)
+        stream = await graph.astream_events(input=initial_state, config=config, version="v3")
 
-        return processed_event
+        await asyncio.gather(self.consume_messages(stream))
+
+        return stream

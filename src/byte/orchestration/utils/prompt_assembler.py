@@ -42,7 +42,7 @@ class PromptAssembler(Bootable, Eventable):
 
         self.context_template = agent_node.get_context_template()
 
-        model_schema, _ = self.agent_node.get_model()
+        model_schema = self.agent_node.get_model()
         self.model_schema = model_schema
 
         self.prompt_state = state

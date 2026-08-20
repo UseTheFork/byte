@@ -5,6 +5,18 @@ from langchain_core.prompts import BasePromptTemplate
 from pydantic import Field
 from pydantic.dataclasses import dataclass
 
+__all__ = [
+    "AgentConfigBoolSchema",
+    "AgentConfigSchema",
+    "AgentConfigStringSchema",
+    "AssistantContextSchema",
+    "ConstraintSchema",
+    "MetadataSchema",
+    "PromptSettingsSchema",
+    "StreamEventSchema",
+    "TokenUsageSchema",
+]
+
 
 @dataclass
 class PromptSettingsSchema:
@@ -78,3 +90,16 @@ class TokenUsageSchema:
     input_token_cache_creation: int = 0
     output_tokens: int = 0
     total_tokens: int = 0
+
+
+@dataclass
+class StreamEventSchema:
+    """Standardize stream events across LLM providers."""
+
+    type: Literal["text", "tool", "reasoning"]
+    status: Literal["use", "delta", "pending", "complete"]
+    id: Optional[str] = Field(default=None)
+    content: str = Field(default="")
+    tool_id: Optional[str] = Field(default=None)
+    tool_name: Optional[str] = Field(default=None)
+    partial_json: Optional[str] = Field(default=None)

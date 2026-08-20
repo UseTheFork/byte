@@ -1,5 +1,11 @@
 from typing import cast
 
+from langchain.chat_models import BaseChatModel
+from langchain_anthropic import ChatAnthropic
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
+from langchain_openrouter import ChatOpenRouter
+
 from byte import Service
 from byte.llm import LLMRegistryService, ModelSchema
 from byte.orchestration import OrchestrationEvents
@@ -18,7 +24,41 @@ class LLMService(Service):
         """Configure LLM service with model settings based on global configuration."""
         self.llm_registry = self.app.make(LLMRegistryService)
 
-    def get_model(self, agent_id: str, **kwargs) -> tuple[ModelSchema, dict]:
+    def init_chat_model(self, model_schema: ModelSchema, **kwargs) -> BaseChatModel:
+
+        # temperature=0,
+        # max_tokens=1024,
+        # max_retries=2,
+        # other params...
+
+        merged_params = {
+            "temperature": 0.1,
+            **model_schema.extra_params,
+            **kwargs,
+        }
+
+        if model_schema.provider == "openrouter":
+            return ChatOpenRouter(
+                model=model_schema.model,
+                **merged_params,  # ty:ignore[invalid-argument-type]
+            )
+        elif model_schema.provider == "anthropic":
+            return ChatAnthropic(
+                model=model_schema.model,
+                **merged_params,  # ty:ignore[invalid-argument-type]
+            )
+        elif model_schema.provider == "openai":
+            return ChatOpenAI(
+                model=model_schema.model,
+                **merged_params,  # ty:ignore[invalid-argument-type]
+            )
+        else:
+            return ChatGoogleGenerativeAI(
+                model=model_schema.model,
+                **merged_params,
+            )
+
+    def get_model(self, agent_id: str, **kwargs) -> ModelSchema:
         """Get a model schema and merged parameters for initialization.
 
         Returns a tuple of (model_schema, merged_params) instead of a compiled model,
@@ -41,18 +81,9 @@ class LLMService(Service):
 
         model_schema = cast(ModelSchema, self.llm_registry.get_model(str(model_config.provider), model_id_from_config))
         model_schema.provider = str(model_config.provider)
-        if model_schema is None:
-            raise ValueError(f"Unknown configuration: {agent_id}")
+        model_schema.extra_params = model_config.extra_params
 
-        params_dict = model_schema.extra_params
-
-        # Merge all parameters, with later dictionaries taking precedence
-        merged_params = {
-            **params_dict,
-            **kwargs,
-        }
-
-        return (model_schema, merged_params)
+        return model_schema
 
     async def add_reinforcement_hook(
         self, payload: OrchestrationEvents.GatherReinforcement

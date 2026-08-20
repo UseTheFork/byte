@@ -244,6 +244,29 @@ class Conversation(Widget):
 
         self.scroll_to_latest_message()
 
+    @on(Messages.ReasoningResponse)
+    async def handle_reasoning_response(self, event: Messages.ReasoningResponse) -> None:
+        response_panel = await self.get_or_create_response_panel(event.panel_id)
+
+        # Control the indicator display state.
+        if isinstance(event.with_indicator, bool):
+            self.post_message(Messages.Status(state="loading", message="Thinking..."))
+        elif isinstance(event.with_indicator, str):
+            self.post_message(Messages.Status(state="loading", message=event.with_indicator))
+
+        if event.status is Status.PENDING:
+            heading = Str.snake_to_title(str(event.chunk)).replace(" Node", "").strip()
+            await response_panel.start_reasoning_stream(heading)
+            assert event.panel_id is not None
+            self.chat_container.mark_active(event.panel_id)
+        elif event.status is Status.RUNNING:
+            await response_panel.add_reasoning_chunk(str(event.chunk))
+        elif event.status is Status.SUCCESS:
+            await response_panel.end_reasoning_stream()
+            self.post_message(Messages.Status())
+
+        self.scroll_to_latest_message()
+
     @on(Messages.ToolResponse)
     async def handle_tool_response(self, event: Messages.ToolResponse) -> None:
         response_panel = await self.get_or_create_response_panel(event.panel_id)

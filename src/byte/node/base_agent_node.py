@@ -2,7 +2,6 @@ import asyncio
 from abc import abstractmethod
 from typing import TYPE_CHECKING, List, Sequence
 
-from langchain.chat_models import init_chat_model
 from langchain.messages import AIMessage as LangchainAIMessage
 from langchain_core.messages import BaseMessage
 from langchain_core.runnables import Runnable
@@ -79,7 +78,7 @@ class BaseAgentNode(BaseNode):
             MessageFragments.Context(),
         ]
 
-    def get_model(self) -> tuple[ModelSchema, dict]:
+    def get_model(self) -> ModelSchema:
         llm_service = self.app.make(LLMService)
         return llm_service.get_model(self.llm_tier)
 
@@ -133,7 +132,7 @@ class BaseAgentNode(BaseNode):
 
     def emit_usage_summary(self, result: LangchainAIMessage):
         usage = result.usage_metadata
-        model_schema, _ = self.get_model()
+        model_schema = self.get_model()
 
         if usage is None:
             return
@@ -227,12 +226,9 @@ class BaseAgentNode(BaseNode):
     def create_runnable(
         self, prompt_assembler: PromptAssembler, tool_choice: dict[str, str] | str | None = None
     ) -> Runnable:
-        model_schema, merged_params = self.get_model()
-        model = init_chat_model(
-            model_schema.model,
-            model_provider=model_schema.provider,
-            **merged_params,
-        )
+        model_schema = self.get_model()
+        llm_service = self.app.make(LLMService)
+        model = llm_service.init_chat_model(model_schema)
 
         tool_schemas = []
         tool_registry_service = self.app.make(ToolRegistryService)
@@ -261,7 +257,7 @@ class BaseAgentNode(BaseNode):
 
         # Bind tool schemas to the model
         if tool_choice:
-            model = model.bind_tools(tool_schemas, tool_choice=tool_choice)
+            model = model.bind_tools(tool_schemas, tool_choice=tool_choice)  # ty:ignore[invalid-argument-type]
         else:
             model = model.bind_tools(tool_schemas)
 

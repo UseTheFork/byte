@@ -6,7 +6,7 @@
       "provider": "openrouter",
       "extra_params": {
         "reasoning": {
-          "effort": "none",
+          "effort": "minimal",
         },
       },
     },
@@ -15,12 +15,12 @@
       "provider": "openrouter",
       "extra_params": {
         "reasoning": {
-          "effort": "none",
+          "effort": "minimal",
         },
       },
     },
     "coding": {
-      "model": "deepseek/deepseek-r1",
+      "model": "anthropic/claude-haiku-4.5",
       "provider": "openrouter",
     },
     "fast": {
