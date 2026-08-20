@@ -76,7 +76,8 @@ class ToolArgs(Widget, can_focus=False):
 
     async def append(self, fragment: str) -> None:
         """Append a fragment to raw arguments."""
-        self.raw_args = self.raw_args + fragment
+        # Since switching to the V3 API using astream_events we receive the whole chunk not only parts.
+        self.raw_args = fragment
         self.refresh(layout=True)
 
         # Allow the task to wake up and actually display the new markdown

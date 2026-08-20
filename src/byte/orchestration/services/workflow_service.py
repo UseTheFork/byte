@@ -180,7 +180,11 @@ class WorkflowService(Service):
 
         self.emit_tui(Messages.CreateHeading(workflow.human_name, "text-primary"))
 
-        stream = await graph.astream_events(input=initial_state, config=config, version="v3")
+        stream = await graph.astream_events(
+            input=initial_state,
+            config=config,
+            version="v3",
+        )
 
         await asyncio.gather(self.consume_messages(stream))
 
