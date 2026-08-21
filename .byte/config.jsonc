@@ -2,22 +2,18 @@
   "$schema": "https://raw.githubusercontent.com/UseTheFork/byte/refs/heads/development/schema.json",
   "llm": {
     "reasoning": {
-      "model": "google/gemini-2.5-pro",
+      "model": "google/gemini-3.7-flash",
       "provider": "openrouter",
       "extra_params": {
-        "reasoning": {
-          "effort": "minimal",
-        },
+        // "reasoning": {
+        //   "effort": "minimal",
+        // },
       },
     },
     "standard": {
-      "model": "google/gemini-2.5-pro",
+      "model": "google/gemini-3.7-flash",
       "provider": "openrouter",
-      "extra_params": {
-        "reasoning": {
-          "effort": "minimal",
-        },
-      },
+      "extra_params": {},
     },
     "coding": {
       "model": "anthropic/claude-haiku-4.5",

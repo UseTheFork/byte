@@ -1,11 +1,12 @@
-"""Virtualized vertical scroll container for efficient rendering of large chat histories."""
-
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from textual.containers import ScrollableContainer
 from textual.timer import Timer
 from textual.widget import Widget
+
+from byte.tui.widgets.ui.layout import Layout
+from byte.tui.widgets.ui.viewport import Viewport
 
 if TYPE_CHECKING:
     from byte.tui.widgets.response_panel import ResponsePanel
@@ -51,7 +52,12 @@ class PanelSlot:
 
 
 class VirtualizedVerticalScroll(ScrollableContainer):
-    """Manage virtualized panel lifecycle based on viewport visibility."""
+    """Manage virtualized panel lifecycle based on viewport visibility.
+
+    Uses Viewport for scroll state and visible range computation, and Layout
+    for panel metadata and height caching. Reconciliation logic determines
+    which panels should be mounted vs. replaced with placeholders.
+    """
 
     DEFAULT_CSS = """
     VirtualizedVerticalScroll {
@@ -62,6 +68,17 @@ class VirtualizedVerticalScroll(ScrollableContainer):
         overflow-y: auto;
     }
     """
+
+    def _get_slot_height(self, slot: PanelSlot) -> int:
+        """Get height for a slot from layout cache or estimate."""
+        panel_id_int = hash(slot.panel_id) & 0x7FFFFFFF
+        cached = self._layout.get_height(panel_id_int)
+        if cached is not None:
+            return cached
+        last_known = self._layout.get_last_known_height(panel_id_int)
+        if last_known is not None:
+            return last_known
+        return self._viewport._estimated_height
 
     def __init__(
         self,
@@ -89,6 +106,13 @@ class VirtualizedVerticalScroll(ScrollableContainer):
         self.active_panel_id: str | None = None
         self._reconcile_timer_handle: Timer | None = None
 
+        # Initialize viewport and layout
+        self._viewport: Viewport[PanelSlot] = Viewport(estimated_height=1, overscan=4, spacing=0)
+        self._layout: Layout[str] = Layout()
+
+        # Set height function for viewport
+        self._viewport.set_height_fn(self._get_slot_height)
+
     async def _cache_panel_height(self, slot: PanelSlot) -> None:
         """Cache the height of a panel."""
         if slot.panel is None or slot.measured_height is not None:
@@ -97,6 +121,8 @@ class VirtualizedVerticalScroll(ScrollableContainer):
         # Only cache if mounted and sized
         if slot.is_mounted and slot.panel.outer_size.height > 0:
             slot.measured_height = slot.panel.outer_size.height
+            panel_id_int = hash(slot.panel_id) & 0x7FFFFFFF
+            self._layout.store_height(panel_id_int, slot.measured_height)
 
     async def _mount_panel(self, slot: PanelSlot) -> None:
         """Mount a panel and remove its placeholder if it exists."""
@@ -107,7 +133,7 @@ class VirtualizedVerticalScroll(ScrollableContainer):
         try:
             placeholder = self.query_one(f"#placeholder-{slot.panel_id}")
             await placeholder.remove()
-        except Exception:
+        except (Exception,):
             pass
 
         # Mount the real panel
@@ -117,7 +143,7 @@ class VirtualizedVerticalScroll(ScrollableContainer):
             # Cache height after mounting
             await self._cache_panel_height(slot)
             self.refresh(layout=True)
-        except Exception:
+        except (Exception,):
             pass
 
     async def add_panel(self, panel: ResponsePanel) -> None:
@@ -139,6 +165,9 @@ class VirtualizedVerticalScroll(ScrollableContainer):
         slot = PanelSlot(panel_id=panel_id, panel=panel, is_mounted=True)
         self._slots.append(slot)
 
+        # Update viewport with new entries
+        self._viewport.set_entries(self._slots, lambda s: hash(s.panel_id) & 0x7FFFFFFF)
+
         # Mount the panel
         await self.mount(panel)
         self.refresh(layout=True)
@@ -158,7 +187,7 @@ class VirtualizedVerticalScroll(ScrollableContainer):
         # Remove the real panel
         try:
             await slot.panel.remove()
-        except Exception:
+        except (Exception,):
             pass
 
         slot.is_mounted = False
@@ -171,7 +200,7 @@ class VirtualizedVerticalScroll(ScrollableContainer):
             )
             try:
                 await self.mount(placeholder)
-            except Exception:
+            except (Exception,):
                 pass
 
     async def _reconcile(self) -> None:
@@ -181,29 +210,20 @@ class VirtualizedVerticalScroll(ScrollableContainer):
         if not self._slots:
             return
 
-        # Get viewport bounds
-        viewport_top = self.scroll_offset.y
-        viewport_height = self.size.height
-        viewport_bottom = viewport_top + viewport_height
-        buffer = viewport_height * 2
+        # Update viewport size
+        self._viewport.set_size(self.size.width, self.size.height)
 
-        # Compute cumulative Y offsets for each panel
-        cumulative_y = 0
-        panel_positions: list[tuple[PanelSlot, int, int]] = []  # (slot, top, bottom)
+        # Update scroll position
+        self._viewport.scroll_to_offset(int(self.scroll_offset.y))
 
-        for slot in self._slots:
-            top = cumulative_y
-            # Use cached height if available, else use 1 (will update after mounting)
-            height = slot.measured_height if slot.measured_height is not None else 1
-            bottom = top + height
-            panel_positions.append((slot, top, bottom))
-            cumulative_y = bottom
+        # Get visible range
+        visible_range = self._viewport.visible_range()
 
         # Reconcile each panel
-        for slot, panel_top, panel_bottom in panel_positions:
+        for i, slot in enumerate(self._slots):
             should_mount = (
-                # Within viewport with buffer
-                (panel_top < viewport_bottom + buffer and panel_bottom > viewport_top - buffer)
+                # Within visible range (with overscan)
+                (i >= visible_range.start and i < visible_range.stop)
                 # Never virtualize panels without measured height (not yet laid out)
                 or slot.measured_height is None
                 # Never virtualize the active panel
@@ -211,10 +231,8 @@ class VirtualizedVerticalScroll(ScrollableContainer):
             )
 
             if should_mount and not slot.is_mounted and slot.panel is not None:
-                # Mount the real panel
                 await self._mount_panel(slot)
             elif not should_mount and slot.is_mounted and slot.panel is not None:
-                # Unmount and replace with placeholder
                 await self._unmount_panel_and_place_holder(slot)
 
     def _schedule_reconcile(self) -> None:
@@ -249,14 +267,21 @@ class VirtualizedVerticalScroll(ScrollableContainer):
             if slot.panel is not None and slot.is_mounted:
                 try:
                     await slot.panel.remove()
-                except Exception:
+                except (Exception,):
                     pass
             # Try to remove placeholder
             try:
                 placeholder = self.query_one(f"#placeholder-{panel_id}")
                 await placeholder.remove()
-            except Exception:
+            except (Exception,):
                 pass
+
+            # Update viewport
+            self._viewport.set_entries(self._slots, lambda s: hash(s.panel_id) & 0x7FFFFFFF)
+
+            # Clean up layout cache
+            panel_id_int = hash(panel_id) & 0x7FFFFFFF
+            self._layout.discard(panel_id_int)
 
     async def remove_all_panels(self) -> None:
         """Remove all panels and slots."""
@@ -283,7 +308,7 @@ class VirtualizedVerticalScroll(ScrollableContainer):
         # Scroll to the panel
         try:
             slot.panel.scroll_visible(animate=True)
-        except Exception:
+        except (Exception,):
             pass
 
     def watch_scroll_y(self, old_value: float, new_value: float) -> None:
