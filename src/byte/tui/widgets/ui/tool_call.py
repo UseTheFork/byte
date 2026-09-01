@@ -68,9 +68,9 @@ class ToolArgs(Widget, can_focus=False):
 
             for key, value in parsed.items():
                 output.append(f"\n╰─ {key}: {value}")
-        elif self.raw_args:
-            # If parsing failed but we have raw args, show them
-            output.append(f"\n{self.raw_args}")
+        # elif self.raw_args:
+        #     # If parsing failed but we have raw args, show them
+        #     output.append(f"\n{self.raw_args}")
 
         return output
 
@@ -80,7 +80,7 @@ class ToolArgs(Widget, can_focus=False):
         self.raw_args = fragment
         self.refresh(layout=True)
 
-        # Allow the task to wake up and actually display the new markdown
+        # Allow the task to wake up and actually display
         await asyncio.sleep(0)
 
 
