@@ -12,7 +12,7 @@ from byte.tui.schemas import Answer
 
 
 class GitService(Service, UserInteractive, Notifiable):
-    """Domain service for git repository operations and file tracking."""
+    """Manage git repository operations and file tracking."""
 
     def boot(self):
         # Initialize git repository using the project root from config
@@ -24,16 +24,12 @@ class GitService(Service, UserInteractive, Notifiable):
             )
 
     async def get_repo(self) -> git.Repo:
-        """Get the git repository instance, ensuring service is booted."""
+        """Retrieve the git repository instance."""
         self.ensure_booted()
         return self._repo
 
     async def get_changed_files(self, include_untracked: bool = True) -> List[Path]:
-        """Get list of changed files in the repository.
-
-        Args:
-                include_untracked: Include untracked files in the results
-        """
+        """Retrieve changed files in the repository."""
         if not self._repo:
             return []
 
@@ -55,11 +51,7 @@ class GitService(Service, UserInteractive, Notifiable):
         return list(set(changed_files))
 
     async def commit(self, commit_message: str) -> None:
-        """Create a git commit with the provided message.
-
-        Args:
-                commit_message: The commit message to use
-        """
+        """Create a git commit with the provided message."""
 
         continue_commit = True
 
@@ -113,7 +105,7 @@ class GitService(Service, UserInteractive, Notifiable):
                     continue_commit = False
 
     async def stage_changes(self, force: bool = False) -> None:
-        """Check for unstaged changes and offer to add them to the commit."""
+        """Stage unstaged changes and untracked files to the index."""
 
         unstaged_changes = self._repo.index.diff(None)  # None compares working tree to index
         untracked_files = self._repo.untracked_files
@@ -151,34 +143,22 @@ class GitService(Service, UserInteractive, Notifiable):
             await self.notify_success(f"Added {len(selected_files)} changes to commit")
 
     async def reset(self, file_path: str | None = None) -> None:
-        """Unstage files from the git index.
-
-        Args:
-                file_path: Optional path to specific file to unstage. If None, unstages all files.
-        """
+        """Unstage files from the git index."""
         if file_path:
             self._repo.index.reset(paths=[file_path])
         else:
             self._repo.index.reset()
 
     async def add(self, file_path: str) -> None:
-        """Stage a specific file to the git index.
-
-        Args:
-                file_path: Path to the file to stage
-        """
+        """Stage a specific file to the git index."""
         self._repo.index.add([file_path])
 
     async def remove(self, file_path: str) -> None:
-        """Stage a file deletion to the git index.
-
-        Args:
-                file_path: Path to the deleted file to stage
-        """
+        """Stage a file deletion to the git index."""
         self._repo.index.remove([file_path])
 
     async def get_diff(self) -> List[dict]:
-        """Get structured diff data for changes in the repository."""
+        """Retrieve structured diff data for staged changes."""
 
         staged_diff = self._repo.head.commit.diff()
 
@@ -260,12 +240,12 @@ class GitService(Service, UserInteractive, Notifiable):
         return diff_data
 
     def get_tracked_files(self) -> List[Path]:
-        """Get all files tracked by git plus untracked files not ignored by .gitignore."""
+        """Retrieve all tracked and untracked files not ignored by .gitignore."""
         files = self._repo.git.ls_files(cached=True, others=True, exclude_standard=True).splitlines()
         return [Path(f) for f in files]
 
     async def get_recent_commits(self, count: int = 5) -> List[dict]:
-        """Get the last X commits from the repository."""
+        """Retrieve recent commits from the repository."""
         self.ensure_booted()
 
         commits = []
