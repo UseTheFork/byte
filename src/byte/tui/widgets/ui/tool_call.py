@@ -1,7 +1,7 @@
 import asyncio
 from typing import TYPE_CHECKING
 
-from partial_json_parser import OBJ, loads
+from partial_json_parser import loads
 from rich.console import RenderableType
 from rich.markdown import Markdown
 from rich.text import Text
@@ -48,11 +48,19 @@ class ToolArgs(Widget, can_focus=False):
             disabled=disabled,
         )
         self.raw_args = ""
+        self._last_rendered_args: str | None = None
+        self._cached_output: Text = Text("")
 
     def render(self) -> RenderableType:
         """Render the tool call display with parsed arguments."""
+        # Skip re-render if payload hasn't changed; return cached output
+        if self.raw_args == self._last_rendered_args:
+            return self._cached_output
+
+        self._last_rendered_args = self.raw_args
+
         try:
-            parsed = loads(self.raw_args, OBJ)
+            parsed = loads(self.raw_args)
         except Exception:
             parsed = None
 
@@ -60,23 +68,35 @@ class ToolArgs(Widget, can_focus=False):
         output = Text("")
 
         # If we have a valid parsed dictionary, display its contents
-        if parsed is not None and isinstance(parsed, dict) and parsed:
+        if parsed is not None and isinstance(parsed, dict):
             phase_id = parsed.get("phase_id")
             phase_status = parsed.get("phase_status")
             if phase_id or phase_status:
                 self.post_message(Messages.PhaseUpdated(phase_id, phase_status))
 
             for key, value in parsed.items():
-                output.append(f"\n╰─ {key}: {value}")
-        # elif self.raw_args:
-        #     # If parsing failed but we have raw args, show them
-        #     output.append(f"\n{self.raw_args}")
+                # Safely convert value to string, handling None and incomplete values
+                if value is None:
+                    value_str = "null"
+                else:
+                    value_str = str(value)
 
+                # Format long or multiline string values cleanly
+                if len(value_str) > 80 or "\n" in value_str:
+                    # Truncate long values and escape newlines for display
+                    value_str = value_str.replace("\n", "\\n")
+                    if len(value_str) > 80:
+                        value_str = value_str[:77] + "..."
+                output.append(f"\n╰─ {key}: {value_str}")
+
+        # Cache the rendered output for idempotent repaints
+        self._cached_output = output
         return output
 
     async def append(self, fragment: str) -> None:
-        """Append a fragment to raw arguments."""
-        # Since switching to the V3 API using astream_events we receive the whole chunk not only parts.
+        """Append a fragment to raw arguments using snapshot semantics."""
+        # Store the full chunk snapshot atomically
+        self.app.byte["log"].info(fragment)
         self.raw_args = fragment
         self.refresh(layout=True)
 
@@ -85,30 +105,47 @@ class ToolArgs(Widget, can_focus=False):
 
 
 class ToolCallStream:
-    """Manage streaming tool call arguments."""
+    """Manage streaming tool call arguments with throttling."""
+
+    THROTTLE_MS: int = 40  # Throttle UI updates to ~40ms (25 updates/sec max)
 
     def __init__(self, tool_call_display: ToolArgs) -> None:
         self.tool_call_display = tool_call_display
         self._task: asyncio.Task | None = None
         self._new_markup = asyncio.Event()
-        self._pending: list[str] = []
+        self._latest_chunk: str = ""
         self._stopped = False
+        self._last_update_time: float = 0.0
 
     async def _run(self) -> None:
-        """Run a task to append argument fragments when available."""
+        """Run a task to append argument chunks with throttling."""
         try:
             while await self._new_markup.wait():
-                new_args = "".join(self._pending)
-                self._pending.clear()
                 self._new_markup.clear()
-                await asyncio.shield(self.tool_call_display.append(new_args))
+
+                # Throttle updates: only refresh if enough time has passed
+                import time
+
+                current_time = time.time()
+                elapsed_ms = (current_time - self._last_update_time) * 1000
+
+                if elapsed_ms >= self.THROTTLE_MS:
+                    # Enough time has passed, update immediately
+                    await asyncio.shield(self.tool_call_display.append(self._latest_chunk))
+                    self._last_update_time = current_time
+                else:
+                    # Not enough time; sleep and retry
+                    sleep_time = (self.THROTTLE_MS - elapsed_ms) / 1000
+                    await asyncio.sleep(sleep_time)
+                    await asyncio.shield(self.tool_call_display.append(self._latest_chunk))
+                    self._last_update_time = time.time()
         except asyncio.CancelledError:
-            # Task has been cancelled, add any outstanding arguments
+            # Task has been cancelled, add any outstanding chunk
             pass
 
-        new_args = "".join(self._pending)
-        if new_args:
-            await self.tool_call_display.append(new_args)
+        # Flush final chunk on stop
+        if self._latest_chunk:
+            await self.tool_call_display.append(self._latest_chunk)
 
     def start(self) -> None:
         """Start the updater in the background."""
@@ -124,7 +161,7 @@ class ToolCallStream:
             self._stopped = True
 
     async def write(self, fragment: str) -> None:
-        """Append or enqueue an argument fragment."""
+        """Append or enqueue an argument fragment using snapshot semantics."""
         if self._stopped:
             raise RuntimeError("Can't write to the stream after it has stopped.")
         if not fragment:
@@ -132,8 +169,8 @@ class ToolCallStream:
             return
 
         self.tool_call_display.post_message(Messages.TokenReceived(fragment))
-        # Append the new fragment, and set an event to tell the _run loop to wake up
-        self._pending.append(fragment)
+        # Store the latest chunk snapshot (replaces previous, not appends)
+        self._latest_chunk = fragment
         self._new_markup.set()
         # Allow the task to wake up and actually display the new arguments
         await asyncio.sleep(0)
