@@ -78,12 +78,14 @@ class ResponsePanel(VerticalGroup):
 
         await self.current_stream.stop()
 
-    async def start_reasoning_stream(self, border_title: str = "Reasoning"):
+    async def start_reasoning_stream(self, border_title: str = "Reasoning") -> None:
+        import time
+
         reasoning_widget = ReasoningMarkdown(border_title=border_title)
+        reasoning_widget.start_time = time.time()
         await self.mount(reasoning_widget)
         self.current_reasoning_widget = reasoning_widget
         self.current_reasoning_stream = ReasoningMarkdown.get_stream(reasoning_widget)
-        return self.current_reasoning_stream
 
     async def add_reasoning_chunk(self, chunk: str):
         if not hasattr(self, "current_reasoning_stream") or self.current_reasoning_stream is None:

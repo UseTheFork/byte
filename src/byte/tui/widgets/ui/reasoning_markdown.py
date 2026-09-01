@@ -1,7 +1,7 @@
 import asyncio
+import time
 
 from rich.console import RenderableType
-from rich.markdown import Markdown
 from rich.text import Text
 from textual.app import ComposeResult
 from textual.widget import Widget
@@ -41,11 +41,11 @@ class ReasoningContent(Widget, can_focus=False):
         self.raw_content = ""
 
     def render(self) -> RenderableType:
-        """Render the reasoning content as markdown."""
+        """Render the reasoning content as plain text."""
         if not self.raw_content:
             return Text("")
 
-        return Markdown(self.raw_content)
+        return Text(self.raw_content)
 
     async def append(self, fragment: str) -> None:
         """Append a fragment to raw content."""
@@ -54,8 +54,8 @@ class ReasoningContent(Widget, can_focus=False):
         await asyncio.sleep(0)
 
 
-class MarkdownStream:
-    """Manage streaming markdown."""
+class TextStream:
+    """Manage streaming text."""
 
     def __init__(self, reasoning_content: ReasoningContent) -> None:
         self.reasoning_content = reasoning_content
@@ -65,20 +65,20 @@ class MarkdownStream:
         self._stopped = False
 
     async def _run(self) -> None:
-        """Run a task to append markdown fragments when available."""
+        """Run a task to append text fragments when available."""
         try:
             while await self._new_markup.wait():
-                new_markdown = "".join(self._pending)
+                new_text = "".join(self._pending)
                 self._pending.clear()
                 self._new_markup.clear()
-                await asyncio.shield(self.reasoning_content.append(new_markdown))
+                await asyncio.shield(self.reasoning_content.append(new_text))
         except asyncio.CancelledError:
-            # Task has been cancelled, add any outstanding markdown
+            # Task has been cancelled, add any outstanding text
             pass
 
-        new_markdown = "".join(self._pending)
-        if new_markdown:
-            await self.reasoning_content.append(new_markdown)
+        new_text = "".join(self._pending)
+        if new_text:
+            await self.reasoning_content.append(new_text)
 
     def start(self) -> None:
         """Start the updater running in the background."""
@@ -93,19 +93,19 @@ class MarkdownStream:
             self._task = None
             self._stopped = True
 
-    async def write(self, markdown_fragment: str) -> None:
-        """Append or enqueue a markdown fragment."""
+    async def write(self, text_fragment: str) -> None:
+        """Append or enqueue a text fragment."""
         if self._stopped:
             raise RuntimeError("Can't write to the stream after it has stopped.")
-        if not markdown_fragment:
+        if not text_fragment:
             # Nothing to do for empty strings.
             return
 
-        self.reasoning_content.post_message(Messages.TokenReceived(markdown_fragment))
+        self.reasoning_content.post_message(Messages.TokenReceived(text_fragment))
         # Append the new fragment, and set an event to tell the _run loop to wake up
-        self._pending.append(markdown_fragment)
+        self._pending.append(text_fragment)
         self._new_markup.set()
-        # Allow the task to wake up and actually display the new markdown
+        # Allow the task to wake up and actually display the new text
         await asyncio.sleep(0)
 
 
@@ -157,6 +157,7 @@ class ReasoningMarkdown(Widget, can_focus=False):
             disabled=disabled,
         )
         self.border_title = f" {border_title} ( Thinking ) "
+        self.start_time: float | None = None
 
     def compose(self) -> ComposeResult:
         """Compose the reasoning widget with collapsible container."""
@@ -166,14 +167,19 @@ class ReasoningMarkdown(Widget, can_focus=False):
             yield ReasoningContent()
 
     def complete(self) -> None:
-        """Collapse the reasoning section."""
+        """Collapse the reasoning section and display elapsed time."""
+        if self.start_time is not None:
+            elapsed = time.time() - self.start_time
+            elapsed_str = f"{elapsed:.1f}s" if elapsed < 60 else f"{int(elapsed // 60)}m {int(elapsed % 60)}s"
+            self.border_title = f" Thought for {elapsed_str} "
+
         collapsible = self.query_one(ReasoningCollapsible)
         collapsible.collapsed = True
 
     @classmethod
-    def get_stream(cls, widget: ReasoningMarkdown) -> MarkdownStream:
-        """Create and start a MarkdownStream for the widget."""
+    def get_stream(cls, widget: ReasoningMarkdown) -> TextStream:
+        """Create and start a TextStream for the widget."""
         reasoning_content = widget.query_one(ReasoningContent)
-        stream = MarkdownStream(reasoning_content)
+        stream = TextStream(reasoning_content)
         stream.start()
         return stream
