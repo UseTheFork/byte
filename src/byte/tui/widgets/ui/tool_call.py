@@ -86,7 +86,7 @@ class ToolArgs(Widget, can_focus=False):
                     # Truncate long values and escape newlines for display
                     value_str = value_str.replace("\n", "\\n")
                     if len(value_str) > 80:
-                        value_str = value_str[:77] + "..."
+                        value_str = value_str[-77:]
                 output.append(f"\n╰─ {key}: {value_str}")
 
         # Cache the rendered output for idempotent repaints
