@@ -261,16 +261,11 @@ class GitService(Service, UserInteractive, Notifiable):
 
     def get_tracked_files(self) -> List[Path]:
         """Get all files tracked by git plus untracked files not ignored by .gitignore."""
-        tracked = self._repo.git.ls_files().splitlines()
-        untracked = self._repo.untracked_files
-        return [Path(f) for f in tracked] + [Path(f) for f in untracked]
+        files = self._repo.git.ls_files(cached=True, others=True, exclude_standard=True).splitlines()
+        return [Path(f) for f in files]
 
     async def get_recent_commits(self, count: int = 5) -> List[dict]:
-        """Get the last X commits from the repository.
-
-        Args:
-                count: Number of recent commits to retrieve (default: 5)
-        """
+        """Get the last X commits from the repository."""
         self.ensure_booted()
 
         commits = []
