@@ -20,7 +20,8 @@ class WorkflowService(Service):
 
     async def consume_messages(self, stream):
         async for event in stream:
-            self.app["log"].info(event)
+            if self.app.is_development:
+                self.app["log"].debug(event)
 
             if event["method"] != "messages":
                 continue

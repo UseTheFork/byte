@@ -5,9 +5,9 @@
       "model": "google/gemini-3.7-flash",
       "provider": "openrouter",
       "extra_params": {
-        // "reasoning": {
-        //   "effort": "minimal",
-        // },
+        "reasoning": {
+          "effort": "minimal",
+        },
       },
     },
     "standard": {
