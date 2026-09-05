@@ -197,10 +197,10 @@
       "title": "LLMModelConfig",
       "type": "object"
     },
-    "LintCommand": {
+    "LintCommandConfig": {
       "properties": {
         "command": {
-          "description": "Command and arguments to execute for linting (e.g., ['ruff', 'check', '--fix']). Use {file} placeholder to specify where the file path should be inserted, otherwise it will be appended to the end.",
+          "description": "Command and arguments to execute for linting (e.g., ['ruff', 'check', '--fix']). Use {files} placeholder to specify where the file paths should be inserted, otherwise they will be appended to the end.",
           "items": {
             "type": "string"
           },
@@ -216,8 +216,11 @@
           "type": "array"
         }
       },
-      "required": ["command", "languages"],
-      "title": "LintCommand",
+      "required": [
+        "command",
+        "languages"
+      ],
+      "title": "LintCommandConfig",
       "type": "object"
     },
     "LintConfig": {
@@ -233,7 +236,7 @@
           "default": [],
           "description": "List of lint commands to run on files with their target extensions",
           "items": {
-            "$ref": "#/$defs/LintCommand"
+            "$ref": "#/$defs/LintCommandConfig"
           },
           "title": "Commands",
           "type": "array"
@@ -293,7 +296,9 @@
           "type": "boolean"
         }
       },
-      "required": ["id"],
+      "required": [
+        "id"
+      ],
       "title": "PresetsConfig",
       "type": "object"
     },
@@ -303,7 +308,12 @@
         "ui_theme": {
           "default": "mocha",
           "description": "Catppuccin theme variant for the CLI interface (mocha/macchiato are dark, latte is light, frappe is cool dark)",
-          "enum": ["mocha", "macchiato", "latte", "frappe"],
+          "enum": [
+            "mocha",
+            "macchiato",
+            "latte",
+            "frappe"
+          ],
           "title": "Ui Theme",
           "type": "string"
         },
@@ -418,5 +428,7 @@
   },
   "title": "ByteUserConfig",
   "type": "object",
-  "$schema": "https://json-schema.org/draft/2020-12/schema"
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "allowComments": true,
+  "allowTrailingCommas": true
 }

@@ -210,6 +210,8 @@ def main():
     """
     schema = ByteUserConfig.model_json_schema()
     schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
+    schema["allowComments"] = True
+    schema["allowTrailingCommas"] = True
 
     schema_file = Path(__file__).parent.parent.parent / "schema.json"
     schema_file.write_text(json.dumps(schema, indent=2), encoding="utf-8")

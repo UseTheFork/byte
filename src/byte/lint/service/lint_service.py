@@ -114,7 +114,7 @@ class LintService(Service, UserInteractive):
                     # Take first 5 lines of error for better context
                     error_lines = error_msg.split("\n")
                     if error_lines:
-                        commands_with_issues.append("```\n" + "\n".join(error_lines[:5]) + "\n```")
+                        commands_with_issues.append("```\n" + "\n".join(error_lines) + "\n```")
 
                 # Show count if more files have errors
                 if len(lint_cmd.files) > 3:
