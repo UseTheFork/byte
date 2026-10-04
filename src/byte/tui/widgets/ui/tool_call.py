@@ -1,7 +1,7 @@
 import asyncio
+import re
 from typing import TYPE_CHECKING
 
-from partial_json_parser import loads
 from rich.console import RenderableType
 from rich.markdown import Markdown
 from rich.text import Text
@@ -9,9 +9,7 @@ from textual import on
 from textual.app import ComposeResult
 from textual.reactive import reactive
 from textual.widget import Widget
-from textual.widgets import Collapsible
 
-from byte.tui.constants import ANGLE_DOWN, ANGLE_RIGHT
 from byte.tui.messages import Messages
 
 if TYPE_CHECKING:
@@ -19,7 +17,7 @@ if TYPE_CHECKING:
 
 
 class ToolArgs(Widget, can_focus=False):
-    """Display streaming tool call arguments."""
+    """Display streaming tool call arguments with phase information."""
 
     app: ByteTUI
 
@@ -48,59 +46,38 @@ class ToolArgs(Widget, can_focus=False):
             disabled=disabled,
         )
         self.raw_args = ""
-        self._last_rendered_args: str | None = None
-        self._cached_output: Text = Text("")
 
     def render(self) -> RenderableType:
-        """Render the tool call display with parsed arguments."""
-        # Skip re-render if payload hasn't changed; return cached output
-        if self.raw_args == self._last_rendered_args:
-            return self._cached_output
+        """Render phase information extracted from raw arguments."""
+        if not self.raw_args:
+            return Text("")
 
-        self._last_rendered_args = self.raw_args
-
-        try:
-            parsed = loads(self.raw_args)
-        except Exception:
-            parsed = None
-
-        # Build the output text
         output = Text("")
 
-        # If we have a valid parsed dictionary, display its contents
-        if parsed is not None and isinstance(parsed, dict):
-            phase_id = parsed.get("phase_id")
-            phase_status = parsed.get("phase_status")
-            if phase_id or phase_status:
-                self.post_message(Messages.PhaseUpdated(phase_id, phase_status))
+        # Extract phase_id using regex
+        phase_id_match = re.search(r'"phase_id"\s*:\s*"([^"]*)"', self.raw_args)
+        phase_id = phase_id_match.group(1) if phase_id_match else None
 
-            for key, value in parsed.items():
-                # Safely convert value to string, handling None and incomplete values
-                if value is None:
-                    value_str = "null"
-                else:
-                    value_str = str(value)
+        # Extract phase_status using regex
+        phase_status_match = re.search(r'"phase_status"\s*:\s*"([^"]*)"', self.raw_args)
+        phase_status = phase_status_match.group(1) if phase_status_match else None
 
-                # Format long or multiline string values cleanly
-                if len(value_str) > 80 or "\n" in value_str:
-                    # Truncate long values and escape newlines for display
-                    value_str = value_str.replace("\n", "\\n")
-                    if len(value_str) > 80:
-                        value_str = value_str[-77:]
-                output.append(f"\n╰─ {key}: {value_str}")
+        # Post phase update message if we found either value
+        if phase_id or phase_status:
+            self.post_message(Messages.PhaseUpdated(phase_id, phase_status))
 
-        # Cache the rendered output for idempotent repaints
-        self._cached_output = output
+        # Display phase information
+        if phase_id:
+            output.append(f"\n   phase_id: {phase_id}")
+        if phase_status:
+            output.append(f"\n   phase_status: {phase_status}")
+
         return output
 
     async def append(self, fragment: str) -> None:
         """Append a fragment to raw arguments using snapshot semantics."""
-        # Store the full chunk snapshot atomically
-        self.app.byte["log"].info(fragment)
         self.raw_args = fragment
         self.refresh(layout=True)
-
-        # Allow the task to wake up and actually display
         await asyncio.sleep(0)
 
 
@@ -201,26 +178,6 @@ class ToolResult(Widget, can_focus=False):
         return self.markdown
 
 
-class ToolArgsCollapsible(Collapsible):
-    DEFAULT_CSS = """
-    ToolArgsCollapsible {
-            width: 1fr;
-            height: auto;
-            background: transparent;
-            border-top: hkey $background;
-            padding-bottom: 1;
-
-            &:focus-within {
-                background-tint: $foreground 5%;
-            }
-
-            &.-collapsed > Contents {
-                display: none;
-            }
-    }
-    """
-
-
 class ToolCall(Widget, can_focus=False):
     """Display tool call information with streaming support."""
 
@@ -253,14 +210,9 @@ class ToolCall(Widget, can_focus=False):
         self.tool_name = tool_name
         self.border_title = f" {self.tool_name}() "
 
-        # label.border_subtitle = "Textual Rocks"
-
     def compose(self) -> ComposeResult:
-        """Compose the tool call widget with arguments and result sections."""
-        with ToolArgsCollapsible(
-            title="Arguments", collapsed=False, collapsed_symbol=ANGLE_RIGHT, expanded_symbol=ANGLE_DOWN
-        ):
-            yield ToolArgs()
+        """Compose the tool call widget with phase information and result sections."""
+        yield ToolArgs()
         yield ToolResult()
 
     @on(Messages.PhaseUpdated)
@@ -275,10 +227,7 @@ class ToolCall(Widget, can_focus=False):
             self.border_subtitle = " · ".join(parts)
 
     def complete(self, status: str = "success", content: str | None = None) -> None:
-        """Collapse arguments and display the result."""
-        collapsible = self.query_one(ToolArgsCollapsible)
-        collapsible.collapsed = True
-
+        """Display the result."""
         result_widget = self.query_one(ToolResult)
         if status == "success":
             pass
