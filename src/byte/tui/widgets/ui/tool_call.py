@@ -66,12 +66,6 @@ class ToolArgs(Widget, can_focus=False):
         if phase_id or phase_status:
             self.post_message(Messages.PhaseUpdated(phase_id, phase_status))
 
-        # Display phase information
-        if phase_id:
-            output.append(f"\n   phase_id: {phase_id}")
-        if phase_status:
-            output.append(f"\n   phase_status: {phase_status}")
-
         return output
 
     async def append(self, fragment: str) -> None:
@@ -84,7 +78,7 @@ class ToolArgs(Widget, can_focus=False):
 class ToolCallStream:
     """Manage streaming tool call arguments with throttling."""
 
-    THROTTLE_MS: int = 40  # Throttle UI updates to ~40ms (25 updates/sec max)
+    app: ByteTUI
 
     def __init__(self, tool_call_display: ToolArgs) -> None:
         self.tool_call_display = tool_call_display
@@ -92,37 +86,20 @@ class ToolCallStream:
         self._new_markup = asyncio.Event()
         self._latest_chunk: str = ""
         self._stopped = False
-        self._last_update_time: float = 0.0
 
     async def _run(self) -> None:
-        """Run a task to append argument chunks with throttling."""
+        """Run a task to append argument fragments when available."""
         try:
             while await self._new_markup.wait():
                 self._new_markup.clear()
-
-                # Throttle updates: only refresh if enough time has passed
-                import time
-
-                current_time = time.time()
-                elapsed_ms = (current_time - self._last_update_time) * 1000
-
-                if elapsed_ms >= self.THROTTLE_MS:
-                    # Enough time has passed, update immediately
-                    await asyncio.shield(self.tool_call_display.append(self._latest_chunk))
-                    self._last_update_time = current_time
-                else:
-                    # Not enough time; sleep and retry
-                    sleep_time = (self.THROTTLE_MS - elapsed_ms) / 1000
-                    await asyncio.sleep(sleep_time)
-                    await asyncio.shield(self.tool_call_display.append(self._latest_chunk))
-                    self._last_update_time = time.time()
+                await asyncio.shield(self.tool_call_display.append(self._latest_chunk))
         except asyncio.CancelledError:
-            # Task has been cancelled, add any outstanding chunk
+            # Task has been cancelled, add any outstanding arguments
             pass
 
-        # Flush final chunk on stop
-        if self._latest_chunk:
-            await self.tool_call_display.append(self._latest_chunk)
+        new_args = self._latest_chunk
+        if new_args:
+            await self.tool_call_display.append(new_args)
 
     def start(self) -> None:
         """Start the updater in the background."""
@@ -146,6 +123,7 @@ class ToolCallStream:
             return
 
         self.tool_call_display.post_message(Messages.TokenReceived(fragment))
+
         # Store the latest chunk snapshot (replaces previous, not appends)
         self._latest_chunk = fragment
         self._new_markup.set()
