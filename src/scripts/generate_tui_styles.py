@@ -14,6 +14,9 @@ COLORS = {
     "primary": "$primary",
     "secondary": "$secondary",
     "accent": "$accent",
+    "success": "$success",
+    "warning": "$warning",
+    "error": "$error",
 }
 
 BORDER_STYLES = [
@@ -55,36 +58,24 @@ FRACTIONS = {
 
 
 class TuiStyleGenerator:
-    """Generator for Textual CSS utility classes.
+    """Generate utility CSS classes for the Textual TUI framework."""
 
-    Generates utility classes for common CSS properties like margins,
-    padding, text alignment, dimensions, etc.
-    """
-
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the style generator with an empty styles list."""
         self.styles: list[str] = []
 
     def add_style(self, selector: str, *properties: str) -> None:
-        """Add a CSS rule to the styles list.
-
-        Args:
-            selector: CSS selector (e.g., ".mt-1")
-            *properties: CSS property declarations (e.g., "margin-top: 1")
-
-        Usage: `generator.add_style(".mt-1", "margin-top: 1")`
-        """
+        """Add a CSS rule to the styles list."""
         props = "; ".join(properties) + ";"
         self.styles.append(f"{selector} {{{props}}}")
 
+    def add_styles(self, styles_dict: dict[str, list[str]]) -> None:
+        """Add multiple CSS rules from a dictionary of selectors to properties."""
+        for selector, properties in styles_dict.items():
+            self.add_style(selector, *properties)
+
     def add_section_header(self, title: str) -> None:
-        """Add a section header comment to the styles.
-
-        Args:
-            title: Section title
-
-        Usage: `generator.add_section_header("Margins")`
-        """
+        """Add a section header comment to the styles."""
         self.styles.append("")
         self.styles.append("# " + "#" * 5)
         self.styles.append(f"# {title}")
@@ -92,22 +83,13 @@ class TuiStyleGenerator:
         self.styles.append("")
 
     def generate_text_alignment(self) -> None:
-        """Generate text alignment utility classes.
-
-        Creates classes like .text-left, .text-center, .text-right, etc.
-        """
+        """Generate text alignment utility classes."""
         self.add_section_header("Text Alignment")
         for direction in "left|start|center|right|end|justify".split("|"):
             self.add_style(f".text-{direction}", f"text-align: {direction}")
 
     def generate_spacing(self, max_value: int = 25) -> None:
-        """Generate margin and padding utility classes.
-
-        Args:
-            max_value: Maximum value for spacing utilities (0 to max_value inclusive)
-
-        Creates classes for margins and padding in all directions.
-        """
+        """Generate margin and padding utility classes."""
         self.add_section_header("Margins")
 
         for pix in range(max_value + 1):
@@ -141,13 +123,7 @@ class TuiStyleGenerator:
             self.add_style(f".pr-{pix}", f"padding-right: {pix}")
 
     def generate_dimensions(self, max_value: int = 8) -> None:
-        """Generate height and width utility classes.
-
-        Args:
-            max_value: Maximum value for dimension utilities (0 to max_value inclusive)
-
-        Creates classes like .h-1, .w-2, etc.
-        """
+        """Generate height and width utility classes."""
         self.add_section_header("Dimensions")
 
         for pix in range(max_value + 1):
@@ -162,19 +138,20 @@ class TuiStyleGenerator:
         self.add_style(".h-full", "height: 100%")
 
     def generate_text_color_styles(self) -> None:
-        """Generate text color utility classes.
-
-        Creates classes for text colors.
-        """
+        """Generate text color utility classes."""
         self.add_section_header("Text Colors")
-        for k, v in COLORS.items():
-            self.add_style(f".text-{k}", f"color: $text-{k}")
+
+        colors = {**COLORS, "muted": "$text-muted"}
+        for k, v in colors.items():
+            self.add_style(f".text-{k}", f"color: {v}")
+            self.add_style(f".text-{k}-90", f"color: {v} 90%")
+            self.add_style(f".text-{k}-70", f"color: {v} 70%")
+            self.add_style(f".text-{k}-50", f"color: {v} 50%")
+            self.add_style(f".text-{k}-30", f"color: {v} 30%")
+            self.styles.append("")
 
     def generate_background_styles(self) -> None:
-        """Generate background utility classes.
-
-        Creates classes for background colors.
-        """
+        """Generate background utility classes."""
         self.add_section_header("Backgrounds")
 
         colors = {**COLORS, "background": "$background"}
@@ -182,10 +159,7 @@ class TuiStyleGenerator:
             self.add_style(f".bg-{k}", f"background: {v}")
 
     def generate_border_styles(self) -> None:
-        """Generate border utility classes.
-
-        Creates classes for borders with various styles.
-        """
+        """Generate border utility classes."""
         self.add_section_header("Borders")
         for k, v in COLORS.items():
             for border in BORDER_STYLES:
@@ -205,80 +179,83 @@ class TuiStyleGenerator:
                     f"border-bottom: {border} {v}",
                 )
 
-    def generate_dock_utilities(self) -> None:
-        """Generate dock direction utility classes.
+    def generate_general_utilities(self) -> None:
+        """Generate general reset CSS utilities."""
+        self.add_section_header("General Reset")
 
-        Creates classes like .dock-top, .dock-right, .dock-bottom, .dock-left.
-        """
+        general_styles = {
+            "*": [
+                "scrollbar-color: $secondary 30%",
+                "scrollbar-color-hover: $secondary 50%",
+                "scrollbar-color-active: $secondary 80%",
+                "scrollbar-background: $surface-darken-1",
+                "scrollbar-background-hover: $surface-darken-1",
+                "scrollbar-background-active: $surface-darken-1",
+                "scrollbar-size-vertical: 1",
+                "link-style: none",
+                "link-color-hover: $secondary",
+                "link-background-hover: $primary 0%",
+                "link-style-hover: u not dim bold",
+            ],
+            ".layout-horizontal": ["layout: horizontal"],
+            ".layout-vertical": ["layout: vertical"],
+            ".overflow-hidden": ["overflow: hidden hidden"],
+        }
+        self.add_styles(general_styles)
+
+    def generate_dock_utilities(self) -> None:
+        """Generate dock direction utility classes."""
         self.add_section_header("Dock")
         for direction in "top|right|bottom|left".split("|"):
             self.add_style(f".dock-{direction}", f"dock: {direction}")
 
     def generate_visibility_utilities(self) -> None:
-        """Generate visibility utility classes.
-
-        Creates classes like .visible and .hidden.
-        """
+        """Generate visibility utility classes."""
         self.add_section_header("Visibility")
         for vis in "visible|hidden".split("|"):
             self.add_style(f".{vis}", f"visibility: {vis}")
 
     def generate_text_style_utilities(self) -> None:
-        """Generate text style utility classes.
-
-        Creates classes like .bold, .italic, .reverse, .underline, .strike.
-        """
+        """Generate text style utility classes."""
         self.add_section_header("Text Styles")
         for font in ["bold", "italic", "reverse", "underline", "strike"]:
             self.add_style(f".{font}", f"text-style: {font}")
 
     def generate_all(self, max_spacing: int = 5, max_dimensions: int = 5) -> str:
-        """Generate all utility styles and return as a string.
-
-        Args:
-            max_spacing: Maximum value for margin/padding utilities
-            max_dimensions: Maximum value for height/width utilities
-
-        Returns:
-            Complete CSS stylesheet as a string
-
-        Usage: `css_content = generator.generate_all()`
-        """
+        """Generate all utility styles and return as a string."""
         self.styles = []
 
-        self.generate_text_alignment()
-        self.generate_spacing(max_spacing)
-        self.generate_dimensions(max_dimensions)
-        self.generate_text_color_styles()
-        self.generate_background_styles()
-        self.generate_border_styles()
+        self.generate_general_utilities()
+
         self.generate_dock_utilities()
         self.generate_visibility_utilities()
         self.generate_text_style_utilities()
 
+        self.generate_text_color_styles()
+
+        self.generate_text_alignment()
+
+        # self.generate_border_styles()
+
+        self.generate_spacing(max_spacing)
+
+        # self.generate_dimensions(max_dimensions)
+        # self.generate_background_styles()
+
         return "\n".join(self.styles) + "\n"
 
     def write_to_file(self, output_path: Path) -> None:
-        """Write generated styles to a file.
-
-        Args:
-            output_path: Path to the output file
-
-        Usage: `generator.write_to_file(Path("src/byte/tui/tui.tcss"))`
-        """
+        """Write generated styles to a file."""
         content = self.generate_all()
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(content, encoding="utf-8")
         print(f"TUI styles written to {output_path}")
 
 
-def main():
-    """Entry point for the script.
-
-    Usage: `python src/scripts/generate_tui_styles.py`
-    """
+def main() -> None:
+    """Entry point for the script."""
     generator = TuiStyleGenerator()
-    output_file = Path(__file__).parent / "tui.tcss"
+    output_file = Path(__file__).parent / "utils.tcss"
     generator.write_to_file(output_file)
 
 

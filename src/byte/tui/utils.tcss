@@ -1,18 +1,12 @@
-# General Reset
 
-* {
-  scrollbar-color: $secondary 30%;
-  scrollbar-color-hover: $secondary 50%;
-  scrollbar-color-active: $secondary 80%;
-  scrollbar-background: $surface-darken-1;
-  scrollbar-background-hover: $surface-darken-1;
-  scrollbar-background-active: $surface-darken-1;
-  scrollbar-size-vertical: 1;
-  link-style: none;
-  link-color-hover: $secondary;
-  link-background-hover: $primary 0%;
-  link-style-hover: u not dim bold;
-}
+# #####
+# General Reset
+# #####
+
+* {scrollbar-color: $secondary 30%; scrollbar-color-hover: $secondary 50%; scrollbar-color-active: $secondary 80%; scrollbar-background: $surface-darken-1; scrollbar-background-hover: $surface-darken-1; scrollbar-background-active: $surface-darken-1; scrollbar-size-vertical: 1; link-style: none; link-color-hover: $secondary; link-background-hover: $primary 0%; link-style-hover: u not dim bold;}
+.layout-horizontal {layout: horizontal;}
+.layout-vertical {layout: vertical;}
+.overflow-hidden {overflow: hidden hidden;}
 
 # #####
 # Dock
@@ -27,8 +21,8 @@
 # Visibility
 # #####
 
-.visible {display: block;}
-.hidden {display: none;}
+.visible {visibility: visible;}
+.hidden {visibility: hidden;}
 
 # #####
 # Text Styles
@@ -39,6 +33,10 @@
 .reverse {text-style: reverse;}
 .underline {text-style: underline;}
 .strike {text-style: strike;}
+
+# #####
+# Text Colors
+# #####
 
 .text-primary {color: $primary;}
 .text-primary-90 {color: $primary 90%;}
@@ -58,22 +56,30 @@
 .text-accent-50 {color: $accent 50%;}
 .text-accent-30 {color: $accent 30%;}
 
+.text-success {color: $success;}
+.text-success-90 {color: $success 90%;}
+.text-success-70 {color: $success 70%;}
+.text-success-50 {color: $success 50%;}
+.text-success-30 {color: $success 30%;}
+
+.text-warning {color: $warning;}
+.text-warning-90 {color: $warning 90%;}
+.text-warning-70 {color: $warning 70%;}
+.text-warning-50 {color: $warning 50%;}
+.text-warning-30 {color: $warning 30%;}
+
+.text-error {color: $error;}
+.text-error-90 {color: $error 90%;}
+.text-error-70 {color: $error 70%;}
+.text-error-50 {color: $error 50%;}
+.text-error-30 {color: $error 30%;}
+
 .text-muted {color: $text-muted;}
 .text-muted-90 {color: $text-muted 90%;}
 .text-muted-70 {color: $text-muted 70%;}
 .text-muted-50 {color: $text-muted 50%;}
 .text-muted-30 {color: $text-muted 30%;}
 
-
-# #####
-# Text Colors
-# #####
-
-# .text-foreground {color: $text-foreground;}
-# .text-primary {color: $text-primary;}
-# .text-secondary {color: $text-secondary;}
-# .text-accent {color: $text-accent;}
-.text-dim {color: $foreground 30%;}
 
 # #####
 # Text Alignment
@@ -85,24 +91,6 @@
 .text-right {text-align: right;}
 .text-end {text-align: end;}
 .text-justify {text-align: justify;}
-
-
-# #####
-# Borders
-# #####
-
-.border-round {border: round $foreground;}
-.border-round-primary {border: round $primary;}
-.border-round-secondary {border: round $secondary;}
-.border-round-dim {border: round $foreground 30%;}
-.border-round-error {border: round $error;}
-.border-round-warning {border: round $warning;}
-.border-round-success {border: round $success;}
-
-.border-top-round-secondary {border-top: round $secondary;}
-.border-top-round-error {border-top: round $error;}
-.border-top-round-warning {border-top: round $warning;}
-.border-top-round-success {border-top: round $success;}
 
 # #####
 # Margins
@@ -197,9 +185,3 @@
 .pb-5 {padding-bottom: 5;}
 .pl-5 {padding-left: 5;}
 .pr-5 {padding-right: 5;}
-
-
-.layout-horizontal {layout: horizontal;}
-.layout-vertical {layout: vertical;}
-
-.overflow-hidden {overflow: hidden hidden;}
