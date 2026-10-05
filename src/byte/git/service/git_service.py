@@ -50,10 +50,11 @@ class GitService(Service, UserInteractive, Notifiable):
         # Remove duplicates and return
         return list(set(changed_files))
 
-    async def commit(self, commit_message: str) -> None:
+    async def commit(self, commit_message: str) -> str | None:
         """Create a git commit with the provided message."""
 
         continue_commit = True
+        commit_hash: str | None = None
 
         # Record currently staged files before attempting commit
         staged_files = [item.a_path for item in self._repo.index.diff("HEAD")]
@@ -63,16 +64,6 @@ class GitService(Service, UserInteractive, Notifiable):
                 # Create the commit
                 commit = self._repo.index.commit(commit_message)
                 commit_hash = commit.hexsha[:6]
-
-                # Display success panel
-                # TODO: Should we flash this?
-                self.emit_tui(
-                    Messages.CreatePanel(
-                        f"({commit_hash}) {commit_message}",
-                        title="Commit Created",
-                        border_style="success",
-                    )
-                )
 
                 # Exit loop on successful commit
                 continue_commit = False
@@ -103,6 +94,8 @@ class GitService(Service, UserInteractive, Notifiable):
                 else:
                     # User declined retry, exit loop
                     continue_commit = False
+
+        return commit_hash
 
     async def stage_changes(self, force: bool = False) -> None:
         """Stage unstaged changes and untracked files to the index."""

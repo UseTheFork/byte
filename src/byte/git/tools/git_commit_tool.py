@@ -100,9 +100,12 @@ class GitCommitTool(BaseTool):
 
         if confirmed:
             try:
-                await git_service.commit(formatted_message)
+                commit_result = await git_service.commit(formatted_message)
 
-                return ToolResult(result={"content": f"Successfully created commit: {formatted_message}"})
+                if commit_result is None:
+                    return ToolResult(result={"content": "User declined to retry commit after failure."})
+
+                return ToolResult(result={"content": f"({commit_result}) {formatted_message}"})
 
             except Exception as e:
                 raise ToolRunException(f"Error creating git commit: {e!s}") from e
