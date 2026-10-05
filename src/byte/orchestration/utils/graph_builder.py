@@ -40,7 +40,7 @@ class GraphBuilder:
         """Discover all available node classes from the node registry."""
         node_registry = self.app.make(NodeRegistry)
 
-        return node_registry.all()
+        return node_registry.all()  # ty:ignore[invalid-return-type]
 
     def add_node(self, node: Type[BaseNode], **kwargs):
         """Add a node to the graph and register it for later use."""
@@ -60,13 +60,14 @@ class GraphBuilder:
         graph = StateGraph(BaseState, context_schema=AssistantContextSchema)  # ty:ignore[invalid-argument-type]
 
         for node_name, node_instance in self._nodes.items():
-            graph.add_node(node_name, node_instance)
+            node_config = node_instance.get_node_config()
+            graph.add_node(node_name, node_instance, **node_config)
 
         for node_name, node_class in self._dummy_nodes.items():
-            graph.add_node(node_name, self.app.make(DummyNode))
+            graph.add_node(node_name, self.app.make(DummyNode))  # ty:ignore[invalid-argument-type]
 
         # Define entry edges
         graph.set_entry_point("start_node")
         graph.set_finish_point("end_node")
 
-        return graph
+        return graph  # ty:ignore[invalid-return-type]

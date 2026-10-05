@@ -1,12 +1,12 @@
 import asyncio
 from abc import abstractmethod
-from typing import TYPE_CHECKING, List, Sequence
+from typing import TYPE_CHECKING, Any, List, Sequence
 
 from langchain.messages import AIMessage as LangchainAIMessage
 from langchain_core.messages import BaseMessage
 from langchain_core.runnables import Runnable
 from langgraph.graph.state import RunnableConfig
-from langgraph.types import Command
+from langgraph.types import Command, RetryPolicy, TimeoutPolicy
 
 from byte.analytics import AgentAnalyticsService, LastMessageUsage, UsageMetrics
 from byte.development import RecordResponseService
@@ -36,41 +36,45 @@ class BaseAgentNode(BaseNode):
 
     @property
     def name(self) -> str:
-        """Agent Name"""
+        """Get the snake_case agent name."""
         return Str.class_to_snake_case(self.__class__.__name__)
 
     @property
     def human_name(self) -> str:
-        """Human readable agent name"""
+        """Get the human-readable agent name."""
         return Str.snake_to_title(self.name).replace("Agent Node", "").strip()
 
-    def get_tools(self, state: BaseState):
+    def get_tools(self, state: BaseState) -> list:
+        """Get the tools available to this agent."""
         return []
 
+    def get_node_config(self) -> dict[str, Any]:
+        return {
+            "retry_policy": RetryPolicy(max_attempts=4, backoff_factor=2.0),
+            "timeout": TimeoutPolicy(run_timeout=60, idle_timeout=5),
+        }
+
     def filter_message_history(self, messages: List[BaseMessage]) -> List[BaseMessage]:
+        """Filter the message history for this agent."""
         return messages
 
     @abstractmethod
     def get_user_template(self) -> List[str]:
-        """Get the user message template for this agent.
-
-        Must be implemented by subclasses to return their specific user message
-        template, which defines how user requests are formatted in prompts.
-        Usage: Override in subclass to provide domain-specific user message formatting
-        """
+        """Get the user message template for this agent."""
         ...
 
     @abstractmethod
     def get_system_template(self) -> List[str]:
-        """ """
+        """Get the system message template for this agent."""
         ...
 
     @abstractmethod
     def get_context_template(self) -> List[str]:
-        """ """
+        """Get the context message template for this agent."""
         ...
 
     def get_prompt(self, current_state: dict) -> List[MessageFragment]:
+        """Get the message fragments to assemble into the prompt."""
         return [
             MessageFragments.System(),
             MessageFragments.User(),
@@ -79,10 +83,12 @@ class BaseAgentNode(BaseNode):
         ]
 
     def get_model(self) -> ModelSchema:
+        """Get the model schema for this agent."""
         llm_service = self.app.make(LLMService)
         return llm_service.get_model(self.llm_tier)
 
     async def generate_prompt(self, prompt_assembler: PromptAssembler) -> List[BaseMessage]:
+        """Assemble the prompt from message fragments."""
         message_fragments = self.get_prompt(prompt_assembler.get_assembled_state())
 
         # Run leaves concurrently (results preserve input order)
@@ -118,11 +124,7 @@ class BaseAgentNode(BaseNode):
         return messages
 
     async def finalize_response(self, result: LangchainAIMessage, prompt: List[BaseMessage], config: RunnableConfig):
-        """Post-invoke hook that runs after every ainvoke call.
-
-        Handles usage summary emission, response recording, and any other
-        post-processing that should occur after the LLM responds.
-        """
+        """Handle post-processing after the LLM responds."""
         self.emit_usage_summary(result)
 
         record_response_service = self.app.make(RecordResponseService)
@@ -131,6 +133,7 @@ class BaseAgentNode(BaseNode):
         )
 
     def emit_usage_summary(self, result: LangchainAIMessage):
+        """Emit token usage summary and analytics."""
         usage = result.usage_metadata
         model_schema = self.get_model()
 
@@ -189,22 +192,7 @@ class BaseAgentNode(BaseNode):
         )
 
     async def generate_agent_state(self, state: BaseState, config, extra: dict = {}) -> PromptAssembler:
-        """Generate the agent state for the assistant node invocation.
-
-        Assembles the user prompt from the state and context, emits a pre-assistant event
-        for hooks to modify the state, and prepares the final agent state with assembled
-        messages and any error context.
-
-        Args:
-            state: The current conversation state
-            config: The runnable configuration
-            context: The assistant context containing templates and configuration
-
-        Returns:
-            Tuple of (agent_state dict, updated config)
-
-        Usage: `agent_state, config = await self._generate_agent_state(state, config, runtime.context)`
-        """
+        """Generate the agent state for the assistant node invocation."""
 
         # Create a new assembler
         prompt_assembler = self.app.make(PromptAssembler, agent_node=self, state=state, extra=extra)
@@ -226,6 +214,7 @@ class BaseAgentNode(BaseNode):
     def create_runnable(
         self, prompt_assembler: PromptAssembler, tool_choice: dict[str, str] | str | None = None
     ) -> Runnable:
+        """Create a runnable model with bound tools."""
         model_schema = self.get_model()
         llm_service = self.app.make(LLMService)
         model = llm_service.init_chat_model(model_schema)
@@ -264,17 +253,7 @@ class BaseAgentNode(BaseNode):
         return model
 
     def route_tool_calls(self, result) -> Command | None:
-        """Route to the tool node when the model returns tool calls.
-
-        Casts the result to this agent's message type and routes to the tool node
-        with the result appended to scratch_messages.
-
-        Args:
-            result: The raw model result containing tool calls
-
-        Returns:
-            Command routing to "tool_node" with the cast result in scratch_messages
-        """
+        """Route to the tool node when the model returns tool calls."""
         if result.tool_calls and len(result.tool_calls) > 0:
             result = AIMessage.from_langchain(result, agent_name=self.name)
             return self.route_to(

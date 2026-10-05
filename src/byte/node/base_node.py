@@ -13,17 +13,15 @@ if TYPE_CHECKING:
 
 class BaseNode(ABC, Bootable, Eventable):
     def get_node_name(self) -> str:
-        """Get the snake_case name of the node based on its class name.
-
-        Usage: `node_name = node.get_node_name()` -> "main_model_node"
-        """
+        """Get the snake_case name of the node based on its class name."""
         return Str.class_to_snake_case(self.__class__.__name__)
 
-    def route_to(self, goto: str, update: dict | None = None) -> Command:
-        """Route to a target node through the routing node.
+    def get_node_config(self) -> dict[str, Any]:
+        """Return node configuration for graph builder."""
+        return {}
 
-        Usage: `return self.route_to("lint_node", {"parsed_blocks": blocks})`
-        """
+    def route_to(self, goto: str, update: dict | None = None) -> Command:
+        """Route to a target node through the routing node."""
         if update is None:
             update = {}
 
@@ -32,12 +30,7 @@ class BaseNode(ABC, Bootable, Eventable):
         return Command(goto="routing_node", update={**update, "routing": routing_state})
 
     def route_back(self, state: BaseState, update: dict | None = None) -> Command:
-        """Route back to the previous node that called this node.
-
-        Extracts the source node from the routing state and routes back to it.
-
-        Usage: `return self.route_back(state, {"errors": error_message})`
-        """
+        """Route back to the previous node that called this node."""
         source = state.get("routing", {}).get("source", "end_node")
         return self.route_to(source, update)
 
@@ -48,4 +41,5 @@ class BaseNode(ABC, Bootable, Eventable):
         *,
         config: RunnableConfig,
     ) -> Any:
-        """Execute the node logic. Must be implemented by subclasses."""
+        """Execute the node logic."""
+        ...
