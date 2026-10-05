@@ -58,8 +58,8 @@ class LintService(Service, UserInteractive):
                 git_root,
                 exit_code,
             )
-            self.app["log"].debug("stdout: {}", stdout.decode("utf-8", errors="ignore"))
-            self.app["log"].debug("stderr: {}", stderr.decode("utf-8", errors="ignore"))
+            self.app["log"].trace("stdout: {}", stdout.decode("utf-8", errors="ignore"))
+            self.app["log"].trace("stderr: {}", stderr.decode("utf-8", errors="ignore"))
 
             lint_task.exit_code = exit_code
             lint_task.stdout = stdout.decode("utf-8", errors="ignore")
