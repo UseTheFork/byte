@@ -2,12 +2,12 @@ from typing import override
 
 from byte.git import CommitService, GitService
 from byte.git.schemas import CommitMessage
+from byte.orchestration.leaves.commit_guidelines import COMMIT_TYPES
 from byte.support import MD, Section
-from byte.tools import BaseTool, ToolDeclinedException, ToolResult, ToolRunException
+from byte.tools import BaseTool, ToolDeclinedException, ToolResult, ToolRunException, ToolValidationException
 from byte.tui import InteractionService, Messages
 
 
-# TODO: we should have a hook that can modify input_schema on the base tool maybe have it be a static method of the class?
 class GitCommitTool(BaseTool):
     name: str = "git_commit"
     description: str = (
@@ -49,6 +49,32 @@ class GitCommitTool(BaseTool):
         "required": ["type", "commit_message"],
     }
 
+    def _validate(
+        self,
+        type: str,
+        commit_message: str,
+        scope: str | None = None,
+    ) -> None:
+        """Validate commit inputs against configuration rules."""
+        config = self.app["config"]
+
+        if type not in COMMIT_TYPES:
+            raise ToolValidationException(
+                f"Invalid commit type '{type}'. Allowed types: {', '.join(COMMIT_TYPES.keys())}"
+            )
+
+        if config.git.enable_scopes and scope:
+            if scope not in config.git.scopes:
+                raise ToolValidationException(
+                    f"Invalid scope '{scope}'. Allowed scopes: {', '.join(config.git.scopes)}"
+                )
+
+        if len(commit_message) > config.git.max_description_length:
+            raise ToolValidationException(
+                f"Commit message exceeds maximum length of {config.git.max_description_length} characters. "
+                f"Current length: {len(commit_message)}"
+            )
+
     @override
     async def run(
         self,
@@ -60,6 +86,7 @@ class GitCommitTool(BaseTool):
         body: list[str] | None = None,
         **kwargs,
     ) -> ToolResult:
+        self._validate(type, commit_message, scope)
 
         git_service = self.app.make(GitService)
         commit_service = self.app.make(CommitService)

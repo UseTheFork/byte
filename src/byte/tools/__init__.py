@@ -9,6 +9,7 @@ if TYPE_CHECKING:
         ToolException,
         ToolNotFoundException,
         ToolRunException,
+        ToolValidationException,
     )
     from byte.tools.schemas import ToolResult
     from byte.tools.service.tool_registry_service import ToolRegistryService
@@ -24,6 +25,7 @@ __all__ = (
     "ToolRegistryService",
     "ToolResult",
     "ToolRunException",
+    "ToolValidationException",
     "ToolsServiceProvider",
 )
 
@@ -34,6 +36,7 @@ _dynamic_imports = {
     "ToolException": "exceptions",
     "ToolMessage": "tool_message",
     "ToolNotFoundException": "exceptions",
+    "ToolValidationException": "exceptions",
     "ToolRegistryService": "service.tool_registry_service",
     "ToolResult": "schemas",
     "ToolRunException": "exceptions",
