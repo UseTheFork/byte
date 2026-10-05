@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from byte.orchestration import UserConfirmPhaseTool
+from byte.orchestration.exceptions import PhaseException
 
 if TYPE_CHECKING:
     from byte.orchestration import BaseState, PhaseModel, RoutePhaseModel
@@ -97,9 +98,12 @@ class PhaseUtils:
 
     @staticmethod
     def update_phase_with_tool_args(
-        tool_call: Dict[str, Any], workflow_phases: Dict[str, Union[RoutePhaseModel | PhaseModel]] = {}
+        tool_call: Dict[str, Any], workflow_phases: Dict[str, Union[RoutePhaseModel | PhaseModel]] | None = None
     ) -> Dict[str, Union[RoutePhaseModel | PhaseModel]]:
         """Update phase status based on tool call arguments."""
+        if workflow_phases is None:
+            workflow_phases = {}
+
         tool_name = tool_call.get("name", None)
         if tool_name == UserConfirmPhaseTool.name:
             return workflow_phases
@@ -109,19 +113,8 @@ class PhaseUtils:
         phase_status = args.get("phase_status", "pending")
 
         if phase_id:
+            if phase_id not in workflow_phases:
+                raise PhaseException(f"Phase '{phase_id}' is not a valid workflow phase.")
             workflow_phases[phase_id].status = phase_status
 
         return workflow_phases
-
-    # @staticmethod
-    # def get_phase_redirect(args: Dict, workflow_phases: Dict[str, Union[RoutePhaseModel | PhaseModel]]) -> str | None:
-    #     """Return the on_complete route target if the phase just completed."""
-    #     phase_id = args.get("phase_id")
-    #     phase_status = args.get("phase_status")
-
-    #     if phase_id and phase_status == "completed":
-    #         phase = workflow_phases.get(phase_id)
-    #         if phase and phase.on_complete is not None:
-    #             return Str.class_to_snake_case(phase.on_complete)
-
-    #     return None
