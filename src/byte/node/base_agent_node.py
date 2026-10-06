@@ -51,7 +51,7 @@ class BaseAgentNode(BaseNode):
     def get_node_config(self) -> dict[str, Any]:
         return {
             "retry_policy": RetryPolicy(max_attempts=4, backoff_factor=2.0),
-            "timeout": TimeoutPolicy(run_timeout=60, idle_timeout=5),
+            "timeout": TimeoutPolicy(run_timeout=60, idle_timeout=45),
         }
 
     def filter_message_history(self, messages: List[BaseMessage]) -> List[BaseMessage]:
