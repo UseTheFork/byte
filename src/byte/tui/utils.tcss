@@ -35,6 +35,24 @@
 .strike {text-style: strike;}
 
 # #####
+# Borders
+# #####
+
+.border-round {border: round $foreground;}
+.border-round-primary {border: round $primary;}
+.border-round-secondary {border: round $secondary;}
+.border-round-dim {border: round $foreground 30%;}
+.border-round-error {border: round $error;}
+.border-round-warning {border: round $warning;}
+.border-round-success {border: round $success;}
+
+.border-top-round-secondary {border-top: round $secondary;}
+.border-top-round-error {border-top: round $error;}
+.border-top-round-warning {border-top: round $warning;}
+.border-top-round-success {border-top: round $success;}
+
+
+# #####
 # Text Colors
 # #####
 
